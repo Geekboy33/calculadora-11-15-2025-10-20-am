@@ -580,13 +580,43 @@ export function ProofOfReservesAPIModule() {
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => downloadPorData(por)}
-                      className="p-2 bg-cyan-500/20 border border-cyan-500 text-cyan-300 rounded-lg hover:bg-cyan-500/30"
-                      title={isSpanish ? 'Descargar' : 'Download'}
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => downloadPorData(por)}
+                        className="p-2 bg-cyan-500/20 border border-cyan-500 text-cyan-300 rounded-lg hover:bg-cyan-500/30"
+                        title={isSpanish ? 'Descargar' : 'Download'}
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (confirm(isSpanish 
+                            ? '¿Eliminar este Proof of Reserve?\n\nEsto también lo eliminará de API VUSD.'
+                            : 'Delete this Proof of Reserve?\n\nThis will also remove it from API VUSD.')) {
+                            
+                            // Eliminar del localStorage de API VUSD
+                            const saved = localStorage.getItem('vusd_por_reports');
+                            if (saved) {
+                              const allPorReports = JSON.parse(saved);
+                              const updated = allPorReports.filter((p: any) => p.id !== por.id);
+                              localStorage.setItem('vusd_por_reports', JSON.stringify(updated));
+                            }
+                            
+                            // Actualizar lista local
+                            setPorReports(prev => prev.filter(p => p.id !== por.id));
+                            
+                            console.log('[PoR API] 🗑️ PoR eliminado:', por.id);
+                            alert(isSpanish 
+                              ? '✅ PoR eliminado correctamente'
+                              : '✅ PoR deleted successfully');
+                          }
+                        }}
+                        className="p-2 bg-red-500/20 border border-red-500 text-red-400 rounded-lg hover:bg-red-500/30"
+                        title={isSpanish ? 'Eliminar' : 'Delete'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -610,9 +640,22 @@ export function ProofOfReservesAPIModule() {
             </p>
           </div>
           <button
-            onClick={() => setShowCreateKeyModal(true)}
-            disabled={porReports.length === 0}
-            className="px-6 py-3 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-bold"
+            onClick={() => {
+              console.log('[PoR API] 🔑 Abriendo modal para generar API Key...');
+              console.log('[PoR API] 📊 PoR disponibles:', porReports.length);
+              
+              if (porReports.length === 0) {
+                alert(isSpanish 
+                  ? '⚠️ No hay Proof of Reserves disponibles\n\nPrimero genera PoR en API VUSD → Proof of Reserve'
+                  : '⚠️ No Proof of Reserves available\n\nFirst generate PoR in API VUSD → Proof of Reserve');
+                return;
+              }
+              
+              // Recargar PoR antes de abrir modal
+              loadPorReports();
+              setShowCreateKeyModal(true);
+            }}
+            className="px-6 py-3 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 flex items-center gap-2 font-bold"
           >
             <Key className="w-5 h-5" />
             {isSpanish ? 'Generar Nueva API Key' : 'Generate New API Key'}
@@ -1011,11 +1054,18 @@ export function ProofOfReservesAPIModule() {
       {/* Create API Key Modal */}
       {showCreateKeyModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0d0d0d] border-2 border-green-500 rounded-lg max-w-2xl w-full p-6">
-            <h3 className="text-2xl font-bold text-green-300 mb-6 flex items-center gap-2">
-              <Key className="w-6 h-6" />
-              {isSpanish ? 'Generar Nueva API Key' : 'Generate New API Key'}
-            </h3>
+          <div className="bg-[#0d0d0d] border-2 border-green-500 rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold text-green-300 flex items-center gap-2">
+                <Key className="w-6 h-6" />
+                {isSpanish ? 'Generar Nueva API Key' : 'Generate New API Key'}
+              </h3>
+              <p className="text-green-300/60 text-sm mt-2">
+                {isSpanish 
+                  ? `${porReports.length} Proof of Reserves activos disponibles para vincular`
+                  : `${porReports.length} active Proof of Reserves available to link`}
+              </p>
+            </div>
 
             <div className="space-y-6">
               {/* Key Name */}
