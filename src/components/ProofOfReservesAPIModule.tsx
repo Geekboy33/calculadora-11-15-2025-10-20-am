@@ -88,6 +88,13 @@ export function ProofOfReservesAPIModule() {
   useEffect(() => {
     loadPorReports();
     loadApiKeys();
+    
+    // Recargar cada 5 segundos para detectar cambios
+    const interval = setInterval(() => {
+      loadPorReports();
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const loadPorReports = () => {
@@ -453,8 +460,12 @@ export function ProofOfReservesAPIModule() {
           </div>
           <button
             onClick={() => {
+              console.log('[PoR API] 🔄 Actualizando manualmente...');
               loadPorReports();
               loadApiKeys();
+              alert(isSpanish 
+                ? `✅ Actualizado\n\nPoR disponibles: ${porReports.length}\nAPI Keys: ${apiKeys.length}`
+                : `✅ Refreshed\n\nAvailable PoR: ${porReports.length}\nAPI Keys: ${apiKeys.length}`);
             }}
             className="px-4 py-2 bg-cyan-500/20 border border-cyan-500 text-cyan-300 rounded-lg hover:bg-cyan-500/30 flex items-center gap-2"
           >
