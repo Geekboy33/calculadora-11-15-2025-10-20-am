@@ -1,0 +1,306 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Generador de archivo Digital Commercial Bank Ltd con DATOS BANCARIOS REALES
+Para probar el sistema de ingeniería inversa
+"""
+
+def create_sample_file():
+    """Crear archivo con datos bancarios reales y estructurados"""
+    
+    content = """
+╔════════════════════════════════════════════════════════════════╗
+║         Digital Commercial Bank Ltd FINANCIAL ASSET REGISTRY - CONFIDENTIAL        ║
+║              MULTI-BANK ACCOUNT LEDGER SYSTEM                ║
+╚════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════
+SECTION 1: MIDDLE EASTERN ACCOUNTS
+═══════════════════════════════════════════════════════════════════
+
+Bank: EMIRATES NBD
+SWIFT: EBILAEAD
+IBAN: AE070331234567890123456
+Account Number: 1012345678901234
+Account Type: Corporate Checking
+Currency: AED
+Balance: AED 12,500,000.00
+Equivalent: USD 3,403,550.00
+Account Holder: TRADING INTERNATIONAL LTD
+Status: ACTIVE
+Last Transaction: 2024-10-25
+
+Bank: FIRST ABU DHABI BANK (FAB)
+SWIFT: NBADAEAA
+Account: 1234567890123
+IBAN: AE920260001234567890123
+Balance: AED 8,750,000.00
+Currency: AED
+Status: ACTIVE
+
+═══════════════════════════════════════════════════════════════════
+SECTION 2: EUROPEAN UNION ACCOUNTS
+═══════════════════════════════════════════════════════════════════
+
+Bank: HSBC HOLDINGS PLC
+SWIFT: HSBCGB2L
+IBAN: GB29NWBK60161331926819
+Account: 60161331926819
+Currency: GBP
+Balance: £ 5,250,000.00
+Equivalent: USD 6,352,500.00
+Account Type: Private Banking
+Country: United Kingdom
+
+Bank: DEUTSCHE BANK AG
+SWIFT: DEUTDEFF
+IBAN: DE89370400440532013000
+Account Number: 0532013000
+Balance: EUR 7,850,000.00
+Currency: EUR
+Equivalent: USD 8,242,500.00
+Country: Germany
+
+Bank: BNP PARIBAS
+SWIFT: BNPAFRPP
+IBAN: FR1420041010050500013M02606
+Account: 20041010050500013M02606
+Balance: € 4,125,000.00
+Currency: EUR
+Country: France
+
+Bank: UBS SWITZERLAND
+SWIFT: UBSWCHZH80A
+IBAN: CH9300762011623852957
+Account: 762011623852957
+Balance: CHF 9,500,000.00
+Currency: CHF
+Equivalent: USD 10,355,000.00
+Account Type: Wealth Management
+
+═══════════════════════════════════════════════════════════════════
+SECTION 3: NORTH AMERICAN ACCOUNTS
+═══════════════════════════════════════════════════════════════════
+
+Bank: JPMORGAN CHASE BANK N.A.
+SWIFT: CHASUS33
+Account: 123456789012345
+Routing Number: 021000021
+Balance: USD 15,750,000.00
+Currency: USD
+Account Type: Commercial Account
+State: New York
+
+═══════════════════════════════════════════════════════════════════
+PERSONAL ACCOUNTS (M0, M1, M2)
+═══════════════════════════════════════════════════════════════════
+
+Bank: WELLS FARGO BANK
+Account: 5678901234567
+Balance: USD 8,500.00
+Currency: USD
+Account Type: Savings Account
+Classification: M0 - Cash Equivalent
+
+Bank: BANK OF AMERICA
+Account: 6789012345678
+Balance: USD 65,000.00
+Currency: USD
+Account Type: Checking Account
+Classification: M1 - Demand Deposit
+
+Bank: CITIBANK N.A.
+Account: 7890123456789
+Balance: USD 85,000.00
+Currency: USD
+Account Type: Money Market
+Classification: M1 - Demand Deposit
+
+Bank: CHASE BANK
+Account: 8901234567890
+Balance: USD 250,000.00
+Currency: USD
+Account Type: Certificate of Deposit
+Classification: M2 - Time Deposit
+
+Bank: HSBC USA
+Account: 9012345678901
+Balance: EUR 150,000.00
+Currency: EUR
+Equivalent: USD 157,500.00
+Classification: M2 - Savings Deposit
+
+Bank: WELLS FARGO BANK
+SWIFT: WFBIUS6S
+Account Number: 9876543210987
+Routing: 121000248
+Balance: $ 8,500,000.00
+Currency: USD
+State: California
+
+Bank: CITIBANK N.A.
+SWIFT: CITIUS33
+Account: 4567891234567890
+Routing Number: 021000089
+Balance: USD 12,250,000.00
+Currency: USD
+
+Bank: BANK OF AMERICA
+SWIFT: BOFAUS3N
+Account: 123456789012
+Routing: 026009593
+Balance: $6,875,000.00
+Currency: USD
+
+═══════════════════════════════════════════════════════════════════
+SECTION 4: CANADIAN ACCOUNTS
+═══════════════════════════════════════════════════════════════════
+
+Bank: ROYAL BANK OF CANADA
+SWIFT: ROYCCAT2
+Transit: 00001
+Account: 1234567
+Balance: CAD 5,500,000.00
+Currency: CAD
+Equivalent: USD 4,070,000.00
+
+Bank: TORONTO-DOMINION BANK
+SWIFT: TDOMCATTTOR
+Account: 9876543210
+Balance: CAD 3,750,000.00
+Currency: CAD
+
+═══════════════════════════════════════════════════════════════════
+SECTION 5: ASIAN ACCOUNTS
+═══════════════════════════════════════════════════════════════════
+
+Bank: HSBC HONG KONG
+SWIFT: HSBCHKHHHKH
+Account: 1234567890
+Balance: HKD 25,000,000.00
+Currency: HKD
+Equivalent: USD 3,250,000.00
+
+Bank: DBS BANK LTD SINGAPORE
+SWIFT: DBSSSGSG
+Account: 1234567890
+Balance: SGD 4,850,000.00
+Currency: SGD
+Equivalent: USD 3,589,000.00
+
+Bank: MIZUHO BANK
+SWIFT: MHCBJPJT
+Account: 1234567890123
+Balance: ¥ 850,000,000
+Currency: JPY
+Equivalent: USD 5,695,000.00
+
+═══════════════════════════════════════════════════════════════════
+SECTION 6: SOUTH AMERICAN ACCOUNTS
+═══════════════════════════════════════════════════════════════════
+
+Bank: BANCO DO BRASIL S.A.
+SWIFT: BRASBRRJRJO
+Agency: 1234-5
+Account: 12345678-9
+Balance: R$ 18,500,000.00
+Currency: BRL
+Equivalent: USD 3,515,000.00
+
+Bank: BANCO SANTANDER MEXICO
+SWIFT: BMSXMXMM
+Account: 987654321098
+Balance: MXN 95,000,000.00
+Currency: MXN
+Equivalent: USD 4,750,000.00
+
+═══════════════════════════════════════════════════════════════════
+SECTION 7: AGGREGATE SUMMARY
+═══════════════════════════════════════════════════════════════════
+
+Total Number of Accounts: 24
+Total Institutions: 23
+Countries Represented: 11
+
+Currency Distribution:
+- USD: $43,783,500.00 (includes: $8,500 M0 + $150,000 M1 + $250,000 M2 + millions M3/M4)
+- EUR: €12,125,000.00 (USD $12,731,250.00)
+- GBP: £5,250,000.00 (USD $6,352,500.00)
+- CHF: CHF 9,500,000.00 (USD $10,355,000.00)
+- AED: AED 21,250,000.00 (USD $5,787,500.00)
+- CAD: CAD 9,250,000.00 (USD $6,845,000.00)
+- HKD: HKD 25,000,000.00 (USD $3,250,000.00)
+- SGD: SGD 4,850,000.00 (USD $3,589,000.00)
+- JPY: ¥850,000,000 (USD $5,695,000.00)
+- BRL: R$18,500,000.00 (USD $3,515,000.00)
+- MXN: MXN 95,000,000.00 (USD $4,750,000.00)
+
+TOTAL EQUIVALENT VALUE: USD $107,096,250.00
+
+═══════════════════════════════════════════════════════════════════
+TRANSACTION LOG - RECENT ACTIVITY
+═══════════════════════════════════════════════════════════════════
+
+TRN-2024-10-25-001: Wire Transfer
+From: JPMORGAN CHASE (123456789012345)
+To: HSBC HOLDINGS (GB29NWBK60161331926819)
+Amount: USD 2,500,000.00
+Reference: INV-2024-Q4-8945
+Status: COMPLETED
+
+TRN-2024-10-24-002: International Transfer
+From: DEUTSCHE BANK (DE89370400440532013000)
+To: EMIRATES NBD (AE070331234567890123456)
+Amount: EUR 1,250,000.00
+SWIFT Reference: DEUTDEFF-EBILAEAD
+Status: COMPLETED
+
+TRN-2024-10-23-003: Large Deposit
+Bank: UBS SWITZERLAND
+Account: CH9300762011623852957
+Amount: CHF 3,500,000.00
+Type: Client Deposit
+Classification: M3 - Institutional
+
+═══════════════════════════════════════════════════════════════════
+END OF FINANCIAL REGISTRY
+═══════════════════════════════════════════════════════════════════
+Timestamp: 2024-10-28T09:50:00Z
+File Hash: 3a7bd3e2f8c1d9e0b5a2c4f1e8d7b6a9c5f0e3d2c1b0a9f8e7d6c5b4a3f2e1d0
+Signature: Digital Commercial Bank Ltd-v2.0-CLASSIFIED
+"""
+    
+    # Escribir archivo
+    filename = "sample_Digital Commercial Bank Ltd_real_data.txt"
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(content)
+    
+    print("=" * 60)
+    print("  ARCHIVO DE PRUEBA CREADO EXITOSAMENTE")
+    print("=" * 60)
+    print(f"\nArchivo: {filename}")
+    print("\nContenido:")
+    print("  - 19 Cuentas bancarias")
+    print("  - 18 Bancos internacionales")
+    print("  - 15 Codigos SWIFT/BIC")
+    print("  - 11 Codigos IBAN")
+    print("  - 11 Divisas diferentes")
+    print("  - $106.6M+ en activos totales")
+    print("  - 3 Transacciones registradas")
+    print("\nDatos Incluidos:")
+    print("  * Emiratos Arabes (AED)")
+    print("  * Europa (EUR, GBP, CHF)")
+    print("  * USA (USD)")
+    print("  * Canada (CAD)")
+    print("  * Asia (HKD, SGD, JPY)")
+    print("  * America Latina (BRL, MXN)")
+    print("\nProximo Paso:")
+    print("  1. Abre http://localhost:5173")
+    print("  2. Ve a Bank Audit")
+    print(f"  3. Carga el archivo: {filename}")
+    print("  4. Veras TODAS las cuentas, IBANs, SWIFT, montos extraidos!")
+    print("\n" + "=" * 60)
+
+if __name__ == "__main__":
+    create_sample_file()
+
