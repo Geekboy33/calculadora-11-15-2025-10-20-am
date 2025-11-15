@@ -1231,7 +1231,7 @@ export function APIVUSDModule() {
   const utilizationPercent = circulatingCap > 0 ? (circulatingOut / circulatingCap) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-black text-white p-2 sm:p-4 md:p-6">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
