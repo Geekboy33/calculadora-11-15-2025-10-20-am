@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Activity, Pause, Play, X, CheckCircle, AlertCircle, Database, RotateCcw } from 'lucide-react';
 import { processingStore, ProcessingState } from '../lib/processing-store';
+import { useLanguage } from '../lib/i18n';
 
 export function GlobalProcessingIndicator() {
+  const { language } = useLanguage();
   const [processingState, setProcessingState] = useState<ProcessingState | null>(null);
   const [isMinimized, setIsMinimized] = useState(false);
   const [showContinuePrompt, setShowContinuePrompt] = useState(false);
+
+  const isSpanish = language === 'es';
 
   useEffect(() => {
     const loadAndSubscribe = async () => {
@@ -77,15 +81,15 @@ export function GlobalProcessingIndicator() {
   const getStatusText = () => {
     switch (processingState.status) {
       case 'processing':
-        return 'Procesando';
+        return isSpanish ? 'Procesando' : 'Processing';
       case 'paused':
-        return 'Pausado';
+        return isSpanish ? 'Pausado' : 'Paused';
       case 'completed':
-        return 'Completado';
+        return isSpanish ? 'Completado' : 'Completed';
       case 'error':
         return 'Error';
       default:
-        return 'Desconocido';
+        return isSpanish ? 'Desconocido' : 'Unknown';
     }
   };
 
@@ -138,7 +142,7 @@ export function GlobalProcessingIndicator() {
         <div className="p-4 space-y-3">
           {/* Nombre del archivo */}
           <div>
-            <div className="text-xs text-[#80ff80] mb-1">Archivo:</div>
+            <div className="text-xs text-[#80ff80] mb-1">{isSpanish ? 'Archivo:' : 'File:'}</div>
             <div className="text-sm text-[#e0ffe0] font-mono truncate" title={processingState.fileName}>
               {processingState.fileName}
             </div>
@@ -147,7 +151,7 @@ export function GlobalProcessingIndicator() {
           {/* Barra de progreso */}
           <div>
             <div className="flex justify-between text-xs text-[#80ff80] mb-2">
-              <span>Progreso</span>
+              <span>{isSpanish ? 'Progreso' : 'Progress'}</span>
               <span className="font-semibold">{processingState.progress.toFixed(2)}%</span>
             </div>
             <div className="w-full bg-[#0a0a0a] rounded-full h-2 overflow-hidden">
@@ -167,13 +171,13 @@ export function GlobalProcessingIndicator() {
           {/* Estadísticas */}
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div>
-              <div className="text-[#4d7c4d]">Procesado:</div>
+              <div className="text-[#4d7c4d]">{isSpanish ? 'Procesado:' : 'Processed:'}</div>
               <div className="text-[#e0ffe0] font-semibold">
                 {formatBytes(processingState.bytesProcessed)}
               </div>
             </div>
             <div>
-              <div className="text-[#4d7c4d]">Total:</div>
+              <div className="text-[#4d7c4d]">{isSpanish ? 'Total:' : 'Total:'}</div>
               <div className="text-[#e0ffe0] font-semibold">
                 {formatBytes(processingState.fileSize)}
               </div>
@@ -185,7 +189,7 @@ export function GlobalProcessingIndicator() {
               </div>
             </div>
             <div>
-              <div className="text-[#4d7c4d]">Monedas:</div>
+              <div className="text-[#4d7c4d]">{isSpanish ? 'Monedas:' : 'Currencies:'}</div>
               <div className="text-[#00ff88] font-semibold">
                 {processingState.balances.length}
               </div>
@@ -194,29 +198,31 @@ export function GlobalProcessingIndicator() {
 
           {/* Estado de sincronización */}
           <div className="flex items-center justify-between text-xs">
-            <span className="text-[#4d7c4d]">Última actualización: {formatTime(processingState.lastUpdateTime)}</span>
+            <span className="text-[#4d7c4d]">
+              {isSpanish ? 'Última actualización:' : 'Last update:'} {formatTime(processingState.lastUpdateTime)}
+            </span>
             {processingState.syncStatus === 'syncing' && (
               <div className="flex items-center gap-1 text-yellow-400">
                 <Activity className="w-3 h-3 animate-spin" />
-                <span className="font-semibold">Sincronizando...</span>
+                <span className="font-semibold">{isSpanish ? 'Sincronizando...' : 'Syncing...'}</span>
               </div>
             )}
             {processingState.syncStatus === 'synced' && processingState.lastSyncTime && (
               <div className="flex items-center gap-1 text-green-400">
                 <CheckCircle className="w-3 h-3" />
-                <span className="font-semibold">Guardado en nube</span>
+                <span className="font-semibold">{isSpanish ? 'Guardado en nube' : 'Saved to cloud'}</span>
               </div>
             )}
             {processingState.syncStatus === 'error' && (
               <div className="flex items-center gap-1 text-red-400">
                 <AlertCircle className="w-3 h-3" />
-                <span className="font-semibold">Error sincronización</span>
+                <span className="font-semibold">{isSpanish ? 'Error sincronización' : 'Sync error'}</span>
               </div>
             )}
             {processingState.syncStatus === 'local-only' && (
               <div className="flex items-center gap-1 text-orange-400">
                 <AlertCircle className="w-3 h-3" />
-                <span className="font-semibold">Solo local</span>
+                <span className="font-semibold">{isSpanish ? 'Solo local' : 'Local only'}</span>
               </div>
             )}
           </div>
@@ -246,10 +252,14 @@ export function GlobalProcessingIndicator() {
             <div className="bg-[#00ff88]/10 border border-[#00ff88]/30 rounded p-3 text-center">
               <p className="text-[#00ff88] text-xs font-semibold flex items-center justify-center gap-2">
                 <Activity className="w-3 h-3 animate-spin" />
-                El archivo se está procesando en segundo plano
+                {isSpanish 
+                  ? 'El archivo se está procesando en segundo plano'
+                  : 'File is being processed in the background'}
               </p>
               <p className="text-[#4d7c4d] text-xs mt-1">
-                Puedes navegar libremente sin interrumpir la carga
+                ✓ {isSpanish 
+                  ? 'Puedes navegar libremente sin interrumpir la carga'
+                  : 'You can navigate freely without interrupting the load'}
               </p>
             </div>
           )}

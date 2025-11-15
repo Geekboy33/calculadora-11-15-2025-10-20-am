@@ -72,8 +72,9 @@ class UnifiedPledgeStore {
   canCreatePledge(custodyAccountId: string, requestedAmount: number): {
     allowed: boolean;
     reason?: string;
-    availableBalance?: number;
+    totalBalance?: number;
     totalPledged?: number;
+    remainingBalance?: number;
   } {
     const account = custodyStore.getAccountById(custodyAccountId);
 
@@ -85,29 +86,47 @@ class UnifiedPledgeStore {
     }
 
     const totalPledged = this.getTotalPledgedAmount(custodyAccountId);
-    const availableForPledge = account.totalBalance - totalPledged;
+    
+    // ========================================
+    // NUEVA LÓGICA: Balance Total = Disponible + Reservado
+    // ========================================
+    // Balance Total de la cuenta que se puede usar para pledges
+    const totalBalanceForPledges = account.totalBalance;
+    
+    // Ya usado en pledges existentes
+    const alreadyUsedInPledges = totalPledged;
+    
+    // Queda disponible para nuevos pledges
+    const remainingForPledges = totalBalanceForPledges - alreadyUsedInPledges;
 
-    console.log('[UnifiedPledgeStore] Can create pledge check:', {
+    console.log('[UnifiedPledgeStore] 🔍 Validación de pledge (Balance Total):', {
       accountId: custodyAccountId,
-      totalBalance: account.totalBalance,
-      totalPledged,
-      availableForPledge,
-      requestedAmount
+      accountName: account.accountName,
+      totalBalance: totalBalanceForPledges,
+      availableBalance: account.availableBalance,
+      reservedBalance: account.reservedBalance,
+      alreadyUsedInPledges,
+      remainingForPledges,
+      requestedAmount,
+      afterThisPledge: remainingForPledges - requestedAmount,
+      percentageOfTotal: ((requestedAmount / totalBalanceForPledges) * 100).toFixed(1) + '%'
     });
 
-    if (requestedAmount > availableForPledge) {
+    if (requestedAmount > remainingForPledges) {
       return {
         allowed: false,
-        reason: `Insufficient balance. Available: ${availableForPledge.toFixed(2)}, Requested: ${requestedAmount.toFixed(2)}`,
-        availableBalance: availableForPledge,
-        totalPledged
+        reason: `Balance total insuficiente. Total cuenta: ${totalBalanceForPledges.toFixed(2)}, Ya usado en pledges: ${alreadyUsedInPledges.toFixed(2)}, Restante: ${remainingForPledges.toFixed(2)}, Solicitado: ${requestedAmount.toFixed(2)}`,
+        totalBalance: totalBalanceForPledges,
+        totalPledged: alreadyUsedInPledges,
+        remainingBalance: remainingForPledges
       };
     }
 
     return {
       allowed: true,
-      availableBalance: availableForPledge,
-      totalPledged
+      totalBalance: totalBalanceForPledges,
+      totalPledged: alreadyUsedInPledges,
+      remainingBalance: remainingForPledges - requestedAmount
     };
   }
 
@@ -192,6 +211,7 @@ class UnifiedPledgeStore {
 
   /**
    * Update custody account balance based on active pledges
+   * CORRECCIÓN: NO sobrescribir reservas manuales, solo actualizar con pledges
    */
   private updateCustodyAccountBalance(custodyAccountId: string): void {
     const totalPledged = this.getTotalPledgedAmount(custodyAccountId);
@@ -199,20 +219,37 @@ class UnifiedPledgeStore {
     const account = accounts.find(a => a.id === custodyAccountId);
 
     if (account) {
-      account.reservedBalance = totalPledged;
-      account.availableBalance = account.totalBalance - totalPledged;
+      // ========================================
+      // CORRECCIÓN: Preservar reservas manuales
+      // ========================================
+      // Calcular reservas manuales (las que NO son de pledges)
+      const currentReserved = account.reservedBalance || 0;
+      const currentPledged = this.getTotalPledgedAmount(custodyAccountId);
+      const manualReserved = Math.max(0, currentReserved - currentPledged);
+      
+      // Nueva reserva = reservas manuales + pledges actuales
+      const newReservedBalance = manualReserved + totalPledged;
+      const newAvailableBalance = account.totalBalance - newReservedBalance;
+
+      console.log('[UnifiedPledgeStore] 🔄 Actualizando balance de cuenta (preservando reservas manuales):', {
+        accountId: custodyAccountId,
+        accountName: account.accountName,
+        totalBalance: account.totalBalance,
+        oldReserved: currentReserved,
+        manualReserved,
+        pledgesReserved: totalPledged,
+        newReserved: newReservedBalance,
+        newAvailable: newAvailableBalance,
+        totalActivePledges: this.getActivePledgesByCustodyAccount(custodyAccountId).length
+      });
+
+      account.reservedBalance = newReservedBalance;
+      account.availableBalance = newAvailableBalance;
 
       // IMPORTANTE: Guardar cambios en localStorage
       custodyStore.saveAccounts(accounts);
 
-      console.log('[UnifiedPledgeStore] ✅ Updated and SAVED account balance:', {
-        accountId: custodyAccountId,
-        accountName: account.accountName,
-        totalBalance: account.totalBalance,
-        reservedBalance: account.reservedBalance,
-        availableBalance: account.availableBalance,
-        totalActivePledges: this.getActivePledgesByCustodyAccount(custodyAccountId).length
-      });
+      console.log('[UnifiedPledgeStore] ✅ Balance actualizado y guardado correctamente');
     }
   }
 
@@ -279,42 +316,17 @@ class UnifiedPledgeStore {
 
   /**
    * Recalculate ALL custody account balances based on active pledges
-   * Call this on app initialization to ensure consistency
+   * DESHABILITADA: Esta función borraba las reservas manuales
+   * Usar updateCustodyAccountBalance individual en su lugar
    */
   recalculateAllBalances(): void {
-    console.log('[UnifiedPledgeStore] 🔄 Recalculating all custody account balances...');
-
-    const accounts = custodyStore.getAccounts();
-    const pledges = this.getPledges();
-
-    // Group pledges by custody account
-    const pledgesByAccount = new Map<string, number>();
-
-    pledges.forEach(pledge => {
-      if (pledge.status === 'ACTIVE') {
-        const current = pledgesByAccount.get(pledge.custody_account_id) || 0;
-        pledgesByAccount.set(pledge.custody_account_id, current + pledge.amount);
-      }
-    });
-
-    // Update all accounts
-    accounts.forEach(account => {
-      const totalPledged = pledgesByAccount.get(account.id) || 0;
-      account.reservedBalance = totalPledged;
-      account.availableBalance = account.totalBalance - totalPledged;
-
-      console.log('[UnifiedPledgeStore] Account recalculated:', {
-        account: account.accountName,
-        totalBalance: account.totalBalance,
-        reservedBalance: account.reservedBalance,
-        availableBalance: account.availableBalance
-      });
-    });
-
-    // Save all changes
-    custodyStore.saveAccounts(accounts);
-
-    console.log('[UnifiedPledgeStore] ✅ All balances recalculated and saved');
+    console.log('[UnifiedPledgeStore] ⚠️ recalculateAllBalances() DESHABILITADA para preservar reservas manuales');
+    console.log('[UnifiedPledgeStore] 💡 Los balances se actualizan automáticamente al crear/eliminar pledges');
+    
+    // NO hacer nada aquí para preservar reservas manuales del módulo Custody
+    // Los balances se actualizan correctamente en:
+    // 1. createPledge() -> updateCustodyAccountBalance()
+    // 2. releasePledge() -> updateCustodyAccountBalance()
   }
 }
 

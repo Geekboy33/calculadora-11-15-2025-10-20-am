@@ -6,11 +6,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   Lock, Send, FileText, Activity, CheckCircle, Clock,
-  AlertCircle, Database, Shield, Zap, Download, RefreshCw, Trash2, Key
+  AlertCircle, Database, Shield, Zap, Download, RefreshCw, Trash2, Key, DollarSign
 } from 'lucide-react';
 import { apiVUSD1Store, type ApiPledge, type ApiPayout, type ApiAttestation, type ReserveSummary } from '../lib/api-vusd1-store';
 import { APIVUSD1KeysManager } from './APIVUSD1KeysManager';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
+import { unifiedPledgeStore } from '../lib/unified-pledge-store';
 
 export default function APIVUSD1Module() {
   const [selectedView, setSelectedView] = useState<'overview' | 'pledges' | 'payouts' | 'attestations' | 'events' | 'api-keys'>('overview');
@@ -53,14 +54,99 @@ export default function APIVUSD1Module() {
       setLoading(true);
       setError(null);
 
-      const [pledgesData, summary, latestAttestation] = await Promise.all([
-        apiVUSD1Store.listPledges({ status: 'ACTIVE' }),
-        apiVUSD1Store.getReservesSummary(),
-        apiVUSD1Store.getLatestAttestation()
-      ]);
+      // Cargar pledges del API store (si Supabase disponible)
+      const pledgesData = await apiVUSD1Store.listPledges({ status: 'ACTIVE' }).catch(err => {
+        console.warn('[APIVUSD1] ⚠️ No se pudieron cargar pledges de API:', err.message);
+        return [];
+      });
 
-      setPledges(pledgesData);
-      setReserveSummary(summary);
+      const summary = await apiVUSD1Store.getReservesSummary().catch(err => {
+        console.warn('[APIVUSD1] ⚠️ No se pudo cargar resumen:', err.message);
+        return null;
+      });
+
+      const latestAttestation = await apiVUSD1Store.getLatestAttestation().catch(err => {
+        console.warn('[APIVUSD1] ⚠️ No se pudo cargar attestation:', err.message);
+        return null;
+      });
+
+      // Cargar también pledges del Unified Store (localStorage)
+      const unifiedPledges = unifiedPledgeStore.getPledges().filter(p => p.status === 'ACTIVE');
+      
+      console.log('[APIVUSD1] 📊 Pledges desde Unified Store:', unifiedPledges.length);
+      
+      // Convertir unified pledges a formato de API pledges
+      const unifiedPledgesFormatted: ApiPledge[] = unifiedPledges.map(up => ({
+        id: up.id,
+        pledge_id: up.id,
+        status: up.status,
+        amount: up.amount,
+        available: up.amount,
+        currency: up.currency,
+        beneficiary: up.beneficiary,
+        expires_at: up.expires_at || '',
+        metadata: JSON.stringify({
+          custody_account_id: up.custody_account_id,
+          source: up.source_module
+        }),
+        created_at: up.created_at,
+        updated_at: up.created_at
+      }));
+
+      // Combinar pledges sin duplicados
+      const allPledges = [...pledgesData];
+      unifiedPledgesFormatted.forEach(up => {
+        if (!allPledges.find(p => p.pledge_id === up.pledge_id)) {
+          allPledges.push(up);
+        }
+      });
+
+      // ========================================
+      // CALCULAR MÉTRICAS DESDE PLEDGES ACTIVOS
+      // ========================================
+      
+      // Circulating Cap = Total de pledges disponibles
+      const calculatedCirculatingCap = allPledges.reduce((sum, p) => sum + (p.available || p.amount), 0);
+      
+      // Pledged USD = Total de pledges en USD
+      const calculatedPledgedUSD = allPledges
+        .filter(p => p.currency === 'USD')
+        .reduce((sum, p) => sum + p.amount, 0);
+      
+      // Active Pledges Count
+      const activePledgesCount = allPledges.length;
+      
+      // Total Reserves = Suma de todos los pledges (todas las monedas)
+      const calculatedTotalReserves = allPledges.reduce((sum, p) => sum + p.amount, 0);
+
+      // Crear summary calculado si no hay de Supabase
+      const calculatedSummary: ReserveSummary = {
+        circulating_cap: calculatedCirculatingCap,
+        pledged_usd: calculatedPledgedUSD,
+        pledge_count: activePledgesCount,
+        total_reserves: calculatedTotalReserves,
+        active_payouts: summary?.active_payouts || 0,
+        unpledged_usd: summary?.unpledged_usd || 0,
+        as_of_date: new Date().toISOString()
+      };
+
+      // Usar summary calculado si hay pledges, sino el de API
+      const finalSummary = allPledges.length > 0 ? calculatedSummary : summary;
+
+      console.log('[APIVUSD1] ✅ Datos cargados:', {
+        pledgesAPI: pledgesData.length,
+        pledgesUnified: unifiedPledges.length,
+        pledgesTotal: allPledges.length,
+        métricas: {
+          circulatingCap: finalSummary?.circulating_cap || 0,
+          pledgedUSD: finalSummary?.pledged_usd || 0,
+          activePledges: activePledgesCount,
+          totalReserves: finalSummary?.total_reserves || 0
+        }
+      });
+
+      setPledges(allPledges);
+      setReserveSummary(finalSummary);
       setAttestation(latestAttestation);
 
     } catch (err) {
@@ -72,9 +158,29 @@ export default function APIVUSD1Module() {
   };
 
   const loadCustodyAccounts = () => {
-    const accounts = custodyStore.getAccounts();
-    console.log('[APIVUSD1] Loaded custody accounts:', accounts.length);
-    setCustodyAccounts(accounts);
+    console.log('[APIVUSD1] 📋 Cargando TODAS las cuentas custody desde Custody Accounts...');
+    
+    const allAccounts = custodyStore.getAccounts();
+
+    console.log('[APIVUSD1] 🔍 Cuentas encontradas:', {
+      total: allAccounts.length,
+      cuentas: allAccounts.map(a => ({
+        nombre: a.accountName,
+        tipo: a.accountType,
+        moneda: a.currency,
+        balance: a.totalBalance,
+        disponible: a.availableBalance
+      }))
+    });
+
+    if (allAccounts.length === 0) {
+      console.warn('[APIVUSD1] ⚠️ No se encontraron cuentas custody');
+      console.log('[APIVUSD1] 💡 Ve a Custody Accounts y crea al menos una cuenta');
+    } else {
+      console.log('[APIVUSD1] ✅ Se cargaron', allAccounts.length, 'cuentas correctamente');
+    }
+
+    setCustodyAccounts(allAccounts);
   };
 
   // Create Pledge
@@ -84,21 +190,104 @@ export default function APIVUSD1Module() {
       setLoading(true);
       setError(null);
 
+      // Validación de duplicados (advertencia, no bloqueo)
+      if (selectedCustodyAccount) {
+        try {
+          const existingPledges = await apiVUSD1Store.listPledges({ status: 'ACTIVE' });
+          const duplicatePledge = existingPledges.find(p => 
+            p.metadata && JSON.parse(p.metadata).custody_account_id === selectedCustodyAccount
+          );
+          
+          if (duplicatePledge) {
+            console.warn('[APIVUSD1] ⚠️ Ya existe pledge para esta cuenta');
+            
+            const confirmCreate = confirm(
+              `⚠️ Ya existe un pledge para esta cuenta.\n\n` +
+              `¿Crear pledge adicional de todas formas?`
+            );
+            
+            if (!confirmCreate) {
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn('[APIVUSD1] ⚠️ Error verificando duplicados (continuando):', err);
+        }
+      }
+
       const result = await apiVUSD1Store.createPledge({
         amount: pledgeForm.amount,
         currency: pledgeForm.currency,
         beneficiary: pledgeForm.beneficiary,
         external_ref: pledgeForm.external_ref || undefined,
         expires_at: pledgeForm.expires_at || undefined,
-        idempotency_key: `PLEDGE_${Date.now()}`
+        idempotency_key: `PLEDGE_${Date.now()}`,
+        metadata: selectedCustodyAccount ? JSON.stringify({
+          custody_account_id: selectedCustodyAccount,
+          reserved_amount: pledgeForm.amount,
+          source: 'APIVUSD1Module'
+        }) : undefined
       });
 
       console.log('[APIVUSD1] ✅ Pledge created:', result);
 
+      // ========================================
+      // ACTUALIZAR UI INMEDIATAMENTE
+      // ========================================
+      
+      // Agregar pledge a la lista INMEDIATAMENTE
+      const newPledgeForDisplay: ApiPledge = {
+        id: result.id || result.pledge_id,
+        pledge_id: result.pledge_id,
+        status: 'ACTIVE',
+        amount: pledgeForm.amount,
+        available: pledgeForm.amount,
+        currency: pledgeForm.currency,
+        beneficiary: pledgeForm.beneficiary,
+        expires_at: pledgeForm.expires_at || '',
+        metadata: selectedCustodyAccount ? JSON.stringify({
+          custody_account_id: selectedCustodyAccount,
+          source: 'APIVUSD1Module'
+        }) : '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      setPledges(prev => {
+        const updated = [newPledgeForDisplay, ...prev];
+        
+        // Actualizar métricas inmediatamente
+        const newCirculatingCap = updated.reduce((sum, p) => sum + (p.available || p.amount), 0);
+        const newPledgedUSD = updated.filter(p => p.currency === 'USD').reduce((sum, p) => sum + p.amount, 0);
+        const newTotalReserves = updated.reduce((sum, p) => sum + p.amount, 0);
+        
+        setReserveSummary(prev => ({
+          circulating_cap: newCirculatingCap,
+          pledged_usd: newPledgedUSD,
+          pledge_count: updated.length,
+          total_reserves: newTotalReserves,
+          active_payouts: prev?.active_payouts || 0,
+          unpledged_usd: prev?.unpledged_usd || 0,
+          as_of_date: new Date().toISOString()
+        }));
+        
+        console.log('[APIVUSD1] ✅ Métricas actualizadas INMEDIATAMENTE:', {
+          circulatingCap: newCirculatingCap,
+          pledgedUSD: newPledgedUSD,
+          activePledges: updated.length,
+          totalReserves: newTotalReserves
+        });
+        
+        return updated;
+      });
+
       setShowPledgeModal(false);
+      setSelectedCustodyAccount('');
       setPledgeForm({ amount: 0, currency: 'USD', beneficiary: '', external_ref: '', expires_at: '' });
 
-      await loadData();
+      // Recargar en background
+      loadData().catch(err => console.warn('[APIVUSD1] ⚠️ Error reloading:', err));
 
       alert(`✅ Pledge Created Successfully!\n\nPledge ID: ${result.pledge_id}\nAmount: ${result.currency} ${result.amount.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}\nBeneficiary: ${result.beneficiary}`);
 
@@ -512,47 +701,130 @@ export default function APIVUSD1Module() {
                         setSelectedCustodyAccount(accountId);
                         const account = custodyAccounts.find(a => a.id === accountId);
                         if (account) {
+                          // Calcular balance restante
+                          const totalBalance = account.totalBalance;
+                          const alreadyPledged = unifiedPledgeStore.getTotalPledgedAmount(accountId);
+                          const remainingBalance = totalBalance - alreadyPledged;
+                          
+                          console.log('[APIVUSD1] Cuenta seleccionada:', {
+                            name: account.accountName,
+                            total: totalBalance,
+                            pledged: alreadyPledged,
+                            remaining: remainingBalance
+                          });
+                          
                           setPledgeForm({
                             ...pledgeForm,
-                            amount: account.availableBalance,
-                            currency: account.currency
+                            amount: remainingBalance,
+                            currency: account.currency,
+                            beneficiary: account.accountName
                           });
                         }
                       }}
-                      className="w-full bg-[#0d0d0d] border-2 border-[#00ff88]/30 focus:border-[#00ff88] text-[#e0ffe0] px-4 py-3 rounded-lg outline-none transition-all text-sm"
+                      size={Math.min(custodyAccounts.length + 1, 8)}
+                      className="w-full bg-[#0d0d0d] border-2 border-[#00ff88]/30 focus:border-[#00ff88] text-[#e0ffe0] px-4 py-2 rounded-lg outline-none transition-all text-sm overflow-y-auto"
+                      style={{ maxHeight: '300px' }}
                       required
                     >
-                      <option value="">-- Select a custody account --</option>
-                      {custodyAccounts.map((account) => (
-                        <option key={account.id} value={account.id}>
-                          {account.accountName} | {account.currency} ${account.availableBalance.toLocaleString()} available
-                        </option>
-                      ))}
+                      <option value="" className="bg-[#0d0d0d] py-2">📝 -- Selecciona una cuenta custody --</option>
+                      {custodyAccounts.map((account) => {
+                        const totalBalance = account.totalBalance;
+                        const alreadyPledged = unifiedPledgeStore.getTotalPledgedAmount(account.id);
+                        const remaining = totalBalance - alreadyPledged;
+                        
+                        return (
+                          <option key={account.id} value={account.id} className="bg-[#0d0d0d] py-2">
+                            💰 {account.accountName} | {account.currency} {remaining.toLocaleString('en-US', { minimumFractionDigits: 2 })} restante {alreadyPledged > 0 ? `(${alreadyPledged.toLocaleString()} usado)` : ''}
+                          </option>
+                        );
+                      })}
                     </select>
-                    {selectedCustodyAccount && (
-                      <p className="text-green-400 text-xs mt-2 flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3" />
-                        Account selected - Amount and currency auto-filled
-                      </p>
-                    )}
+                    <div className="text-xs text-[#80ff80] mt-2">
+                      {custodyAccounts.length > 5 && '⬆️⬇️ Usa scroll para ver más cuentas'}
+                      {selectedCustodyAccount && (
+                        <div className="flex items-center gap-1 text-green-400 font-semibold mt-1">
+                          <CheckCircle className="w-3 h-3" />
+                          Cuenta seleccionada - Formulario auto-completado
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
 
+              {/* Selector de Porcentajes - Solo si hay cuenta seleccionada */}
+              {selectedCustodyAccount && (() => {
+                const account = custodyAccounts.find(a => a.id === selectedCustodyAccount);
+                if (!account) return null;
+                
+                const totalBalance = account.totalBalance;
+                const alreadyPledged = unifiedPledgeStore.getTotalPledgedAmount(selectedCustodyAccount);
+                const remainingBalance = totalBalance - alreadyPledged;
+                
+                return (
+                  <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-4">
+                    <label className="text-sm text-green-400 mb-3 block font-semibold flex items-center gap-2">
+                      <Activity className="w-4 h-4" />
+                      ⚡ Quick Pledge - % of Remaining Balance
+                    </label>
+                    <div className="grid grid-cols-5 gap-2">
+                      {[10, 20, 30, 50, 100].map(percentage => {
+                        const calculatedAmount = (remainingBalance * percentage) / 100;
+
+                        return (
+                          <button
+                            key={percentage}
+                            type="button"
+                            onClick={() => {
+                              setPledgeForm({
+                                ...pledgeForm,
+                                amount: calculatedAmount
+                              });
+                              console.log(`[APIVUSD1] ✅ ${percentage}% of remaining = ${account.currency} ${calculatedAmount.toLocaleString()}`);
+                            }}
+                            className="px-3 py-3 bg-gradient-to-br from-green-600 to-emerald-600 text-white rounded-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all text-sm font-bold hover:scale-105"
+                          >
+                            <div className="text-lg mb-1">{percentage}%</div>
+                            <div className="text-xs opacity-90">
+                              {calculatedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-3 text-xs text-center space-y-1">
+                      <div className="text-green-300">
+                        💰 Remaining Balance: {account.currency} {remainingBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </div>
+                      {alreadyPledged > 0 && (
+                        <div className="text-orange-300/80">
+                          📊 Already in pledges: {alreadyPledged.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div>
-                <label className="block text-[#4d7c4d] text-sm mb-2">Amount</label>
+                <label className="block text-[#00ff88] text-sm font-semibold mb-2 flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  Amount {selectedCustodyAccount && '(editable)'}
+                </label>
                 <input
                   type="number"
                   step="0.01"
                   value={pledgeForm.amount}
                   onChange={(e) => setPledgeForm({ ...pledgeForm, amount: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-4 py-2 text-white"
+                  className="w-full bg-[#0a0a0a] border border-[#00ff88]/30 focus:border-[#00ff88] rounded-lg px-4 py-3 text-white transition-all"
                   required
-                  disabled={!selectedCustodyAccount}
                 />
-                {!selectedCustodyAccount && (
-                  <p className="text-[#4d7c4d] text-xs mt-1">Select a custody account first</p>
-                )}
+                <div className="text-xs text-[#80ff80] mt-1">
+                  {selectedCustodyAccount 
+                    ? '✏️ Edit manually or use % buttons above'
+                    : '💡 Select a custody account first to use quick %'
+                  }
+                </div>
               </div>
 
               <div>

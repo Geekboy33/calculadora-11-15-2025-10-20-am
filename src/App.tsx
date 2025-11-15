@@ -32,7 +32,7 @@ const APIDAESPledgeModule = lazy(() => import('./components/APIDAESPledgeModule'
 const APIVUSD1Module = lazy(() => import('./components/APIVUSD1Module').then(m => ({ default: m.default })));
 const APIGlobalModule = lazy(() => import('./components/APIGlobalModule').then(m => ({ default: m.default })));
 const APIDigitalModule = lazy(() => import('./components/APIDigitalModule').then(m => ({ default: m.APIDigitalModule })));
-const ProofOfReservesManager = lazy(() => import('./components/ProofOfReservesManager').then(m => ({ default: m.ProofOfReservesManager })));
+const ProofOfReservesAPIModule = lazy(() => import('./components/ProofOfReservesAPIModule').then(m => ({ default: m.ProofOfReservesAPIModule })));
 
 type Tab = 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves';
 
@@ -228,7 +228,7 @@ function App() {
           {activeTab === 'api-digital' && <APIDigitalModule />}
           {activeTab === 'api-vusd' && <APIVUSDModule />}
           {activeTab === 'api-vusd1' && <APIVUSD1Module />}
-          {activeTab === 'proof-of-reserves' && <ProofOfReservesManager />}
+          {activeTab === 'proof-of-reserves' && <ProofOfReservesAPIModule />}
           {activeTab === 'api-daes-pledge' && <APIDAESPledgeModule />}
           {activeTab === 'audit-bank' && <AuditBankWindow />}
           {activeTab === 'corebanking-api' && <CoreBankingAPIModule />}

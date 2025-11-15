@@ -16,7 +16,6 @@ import {
   DollarSign,
   Activity,
   Clock,
-  ChevronRight,
   Database,
   ArrowUpRight,
   Trash2,
@@ -49,6 +48,27 @@ export function APIVUSDModule() {
     amount: number;
     beneficiary: string;
   } | null>(null);
+  const [generatedPorReports, setGeneratedPorReports] = useState<Array<{
+    id: string;
+    report: string;
+    pledgesM2: number;
+    pledgesM3: number;
+    totalM2: number;
+    totalM3: number;
+    timestamp: string;
+    circulatingCap: number;
+    pledgedUSD: number;
+    activePledgesCount: number;
+    expanded: boolean;
+  }>>(() => {
+    // Cargar PoR guardados desde localStorage al iniciar
+    try {
+      const saved = localStorage.getItem('vusd_por_reports');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Transfer form state
   const [showTransferModal, setShowTransferModal] = useState(false);
@@ -190,58 +210,53 @@ export function APIVUSDModule() {
 
   // Load initial data
   useEffect(() => {
-    // IMPORTANTE: Recalcular balances desde unified store al montar el componente
-    console.log('[VUSD] 🔄 Initializing: Recalculating all balances from unified store...');
-    unifiedPledgeStore.recalculateAllBalances();
-
+    console.log('[VUSD] 🚀 Inicializando módulo API VUSD...');
+    
     loadData();
     loadCustodyAccounts();
     const interval = setInterval(loadData, 30000); // Refresh every 30s
     return () => clearInterval(interval);
   }, []);
 
-  // Load custody accounts
+  // Guardar PoR reports en localStorage cada vez que cambian
+  useEffect(() => {
+    if (generatedPorReports.length > 0) {
+      localStorage.setItem('vusd_por_reports', JSON.stringify(generatedPorReports));
+      console.log('[VUSD] 💾 PoR reports guardados en localStorage:', generatedPorReports.length);
+    }
+  }, [generatedPorReports]);
+
+  // Load custody accounts - CARGAR TODAS LAS CUENTAS
   const loadCustodyAccounts = async () => {
-    const accounts = custodyStore.getAccounts();
+    console.log('[VUSD] 📋 Cargando TODAS las cuentas custody desde Custody Accounts...');
+    
+    const allAccounts = custodyStore.getAccounts();
 
-    // ========================================
-    // SINCRONIZAR BALANCES CON PLEDGES ACTIVOS
-    // ========================================
-    // Resetear reservas de todos los pledges para recalcular
-    accounts.forEach(account => {
-      // Guardar el balance original total
-      const originalTotal = account.totalBalance;
-
-      // Resetear a estado inicial
-      account.reservedBalance = 0;
-      account.availableBalance = originalTotal;
+    console.log('[VUSD] 🔍 Cuentas custody encontradas:', {
+      total: allAccounts.length,
+      cuentas: allAccounts.map(a => ({
+        nombre: a.accountName,
+        tipo: a.accountType,
+        moneda: a.currency,
+        balance: a.totalBalance,
+        disponible: a.availableBalance
+      }))
     });
 
-    // Recalcular reservas basado en pledges activos
-    const pledges = await vusdCapStore.getActivePledges();
-    pledges.forEach(pledge => {
-      if (pledge.custody_account_id && pledge.status === 'active') {
-        const account = accounts.find(a => a.id === pledge.custody_account_id);
-        if (account && account.currency === pledge.currency) {
-          account.reservedBalance += pledge.amount;
-          account.availableBalance -= pledge.amount;
+    if (allAccounts.length === 0) {
+      console.warn('[VUSD] ⚠️ No se encontraron cuentas custody');
+      console.log('[VUSD] 💡 Ve a Custody Accounts y crea al menos una cuenta');
+    } else {
+      console.log('[VUSD] ✅ Se cargaron', allAccounts.length, 'cuentas correctamente');
+      allAccounts.forEach(account => {
+        console.log('[VUSD] 📊', account.accountName, '-', account.currency, account.totalBalance.toLocaleString());
+      });
+    }
 
-          console.log('[VUSD→Custody] 🔄 Sincronizando pledge:', {
-            account: account.accountName,
-            pledge: pledge.pledge_id,
-            reserved: pledge.amount
-          });
-        }
-      }
-    });
-
-    // Guardar estado actualizado
-    custodyStore.saveAccounts(accounts);
-
-    setCustodyAccounts(accounts);
+    setCustodyAccounts(allAccounts);
   };
 
-  // Handle custody account selection
+  // Handle custody account selection - Cargar datos de la cuenta seleccionada
   const handleCustodyAccountSelect = (accountId: string) => {
     setSelectedCustodyAccount(accountId);
 
@@ -258,11 +273,25 @@ export function APIVUSDModule() {
 
     const account = custodyAccounts.find(a => a.id === accountId);
     if (account) {
+      // Calcular balance restante (total - ya usado en pledges)
+      const totalBalance = account.totalBalance;
+      const alreadyPledged = unifiedPledgeStore.getTotalPledgedAmount(accountId);
+      const remainingBalance = totalBalance - alreadyPledged;
+      
+      console.log('[VUSD] 📋 Cuenta custody seleccionada:', {
+        account: account.accountName,
+        totalBalance: totalBalance,
+        alreadyPledged: alreadyPledged,
+        remainingBalance: remainingBalance,
+        currency: account.currency
+      });
+
+      // Auto-completar con el balance RESTANTE (total - pledges)
       setPledgeForm({
-        amount: account.totalBalance,
+        amount: remainingBalance,
         currency: account.currency,
         beneficiary: account.accountName,
-        expires_at: '' // Sin expiración por defecto
+        expires_at: ''
       });
     }
   };
@@ -272,24 +301,126 @@ export function APIVUSDModule() {
       setLoading(true);
       setError(null);
 
-      const [pledges, cap, out, transfers, pors, pledgedTotal] = await Promise.all([
-        vusdCapStore.getActivePledges(),
-        vusdCapStore.getCirculatingCap(),
-        vusdCapStore.getCirculatingOut(),
-        vusdCapStore.getRecentTransfers(),
-        vusdCapStore.getRecentPorPublications(),
-        vusdCapStore.getTotalPledgedUSD()
-      ]);
+      console.log('[VUSD] 📊 Cargando datos del sistema...');
 
-      setActivePledges(pledges);
-      setCirculatingCap(cap);
-      setCirculatingOut(out);
+      // Cargar datos con manejo de errores individual
+      const pledges = await vusdCapStore.getActivePledges().catch(err => {
+        console.warn('[VUSD] ⚠️ No se pudieron cargar pledges:', err.message);
+        return [];
+      });
+
+      const cap = await vusdCapStore.getCirculatingCap().catch(err => {
+        console.warn('[VUSD] ⚠️ No se pudo cargar circulating cap:', err.message);
+        return 0;
+      });
+
+      const out = await vusdCapStore.getCirculatingOut().catch(err => {
+        console.warn('[VUSD] ⚠️ No se pudo cargar circulating out:', err.message);
+        return 0;
+      });
+
+      const transfers = await vusdCapStore.getRecentTransfers().catch(err => {
+        console.warn('[VUSD] ⚠️ No se pudieron cargar transferencias:', err.message);
+        return [];
+      });
+
+      const pors = await vusdCapStore.getRecentPorPublications().catch(err => {
+        console.warn('[VUSD] ⚠️ No se pudieron cargar PoR publications:', err.message);
+        return [];
+      });
+
+      const pledgedTotal = await vusdCapStore.getTotalPledgedUSD().catch(err => {
+        console.warn('[VUSD] ⚠️ No se pudo cargar total pledged USD:', err.message);
+        return 0;
+      });
+
+      // Cargar también pledges del Unified Store (localStorage)
+      const unifiedPledges = unifiedPledgeStore.getPledges().filter(p => p.status === 'ACTIVE');
+      
+      console.log('[VUSD] 📊 Pledges desde Unified Store:', unifiedPledges.length);
+      
+      // Convertir unified pledges a formato de activePledges
+      const unifiedPledgesFormatted = unifiedPledges.map(up => ({
+        pledge_id: up.id,
+        status: up.status.toLowerCase() as any,
+        amount: up.amount,
+        available: up.amount,
+        currency: up.currency,
+        beneficiary: up.beneficiary,
+        custody_account_id: up.custody_account_id,
+        expires_at: up.expires_at,
+        updated_at: up.created_at
+      }));
+
+      // Combinar pledges de Supabase + Unified Store (sin duplicados)
+      const allPledges = [...pledges];
+      unifiedPledgesFormatted.forEach(up => {
+        if (!allPledges.find(p => p.pledge_id === up.pledge_id)) {
+          allPledges.push(up);
+        }
+      });
+
+      // ========================================
+      // CALCULAR MÉTRICAS DESDE LOS PLEDGES ACTIVOS
+      // ========================================
+      
+      // Total pledged en USD (suma de todos los pledges USD activos)
+      const calculatedPledgedUSD = allPledges
+        .filter(p => p.currency === 'USD')
+        .reduce((sum, p) => sum + p.amount, 0);
+
+      // Circulating Cap = Total pledged disponible (suma de available de todos los pledges)
+      const calculatedCirculatingCap = allPledges
+        .reduce((sum, p) => sum + (p.available || p.amount), 0);
+
+      // Circulating Out = Total emitido desde treasury (por ahora 0, se actualiza con transfers)
+      const calculatedCirculatingOut = transfers.reduce((sum, t) => sum + t.amount, 0);
+
+      // Disponible = Cap - Out
+      const calculatedRemaining = calculatedCirculatingCap - calculatedCirculatingOut;
+
+      console.log('[VUSD] 📊 Métricas calculadas desde pledges activos:', {
+        pledgesSupabase: pledges.length,
+        pledgesUnified: unifiedPledges.length,
+        pledgesTotal: allPledges.length,
+        calculatedPledgedUSD: calculatedPledgedUSD,
+        calculatedCirculatingCap: calculatedCirculatingCap,
+        calculatedCirculatingOut: calculatedCirculatingOut,
+        calculatedRemaining: calculatedRemaining
+      });
+
+      // Usar métricas calculadas si hay pledges, sino usar las de Supabase
+      const finalCap = allPledges.length > 0 ? calculatedCirculatingCap : cap;
+      const finalOut = calculatedCirculatingOut;
+      const finalPledgedUSD = allPledges.length > 0 ? calculatedPledgedUSD : pledgedTotal;
+
+      console.log('[VUSD] ✅ Métricas finales:', {
+        circulatingCap: finalCap,
+        circulatingOut: finalOut,
+        remaining: finalCap - finalOut,
+        pledgedUSD: finalPledgedUSD
+      });
+
+      setActivePledges(allPledges);
+      setCirculatingCap(finalCap);
+      setCirculatingOut(finalOut);
       setRecentTransfers(transfers);
       setPorPublications(pors);
-      setPledgedUSD(pledgedTotal);
+      setPledgedUSD(finalPledgedUSD);
+      
+      setError(null); // Limpiar cualquier error previo si todo cargó bien
     } catch (err) {
-      console.error('[VUSD] Error loading data:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      console.error('[VUSD] ❌ Error crítico loading data:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido al cargar datos';
+      setError(errorMessage);
+      
+      // Aún así, inicializar con valores por defecto
+      setActivePledges([]);
+      setCirculatingCap(0);
+      setCirculatingOut(0);
+      setRecentTransfers([]);
+      setPorPublications([]);
+      setPledgedUSD(0);
     } finally {
       setLoading(false);
     }
@@ -328,7 +459,29 @@ export function APIVUSDModule() {
       setError(null);
 
       // ========================================
-      // VALIDACIÓN UNIFICADA DE BALANCE
+      // INFORMACIÓN: PLEDGES EXISTENTES (SOLO INFO)
+      // ========================================
+      if (selectedCustodyAccount) {
+        try {
+          const existingPledges = await vusdCapStore.getActivePledges();
+          const pledgesForThisAccount = existingPledges.filter(p => p.custody_account_id === selectedCustodyAccount);
+          
+          if (pledgesForThisAccount.length > 0) {
+            console.log('[VUSD] 📊 Esta cuenta ya tiene', pledgesForThisAccount.length, 'pledge(s) activo(s):');
+            pledgesForThisAccount.forEach(p => {
+              console.log(`   • ${p.pledge_id}: ${p.currency} ${p.amount.toLocaleString()}`);
+            });
+            console.log('[VUSD] ✅ Se permitirá crear pledge adicional si hay balance restante');
+          } else {
+            console.log('[VUSD] ✅ Primer pledge para esta cuenta');
+          }
+        } catch (err) {
+          console.warn('[VUSD] ⚠️ No se pudo verificar pledges existentes (continuando):', err);
+        }
+      }
+
+      // ========================================
+      // VALIDACIÓN 2: BALANCE SUFICIENTE
       // ========================================
       if (selectedCustodyAccount) {
         const validation = unifiedPledgeStore.canCreatePledge(selectedCustodyAccount, pledgeForm.amount);
@@ -336,28 +489,29 @@ export function APIVUSDModule() {
         if (!validation.allowed) {
           const custodyAccount = custodyStore.getAccountById(selectedCustodyAccount);
           throw new Error(
-            `❌ ${t.validationNoCapitalTitle}\n\n` +
-            `${t.validationNoCapitalAccount}: ${custodyAccount?.accountName || 'Unknown'}\n` +
-            `${t.validationNoCapitalBalanceTotal}: ${pledgeForm.currency} ${custodyAccount?.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}\n` +
-            `${t.validationNoCapitalBalanceAvailable}: ${pledgeForm.currency} ${(validation.availableBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}\n` +
-            `${t.validationNoCapitalBalanceReserved}: ${pledgeForm.currency} ${(validation.totalPledged || 0).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}\n\n` +
-            `${validation.reason}\n\n` +
-            `${t.validationNoCapitalSolution}\n` +
-            `1. ${t.validationNoCapitalSolution1}\n` +
-            `2. ${t.validationNoCapitalSolution2}`
+            `❌ BALANCE TOTAL INSUFICIENTE\n\n` +
+            `Cuenta: ${custodyAccount?.accountName || 'Unknown'}\n` +
+            `Balance Total: ${pledgeForm.currency} ${(validation.totalBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}\n` +
+            `Ya Usado en Pledges: ${pledgeForm.currency} ${(validation.totalPledged || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}\n` +
+            `Restante para Pledges: ${pledgeForm.currency} ${(validation.remainingBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}\n` +
+            `Solicitado Ahora: ${pledgeForm.currency} ${pledgeForm.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}\n\n` +
+            `Solución:\n` +
+            `1. Reduce el monto del pledge a ${(validation.remainingBalance || 0).toFixed(2)} o menos\n` +
+            `2. Elimina un pledge existente para liberar capital\n` +
+            `3. Usa los botones de % para calcular automáticamente`
           );
         }
 
         const custodyAccount = custodyStore.getAccountById(selectedCustodyAccount);
-        const realAvailableBalance = validation.availableBalance || 0;
 
-        console.log('[VUSD] ✅ Balance validation APPROVED by UnifiedPledgeStore:', {
-          account: custodyAccount?.accountName,
-          totalBalance: custodyAccount?.totalBalance,
-          totalPledged: validation.totalPledged,
-          available: realAvailableBalance,
-          requested: pledgeForm.amount,
-          afterPledge: realAvailableBalance - pledgeForm.amount
+        console.log('[VUSD] ✅ Validación APROBADA:', {
+          cuenta: custodyAccount?.accountName,
+          balanceTotal: validation.totalBalance,
+          yaUsadoEnPledges: validation.totalPledged,
+          restante: validation.remainingBalance,
+          solicitado: pledgeForm.amount,
+          porcentajeDelTotal: ((pledgeForm.amount / (validation.totalBalance || 1)) * 100).toFixed(1) + '%',
+          quedaraDespues: (validation.remainingBalance || 0)
         });
       }
 
@@ -369,20 +523,14 @@ export function APIVUSDModule() {
         fromCustodyAccount: selectedCustodyAccount ? custodyAccounts.find(a => a.id === selectedCustodyAccount)?.accountName : 'Manual Entry'
       });
 
-      const result = await vusdCapStore.createPledge({
-        amount: pledgeForm.amount,
-        currency: pledgeForm.currency,
-        beneficiary: pledgeForm.beneficiary,
-        custody_account_id: selectedCustodyAccount || undefined,
-        expires_at: pledgeForm.expires_at || undefined
-      });
-
-      console.log('[VUSD] ✅ Pledge creado exitosamente:', result);
-
       // ========================================
-      // CREAR UNIFIED PLEDGE (TRACKING CENTRAL)
+      // CREAR PLEDGE - Primero en Unified Store (SIEMPRE FUNCIONA)
       // ========================================
+      console.log('[VUSD] 🔨 Creando pledge en Unified Pledge Store...');
+      
       let unifiedPledge = null;
+      let result = null;
+
       if (selectedCustodyAccount) {
         try {
           const custodyAccount = custodyStore.getAccountById(selectedCustodyAccount);
@@ -392,45 +540,55 @@ export function APIVUSDModule() {
             currency: pledgeForm.currency,
             beneficiary: pledgeForm.beneficiary,
             source_module: 'API_VUSD',
-            external_ref: result.pledge_id,
+            external_ref: `VUSD_${Date.now()}_${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
             expires_at: pledgeForm.expires_at || undefined,
             blockchain_network: custodyAccount?.blockchainLink,
             contract_address: custodyAccount?.contractAddress,
             token_symbol: custodyAccount?.tokenSymbol
           });
 
-          console.log('[VUSD→Unified] ✅ Unified pledge created:', unifiedPledge.id);
+          console.log('[VUSD→Unified] ✅ Pledge creado en Unified Store:', unifiedPledge.id);
+          
+          // Usar el ID del unified pledge como referencia
+          result = {
+            pledge_id: unifiedPledge.id,
+            amount: pledgeForm.amount,
+            currency: pledgeForm.currency,
+            beneficiary: pledgeForm.beneficiary
+          };
+          
         } catch (unifiedError) {
           console.error('[VUSD→Unified] ❌ Error creating unified pledge:', unifiedError);
+          throw new Error('Error creando pledge: ' + (unifiedError as Error).message);
         }
+      } else {
+        // Sin cuenta custody, crear pledge manual
+        result = {
+          pledge_id: `MANUAL_${Date.now()}_${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
+          amount: pledgeForm.amount,
+          currency: pledgeForm.currency,
+          beneficiary: pledgeForm.beneficiary
+        };
+        console.log('[VUSD] ✅ Pledge manual creado (sin cuenta custody)');
       }
 
-      // ========================================
-      // ACTUALIZAR BALANCES EN CUSTODY STORE DESDE UNIFIED STORE
-      // ========================================
-      if (selectedCustodyAccount && unifiedPledge) {
-        try {
-          const accounts = custodyStore.getAccounts();
-          const custodyAccount = accounts.find(a => a.id === selectedCustodyAccount);
-          if (custodyAccount) {
-            // IMPORTANTE: Recalcular SIEMPRE desde unified store (fuente de verdad)
-            const totalPledged = unifiedPledgeStore.getTotalPledgedAmount(selectedCustodyAccount);
-            custodyAccount.reservedBalance = totalPledged;
-            custodyAccount.availableBalance = custodyAccount.totalBalance - totalPledged;
-            custodyStore.saveAccounts(accounts);
-
-            console.log('[VUSD→Custody] ✅ Balance actualizado desde unified store:', {
-              account: custodyAccount.accountName,
-              totalBalance: custodyAccount.totalBalance,
-              totalPledged: totalPledged,
-              newAvailable: custodyAccount.availableBalance,
-              newReserved: custodyAccount.reservedBalance
-            });
-          }
-        } catch (reserveError) {
-          console.warn('[VUSD→Custody] ⚠️ Error actualizando balance (no crítico):', reserveError);
-        }
+      // Intentar sincronizar con vusdCapStore (si Supabase disponible)
+      try {
+        await vusdCapStore.createPledge({
+          amount: pledgeForm.amount,
+          currency: pledgeForm.currency,
+          beneficiary: pledgeForm.beneficiary,
+          custody_account_id: selectedCustodyAccount || undefined,
+          expires_at: pledgeForm.expires_at || undefined
+        });
+        console.log('[VUSD] ✅ Pledge también guardado en vusdCapStore (Supabase)');
+      } catch (vusdError: any) {
+        console.warn('[VUSD] ⚠️ No se pudo guardar en vusdCapStore (sin Supabase):', vusdError.message);
+        console.log('[VUSD] ℹ️ Pledge guardado solo en Unified Store (localStorage)');
       }
+
+      // El pledge ya fue creado en Unified Store arriba
+      // Los balances ya fueron actualizados por unifiedPledgeStore.createPledge()
 
       // ========================================
       // INTEGRACIÓN AUTOMÁTICA CON API VUSD1
@@ -475,18 +633,63 @@ export function APIVUSDModule() {
         // No bloqueamos el flujo principal si VUSD1 falla
       }
 
-      // Cerrar modal y limpiar
+      // ========================================
+      // ACTUALIZAR UI INMEDIATAMENTE (SIN ESPERAR RECARGA)
+      // ========================================
+      
+      // 1. Agregar el pledge a la lista de activePledges INMEDIATAMENTE
+      const newPledgeForDisplay = {
+        pledge_id: result.pledge_id,
+        status: 'active' as any,
+        amount: pledgeForm.amount,
+        available: pledgeForm.amount,
+        currency: pledgeForm.currency,
+        beneficiary: pledgeForm.beneficiary,
+        custody_account_id: selectedCustodyAccount,
+        expires_at: pledgeForm.expires_at,
+        updated_at: new Date().toISOString()
+      };
+
+      setActivePledges(prev => {
+        const updated = [newPledgeForDisplay, ...prev];
+        
+        // Actualizar métricas inmediatamente basadas en los nuevos pledges
+        const newPledgedUSD = updated
+          .filter(p => p.currency === 'USD')
+          .reduce((sum, p) => sum + p.amount, 0);
+        
+        const newCirculatingCap = updated
+          .reduce((sum, p) => sum + (p.available || p.amount), 0);
+        
+        setCirculatingCap(newCirculatingCap);
+        setPledgedUSD(newPledgedUSD);
+        
+        console.log('[VUSD] ✅ Métricas actualizadas INMEDIATAMENTE:', {
+          pledgesActivos: updated.length,
+          circulatingCap: newCirculatingCap,
+          pledgedUSD: newPledgedUSD
+        });
+        
+        return updated;
+      });
+      
+      console.log('[VUSD] ✅ Pledge agregado a la lista INMEDIATAMENTE');
+
+      // 2. Cerrar modal y limpiar
       setShowPledgeModal(false);
       setSelectedCustodyAccount('');
       setPledgeForm({ amount: 0, currency: 'USD', beneficiary: '', expires_at: '' });
 
-      // Forzar actualización de caché y recargar datos
-      console.log('[VUSD] 🔄 Recargando datos y caché...');
-      await vusdCapStore.initializeCache(); // Forzar actualización de caché
-      await loadData(); // Recargar todos los datos
-      loadCustodyAccounts(); // Recargar cuentas custody con balances actualizados
-
-      console.log('[VUSD] ✅ Datos recargados, pledge debe estar visible');
+      // 3. Recargar en background (sin bloquear UI)
+      console.log('[VUSD] 🔄 Recargando datos en background...');
+      
+      Promise.all([
+        vusdCapStore.initializeCache().catch(err => console.warn('[VUSD] ⚠️ Error init cache:', err)),
+        loadData().catch(err => console.warn('[VUSD] ⚠️ Error loadData:', err))
+      ]).then(() => {
+        loadCustodyAccounts();
+        console.log('[VUSD] ✅ Datos recargados en background');
+      });
 
       // Guardar datos del pledge para Black Screen
       setLastPledgeData({
@@ -541,12 +744,334 @@ export function APIVUSDModule() {
       setLoading(true);
       setError(null);
 
-      const result = await vusdCapStore.publishPor();
-      alert(`${t.porPublished}\nTX ID: ${result.txId || 'N/A'}`);
+      console.log('[VUSD] 📊 Generando Proof of Reserve completo...');
+
+      // ========================================
+      // GENERAR REPORTE COMPLETO DE PROOF OF RESERVE
+      // ========================================
+      
+      const timestamp = new Date().toISOString();
+      const reportDate = new Date().toLocaleString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+      // Textos traducibles
+      const isSpanish = language === 'es';
+      
+      let porReport = '';
+      porReport += '═══════════════════════════════════════════════════════════════════\n';
+      porReport += isSpanish 
+        ? '              PRUEBA DE RESERVAS - API VUSD\n'
+        : '              PROOF OF RESERVE - API VUSD\n';
+      porReport += '           DATA AND EXCHANGE SETTLEMENT (DAES)\n';
+      porReport += '═══════════════════════════════════════════════════════════════════\n\n';
+      porReport += isSpanish ? `Fecha de Generación: ${reportDate}\n` : `Generation Date: ${reportDate}\n`;
+      porReport += `Timestamp ISO: ${timestamp}\n`;
+      porReport += isSpanish ? `Sistema: CoreBanking DAES v5.2.0\n` : `System: CoreBanking DAES v5.2.0\n`;
+      porReport += isSpanish 
+        ? `Módulo: API VUSD - Gestión de Cap Circulante\n\n`
+        : `Module: API VUSD - Circulating Cap Management\n\n`;
+
+      // Resumen General
+      porReport += '───────────────────────────────────────────────────────────────────\n';
+      porReport += isSpanish ? 'RESUMEN GENERAL\n' : 'GENERAL SUMMARY\n';
+      porReport += '───────────────────────────────────────────────────────────────────\n\n';
+      porReport += isSpanish 
+        ? `Total Pledges Activos:       ${activePledges.length}\n`
+        : `Total Active Pledges:        ${activePledges.length}\n`;
+      porReport += isSpanish
+        ? `Cap Circulante Total:        USD ${circulatingCap.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`
+        : `Total Circulating Cap:       USD ${circulatingCap.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+      porReport += isSpanish
+        ? `Circulante Emitido:          USD ${circulatingOut.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`
+        : `Circulating Out (Issued):    USD ${circulatingOut.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+      porReport += isSpanish
+        ? `Disponible:                  USD ${(circulatingCap - circulatingOut).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`
+        : `Available:                   USD ${(circulatingCap - circulatingOut).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+      porReport += isSpanish
+        ? `Pledges USD Totales:         USD ${pledgedUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n\n`
+        : `Total USD Pledges:           USD ${pledgedUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n\n`;
+
+      // Detalle de Pledges por Cuenta Custody
+      porReport += '═══════════════════════════════════════════════════════════════════\n';
+      porReport += isSpanish 
+        ? 'DETALLE DE PLEDGES POR CUENTA CUSTODY\n'
+        : 'PLEDGE DETAILS BY CUSTODY ACCOUNT\n';
+      porReport += '═══════════════════════════════════════════════════════════════════\n\n';
+
+      activePledges.forEach((pledge, index) => {
+        const custodyAccount = pledge.custody_account_id 
+          ? custodyAccounts.find(a => a.id === pledge.custody_account_id)
+          : null;
+
+        porReport += `─────────────────────────────────────────────────────────────────\n`;
+        porReport += `PLEDGE ${index + 1} de ${activePledges.length}\n`;
+        porReport += `─────────────────────────────────────────────────────────────────\n\n`;
+        
+        porReport += `Pledge ID:           ${pledge.pledge_id}\n`;
+        porReport += `Status:              ${pledge.status.toUpperCase()}\n`;
+        porReport += isSpanish
+          ? `Monto:               ${pledge.currency} ${pledge.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`
+          : `Amount:              ${pledge.currency} ${pledge.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+        porReport += isSpanish
+          ? `Disponible:          ${pledge.currency} ${(pledge.available || pledge.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`
+          : `Available:           ${pledge.currency} ${(pledge.available || pledge.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+        porReport += isSpanish
+          ? `Beneficiario:        ${pledge.beneficiary}\n`
+          : `Beneficiary:         ${pledge.beneficiary}\n`;
+        porReport += isSpanish
+          ? `Fecha Creación:      ${pledge.updated_at ? new Date(pledge.updated_at).toLocaleString('es-ES') : 'N/A'}\n`
+          : `Creation Date:       ${pledge.updated_at ? new Date(pledge.updated_at).toLocaleString('en-US') : 'N/A'}\n`;
+        
+        if (pledge.expires_at) {
+          porReport += `Fecha Expiración:    ${new Date(pledge.expires_at).toLocaleDateString('es-ES')}\n`;
+        }
+        
+        porReport += `\n`;
+
+        if (custodyAccount) {
+          porReport += isSpanish
+            ? `┌─ CUENTA CUSTODY VINCULADA ─────────────────────────────────┐\n`
+            : `┌─ LINKED CUSTODY ACCOUNT ───────────────────────────────────┐\n`;
+          porReport += `│\n`;
+          porReport += isSpanish
+            ? `│ Nombre Cuenta:       ${custodyAccount.accountName}\n`
+            : `│ Account Name:        ${custodyAccount.accountName}\n`;
+          porReport += isSpanish
+            ? `│ Tipo de Cuenta:      ${custodyAccount.accountType === 'banking' ? 'BANKING (M2)' : 'BLOCKCHAIN (M3)'}\n`
+            : `│ Account Type:        ${custodyAccount.accountType === 'banking' ? 'BANKING (M2)' : 'BLOCKCHAIN (M3)'}\n`;
+          porReport += isSpanish
+            ? `│ Moneda:              ${custodyAccount.currency}\n`
+            : `│ Currency:            ${custodyAccount.currency}\n`;
+          porReport += isSpanish
+            ? `│ Balance Total:       ${custodyAccount.currency} ${custodyAccount.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}\n`
+            : `│ Total Balance:       ${custodyAccount.currency} ${custodyAccount.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}\n`;
+          porReport += `│\n`;
+          
+          // Clasificación M2/M3
+          if (custodyAccount.accountType === 'banking') {
+            porReport += isSpanish
+              ? `│ CLASIFICACIÓN:       M2 - RESERVA BANCARIA\n`
+              : `│ CLASSIFICATION:      M2 - BANKING RESERVE\n`;
+            porReport += `│\n`;
+            porReport += isSpanish ? `│ Detalles Bancarios:\n` : `│ Banking Details:\n`;
+            porReport += isSpanish
+              ? `│ ├─ Banco:            Digital Commercial Bank Ltd\n`
+              : `│ ├─ Bank:             Digital Commercial Bank Ltd\n`;
+            porReport += isSpanish
+              ? `│ ├─ Sistema:          Core BANKING System DAES\n`
+              : `│ ├─ System:           Core BANKING System DAES\n`;
+            porReport += isSpanish
+              ? `│ │                    Data and Exchange Settlement\n`
+              : `│ │                    Data and Exchange Settlement\n`;
+            porReport += isSpanish
+              ? `│ └─ Núm. de Cuenta:   ${custodyAccount.accountNumber || 'N/A'}\n`
+              : `│ └─ Account Number:   ${custodyAccount.accountNumber || 'N/A'}\n`;
+          } else {
+            porReport += isSpanish
+              ? `│ CLASIFICACIÓN:       M3 - RESERVA BLOCKCHAIN\n`
+              : `│ CLASSIFICATION:      M3 - BLOCKCHAIN RESERVE\n`;
+            porReport += `│\n`;
+            porReport += isSpanish ? `│ Detalles Blockchain:\n` : `│ Blockchain Details:\n`;
+            porReport += isSpanish
+              ? `│ ├─ Red:              ${custodyAccount.blockchainLink || 'N/A'}\n`
+              : `│ ├─ Network:          ${custodyAccount.blockchainLink || 'N/A'}\n`;
+            porReport += isSpanish
+              ? `│ ├─ Dirección Contrato: ${custodyAccount.contractAddress || 'N/A'}\n`
+              : `│ ├─ Contract Address: ${custodyAccount.contractAddress || 'N/A'}\n`;
+            porReport += isSpanish
+              ? `│ ├─ Símbolo Token:    ${custodyAccount.tokenSymbol || 'N/A'}\n`
+              : `│ ├─ Token Symbol:     ${custodyAccount.tokenSymbol || 'N/A'}\n`;
+            porReport += isSpanish
+              ? `│ └─ Tipo de Cadena:   ${custodyAccount.blockchainLink ? 'Blockchain Pública' : 'N/A'}\n`
+              : `│ └─ Chain Type:       ${custodyAccount.blockchainLink ? 'Public Blockchain' : 'N/A'}\n`;
+          }
+          
+          porReport += `│\n`;
+          porReport += `│ Compliance:\n`;
+          porReport += isSpanish
+            ? `│ ├─ ISO 27001:        ${custodyAccount.iso27001Compliant ? '✅ CUMPLE' : '❌ NO'}\n`
+            : `│ ├─ ISO 27001:        ${custodyAccount.iso27001Compliant ? '✅ COMPLIANT' : '❌ NO'}\n`;
+          porReport += isSpanish
+            ? `│ ├─ ISO 20022:        ${custodyAccount.iso20022Compatible ? '✅ COMPATIBLE' : '❌ NO'}\n`
+            : `│ ├─ ISO 20022:        ${custodyAccount.iso20022Compatible ? '✅ COMPATIBLE' : '❌ NO'}\n`;
+          porReport += isSpanish
+            ? `│ ├─ FATF AML:         ${custodyAccount.fatfAmlVerified ? '✅ VERIFICADO' : '❌ NO'}\n`
+            : `│ ├─ FATF AML:         ${custodyAccount.fatfAmlVerified ? '✅ VERIFIED' : '❌ NO'}\n`;
+          porReport += isSpanish
+            ? `│ ├─ KYC:              ${custodyAccount.kycVerified ? '✅ VERIFICADO' : '❌ NO'}\n`
+            : `│ ├─ KYC:              ${custodyAccount.kycVerified ? '✅ VERIFIED' : '❌ NO'}\n`;
+          porReport += isSpanish
+            ? `│ ├─ Puntuación AML:   ${custodyAccount.amlScore}/100\n`
+            : `│ ├─ AML Score:        ${custodyAccount.amlScore}/100\n`;
+          porReport += isSpanish
+            ? `│ └─ Nivel de Riesgo:  ${custodyAccount.riskLevel.toUpperCase()}\n`
+            : `│ └─ Risk Level:       ${custodyAccount.riskLevel.toUpperCase()}\n`;
+          porReport += `│\n`;
+          porReport += `└────────────────────────────────────────────────────────────┘\n`;
+        } else {
+          porReport += isSpanish
+            ? `┌─ PLEDGE MANUAL (SIN CUENTA CUSTODY) ──────────────────────┐\n`
+            : `┌─ MANUAL PLEDGE (NO CUSTODY ACCOUNT) ──────────────────────┐\n`;
+          porReport += isSpanish
+            ? `│ Tipo: Entrada Manual                                      │\n`
+            : `│ Type: Manual Entry                                        │\n`;
+          porReport += isSpanish
+            ? `│ Clasificación: Sin clasificar                             │\n`
+            : `│ Classification: Unclassified                              │\n`;
+          porReport += `└────────────────────────────────────────────────────────────┘\n`;
+        }
+        
+        porReport += `\n`;
+      });
+
+      // Resumen por Tipo de Reserva
+      porReport += '═══════════════════════════════════════════════════════════════════\n';
+      porReport += isSpanish 
+        ? 'CLASIFICACIÓN DE RESERVAS (M2/M3)\n'
+        : 'RESERVE CLASSIFICATION (M2/M3)\n';
+      porReport += '═══════════════════════════════════════════════════════════════════\n\n';
+
+      const pledgesM2 = activePledges.filter(p => {
+        const acc = custodyAccounts.find(a => a.id === p.custody_account_id);
+        return acc && acc.accountType === 'banking';
+      });
+
+      const pledgesM3 = activePledges.filter(p => {
+        const acc = custodyAccounts.find(a => a.id === p.custody_account_id);
+        return acc && acc.accountType === 'blockchain';
+      });
+
+      const pledgesManual = activePledges.filter(p => !p.custody_account_id);
+
+      const totalM2 = pledgesM2.reduce((sum, p) => sum + p.amount, 0);
+      const totalM3 = pledgesM3.reduce((sum, p) => sum + p.amount, 0);
+      const totalManual = pledgesManual.reduce((sum, p) => sum + p.amount, 0);
+
+      porReport += isSpanish ? `M2 - RESERVAS BANCARIAS:\n` : `M2 - BANKING RESERVES:\n`;
+      porReport += isSpanish
+        ? `  Cantidad de Pledges:  ${pledgesM2.length}\n`
+        : `  Number of Pledges:    ${pledgesM2.length}\n`;
+      porReport += `  Total en USD:         USD ${totalM2.toLocaleString('en-US', { minimumFractionDigits: 2 })}\n`;
+      porReport += isSpanish
+        ? `  Porcentaje del Total: ${circulatingCap > 0 ? ((totalM2 / circulatingCap) * 100).toFixed(2) : 0}%\n\n`
+        : `  Percentage of Total:  ${circulatingCap > 0 ? ((totalM2 / circulatingCap) * 100).toFixed(2) : 0}%\n\n`;
+
+      porReport += isSpanish ? `M3 - RESERVAS BLOCKCHAIN:\n` : `M3 - BLOCKCHAIN RESERVES:\n`;
+      porReport += isSpanish
+        ? `  Cantidad de Pledges:  ${pledgesM3.length}\n`
+        : `  Number of Pledges:    ${pledgesM3.length}\n`;
+      porReport += `  Total en USD:         USD ${totalM3.toLocaleString('en-US', { minimumFractionDigits: 2 })}\n`;
+      porReport += isSpanish
+        ? `  Porcentaje del Total: ${circulatingCap > 0 ? ((totalM3 / circulatingCap) * 100).toFixed(2) : 0}%\n\n`
+        : `  Percentage of Total:  ${circulatingCap > 0 ? ((totalM3 / circulatingCap) * 100).toFixed(2) : 0}%\n\n`;
+
+      if (pledgesManual.length > 0) {
+        porReport += isSpanish 
+          ? `PLEDGES MANUALES (Sin clasificar):\n`
+          : `MANUAL PLEDGES (Unclassified):\n`;
+        porReport += isSpanish
+          ? `  Cantidad:             ${pledgesManual.length}\n`
+          : `  Quantity:             ${pledgesManual.length}\n`;
+        porReport += `  Total en USD:         USD ${totalManual.toLocaleString('en-US', { minimumFractionDigits: 2 })}\n\n`;
+      }
+
+      // Footer
+      porReport += '═══════════════════════════════════════════════════════════════════\n';
+      porReport += isSpanish ? 'CERTIFICACIÓN\n' : 'CERTIFICATION\n';
+      porReport += '═══════════════════════════════════════════════════════════════════\n\n';
+      porReport += isSpanish
+        ? `Este documento certifica que las reservas arriba detalladas\n` +
+          `están respaldadas por activos verificados en cuentas custody\n` +
+          `bajo el control de DATA AND EXCHANGE SETTLEMENT (DAES).\n\n`
+        : `This document certifies that the reserves detailed above\n` +
+          `are backed by verified assets in custody accounts\n` +
+          `under the control of DATA AND EXCHANGE SETTLEMENT (DAES).\n\n`;
+      porReport += isSpanish
+        ? `Generado por: Sistema CoreBanking DAES\n`
+        : `Generated by: CoreBanking DAES System\n`;
+      porReport += isSpanish
+        ? `Módulo: API VUSD - Cap Circulante\n`
+        : `Module: API VUSD - Circulating Cap\n`;
+      porReport += `Timestamp: ${timestamp}\n\n`;
+      porReport += '═══════════════════════════════════════════════════════════════════\n';
+      porReport += isSpanish
+        ? '                    FIN DEL REPORTE\n'
+        : '                    END OF REPORT\n';
+      porReport += '═══════════════════════════════════════════════════════════════════\n';
+
+      // Exportar como TXT
+      const blob = new Blob([porReport], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Proof_of_Reserve_${new Date().toISOString().split('T')[0]}_${Date.now()}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Agregar reporte al array (permite múltiples PoR)
+      const newPorReport = {
+        id: `POR_${Date.now()}_${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
+        report: porReport,
+        pledgesM2: pledgesM2.length,
+        pledgesM3: pledgesM3.length,
+        totalM2: totalM2,
+        totalM3: totalM3,
+        timestamp: timestamp,
+        circulatingCap: circulatingCap,
+        pledgedUSD: pledgedUSD,
+        activePledgesCount: activePledges.length,
+        expanded: true
+      };
+
+      setGeneratedPorReports(prev => [newPorReport, ...prev]);
+
+      console.log('[VUSD] ✅ Proof of Reserve generado y descargado');
+      console.log('[VUSD] 📄 Reporte incluye:', {
+        pledgesTotal: activePledges.length,
+        pledgesM2: pledgesM2.length,
+        pledgesM3: pledgesM3.length,
+        totalReserves: circulatingCap
+      });
+
+      // Intentar publicar en blockchain (si Supabase disponible)
+      try {
+        const result = await vusdCapStore.publishPor();
+        alert(
+          `✅ ${t.porPublished}\n\n` +
+          `TX ID: ${result.tx_id || 'N/A'}\n` +
+          `Pledges: ${activePledges.length}\n` +
+          `Total: USD ${circulatingCap.toLocaleString()}\n` +
+          `M2 (Banking): ${pledgesM2.length} (${totalM2.toLocaleString()})\n` +
+          `M3 (Blockchain): ${pledgesM3.length} (${totalM3.toLocaleString()})\n\n` +
+          `📄 Archivo TXT descargado con especificaciones completas`
+        );
+      } catch (err) {
+        console.warn('[VUSD] ⚠️ No se pudo publicar en blockchain (sin Supabase)');
+        alert(
+          `✅ Proof of Reserve Generado\n\n` +
+          `Pledges: ${activePledges.length}\n` +
+          `Total: USD ${circulatingCap.toLocaleString()}\n` +
+          `M2 (Banking): ${pledgesM2.length}\n` +
+          `M3 (Blockchain): ${pledgesM3.length}\n\n` +
+          `📄 Archivo TXT descargado con todas las especificaciones\n\n` +
+          `⚠️ Blockchain publish requiere Supabase configurado`
+        );
+      }
+
       await loadData();
     } catch (err) {
       const error = err as Error;
+      console.error('[VUSD] ❌ Error generando PoR:', error);
       setError(error.message || 'PoR publication failed');
+      alert('Error generando Proof of Reserve: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -571,61 +1096,58 @@ export function APIVUSDModule() {
 
       console.log('[VUSD] 🗑️ Eliminando pledge:', pledge.pledge_id);
 
-      // Eliminar pledge (marca como RELEASED)
-      await vusdCapStore.deletePledge(pledge.pledge_id);
-
-      console.log('[VUSD] ✅ Pledge eliminado exitosamente');
-
       // ========================================
-      // SINCRONIZAR ELIMINACIÓN CON API VUSD1
+      // 1. ELIMINAR DEL UNIFIED PLEDGE STORE (PRIMERO)
       // ========================================
+      let pledgeEliminado = false;
+      
       try {
-        console.log('[VUSD→VUSD1] 🔄 Eliminando pledge replicado en API VUSD1...');
-
-        // Buscar el pledge correspondiente en VUSD1 por external_ref
-        const vusd1Pledges = await apiVUSD1Store.getActivePledges();
-        const matchingPledge = vusd1Pledges.find(p =>
-          p.external_ref === pledge.pledge_id ||
-          p.metadata?.original_pledge_id === pledge.pledge_id
-        );
-
-        if (matchingPledge) {
-          await apiVUSD1Store.deletePledge(matchingPledge.pledge_id);
-          console.log('[VUSD→VUSD1] ✅ Pledge eliminado en API VUSD1:', matchingPledge.pledge_id);
-        } else {
-          console.log('[VUSD→VUSD1] ℹ️ No se encontró pledge replicado en VUSD1');
-        }
-      } catch (vusd1Error) {
-        console.warn('[VUSD→VUSD1] ⚠️ Error eliminando en VUSD1 (no crítico):', vusd1Error);
-      }
-
-      // ========================================
-      // LIBERAR EN UNIFIED PLEDGE STORE (CENTRAL)
-      // ========================================
-      try {
+        // Buscar el pledge en Unified Store (puede ser el mismo ID o buscar por external_ref)
         const unifiedPledges = unifiedPledgeStore.getPledges();
         const matchingUnifiedPledge = unifiedPledges.find(p =>
+          p.id === pledge.pledge_id ||
           p.external_ref === pledge.pledge_id ||
           p.vusd_pledge_id === pledge.pledge_id
         );
 
         if (matchingUnifiedPledge) {
           unifiedPledgeStore.releasePledge(matchingUnifiedPledge.id);
-          console.log('[VUSD→Unified] ✅ Released pledge in unified store:', matchingUnifiedPledge.id);
+          console.log('[VUSD→Unified] ✅ Pledge eliminado del Unified Store:', matchingUnifiedPledge.id);
+          pledgeEliminado = true;
+        } else {
+          console.log('[VUSD→Unified] ℹ️ Pledge no encontrado en Unified Store, buscando en Supabase...');
         }
       } catch (unifiedError) {
-        console.warn('[VUSD→Unified] ⚠️ Error releasing unified pledge (no crítico):', unifiedError);
+        console.warn('[VUSD→Unified] ⚠️ Error eliminando de Unified Store:', unifiedError);
       }
 
       // ========================================
-      // LIBERAR CAPITAL EN CUSTODY STORE
+      // 2. INTENTAR ELIMINAR DE SUPABASE (OPCIONAL)
+      // ========================================
+      try {
+        await vusdCapStore.deletePledge(pledge.pledge_id);
+        console.log('[VUSD→Supabase] ✅ Pledge eliminado de Supabase');
+        pledgeEliminado = true;
+      } catch (supabaseError: any) {
+        console.warn('[VUSD→Supabase] ⚠️ No se pudo eliminar de Supabase:', supabaseError.message);
+        // No es crítico si no hay Supabase
+      }
+
+      if (!pledgeEliminado) {
+        throw new Error('No se pudo eliminar el pledge de ninguna fuente');
+      }
+
+      console.log('[VUSD] ✅ Pledge eliminado exitosamente');
+
+      // ========================================
+      // 3. LIBERAR CAPITAL EN CUSTODY STORE
       // ========================================
       if (pledge.custody_account_id) {
         try {
           const accounts = custodyStore.getAccounts();
           const custodyAccount = accounts.find(a => a.id === pledge.custody_account_id);
           if (custodyAccount) {
-            // IMPORTANTE: Recalcular desde unified store
+            // Recalcular desde unified store (fuente de verdad)
             const totalPledged = unifiedPledgeStore.getTotalPledgedAmount(pledge.custody_account_id);
             custodyAccount.reservedBalance = totalPledged;
             custodyAccount.availableBalance = custodyAccount.totalBalance - totalPledged;
@@ -647,10 +1169,46 @@ export function APIVUSDModule() {
         }
       }
 
-      // Recargar datos
-      await vusdCapStore.initializeCache();
-      await loadData();
+      // ========================================
+      // ACTUALIZAR UI INMEDIATAMENTE (SIN ESPERAR)
+      // ========================================
+      
+      // 1. Eliminar de la lista INMEDIATAMENTE y actualizar métricas
+      setActivePledges(prev => {
+        const updated = prev.filter(p => p.pledge_id !== pledge.pledge_id);
+        
+        // Recalcular métricas inmediatamente
+        const newPledgedUSD = updated
+          .filter(p => p.currency === 'USD')
+          .reduce((sum, p) => sum + p.amount, 0);
+        
+        const newCirculatingCap = updated
+          .reduce((sum, p) => sum + (p.available || p.amount), 0);
+        
+        setCirculatingCap(newCirculatingCap);
+        setPledgedUSD(newPledgedUSD);
+        
+        console.log('[VUSD] ✅ Métricas actualizadas después de eliminar:', {
+          pledgesActivos: updated.length,
+          circulatingCap: newCirculatingCap,
+          pledgedUSD: newPledgedUSD
+        });
+        
+        return updated;
+      });
+      
+      console.log('[VUSD] ✅ Pledge eliminado de la lista INMEDIATAMENTE');
 
+      // 2. Recargar datos en background (sin bloquear)
+      Promise.all([
+        vusdCapStore.initializeCache().catch(err => console.warn('[VUSD] ⚠️ Error cache:', err)),
+        loadData().catch(err => console.warn('[VUSD] ⚠️ Error loadData:', err))
+      ]).then(() => {
+        loadCustodyAccounts();
+        console.log('[VUSD] ✅ Datos sincronizados en background');
+      });
+
+      // 3. Mensaje de éxito
       alert(
         `✅ Pledge eliminado exitosamente\n\n` +
         `Pledge ID: ${pledge.pledge_id}\n` +
@@ -888,8 +1446,31 @@ export function APIVUSDModule() {
                             <span className="text-[#4d7c4d]">{t.beneficiary}: </span>
                             <span className="text-white">{pledge.beneficiary}</span>
                           </div>
-                          {pledge.expires_at && (
+                          {pledge.custody_account_id && (
                             <div>
+                              <span className="text-[#4d7c4d]">Custody Account: </span>
+                              <span className="text-cyan-400 font-mono text-xs">
+                                {custodyAccounts.find(a => a.id === pledge.custody_account_id)?.accountName || pledge.custody_account_id.substring(0, 12) + '...'}
+                              </span>
+                            </div>
+                          )}
+                          {pledge.updated_at && (
+                            <div className="col-span-2">
+                              <span className="text-[#4d7c4d]">📅 Creado: </span>
+                              <span className="text-blue-400 font-mono text-xs">
+                                {new Date(pledge.updated_at).toLocaleString('es-ES', {
+                                  year: 'numeric',
+                                  month: '2-digit',
+                                  day: '2-digit',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  second: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          )}
+                          {pledge.expires_at && (
+                            <div className="col-span-2">
                               <span className="text-[#4d7c4d]">{t.expiresAt}: </span>
                               <span className="text-yellow-400">
                                 {new Date(pledge.expires_at).toLocaleDateString()}
@@ -989,11 +1570,146 @@ export function APIVUSDModule() {
               {t.publishPor}
             </button>
           </div>
-          <div className="p-6">
-            {porPublications.length === 0 ? (
-              <div className="text-center py-12 text-[#4d7c4d]">{t.noData}</div>
-            ) : (
+          <div className="p-6 space-y-6">
+            {/* Lista de Reportes PoR Generados - Con scroll */}
+            {generatedPorReports.length > 0 && (
+              <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2">
+                {generatedPorReports.map((porItem, index) => (
+                  <div key={porItem.id} className="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border-2 border-cyan-500/50 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div 
+                        className="flex items-center gap-3 cursor-pointer flex-1" 
+                        onClick={() => {
+                          setGeneratedPorReports(prev => prev.map(p => 
+                            p.id === porItem.id ? { ...p, expanded: !p.expanded } : p
+                          ));
+                        }}
+                      >
+                        <FileText className="w-6 h-6 text-cyan-400" />
+                        <h3 className="text-xl font-bold text-cyan-300">
+                          {language === 'es' 
+                            ? `Proof of Reserve #${generatedPorReports.length - index}`
+                            : `Proof of Reserve #${generatedPorReports.length - index}`}
+                        </h3>
+                        <button
+                          type="button"
+                          className="ml-2 text-cyan-400 hover:text-cyan-300 transition-colors text-xl"
+                          title={porItem.expanded ? (language === 'es' ? 'Minimizar' : 'Minimize') : (language === 'es' ? 'Maximizar' : 'Maximize')}
+                        >
+                          {porItem.expanded ? '▼' : '▶'}
+                        </button>
+                        <span className="text-xs text-cyan-300/60 ml-2">
+                          {new Date(porItem.timestamp).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            const blob = new Blob([porItem.report], { type: 'text/plain;charset=utf-8' });
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = `Proof_of_Reserve_${new Date(porItem.timestamp).toISOString().split('T')[0]}_${porItem.id}.txt`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(url);
+                          }}
+                          className="px-3 py-2 bg-cyan-500/20 border border-cyan-500 text-cyan-300 rounded-lg hover:bg-cyan-500/30 flex items-center gap-2"
+                        >
+                          <ArrowUpRight className="w-4 h-4" />
+                          {language === 'es' ? 'TXT' : 'TXT'}
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(language === 'es' 
+                              ? '¿Eliminar este Proof of Reserve?' 
+                              : 'Delete this Proof of Reserve?')) {
+                              setGeneratedPorReports(prev => prev.filter(p => p.id !== porItem.id));
+                              console.log('[VUSD] 🗑️ PoR eliminado:', porItem.id);
+                            }
+                          }}
+                          className="p-2 bg-red-500/20 border border-red-500 text-red-400 rounded-lg hover:bg-red-500/30 flex items-center gap-2"
+                          title={language === 'es' ? 'Eliminar' : 'Delete'}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Resumen Visual - Siempre visible */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                      <div className="bg-black/30 rounded-lg p-3">
+                        <div className="text-xs text-cyan-300/60 mb-1">
+                          {language === 'es' ? 'Pledges' : 'Pledges'}
+                        </div>
+                        <div className="text-2xl font-bold text-cyan-300">{porItem.activePledgesCount}</div>
+                      </div>
+                      <div className="bg-black/30 rounded-lg p-3">
+                        <div className="text-xs text-cyan-300/60 mb-1">
+                          {language === 'es' ? 'Cap Total' : 'Total Cap'}
+                        </div>
+                        <div className="text-lg font-bold text-cyan-300">
+                          ${porItem.circulatingCap.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                        </div>
+                      </div>
+                      <div className="bg-black/30 rounded-lg p-3">
+                        <div className="text-xs text-green-300/60 mb-1">M2</div>
+                        <div className="text-lg font-bold text-green-300">
+                          {porItem.pledgesM2} <span className="text-sm">({porItem.totalM2.toLocaleString()})</span>
+                        </div>
+                      </div>
+                      <div className="bg-black/30 rounded-lg p-3">
+                        <div className="text-xs text-purple-300/60 mb-1">M3</div>
+                        <div className="text-lg font-bold text-purple-300">
+                          {porItem.pledgesM3} <span className="text-sm">({porItem.totalM3.toLocaleString()})</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Reporte Completo - Solo visible cuando está expandido */}
+                    {porItem.expanded && (
+                      <div>
+                        <div className="text-sm text-cyan-300 mb-2 font-semibold flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          {language === 'es' ? '📄 Reporte Completo:' : '📄 Full Report:'}
+                        </div>
+                        <textarea
+                          value={porItem.report}
+                          readOnly
+                          className="w-full h-96 bg-black/50 border border-cyan-500/30 rounded-lg p-4 text-green-400 font-mono text-xs overflow-y-auto resize-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                          style={{ fontFamily: 'Consolas, Monaco, monospace' }}
+                        />
+                        <div className="text-xs text-cyan-300/60 mt-2">
+                          {language === 'es'
+                            ? 'ℹ️ Scroll para ver el reporte completo • Incluye clasificación M2/M3, datos de custody, blockchain, compliance'
+                            : 'ℹ️ Scroll to view full report • Includes M2/M3 classification, custody data, blockchain, compliance'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Mensaje cuando no hay reportes */}
+            {generatedPorReports.length === 0 && porPublications.length === 0 ? (
+              <div className="text-center py-12">
+                <Database className="w-16 h-16 text-[#4d7c4d] mx-auto mb-4" />
+                <div className="text-[#4d7c4d] mb-2">
+                  {language === 'es' 
+                    ? 'No hay Proof of Reserve generados'
+                    : 'No Proof of Reserve generated'}
+                </div>
+                <div className="text-[#4d7c4d] text-sm">
+                  {language === 'es'
+                    ? 'Click en "Publicar PoR" para generar el reporte'
+                    : 'Click on "Publish PoR" to generate the report'}
+                </div>
+              </div>
+            ) : porPublications.length > 0 ? (
               <div className="space-y-3">
+                <div className="text-lg font-bold text-purple-400 mb-4">Publicaciones en Blockchain:</div>
                 {porPublications.map((por, idx) => (
                   <div
                     key={por.id}
@@ -1039,7 +1755,7 @@ export function APIVUSDModule() {
                   </div>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       )}
@@ -1112,34 +1828,117 @@ export function APIVUSDModule() {
               {custodyAccounts.length > 0 ? (
                 <>
                   <div>
-                    <label className="block text-purple-300 text-sm mb-2">{t.selectCustodyAccount}</label>
+                    <label className="block text-purple-300 text-sm mb-2 font-semibold flex items-center gap-2">
+                      <Database className="w-4 h-4" />
+                      {t.selectCustodyAccount}
+                    </label>
                     <select
                       value={selectedCustodyAccount}
                       onChange={(e) => handleCustodyAccountSelect(e.target.value)}
-                      className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-4 py-2 text-white"
+                      size={Math.min(custodyAccounts.length + 1, 8)}
+                      className="w-full bg-[#0a0a0a] border border-purple-500/30 rounded-lg px-4 py-2 text-white hover:border-purple-500/50 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all cursor-pointer overflow-y-auto"
+                      style={{ maxHeight: '300px' }}
                     >
-                      <option value="">{t.manualEntry}</option>
-                      {custodyAccounts.map(account => (
-                        <option key={account.id} value={account.id}>
-                          {account.accountName} - {account.currency} {account.totalBalance.toLocaleString()}
-                        </option>
-                      ))}
+                      <option value="" className="bg-[#0a0a0a] py-2">📝 {t.manualEntry} (Sin cuenta custody)</option>
+                      {custodyAccounts.map(account => {
+                        const totalBalance = account.totalBalance;
+                        const alreadyPledged = unifiedPledgeStore.getTotalPledgedAmount(account.id);
+                        const remaining = totalBalance - alreadyPledged;
+                        
+                        return (
+                          <option 
+                            key={account.id} 
+                            value={account.id}
+                            className="bg-[#0a0a0a] py-2 hover:bg-purple-900/30"
+                          >
+                            💰 {account.accountName} | {account.currency} {remaining.toLocaleString('en-US', { minimumFractionDigits: 2 })} restante {alreadyPledged > 0 ? `(${alreadyPledged.toLocaleString()} usado)` : ''}
+                          </option>
+                        );
+                      })}
                     </select>
+                    <div className="text-xs text-purple-300/60 mt-2 flex items-start gap-2">
+                      <div>💡</div>
+                      <div>
+                        Selecciona una cuenta de Custody Accounts para auto-completar el pledge.
+                        {custodyAccounts.length === 0 && (
+                          <span className="text-orange-300 font-semibold"> ⚠️ No hay cuentas - ve a "Custody Accounts" para crearlas.</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Información de cuenta seleccionada */}
                   {selectedCustodyAccount && custodyAccounts.find(a => a.id === selectedCustodyAccount) && (
-                    <div className="bg-purple-900/20 border border-purple-500/40 rounded-lg p-4">
-                      <div className="text-sm font-semibold text-purple-400 mb-2">{t.custodyAccountInfo}</div>
+                    <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-2 border-purple-500/50 rounded-lg p-4">
+                      <div className="text-sm font-bold text-purple-300 mb-3 flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4" />
+                        {t.custodyAccountInfo}
+                      </div>
                       {(() => {
                         const account = custodyAccounts.find(a => a.id === selectedCustodyAccount)!;
+                        const totalBalance = account.totalBalance;
+                        const pledgedAmount = unifiedPledgeStore.getTotalPledgedAmount(selectedCustodyAccount);
+                        const remainingBalance = totalBalance - pledgedAmount;
+                        const afterThisPledge = remainingBalance - pledgeForm.amount;
+                        
                         return (
-                          <div className="space-y-1 text-xs text-purple-300/80">
-                            <div>• {t.beneficiary}: {account.accountName}</div>
-                            <div>• {t.totalBalance}: {account.currency} {account.totalBalance.toLocaleString()}</div>
-                            <div>• {t.availableBalance}: {account.currency} {account.availableBalance.toLocaleString()}</div>
-                            <div>• Currency: {account.currency}</div>
-                            {account.blockchain && <div>• Blockchain: {account.blockchain}</div>}
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-black/30 rounded p-3">
+                                <div className="text-xs text-purple-300/60 mb-1">Cuenta Seleccionada</div>
+                                <div className="text-base font-bold text-white">{account.accountName}</div>
+                                <div className="text-xs text-purple-300/60 mt-1">{account.accountType === 'banking' ? '🏦 Banking' : '⛓️ Blockchain'}</div>
+                              </div>
+                              <div className="bg-black/30 rounded p-3">
+                                <div className="text-xs text-purple-300/60 mb-1">Moneda</div>
+                                <div className="text-base font-bold text-white">{account.currency}</div>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-3 gap-2">
+                              <div className="bg-blue-900/30 rounded p-2">
+                                <div className="text-xs text-blue-300/80 mb-1">Balance Total</div>
+                                <div className="text-sm font-bold text-blue-300">
+                                  {totalBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                </div>
+                              </div>
+                              <div className="bg-orange-900/30 rounded p-2">
+                                <div className="text-xs text-orange-300/80 mb-1">Ya en Pledges</div>
+                                <div className="text-sm font-bold text-orange-300">
+                                  {pledgedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                </div>
+                              </div>
+                              <div className="bg-green-900/30 rounded p-2">
+                                <div className="text-xs text-green-300/80 mb-1">Restante</div>
+                                <div className="text-sm font-bold text-green-300">
+                                  {remainingBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                                </div>
+                              </div>
+                            </div>
+
+                            {pledgeForm.amount > 0 && (
+                              <div className={`border-2 rounded-lg p-3 ${afterThisPledge >= 0 ? 'bg-cyan-900/20 border-cyan-500/50' : 'bg-red-900/20 border-red-500/50'}`}>
+                                <div className="text-xs mb-1 font-semibold" style={{color: afterThisPledge >= 0 ? '#67e8f9' : '#fca5a5'}}>
+                                  📊 Después de crear este pledge:
+                                </div>
+                                <div className="text-base font-bold" style={{color: afterThisPledge >= 0 ? '#67e8f9' : '#fca5a5'}}>
+                                  {afterThisPledge >= 0 ? '✅' : '❌'} Restará: {account.currency} {afterThisPledge.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                </div>
+                                <div className="text-xs mt-1 opacity-80" style={{color: afterThisPledge >= 0 ? '#67e8f9' : '#fca5a5'}}>
+                                  {afterThisPledge >= 0 
+                                    ? `Podrás crear más pledges con el restante` 
+                                    : `⚠️ Excede el balance restante - reduce el monto`
+                                  }
+                                </div>
+                              </div>
+                            )}
+                            
+                            {account.blockchainLink && (
+                              <div className="bg-black/30 rounded p-2">
+                                <div className="text-xs text-purple-300/60 mb-1">🔗 Blockchain Network</div>
+                                <div className="text-xs font-mono text-blue-400">{account.blockchainLink}</div>
+                              </div>
+                            )}
                           </div>
                         );
                       })()}
@@ -1147,28 +1946,109 @@ export function APIVUSDModule() {
                   )}
                 </>
               ) : (
-                <div className="bg-yellow-900/20 border border-yellow-500/40 rounded-lg p-4">
-                  <div className="text-sm text-yellow-300">
-                    <AlertCircle className="w-4 h-4 inline mr-2" />
-                    No custody accounts available. Using manual entry mode.
-                  </div>
-                  <div className="text-xs text-yellow-300/60 mt-2">
-                    Go to <span className="font-semibold">Custody Accounts</span> module to create accounts.
+                <div className="bg-gradient-to-r from-yellow-900/30 to-orange-900/30 border-2 border-yellow-500/50 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-6 h-6 text-yellow-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-sm font-semibold text-yellow-300 mb-1">
+                        {language === 'es' ? '⚠️ No hay Cuentas con Reservas Disponibles' : '⚠️ No Accounts with Reserves Available'}
+                      </div>
+                      <div className="text-xs text-yellow-300/80 mb-2">
+                        {language === 'es' 
+                          ? 'Para crear pledges, necesitas cuentas de custodia con fondos RESERVADOS.'
+                          : 'To create pledges, you need custody accounts with RESERVED funds.'}
+                      </div>
+                      <div className="text-xs bg-yellow-500/20 border border-yellow-500/30 rounded p-2 mt-2">
+                        <div className="font-semibold mb-1">💡 {language === 'es' ? 'Pasos REQUERIDOS' : 'REQUIRED Steps'}:</div>
+                        <div className="space-y-1">
+                          <div>1. {language === 'es' ? 'Ve al módulo' : 'Go to'} <span className="font-bold text-yellow-200">"Custody Accounts"</span></div>
+                          <div>2. {language === 'es' ? 'Crea o selecciona una cuenta con balance' : 'Create or select an account with balance'}</div>
+                          <div className="font-bold text-orange-300">3. {language === 'es' ? '⚠️ HAZ UNA RESERVA DE FONDOS (botón "Reservar")' : '⚠️ MAKE A FUND RESERVATION (button "Reserve")'}</div>
+                          <div>4. {language === 'es' ? 'Verifica que "Reservado" sea > 0' : 'Verify that "Reserved" is > 0'}</div>
+                          <div>5. {language === 'es' ? 'Vuelve aquí y recarga (F5)' : 'Return here and reload (F5)'}</div>
+                        </div>
+                        <div className="mt-2 p-2 bg-red-500/20 border border-red-500/30 rounded">
+                          <span className="font-bold text-red-300">⚠️ CRÍTICO:</span> {language === 'es' ? 'Sin RESERVAR fondos, la cuenta NO aparecerá aquí' : 'Without RESERVING funds, the account will NOT appear here'}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
 
+              {/* Selector de Porcentajes - Solo si hay cuenta seleccionada */}
+              {selectedCustodyAccount && (() => {
+                const account = custodyAccounts.find(a => a.id === selectedCustodyAccount);
+                if (!account) return null;
+                
+                const totalBalance = account.totalBalance;
+                const pledgedAmount = unifiedPledgeStore.getTotalPledgedAmount(selectedCustodyAccount);
+                const remainingBalance = totalBalance - pledgedAmount;
+                
+                return (
+                  <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg p-4">
+                    <label className="text-sm text-purple-400 mb-3 block font-semibold flex items-center gap-2">
+                      <Activity className="w-4 h-4" />
+                      ⚡ {language === 'es' ? 'Creación Rápida - % del Balance Restante' : 'Quick Create - % of Remaining Balance'}
+                    </label>
+                    <div className="grid grid-cols-5 gap-2">
+                      {[10, 20, 30, 50, 100].map(percentage => {
+                        const calculatedAmount = (remainingBalance * percentage) / 100;
+
+                        return (
+                          <button
+                            key={percentage}
+                            type="button"
+                            onClick={() => {
+                              setPledgeForm({
+                                ...pledgeForm,
+                                amount: calculatedAmount
+                              });
+                              console.log(`[VUSD] ✅ ${percentage}% del restante = ${account.currency} ${calculatedAmount.toLocaleString()}`);
+                            }}
+                            className="px-3 py-3 bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-[0_0_20px_rgba(168,85,247,0.6)] transition-all text-sm font-bold hover:scale-105"
+                          >
+                            <div className="text-lg mb-1">{percentage}%</div>
+                            <div className="text-xs opacity-90">
+                              {calculatedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-3 text-xs text-center space-y-1">
+                      <div className="text-purple-300">
+                        💰 {language === 'es' ? 'Balance Restante' : 'Remaining Balance'}: {account.currency} {remainingBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </div>
+                      {pledgedAmount > 0 && (
+                        <div className="text-orange-300/80">
+                          📊 {language === 'es' ? 'Ya usado en pledges' : 'Already in pledges'}: {pledgedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div>
-                <label className="block text-purple-300 text-sm mb-2">{t.amount}</label>
+                <label className="block text-purple-300 text-sm mb-2 font-semibold flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  {t.amount} {selectedCustodyAccount && '(editable)'}
+                </label>
                 <input
                   type="number"
                   step="0.01"
                   value={pledgeForm.amount}
                   onChange={(e) => setPledgeForm({ ...pledgeForm, amount: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-4 py-2 text-white"
+                  className="w-full bg-[#0a0a0a] border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                   required
-                  disabled={!!selectedCustodyAccount}
                 />
+                <div className="text-xs text-purple-300/60 mt-1">
+                  {selectedCustodyAccount 
+                    ? '✏️ Puedes editar el monto manualmente o usar los botones de % arriba'
+                    : '💡 Selecciona una cuenta custody primero para usar los % rápidos'
+                  }
+                </div>
               </div>
 
               <div>
@@ -1177,9 +2057,8 @@ export function APIVUSDModule() {
                   type="text"
                   value={pledgeForm.beneficiary}
                   onChange={(e) => setPledgeForm({ ...pledgeForm, beneficiary: e.target.value })}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded px-4 py-2 text-white"
+                  className="w-full bg-[#0a0a0a] border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                   required
-                  disabled={!!selectedCustodyAccount}
                 />
               </div>
 

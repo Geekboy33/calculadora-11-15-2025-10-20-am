@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Custody Accounts - DAES</title>
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { color: #0ff; border-bottom: 2px solid #0ff; padding-bottom: 10px; }
+        h2 { color: #ff0; margin-top: 30px; }
+        .section {
+            background: #111;
+            border: 1px solid #0f0;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .success { color: #0f0; font-weight: bold; }
+        .error { color: #f00; font-weight: bold; }
+        .warning { color: #ff0; font-weight: bold; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #0f0;
+            padding: 8px;
+            text-align: left;
+        }
+        th { background: #1a1a1a; color: #0ff; }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 3px;
+        }
+        button:hover { background: #0ff; }
+        pre {
+            background: #1a1a1a;
+            padding: 10px;
+            overflow-x: auto;
+            border-left: 3px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 DEBUG: Custody Accounts - Sistema DAES</h1>
+
+    <div class="section">
+        <h2>📊 Estado de localStorage</h2>
+        <div id="storage-status"></div>
+    </div>
+
+    <div class="section">
+        <h2>📋 Cuentas Custody Encontradas</h2>
+        <div id="accounts-list"></div>
+    </div>
+
+    <div class="section">
+        <h2>🔧 Acciones</h2>
+        <button onclick="analyzeAccounts()">🔄 Analizar Cuentas</button>
+        <button onclick="showRawData()">📄 Ver Datos Crudos</button>
+        <button onclick="createTestAccount()">➕ Crear Cuenta de Prueba</button>
+        <button onclick="clearStorage()">🗑️ Limpiar Todo</button>
+    </div>
+
+    <div class="section">
+        <h2>📝 Logs Detallados</h2>
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'Digital Commercial Bank Ltd_custody_accounts';
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#0f0',
+                error: '#f00',
+                warning: '#ff0',
+                success: '#0ff'
+            };
+            logsDiv.innerHTML += `<div style="color: ${colors[type]}">[${timestamp}] ${message}</div>`;
+        }
+
+        function analyzeAccounts() {
+            log('🔍 Iniciando análisis de cuentas...', 'info');
+            
+            const statusDiv = document.getElementById('storage-status');
+            const accountsDiv = document.getElementById('accounts-list');
+            
+            // Verificar si existe localStorage
+            const stored = localStorage.getItem(STORAGE_KEY);
+            
+            if (!stored) {
+                statusDiv.innerHTML = '<span class="error">❌ NO HAY DATOS EN LOCALSTORAGE</span>';
+                accountsDiv.innerHTML = '<span class="error">No se encontraron cuentas custody.</span>';
+                log('❌ localStorage vacío para key: ' + STORAGE_KEY, 'error');
+                return;
+            }
+            
+            log('✅ Datos encontrados en localStorage', 'success');
+            statusDiv.innerHTML = '<span class="success">✅ Datos encontrados en localStorage</span>';
+            
+            try {
+                const data = JSON.parse(stored);
+                log('✅ JSON parseado correctamente', 'success');
+                log('Estructura: ' + JSON.stringify(Object.keys(data)), 'info');
+                
+                if (!data.accounts || !Array.isArray(data.accounts)) {
+                    log('❌ No hay array de cuentas en los datos', 'error');
+                    accountsDiv.innerHTML = '<span class="error">Estructura de datos inválida</span>';
+                    return;
+                }
+                
+                const accounts = data.accounts;
+                log(`✅ Encontradas ${accounts.length} cuentas`, 'success');
+                
+                if (accounts.length === 0) {
+                    accountsDiv.innerHTML = '<span class="warning">⚠️ Array de cuentas está vacío</span>';
+                    return;
+                }
+                
+                // Crear tabla
+                let html = `<table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Moneda</th>
+                            <th>Total</th>
+                            <th>Reservado</th>
+                            <th>Disponible</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                
+                accounts.forEach(account => {
+                    const hasReserves = account.reservedBalance > 0;
+                    const statusColor = hasReserves ? '#0f0' : '#f00';
+                    const statusText = hasReserves ? '✅ CON RESERVAS' : '❌ SIN RESERVAS';
+                    
+                    html += `<tr>
+                        <td>${account.accountName}</td>
+                        <td>${account.accountType}</td>
+                        <td>${account.currency}</td>
+                        <td>${account.totalBalance.toLocaleString()}</td>
+                        <td style="color: ${statusColor}; font-weight: bold">${account.reservedBalance.toLocaleString()}</td>
+                        <td>${account.availableBalance.toLocaleString()}</td>
+                        <td style="color: ${statusColor}">${statusText}</td>
+                    </tr>`;
+                    
+                    log(`Cuenta: ${account.accountName} - Reservado: ${account.reservedBalance}`, hasReserves ? 'success' : 'warning');
+                });
+                
+                html += '</tbody></table>';
+                accountsDiv.innerHTML = html;
+                
+                // Resumen
+                const withReserves = accounts.filter(a => a.reservedBalance > 0);
+                log(`📊 Resumen: ${withReserves.length} de ${accounts.length} tienen reservas`, withReserves.length > 0 ? 'success' : 'warning');
+                
+                if (withReserves.length === 0) {
+                    accountsDiv.innerHTML += '<div class="warning" style="margin-top: 15px; padding: 10px; border: 2px solid #ff0;">⚠️ NINGUNA CUENTA TIENE RESERVAS<br>Para crear pledges, debes RESERVAR fondos en Custody Accounts</div>';
+                }
+                
+            } catch (err) {
+                log('❌ Error parseando JSON: ' + err.message, 'error');
+                statusDiv.innerHTML = '<span class="error">❌ Error parseando datos</span>';
+                accountsDiv.innerHTML = '<span class="error">Error: ' + err.message + '</span>';
+            }
+        }
+
+        function showRawData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (!stored) {
+                alert('❌ No hay datos en localStorage');
+                return;
+            }
+            
+            const logsDiv = document.getElementById('logs');
+            logsDiv.innerHTML += '<pre>' + JSON.stringify(JSON.parse(stored), null, 2) + '</pre>';
+            log('📄 Datos crudos mostrados', 'info');
+        }
+
+        function createTestAccount() {
+            log('➕ Creando cuenta de prueba...', 'info');
+            
+            const stored = localStorage.getItem(STORAGE_KEY);
+            let data = stored ? JSON.parse(stored) : { accounts: [], lastUpdated: new Date().toISOString() };
+            
+            const testAccount = {
+                id: 'TEST_' + Date.now(),
+                accountType: 'banking',
+                accountName: 'TEST ACCOUNT - USD Main',
+                currency: 'USD',
+                totalBalance: 100000,
+                reservedBalance: 50000,  // ✅ CON RESERVA
+                availableBalance: 50000,
+                bankName: 'Test Bank',
+                iban: 'TEST1234567890',
+                encryptedData: '',
+                verificationHash: '',
+                apiId: 'TEST',
+                apiEndpoint: '',
+                apiKey: '',
+                apiStatus: 'active',
+                vusdBalanceEnabled: true,
+                daesPledgeEnabled: true,
+                iso27001Compliant: false,
+                iso20022Compatible: false,
+                fatfAmlVerified: false,
+                kycVerified: false,
+                amlScore: 0,
+                riskLevel: 'low',
+                createdAt: new Date().toISOString(),
+                reservations: []
+            };
+            
+            data.accounts.push(testAccount);
+            data.lastUpdated = new Date().toISOString();
+            
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            
+            log('✅ Cuenta de prueba creada con USD 50,000 RESERVADO', 'success');
+            alert('✅ Cuenta de prueba creada!\n\nNombre: TEST ACCOUNT - USD Main\nBalance Total: USD 100,000\nReservado: USD 50,000\nDisponible: USD 50,000\n\nAhora ve a API VUSD y deberías verla en el dropdown.');
+            
+            analyzeAccounts();
+        }
+
+        function clearStorage() {
+            if (!confirm('⚠️ ¿Estás seguro?\n\nEsto eliminará TODAS las cuentas custody.')) {
+                return;
+            }
+            
+            localStorage.removeItem(STORAGE_KEY);
+            log('🗑️ localStorage limpiado', 'warning');
+            alert('✅ localStorage limpiado.\n\nAhora puedes crear cuentas nuevas en Custody Accounts.');
+            
+            analyzeAccounts();
+        }
+
+        // Auto-ejecutar análisis al cargar
+        window.onload = function() {
+            log('🚀 Herramienta de debugging iniciada', 'success');
+            analyzeAccounts();
+        };
+    </script>
+</body>
+</html>
+

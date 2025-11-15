@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Minus, RefreshCw, Download } from 'lucide-react';
 import { analyticsStore, AnalyticsData, KPIData } from '../lib/analytics-store';
 import { getIcon } from '../lib/icon-mapping';
+import { useLanguage } from '../lib/i18n';
 
 export function AnalyticsDashboard() {
+  const { language } = useLanguage();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const isSpanish = language === 'es';
 
   useEffect(() => {
     let mounted = true;
@@ -108,9 +112,11 @@ export function AnalyticsDashboard() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#e0ffe0] mb-2">Dashboard Analytics</h1>
+            <h1 className="text-3xl font-bold text-[#e0ffe0] mb-2">
+              {isSpanish ? 'Dashboard Analytics' : 'Analytics Dashboard'}
+            </h1>
             <p className="text-[#80ff80]">
-              Última actualización: {new Date(analytics.lastUpdated).toLocaleString('es-ES')}
+              {isSpanish ? 'Última actualización:' : 'Last update:'} {new Date(analytics.lastUpdated).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
             </p>
           </div>
 
@@ -121,7 +127,7 @@ export function AnalyticsDashboard() {
               className="flex items-center gap-2 px-4 py-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg text-[#00ff88] hover:border-[#00ff88] transition-all disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Actualizar
+              {isSpanish ? 'Actualizar' : 'Refresh'}
             </button>
 
             <button
@@ -129,7 +135,7 @@ export function AnalyticsDashboard() {
               className="flex items-center gap-2 px-4 py-2 bg-[#00ff88] text-black rounded-lg hover:bg-[#00cc6a] transition-all font-semibold"
             >
               <Download className="w-4 h-4" />
-              Exportar
+              {isSpanish ? 'Exportar' : 'Export'}
             </button>
           </div>
         </div>
