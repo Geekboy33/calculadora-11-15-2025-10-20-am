@@ -57,6 +57,7 @@ export function CustodyAccountsModule() {
     amount: 0,
     blockchain: 'Ethereum',
     tokenSymbol: '',
+    contractAddress: '',
     bankName: 'DAES - Data and Exchange Settlement',
   });
 
@@ -174,7 +175,8 @@ export function CustodyAccountsModule() {
       formData.amount,
       formData.blockchain,
       tokenSymbol,
-      formData.bankName
+      formData.bankName,
+      formData.contractAddress || undefined
     );
 
     setShowCreateModal(false);
@@ -185,6 +187,7 @@ export function CustodyAccountsModule() {
       amount: 0, 
       blockchain: 'Ethereum', 
       tokenSymbol: '',
+      contractAddress: '',
       bankName: 'DAES - Data and Exchange Settlement',
     });
     
@@ -1423,11 +1426,21 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     </div>
                   </div>
 
-                  <div className="bg-cyan-900/20 border border-cyan-500/30 rounded p-3">
-                    <div className="text-xs text-cyan-300">
-                      ℹ️ {language === 'es' 
-                        ? 'La dirección del contrato se generará automáticamente al crear la cuenta' 
-                        : 'Contract address will be auto-generated when creating the account'}
+                  <div>
+                    <label className="text-sm text-[#4d7c4d] mb-2 block">
+                      {language === 'es' ? 'Dirección del Contrato (Opcional)' : 'Contract Address (Optional)'}
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.contractAddress}
+                      onChange={e => setFormData({...formData, contractAddress: e.target.value})}
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#80ff80] font-mono focus:outline-none focus:border-cyan-500"
+                      placeholder={language === 'es' ? 'Ej: 0x1234567890abcdef1234567890abcdef12345678' : 'Ex: 0x1234567890abcdef1234567890abcdef12345678'}
+                    />
+                    <div className="text-xs text-cyan-300 mt-1">
+                      {language === 'es' 
+                        ? '💡 Ingresa la dirección del contrato inteligente manualmente o déjalo vacío' 
+                        : '💡 Enter the smart contract address manually or leave it empty'}
                     </div>
                   </div>
                 </div>

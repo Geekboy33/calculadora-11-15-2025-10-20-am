@@ -211,7 +211,8 @@ class CustodyStore {
     balance: number,
     blockchain?: string,
     tokenSymbol?: string,
-    bankName?: string
+    bankName?: string,
+    contractAddress?: string
   ): CustodyAccount {
     // 🔢 GENERAR NÚMERO DE CUENTA SECUENCIAL ISO BANCARIO
     const generatedAccountNumber = this.getNextAccountNumber(accountType, currency);
@@ -272,7 +273,8 @@ class CustodyStore {
     // Campos específicos por tipo
     if (accountType === 'blockchain') {
       account.blockchainLink = blockchain || 'Ethereum';
-      account.contractAddress = `0x${Math.random().toString(16).substring(2, 42).toUpperCase()}`;
+      // Usar contractAddress proporcionado o dejar vacío para ingreso manual
+      account.contractAddress = contractAddress || '';
       account.tokenSymbol = tokenSymbol || `${currency}T`;
       account.accountNumber = generatedAccountNumber; // Número secuencial
     } else {
