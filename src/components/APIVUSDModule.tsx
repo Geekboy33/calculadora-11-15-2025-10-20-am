@@ -835,6 +835,11 @@ export function APIVUSDModule() {
         porReport += `\n`;
 
         if (custodyAccount) {
+          // Calcular distribución 40% M2 / 60% M3 del pledge
+          const pledgeAmount = pledge.amount;
+          const m2Amount = pledgeAmount * 0.40; // 40% M2
+          const m3Amount = pledgeAmount * 0.60; // 60% M3
+          
           porReport += isSpanish
             ? `┌─ CUENTA CUSTODY VINCULADA ─────────────────────────────────┐\n`
             : `┌─ LINKED CUSTODY ACCOUNT ───────────────────────────────────┐\n`;
@@ -853,11 +858,21 @@ export function APIVUSDModule() {
             : `│ Total Balance:       ${custodyAccount.currency} ${custodyAccount.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}\n`;
           porReport += `│\n`;
           
+          // DISTRIBUCIÓN DE RESERVAS: 40% M2 / 60% M3
+          porReport += isSpanish ? `│ DISTRIBUCIÓN DE RESERVAS:\n` : `│ RESERVE DISTRIBUTION:\n`;
+          porReport += isSpanish
+            ? `│ ├─ M2 (Bancaria):    ${custodyAccount.currency} ${m2Amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} (40%)\n`
+            : `│ ├─ M2 (Banking):     ${custodyAccount.currency} ${m2Amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} (40%)\n`;
+          porReport += isSpanish
+            ? `│ └─ M3 (Blockchain):  ${custodyAccount.currency} ${m3Amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} (60%)\n`
+            : `│ └─ M3 (Blockchain):  ${custodyAccount.currency} ${m3Amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} (60%)\n`;
+          porReport += `│\n`;
+          
           // Clasificación M2/M3
           if (custodyAccount.accountType === 'banking') {
             porReport += isSpanish
-              ? `│ CLASIFICACIÓN:       M2 - RESERVA BANCARIA\n`
-              : `│ CLASSIFICATION:      M2 - BANKING RESERVE\n`;
+              ? `│ CLASIFICACIÓN PRINCIPAL: M2 - RESERVA BANCARIA\n`
+              : `│ PRIMARY CLASSIFICATION:  M2 - BANKING RESERVE\n`;
             porReport += `│\n`;
             porReport += isSpanish ? `│ Detalles Bancarios:\n` : `│ Banking Details:\n`;
             porReport += isSpanish
@@ -874,8 +889,8 @@ export function APIVUSDModule() {
               : `│ └─ Account Number:   ${custodyAccount.accountNumber || 'N/A'}\n`;
           } else {
             porReport += isSpanish
-              ? `│ CLASIFICACIÓN:       M3 - RESERVA BLOCKCHAIN\n`
-              : `│ CLASSIFICATION:      M3 - BLOCKCHAIN RESERVE\n`;
+              ? `│ CLASIFICACIÓN PRINCIPAL: M3 - RESERVA BLOCKCHAIN\n`
+              : `│ PRIMARY CLASSIFICATION:  M3 - BLOCKCHAIN RESERVE\n`;
             porReport += `│\n`;
             porReport += isSpanish ? `│ Detalles Blockchain:\n` : `│ Blockchain Details:\n`;
             porReport += isSpanish
