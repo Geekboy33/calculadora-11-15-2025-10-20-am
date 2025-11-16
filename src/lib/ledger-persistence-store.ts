@@ -42,7 +42,7 @@ class LedgerPersistenceStore {
   private listeners: Set<() => void> = new Set();
   private readonly STORAGE_KEY = 'daes_ledger_state';
   private readonly FILE_CACHE_KEY = 'daes_ledger_file_cache';
-  private autoSaveInterval: NodeJS.Timeout | null = null;
+  private autoSaveInterval: number | null = null;
 
   private constructor() {
     this.state = {
@@ -107,11 +107,11 @@ class LedgerPersistenceStore {
 
   private startAutoSave() {
     // Guardar automáticamente cada 10 segundos
-    this.autoSaveInterval = setInterval(() => {
+    this.autoSaveInterval = window.setInterval(() => {
       if (this.state.isProcessing) {
         this.saveToStorage();
       }
-    }, 10000);
+    }, 10000) as unknown as number;
   }
 
   // ==========================================
@@ -324,7 +324,7 @@ class LedgerPersistenceStore {
 
   cleanup() {
     if (this.autoSaveInterval) {
-      clearInterval(this.autoSaveInterval);
+      window.clearInterval(this.autoSaveInterval);
     }
   }
 
