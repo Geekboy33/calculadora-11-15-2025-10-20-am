@@ -149,12 +149,12 @@ export function ProofOfReservesAPIModule() {
   };
 
   const generateEndpoint = (apiKey: string) => {
-    const baseUrl = 'https://luxliqdaes.cloud';
+    const baseUrl = 'https://api.luxliqdaes.cloud';
     return `${baseUrl}/api/v1/proof-of-reserves/${apiKey}`;
   };
 
   const generateApiUrls = (apiKey: string) => {
-    const baseUrl = 'https://luxliqdaes.cloud';
+    const baseUrl = 'https://api.luxliqdaes.cloud';
     return {
       baseEndpoint: `${baseUrl}/api/v1/proof-of-reserves/${apiKey}`,
       dataEndpoint: `${baseUrl}/api/v1/proof-of-reserves/${apiKey}/data`,
@@ -1258,31 +1258,31 @@ export function ProofOfReservesAPIModule() {
                   <div className="p-2 bg-black/50 rounded border border-blue-500/10">
                     <div className="text-blue-300/60 mb-1">📍 Base:</div>
                     <div className="text-blue-400 break-all">
-                      GET https://luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}
+                      GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}
                     </div>
                   </div>
                   <div className="p-2 bg-black/50 rounded border border-cyan-500/10">
                     <div className="text-cyan-300/60 mb-1">📊 Data:</div>
                     <div className="text-cyan-400 break-all">
-                      GET https://luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}/data
+                      GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}/data
                     </div>
                   </div>
                   <div className="p-2 bg-black/50 rounded border border-green-500/10">
                     <div className="text-green-300/60 mb-1">⬇️ Download:</div>
                     <div className="text-green-400 break-all">
-                      GET https://luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}/download
+                      GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}/download
                     </div>
                   </div>
                   <div className="p-2 bg-black/50 rounded border border-purple-500/10">
                     <div className="text-purple-300/60 mb-1">📈 Summary:</div>
                     <div className="text-purple-400 break-all">
-                      GET https://luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}/summary
+                      GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}/summary
                     </div>
                   </div>
                   <div className="p-2 bg-black/50 rounded border border-orange-500/10">
                     <div className="text-orange-300/60 mb-1">✅ Verify:</div>
                     <div className="text-orange-400 break-all">
-                      GET https://luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}/verify
+                      GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}/verify
                     </div>
                   </div>
                 </div>
@@ -1295,7 +1295,7 @@ export function ProofOfReservesAPIModule() {
                 </div>
                 <pre className="text-xs text-yellow-300/80 font-mono bg-black/50 p-3 rounded overflow-x-auto">
 {`curl -X GET \\
-  'https://luxliqdaes.cloud/api/v1/proof-of-reserves/${newKeyData.apiKey}' \\
+  'https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${newKeyData.apiKey}' \\
   -H 'Authorization: Bearer ${newKeyData.apiKey}' \\
   -H 'X-Secret-Key: ${newKeyData.secretKey.substring(0, 30)}...'`}
                 </pre>
