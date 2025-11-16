@@ -218,14 +218,14 @@ export function ProofOfReservesAPIModule() {
     console.log('[PoR API] ✅ API Key creada:', apiKey);
     console.log('[PoR API] 🔔 Webhook configurado:', webhookUrl || 'No webhook');
 
-    // GENERAR Y DESCARGAR TXT AUTOMÁTICAMENTE
+    // GENERAR Y DESCARGAR TXT AUTOMÁTICAMENTE (TRADUCIDO)
     const txtContent = `
 ═══════════════════════════════════════════════════════════════
-  DAES CoreBanking System - API Key Credentials
+  DAES CoreBanking System - ${isSpanish ? 'Credenciales de API Key' : 'API Key Credentials'}
 ═══════════════════════════════════════════════════════════════
 
-⚠️  IMPORTANTE: Guarda este archivo de forma segura.
-    No podrás recuperar estas credenciales nuevamente.
+⚠️  ${isSpanish ? 'IMPORTANTE: Guarda este archivo de forma segura.' : 'IMPORTANT: Save this file securely.'}
+    ${isSpanish ? 'No podrás recuperar estas credenciales nuevamente.' : 'You will not be able to recover these credentials again.'}
 
 ───────────────────────────────────────────────────────────────
 🔑 API KEY:
@@ -238,45 +238,45 @@ ${apiKey}
 ${secretKey}
 
 ───────────────────────────────────────────────────────────────
-📅 Fecha de Generación:
+📅 ${isSpanish ? 'Fecha de Generación:' : 'Generation Date:'}
 ───────────────────────────────────────────────────────────────
 ${new Date().toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
 
 ───────────────────────────────────────────────────────────────
-📝 Nombre de la API Key:
+📝 ${isSpanish ? 'Nombre de la API Key:' : 'API Key Name:'}
 ───────────────────────────────────────────────────────────────
 ${newKey.name}
 
 ───────────────────────────────────────────────────────────────
-🔗 ENDPOINTS API DISPONIBLES:
+🔗 ${isSpanish ? 'ENDPOINTS API DISPONIBLES:' : 'AVAILABLE API ENDPOINTS:'}
 ───────────────────────────────────────────────────────────────
 
-📍 Endpoint Principal (PoR Completo):
+📍 ${isSpanish ? 'Endpoint Principal (PoR Completo):' : 'Main Endpoint (Full PoR):'}
 GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${apiKey}
 
-📊 Data Endpoint (Solo Datos):
+📊 ${isSpanish ? 'Data Endpoint (Solo Datos):' : 'Data Endpoint (Data Only):'}
 GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${apiKey}/data
 
-⬇️ Download Endpoint (Descargar TXT):
+⬇️ ${isSpanish ? 'Download Endpoint (Descargar TXT):' : 'Download Endpoint (Download TXT):'}
 GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${apiKey}/download
 
-📈 Summary Endpoint (Resumen):
+📈 ${isSpanish ? 'Summary Endpoint (Resumen):' : 'Summary Endpoint (Summary):'}
 GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${apiKey}/summary
 
-✅ Verify Endpoint (Verificar):
+✅ ${isSpanish ? 'Verify Endpoint (Verificar):' : 'Verify Endpoint (Verify):'}
 GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${apiKey}/verify
 
 ───────────────────────────────────────────────────────────────
-🔐 AUTENTICACIÓN REQUERIDA:
+🔐 ${isSpanish ? 'AUTENTICACIÓN REQUERIDA:' : 'REQUIRED AUTHENTICATION:'}
 ───────────────────────────────────────────────────────────────
 
-Todas las llamadas API deben incluir estos headers:
+${isSpanish ? 'Todas las llamadas API deben incluir estos headers:' : 'All API calls must include these headers:'}
 
 Authorization: Bearer ${apiKey}
 X-Secret-Key: ${secretKey}
 
 ───────────────────────────────────────────────────────────────
-📝 EJEMPLO DE USO (cURL):
+📝 ${isSpanish ? 'EJEMPLO DE USO (cURL):' : 'USAGE EXAMPLE (cURL):'}
 ───────────────────────────────────────────────────────────────
 
 curl -X GET \\
@@ -286,7 +286,7 @@ curl -X GET \\
   -H 'Accept: application/json'
 
 ───────────────────────────────────────────────────────────────
-📝 EJEMPLO DE USO (JavaScript):
+📝 ${isSpanish ? 'EJEMPLO DE USO (JavaScript):' : 'USAGE EXAMPLE (JavaScript):'}
 ───────────────────────────────────────────────────────────────
 
 const API_KEY = '${apiKey}';
@@ -308,7 +308,7 @@ const data = await response.json();
 console.log(data);
 
 ───────────────────────────────────────────────────────────────
-📝 EJEMPLO DE USO (Python):
+📝 ${isSpanish ? 'EJEMPLO DE USO (Python):' : 'USAGE EXAMPLE (Python):'}
 ───────────────────────────────────────────────────────────────
 
 import requests
@@ -331,45 +331,48 @@ data = response.json()
 print(data)
 
 ───────────────────────────────────────────────────────────────
-🔔 WEBHOOK CONFIGURATION:
+🔔 ${isSpanish ? 'CONFIGURACIÓN DE WEBHOOK:' : 'WEBHOOK CONFIGURATION:'}
 ───────────────────────────────────────────────────────────────
 
 ${webhookUrl ? `Webhook URL: ${webhookUrl}
-Eventos configurados: ${selectedEvents.join(', ')}
+${isSpanish ? 'Eventos configurados:' : 'Configured events:'} ${selectedEvents.join(', ')}
 
-El sistema enviará POST requests a esta URL cuando ocurran
-los eventos configurados.` : 'No se configuró webhook para esta API key.'}
+${isSpanish 
+  ? 'El sistema enviará POST requests a esta URL cuando ocurran los eventos configurados.'
+  : 'The system will send POST requests to this URL when the configured events occur.'}` 
+  : (isSpanish ? 'No se configuró webhook para esta API key.' : 'No webhook was configured for this API key.')}
 
 ───────────────────────────────────────────────────────────────
-📄 PROOF OF RESERVES VINCULADOS:
+📄 ${isSpanish ? 'PROOF OF RESERVES VINCULADOS:' : 'LINKED PROOF OF RESERVES:'}
 ───────────────────────────────────────────────────────────────
 
-${selectedPorIds.length} PoR vinculados a esta API key:
+${selectedPorIds.length} ${isSpanish ? 'PoR vinculados a esta API key:' : 'PoR linked to this API key:'}
 ${selectedPorIds.map((id, i) => `${i + 1}. ${id}`).join('\n')}
 
 ───────────────────────────────────────────────────────────────
-⚙️ PERMISOS:
+⚙️ ${isSpanish ? 'PERMISOS:' : 'PERMISSIONS:'}
 ───────────────────────────────────────────────────────────────
 
-✅ Lectura de Proof of Reserves
-✅ Descarga de reportes TXT
-✅ Acceso a todos los endpoints API
-✅ Verificación de integridad
+✅ ${isSpanish ? 'Lectura de Proof of Reserves' : 'Read Proof of Reserves'}
+✅ ${isSpanish ? 'Descarga de reportes TXT' : 'Download TXT reports'}
+✅ ${isSpanish ? 'Acceso a todos los endpoints API' : 'Access to all API endpoints'}
+✅ ${isSpanish ? 'Verificación de integridad' : 'Integrity verification'}
 
 ───────────────────────────────────────────────────────────────
-📞 SOPORTE:
+📞 ${isSpanish ? 'SOPORTE:' : 'SUPPORT:'}
 ───────────────────────────────────────────────────────────────
 
-Sistema: DAES CoreBanking v5.2.0
-Módulo: Proof of Reserves API
-Documentación: Ver PoR_API_SETUP.md en el repositorio
+${isSpanish ? 'Sistema:' : 'System:'} DAES CoreBanking v5.2.0
+${isSpanish ? 'Módulo:' : 'Module:'} Proof of Reserves API
+${isSpanish ? 'Documentación:' : 'Documentation:'} ${isSpanish ? 'Ver' : 'See'} PoR_API_SETUP.md ${isSpanish ? 'en el repositorio' : 'in the repository'}
 
-Para soporte técnico o consultas sobre esta API key,
-contacta al administrador del sistema CoreBanking.
+${isSpanish 
+  ? 'Para soporte técnico o consultas sobre esta API key, contacta al administrador del sistema CoreBanking.'
+  : 'For technical support or queries about this API key, contact the CoreBanking system administrator.'}
 
 ═══════════════════════════════════════════════════════════════
   DAES CoreBanking System - Data and Exchange Settlement
-  © ${new Date().getFullYear()} - Todos los derechos reservados
+  © ${new Date().getFullYear()} - ${isSpanish ? 'Todos los derechos reservados' : 'All rights reserved'}
 ═══════════════════════════════════════════════════════════════
 `;
 
