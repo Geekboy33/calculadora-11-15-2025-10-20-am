@@ -66,6 +66,7 @@ interface WebhookLog {
 
 export function ProofOfReservesAPIModule() {
   const { language } = useLanguage();
+  const API_BASE = (import.meta as any).env?.VITE_POR_API_BASE || 'http://localhost:8787';
   const [porReports, setPorReports] = useState<PorReport[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKeyData[]>([]);
   const [showCreateKeyModal, setShowCreateKeyModal] = useState(false);
@@ -149,12 +150,12 @@ export function ProofOfReservesAPIModule() {
   };
 
   const generateEndpoint = (apiKey: string) => {
-    const baseUrl = 'https://api.luxliqdaes.cloud';
+    const baseUrl = API_BASE;
     return `${baseUrl}/api/v1/proof-of-reserves/${apiKey}`;
   };
 
   const generateApiUrls = (apiKey: string) => {
-    const baseUrl = 'https://api.luxliqdaes.cloud';
+    const baseUrl = API_BASE;
     return {
       baseEndpoint: `${baseUrl}/api/v1/proof-of-reserves/${apiKey}`,
       dataEndpoint: `${baseUrl}/api/v1/proof-of-reserves/${apiKey}/data`,
@@ -164,7 +165,7 @@ export function ProofOfReservesAPIModule() {
     };
   };
 
-  const handleCreateApiKey = () => {
+  const handleCreateApiKey = async () => {
     if (!keyName.trim()) {
       alert(isSpanish ? 'Por favor ingresa un nombre para la API key' : 'Please enter a name for the API key');
       return;
@@ -216,6 +217,34 @@ export function ProofOfReservesAPIModule() {
 
     console.log('[PoR API] ✅ API Key creada:', apiKey);
     console.log('[PoR API] 🔔 Webhook configurado:', webhookUrl || 'No webhook');
+
+    // Registrar API key REAL en backend
+    try {
+      const resp = await fetch(`${API_BASE}/admin/api-keys`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newKey)
+      });
+      if (!resp.ok) {
+        console.warn('[PoR API] ⚠️ No se pudo registrar API key en backend');
+      }
+    } catch (e) {
+      console.warn('[PoR API] ⚠️ Error registrando API key en backend:', (e as Error).message);
+    }
+
+    // Enviar PoR reales al backend para consumo API
+    try {
+      const resp = await fetch(`${API_BASE}/admin/import-por`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reports: porReports })
+      });
+      if (!resp.ok) {
+        console.warn('[PoR API] ⚠️ No se pudieron sincronizar PoR con backend');
+      }
+    } catch (e) {
+      console.warn('[PoR API] ⚠️ Error sincronizando PoR con backend:', (e as Error).message);
+    }
   };
 
   const handleRevokeKey = (keyId: string) => {
@@ -258,73 +287,36 @@ export function ProofOfReservesAPIModule() {
     URL.revokeObjectURL(url);
   };
 
-  // Ejecutar llamada REAL al endpoint API con webhook REAL
+  // Ejecutar llamada REAL al endpoint API
   const simulateApiCall = async (key: ApiKeyData, endpoint: string) => {
     const startTime = Date.now();
     
     try {
       console.log('[PoR API] 📡 Ejecutando llamada API REAL:', endpoint);
-      
-      // Obtener PoR reports vinculados con TODA la información
-      const linkedPorData = porReports
-        .filter(p => key.linkedPorIds.includes(p.id))
-        .map(p => ({
-          id: p.id,
-          timestamp: p.timestamp,
-          circulatingCap: p.circulatingCap,
-          pledgedUSD: p.pledgedUSD,
-          activePledges: p.activePledgesCount,
-          pledgesM2: p.pledgesM2,
-          pledgesM3: p.pledgesM3,
-          totalM2: p.totalM2,
-          totalM3: p.totalM3,
-          fullReport: p.report, // Reporte completo de texto
-          reportLength: p.report.length
-        }));
 
-      // Crear payload completo con TODA la información
-      const fullPayload = {
-        success: true,
-        timestamp: new Date().toISOString(),
-        apiKey: key.apiKey,
-        endpoint: endpoint,
-        authentication: {
-          apiKey: key.apiKey,
-          secretKey: key.secretKey.substring(0, 20) + '...',
-          method: 'Bearer Token'
-        },
-        data: {
-          porReports: linkedPorData,
-          summary: {
-            totalReports: linkedPorData.length,
-            totalCirculatingCap: linkedPorData.reduce((sum, p) => sum + p.circulatingCap, 0),
-            totalPledgedUSD: linkedPorData.reduce((sum, p) => sum + p.pledgedUSD, 0),
-            totalActivePledges: linkedPorData.reduce((sum, p) => sum + p.activePledges, 0),
-            totalM2: linkedPorData.reduce((sum, p) => sum + p.pledgesM2, 0),
-            totalM3: linkedPorData.reduce((sum, p) => sum + p.pledgesM3, 0),
-            m2Amount: linkedPorData.reduce((sum, p) => sum + p.totalM2, 0),
-            m3Amount: linkedPorData.reduce((sum, p) => sum + p.totalM3, 0)
-          },
-          metadata: {
-            apiKeyName: key.name,
-            createdAt: key.createdAt,
-            requestCount: (key.requestCount || 0) + 1,
-            permissions: key.permissions
-          }
+      const resp = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${key.apiKey}`,
+          'X-Secret-Key': key.secretKey,
+          'Accept': 'application/json'
         }
-      };
+      });
+
+      const payload = await resp.json().catch(() => ({}));
+      const ok = resp.ok;
       
-      // Crear log de webhook con payload completo
+      // Crear log con respuesta real
       const webhookLog: WebhookLog = {
         id: `WH_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         apiKeyId: key.id,
-        event: 'api.request',
+        event: ok ? 'api.request' : 'api.error',
         endpoint: endpoint,
         method: 'GET',
         timestamp: new Date().toISOString(),
-        status: 'success',
+        status: ok ? 'success' : 'failed',
         responseTime: Date.now() - startTime,
-        payload: fullPayload
+        payload
       };
       
       setWebhookLogs(prev => [webhookLog, ...prev].slice(0, 100));
@@ -338,67 +330,11 @@ export function ProofOfReservesAPIModule() {
       setApiKeys(updatedKeys);
       localStorage.setItem('por_api_keys', JSON.stringify(updatedKeys));
       
-      // Si hay webhook URL configurada, enviar POST REAL
-      if (key.webhookUrl && key.webhookEvents.includes('api.request')) {
-        console.log('[PoR API] 🔔 Enviando webhook REAL a:', key.webhookUrl);
-        
-        try {
-          // Enviar POST REAL al webhook
-          const response = await fetch(key.webhookUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-API-Key': key.apiKey,
-              'X-Secret-Key': key.secretKey,
-              'User-Agent': 'DAES-PoR-API/1.0'
-            },
-            body: JSON.stringify(fullPayload)
-          });
-          
-          const webhookStatus = response.ok ? 'success' : 'failed';
-          console.log('[PoR API] 📤 Webhook enviado:', webhookStatus, response.status);
-          
-          // Log del webhook
-          const webhookSentLog: WebhookLog = {
-            id: `WH_SENT_${Date.now()}`,
-            apiKeyId: key.id,
-            event: 'webhook.sent',
-            endpoint: key.webhookUrl,
-            method: 'POST',
-            timestamp: new Date().toISOString(),
-            status: webhookStatus,
-            responseTime: Date.now() - startTime,
-            payload: { webhookUrl: key.webhookUrl, status: response.status }
-          };
-          
-          setWebhookLogs(prev => [webhookSentLog, ...prev].slice(0, 100));
-          
-        } catch (webhookError) {
-          console.error('[PoR API] ❌ Error enviando webhook:', webhookError);
-          
-          // Log de error
-          const webhookErrorLog: WebhookLog = {
-            id: `WH_ERROR_${Date.now()}`,
-            apiKeyId: key.id,
-            event: 'webhook.error',
-            endpoint: key.webhookUrl || '',
-            method: 'POST',
-            timestamp: new Date().toISOString(),
-            status: 'failed',
-            responseTime: Date.now() - startTime,
-            payload: { error: (webhookError as Error).message }
-          };
-          
-          setWebhookLogs(prev => [webhookErrorLog, ...prev].slice(0, 100));
-        }
-      }
-      
       alert(
-        `✅ ${isSpanish ? 'Llamada API Exitosa' : 'API Call Successful'}\n\n` +
+        `${ok ? '✅' : '❌'} ${isSpanish ? (ok ? 'Llamada API Exitosa' : 'Error en llamada API') : (ok ? 'API Call Successful' : 'API Call Error')}\n\n` +
         `Endpoint: ${endpoint}\n` +
         `${isSpanish ? 'Tiempo de respuesta' : 'Response time'}: ${Date.now() - startTime}ms\n` +
-        `${isSpanish ? 'PoR vinculados' : 'Linked PoR'}: ${key.linkedPorIds.length}\n` +
-        `${isSpanish ? 'Data completa' : 'Full data'}: ${JSON.stringify(fullPayload).length} bytes\n\n` +
+        `${isSpanish ? 'Status' : 'Status'}: ${resp.status}\n\n` +
         `${isSpanish ? '📄 Ver respuesta completa en logs abajo' : '📄 See full response in logs below'}`
       );
       
