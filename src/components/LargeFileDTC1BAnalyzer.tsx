@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 import { processingStore } from '../lib/processing-store';
+import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
 import { useLanguage } from '../lib/i18n.tsx';
 
 // CurrencyBalance is now imported from balances-store
@@ -53,49 +54,109 @@ export function LargeFileDTC1BAnalyzer() {
   // Load existing balances and check for pending processes on mount
   useEffect(() => {
     const loadInitialData = async () => {
+      // PRIORIDAD 1: Cargar desde ledgerPersistenceStore (más confiable)
+      const ledgerStatus = ledgerPersistenceStore.getStatus();
+      const ledgerBalances = ledgerPersistenceStore.getBalances();
+      
+      console.log('[LargeFileDTC1BAnalyzer] 📊 Estado Ledger Store:', ledgerStatus);
+      
+      if (ledgerBalances.length > 0) {
+        // Convertir balances de ledgerPersistenceStore a CurrencyBalance
+        const converted: CurrencyBalance[] = ledgerBalances.map(b => ({
+          currency: b.currency,
+          balance: b.balance,
+          transactionCount: 1,
+          accountName: b.account || `Cuenta ${b.currency}`,
+          lastUpdate: new Date(b.lastUpdate).toISOString()
+        }));
+        
+        setLoadedBalances(converted);
+        console.log('[LargeFileDTC1BAnalyzer] ✅ Balances cargados desde Ledger Store:', converted.length);
+      }
+      
+      // PRIORIDAD 2: Cargar desde balanceStore (legacy)
       const existing = balanceStore.loadBalances();
-      if (existing) {
+      if (existing && existing.balances.length > ledgerBalances.length) {
         setLoadedBalances(existing.balances);
-        console.log('[LargeFileDTC1BAnalyzer] Loaded existing balances:', existing.balances.length);
+        console.log('[LargeFileDTC1BAnalyzer] ✅ Balances cargados desde Balance Store:', existing.balances.length);
       }
 
-      // Verificar si hay un proceso pendiente desde Supabase
-      const pendingState = await processingStore.loadState();
-      if (pendingState && (pendingState.status === 'processing' || pendingState.status === 'paused')) {
-        setHasPendingProcess(true);
-        setPendingProcessInfo({
-          fileName: pendingState.fileName,
-          progress: pendingState.progress
-        });
-        console.log('[LargeFileDTC1BAnalyzer] Proceso pendiente detectado:', pendingState.fileName, pendingState.progress + '%');
-
-        // Cargar balances desde Supabase si existe fileHash
-        let balancesToShow = pendingState.balances || [];
-        if (pendingState.fileHash) {
-          const supabaseBalances = await processingStore.loadBalancesFromSupabase(pendingState.fileHash);
-          if (supabaseBalances.length > 0) {
-            balancesToShow = supabaseBalances;
-            console.log('[LargeFileDTC1BAnalyzer] Balances cargados desde Supabase:', supabaseBalances.length);
+      // PRIORIDAD 3: Verificar recuperación de Ledger Store
+      if (ledgerPersistenceStore.needsRecovery()) {
+        const recoveryInfo = ledgerPersistenceStore.getRecoveryInfo();
+        if (recoveryInfo) {
+          setHasPendingProcess(true);
+          setPendingProcessInfo({
+            fileName: recoveryInfo.fileName || 'Archivo Ledger',
+            progress: recoveryInfo.percentage
+          });
+          console.log('[LargeFileDTC1BAnalyzer] 🔄 Recuperación disponible:', recoveryInfo);
+          
+          // Mostrar análisis parcial
+          if (ledgerBalances.length > 0) {
+            setAnalysis({
+              fileName: recoveryInfo.fileName || 'Ledger1_DAES.bin',
+              fileSize: recoveryInfo.totalBytes,
+              bytesProcessed: recoveryInfo.bytesProcessed,
+              progress: recoveryInfo.percentage,
+              magicNumber: '',
+              entropy: 0,
+              isEncrypted: false,
+              detectedAlgorithm: 'Recuperación parcial',
+              ivBytes: '',
+              saltBytes: '',
+              balances: ledgerBalances.map(b => ({
+                currency: b.currency,
+                balance: b.balance,
+                transactionCount: 1,
+                accountName: b.account || `Cuenta ${b.currency}`,
+                lastUpdate: new Date(b.lastUpdate).toISOString()
+              })),
+              status: 'idle'
+            });
           }
         }
+      }
 
-        // Mostrar balances recuperados
-        if (balancesToShow.length > 0) {
-          setAnalysis({
+      // PRIORIDAD 4: Verificar Supabase (si no hay nada en Ledger Store)
+      if (ledgerBalances.length === 0) {
+        const pendingState = await processingStore.loadState();
+        if (pendingState && (pendingState.status === 'processing' || pendingState.status === 'paused')) {
+          setHasPendingProcess(true);
+          setPendingProcessInfo({
             fileName: pendingState.fileName,
-            fileSize: pendingState.fileSize,
-            bytesProcessed: pendingState.bytesProcessed,
-            progress: pendingState.progress,
-            magicNumber: '',
-            entropy: 0,
-            isEncrypted: false,
-            detectedAlgorithm: t.analyzerProcessing,
-            ivBytes: '',
-            saltBytes: '',
-            balances: balancesToShow,
-            status: 'idle'
+            progress: pendingState.progress
           });
-          setLoadedBalances(balancesToShow);
+          console.log('[LargeFileDTC1BAnalyzer] Proceso pendiente detectado (Supabase):', pendingState.fileName, pendingState.progress + '%');
+
+          // Cargar balances desde Supabase si existe fileHash
+          let balancesToShow = pendingState.balances || [];
+          if (pendingState.fileHash) {
+            const supabaseBalances = await processingStore.loadBalancesFromSupabase(pendingState.fileHash);
+            if (supabaseBalances.length > 0) {
+              balancesToShow = supabaseBalances;
+              console.log('[LargeFileDTC1BAnalyzer] Balances cargados desde Supabase:', supabaseBalances.length);
+            }
+          }
+
+          // Mostrar balances recuperados
+          if (balancesToShow.length > 0) {
+            setAnalysis({
+              fileName: pendingState.fileName,
+              fileSize: pendingState.fileSize,
+              bytesProcessed: pendingState.bytesProcessed,
+              progress: pendingState.progress,
+              magicNumber: '',
+              entropy: 0,
+              isEncrypted: false,
+              detectedAlgorithm: t.analyzerProcessing,
+              ivBytes: '',
+              saltBytes: '',
+              balances: balancesToShow,
+              status: 'idle'
+            });
+            setLoadedBalances(balancesToShow);
+          }
         }
       }
     };
@@ -123,11 +184,12 @@ export function LargeFileDTC1BAnalyzer() {
     };
   }, []);
 
-  // Guardar balances en el store global
+  // Guardar balances en el store global (doble persistencia)
   const saveBalancesToStorage = (balances: CurrencyBalance[], fileName: string, fileSize: number) => {
     try {
       const totalTransactions = balances.reduce((sum, b) => sum + b.transactionCount, 0);
       
+      // PERSISTENCIA 1: Balance Store (legacy)
       balanceStore.saveBalances({
         balances,
         lastScanDate: new Date().toISOString(),
@@ -136,10 +198,20 @@ export function LargeFileDTC1BAnalyzer() {
         totalTransactions,
       });
 
+      // PERSISTENCIA 2: Ledger Persistence Store (nuevo sistema)
+      ledgerPersistenceStore.updateBalances(
+        balances.map(b => ({
+          currency: b.currency,
+          balance: b.balance,
+          account: b.accountName,
+          lastUpdate: Date.now()
+        }))
+      );
+
       setLoadedBalances(balances);
-      console.log('[LargeFileDTC1BAnalyzer] Balances saved successfully');
+      console.log('[LargeFileDTC1BAnalyzer] 💾 Balances guardados en 2 stores:', balances.length);
     } catch (error) {
-      console.error('[LargeFileDTC1BAnalyzer] Error saving balances:', error);
+      console.error('[LargeFileDTC1BAnalyzer] ❌ Error saving balances:', error);
     }
   };
 
@@ -280,35 +352,55 @@ export function LargeFileDTC1BAnalyzer() {
       currentFileRef.current = file;
       setError(null);
 
+      // Registrar archivo en ledgerPersistenceStore
+      ledgerPersistenceStore.setFileState(file.name, file.size, file.lastModified);
+      console.log('[LargeFileDTC1BAnalyzer] 📁 Archivo registrado en Ledger Store');
+
       // Calcular hash y buscar proceso existente
       try {
         const fileHash = await processingStore.calculateFileHash(file);
         const existingProcess = await processingStore.findProcessingByFileHash(fileHash);
+        
+        // También verificar recuperación en ledgerPersistenceStore
+        const ledgerRecovery = ledgerPersistenceStore.getRecoveryInfo();
+        const startFromByte = ledgerRecovery?.bytesProcessed || 0;
 
-        if (existingProcess) {
+        if (existingProcess || ledgerRecovery) {
+          const progressToShow = ledgerRecovery?.percentage || existingProcess?.progress || 0;
           const resume = confirm(
             `¡Archivo reconocido!\n\n` +
-            `Progreso guardado: ${existingProcess.progress.toFixed(2)}%\n` +
+            `Progreso guardado: ${progressToShow.toFixed(2)}%\n` +
+            `Balances recuperados: ${ledgerPersistenceStore.getBalances().length}\n\n` +
             `¿Deseas continuar desde donde lo dejaste?`
           );
 
           if (!resume) {
             await processingStore.clearState();
+            ledgerPersistenceStore.clearFileState();
           }
         }
 
-        await processingStore.startGlobalProcessing(file, 0, (progress, balances) => {
+        ledgerPersistenceStore.setProcessing(true);
+
+        await processingStore.startGlobalProcessing(file, startFromByte, (progress, balances) => {
+          // Calcular bytes procesados y chunk index
+          const bytesProcessed = (file.size * progress) / 100;
+          const chunkIndex = Math.floor(bytesProcessed / (10 * 1024 * 1024)); // 10MB chunks
+          
+          // Actualizar ledgerPersistenceStore
+          ledgerPersistenceStore.updateProgress(bytesProcessed, file.size, chunkIndex);
+          
           // Callback de progreso para actualizar UI local
           setAnalysis(prev => prev ? {
             ...prev,
             progress,
-            bytesProcessed: (file.size * progress) / 100,
+            bytesProcessed,
             balances,
             status: 'processing'
           } : {
             fileName: file.name,
             fileSize: file.size,
-            bytesProcessed: (file.size * progress) / 100,
+            bytesProcessed,
             progress,
             magicNumber: '',
             entropy: 0,
@@ -320,14 +412,18 @@ export function LargeFileDTC1BAnalyzer() {
             status: 'processing'
           });
 
-          // Guardar balances periódicamente
+          // Guardar balances periódicamente en ambos stores
           if (balances.length > 0 && Math.floor(progress) % 10 === 0) {
             saveBalancesToStorage(balances, file.name, file.size);
+            console.log('[LargeFileDTC1BAnalyzer] 💾 Auto-guardado en progreso:', progress.toFixed(1) + '%');
           }
         });
 
+        // Procesamiento completado
+        ledgerPersistenceStore.setProcessing(false);
         setIsProcessing(false);
         processingRef.current = false;
+        console.log('[LargeFileDTC1BAnalyzer] ✅ Procesamiento completado y persistido');
       } catch (error) {
         console.error('[LargeFileDTC1BAnalyzer] Error:', error);
         setIsProcessing(false);
@@ -341,19 +437,25 @@ export function LargeFileDTC1BAnalyzer() {
     if (isPaused) {
       // Reanudar
       await processingStore.resumeProcessing();
+      ledgerPersistenceStore.resumeProcessing();
       setIsPaused(false);
+      console.log('[LargeFileDTC1BAnalyzer] ▶️ Procesamiento reanudado');
     } else {
       // Pausar
       await processingStore.pauseProcessing();
+      ledgerPersistenceStore.pauseProcessing();
       setIsPaused(true);
+      console.log('[LargeFileDTC1BAnalyzer] ⏸️ Procesamiento pausado');
     }
   };
 
   const handleStop = () => {
     processingStore.stopProcessing();
+    ledgerPersistenceStore.setProcessing(false);
     processingRef.current = false;
     setIsProcessing(false);
     setIsPaused(false);
+    console.log('[LargeFileDTC1BAnalyzer] ⏹️ Procesamiento detenido');
   };
 
   const handleDecrypt = async () => {
@@ -417,9 +519,11 @@ export function LargeFileDTC1BAnalyzer() {
   const clearSavedBalances = () => {
     if (confirm(t.msgConfirmClear)) {
       balanceStore.clearBalances();
+      ledgerPersistenceStore.reset();
       setLoadedBalances([]);
       setAnalysis(null);
       alert(t.msgBalancesCleared);
+      console.log('[LargeFileDTC1BAnalyzer] 🗑️ Todos los datos limpiados de ambos stores');
     }
   };
 

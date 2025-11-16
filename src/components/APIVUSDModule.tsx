@@ -26,6 +26,8 @@ import { vusdCapStore, type Pledge, type PorPublication, type TreasuryTransfer }
 import { custodyStore } from '../lib/custody-store';
 import { apiVUSD1Store } from '../lib/api-vusd1-store';
 import { unifiedPledgeStore } from '../lib/unified-pledge-store';
+import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
+import { LedgerStatusIndicator } from './LedgerStatusIndicator';
 import {
   generateBlackScreenData,
   downloadBlackScreenHTML,
@@ -1258,6 +1260,7 @@ export function APIVUSDModule() {
             <p className="text-[#80ff80] mt-2">{t.subtitle}</p>
           </div>
           <div className="flex gap-3">
+            <LedgerStatusIndicator />
             <button
               onClick={loadData}
               disabled={loading}

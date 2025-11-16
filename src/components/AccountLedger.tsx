@@ -6,6 +6,8 @@
 import { useState, useEffect } from 'react';
 import { RefreshCw, TrendingUp, Database, CheckCircle, Activity, DollarSign } from 'lucide-react';
 import { balanceStore, formatCurrency, getCurrencyName, type CurrencyBalance } from '../lib/balances-store';
+import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
+import { LedgerStatusIndicator } from './LedgerStatusIndicator';
 import { useLanguage } from '../lib/i18n.tsx';
 
 export function AccountLedger() {
@@ -73,6 +75,8 @@ export function AccountLedger() {
               </p>
             </div>
           <div className="flex items-center gap-4">
+            {/* Indicador de Estado del Ledger */}
+            <LedgerStatusIndicator />
             {isLiveUpdating && (
               <div className="flex items-center gap-2 bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88] px-4 py-2 rounded-lg animate-pulse shadow-[0_0_15px_rgba(0,255,136,0.4)]">
                 <Activity className="w-5 h-5 animate-spin" />
