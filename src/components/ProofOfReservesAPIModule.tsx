@@ -1237,16 +1237,153 @@ export function ProofOfReservesAPIModule() {
                 </pre>
               </div>
 
-              {/* Close Button */}
-              <button
-                onClick={() => {
-                  setShowSecretModal(false);
-                  setNewKeyData(null);
-                }}
-                className="w-full px-6 py-4 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 font-bold text-lg"
-              >
-                {isSpanish ? 'Entendido - Cerrar' : 'Understood - Close'}
-              </button>
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    if (!newKeyData) return;
+                    
+                    const content = `
+═══════════════════════════════════════════════════════════════
+  DAES CoreBanking System - API Key Credentials
+═══════════════════════════════════════════════════════════════
+
+⚠️  IMPORTANTE: Guarda este archivo de forma segura.
+    No podrás recuperar estas credenciales nuevamente.
+
+───────────────────────────────────────────────────────────────
+🔑 API KEY:
+───────────────────────────────────────────────────────────────
+${newKeyData.apiKey}
+
+───────────────────────────────────────────────────────────────
+🔐 SECRET KEY:
+───────────────────────────────────────────────────────────────
+${newKeyData.secretKey}
+
+───────────────────────────────────────────────────────────────
+📅 Fecha de Generación:
+───────────────────────────────────────────────────────────────
+${new Date().toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
+
+───────────────────────────────────────────────────────────────
+🔗 ENDPOINTS API DISPONIBLES:
+───────────────────────────────────────────────────────────────
+
+📍 Endpoint Principal (PoR Completo):
+GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${newKeyData.apiKey}
+
+📊 Data Endpoint (Solo Datos):
+GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${newKeyData.apiKey}/data
+
+⬇️ Download Endpoint (Descargar TXT):
+GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${newKeyData.apiKey}/download
+
+📈 Summary Endpoint (Resumen):
+GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${newKeyData.apiKey}/summary
+
+✅ Verify Endpoint (Verificar):
+GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${newKeyData.apiKey}/verify
+
+───────────────────────────────────────────────────────────────
+🔐 AUTENTICACIÓN REQUERIDA:
+───────────────────────────────────────────────────────────────
+
+Todas las llamadas API deben incluir estos headers:
+
+Authorization: Bearer ${newKeyData.apiKey}
+X-Secret-Key: ${newKeyData.secretKey}
+
+───────────────────────────────────────────────────────────────
+📝 EJEMPLO DE USO (cURL):
+───────────────────────────────────────────────────────────────
+
+curl -X GET \\
+  'https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/${newKeyData.apiKey}' \\
+  -H 'Authorization: Bearer ${newKeyData.apiKey}' \\
+  -H 'X-Secret-Key: ${newKeyData.secretKey}' \\
+  -H 'Accept: application/json'
+
+───────────────────────────────────────────────────────────────
+📝 EJEMPLO DE USO (JavaScript):
+───────────────────────────────────────────────────────────────
+
+const API_KEY = '${newKeyData.apiKey}';
+const SECRET_KEY = '${newKeyData.secretKey}';
+
+const response = await fetch(
+  'https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/' + API_KEY,
+  {
+    method: 'GET',
+    headers: {
+      'Authorization': 'Bearer ' + API_KEY,
+      'X-Secret-Key': SECRET_KEY,
+      'Accept': 'application/json'
+    }
+  }
+);
+
+const data = await response.json();
+console.log(data);
+
+───────────────────────────────────────────────────────────────
+📝 EJEMPLO DE USO (Python):
+───────────────────────────────────────────────────────────────
+
+import requests
+
+API_KEY = "${newKeyData.apiKey}"
+SECRET_KEY = "${newKeyData.secretKey}"
+
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "X-Secret-Key": SECRET_KEY,
+    "Accept": "application/json"
+}
+
+response = requests.get(
+    f"https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/{API_KEY}",
+    headers=headers
+)
+
+data = response.json()
+print(data)
+
+═══════════════════════════════════════════════════════════════
+  DAES CoreBanking System - Data and Exchange Settlement
+  © ${new Date().getFullYear()} - Todos los derechos reservados
+═══════════════════════════════════════════════════════════════
+`;
+                    
+                    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `DAES_API_Credentials_${newKeyData.apiKey}_${new Date().toISOString().split('T')[0]}.txt`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    
+                    alert(isSpanish 
+                      ? '✅ Credenciales descargadas correctamente' 
+                      : '✅ Credentials downloaded successfully');
+                  }}
+                  className="flex-1 px-6 py-4 bg-blue-500/20 border border-blue-500 text-blue-300 rounded-lg hover:bg-blue-500/30 font-bold text-lg flex items-center justify-center gap-2"
+                >
+                  <Download className="w-5 h-5" />
+                  {isSpanish ? 'Descargar TXT' : 'Download TXT'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSecretModal(false);
+                    setNewKeyData(null);
+                  }}
+                  className="flex-1 px-6 py-4 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 font-bold text-lg"
+                >
+                  {isSpanish ? 'Cerrar' : 'Close'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
