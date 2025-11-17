@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import './responsive.css';
+import './styles/design-system.css';
 import { LanguageProvider } from './lib/i18n.tsx';
 import { AuthProvider } from './lib/auth.tsx';
 import { ToastProvider, useToast } from './components/ui/Toast';
