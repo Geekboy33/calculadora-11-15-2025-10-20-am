@@ -19,7 +19,10 @@ import {
   Database,
   ArrowUpRight,
   Trash2,
-  FileText
+  FileText,
+  Edit,
+  Plus,
+  Minus
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { vusdCapStore, type Pledge, type PorPublication, type TreasuryTransfer } from '../lib/vusd-cap-store';
@@ -1497,14 +1500,89 @@ export function APIVUSDModule() {
                           )}
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleDeletePledge(pledge)}
-                        disabled={loading}
-                        className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/20 hover:border-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Eliminar pledge"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => {
+                            const newAmount = prompt(
+                              (language === 'es' ? '✏️ Editar monto del pledge\n\n' : '✏️ Edit pledge amount\n\n') +
+                              `Pledge: ${pledge.pledge_id}\n` +
+                              `${language === 'es' ? 'Monto actual:' : 'Current amount:'} ${pledge.currency} ${pledge.amount.toLocaleString()}\n` +
+                              `${language === 'es' ? 'Beneficiario:' : 'Beneficiary:'} ${pledge.beneficiary}\n\n` +
+                              (language === 'es' ? 'Ingresa el nuevo monto:' : 'Enter new amount:'),
+                              pledge.amount.toString()
+                            );
+                            
+                            if (newAmount && !isNaN(parseFloat(newAmount))) {
+                              const amount = parseFloat(newAmount);
+                              
+                              // Validar con custody account si existe
+                              if (pledge.custody_account_id) {
+                                const account = custodyAccounts.find(a => a.id === pledge.custody_account_id);
+                                if (account) {
+                                  const currentPledged = unifiedPledgeStore.getTotalPledgedAmount(account.id);
+                                  const otherPledges = currentPledged - pledge.amount;
+                                  const newTotal = otherPledges + amount;
+                                  
+                                  if (newTotal > account.totalBalance) {
+                                    alert(`❌ Error\n\n${language === 'es' ? 'El nuevo monto excede el balance total de la cuenta' : 'New amount exceeds account total balance'}\n\n${language === 'es' ? 'Balance total:' : 'Total balance:'} ${account.totalBalance.toLocaleString()}\n${language === 'es' ? 'Otros pledges:' : 'Other pledges:'} ${otherPledges.toLocaleString()}\n${language === 'es' ? 'Máximo permitido:' : 'Maximum allowed:'} ${(account.totalBalance - otherPledges).toLocaleString()}`);
+                                    return;
+                                  }
+                                }
+                              }
+                              
+                              // Actualizar en unified pledge store
+                              const unifiedPledges = unifiedPledgeStore.getPledges();
+                              const unifiedPledge = unifiedPledges.find(p => 
+                                p.id === pledge.pledge_id || p.vusd_pledge_id === pledge.pledge_id
+                              );
+                              
+                              if (unifiedPledge) {
+                                unifiedPledge.amount = amount;
+                                localStorage.setItem('unified_pledges', JSON.stringify(unifiedPledges));
+                                console.log('[VUSD] ✅ Pledge actualizado en Unified Store');
+                              }
+                              
+                              // Actualizar en lista local
+                              setActivePledges(prev => prev.map(p => 
+                                p.pledge_id === pledge.pledge_id 
+                                  ? { ...p, amount, available: amount }
+                                  : p
+                              ));
+                              
+                              // Recalcular métricas inmediatamente
+                              const newPledgedUSD = activePledges
+                                .filter(p => p.currency === 'USD')
+                                .map(p => p.pledge_id === pledge.pledge_id ? { ...p, amount } : p)
+                                .reduce((sum, p) => sum + p.amount, 0);
+                              
+                              const newCirculatingCap = activePledges
+                                .map(p => p.pledge_id === pledge.pledge_id ? { ...p, amount } : p)
+                                .reduce((sum, p) => sum + p.amount, 0);
+                              
+                              setCirculatingCap(newCirculatingCap);
+                              setPledgedUSD(newPledgedUSD);
+                              
+                              // Recargar datos en background
+                              loadData();
+                              
+                              alert(`✅ ${language === 'es' ? 'Pledge actualizado' : 'Pledge updated'}\n\n${language === 'es' ? 'Monto anterior:' : 'Previous amount:'} ${pledge.amount.toLocaleString()}\n${language === 'es' ? 'Nuevo monto:' : 'New amount:'} ${amount.toLocaleString()}\n\n${language === 'es' ? 'Las métricas se actualizarán automáticamente' : 'Metrics will update automatically'}`);
+                            }
+                          }}
+                          disabled={loading}
+                          className="p-2 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-lg hover:bg-blue-500/20 hover:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={language === 'es' ? 'Editar monto' : 'Edit amount'}
+                        >
+                          <Edit className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePledge(pledge)}
+                          disabled={loading}
+                          className="p-2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/20 hover:border-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={language === 'es' ? 'Eliminar pledge' : 'Delete pledge'}
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

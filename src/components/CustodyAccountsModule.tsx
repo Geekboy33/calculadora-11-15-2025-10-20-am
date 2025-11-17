@@ -38,6 +38,7 @@ const BLOCKCHAINS = [
 
 export function CustodyAccountsModule() {
   const { t, language } = useLanguage();
+  const isSpanish = language === 'es';
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
   const [systemBalances, setSystemBalances] = useState<CurrencyBalance[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -811,14 +812,77 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
 
-              {/* Balances */}
+              {/* Balances con botones de edición */}
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
                   <div className="text-xs text-[#4d7c4d] mb-1">
                     {language === 'es' ? 'Total' : 'Total'}
                   </div>
-                  <div className="text-2xl font-bold text-[#00ff88] font-mono">
+                  <div className="text-2xl font-bold text-[#00ff88] font-mono mb-2">
                     {account.currency} {account.totalBalance.toLocaleString()}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const amount = prompt(
+                          isSpanish 
+                            ? `💰 Aumentar capital a la cuenta\n\nCuenta: ${account.accountName}\nBalance actual: ${account.currency} ${account.totalBalance.toLocaleString()}\n\n¿Cuánto deseas agregar?`
+                            : `💰 Add funds to account\n\nAccount: ${account.accountName}\nCurrent balance: ${account.currency} ${account.totalBalance.toLocaleString()}\n\nHow much to add?`,
+                          '1000'
+                        );
+                        if (amount && !isNaN(parseFloat(amount))) {
+                          const newTotal = account.totalBalance + parseFloat(amount);
+                          const accounts = custodyStore.getAccounts();
+                          const acc = accounts.find(a => a.id === account.id);
+                          if (acc) {
+                            acc.totalBalance = newTotal;
+                            acc.availableBalance = newTotal - acc.reservedBalance;
+                            custodyStore['accounts'] = accounts;
+                            localStorage.setItem('custody_accounts', JSON.stringify(accounts));
+                            loadCustodyAccounts();
+                            alert(`✅ Capital agregado\n\n+${account.currency} ${parseFloat(amount).toLocaleString()}\nNuevo total: ${account.currency} ${newTotal.toLocaleString()}`);
+                          }
+                        }
+                      }}
+                      className="flex-1 px-2 py-1 bg-green-500/20 border border-green-500 text-green-400 rounded text-xs hover:bg-green-500/30"
+                      title={isSpanish ? 'Aumentar capital' : 'Add funds'}
+                    >
+                      + 💰
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const amount = prompt(
+                          isSpanish 
+                            ? `📉 Disminuir capital de la cuenta\n\nCuenta: ${account.accountName}\nBalance actual: ${account.currency} ${account.totalBalance.toLocaleString()}\nReservado: ${account.currency} ${account.reservedBalance.toLocaleString()}\n\n¿Cuánto deseas retirar?`
+                            : `📉 Reduce account funds\n\nAccount: ${account.accountName}\nCurrent balance: ${account.currency} ${account.totalBalance.toLocaleString()}\nReserved: ${account.currency} ${account.reservedBalance.toLocaleString()}\n\nHow much to withdraw?`,
+                          '1000'
+                        );
+                        if (amount && !isNaN(parseFloat(amount))) {
+                          const withdrawAmount = parseFloat(amount);
+                          const newTotal = account.totalBalance - withdrawAmount;
+                          if (newTotal < account.reservedBalance) {
+                            alert(`❌ Error\n\nNo puedes reducir el balance por debajo del monto reservado (${account.currency} ${account.reservedBalance.toLocaleString()})`);
+                            return;
+                          }
+                          const accounts = custodyStore.getAccounts();
+                          const acc = accounts.find(a => a.id === account.id);
+                          if (acc) {
+                            acc.totalBalance = newTotal;
+                            acc.availableBalance = newTotal - acc.reservedBalance;
+                            custodyStore['accounts'] = accounts;
+                            localStorage.setItem('custody_accounts', JSON.stringify(accounts));
+                            loadCustodyAccounts();
+                            alert(`✅ Capital retirado\n\n-${account.currency} ${withdrawAmount.toLocaleString()}\nNuevo total: ${account.currency} ${newTotal.toLocaleString()}`);
+                          }
+                        }
+                      }}
+                      className="flex-1 px-2 py-1 bg-red-500/20 border border-red-500 text-red-400 rounded text-xs hover:bg-red-500/30"
+                      title={isSpanish ? 'Disminuir capital' : 'Withdraw funds'}
+                    >
+                      - 💸
+                    </button>
                   </div>
                 </div>
                 <div className="bg-[#0a0a0a] border border-yellow-900/30 rounded-lg p-4">

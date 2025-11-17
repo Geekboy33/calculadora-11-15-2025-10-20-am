@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Lock, Send, FileText, Activity, CheckCircle, Clock,
-  AlertCircle, Database, Shield, Zap, Download, RefreshCw, Trash2, Key, DollarSign
+  AlertCircle, Database, Shield, Zap, Download, RefreshCw, Trash2, Key, DollarSign, Edit
 } from 'lucide-react';
 import { apiVUSD1Store, type ApiPledge, type ApiPayout, type ApiAttestation, type ReserveSummary } from '../lib/api-vusd1-store';
 import { APIVUSD1KeysManager } from './APIVUSD1KeysManager';
@@ -640,7 +640,51 @@ export default function APIVUSD1Module() {
                       </div>
                     </div>
                     {pledge.status === 'ACTIVE' && (
-                      <div className="flex justify-end">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => {
+                            const newAmount = prompt(
+                              `✏️ Edit pledge amount\n\n` +
+                              `Pledge: ${pledge.pledge_id}\n` +
+                              `Current amount: ${pledge.currency} ${pledge.amount.toLocaleString()}\n` +
+                              `Beneficiary: ${pledge.beneficiary}\n\n` +
+                              'Enter new amount:',
+                              pledge.amount.toString()
+                            );
+                            
+                            if (newAmount && !isNaN(parseFloat(newAmount))) {
+                              const amount = parseFloat(newAmount);
+                              
+                              // Actualizar en unified pledge store
+                              const unifiedPledges = unifiedPledgeStore.getPledges();
+                              const unifiedPledge = unifiedPledges.find(p => 
+                                p.id === pledge.pledge_id || p.vusd1_pledge_id === pledge.pledge_id
+                              );
+                              
+                              if (unifiedPledge) {
+                                unifiedPledge.amount = amount;
+                                localStorage.setItem('unified_pledges', JSON.stringify(unifiedPledges));
+                                console.log('[VUSD1] ✅ Pledge actualizado en Unified Store');
+                              }
+                              
+                              // Actualizar en lista local
+                              setPledges(prev => prev.map(p => 
+                                p.pledge_id === pledge.pledge_id 
+                                  ? { ...p, amount, available: amount }
+                                  : p
+                              ));
+                              
+                              // Recalcular métricas
+                              loadData();
+                              
+                              alert(`✅ Pledge updated\n\nPrevious amount: ${pledge.amount.toLocaleString()}\nNew amount: ${amount.toLocaleString()}\n\nMetrics will update automatically`);
+                            }
+                          }}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded text-sm text-blue-400 transition-colors"
+                        >
+                          <Edit className="w-4 h-4" />
+                          Edit
+                        </button>
                         <button
                           onClick={() => handleDeletePledge(pledge)}
                           className="flex items-center gap-2 px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 rounded text-sm text-red-400 transition-colors"
