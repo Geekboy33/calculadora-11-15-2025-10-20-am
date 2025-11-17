@@ -779,7 +779,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               <Database className="w-6 h-6" />
               {isSpanish ? 'Endpoints API Disponibles' : 'Available API Endpoints'}
             </h3>
-            <div className="space-y-3 text-sm font-mono">
+            <div className="space-y-3 text-sm font-mono max-h-[400px] overflow-y-auto pr-2 scroll-smooth">
               <div className="bg-black/30 rounded p-3">
                 <div className="text-cyan-300/60 mb-1">GET Proof of Reserves:</div>
                 <div className="text-cyan-400">
@@ -866,7 +866,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[calc(100vh-400px)] min-h-[300px] overflow-y-auto pr-2 scroll-smooth">
               {pledges.map((pledge) => (
                 <div
                   key={pledge.pledgeId}
@@ -1004,7 +1004,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[calc(100vh-400px)] min-h-[300px] overflow-y-auto pr-2 scroll-smooth">
               {payouts.map((payout) => (
                 <div
                   key={payout.payoutId}
@@ -1165,7 +1165,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                   X-DAES-Signature: HMAC-SHA256(secret, timestamp + body)
                 </div>
               </div>
-              <div className="bg-black/30 rounded p-4">
+              <div className="bg-black/30 rounded p-4 max-h-[300px] overflow-y-auto scroll-smooth">
                 <div className="text-orange-300/60 text-sm mb-2">{isSpanish ? 'Eventos:' : 'Events:'}</div>
                 <div className="flex flex-wrap gap-2">
                   {['PLEDGE_CREATED', 'PLEDGE_ADJUSTED', 'PLEDGE_RELEASED', 'PAYOUT_COMPLETED'].map(event => (
