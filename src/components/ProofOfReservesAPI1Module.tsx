@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import {
   Shield, Lock, Send, TrendingUp, Database, Activity, 
   CheckCircle, AlertCircle, RefreshCw, Download, Key,
-  FileText, DollarSign, Clock, Zap, Webhook
+  FileText, DollarSign, Clock, Zap, Webhook, Trash2, Copy
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { unifiedPledgeStore } from '../lib/unified-pledge-store';
@@ -25,6 +25,10 @@ interface PledgeAPI1 {
   lockedAt: string;
   expiresAt?: string;
   termDays?: number;
+  linkedVUSDPledge?: string;
+  linkedPorReport?: string;
+  porReportData?: string;
+  apiEndpoint?: string;
 }
 
 interface PayoutAPI1 {
@@ -140,22 +144,15 @@ export function ProofOfReservesAPI1Module() {
       
       console.log('[API1] 🔄 Cargando datos...');
       
-      // Cargar pledges desde unified store
-      const unifiedPledges = unifiedPledgeStore.getPledges();
-      const activePledges: PledgeAPI1[] = unifiedPledges
-        .filter(p => p.status === 'ACTIVE')
-        .map(p => ({
-          pledgeId: p.id,
-          porId: POR_ID,
-          status: p.status,
-          amountUsd: p.amount.toFixed(2),
-          available: p.amount.toFixed(2),
-          currency: p.currency,
-          beneficiary: p.beneficiary,
-          lockedAt: p.created_at,
-          expiresAt: p.expires_at,
-          termDays: p.expires_at ? Math.ceil((new Date(p.expires_at).getTime() - new Date(p.created_at).getTime()) / (1000 * 60 * 60 * 24)) : undefined
-        }));
+      // Cargar pledges desde localStorage de API1 (con vínculos a PoR)
+      const savedAPI1Pledges = localStorage.getItem('api1_pledges');
+      let activePledges: PledgeAPI1[] = [];
+      
+      if (savedAPI1Pledges) {
+        const parsed = JSON.parse(savedAPI1Pledges);
+        activePledges = parsed.filter((p: PledgeAPI1) => p.status === 'ACTIVE');
+        console.log('[API1] ✅ Pledges cargados desde localStorage:', activePledges.length);
+      }
       
       setPledges(activePledges);
       console.log('[API1] 📊 Pledges activos:', activePledges.length);
@@ -195,36 +192,155 @@ export function ProofOfReservesAPI1Module() {
     }
   };
 
+  const handleDeletePledge = (pledge: PledgeAPI1) => {
+    if (!confirm(
+      (isSpanish ? '¿Eliminar este pledge?\n\n' : 'Delete this pledge?\n\n') +
+      `Pledge ID: ${pledge.pledgeId}\n` +
+      `Amount: USD ${parseFloat(pledge.amountUsd).toLocaleString()}\n` +
+      `Beneficiary: ${pledge.beneficiary}`
+    )) {
+      return;
+    }
+    
+    const savedPledges = localStorage.getItem('api1_pledges');
+    if (savedPledges) {
+      const currentPledges: PledgeAPI1[] = JSON.parse(savedPledges);
+      const updated = currentPledges.filter(p => p.pledgeId !== pledge.pledgeId);
+      localStorage.setItem('api1_pledges', JSON.stringify(updated));
+    }
+    
+    loadData();
+    
+    alert(
+      `✅ ${isSpanish ? 'Pledge eliminado' : 'Pledge deleted'}\n\n` +
+      `Pledge ID: ${pledge.pledgeId}`
+    );
+  };
+
+  const downloadPledgeTXT = (pledge: PledgeAPI1) => {
+    let content = '';
+    
+    // Si tiene PoR vinculado, usar ese contenido
+    if (pledge.porReportData) {
+      content = pledge.porReportData;
+    } else {
+      // Generar contenido básico
+      content = `
+═══════════════════════════════════════════════════════════════
+  DAES CoreBanking - Pledge for Anchor VUSD
+═══════════════════════════════════════════════════════════════
+
+${isSpanish ? 'INFORMACIÓN DEL PLEDGE' : 'PLEDGE INFORMATION'}
+───────────────────────────────────────────────────────────────
+
+Pledge ID:           ${pledge.pledgeId}
+PoR ID:              ${pledge.porId}
+Status:              ${pledge.status}
+${isSpanish ? 'Monto USD:' : 'USD Amount:'}           USD ${parseFloat(pledge.amountUsd).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+${isSpanish ? 'Disponible:' : 'Available:'}           USD ${parseFloat(pledge.available).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+${isSpanish ? 'Moneda:' : 'Currency:'}              ${pledge.currency}
+${isSpanish ? 'Beneficiario:' : 'Beneficiary:'}         ${pledge.beneficiary}
+${isSpanish ? 'Bloqueado:' : 'Locked At:'}           ${new Date(pledge.lockedAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
+${pledge.expiresAt ? `${isSpanish ? 'Expira:' : 'Expires At:'}            ${new Date(pledge.expiresAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}` : ''}
+${pledge.termDays ? `${isSpanish ? 'Plazo:' : 'Term:'}                ${pledge.termDays} ${isSpanish ? 'días' : 'days'}` : ''}
+
+───────────────────────────────────────────────────────────────
+${isSpanish ? 'API ENDPOINT' : 'API ENDPOINT'}
+───────────────────────────────────────────────────────────────
+
+Endpoint:            ${pledge.apiEndpoint}
+
+${isSpanish ? 'Autenticación:' : 'Authentication:'}
+Authorization: Bearer ${API_KEY}
+X-Secret-Key: ${SECRET_KEY}
+
+${isSpanish ? 'Ejemplo cURL:' : 'cURL Example:'}
+curl -X GET \\
+  '${pledge.apiEndpoint}' \\
+  -H 'Authorization: Bearer ${API_KEY}' \\
+  -H 'X-Secret-Key: ${SECRET_KEY}'
+
+───────────────────────────────────────────────────────────────
+${isSpanish ? 'VÍNCULOS' : 'LINKS'}
+───────────────────────────────────────────────────────────────
+
+${pledge.linkedVUSDPledge ? `${isSpanish ? 'Pledge VUSD:' : 'VUSD Pledge:'}        ${pledge.linkedVUSDPledge}` : `${isSpanish ? 'Pledge VUSD:' : 'VUSD Pledge:'}        ${isSpanish ? 'No vinculado' : 'Not linked'}`}
+${pledge.linkedPorReport ? `${isSpanish ? 'PoR Report:' : 'PoR Report:'}          ${pledge.linkedPorReport}` : `${isSpanish ? 'PoR Report:' : 'PoR Report:'}          ${isSpanish ? 'No vinculado' : 'Not linked'}`}
+
+───────────────────────────────────────────────────────────────
+${isSpanish ? 'INTEGRACIÓN ANCHOR' : 'ANCHOR INTEGRATION'}
+───────────────────────────────────────────────────────────────
+
+Anchor URL:          https://anchor.vergy.world
+${isSpanish ? 'Compatible con:' : 'Compatible with:'}      SEP-24 (Stellar)
+${isSpanish ? 'Protocolo:' : 'Protocol:'}            Institutional Treasury API
+${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
+
+═══════════════════════════════════════════════════════════════
+  DAES CoreBanking System - Data and Exchange Settlement
+  © ${new Date().getFullYear()} - ${isSpanish ? 'Todos los derechos reservados' : 'All rights reserved'}
+═══════════════════════════════════════════════════════════════
+`;
+    }
+    
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Pledge_Anchor_${pledge.pledgeId}_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    console.log('[API1] 📄 TXT descargado:', pledge.pledgeId);
+  };
+
   const handleCreatePledge = () => {
     if (pledgeForm.amountUsd <= 0) {
       alert(isSpanish ? '⚠️ Ingresa un monto válido' : '⚠️ Enter a valid amount');
       return;
     }
     
-    // Crear pledge en unified store
-    const pledgeId = `PL-${Date.now()}`;
-    const custodyAccounts = custodyStore.getAccounts();
-    const usdAccount = custodyAccounts.find(a => a.currency === 'USD' && a.totalBalance > 0);
-    
-    if (!usdAccount) {
-      alert(isSpanish 
-        ? '⚠️ No hay cuentas USD disponibles\n\nCrea una cuenta en Custody Accounts primero'
-        : '⚠️ No USD accounts available\n\nCreate an account in Custody Accounts first');
-      return;
-    }
-    
+    const pledgeId = `PL-ANCHOR-${Date.now()}`;
+    const lockedAt = new Date().toISOString();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + pledgeForm.termDays);
     
-    unifiedPledgeStore.createPledge(
-      usdAccount.id,
-      pledgeForm.amountUsd,
-      pledgeForm.currency,
-      pledgeForm.beneficiary,
-      expiresAt.toISOString(),
-      'API_VUSD',
-      pledgeId
-    );
+    // Obtener PoR report vinculado si existe
+    let porReportData = '';
+    if (pledgeForm.selectedPorReport) {
+      const selectedPor = porReports.find(p => p.id === pledgeForm.selectedPorReport);
+      if (selectedPor) {
+        porReportData = selectedPor.report;
+      }
+    }
+    
+    // Generar endpoint único para este pledge
+    const apiEndpoint = `https://api.luxliqdaes.cloud/api/v1/anchor/pledges/${pledgeId}`;
+    
+    const newPledge: PledgeAPI1 = {
+      pledgeId,
+      porId: POR_ID,
+      status: 'ACTIVE',
+      amountUsd: pledgeForm.amountUsd.toFixed(2),
+      available: pledgeForm.amountUsd.toFixed(2),
+      currency: pledgeForm.currency,
+      beneficiary: pledgeForm.beneficiary,
+      lockedAt,
+      expiresAt: expiresAt.toISOString(),
+      termDays: pledgeForm.termDays,
+      linkedVUSDPledge: pledgeForm.selectedVUSDPledge || undefined,
+      linkedPorReport: pledgeForm.selectedPorReport || undefined,
+      porReportData: porReportData || undefined,
+      apiEndpoint
+    };
+    
+    // Guardar en localStorage
+    const savedPledges = localStorage.getItem('api1_pledges');
+    const currentPledges = savedPledges ? JSON.parse(savedPledges) : [];
+    currentPledges.push(newPledge);
+    localStorage.setItem('api1_pledges', JSON.stringify(currentPledges));
     
     setShowCreatePledgeModal(false);
     setPledgeForm({
@@ -232,17 +348,22 @@ export function ProofOfReservesAPI1Module() {
       currency: 'USD',
       termDays: 90,
       beneficiary: 'VUSD',
-      notes: ''
+      notes: '',
+      selectedVUSDPledge: '',
+      selectedPorReport: ''
     });
     
     loadData();
     
     alert(
-      `✅ ${isSpanish ? 'Pledge creado exitosamente' : 'Pledge created successfully'}\n\n` +
+      `✅ ${isSpanish ? 'Pledge creado para Anchor VUSD' : 'Pledge created for Anchor VUSD'}\n\n` +
       `Pledge ID: ${pledgeId}\n` +
       `Amount: USD ${pledgeForm.amountUsd.toLocaleString()}\n` +
       `Beneficiary: ${pledgeForm.beneficiary}\n` +
-      `Term: ${pledgeForm.termDays} days`
+      `Term: ${pledgeForm.termDays} days\n` +
+      `API Endpoint: ${apiEndpoint}\n\n` +
+      (pledgeForm.selectedVUSDPledge ? `✓ Vinculado a pledge VUSD\n` : '') +
+      (pledgeForm.selectedPorReport ? `✓ Vinculado a PoR report` : '')
     );
   };
 
@@ -539,21 +660,41 @@ export function ProofOfReservesAPI1Module() {
                   className="bg-[#0d0d0d] border border-green-500/30 rounded-lg p-6"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div>
+                    <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="px-3 py-1 bg-green-500/20 text-green-300 text-xs rounded font-bold">
                           {pledge.status}
                         </span>
-                        <span className="text-white font-mono">{pledge.pledgeId}</span>
+                        <span className="text-white font-mono text-sm">{pledge.pledgeId}</span>
                       </div>
                       <div className="text-sm text-green-300/60">
                         {isSpanish ? 'Beneficiario:' : 'Beneficiary:'} {pledge.beneficiary}
                       </div>
+                      {pledge.linkedVUSDPledge && (
+                        <div className="text-xs text-cyan-400 mt-1">
+                          🔗 {isSpanish ? 'Vinculado a:' : 'Linked to:'} {pledge.linkedVUSDPledge}
+                        </div>
+                      )}
                     </div>
-                    <Lock className="w-8 h-8 text-green-400" />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => downloadPledgeTXT(pledge)}
+                        className="p-2 bg-cyan-500/20 border border-cyan-500 text-cyan-300 rounded-lg hover:bg-cyan-500/30 transition-all"
+                        title={isSpanish ? 'Descargar TXT' : 'Download TXT'}
+                      >
+                        <FileText className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeletePledge(pledge)}
+                        className="p-2 bg-red-500/20 border border-red-500 text-red-400 rounded-lg hover:bg-red-500/30 transition-all"
+                        title={isSpanish ? 'Eliminar' : 'Delete'}
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                     <div>
                       <div className="text-green-300/60 mb-1">{isSpanish ? 'Monto USD:' : 'USD Amount:'}</div>
                       <div className="text-2xl font-bold text-green-300">
@@ -581,6 +722,33 @@ export function ProofOfReservesAPI1Module() {
                       </div>
                     )}
                   </div>
+
+                  {/* API Endpoint */}
+                  {pledge.apiEndpoint && (
+                    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
+                      <div className="text-xs text-blue-300/60 mb-2 font-semibold flex items-center gap-2">
+                        <Key className="w-3 h-3" />
+                        {isSpanish ? 'API Endpoint Generado:' : 'Generated API Endpoint:'}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 text-blue-400 font-mono text-xs bg-black/50 p-2 rounded border border-blue-500/20 break-all">
+                          GET {pledge.apiEndpoint}
+                        </code>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(pledge.apiEndpoint || '');
+                            alert(isSpanish ? '✅ Endpoint copiado' : '✅ Endpoint copied');
+                          }}
+                          className="p-2 bg-blue-500/20 border border-blue-500 text-blue-300 rounded hover:bg-blue-500/30"
+                        >
+                          <Key className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="text-xs text-blue-300/60 mt-2">
+                        🔐 {isSpanish ? 'Requiere autenticación Bearer + X-Secret-Key' : 'Requires Bearer + X-Secret-Key authentication'}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
