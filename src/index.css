@@ -1,9 +1,9 @@
+/* Import Professional Design System */
+@import './styles/design-system.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Professional Design System */
-@import './styles/design-system.css';
 
 /* 🎨 Paleta de Colores Futurista - Negro + Verde Neón Tipo Pantalla Iluminada */
 :root {

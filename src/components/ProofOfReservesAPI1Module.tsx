@@ -71,10 +71,10 @@ export function ProofOfReservesAPI1Module() {
   const [porReports, setPorReports] = useState<any[]>([]);
   const [availablePledgesVUSD, setAvailablePledgesVUSD] = useState<any[]>([]);
   
-  // API Credentials (from existing PoR)
-  const API_KEY = 'por_1763215039421_v9p76zcxqxd';
-  const SECRET_KEY = 'sk_AsWH12YRHFo9BG9DRYGtJFWDumr4lps2ne6vywfKpWc8Hm3p3wrhPa7IxkagWbvs';
+  // API Configuration (keys stored in Netlify environment)
   const POR_ID = 'por_1763215039421_v9p76zcxqxd';
+  const API_KEY = 'por_1763215039421_v9p76zcxqxd'; // Solo para display, no se usa en requests
+  const SECRET_KEY = '••••••••'; // Oculto por seguridad
   
   // Modals
   const [showCreatePledgeModal, setShowCreatePledgeModal] = useState(false);
