@@ -12,14 +12,6 @@ export function AuditLogViewer() {
   const [verifyingSignature, setVerifyingSignature] = useState(false);
   const [signatureValid, setSignatureValid] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    loadLogs();
-  }, []);
-
-  useEffect(() => {
-    filterLogs();
-  }, [logs, searchTerm, serviceFilter, filterLogs]);
-
   const loadLogs = () => {
     setLogs(bankingStore.getAuditLogs());
   };
@@ -70,6 +62,14 @@ export function AuditLogViewer() {
       setVerifyingSignature(false);
     }
   };
+
+  useEffect(() => {
+    loadLogs();
+  }, []);
+
+  useEffect(() => {
+    filterLogs();
+  }, [logs, searchTerm, serviceFilter]);
 
   const exportLogs = () => {
     const exportData = filteredLogs.map(log => ({
