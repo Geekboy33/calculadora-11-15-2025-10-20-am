@@ -26,6 +26,7 @@ import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
 import { CustodyBlackScreen } from './CustodyBlackScreen';
 import { apiVUSD1Store } from '../lib/api-vusd1-store';
+import { transactionEventStore } from '../lib/transaction-event-store';
 
 const BLOCKCHAINS = [
   { name: 'Ethereum', symbol: 'ETH', color: 'text-blue-400' },

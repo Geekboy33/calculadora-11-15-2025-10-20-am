@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap } from 'lucide-react';
+import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity } from 'lucide-react';
 import { LanguageSelector } from './components/LanguageSelector';
 import { Login } from './components/Login';
 import { PublicVerificationPage } from './components/PublicVerificationPage';
@@ -34,8 +34,9 @@ const APIGlobalModule = lazy(() => import('./components/APIGlobalModule').then(m
 const APIDigitalModule = lazy(() => import('./components/APIDigitalModule').then(m => ({ default: m.APIDigitalModule })));
 const ProofOfReservesAPIModule = lazy(() => import('./components/ProofOfReservesAPIModule').then(m => ({ default: m.ProofOfReservesAPIModule })));
 const ProofOfReservesAPI1Module = lazy(() => import('./components/ProofOfReservesAPI1Module').then(m => ({ default: m.ProofOfReservesAPI1Module })));
+const TransactionEventsModule = lazy(() => import('./components/TransactionEventsModule').then(m => ({ default: m.TransactionEventsModule })));
 
-type Tab = 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1';
+type Tab = 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -113,6 +114,7 @@ function App() {
     { id: 'api-vusd1' as Tab, name: 'API VUSD1', icon: Database },
     { id: 'proof-of-reserves' as Tab, name: 'Proof of Reserves API', icon: Shield },
     { id: 'proof-of-reserves-api1' as Tab, name: 'PoR API1 - Anchor VUSD', icon: Zap },
+    { id: 'transactions-events' as Tab, name: isSpanish ? 'Transacciones y Eventos' : 'Transactions & Events', icon: Activity },
     { id: 'api-daes-pledge' as Tab, name: 'DAES Pledge/Escrow', icon: TrendingUp },
     { id: 'audit-bank' as Tab, name: t.navAuditBank, icon: FileSearch },
     { id: 'corebanking-api' as Tab, name: 'CoreBanking API', icon: ArrowRightLeft },
@@ -232,6 +234,7 @@ function App() {
           {activeTab === 'api-vusd1' && <APIVUSD1Module />}
           {activeTab === 'proof-of-reserves' && <ProofOfReservesAPIModule />}
           {activeTab === 'proof-of-reserves-api1' && <ProofOfReservesAPI1Module />}
+          {activeTab === 'transactions-events' && <TransactionEventsModule />}
           {activeTab === 'api-daes-pledge' && <APIDAESPledgeModule />}
           {activeTab === 'audit-bank' && <AuditBankWindow />}
           {activeTab === 'corebanking-api' && <CoreBankingAPIModule />}
