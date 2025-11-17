@@ -92,13 +92,18 @@ export function ProofOfReservesAPI1Module() {
   });
 
   useEffect(() => {
-    loadData();
+    loadData().catch(err => {
+      console.error('[API1] ❌ Error crítico en mount:', err);
+      setError('Error al inicializar módulo');
+    });
   }, []);
 
   const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
+      
+      console.log('[API1] 🔄 Cargando datos...');
       
       // Cargar pledges desde unified store
       const unifiedPledges = unifiedPledgeStore.getPledges();
@@ -118,6 +123,7 @@ export function ProofOfReservesAPI1Module() {
         }));
       
       setPledges(activePledges);
+      console.log('[API1] 📊 Pledges activos:', activePledges.length);
       
       // Calcular resumen de reservas
       const custodyAccounts = custodyStore.getAccounts();
@@ -343,8 +349,18 @@ export function ProofOfReservesAPI1Module() {
       </div>
 
       {/* Overview Section */}
-      {selectedView === 'overview' && reserveSummary && (
+      {selectedView === 'overview' && (
         <div className="space-y-6">
+          {!reserveSummary ? (
+            <div className="text-center py-12">
+              <Database className="w-16 h-16 text-cyan-400/30 mx-auto mb-4 animate-pulse" />
+              <div className="text-cyan-300/60 mb-2">
+                {isSpanish ? 'Cargando datos...' : 'Loading data...'}
+              </div>
+            </div>
+          ) : (
+            <>
+          {/* Contenido del overview */}
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-[#0d0d0d] border border-cyan-500 rounded-lg p-6">
@@ -447,6 +463,8 @@ export function ProofOfReservesAPI1Module() {
               </div>
             </div>
           </div>
+            </>
+          )}
         </div>
       )}
 
