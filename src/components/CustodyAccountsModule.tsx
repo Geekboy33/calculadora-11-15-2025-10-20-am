@@ -44,6 +44,9 @@ export function CustodyAccountsModule() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showReserveModal, setShowReserveModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showEditBalanceModal, setShowEditBalanceModal] = useState(false);
+  const [balanceOperation, setBalanceOperation] = useState<'add' | 'subtract'>('add');
+  const [balanceAmount, setBalanceAmount] = useState(0);
   const [showBlackScreen, setShowBlackScreen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<CustodyAccount | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -812,73 +815,27 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
 
-              {/* Balances con botones de edición */}
+              {/* Balances con botón de ajuste */}
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
-                  <div className="text-xs text-[#4d7c4d] mb-1">
-                    {language === 'es' ? 'Total' : 'Total'}
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="text-xs text-[#4d7c4d]">
+                      {language === 'es' ? 'Total' : 'Total'}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedAccount(account);
+                        setShowEditBalanceModal(true);
+                      }}
+                      className="p-1 bg-[#00ff88]/10 border border-[#00ff88]/30 text-[#00ff88] rounded hover:bg-[#00ff88]/20 transition-all"
+                      title={isSpanish ? 'Ajustar balance' : 'Adjust balance'}
+                    >
+                      <TrendingUp className="w-3 h-3" />
+                    </button>
                   </div>
-                  <div className="text-2xl font-bold text-[#00ff88] font-mono mb-2">
+                  <div className="text-2xl font-bold text-[#00ff88] font-mono">
                     {account.currency} {account.totalBalance.toLocaleString()}
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const amount = prompt(
-                          isSpanish 
-                            ? `💰 Aumentar capital a la cuenta\n\nCuenta: ${account.accountName}\nBalance actual: ${account.currency} ${account.totalBalance.toLocaleString()}\n\n¿Cuánto deseas agregar?`
-                            : `💰 Add funds to account\n\nAccount: ${account.accountName}\nCurrent balance: ${account.currency} ${account.totalBalance.toLocaleString()}\n\nHow much to add?`,
-                          '1000'
-                        );
-                        if (amount && !isNaN(parseFloat(amount))) {
-                          const addAmount = parseFloat(amount);
-                          const newTotal = account.totalBalance + addAmount;
-                          
-                          if (custodyStore.updateAccountBalance(account.id, newTotal)) {
-                            loadCustodyAccounts();
-                            alert(`✅ ${isSpanish ? 'Capital agregado' : 'Funds added'}\n\n+${account.currency} ${addAmount.toLocaleString()}\n${isSpanish ? 'Nuevo total:' : 'New total:'} ${account.currency} ${newTotal.toLocaleString()}`);
-                          } else {
-                            alert(`❌ Error ${isSpanish ? 'al agregar capital' : 'adding funds'}`);
-                          }
-                        }
-                      }}
-                      className="flex-1 px-2 py-1 bg-green-500/20 border border-green-500 text-green-400 rounded text-xs hover:bg-green-500/30"
-                      title={isSpanish ? 'Aumentar capital' : 'Add funds'}
-                    >
-                      + 💰
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const amount = prompt(
-                          isSpanish 
-                            ? `📉 Disminuir capital de la cuenta\n\nCuenta: ${account.accountName}\nBalance actual: ${account.currency} ${account.totalBalance.toLocaleString()}\nReservado: ${account.currency} ${account.reservedBalance.toLocaleString()}\n\n¿Cuánto deseas retirar?`
-                            : `📉 Reduce account funds\n\nAccount: ${account.accountName}\nCurrent balance: ${account.currency} ${account.totalBalance.toLocaleString()}\nReserved: ${account.currency} ${account.reservedBalance.toLocaleString()}\n\nHow much to withdraw?`,
-                          '1000'
-                        );
-                        if (amount && !isNaN(parseFloat(amount))) {
-                          const withdrawAmount = parseFloat(amount);
-                          const newTotal = account.totalBalance - withdrawAmount;
-                          
-                          if (newTotal < account.reservedBalance) {
-                            alert(`❌ Error\n\n${isSpanish ? 'No puedes reducir el balance por debajo del monto reservado' : 'Cannot reduce balance below reserved amount'} (${account.currency} ${account.reservedBalance.toLocaleString()})`);
-                            return;
-                          }
-                          
-                          if (custodyStore.updateAccountBalance(account.id, newTotal)) {
-                            loadCustodyAccounts();
-                            alert(`✅ ${isSpanish ? 'Capital retirado' : 'Funds withdrawn'}\n\n-${account.currency} ${withdrawAmount.toLocaleString()}\n${isSpanish ? 'Nuevo total:' : 'New total:'} ${account.currency} ${newTotal.toLocaleString()}`);
-                          } else {
-                            alert(`❌ Error ${isSpanish ? 'al retirar capital' : 'withdrawing funds'}`);
-                          }
-                        }
-                      }}
-                      className="flex-1 px-2 py-1 bg-red-500/20 border border-red-500 text-red-400 rounded text-xs hover:bg-red-500/30"
-                      title={isSpanish ? 'Disminuir capital' : 'Withdraw funds'}
-                    >
-                      - 💸
-                    </button>
                   </div>
                 </div>
                 <div className="bg-[#0a0a0a] border border-yellow-900/30 rounded-lg p-4">
@@ -2323,6 +2280,214 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
           account={selectedAccount}
           onClose={() => setShowBlackScreen(false)}
         />
+      )}
+
+      {/* Modal de Ajuste de Balance */}
+      {showEditBalanceModal && selectedAccount && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0d0d0d] border-2 border-[#00ff88] rounded-xl max-w-lg w-full p-6">
+            <h2 className="text-2xl font-bold text-[#00ff88] mb-6 flex items-center gap-3">
+              <TrendingUp className="w-7 h-7" />
+              {isSpanish ? 'Ajustar Balance de Cuenta' : 'Adjust Account Balance'}
+            </h2>
+
+            {/* Información de la cuenta */}
+            <div className="bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border border-cyan-500/30 rounded-lg p-4 mb-6">
+              <div className="text-sm text-cyan-300 mb-3 font-semibold">
+                📋 {selectedAccount.accountName}
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-xs">
+                <div className="bg-black/30 rounded p-2">
+                  <div className="text-cyan-300/60 mb-1">{isSpanish ? 'Total Actual' : 'Current Total'}</div>
+                  <div className="text-cyan-300 font-mono font-bold">
+                    {selectedAccount.currency} {selectedAccount.totalBalance.toLocaleString()}
+                  </div>
+                </div>
+                <div className="bg-black/30 rounded p-2">
+                  <div className="text-yellow-300/60 mb-1">{isSpanish ? 'Reservado' : 'Reserved'}</div>
+                  <div className="text-yellow-300 font-mono font-bold">
+                    {selectedAccount.currency} {selectedAccount.reservedBalance.toLocaleString()}
+                  </div>
+                </div>
+                <div className="bg-black/30 rounded p-2">
+                  <div className="text-green-300/60 mb-1">{isSpanish ? 'Disponible' : 'Available'}</div>
+                  <div className="text-green-300 font-mono font-bold">
+                    {selectedAccount.currency} {selectedAccount.availableBalance.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Selector de Operación */}
+            <div className="mb-6">
+              <label className="block text-[#00ff88] text-sm mb-3 font-semibold">
+                {isSpanish ? 'Selecciona operación:' : 'Select operation:'}
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setBalanceOperation('add')}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    balanceOperation === 'add'
+                      ? 'border-green-500 bg-green-500/20 text-green-300'
+                      : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#4d7c4d] hover:border-green-500/30'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">📈</div>
+                  <div className="font-bold">{isSpanish ? 'AUMENTAR' : 'ADD'}</div>
+                  <div className="text-xs mt-1 opacity-80">
+                    {isSpanish ? 'Agregar capital' : 'Add funds'}
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBalanceOperation('subtract')}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    balanceOperation === 'subtract'
+                      ? 'border-red-500 bg-red-500/20 text-red-300'
+                      : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#4d7c4d] hover:border-red-500/30'
+                  }`}
+                >
+                  <div className="text-3xl mb-2">📉</div>
+                  <div className="font-bold">{isSpanish ? 'DISMINUIR' : 'SUBTRACT'}</div>
+                  <div className="text-xs mt-1 opacity-80">
+                    {isSpanish ? 'Retirar capital' : 'Withdraw funds'}
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Input de Monto */}
+            <div className="mb-6">
+              <label className="block text-[#00ff88] text-sm mb-2 font-semibold">
+                {isSpanish ? 'Monto:' : 'Amount:'}
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={balanceAmount}
+                onChange={(e) => setBalanceAmount(parseFloat(e.target.value) || 0)}
+                className="w-full bg-[#0a0a0a] border-2 border-[#00ff88]/30 focus:border-[#00ff88] rounded-lg px-4 py-3 text-[#00ff88] font-mono text-xl focus:outline-none transition-all"
+                placeholder="0.00"
+                autoFocus
+              />
+              <div className="text-xs text-[#4d7c4d] mt-2">
+                {balanceOperation === 'add' ? (
+                  <span className="text-green-400">
+                    ➕ {isSpanish ? 'Se agregará:' : 'Will add:'} {selectedAccount.currency} {balanceAmount.toLocaleString()}
+                  </span>
+                ) : (
+                  <span className="text-red-400">
+                    ➖ {isSpanish ? 'Se restará:' : 'Will subtract:'} {selectedAccount.currency} {balanceAmount.toLocaleString()}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Preview del nuevo balance */}
+            {balanceAmount > 0 && (
+              <div className={`rounded-lg p-4 mb-6 border-2 ${
+                balanceOperation === 'add'
+                  ? 'bg-green-900/20 border-green-500/50'
+                  : (selectedAccount.totalBalance - balanceAmount) >= selectedAccount.reservedBalance
+                    ? 'bg-blue-900/20 border-blue-500/50'
+                    : 'bg-red-900/20 border-red-500/50'
+              }`}>
+                <div className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <Database className="w-4 h-4" />
+                  {isSpanish ? 'Vista Previa:' : 'Preview:'}
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <div className="text-white/60 mb-1">{isSpanish ? 'Actual' : 'Current'}</div>
+                    <div className="font-mono font-bold text-white">
+                      {selectedAccount.totalBalance.toLocaleString()}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-white/60 mb-1">{isSpanish ? 'Cambio' : 'Change'}</div>
+                    <div className={`font-mono font-bold ${balanceOperation === 'add' ? 'text-green-400' : 'text-red-400'}`}>
+                      {balanceOperation === 'add' ? '+' : '-'}{balanceAmount.toLocaleString()}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-white/60 mb-1">{isSpanish ? 'Nuevo' : 'New'}</div>
+                    <div className={`font-mono font-bold ${
+                      balanceOperation === 'add' || (selectedAccount.totalBalance - balanceAmount) >= selectedAccount.reservedBalance
+                        ? 'text-[#00ff88]'
+                        : 'text-red-400'
+                    }`}>
+                      {balanceOperation === 'add'
+                        ? (selectedAccount.totalBalance + balanceAmount).toLocaleString()
+                        : (selectedAccount.totalBalance - balanceAmount).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+                {balanceOperation === 'subtract' && (selectedAccount.totalBalance - balanceAmount) < selectedAccount.reservedBalance && (
+                  <div className="mt-3 text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded p-2">
+                    ⚠️ {isSpanish 
+                      ? `No puedes reducir el balance por debajo del monto reservado (${selectedAccount.currency} ${selectedAccount.reservedBalance.toLocaleString()})`
+                      : `Cannot reduce balance below reserved amount (${selectedAccount.currency} ${selectedAccount.reservedBalance.toLocaleString()})`}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Botones de Acción */}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEditBalanceModal(false);
+                  setBalanceAmount(0);
+                  setBalanceOperation('add');
+                }}
+                className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525] font-semibold"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (balanceAmount <= 0) {
+                    alert(isSpanish ? '⚠️ Ingresa un monto válido' : '⚠️ Enter a valid amount');
+                    return;
+                  }
+
+                  const newTotal = balanceOperation === 'add'
+                    ? selectedAccount.totalBalance + balanceAmount
+                    : selectedAccount.totalBalance - balanceAmount;
+
+                  if (custodyStore.updateAccountBalance(selectedAccount.id, newTotal)) {
+                    loadCustodyAccounts();
+                    setShowEditBalanceModal(false);
+                    setBalanceAmount(0);
+                    setBalanceOperation('add');
+                    
+                    alert(
+                      `✅ ${isSpanish ? 'Balance actualizado correctamente' : 'Balance updated successfully'}\n\n` +
+                      `${isSpanish ? 'Operación:' : 'Operation:'} ${balanceOperation === 'add' ? '➕ ' + (isSpanish ? 'Aumentar' : 'Add') : '➖ ' + (isSpanish ? 'Disminuir' : 'Subtract')}\n` +
+                      `${isSpanish ? 'Monto:' : 'Amount:'} ${selectedAccount.currency} ${balanceAmount.toLocaleString()}\n` +
+                      `${isSpanish ? 'Balance anterior:' : 'Previous balance:'} ${selectedAccount.currency} ${selectedAccount.totalBalance.toLocaleString()}\n` +
+                      `${isSpanish ? 'Nuevo balance:' : 'New balance:'} ${selectedAccount.currency} ${newTotal.toLocaleString()}`
+                    );
+                  } else {
+                    alert(`❌ Error: ${isSpanish ? 'No se pudo actualizar el balance' : 'Could not update balance'}`);
+                  }
+                }}
+                disabled={balanceAmount <= 0 || (balanceOperation === 'subtract' && (selectedAccount.totalBalance - balanceAmount) < selectedAccount.reservedBalance)}
+                className={`flex-1 px-6 py-3 font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                  balanceOperation === 'add'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-black hover:shadow-[0_0_20px_rgba(34,197,94,0.6)]'
+                    : 'bg-gradient-to-r from-red-500 to-orange-500 text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.6)]'
+                }`}
+              >
+                <CheckCircle className="w-5 h-5 inline mr-2" />
+                {isSpanish ? 'Confirmar Cambio' : 'Confirm Change'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       </div>
       {/* Fin contenedor scroll */}
