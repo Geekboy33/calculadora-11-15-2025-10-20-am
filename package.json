@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "server": "node server/index.js",
+    "server:api1": "node server/api1-server.js",
     "dev:all": "concurrently -k -n APP,API -c green,cyan \"vite\" \"node server/index.js\"",
+    "dev:full": "concurrently -k -n APP,API,API1 -c green,cyan,magenta \"vite\" \"node server/index.js\" \"node server/api1-server.js\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",

@@ -1,0 +1,743 @@
+/**
+ * Proof of Reserves API1 Module
+ * API institucional compatible con Anchor VUSD (https://anchor.vergy.world)
+ * Endpoints: PoR, Pledges/Lockbox, Payouts, Reconciliation, Webhooks HMAC
+ */
+
+import { useState, useEffect } from 'react';
+import {
+  Shield, Lock, Send, TrendingUp, Database, Activity, 
+  CheckCircle, AlertCircle, RefreshCw, Download, Key,
+  FileText, DollarSign, Clock, Zap, Webhook
+} from 'lucide-react';
+import { useLanguage } from '../lib/i18n';
+import { unifiedPledgeStore } from '../lib/unified-pledge-store';
+import { custodyStore } from '../lib/custody-store';
+
+interface PledgeAPI1 {
+  pledgeId: string;
+  porId: string;
+  status: 'ACTIVE' | 'EXPIRED' | 'RELEASED';
+  amountUsd: string;
+  available: string;
+  currency: string;
+  beneficiary: string;
+  lockedAt: string;
+  expiresAt?: string;
+  termDays?: number;
+}
+
+interface PayoutAPI1 {
+  payoutId: string;
+  externalRef: string;
+  pledgeId: string;
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  amountUsd: string;
+  currency: string;
+  createdAt: string;
+  completedAt?: string;
+  beneficiary: {
+    name: string;
+    accountType: 'institutional' | 'retail';
+  };
+}
+
+interface ReserveSummary {
+  asOf: string;
+  totalUsdReserves: string;
+  totalUsdPledges: string;
+  unpledgedUsd: string;
+  circulatingCap: string;
+  coverageRatio: string;
+}
+
+export function ProofOfReservesAPI1Module() {
+  const { language } = useLanguage();
+  const isSpanish = language === 'es';
+  
+  const API_BASE = 'http://localhost:8788'; // Puerto diferente para API1
+  const [selectedView, setSelectedView] = useState<'overview' | 'pledges' | 'payouts' | 'reconciliation' | 'webhooks'>('overview');
+  
+  // Data states
+  const [pledges, setPledges] = useState<PledgeAPI1[]>([]);
+  const [payouts, setPayouts] = useState<PayoutAPI1[]>([]);
+  const [reserveSummary, setReserveSummary] = useState<ReserveSummary | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // API Credentials (from existing PoR)
+  const API_KEY = 'por_1763215039421_v9p76zcxqxd';
+  const SECRET_KEY = 'sk_AsWH12YRHFo9BG9DRYGtJFWDumr4lps2ne6vywfKpWc8Hm3p3wrhPa7IxkagWbvs';
+  const POR_ID = 'por_1763215039421_v9p76zcxqxd';
+  
+  // Modals
+  const [showCreatePledgeModal, setShowCreatePledgeModal] = useState(false);
+  const [showCreatePayoutModal, setShowCreatePayoutModal] = useState(false);
+  
+  // Forms
+  const [pledgeForm, setPledgeForm] = useState({
+    amountUsd: 0,
+    currency: 'USD',
+    termDays: 90,
+    beneficiary: 'VUSD',
+    notes: ''
+  });
+  
+  const [payoutForm, setPayoutForm] = useState({
+    pledgeId: '',
+    externalRef: '',
+    amountUsd: 0,
+    beneficiaryName: '',
+    accountType: 'institutional' as 'institutional' | 'retail'
+  });
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Cargar pledges desde unified store
+      const unifiedPledges = unifiedPledgeStore.getPledges();
+      const activePledges: PledgeAPI1[] = unifiedPledges
+        .filter(p => p.status === 'ACTIVE')
+        .map(p => ({
+          pledgeId: p.id,
+          porId: POR_ID,
+          status: p.status,
+          amountUsd: p.amount.toFixed(2),
+          available: p.amount.toFixed(2),
+          currency: p.currency,
+          beneficiary: p.beneficiary,
+          lockedAt: p.created_at,
+          expiresAt: p.expires_at,
+          termDays: p.expires_at ? Math.ceil((new Date(p.expires_at).getTime() - new Date(p.created_at).getTime()) / (1000 * 60 * 60 * 24)) : undefined
+        }));
+      
+      setPledges(activePledges);
+      
+      // Calcular resumen de reservas
+      const custodyAccounts = custodyStore.getAccounts();
+      const totalReserves = custodyAccounts
+        .filter(a => a.currency === 'USD')
+        .reduce((sum, a) => sum + a.totalBalance, 0);
+      
+      const totalPledges = activePledges.reduce((sum, p) => sum + parseFloat(p.amountUsd), 0);
+      const unpledged = totalReserves - totalPledges;
+      const circulatingCap = totalPledges;
+      const coverageRatio = totalPledges > 0 ? (totalReserves / totalPledges) : 0;
+      
+      setReserveSummary({
+        asOf: new Date().toISOString(),
+        totalUsdReserves: totalReserves.toFixed(2),
+        totalUsdPledges: totalPledges.toFixed(2),
+        unpledgedUsd: unpledged.toFixed(2),
+        circulatingCap: circulatingCap.toFixed(2),
+        coverageRatio: coverageRatio.toFixed(4)
+      });
+      
+      console.log('[API1] ✅ Datos cargados:', {
+        pledges: activePledges.length,
+        totalReserves,
+        totalPledges,
+        circulatingCap
+      });
+      
+    } catch (err) {
+      console.error('[API1] ❌ Error cargando datos:', err);
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreatePledge = () => {
+    if (pledgeForm.amountUsd <= 0) {
+      alert(isSpanish ? '⚠️ Ingresa un monto válido' : '⚠️ Enter a valid amount');
+      return;
+    }
+    
+    // Crear pledge en unified store
+    const pledgeId = `PL-${Date.now()}`;
+    const custodyAccounts = custodyStore.getAccounts();
+    const usdAccount = custodyAccounts.find(a => a.currency === 'USD' && a.totalBalance > 0);
+    
+    if (!usdAccount) {
+      alert(isSpanish 
+        ? '⚠️ No hay cuentas USD disponibles\n\nCrea una cuenta en Custody Accounts primero'
+        : '⚠️ No USD accounts available\n\nCreate an account in Custody Accounts first');
+      return;
+    }
+    
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + pledgeForm.termDays);
+    
+    unifiedPledgeStore.createPledge(
+      usdAccount.id,
+      pledgeForm.amountUsd,
+      pledgeForm.currency,
+      pledgeForm.beneficiary,
+      expiresAt.toISOString(),
+      'API_VUSD',
+      pledgeId
+    );
+    
+    setShowCreatePledgeModal(false);
+    setPledgeForm({
+      amountUsd: 0,
+      currency: 'USD',
+      termDays: 90,
+      beneficiary: 'VUSD',
+      notes: ''
+    });
+    
+    loadData();
+    
+    alert(
+      `✅ ${isSpanish ? 'Pledge creado exitosamente' : 'Pledge created successfully'}\n\n` +
+      `Pledge ID: ${pledgeId}\n` +
+      `Amount: USD ${pledgeForm.amountUsd.toLocaleString()}\n` +
+      `Beneficiary: ${pledgeForm.beneficiary}\n` +
+      `Term: ${pledgeForm.termDays} days`
+    );
+  };
+
+  const testAnchorConnection = async () => {
+    try {
+      setLoading(true);
+      
+      const response = await fetch(`${API_BASE}/api/v1/proof-of-reserves/${POR_ID}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${API_KEY}`,
+          'X-Secret-Key': SECRET_KEY,
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        alert(
+          `✅ ${isSpanish ? 'Conexión exitosa con API' : 'Successful API connection'}\n\n` +
+          `Endpoint: ${API_BASE}/api/v1/proof-of-reserves/${POR_ID}\n` +
+          `Status: ${response.status}\n` +
+          `CIRC_CAP: $${data.data?.summary?.totalCirculatingCap || 0}`
+        );
+      } else {
+        const error = await response.json();
+        alert(
+          `⚠️ ${isSpanish ? 'Respuesta del servidor' : 'Server response'}\n\n` +
+          `Status: ${response.status}\n` +
+          `Error: ${error.error || 'Unknown'}`
+        );
+      }
+    } catch (err) {
+      alert(
+        `❌ ${isSpanish ? 'Error de conexión' : 'Connection error'}\n\n` +
+        `${(err as Error).message}\n\n` +
+        `${isSpanish ? 'Verifica que el servidor API esté corriendo en puerto 8788' : 'Verify API server is running on port 8788'}`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-cyan-400 flex items-center gap-3">
+              <Shield className="w-8 h-8" />
+              {isSpanish ? 'Proof of Reserves API1 - Anchor VUSD' : 'Proof of Reserves API1 - Anchor VUSD'}
+            </h1>
+            <p className="text-cyan-300/60 mt-2">
+              {isSpanish 
+                ? 'API institucional compatible con https://anchor.vergy.world'
+                : 'Institutional API compatible with https://anchor.vergy.world'}
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={testAnchorConnection}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-500/20 border border-blue-500 text-blue-300 rounded-lg hover:bg-blue-500/30 flex items-center gap-2 disabled:opacity-50"
+            >
+              <Zap className="w-5 h-5" />
+              {isSpanish ? 'Test Anchor' : 'Test Anchor'}
+            </button>
+            <button
+              onClick={loadData}
+              disabled={loading}
+              className="px-4 py-2 bg-cyan-500/20 border border-cyan-500 text-cyan-300 rounded-lg hover:bg-cyan-500/30 flex items-center gap-2 disabled:opacity-50"
+            >
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              {isSpanish ? 'Actualizar' : 'Refresh'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="mb-6 bg-red-900/20 border border-red-500 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-6 h-6 text-red-400" />
+            <div>
+              <div className="text-red-300 font-bold">Error</div>
+              <div className="text-red-300/80 text-sm">{error}</div>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="ml-auto text-red-400 hover:text-red-300"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* API Credentials Banner */}
+      <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-500/30 rounded-lg p-4 mb-8">
+        <div className="flex items-center gap-3 mb-3">
+          <Key className="w-5 h-5 text-purple-400" />
+          <h3 className="text-lg font-bold text-purple-300">
+            {isSpanish ? 'Credenciales de Autenticación' : 'Authentication Credentials'}
+          </h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div className="bg-black/30 rounded p-3">
+            <div className="text-purple-300/60 mb-1">PoR ID:</div>
+            <div className="text-purple-300 font-mono break-all">{POR_ID}</div>
+          </div>
+          <div className="bg-black/30 rounded p-3">
+            <div className="text-purple-300/60 mb-1">API Key:</div>
+            <div className="text-purple-300 font-mono break-all">{API_KEY}</div>
+          </div>
+          <div className="bg-black/30 rounded p-3">
+            <div className="text-purple-300/60 mb-1">Anchor URL:</div>
+            <div className="text-blue-400 font-mono">https://anchor.vergy.world</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6 border-b border-[#1a1a1a]">
+        {(['overview', 'pledges', 'payouts', 'reconciliation', 'webhooks'] as const).map((view) => (
+          <button
+            key={view}
+            onClick={() => setSelectedView(view)}
+            className={`px-6 py-3 font-medium transition-colors capitalize ${
+              selectedView === view
+                ? 'text-cyan-400 border-b-2 border-cyan-400'
+                : 'text-[#4d7c4d] hover:text-cyan-300'
+            }`}
+          >
+            {view}
+          </button>
+        ))}
+      </div>
+
+      {/* Overview Section */}
+      {selectedView === 'overview' && reserveSummary && (
+        <div className="space-y-6">
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-[#0d0d0d] border border-cyan-500 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-cyan-300/60 text-sm">{isSpanish ? 'Reservas Totales' : 'Total Reserves'}</span>
+                <Database className="w-5 h-5 text-cyan-400" />
+              </div>
+              <div className="text-3xl font-bold text-cyan-400">
+                ${parseFloat(reserveSummary.totalUsdReserves).toLocaleString()}
+              </div>
+            </div>
+
+            <div className="bg-[#0d0d0d] border border-green-500 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-green-300/60 text-sm">{isSpanish ? 'Pledges Totales' : 'Total Pledges'}</span>
+                <Lock className="w-5 h-5 text-green-400" />
+              </div>
+              <div className="text-3xl font-bold text-green-400">
+                ${parseFloat(reserveSummary.totalUsdPledges).toLocaleString()}
+              </div>
+            </div>
+
+            <div className="bg-[#0d0d0d] border border-purple-500 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-purple-300/60 text-sm">CIRC_CAP</span>
+                <TrendingUp className="w-5 h-5 text-purple-400" />
+              </div>
+              <div className="text-3xl font-bold text-purple-400">
+                ${parseFloat(reserveSummary.circulatingCap).toLocaleString()}
+              </div>
+            </div>
+
+            <div className="bg-[#0d0d0d] border border-yellow-500 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-yellow-300/60 text-sm">{isSpanish ? 'Ratio Cobertura' : 'Coverage Ratio'}</span>
+                <CheckCircle className="w-5 h-5 text-yellow-400" />
+              </div>
+              <div className="text-3xl font-bold text-yellow-400">
+                {parseFloat(reserveSummary.coverageRatio).toFixed(4)}
+              </div>
+            </div>
+          </div>
+
+          {/* API Info */}
+          <div className="bg-[#0d0d0d] border border-cyan-500/30 rounded-lg p-6">
+            <h3 className="text-xl font-bold text-cyan-300 mb-4 flex items-center gap-2">
+              <Database className="w-6 h-6" />
+              {isSpanish ? 'Endpoints API Disponibles' : 'Available API Endpoints'}
+            </h3>
+            <div className="space-y-3 text-sm font-mono">
+              <div className="bg-black/30 rounded p-3">
+                <div className="text-cyan-300/60 mb-1">GET Proof of Reserves:</div>
+                <div className="text-cyan-400">
+                  {API_BASE}/api/v1/proof-of-reserves/{POR_ID}
+                </div>
+              </div>
+              <div className="bg-black/30 rounded p-3">
+                <div className="text-green-300/60 mb-1">GET Active Pledges:</div>
+                <div className="text-green-400">
+                  {API_BASE}/api/v1/pledges?status=ACTIVE&porId={POR_ID}
+                </div>
+              </div>
+              <div className="bg-black/30 rounded p-3">
+                <div className="text-purple-300/60 mb-1">POST Create Pledge:</div>
+                <div className="text-purple-400">
+                  {API_BASE}/api/v1/pledges
+                </div>
+              </div>
+              <div className="bg-black/30 rounded p-3">
+                <div className="text-yellow-300/60 mb-1">GET Reserves Summary:</div>
+                <div className="text-yellow-400">
+                  {API_BASE}/api/v1/reserves/summary
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Anchor Integration Status */}
+          <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg p-6">
+            <h3 className="text-xl font-bold text-blue-300 mb-4 flex items-center gap-2">
+              <Webhook className="w-6 h-6" />
+              {isSpanish ? 'Estado de Integración Anchor' : 'Anchor Integration Status'}
+            </h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="bg-black/30 rounded p-3">
+                <div className="text-blue-300/60 mb-1">{isSpanish ? 'URL Anchor:' : 'Anchor URL:'}</div>
+                <div className="text-blue-400 font-mono">https://anchor.vergy.world</div>
+              </div>
+              <div className="bg-black/30 rounded p-3">
+                <div className="text-blue-300/60 mb-1">{isSpanish ? 'Webhooks HMAC:' : 'HMAC Webhooks:'}</div>
+                <div className="text-green-400 font-bold">✅ {isSpanish ? 'Habilitados' : 'Enabled'}</div>
+              </div>
+              <div className="bg-black/30 rounded p-3">
+                <div className="text-blue-300/60 mb-1">{isSpanish ? 'Protocolo:' : 'Protocol:'}</div>
+                <div className="text-purple-400">SEP-24 Compatible</div>
+              </div>
+              <div className="bg-black/30 rounded p-3">
+                <div className="text-blue-300/60 mb-1">{isSpanish ? 'Idempotencia:' : 'Idempotency:'}</div>
+                <div className="text-green-400">✅ {isSpanish ? 'Soportada' : 'Supported'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pledges Section */}
+      {selectedView === 'pledges' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-green-300">
+              {isSpanish ? 'Pledges Activos (Lockbox)' : 'Active Pledges (Lockbox)'}
+            </h2>
+            <button
+              onClick={() => setShowCreatePledgeModal(true)}
+              className="px-6 py-3 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 flex items-center gap-2 font-bold"
+            >
+              <Lock className="w-5 h-5" />
+              {isSpanish ? 'Crear Pledge' : 'Create Pledge'}
+            </button>
+          </div>
+
+          {pledges.length === 0 ? (
+            <div className="text-center py-12">
+              <Lock className="w-16 h-16 text-green-400/30 mx-auto mb-4" />
+              <div className="text-green-300/60 mb-2">
+                {isSpanish ? 'No hay pledges activos' : 'No active pledges'}
+              </div>
+              <div className="text-green-300/40 text-sm">
+                {isSpanish 
+                  ? 'Los pledges permiten al Anchor calcular CIRC_CAP'
+                  : 'Pledges allow Anchor to calculate CIRC_CAP'}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pledges.map((pledge) => (
+                <div
+                  key={pledge.pledgeId}
+                  className="bg-[#0d0d0d] border border-green-500/30 rounded-lg p-6"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="px-3 py-1 bg-green-500/20 text-green-300 text-xs rounded font-bold">
+                          {pledge.status}
+                        </span>
+                        <span className="text-white font-mono">{pledge.pledgeId}</span>
+                      </div>
+                      <div className="text-sm text-green-300/60">
+                        {isSpanish ? 'Beneficiario:' : 'Beneficiary:'} {pledge.beneficiary}
+                      </div>
+                    </div>
+                    <Lock className="w-8 h-8 text-green-400" />
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <div className="text-green-300/60 mb-1">{isSpanish ? 'Monto USD:' : 'USD Amount:'}</div>
+                      <div className="text-2xl font-bold text-green-300">
+                        ${parseFloat(pledge.amountUsd).toLocaleString()}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-cyan-300/60 mb-1">{isSpanish ? 'Disponible:' : 'Available:'}</div>
+                      <div className="text-xl font-bold text-cyan-300">
+                        ${parseFloat(pledge.available).toLocaleString()}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-purple-300/60 mb-1">{isSpanish ? 'Bloqueado:' : 'Locked:'}</div>
+                      <div className="text-purple-300 text-sm">
+                        {new Date(pledge.lockedAt).toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')}
+                      </div>
+                    </div>
+                    {pledge.expiresAt && (
+                      <div>
+                        <div className="text-yellow-300/60 mb-1">{isSpanish ? 'Expira:' : 'Expires:'}</div>
+                        <div className="text-yellow-300 text-sm">
+                          {new Date(pledge.expiresAt).toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Payouts Section */}
+      {selectedView === 'payouts' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-blue-300">
+              {isSpanish ? 'Payouts (Retiros VUSD → USD)' : 'Payouts (VUSD → USD Withdrawals)'}
+            </h2>
+            <button
+              onClick={() => setShowCreatePayoutModal(true)}
+              disabled={pledges.length === 0}
+              className="px-6 py-3 bg-blue-500/20 border border-blue-500 text-blue-300 rounded-lg hover:bg-blue-500/30 flex items-center gap-2 font-bold disabled:opacity-50"
+            >
+              <Send className="w-5 h-5" />
+              {isSpanish ? 'Crear Payout' : 'Create Payout'}
+            </button>
+          </div>
+
+          <div className="text-center py-12">
+            <Send className="w-16 h-16 text-blue-400/30 mx-auto mb-4" />
+            <div className="text-blue-300/60 mb-2">
+              {isSpanish ? 'Sistema de payouts en desarrollo' : 'Payout system in development'}
+            </div>
+            <div className="text-blue-300/40 text-sm">
+              {isSpanish 
+                ? 'Compatible con SEP-24 para integración con Anchor'
+                : 'SEP-24 compatible for Anchor integration'}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reconciliation Section */}
+      {selectedView === 'reconciliation' && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-purple-300 mb-4">
+            {isSpanish ? 'Conciliación Diaria' : 'Daily Reconciliation'}
+          </h2>
+
+          <div className="bg-[#0d0d0d] border border-purple-500/30 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="w-6 h-6 text-purple-400" />
+              <h3 className="text-lg font-bold text-purple-300">
+                {isSpanish ? 'Reporte de Conciliación' : 'Reconciliation Report'}
+              </h3>
+            </div>
+            <div className="text-sm text-purple-300/60 mb-4">
+              {isSpanish 
+                ? 'Genera reportes CSV/JSON con pledges, payouts y movimientos del día'
+                : 'Generate CSV/JSON reports with pledges, payouts and daily movements'}
+            </div>
+            <button
+              className="px-6 py-3 bg-purple-500/20 border border-purple-500 text-purple-300 rounded-lg hover:bg-purple-500/30 flex items-center gap-2"
+            >
+              <Download className="w-5 h-5" />
+              {isSpanish ? 'Generar Reporte' : 'Generate Report'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Webhooks Section */}
+      {selectedView === 'webhooks' && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-orange-300 mb-4">
+            {isSpanish ? 'Webhooks HMAC → Anchor' : 'HMAC Webhooks → Anchor'}
+          </h2>
+
+          <div className="bg-[#0d0d0d] border border-orange-500/30 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Webhook className="w-6 h-6 text-orange-400" />
+              <h3 className="text-lg font-bold text-orange-300">
+                {isSpanish ? 'Configuración de Webhooks' : 'Webhook Configuration'}
+              </h3>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-black/30 rounded p-4">
+                <div className="text-orange-300/60 text-sm mb-2">{isSpanish ? 'URL Destino:' : 'Destination URL:'}</div>
+                <div className="text-orange-300 font-mono text-sm">
+                  https://anchor.vergy.world/daes/webhooks/pledges
+                </div>
+              </div>
+              <div className="bg-black/30 rounded p-4">
+                <div className="text-orange-300/60 text-sm mb-2">{isSpanish ? 'Firma:' : 'Signature:'}</div>
+                <div className="text-orange-300 font-mono text-xs">
+                  X-DAES-Signature: HMAC-SHA256(secret, timestamp + body)
+                </div>
+              </div>
+              <div className="bg-black/30 rounded p-4">
+                <div className="text-orange-300/60 text-sm mb-2">{isSpanish ? 'Eventos:' : 'Events:'}</div>
+                <div className="flex flex-wrap gap-2">
+                  {['PLEDGE_CREATED', 'PLEDGE_ADJUSTED', 'PLEDGE_RELEASED', 'PAYOUT_COMPLETED'].map(event => (
+                    <span key={event} className="px-2 py-1 bg-orange-500/20 text-orange-300 rounded text-xs">
+                      {event}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Pledge Modal */}
+      {showCreatePledgeModal && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0d0d0d] border-2 border-green-500 rounded-xl max-w-2xl w-full p-6">
+            <h3 className="text-2xl font-bold text-green-300 mb-6 flex items-center gap-3">
+              <Lock className="w-7 h-7" />
+              {isSpanish ? 'Crear Nuevo Pledge' : 'Create New Pledge'}
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-green-300 text-sm mb-2 font-semibold">
+                  {isSpanish ? 'Monto USD:' : 'USD Amount:'}
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={pledgeForm.amountUsd}
+                  onChange={(e) => setPledgeForm({ ...pledgeForm, amountUsd: parseFloat(e.target.value) || 0 })}
+                  className="w-full bg-[#0a0a0a] border border-green-500/30 rounded-lg px-4 py-3 text-white font-mono text-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div>
+                <label className="block text-green-300 text-sm mb-2 font-semibold">
+                  {isSpanish ? 'Beneficiario:' : 'Beneficiary:'}
+                </label>
+                <input
+                  type="text"
+                  value={pledgeForm.beneficiary}
+                  onChange={(e) => setPledgeForm({ ...pledgeForm, beneficiary: e.target.value })}
+                  className="w-full bg-[#0a0a0a] border border-green-500/30 rounded-lg px-4 py-3 text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-green-300 text-sm mb-2 font-semibold">
+                  {isSpanish ? 'Plazo (días):' : 'Term (days):'}
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[30, 60, 90, 180].map(days => (
+                    <button
+                      key={days}
+                      type="button"
+                      onClick={() => setPledgeForm({ ...pledgeForm, termDays: days })}
+                      className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                        pledgeForm.termDays === days
+                          ? 'bg-green-500 text-black'
+                          : 'bg-green-500/20 border border-green-500/30 text-green-300 hover:bg-green-500/30'
+                      }`}
+                    >
+                      {days}d
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-green-300 text-sm mb-2 font-semibold">
+                  {isSpanish ? 'Notas (opcional):' : 'Notes (optional):'}
+                </label>
+                <textarea
+                  value={pledgeForm.notes}
+                  onChange={(e) => setPledgeForm({ ...pledgeForm, notes: e.target.value })}
+                  className="w-full bg-[#0a0a0a] border border-green-500/30 rounded-lg px-4 py-3 text-white"
+                  rows={3}
+                  placeholder={isSpanish ? 'Información adicional...' : 'Additional information...'}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6 pt-6 border-t border-green-500/20">
+              <button
+                onClick={() => {
+                  setShowCreatePledgeModal(false);
+                  setPledgeForm({
+                    amountUsd: 0,
+                    currency: 'USD',
+                    termDays: 90,
+                    beneficiary: 'VUSD',
+                    notes: ''
+                  });
+                }}
+                className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525] font-semibold"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleCreatePledge}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-black rounded-lg hover:shadow-[0_0_20px_rgba(34,197,94,0.6)] font-bold flex items-center justify-center gap-2"
+              >
+                <Lock className="w-5 h-5" />
+                {isSpanish ? 'Crear Pledge' : 'Create Pledge'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
