@@ -6,6 +6,7 @@ import './responsive.css';
 import { LanguageProvider } from './lib/i18n.tsx';
 import { AuthProvider } from './lib/auth.tsx';
 import { ToastProvider, useToast } from './components/ui/Toast';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function AppWithToast() {
   const { addToast } = useToast();
@@ -22,14 +23,26 @@ function AppWithToast() {
   return <App />;
 }
 
+// Captura de errores global
+window.onerror = function(message, source, lineno, colno, error) {
+  console.error('❌ Error global capturado:', { message, source, lineno, colno, error });
+  return false;
+};
+
+window.onunhandledrejection = function(event) {
+  console.error('❌ Promise rechazada sin capturar:', event.reason);
+};
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <LanguageProvider>
-        <ToastProvider>
-          <AppWithToast />
-        </ToastProvider>
-      </LanguageProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <LanguageProvider>
+          <ToastProvider>
+            <AppWithToast />
+          </ToastProvider>
+        </LanguageProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   </StrictMode>
 );
