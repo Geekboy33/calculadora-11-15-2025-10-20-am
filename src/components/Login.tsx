@@ -137,14 +137,14 @@ export function Login({ onLogin }: LoginProps) {
               {t.loginSubtitle}
             </p>
             <div className="mt-4 space-y-2">
-              <div className="text-[#00ff88] text-sm font-bold">
+              <div className="text-[#00ff88] text-base font-bold tracking-wide">
                 Digital Commercial Bank Ltd
               </div>
-              <div className="text-[#4d7c4d] text-xs font-mono space-y-1">
-                <div>International Banking License Number: L 15446</div>
-                <div>Company Number: 15446</div>
+              <div className="text-white/90 text-sm font-mono space-y-1 leading-relaxed">
+                <div className="font-semibold">International Banking License Number: L 15446</div>
+                <div className="font-semibold">Company Number: 15446</div>
               </div>
-              <div className="text-[#4d7c4d] text-xs font-mono mt-2">
+              <div className="text-white/80 text-xs font-mono mt-3 tracking-wider">
                 CoreBanking Security Gateway
               </div>
             </div>
