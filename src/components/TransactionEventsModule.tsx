@@ -42,7 +42,7 @@ export function TransactionEventsModule() {
       transactionEventStore.recordEvent(
         'ACCOUNT_CREATED',
         'SYSTEM',
-        'Sistema de eventos inicializado correctamente',
+        isSpanish ? 'Sistema de eventos inicializado correctamente' : 'Event system initialized successfully',
         {
           status: 'COMPLETED',
           metadata: {
@@ -60,7 +60,20 @@ export function TransactionEventsModule() {
       applyFilters(updatedEvents);
     });
     
-    return unsubscribe;
+    // Auto-reload cada 3 segundos
+    const interval = setInterval(() => {
+      const freshEvents = transactionEventStore.getEvents();
+      if (freshEvents.length !== events.length) {
+        console.log('[TxModule] 🔄 Nuevos eventos detectados');
+        setEvents(freshEvents);
+        applyFilters(freshEvents);
+      }
+    }, 3000);
+    
+    return () => {
+      unsubscribe();
+      clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
@@ -157,6 +170,67 @@ export function TransactionEventsModule() {
   };
 
   const stats = transactionEventStore.getStats();
+
+  const translateEventType = (type: TransactionType): string => {
+    if (!isSpanish) return type;
+    
+    const translations: Record<TransactionType, string> = {
+      'ACCOUNT_CREATED': 'Cuenta Creada',
+      'ACCOUNT_DELETED': 'Cuenta Eliminada',
+      'BALANCE_INCREASE': 'Aumento de Balance',
+      'BALANCE_DECREASE': 'Disminución de Balance',
+      'FUNDS_RESERVED': 'Fondos Reservados',
+      'FUNDS_RELEASED': 'Fondos Liberados',
+      'PLEDGE_CREATED': 'Pledge Creado',
+      'PLEDGE_EDITED': 'Pledge Editado',
+      'PLEDGE_DELETED': 'Pledge Eliminado',
+      'TRANSFER_CREATED': 'Transferencia Creada',
+      'TRANSFER_COMPLETED': 'Transferencia Completada',
+      'POR_GENERATED': 'PoR Generado',
+      'POR_DELETED': 'PoR Eliminado',
+      'API_KEY_CREATED': 'API Key Creada',
+      'API_KEY_REVOKED': 'API Key Revocada',
+      'PAYOUT_CREATED': 'Payout Creado',
+      'PAYOUT_COMPLETED': 'Payout Completado',
+      'RECONCILIATION_RUN': 'Conciliación Ejecutada'
+    };
+    
+    return translations[type] || type;
+  };
+
+  const translateModule = (module: ModuleSource): string => {
+    if (!isSpanish) return module;
+    
+    const translations: Record<ModuleSource, string> = {
+      'CUSTODY_ACCOUNTS': 'Cuentas Custody',
+      'API_VUSD': 'API VUSD',
+      'API_VUSD1': 'API VUSD1',
+      'API_DAES': 'API DAES',
+      'API_GLOBAL': 'API Global',
+      'API_DIGITAL': 'API Digital',
+      'POR_API': 'PoR API',
+      'POR_API1_ANCHOR': 'PoR API1 Anchor',
+      'ACCOUNT_LEDGER': 'Libro Mayor',
+      'BLACK_SCREEN': 'Black Screen',
+      'LARGE_FILE_ANALYZER': 'Analizador Archivos',
+      'SYSTEM': 'Sistema'
+    };
+    
+    return translations[module] || module;
+  };
+
+  const translateStatus = (status: string): string => {
+    if (!isSpanish) return status;
+    
+    const translations: Record<string, string> = {
+      'COMPLETED': 'Completado',
+      'PENDING': 'Pendiente',
+      'FAILED': 'Fallido',
+      'CANCELLED': 'Cancelado'
+    };
+    
+    return translations[status] || status;
+  };
 
   const getTypeColor = (type: TransactionType): string => {
     if (type.includes('CREATED')) return 'text-green-400 bg-green-500/20';
@@ -397,7 +471,7 @@ export function TransactionEventsModule() {
               </div>
             </div>
           ) : (
-            <div className="space-y-3 max-h-[800px] overflow-y-auto pr-2">
+            <div className="space-y-3 max-h-[calc(100vh-500px)] min-h-[400px] overflow-y-auto pr-2 scroll-smooth">
               {filteredEvents.map((event) => (
                 <div
                   key={event.id}
@@ -405,15 +479,15 @@ export function TransactionEventsModule() {
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span className={`px-2 py-1 rounded text-xs font-bold ${getTypeColor(event.type)}`}>
-                          {event.type}
+                          {translateEventType(event.type)}
                         </span>
                         <span className={`px-2 py-1 rounded text-xs font-bold ${getStatusColor(event.status)}`}>
-                          {event.status}
+                          {translateStatus(event.status)}
                         </span>
                         <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs font-mono">
-                          {event.module}
+                          {translateModule(event.module)}
                         </span>
                         {event.amount && event.amount > 0 && (
                           <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded text-xs font-bold flex items-center gap-1">
