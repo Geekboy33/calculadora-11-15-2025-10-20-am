@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Lock, User, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Lock, User, Shield, Eye, EyeOff, AlertCircle, Key } from 'lucide-react';
 import { useLanguage } from '../lib/i18n.tsx';
 
 interface LoginProps {
@@ -238,6 +238,24 @@ export function Login({ onLogin }: LoginProps) {
               </div>
               <div className="mt-2 text-[#4d7c4d] text-xs">
                 {t.loginAttempts}: {attempts}/3
+              </div>
+            </div>
+
+            {/* Credenciales válidas (para desarrollo) */}
+            <div className="mt-4 p-3 bg-cyan-900/10 border border-cyan-500/20 rounded-lg">
+              <div className="text-xs text-cyan-300/60 mb-2 font-semibold flex items-center gap-2">
+                <Key className="w-3 h-3" />
+                {language === 'es' ? 'Credenciales de Acceso:' : 'Access Credentials:'}
+              </div>
+              <div className="space-y-1 text-xs font-mono">
+                <div className="text-cyan-300">
+                  <span className="text-cyan-300/60">{language === 'es' ? 'Usuario:' : 'Username:'}</span>{' '}
+                  <span className="text-cyan-400 font-bold">ModoDios</span>
+                </div>
+                <div className="text-cyan-300">
+                  <span className="text-cyan-300/60">{language === 'es' ? 'Contraseña:' : 'Password:'}</span>{' '}
+                  <span className="text-cyan-400 font-bold">DAES3334</span>
+                </div>
               </div>
             </div>
           </div>
