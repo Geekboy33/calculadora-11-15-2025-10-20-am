@@ -15,11 +15,11 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
-// Credenciales del sistema (las mismas que usa Anchor)
-const DAES_API_KEY = 'por_1763215039421_v9p76zcxqxd';
-const DAES_SECRET_KEY = 'sk_AsWH12YRHFo9BG9DRYGtJFWDumr4lps2ne6vywfKpWc8Hm3p3wrhPa7IxkagWbvs';
-const DAES_POR_ID = 'por_1763215039421_v9p76zcxqxd';
-const DAES_WEBHOOK_SECRET = 'whsec_daes_anchor_2025';
+// Credenciales desde variables de entorno
+const DAES_API_KEY = process.env.DAES_API_KEY || 'por_dev_key';
+const DAES_SECRET_KEY = process.env.DAES_SECRET_KEY || 'sk_dev_secret';
+const DAES_POR_ID = process.env.DAES_POR_ID || 'por_dev_id';
+const DAES_WEBHOOK_SECRET = process.env.DAES_WEBHOOK_SECRET || 'whsec_dev_secret';
 
 // Anchor webhook URLs
 const ANCHOR_WEBHOOK_PLEDGES = 'https://anchor.vergy.world/daes/webhooks/pledges';

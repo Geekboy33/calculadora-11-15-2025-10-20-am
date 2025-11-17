@@ -24,9 +24,13 @@ dist-ssr
 # Archivos con claves privadas y datos sensibles
 .env
 .env.*
+.env.local
+.env.development.local
+.env.production.local
 server/data/apiKeys.json
 server/data/porReports.json
 PoR_API_SETUP.md
 
 # Local Netlify folder
 .netlify
+.netlify.state.json

@@ -9,11 +9,11 @@ export async function secureAPIRequest(
   body?: any
 ) {
   try {
-    // En desarrollo local, usar servidor directo
+    // En desarrollo local, usar servidor directo con claves de env
     if (import.meta.env.DEV) {
-      const API_BASE = 'http://localhost:8788';
-      const DAES_API_KEY = 'por_1763215039421_v9p76zcxqxd';
-      const DAES_SECRET_KEY = 'sk_AsWH12YRHFo9BG9DRYGtJFWDumr4lps2ne6vywfKpWc8Hm3p3wrhPa7IxkagWbvs';
+      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8788';
+      const DAES_API_KEY = import.meta.env.VITE_DAES_API_KEY || 'por_dev_key';
+      const DAES_SECRET_KEY = import.meta.env.VITE_DAES_SECRET_KEY || 'sk_dev_secret';
       
       const response = await fetch(`${API_BASE}${endpoint}`, {
         method,
