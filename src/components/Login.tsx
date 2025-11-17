@@ -136,8 +136,17 @@ export function Login({ onLogin }: LoginProps) {
             <p className="text-cyber text-sm font-semibold tracking-widest">
               {t.loginSubtitle}
             </p>
-            <div className="mt-4 text-[#4d7c4d] text-xs font-mono">
-              CoreBanking Security Gateway
+            <div className="mt-4 space-y-2">
+              <div className="text-[#00ff88] text-sm font-bold">
+                Digital Commercial Bank Ltd
+              </div>
+              <div className="text-[#4d7c4d] text-xs font-mono space-y-1">
+                <div>International Banking License Number: L 15446</div>
+                <div>Company Number: 15446</div>
+              </div>
+              <div className="text-[#4d7c4d] text-xs font-mono mt-2">
+                CoreBanking Security Gateway
+              </div>
             </div>
           </div>
 
