@@ -376,6 +376,10 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
   const testAnchorConnection = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      console.log('[API1] 🔌 Probando conexión con API1...');
+      console.log('[API1] 📡 URL:', `${API_BASE}/api/v1/proof-of-reserves/${POR_ID}`);
       
       const response = await fetch(`${API_BASE}/api/v1/proof-of-reserves/${POR_ID}`, {
         method: 'GET',
@@ -386,28 +390,54 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
         }
       });
       
+      console.log('[API1] 📥 Respuesta recibida:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('[API1] ✅ Data:', data);
+        
         alert(
-          `✅ ${isSpanish ? 'Conexión exitosa con API' : 'Successful API connection'}\n\n` +
+          `✅ ${isSpanish ? 'Conexión exitosa con API1' : 'Successful API1 connection'}\n\n` +
           `Endpoint: ${API_BASE}/api/v1/proof-of-reserves/${POR_ID}\n` +
-          `Status: ${response.status}\n` +
-          `CIRC_CAP: $${data.data?.summary?.totalCirculatingCap || 0}`
+          `Status: ${response.status} OK\n` +
+          `PoR ID: ${data.porId || POR_ID}\n` +
+          `Total Reserves: $${parseFloat(data.totalUsdReserves || 0).toLocaleString()}\n` +
+          `Total Pledges: $${parseFloat(data.totalUsdPledges || 0).toLocaleString()}\n` +
+          `CIRC_CAP: $${parseFloat(data.circulatingCap || 0).toLocaleString()}\n` +
+          `Coverage Ratio: ${parseFloat(data.coverageRatio || 0).toFixed(4)}\n\n` +
+          `✓ ${isSpanish ? 'Servidor API1 funcionando correctamente' : 'API1 server working correctly'}`
         );
       } else {
-        const error = await response.json();
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[API1] ❌ Error response:', errorData);
+        
         alert(
-          `⚠️ ${isSpanish ? 'Respuesta del servidor' : 'Server response'}\n\n` +
-          `Status: ${response.status}\n` +
-          `Error: ${error.error || 'Unknown'}`
+          `⚠️ ${isSpanish ? 'Error del servidor API1' : 'API1 server error'}\n\n` +
+          `Status: ${response.status} ${response.statusText}\n` +
+          `Error: ${errorData.error || 'Unknown'}\n` +
+          `Message: ${errorData.message || 'No details'}\n\n` +
+          `${isSpanish ? '💡 Verifica que el servidor esté corriendo:' : '💡 Verify server is running:'}\n` +
+          `npm run server:api1`
         );
       }
     } catch (err) {
+      console.error('[API1] ❌ Error de conexión:', err);
+      
+      const errorMessage = (err as Error).message;
+      
       alert(
-        `❌ ${isSpanish ? 'Error de conexión' : 'Connection error'}\n\n` +
-        `${(err as Error).message}\n\n` +
-        `${isSpanish ? 'Verifica que el servidor API esté corriendo en puerto 8788' : 'Verify API server is running on port 8788'}`
+        `❌ ${isSpanish ? 'No se pudo conectar al servidor API1' : 'Could not connect to API1 server'}\n\n` +
+        `Error: ${errorMessage}\n\n` +
+        `${isSpanish ? '🔧 Solución:' : '🔧 Solution:'}\n` +
+        `1. ${isSpanish ? 'Abre una nueva terminal' : 'Open a new terminal'}\n` +
+        `2. cd "${isSpanish ? 'carpeta-proyecto' : 'project-folder'}"\n` +
+        `3. npm run server:api1\n\n` +
+        `${isSpanish ? 'El servidor debe iniciar en puerto 8788' : 'Server should start on port 8788'}`
       );
+      
+      setError(isSpanish 
+        ? 'Servidor API1 no disponible. Ejecuta: npm run server:api1'
+        : 'API1 server not available. Run: npm run server:api1');
     } finally {
       setLoading(false);
     }
