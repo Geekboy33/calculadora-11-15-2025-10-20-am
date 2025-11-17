@@ -725,6 +725,42 @@ class CustodyStore {
   }
 
   /**
+   * Actualizar balance de una cuenta
+   */
+  updateAccountBalance(accountId: string, newTotalBalance: number): boolean {
+    const accounts = this.getAccounts();
+    const account = accounts.find(a => a.id === accountId);
+    
+    if (!account) {
+      console.error('[CustodyStore] Cuenta no encontrada:', accountId);
+      return false;
+    }
+    
+    // Validar que el nuevo balance no sea menor que el reservado
+    if (newTotalBalance < account.reservedBalance) {
+      console.error('[CustodyStore] ❌ El nuevo balance no puede ser menor que el monto reservado');
+      return false;
+    }
+    
+    const oldBalance = account.totalBalance;
+    account.totalBalance = newTotalBalance;
+    account.availableBalance = newTotalBalance - account.reservedBalance;
+    account.lastUpdated = new Date().toISOString();
+    
+    this.saveAccounts(accounts);
+    
+    console.log('[CustodyStore] ✅ Balance actualizado:', {
+      account: account.accountName,
+      oldBalance,
+      newBalance: newTotalBalance,
+      change: newTotalBalance - oldBalance,
+      newAvailable: account.availableBalance
+    });
+    
+    return true;
+  }
+
+  /**
    * Guardar cuentas
    */
   private saveAccounts(accounts: CustodyAccount[]): void {

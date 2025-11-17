@@ -832,16 +832,14 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                           '1000'
                         );
                         if (amount && !isNaN(parseFloat(amount))) {
-                          const newTotal = account.totalBalance + parseFloat(amount);
-                          const accounts = custodyStore.getAccounts();
-                          const acc = accounts.find(a => a.id === account.id);
-                          if (acc) {
-                            acc.totalBalance = newTotal;
-                            acc.availableBalance = newTotal - acc.reservedBalance;
-                            custodyStore['accounts'] = accounts;
-                            localStorage.setItem('custody_accounts', JSON.stringify(accounts));
+                          const addAmount = parseFloat(amount);
+                          const newTotal = account.totalBalance + addAmount;
+                          
+                          if (custodyStore.updateAccountBalance(account.id, newTotal)) {
                             loadCustodyAccounts();
-                            alert(`✅ Capital agregado\n\n+${account.currency} ${parseFloat(amount).toLocaleString()}\nNuevo total: ${account.currency} ${newTotal.toLocaleString()}`);
+                            alert(`✅ ${isSpanish ? 'Capital agregado' : 'Funds added'}\n\n+${account.currency} ${addAmount.toLocaleString()}\n${isSpanish ? 'Nuevo total:' : 'New total:'} ${account.currency} ${newTotal.toLocaleString()}`);
+                          } else {
+                            alert(`❌ Error ${isSpanish ? 'al agregar capital' : 'adding funds'}`);
                           }
                         }
                       }}
@@ -862,19 +860,17 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         if (amount && !isNaN(parseFloat(amount))) {
                           const withdrawAmount = parseFloat(amount);
                           const newTotal = account.totalBalance - withdrawAmount;
+                          
                           if (newTotal < account.reservedBalance) {
-                            alert(`❌ Error\n\nNo puedes reducir el balance por debajo del monto reservado (${account.currency} ${account.reservedBalance.toLocaleString()})`);
+                            alert(`❌ Error\n\n${isSpanish ? 'No puedes reducir el balance por debajo del monto reservado' : 'Cannot reduce balance below reserved amount'} (${account.currency} ${account.reservedBalance.toLocaleString()})`);
                             return;
                           }
-                          const accounts = custodyStore.getAccounts();
-                          const acc = accounts.find(a => a.id === account.id);
-                          if (acc) {
-                            acc.totalBalance = newTotal;
-                            acc.availableBalance = newTotal - acc.reservedBalance;
-                            custodyStore['accounts'] = accounts;
-                            localStorage.setItem('custody_accounts', JSON.stringify(accounts));
+                          
+                          if (custodyStore.updateAccountBalance(account.id, newTotal)) {
                             loadCustodyAccounts();
-                            alert(`✅ Capital retirado\n\n-${account.currency} ${withdrawAmount.toLocaleString()}\nNuevo total: ${account.currency} ${newTotal.toLocaleString()}`);
+                            alert(`✅ ${isSpanish ? 'Capital retirado' : 'Funds withdrawn'}\n\n-${account.currency} ${withdrawAmount.toLocaleString()}\n${isSpanish ? 'Nuevo total:' : 'New total:'} ${account.currency} ${newTotal.toLocaleString()}`);
+                          } else {
+                            alert(`❌ Error ${isSpanish ? 'al retirar capital' : 'withdrawing funds'}`);
                           }
                         }
                       }}
