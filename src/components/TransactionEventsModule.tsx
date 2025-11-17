@@ -415,6 +415,12 @@ export function TransactionEventsModule() {
                         <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs font-mono">
                           {event.module}
                         </span>
+                        {event.amount && event.amount > 0 && (
+                          <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded text-xs font-bold flex items-center gap-1">
+                            <DollarSign className="w-3 h-3" />
+                            {event.currency} {event.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        )}
                       </div>
                       <div className="text-white font-semibold mb-1">{event.description}</div>
                       <div className="flex items-center gap-4 text-xs text-cyan-300/60">
@@ -425,14 +431,6 @@ export function TransactionEventsModule() {
                         <span className="font-mono">{event.id}</span>
                       </div>
                     </div>
-                    {event.amount && (
-                      <div className="text-right">
-                        <div className="text-xs text-cyan-300/60 mb-1">{isSpanish ? 'Monto' : 'Amount'}</div>
-                        <div className="text-xl font-bold text-cyan-300">
-                          {event.currency} {event.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Detalles adicionales */}
