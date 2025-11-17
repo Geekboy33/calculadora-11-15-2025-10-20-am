@@ -145,22 +145,32 @@ export function ProofOfReservesAPI1Module() {
       setLoading(true);
       setError(null);
       
-      console.log('[API1] 🔄 Cargando datos...');
+      console.log('[API1] 🔄 Cargando datos desde localStorage y stores...');
       
-      // Cargar pledges desde localStorage de API1 (con vínculos a PoR)
+      // 1. Cargar pledges de API1 desde localStorage
       const savedAPI1Pledges = localStorage.getItem('api1_pledges');
       let activePledges: PledgeAPI1[] = [];
       
       if (savedAPI1Pledges) {
         const parsed = JSON.parse(savedAPI1Pledges);
         activePledges = parsed.filter((p: PledgeAPI1) => p.status === 'ACTIVE');
-        console.log('[API1] ✅ Pledges cargados desde localStorage:', activePledges.length);
+        console.log('[API1] ✅ Pledges API1 cargados:', activePledges.length);
       }
       
       setPledges(activePledges);
-      console.log('[API1] 📊 Pledges activos:', activePledges.length);
       
-      // Calcular resumen de reservas
+      // 2. Recargar PoR reports desde API VUSD
+      loadPorReportsFromVUSD();
+      
+      // 3. Cargar payouts desde localStorage
+      const savedPayouts = localStorage.getItem('api1_payouts');
+      if (savedPayouts) {
+        const parsed = JSON.parse(savedPayouts);
+        setPayouts(parsed);
+        console.log('[API1] ✅ Payouts cargados:', parsed.length);
+      }
+      
+      // 4. Calcular resumen de reservas desde custody accounts
       const custodyAccounts = custodyStore.getAccounts();
       const totalReserves = custodyAccounts
         .filter(a => a.currency === 'USD')
@@ -180,12 +190,25 @@ export function ProofOfReservesAPI1Module() {
         coverageRatio: coverageRatio.toFixed(4)
       });
       
-      console.log('[API1] ✅ Datos cargados:', {
+      console.log('[API1] ✅ Refresh completado:', {
         pledges: activePledges.length,
+        payouts: savedPayouts ? JSON.parse(savedPayouts).length : 0,
+        porReports: porReports.length,
         totalReserves,
         totalPledges,
         circulatingCap
       });
+      
+      // 5. Mostrar confirmación
+      if (!loading) {
+        alert(
+          `✅ ${isSpanish ? 'Datos actualizados' : 'Data refreshed'}\n\n` +
+          `${isSpanish ? 'Pledges:' : 'Pledges:'} ${activePledges.length}\n` +
+          `${isSpanish ? 'PoR Reports:' : 'PoR Reports:'} ${porReports.length}\n` +
+          `${isSpanish ? 'Reservas Totales:' : 'Total Reserves:'} $${totalReserves.toLocaleString()}\n` +
+          `CIRC_CAP: $${circulatingCap.toLocaleString()}`
+        );
+      }
       
     } catch (err) {
       console.error('[API1] ❌ Error cargando datos:', err);
@@ -435,6 +458,12 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
             accountType: payoutForm.accountType
           }
         };
+        
+        // Guardar en localStorage
+        const savedPayouts = localStorage.getItem('api1_payouts');
+        const currentPayouts = savedPayouts ? JSON.parse(savedPayouts) : [];
+        currentPayouts.unshift(newPayout); // Agregar al inicio
+        localStorage.setItem('api1_payouts', JSON.stringify(currentPayouts));
         
         setPayouts(prev => [newPayout, ...prev]);
         
