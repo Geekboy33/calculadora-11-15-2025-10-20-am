@@ -41,7 +41,8 @@ type Tab = 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | '
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isSpanish = language === 'es';
   const { isAuthenticated, user, login, logout } = useAuth();
 
   // Detectar si es una URL de verificación pública
