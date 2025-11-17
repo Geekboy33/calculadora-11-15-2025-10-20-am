@@ -7,6 +7,7 @@
 import { custodyStore } from './custody-store';
 import { apiVUSD1Store } from './api-vusd1-store';
 import { transactionEventStore } from './transaction-event-store';
+import { StorageManager } from './storage-manager';
 
 export interface UnifiedPledge {
   id: string;
@@ -179,10 +180,27 @@ class UnifiedPledgeStore {
       anchored_coins: params.amount
     };
 
-    // Save to storage
+    // Save to storage with quota check
     const pledges = this.getPledges();
     pledges.push(pledge);
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(pledges));
+    
+    const success = StorageManager.safeSetItem(this.STORAGE_KEY, JSON.stringify(pledges));
+    
+    if (!success) {
+      // Mostrar alerta y permitir limpieza
+      const cleaned = StorageManager.showQuotaExceededAlert('es');
+      
+      if (cleaned) {
+        // Reintentar después de limpieza
+        const retrySuccess = StorageManager.safeSetItem(this.STORAGE_KEY, JSON.stringify(pledges));
+        
+        if (!retrySuccess) {
+          throw new Error('No se pudo guardar el pledge incluso después de limpiar el almacenamiento. Contacta al administrador.');
+        }
+      } else {
+        throw new Error('Operación cancelada por el usuario. Limpia el almacenamiento para continuar.');
+      }
+    }
 
     console.log('[UnifiedPledgeStore] ✅ Pledge created:', pledge);
 
