@@ -64,6 +64,8 @@ export function ProofOfReservesAPI1Module() {
   const [reserveSummary, setReserveSummary] = useState<ReserveSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [porReports, setPorReports] = useState<any[]>([]);
+  const [availablePledgesVUSD, setAvailablePledgesVUSD] = useState<any[]>([]);
   
   // API Credentials (from existing PoR)
   const API_KEY = 'por_1763215039421_v9p76zcxqxd';
@@ -80,7 +82,9 @@ export function ProofOfReservesAPI1Module() {
     currency: 'USD',
     termDays: 90,
     beneficiary: 'VUSD',
-    notes: ''
+    notes: '',
+    selectedVUSDPledge: '',
+    selectedPorReport: ''
   });
   
   const [payoutForm, setPayoutForm] = useState({
@@ -96,7 +100,38 @@ export function ProofOfReservesAPI1Module() {
       console.error('[API1] ❌ Error crítico en mount:', err);
       setError('Error al inicializar módulo');
     });
+    
+    // Cargar PoR reports desde API VUSD
+    loadPorReportsFromVUSD();
+    
+    // Auto-reload cada 5 segundos
+    const interval = setInterval(() => {
+      loadPorReportsFromVUSD();
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, []);
+
+  const loadPorReportsFromVUSD = () => {
+    try {
+      const saved = localStorage.getItem('vusd_por_reports');
+      if (saved) {
+        const reports = JSON.parse(saved);
+        setPorReports(reports);
+        console.log('[API1] ✅ PoR reports cargados desde API VUSD:', reports.length);
+      }
+      
+      // Cargar pledges de API VUSD
+      const unifiedPledges = unifiedPledgeStore.getPledges();
+      const vusdPledges = unifiedPledges.filter(p => 
+        p.source_module === 'API_VUSD' && p.status === 'ACTIVE'
+      );
+      setAvailablePledgesVUSD(vusdPledges);
+      console.log('[API1] ✅ Pledges VUSD disponibles:', vusdPledges.length);
+    } catch (err) {
+      console.error('[API1] ⚠️ Error cargando PoR/Pledges VUSD:', err);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -656,19 +691,97 @@ export function ProofOfReservesAPI1Module() {
         </div>
       )}
 
-      {/* Create Pledge Modal */}
+      {/* Create Pledge Modal - Integrado con API VUSD */}
       {showCreatePledgeModal && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0d0d0d] border-2 border-green-500 rounded-xl max-w-2xl w-full p-6">
+          <div className="bg-[#0d0d0d] border-2 border-green-500 rounded-xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <h3 className="text-2xl font-bold text-green-300 mb-6 flex items-center gap-3">
               <Lock className="w-7 h-7" />
-              {isSpanish ? 'Crear Nuevo Pledge' : 'Create New Pledge'}
+              {isSpanish ? 'Crear Pledge para Anchor VUSD' : 'Create Pledge for Anchor VUSD'}
             </h3>
 
             <div className="space-y-4">
+              {/* Seleccionar Pledge de API VUSD */}
+              <div className="bg-cyan-900/20 border border-cyan-500/30 rounded-lg p-4">
+                <label className="block text-cyan-300 text-sm mb-3 font-semibold flex items-center gap-2">
+                  <Database className="w-4 h-4" />
+                  {isSpanish ? '1. Seleccionar Pledge de API VUSD (Opcional):' : '1. Select Pledge from API VUSD (Optional):'}
+                </label>
+                {availablePledgesVUSD.length === 0 ? (
+                  <div className="bg-yellow-900/20 border border-yellow-500/30 rounded p-3 text-sm text-yellow-300">
+                    ⚠️ {isSpanish 
+                      ? 'No hay pledges en API VUSD. Puedes crear uno manualmente o ir a API VUSD primero.'
+                      : 'No pledges in API VUSD. You can create one manually or go to API VUSD first.'}
+                  </div>
+                ) : (
+                  <select
+                    value={pledgeForm.selectedVUSDPledge}
+                    onChange={(e) => {
+                      const pledgeId = e.target.value;
+                      
+                      if (pledgeId) {
+                        const selectedPledge = availablePledgesVUSD.find(p => p.id === pledgeId);
+                        if (selectedPledge) {
+                          setPledgeForm({
+                            ...pledgeForm,
+                            selectedVUSDPledge: pledgeId,
+                            amountUsd: selectedPledge.amount,
+                            currency: selectedPledge.currency,
+                            beneficiary: selectedPledge.beneficiary
+                          });
+                        }
+                      } else {
+                        setPledgeForm({
+                          ...pledgeForm,
+                          selectedVUSDPledge: '',
+                          amountUsd: 0,
+                          beneficiary: 'VUSD'
+                        });
+                      }
+                    }}
+                    className="w-full bg-[#0a0a0a] border border-cyan-500/30 rounded-lg px-4 py-3 text-white"
+                  >
+                    <option value="">{isSpanish ? '-- Crear manualmente --' : '-- Create manually --'}</option>
+                    {availablePledgesVUSD.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.id} | ${p.amount.toLocaleString()} | {p.beneficiary}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Seleccionar PoR Report de API VUSD */}
+              <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
+                <label className="block text-purple-300 text-sm mb-3 font-semibold flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  {isSpanish ? '2. Vincular Proof of Reserve (Opcional):' : '2. Link Proof of Reserve (Optional):'}
+                </label>
+                {porReports.length === 0 ? (
+                  <div className="bg-yellow-900/20 border border-yellow-500/30 rounded p-3 text-sm text-yellow-300">
+                    ⚠️ {isSpanish 
+                      ? 'No hay PoR generados. Ve a API VUSD → Proof of Reserve para generar uno.'
+                      : 'No PoR generated. Go to API VUSD → Proof of Reserve to generate one.'}
+                  </div>
+                ) : (
+                  <select
+                    value={pledgeForm.selectedPorReport}
+                    onChange={(e) => setPledgeForm({ ...pledgeForm, selectedPorReport: e.target.value })}
+                    className="w-full bg-[#0a0a0a] border border-purple-500/30 rounded-lg px-4 py-3 text-white"
+                  >
+                    <option value="">{isSpanish ? '-- Sin vincular --' : '-- No link --'}</option>
+                    {porReports.map((por, i) => (
+                      <option key={por.id} value={por.id}>
+                        PoR #{porReports.length - i} | Cap: ${por.circulatingCap.toLocaleString()} | {new Date(por.timestamp).toLocaleDateString()}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
               <div>
                 <label className="block text-green-300 text-sm mb-2 font-semibold">
-                  {isSpanish ? 'Monto USD:' : 'USD Amount:'}
+                  {isSpanish ? '3. Monto USD:' : '3. USD Amount:'}
                 </label>
                 <input
                   type="number"
@@ -677,27 +790,34 @@ export function ProofOfReservesAPI1Module() {
                   onChange={(e) => setPledgeForm({ ...pledgeForm, amountUsd: parseFloat(e.target.value) || 0 })}
                   className="w-full bg-[#0a0a0a] border border-green-500/30 rounded-lg px-4 py-3 text-white font-mono text-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
                   placeholder="0.00"
+                  disabled={!!pledgeForm.selectedVUSDPledge}
                 />
+                {pledgeForm.selectedVUSDPledge && (
+                  <div className="text-xs text-cyan-300 mt-1">
+                    ✓ {isSpanish ? 'Monto auto-cargado desde pledge VUSD' : 'Amount auto-loaded from VUSD pledge'}
+                  </div>
+                )}
               </div>
 
               <div>
                 <label className="block text-green-300 text-sm mb-2 font-semibold">
-                  {isSpanish ? 'Beneficiario:' : 'Beneficiary:'}
+                  {isSpanish ? '4. Beneficiario:' : '4. Beneficiary:'}
                 </label>
                 <input
                   type="text"
                   value={pledgeForm.beneficiary}
                   onChange={(e) => setPledgeForm({ ...pledgeForm, beneficiary: e.target.value })}
                   className="w-full bg-[#0a0a0a] border border-green-500/30 rounded-lg px-4 py-3 text-white"
+                  disabled={!!pledgeForm.selectedVUSDPledge}
                 />
               </div>
 
               <div>
                 <label className="block text-green-300 text-sm mb-2 font-semibold">
-                  {isSpanish ? 'Plazo (días):' : 'Term (days):'}
+                  {isSpanish ? '5. Plazo (días):' : '5. Term (days):'}
                 </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {[30, 60, 90, 180].map(days => (
+                <div className="grid grid-cols-3 gap-2">
+                  {[60, 90, 180].map(days => (
                     <button
                       key={days}
                       type="button"
@@ -716,7 +836,7 @@ export function ProofOfReservesAPI1Module() {
 
               <div>
                 <label className="block text-green-300 text-sm mb-2 font-semibold">
-                  {isSpanish ? 'Notas (opcional):' : 'Notes (optional):'}
+                  {isSpanish ? '6. Notas (opcional):' : '6. Notes (optional):'}
                 </label>
                 <textarea
                   value={pledgeForm.notes}
@@ -737,7 +857,9 @@ export function ProofOfReservesAPI1Module() {
                     currency: 'USD',
                     termDays: 90,
                     beneficiary: 'VUSD',
-                    notes: ''
+                    notes: '',
+                    selectedVUSDPledge: '',
+                    selectedPorReport: ''
                   });
                 }}
                 className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525] font-semibold"
@@ -749,7 +871,7 @@ export function ProofOfReservesAPI1Module() {
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-black rounded-lg hover:shadow-[0_0_20px_rgba(34,197,94,0.6)] font-bold flex items-center justify-center gap-2"
               >
                 <Lock className="w-5 h-5" />
-                {isSpanish ? 'Crear Pledge' : 'Create Pledge'}
+                {isSpanish ? 'Crear Pledge para Anchor' : 'Create Pledge for Anchor'}
               </button>
             </div>
           </div>
