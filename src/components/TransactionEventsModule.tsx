@@ -32,10 +32,30 @@ export function TransactionEventsModule() {
   });
 
   useEffect(() => {
+    console.log('[TxModule] 🔄 Inicializando módulo...');
     loadEvents();
+    
+    // Crear evento de prueba si no hay ninguno
+    const currentEvents = transactionEventStore.getEvents();
+    if (currentEvents.length === 0) {
+      console.log('[TxModule] 📝 Creando evento de prueba inicial...');
+      transactionEventStore.recordEvent(
+        'ACCOUNT_CREATED',
+        'SYSTEM',
+        'Sistema de eventos inicializado correctamente',
+        {
+          status: 'COMPLETED',
+          metadata: {
+            version: '5.2.0',
+            initialized: new Date().toISOString()
+          }
+        }
+      );
+    }
     
     // Suscribirse a cambios en tiempo real
     const unsubscribe = transactionEventStore.subscribe((updatedEvents) => {
+      console.log('[TxModule] 🔔 Eventos actualizados:', updatedEvents.length);
       setEvents(updatedEvents);
       applyFilters(updatedEvents);
     });
@@ -88,6 +108,22 @@ export function TransactionEventsModule() {
     }
 
     setFilteredEvents(filtered);
+  };
+
+  const generateTestEvents = () => {
+    // Generar eventos de prueba
+    transactionEventStore.recordAccountCreated('Test USD Account', 'USD', 5000000, 'TEST-ACC-001');
+    transactionEventStore.recordBalanceIncrease('TEST-ACC-001', 'Test USD Account', 1000000, 'USD', 5000000, 6000000);
+    transactionEventStore.recordPledgeCreated('API_VUSD', 'TEST-PLD-001', 500000, 'Test Corp', 'Test USD Account');
+    transactionEventStore.recordPorGenerated(500000, 1, 'TEST-POR-001');
+    
+    loadEvents();
+    
+    alert(
+      `✅ ${isSpanish ? 'Eventos de prueba generados' : 'Test events generated'}\n\n` +
+      `${isSpanish ? 'Se crearon 4 eventos de ejemplo' : '4 sample events created'}\n\n` +
+      `${isSpanish ? 'Recarga la página para verlos' : 'Reload page to see them'}`
+    );
   };
 
   const downloadTXT = () => {
@@ -158,6 +194,13 @@ export function TransactionEventsModule() {
             </p>
           </div>
           <div className="flex gap-3">
+            <button
+              onClick={generateTestEvents}
+              className="px-4 py-2 bg-purple-500/20 border border-purple-500 text-purple-300 rounded-lg hover:bg-purple-500/30 flex items-center gap-2"
+            >
+              <Activity className="w-4 h-4" />
+              {isSpanish ? 'Test' : 'Test'}
+            </button>
             <button
               onClick={downloadCSV}
               className="px-4 py-2 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 flex items-center gap-2"
