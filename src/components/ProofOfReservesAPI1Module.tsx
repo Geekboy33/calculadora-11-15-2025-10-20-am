@@ -98,6 +98,9 @@ export function ProofOfReservesAPI1Module() {
     beneficiaryName: '',
     accountType: 'institutional' as 'institutional' | 'retail'
   });
+  
+  const [webhookLogs, setWebhookLogs] = useState<any[]>([]);
+  const [reconciliationData, setReconciliationData] = useState<any>(null);
 
   useEffect(() => {
     loadData().catch(err => {
@@ -371,6 +374,180 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
       (pledgeForm.selectedVUSDPledge ? `✓ ${isSpanish ? 'Vinculado a pledge VUSD' : 'Linked to VUSD pledge'}\n` : '') +
       (pledgeForm.selectedPorReport ? `✓ ${isSpanish ? 'Vinculado a PoR report' : 'Linked to PoR report'}` : '')
     );
+  };
+
+  const handleCreatePayout = async () => {
+    if (!payoutForm.pledgeId) {
+      alert(isSpanish ? '⚠️ Selecciona un pledge' : '⚠️ Select a pledge');
+      return;
+    }
+    
+    if (payoutForm.amountUsd <= 0) {
+      alert(isSpanish ? '⚠️ Ingresa un monto válido' : '⚠️ Enter a valid amount');
+      return;
+    }
+    
+    if (!payoutForm.externalRef) {
+      alert(isSpanish ? '⚠️ Ingresa una referencia externa' : '⚠️ Enter external reference');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      const idempotencyKey = `payout-${Date.now()}`;
+      
+      const response = await fetch(`${API_BASE}/api/v1/payouts`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${API_KEY}`,
+          'X-Secret-Key': SECRET_KEY,
+          'Content-Type': 'application/json',
+          'Idempotency-Key': idempotencyKey
+        },
+        body: JSON.stringify({
+          externalRef: payoutForm.externalRef,
+          amountUsd: payoutForm.amountUsd.toFixed(2),
+          currency: 'USD',
+          pledgeId: payoutForm.pledgeId,
+          beneficiary: {
+            name: payoutForm.beneficiaryName || 'Unknown',
+            accountType: payoutForm.accountType
+          },
+          callbackUrl: `${API_BASE}/webhooks/payouts/callback`
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Agregar a lista de payouts
+        const newPayout: PayoutAPI1 = {
+          payoutId: data.payoutId,
+          externalRef: payoutForm.externalRef,
+          pledgeId: payoutForm.pledgeId,
+          status: data.status,
+          amountUsd: payoutForm.amountUsd.toFixed(2),
+          currency: 'USD',
+          createdAt: data.createdAt,
+          beneficiary: {
+            name: payoutForm.beneficiaryName,
+            accountType: payoutForm.accountType
+          }
+        };
+        
+        setPayouts(prev => [newPayout, ...prev]);
+        
+        setShowCreatePayoutModal(false);
+        setPayoutForm({
+          pledgeId: '',
+          externalRef: '',
+          amountUsd: 0,
+          beneficiaryName: '',
+          accountType: 'institutional'
+        });
+        
+        alert(
+          `✅ ${isSpanish ? 'Payout creado exitosamente' : 'Payout created successfully'}\n\n` +
+          `Payout ID: ${data.payoutId}\n` +
+          `External Ref: ${payoutForm.externalRef}\n` +
+          `Amount: USD ${payoutForm.amountUsd.toLocaleString()}\n` +
+          `Status: ${data.status}\n\n` +
+          `${isSpanish ? 'El payout se procesará en 2 segundos' : 'Payout will be processed in 2 seconds'}`
+        );
+        
+        // Recargar después de 3 segundos para ver el payout completado
+        setTimeout(() => loadData(), 3000);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Payout creation failed');
+      }
+    } catch (err) {
+      console.error('[API1] ❌ Error creando payout:', err);
+      alert(`❌ Error: ${(err as Error).message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateReconciliation = async () => {
+    try {
+      setLoading(true);
+      
+      const today = new Date().toISOString().split('T')[0];
+      
+      const response = await fetch(
+        `${API_BASE}/api/v1/reconciliation?date=${today}&format=json`,
+        {
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'X-Secret-Key': SECRET_KEY
+          }
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        setReconciliationData(data);
+        
+        alert(
+          `✅ ${isSpanish ? 'Reporte de conciliación generado' : 'Reconciliation report generated'}\n\n` +
+          `${isSpanish ? 'Fecha:' : 'Date:'} ${data.date}\n` +
+          `${isSpanish ? 'Total Pledges:' : 'Total Pledges:'} ${data.summary.totalPledges}\n` +
+          `${isSpanish ? 'Monto Pledges:' : 'Pledges Amount:'} $${parseFloat(data.summary.totalPledgeAmount).toLocaleString()}\n` +
+          `${isSpanish ? 'Total Payouts:' : 'Total Payouts:'} ${data.summary.totalPayouts}\n` +
+          `${isSpanish ? 'Monto Payouts:' : 'Payouts Amount:'} $${parseFloat(data.summary.totalPayoutAmount).toLocaleString()}`
+        );
+      } else {
+        throw new Error('Failed to generate reconciliation');
+      }
+    } catch (err) {
+      console.error('[API1] ❌ Error generando reconciliación:', err);
+      alert(`❌ Error: ${(err as Error).message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const downloadReconciliationCSV = async () => {
+    try {
+      setLoading(true);
+      
+      const today = new Date().toISOString().split('T')[0];
+      
+      const response = await fetch(
+        `${API_BASE}/api/v1/reconciliation?date=${today}&format=csv`,
+        {
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+            'X-Secret-Key': SECRET_KEY
+          }
+        }
+      );
+      
+      if (response.ok) {
+        const csvText = await response.text();
+        const blob = new Blob([csvText], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `reconciliation_${today}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        alert(
+          `✅ ${isSpanish ? 'CSV descargado' : 'CSV downloaded'}\n\n` +
+          `${isSpanish ? 'Archivo:' : 'File:'} reconciliation_${today}.csv`
+        );
+      }
+    } catch (err) {
+      console.error('[API1] ❌ Error descargando CSV:', err);
+      alert(`❌ Error: ${(err as Error).message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const testAnchorConnection = async () => {
@@ -814,26 +991,104 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
             </button>
           </div>
 
-          <div className="text-center py-12">
-            <Send className="w-16 h-16 text-blue-400/30 mx-auto mb-4" />
-            <div className="text-blue-300/60 mb-2">
-              {isSpanish ? 'Sistema de payouts en desarrollo' : 'Payout system in development'}
+          {payouts.length === 0 ? (
+            <div className="text-center py-12">
+              <Send className="w-16 h-16 text-blue-400/30 mx-auto mb-4" />
+              <div className="text-blue-300/60 mb-2">
+                {isSpanish ? 'No hay payouts registrados' : 'No payouts registered'}
+              </div>
+              <div className="text-blue-300/40 text-sm">
+                {isSpanish 
+                  ? 'Compatible con SEP-24 para integración con Anchor'
+                  : 'SEP-24 compatible for Anchor integration'}
+              </div>
             </div>
-            <div className="text-blue-300/40 text-sm">
-              {isSpanish 
-                ? 'Compatible con SEP-24 para integración con Anchor'
-                : 'SEP-24 compatible for Anchor integration'}
+          ) : (
+            <div className="space-y-3">
+              {payouts.map((payout) => (
+                <div
+                  key={payout.payoutId}
+                  className="bg-[#0d0d0d] border border-blue-500/30 rounded-lg p-6"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className={`px-3 py-1 text-xs rounded font-bold ${
+                          payout.status === 'COMPLETED' ? 'bg-green-500/20 text-green-300' :
+                          payout.status === 'PROCESSING' ? 'bg-yellow-500/20 text-yellow-300' :
+                          payout.status === 'FAILED' ? 'bg-red-500/20 text-red-400' :
+                          'bg-blue-500/20 text-blue-300'
+                        }`}>
+                          {payout.status}
+                        </span>
+                        <span className="text-white font-mono text-sm">{payout.payoutId}</span>
+                      </div>
+                      <div className="text-sm text-blue-300/60">
+                        External Ref: {payout.externalRef}
+                      </div>
+                    </div>
+                    <Send className="w-8 h-8 text-blue-400" />
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <div className="text-blue-300/60 mb-1">{isSpanish ? 'Monto:' : 'Amount:'}</div>
+                      <div className="text-xl font-bold text-blue-300">
+                        ${parseFloat(payout.amountUsd).toLocaleString()}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-cyan-300/60 mb-1">{isSpanish ? 'Beneficiario:' : 'Beneficiary:'}</div>
+                      <div className="text-cyan-300">{payout.beneficiary.name}</div>
+                    </div>
+                    <div>
+                      <div className="text-purple-300/60 mb-1">{isSpanish ? 'Creado:' : 'Created:'}</div>
+                      <div className="text-purple-300 text-sm">
+                        {new Date(payout.createdAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
+                      </div>
+                    </div>
+                    {payout.completedAt && (
+                      <div>
+                        <div className="text-green-300/60 mb-1">{isSpanish ? 'Completado:' : 'Completed:'}</div>
+                        <div className="text-green-300 text-sm">
+                          {new Date(payout.completedAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
         </div>
       )}
 
       {/* Reconciliation Section */}
       {selectedView === 'reconciliation' && (
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-purple-300 mb-4">
-            {isSpanish ? 'Conciliación Diaria' : 'Daily Reconciliation'}
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-purple-300">
+              {isSpanish ? 'Conciliación Diaria' : 'Daily Reconciliation'}
+            </h2>
+            <div className="flex gap-2">
+              <button
+                onClick={downloadReconciliationCSV}
+                disabled={loading}
+                className="px-4 py-2 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 flex items-center gap-2 disabled:opacity-50"
+              >
+                <Download className="w-4 h-4" />
+                CSV
+              </button>
+              <button
+                onClick={generateReconciliation}
+                disabled={loading}
+                className="px-6 py-3 bg-purple-500/20 border border-purple-500 text-purple-300 rounded-lg hover:bg-purple-500/30 flex items-center gap-2 font-bold disabled:opacity-50"
+              >
+                <FileText className="w-5 h-5" />
+                {isSpanish ? 'Generar Reporte' : 'Generate Report'}
+              </button>
+            </div>
+          </div>
 
           <div className="bg-[#0d0d0d] border border-purple-500/30 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -847,12 +1102,37 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                 ? 'Genera reportes CSV/JSON con pledges, payouts y movimientos del día'
                 : 'Generate CSV/JSON reports with pledges, payouts and daily movements'}
             </div>
-            <button
-              className="px-6 py-3 bg-purple-500/20 border border-purple-500 text-purple-300 rounded-lg hover:bg-purple-500/30 flex items-center gap-2"
-            >
-              <Download className="w-5 h-5" />
-              {isSpanish ? 'Generar Reporte' : 'Generate Report'}
-            </button>
+            
+            {reconciliationData ? (
+              <div className="bg-black/30 rounded-lg p-4 space-y-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="bg-purple-900/20 rounded p-3">
+                    <div className="text-purple-300/60 mb-1">{isSpanish ? 'Fecha:' : 'Date:'}</div>
+                    <div className="text-purple-300 font-bold">{reconciliationData.date}</div>
+                  </div>
+                  <div className="bg-green-900/20 rounded p-3">
+                    <div className="text-green-300/60 mb-1">{isSpanish ? 'Pledges:' : 'Pledges:'}</div>
+                    <div className="text-green-300 font-bold">{reconciliationData.summary.totalPledges}</div>
+                  </div>
+                  <div className="bg-blue-900/20 rounded p-3">
+                    <div className="text-blue-300/60 mb-1">{isSpanish ? 'Payouts:' : 'Payouts:'}</div>
+                    <div className="text-blue-300 font-bold">{reconciliationData.summary.totalPayouts}</div>
+                  </div>
+                  <div className="bg-cyan-900/20 rounded p-3">
+                    <div className="text-cyan-300/60 mb-1">{isSpanish ? 'Neto:' : 'Net:'}</div>
+                    <div className="text-cyan-300 font-bold">
+                      ${(parseFloat(reconciliationData.summary.totalPledgeAmount) - parseFloat(reconciliationData.summary.totalPayoutAmount)).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6 text-purple-300/60">
+                {isSpanish 
+                  ? 'Click "Generar Reporte" para ver datos de hoy'
+                  : 'Click "Generate Report" to view today\'s data'}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1100,6 +1380,137 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               >
                 <Lock className="w-5 h-5" />
                 {isSpanish ? 'Crear Pledge para Anchor' : 'Create Pledge for Anchor'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Payout Modal */}
+      {showCreatePayoutModal && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0d0d0d] border-2 border-blue-500 rounded-xl max-w-2xl w-full p-6">
+            <h3 className="text-2xl font-bold text-blue-300 mb-6 flex items-center gap-3">
+              <Send className="w-7 h-7" />
+              {isSpanish ? 'Crear Payout (VUSD → USD)' : 'Create Payout (VUSD → USD)'}
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-blue-300 text-sm mb-2 font-semibold">
+                  {isSpanish ? 'Seleccionar Pledge:' : 'Select Pledge:'}
+                </label>
+                <select
+                  value={payoutForm.pledgeId}
+                  onChange={(e) => setPayoutForm({ ...payoutForm, pledgeId: e.target.value })}
+                  className="w-full bg-[#0a0a0a] border border-blue-500/30 rounded-lg px-4 py-3 text-white"
+                  required
+                >
+                  <option value="">{isSpanish ? '-- Selecciona un pledge --' : '-- Select a pledge --'}</option>
+                  {pledges.map(p => (
+                    <option key={p.pledgeId} value={p.pledgeId}>
+                      {p.pledgeId} | ${parseFloat(p.available).toLocaleString()} {isSpanish ? 'disponible' : 'available'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-blue-300 text-sm mb-2 font-semibold">
+                  {isSpanish ? 'Referencia Externa (SEP-24):' : 'External Reference (SEP-24):'}
+                </label>
+                <input
+                  type="text"
+                  value={payoutForm.externalRef}
+                  onChange={(e) => setPayoutForm({ ...payoutForm, externalRef: e.target.value })}
+                  className="w-full bg-[#0a0a0a] border border-blue-500/30 rounded-lg px-4 py-3 text-white font-mono"
+                  placeholder="SEP24-TRX-001"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-blue-300 text-sm mb-2 font-semibold">
+                  {isSpanish ? 'Monto USD:' : 'USD Amount:'}
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={payoutForm.amountUsd}
+                  onChange={(e) => setPayoutForm({ ...payoutForm, amountUsd: parseFloat(e.target.value) || 0 })}
+                  className="w-full bg-[#0a0a0a] border border-blue-500/30 rounded-lg px-4 py-3 text-white font-mono text-xl"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-blue-300 text-sm mb-2 font-semibold">
+                  {isSpanish ? 'Nombre del Beneficiario:' : 'Beneficiary Name:'}
+                </label>
+                <input
+                  type="text"
+                  value={payoutForm.beneficiaryName}
+                  onChange={(e) => setPayoutForm({ ...payoutForm, beneficiaryName: e.target.value })}
+                  className="w-full bg-[#0a0a0a] border border-blue-500/30 rounded-lg px-4 py-3 text-white"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <label className="block text-blue-300 text-sm mb-2 font-semibold">
+                  {isSpanish ? 'Tipo de Cuenta:' : 'Account Type:'}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPayoutForm({ ...payoutForm, accountType: 'institutional' })}
+                    className={`px-4 py-2 rounded-lg font-bold ${
+                      payoutForm.accountType === 'institutional'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-blue-500/20 border border-blue-500/30 text-blue-300'
+                    }`}
+                  >
+                    {isSpanish ? 'Institucional' : 'Institutional'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPayoutForm({ ...payoutForm, accountType: 'retail' })}
+                    className={`px-4 py-2 rounded-lg font-bold ${
+                      payoutForm.accountType === 'retail'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-blue-500/20 border border-blue-500/30 text-blue-300'
+                    }`}
+                  >
+                    {isSpanish ? 'Retail' : 'Retail'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6 pt-6 border-t border-blue-500/20">
+              <button
+                onClick={() => {
+                  setShowCreatePayoutModal(false);
+                  setPayoutForm({
+                    pledgeId: '',
+                    externalRef: '',
+                    amountUsd: 0,
+                    beneficiaryName: '',
+                    accountType: 'institutional'
+                  });
+                }}
+                className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525] font-semibold"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleCreatePayout}
+                disabled={loading}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Send className="w-5 h-5" />
+                {isSpanish ? 'Crear Payout' : 'Create Payout'}
               </button>
             </div>
           </div>
