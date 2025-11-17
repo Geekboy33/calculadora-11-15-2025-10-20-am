@@ -241,8 +241,8 @@ ${isSpanish ? 'Disponible:' : 'Available:'}           USD ${parseFloat(pledge.av
 ${isSpanish ? 'Moneda:' : 'Currency:'}              ${pledge.currency}
 ${isSpanish ? 'Beneficiario:' : 'Beneficiary:'}         ${pledge.beneficiary}
 ${isSpanish ? 'Bloqueado:' : 'Locked At:'}           ${new Date(pledge.lockedAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
-${pledge.expiresAt ? `${isSpanish ? 'Expira:' : 'Expires At:'}            ${new Date(pledge.expiresAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}` : ''}
-${pledge.termDays ? `${isSpanish ? 'Plazo:' : 'Term:'}                ${pledge.termDays} ${isSpanish ? 'días' : 'days'}` : ''}
+${pledge.expiresAt ? `${isSpanish ? 'Expira:' : 'Expires At:'}            ${new Date(pledge.expiresAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}` : `${isSpanish ? 'Expira:' : 'Expires At:'}            ∞ ${isSpanish ? 'PERPETUO' : 'PERPETUAL'}`}
+${pledge.termDays && pledge.termDays > 0 ? `${isSpanish ? 'Plazo:' : 'Term:'}                ${pledge.termDays} ${isSpanish ? 'días' : 'days'}` : `${isSpanish ? 'Plazo:' : 'Term:'}                ∞ ${isSpanish ? 'Sin vencimiento' : 'No expiration'}`}
 
 ───────────────────────────────────────────────────────────────
 ${isSpanish ? 'API ENDPOINT' : 'API ENDPOINT'}
@@ -304,8 +304,14 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
     
     const pledgeId = `PL-ANCHOR-${Date.now()}`;
     const lockedAt = new Date().toISOString();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + pledgeForm.termDays);
+    
+    // Si termDays es 0, es perpetuo (sin expiración)
+    let expiresAtISO: string | undefined = undefined;
+    if (pledgeForm.termDays > 0) {
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + pledgeForm.termDays);
+      expiresAtISO = expiresAt.toISOString();
+    }
     
     // Obtener PoR report vinculado si existe
     let porReportData = '';
@@ -328,8 +334,8 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
       currency: pledgeForm.currency,
       beneficiary: pledgeForm.beneficiary,
       lockedAt,
-      expiresAt: expiresAt.toISOString(),
-      termDays: pledgeForm.termDays,
+      expiresAt: expiresAtISO,
+      termDays: pledgeForm.termDays || undefined,
       linkedVUSDPledge: pledgeForm.selectedVUSDPledge || undefined,
       linkedPorReport: pledgeForm.selectedPorReport || undefined,
       porReportData: porReportData || undefined,
@@ -360,10 +366,10 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
       `Pledge ID: ${pledgeId}\n` +
       `Amount: USD ${pledgeForm.amountUsd.toLocaleString()}\n` +
       `Beneficiary: ${pledgeForm.beneficiary}\n` +
-      `Term: ${pledgeForm.termDays} days\n` +
+      `Term: ${pledgeForm.termDays === 0 ? (isSpanish ? '∞ Perpetuo' : '∞ Perpetual') : pledgeForm.termDays + ' days'}\n` +
       `API Endpoint: ${apiEndpoint}\n\n` +
-      (pledgeForm.selectedVUSDPledge ? `✓ Vinculado a pledge VUSD\n` : '') +
-      (pledgeForm.selectedPorReport ? `✓ Vinculado a PoR report` : '')
+      (pledgeForm.selectedVUSDPledge ? `✓ ${isSpanish ? 'Vinculado a pledge VUSD' : 'Linked to VUSD pledge'}\n` : '') +
+      (pledgeForm.selectedPorReport ? `✓ ${isSpanish ? 'Vinculado a PoR report' : 'Linked to PoR report'}` : '')
     );
   };
 
@@ -713,14 +719,19 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                         {new Date(pledge.lockedAt).toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')}
                       </div>
                     </div>
-                    {pledge.expiresAt && (
-                      <div>
-                        <div className="text-yellow-300/60 mb-1">{isSpanish ? 'Expira:' : 'Expires:'}</div>
-                        <div className="text-yellow-300 text-sm">
-                          {new Date(pledge.expiresAt).toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')}
-                        </div>
+                    <div>
+                      <div className="text-yellow-300/60 mb-1">{isSpanish ? 'Expira:' : 'Expires:'}</div>
+                      <div className="text-yellow-300 text-sm font-bold">
+                        {pledge.expiresAt 
+                          ? new Date(pledge.expiresAt).toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')
+                          : (
+                            <span className="text-purple-400 flex items-center gap-1">
+                              ∞ {isSpanish ? 'Perpetuo' : 'Perpetual'}
+                            </span>
+                          )
+                        }
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* API Endpoint */}
@@ -984,7 +995,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                 <label className="block text-green-300 text-sm mb-2 font-semibold">
                   {isSpanish ? '5. Plazo (días):' : '5. Term (days):'}
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   {[60, 90, 180].map(days => (
                     <button
                       key={days}
@@ -999,7 +1010,26 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                       {days}d
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => setPledgeForm({ ...pledgeForm, termDays: 0 })}
+                    className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                      pledgeForm.termDays === 0
+                        ? 'bg-purple-500 text-white border-2 border-purple-300'
+                        : 'bg-purple-500/20 border border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
+                    }`}
+                  >
+                    <div className="text-lg">∞</div>
+                    <div className="text-xs">{isSpanish ? 'Perpetuo' : 'Perpetual'}</div>
+                  </button>
                 </div>
+                {pledgeForm.termDays === 0 && (
+                  <div className="mt-2 text-xs text-purple-300 bg-purple-900/20 border border-purple-500/30 rounded p-2">
+                    ♾️ {isSpanish 
+                      ? 'Pledge perpetuo - Sin fecha de expiración'
+                      : 'Perpetual pledge - No expiration date'}
+                  </div>
+                )}
               </div>
 
               <div>
