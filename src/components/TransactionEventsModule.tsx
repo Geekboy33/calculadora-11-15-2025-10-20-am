@@ -60,21 +60,24 @@ export function TransactionEventsModule() {
       applyFilters(updatedEvents);
     });
     
-    // Auto-reload cada 3 segundos
+    // Auto-reload cada 2 segundos para detectar cambios
     const interval = setInterval(() => {
       const freshEvents = transactionEventStore.getEvents();
-      if (freshEvents.length !== events.length) {
-        console.log('[TxModule] 🔄 Nuevos eventos detectados');
+      console.log('[TxModule] 🔍 Verificando eventos:', freshEvents.length, 'vs', events.length);
+      
+      // Siempre actualizar, no solo cuando cambia la cantidad
+      if (JSON.stringify(freshEvents) !== JSON.stringify(events)) {
+        console.log('[TxModule] 🔄 Actualizando eventos...');
         setEvents(freshEvents);
         applyFilters(freshEvents);
       }
-    }, 3000);
+    }, 2000);
     
     return () => {
       unsubscribe();
       clearInterval(interval);
     };
-  }, []);
+  }, [events]);
 
   useEffect(() => {
     applyFilters(events);
@@ -82,6 +85,7 @@ export function TransactionEventsModule() {
 
   const loadEvents = () => {
     const allEvents = transactionEventStore.getEvents();
+    console.log('[TxModule] 📊 Eventos cargados:', allEvents.length);
     setEvents(allEvents);
     setFilteredEvents(allEvents);
   };
