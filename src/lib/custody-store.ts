@@ -7,6 +7,7 @@ import CryptoJS from 'crypto-js';
 import { custodyHistory } from './custody-history';
 import { vusdCapStore } from './vusd-cap-store';
 import { daesPledgeStore } from './daes-pledge-store';
+import { transactionEventStore } from './transaction-event-store';
 
 export interface CustodyAccount {
   id: string;
@@ -743,17 +744,39 @@ class CustodyStore {
     }
     
     const oldBalance = account.totalBalance;
+    const change = newTotalBalance - oldBalance;
     account.totalBalance = newTotalBalance;
     account.availableBalance = newTotalBalance - account.reservedBalance;
     account.lastUpdated = new Date().toISOString();
     
     this.saveAccounts(accounts);
     
+    // Registrar evento en transaction-event-store
+    if (change > 0) {
+      transactionEventStore.recordBalanceIncrease(
+        accountId,
+        account.accountName,
+        change,
+        account.currency,
+        oldBalance,
+        newTotalBalance
+      );
+    } else if (change < 0) {
+      transactionEventStore.recordBalanceDecrease(
+        accountId,
+        account.accountName,
+        Math.abs(change),
+        account.currency,
+        oldBalance,
+        newTotalBalance
+      );
+    }
+    
     console.log('[CustodyStore] ✅ Balance actualizado:', {
       account: account.accountName,
       oldBalance,
       newBalance: newTotalBalance,
-      change: newTotalBalance - oldBalance,
+      change,
       newAvailable: account.availableBalance
     });
     

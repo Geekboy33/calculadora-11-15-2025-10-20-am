@@ -6,6 +6,7 @@
 
 import { custodyStore } from './custody-store';
 import { apiVUSD1Store } from './api-vusd1-store';
+import { transactionEventStore } from './transaction-event-store';
 
 export interface UnifiedPledge {
   id: string;
