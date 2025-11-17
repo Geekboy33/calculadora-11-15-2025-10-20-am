@@ -631,19 +631,38 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
       
       const errorMessage = (err as Error).message;
       
-      alert(
-        `❌ ${isSpanish ? 'No se pudo conectar al servidor API1' : 'Could not connect to API1 server'}\n\n` +
-        `Error: ${errorMessage}\n\n` +
-        `${isSpanish ? '🔧 Solución:' : '🔧 Solution:'}\n` +
-        `1. ${isSpanish ? 'Abre una nueva terminal' : 'Open a new terminal'}\n` +
-        `2. cd "${isSpanish ? 'carpeta-proyecto' : 'project-folder'}"\n` +
-        `3. npm run server:api1\n\n` +
-        `${isSpanish ? 'El servidor debe iniciar en puerto 8788' : 'Server should start on port 8788'}`
-      );
+      // Mensaje diferente para producción vs desarrollo
+      const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
       
-      setError(isSpanish 
-        ? 'Servidor API1 no disponible. Ejecuta: npm run server:api1'
-        : 'API1 server not available. Run: npm run server:api1');
+      if (isProduction) {
+        alert(
+          `⚠️ ${isSpanish ? 'Servidor API1 No Disponible en Producción' : 'API1 Server Not Available in Production'}\n\n` +
+          `${isSpanish ? 'El servidor API1 es solo para desarrollo local.' : 'API1 server is for local development only.'}\n\n` +
+          `${isSpanish ? 'En producción, usa:' : 'In production, use:'}\n` +
+          `• Proof of Reserves API (módulo principal)\n` +
+          `• Genera pledges en API VUSD\n` +
+          `• Anchor consulta endpoints públicos\n\n` +
+          `${isSpanish ? 'Este test solo funciona en desarrollo local.' : 'This test only works in local development.'}`
+        );
+        
+        setError(isSpanish 
+          ? 'Test Anchor solo disponible en desarrollo. Usa Proof of Reserves API en producción.'
+          : 'Anchor test only available in development. Use Proof of Reserves API in production.');
+      } else {
+        alert(
+          `❌ ${isSpanish ? 'No se pudo conectar al servidor API1' : 'Could not connect to API1 server'}\n\n` +
+          `Error: ${errorMessage}\n\n` +
+          `${isSpanish ? '🔧 Solución en Local:' : '🔧 Local Solution:'}\n` +
+          `1. ${isSpanish ? 'Abre una nueva terminal' : 'Open a new terminal'}\n` +
+          `2. cd "calculadora-11-15-2025-10-20-am"\n` +
+          `3. npm run server:api1\n\n` +
+          `${isSpanish ? 'El servidor debe iniciar en:' : 'Server should start on:'} http://localhost:8788`
+        );
+        
+        setError(isSpanish 
+          ? 'Servidor API1 no disponible. Ejecuta: npm run server:api1'
+          : 'API1 server not available. Run: npm run server:api1');
+      }
     } finally {
       setLoading(false);
     }
