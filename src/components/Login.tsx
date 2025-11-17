@@ -13,7 +13,7 @@ interface LoginProps {
 }
 
 export function Login({ onLogin }: LoginProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
