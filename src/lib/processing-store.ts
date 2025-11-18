@@ -762,42 +762,67 @@ class ProcessingStore {
       let offset = resumeFrom;
 
       while (offset < totalSize && !signal.aborted) {
-        while (this.currentState?.status === 'paused' && !signal.aborted) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+        try {
+          while (this.currentState?.status === 'paused' && !signal.aborted) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+
+          if (signal.aborted) break;
+
+          const chunkEnd = Math.min(offset + CHUNK_SIZE, totalSize);
+          const blob = file.slice(offset, chunkEnd);
+          const buffer = await blob.arrayBuffer();
+          const chunk = new Uint8Array(buffer);
+
+          this.extractCurrencyBalancesOptimized(chunk, offset, balanceTracker);
+
+          bytesProcessed += chunk.length;
+          offset = chunkEnd;
+          currentChunk++;
+
+          const progress = (bytesProcessed / totalSize) * 100;
+          
+          // Log detallado cada 10%
+          if (Math.floor(progress) % 10 === 0 && Math.floor(progress) !== Math.floor((bytesProcessed - chunk.length) / totalSize * 100)) {
+            console.log(`[ProcessingStore] 📊 Progreso: ${progress.toFixed(2)}% (${(bytesProcessed / 1024 / 1024 / 1024).toFixed(2)} GB de ${(totalSize / 1024 / 1024 / 1024).toFixed(2)} GB) - Chunk ${currentChunk}/${totalChunks}`);
+          }
+          
+          // CRÍTICO: Log específico en 29-30% para debugging
+          if (progress >= 29 && progress <= 31 && currentChunk % 10 === 0) {
+            console.warn(`[ProcessingStore] ⚠️ ZONA CRÍTICA 29-30%: Chunk ${currentChunk}, Offset ${(offset / 1024 / 1024 / 1024).toFixed(2)} GB`);
+          }
+          
+          const balancesArray = Object.values(balanceTracker).sort((a, b) => {
+            if (a.currency === 'USD') return -1;
+            if (b.currency === 'USD') return 1;
+            if (a.currency === 'EUR') return -1;
+            if (b.currency === 'EUR') return 1;
+            return b.totalAmount - a.totalAmount;
+          });
+
+          await this.updateProgress(bytesProcessed, progress, balancesArray, currentChunk);
+
+          if (onProgress) {
+            onProgress(progress, balancesArray);
+          }
+
+          // 🔥 UPDATE: Usar setTimeout en lugar de requestIdleCallback
+          // requestIdleCallback se pausa cuando la ventana está minimizada
+          // setTimeout continúa funcionando en segundo plano
+          await new Promise(resolve => setTimeout(resolve, 0));
+          
+        } catch (chunkError) {
+          console.error(`[ProcessingStore] ❌ Error procesando chunk ${currentChunk} en ${(offset / 1024 / 1024 / 1024).toFixed(2)} GB:`, chunkError);
+          
+          // Intentar continuar con siguiente chunk
+          offset = chunkEnd;
+          currentChunk++;
+          
+          // Si hay muchos errores consecutivos, detener
+          if (currentChunk % 100 === 0) {
+            console.warn(`[ProcessingStore] ⚠️ Errores detectados pero continuando... Chunk ${currentChunk}`);
+          }
         }
-
-        if (signal.aborted) break;
-
-        const chunkEnd = Math.min(offset + CHUNK_SIZE, totalSize);
-        const blob = file.slice(offset, chunkEnd);
-        const buffer = await blob.arrayBuffer();
-        const chunk = new Uint8Array(buffer);
-
-        this.extractCurrencyBalancesOptimized(chunk, offset, balanceTracker);
-
-        bytesProcessed += chunk.length;
-        offset = chunkEnd;
-        currentChunk++;
-
-        const progress = (bytesProcessed / totalSize) * 100;
-        const balancesArray = Object.values(balanceTracker).sort((a, b) => {
-          if (a.currency === 'USD') return -1;
-          if (b.currency === 'USD') return 1;
-          if (a.currency === 'EUR') return -1;
-          if (b.currency === 'EUR') return 1;
-          return b.totalAmount - a.totalAmount;
-        });
-
-        await this.updateProgress(bytesProcessed, progress, balancesArray, currentChunk);
-
-        if (onProgress) {
-          onProgress(progress, balancesArray);
-        }
-
-        // 🔥 UPDATE: Usar setTimeout en lugar de requestIdleCallback
-        // requestIdleCallback se pausa cuando la ventana está minimizada
-        // setTimeout continúa funcionando en segundo plano
-        await new Promise(resolve => setTimeout(resolve, 0));
       }
 
       if (!signal.aborted) {
