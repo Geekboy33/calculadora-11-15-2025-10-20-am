@@ -55,11 +55,6 @@ function App() {
 
   const verificationAccountId = checkPublicVerificationUrl();
 
-  // Si es una URL de verificación pública, mostrar la página de verificación
-  if (verificationAccountId) {
-    return <PublicVerificationPage accountId={verificationAccountId} />;
-  }
-
   // Efecto para mantener procesamiento global activo al cambiar de módulo
   useEffect(() => {
     let mounted = true;
@@ -96,6 +91,11 @@ function App() {
       window.removeEventListener('navigate-to-analyzer', handleNavigateToAnalyzer);
     };
   }, []);
+
+  // Si es una URL de verificación pública, mostrar la página de verificación
+  if (verificationAccountId) {
+    return <PublicVerificationPage accountId={verificationAccountId} />;
+  }
 
   // Mostrar login si no está autenticado
   if (!isAuthenticated) {
