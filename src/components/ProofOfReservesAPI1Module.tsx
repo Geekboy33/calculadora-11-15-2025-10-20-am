@@ -627,17 +627,46 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
         const data = await response.json();
         console.log('[API1] ✅ Data:', data);
         
+        const endpoint = isProduction 
+          ? `${window.location.origin}/.netlify/functions/proof-of-reserves`
+          : `${API_BASE}/api/v1/proof-of-reserves/${POR_ID}`;
+        
         alert(
-          `✅ ${isSpanish ? 'Conexión exitosa con API1' : 'Successful API1 connection'}\n\n` +
-          `Endpoint: ${API_BASE}/api/v1/proof-of-reserves/${POR_ID}\n` +
+          `✅ ${isSpanish ? 'Conexión exitosa' : 'Connection successful'}\n\n` +
+          `Endpoint: ${endpoint}\n` +
           `Status: ${response.status} OK\n` +
+          `${isSpanish ? 'Modo:' : 'Mode:'} ${isProduction ? 'Producción (Netlify)' : 'Desarrollo (Local)'}\n\n` +
           `PoR ID: ${data.porId || POR_ID}\n` +
-          `Total Reserves: $${parseFloat(data.totalUsdReserves || 0).toLocaleString()}\n` +
-          `Total Pledges: $${parseFloat(data.totalUsdPledges || 0).toLocaleString()}\n` +
-          `CIRC_CAP: $${parseFloat(data.circulatingCap || 0).toLocaleString()}\n` +
-          `Coverage Ratio: ${parseFloat(data.coverageRatio || 0).toFixed(4)}\n\n` +
-          `✓ ${isSpanish ? 'Servidor API1 funcionando correctamente' : 'API1 server working correctly'}`
+          `Total Reserves: $${parseFloat(data.totalUsdReserves || reserveSummary?.totalUsdReserves || 0).toLocaleString()}\n` +
+          `Total Pledges: $${parseFloat(data.totalUsdPledges || reserveSummary?.totalUsdPledges || 0).toLocaleString()}\n` +
+          `CIRC_CAP: $${parseFloat(data.circulatingCap || reserveSummary?.circulatingCap || 0).toLocaleString()}\n` +
+          `Coverage Ratio: ${parseFloat(data.coverageRatio || reserveSummary?.coverageRatio || 0).toFixed(4)}\n\n` +
+          `✓ ${isSpanish ? 'Sistema funcionando correctamente' : 'System working correctly'}`
         );
+      } else if (isProduction && response.status === 404) {
+        // En producción, si Netlify Function no existe, usar datos locales
+        console.log('[API1] ℹ️ Netlify Function no disponible, usando datos locales');
+        
+        if (reserveSummary) {
+          alert(
+            `✅ ${isSpanish ? 'Datos locales disponibles' : 'Local data available'}\n\n` +
+            `${isSpanish ? 'Modo:' : 'Mode:'} Producción (Solo lectura)\n\n` +
+            `Total Reserves: $${parseFloat(reserveSummary.totalUsdReserves).toLocaleString()}\n` +
+            `Total Pledges: $${parseFloat(reserveSummary.totalUsdPledges).toLocaleString()}\n` +
+            `CIRC_CAP: $${parseFloat(reserveSummary.circulatingCap).toLocaleString()}\n` +
+            `Coverage Ratio: ${parseFloat(reserveSummary.coverageRatio).toFixed(4)}\n\n` +
+            `ℹ️ ${isSpanish 
+              ? 'Datos desde localStorage. Para conectar con backend, configura Netlify Functions.'
+              : 'Data from localStorage. To connect with backend, configure Netlify Functions.'}`
+          );
+        } else {
+          alert(
+            `⚠️ ${isSpanish ? 'Sin datos disponibles' : 'No data available'}\n\n` +
+            `${isSpanish 
+              ? 'Crea pledges en API VUSD primero o configura el backend.'
+              : 'Create pledges in API VUSD first or configure the backend.'}`
+          );
+        }
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error('[API1] ❌ Error response:', errorData);
