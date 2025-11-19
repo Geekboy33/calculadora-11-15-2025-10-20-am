@@ -59,7 +59,11 @@ export function ProofOfReservesAPI1Module() {
   const { language } = useLanguage();
   const isSpanish = language === 'es';
   
-  const API_BASE = 'http://localhost:8788'; // Puerto diferente para API1
+  // Detectar entorno y usar URL apropiada
+  const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
+  const API_BASE = isProduction 
+    ? 'https://api.luxliqdaes.cloud'  // Producción (requiere DNS configurado)
+    : 'http://localhost:8788';         // Desarrollo local
   const [selectedView, setSelectedView] = useState<'overview' | 'pledges' | 'payouts' | 'reconciliation' | 'webhooks'>('overview');
   
   // Data states
