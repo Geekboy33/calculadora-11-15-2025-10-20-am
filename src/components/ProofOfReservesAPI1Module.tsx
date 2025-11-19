@@ -62,8 +62,8 @@ export function ProofOfReservesAPI1Module() {
   // Detectar entorno y usar URL apropiada
   const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1');
   const API_BASE = isProduction 
-    ? 'https://api.luxliqdaes.cloud'  // Producción (requiere DNS configurado)
-    : 'http://localhost:8788';         // Desarrollo local
+    ? '/.netlify/functions'  // Producción: usa Netlify Functions como proxy
+    : 'http://localhost:8788';  // Desarrollo: servidor local directo
   const [selectedView, setSelectedView] = useState<'overview' | 'pledges' | 'payouts' | 'reconciliation' | 'webhooks'>('overview');
   
   // Data states
@@ -589,15 +589,36 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
       setError(null);
       
       console.log('[API1] 🔌 Probando conexión con API1...');
-      console.log('[API1] 📡 URL:', `${API_BASE}/api/v1/proof-of-reserves/${POR_ID}`);
       
-      const response = await fetch(`${API_BASE}/api/v1/proof-of-reserves/${POR_ID}`, {
-        method: 'GET',
-        headers: {
+      let url, headers;
+      
+      if (isProduction) {
+        // En producción, usar Netlify Function como proxy
+        url = `${API_BASE}/proof-of-reserves`;
+        headers = {
+          'Content-Type': 'application/json'
+        };
+        console.log('[API1] 📡 URL Producción:', url, '(Netlify Function)');
+      } else {
+        // En desarrollo, servidor directo
+        url = `${API_BASE}/api/v1/proof-of-reserves/${POR_ID}`;
+        headers = {
           'Authorization': `Bearer ${API_KEY}`,
           'X-Secret-Key': SECRET_KEY,
           'Accept': 'application/json'
-        }
+        };
+        console.log('[API1] 📡 URL Desarrollo:', url);
+      }
+      
+      const requestBody = isProduction ? JSON.stringify({
+        endpoint: `/api/v1/proof-of-reserves/${POR_ID}`,
+        method: 'GET'
+      }) : undefined;
+      
+      const response = await fetch(url, {
+        method: isProduction ? 'POST' : 'GET',
+        headers,
+        body: requestBody
       });
       
       console.log('[API1] 📥 Respuesta recibida:', response.status);
@@ -832,28 +853,48 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               {isSpanish ? 'Endpoints API Disponibles' : 'Available API Endpoints'}
             </h3>
             <div className="space-y-3 text-sm font-mono max-h-[400px] overflow-y-auto pr-2 scroll-smooth">
+              {isProduction && (
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded p-3 mb-3">
+                  <div className="text-blue-300 text-xs mb-1">
+                    ℹ️ {isSpanish ? 'Modo Producción' : 'Production Mode'}
+                  </div>
+                  <div className="text-blue-300/80 text-xs">
+                    {isSpanish 
+                      ? 'Usando Netlify Functions como proxy seguro'
+                      : 'Using Netlify Functions as secure proxy'}
+                  </div>
+                </div>
+              )}
               <div className="bg-black/30 rounded p-3">
                 <div className="text-cyan-300/60 mb-1">GET Proof of Reserves:</div>
-                <div className="text-cyan-400">
-                  {API_BASE}/api/v1/proof-of-reserves/{POR_ID}
+                <div className="text-cyan-400 break-all">
+                  {isProduction 
+                    ? `${window.location.origin}/.netlify/functions/proof-of-reserves`
+                    : `${API_BASE}/api/v1/proof-of-reserves/${POR_ID}`}
                 </div>
               </div>
               <div className="bg-black/30 rounded p-3">
                 <div className="text-green-300/60 mb-1">GET Active Pledges:</div>
-                <div className="text-green-400">
-                  {API_BASE}/api/v1/pledges?status=ACTIVE&porId={POR_ID}
+                <div className="text-green-400 break-all">
+                  {isProduction 
+                    ? `${window.location.origin}/.netlify/functions/proof-of-reserves`
+                    : `${API_BASE}/api/v1/pledges?status=ACTIVE&porId=${POR_ID}`}
                 </div>
               </div>
               <div className="bg-black/30 rounded p-3">
                 <div className="text-purple-300/60 mb-1">POST Create Pledge:</div>
-                <div className="text-purple-400">
-                  {API_BASE}/api/v1/pledges
+                <div className="text-purple-400 break-all">
+                  {isProduction 
+                    ? `${window.location.origin}/.netlify/functions/proof-of-reserves`
+                    : `${API_BASE}/api/v1/pledges`}
                 </div>
               </div>
               <div className="bg-black/30 rounded p-3">
                 <div className="text-yellow-300/60 mb-1">GET Reserves Summary:</div>
-                <div className="text-yellow-400">
-                  {API_BASE}/api/v1/reserves/summary
+                <div className="text-yellow-400 break-all">
+                  {isProduction 
+                    ? `${window.location.origin}/.netlify/functions/proof-of-reserves`
+                    : `${API_BASE}/api/v1/reserves/summary`}
                 </div>
               </div>
             </div>
