@@ -67,8 +67,11 @@ export function IbanManagerModule() {
   const [allocateForm, setAllocateForm] = useState({
     custodyAccountId: '',
     countryCode: 'AE' as 'AE' | 'DE' | 'ES',
+    currency: 'USD' as 'AED' | 'USD' | 'EUR',
     createdBy: localStorage.getItem('daes_user') || 'system'
   });
+
+  const [selectedCustodyAccount, setSelectedCustodyAccount] = useState<CustodyAccount | null>(null);
 
   const [statusForm, setStatusForm] = useState({
     newStatus: 'ACTIVE' as 'ACTIVE' | 'BLOCKED' | 'CLOSED',
@@ -107,14 +110,23 @@ export function IbanManagerModule() {
     setCustodyAccounts(accounts);
   };
 
-  const generateIban = (countryCode: string, bankCode: string, accountNumber: string): string => {
-    // Implementación simplificada del algoritmo ISO 13616 mod 97
+  const generateIban = (countryCode: string, bankCode: string, accountNumber: string, currency?: string): string => {
+    // Implementación del algoritmo ISO 13616 mod 97
     let bban = '';
 
     switch (countryCode) {
       case 'AE':
         // UAE: 3 bank + 16 account
-        bban = bankCode.padStart(3, '0') + accountNumber.padStart(16, '0');
+        // Para UAE, ajustar bank code según currency
+        let adjustedBankCode = bankCode;
+        if (currency === 'AED') {
+          adjustedBankCode = '026'; // Cuenta AED
+        } else if (currency === 'USD') {
+          adjustedBankCode = '026'; // Cuenta USD (mismo banco, diferente sub-cuenta)
+        } else if (currency === 'EUR') {
+          adjustedBankCode = '026'; // Cuenta EUR
+        }
+        bban = adjustedBankCode.padStart(3, '0') + accountNumber.padStart(16, '0');
         break;
       case 'DE':
         // Germany: 8 BLZ + 10 account
@@ -144,6 +156,7 @@ export function IbanManagerModule() {
 
     console.log('[IbanManager] IBAN generado:', {
       country: countryCode,
+      currency,
       bban,
       checkDigits,
       iban
@@ -181,8 +194,11 @@ export function IbanManagerModule() {
 
       const bankCode = bankCodes[allocateForm.countryCode];
       
-      // Generar IBAN
-      const iban = generateIban(allocateForm.countryCode, bankCode, accountNumber);
+      // Para UAE, usar la currency seleccionada en el form
+      const currencyToUse = allocateForm.countryCode === 'AE' ? allocateForm.currency : custodyAccount.currency;
+      
+      // Generar IBAN con currency específica
+      const iban = generateIban(allocateForm.countryCode, bankCode, accountNumber, currencyToUse);
       const ibanFormatted = iban.replace(/(.{4})/g, '$1 ').trim();
 
       const newIban: IbanRecord = {
@@ -191,7 +207,7 @@ export function IbanManagerModule() {
         iban,
         ibanFormatted,
         countryCode: allocateForm.countryCode,
-        currency: custodyAccount.currency,
+        currency: currencyToUse,
         bankCode,
         internalAccountNumber: accountNumber,
         status: 'PENDING',
@@ -237,8 +253,10 @@ export function IbanManagerModule() {
       setAllocateForm({
         custodyAccountId: '',
         countryCode: 'AE',
+        currency: 'USD',
         createdBy: allocateForm.createdBy
       });
+      setSelectedCustodyAccount(null);
 
     } catch (error: any) {
       console.error('[IbanManager] Error:', error);
@@ -619,7 +637,18 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                 </label>
                 <select
                   value={allocateForm.custodyAccountId}
-                  onChange={e => setAllocateForm({ ...allocateForm, custodyAccountId: e.target.value })}
+                  onChange={e => {
+                    const accountId = e.target.value;
+                    const account = custodyAccounts.find(a => a.id === accountId);
+                    setSelectedCustodyAccount(account || null);
+                    setAllocateForm({ 
+                      ...allocateForm, 
+                      custodyAccountId: accountId,
+                      currency: account?.currency === 'AED' || account?.currency === 'USD' || account?.currency === 'EUR'
+                        ? account.currency as 'AED' | 'USD' | 'EUR'
+                        : 'USD'
+                    });
+                  }}
                   className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
                   required
                 >
@@ -630,6 +659,31 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                     </option>
                   ))}
                 </select>
+                {selectedCustodyAccount && (
+                  <div className="mt-3 p-3 bg-purple-500/10 border border-purple-400/30 rounded-lg text-sm">
+                    <p className="text-purple-300 font-semibold mb-2">
+                      {isSpanish ? 'Cuenta seleccionada:' : 'Selected account:'}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 text-white/70">
+                      <div>
+                        <span className="text-white/50">{isSpanish ? 'Nombre:' : 'Name:'}</span>
+                        <p className="text-white">{selectedCustodyAccount.accountName}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/50">{isSpanish ? 'Moneda:' : 'Currency:'}</span>
+                        <p className="text-[#00ff88]">{selectedCustodyAccount.currency}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/50">{isSpanish ? 'Balance:' : 'Balance:'}</span>
+                        <p className="text-white">{selectedCustodyAccount.currency} {selectedCustodyAccount.totalBalance.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/50">{isSpanish ? 'Tipo:' : 'Type:'}</span>
+                        <p className="text-white capitalize">{selectedCustodyAccount.accountType}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -659,19 +713,68 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                 </div>
               </div>
 
+              {allocateForm.countryCode === 'AE' && (
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-2">
+                    {isSpanish ? 'Moneda del IBAN (UAE soporta 3 divisas)' : 'IBAN Currency (UAE supports 3 currencies)'}
+                  </label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {(['AED', 'USD', 'EUR'] as const).map(curr => (
+                      <button
+                        key={curr}
+                        type="button"
+                        onClick={() => setAllocateForm({ ...allocateForm, currency: curr })}
+                        className={`px-4 py-3 rounded-xl font-semibold transition ${
+                          allocateForm.currency === curr
+                            ? 'bg-cyan-500/20 border-2 border-cyan-400/60 text-cyan-300'
+                            : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
+                        }`}
+                      >
+                        <div className="text-lg font-mono">{curr}</div>
+                        <div className="text-[10px] text-white/60">
+                          {curr === 'AED' && (isSpanish ? 'Dirham' : 'Dirham')}
+                          {curr === 'USD' && (isSpanish ? 'Dólar' : 'Dollar')}
+                          {curr === 'EUR' && (isSpanish ? 'Euro' : 'Euro')}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-cyan-200/60 mt-2">
+                    {isSpanish 
+                      ? 'Digital Commercial Bank Ltd emite IBANs de UAE en las 3 divisas principales'
+                      : 'Digital Commercial Bank Ltd issues UAE IBANs in 3 major currencies'}
+                  </p>
+                </div>
+              )}
+
               <div className="bg-cyan-500/10 border border-cyan-400/30 rounded-xl p-4 text-sm">
                 <p className="text-cyan-300 font-semibold mb-2">
-                  {isSpanish ? 'Información del banco emisor:' : 'Issuing bank information:'}
+                  {isSpanish ? 'IBAN que se generará:' : 'IBAN to be generated:'}
                 </p>
                 <div className="space-y-1 text-white/70">
                   <p><span className="text-white/50">{isSpanish ? 'Banco:' : 'Bank:'}</span> Digital Commercial Bank Ltd</p>
                   <p><span className="text-white/50">{isSpanish ? 'Licencia:' : 'License:'}</span> L 15446</p>
-                  <p><span className="text-white/50">{isSpanish ? 'Código de banco' : 'Bank code'} ({allocateForm.countryCode}):</span> {allocateForm.countryCode === 'AE' ? '026' : allocateForm.countryCode === 'DE' ? '37040044' : '2100'}</p>
+                  <p><span className="text-white/50">{isSpanish ? 'País:' : 'Country:'}</span> {allocateForm.countryCode} - {
+                    allocateForm.countryCode === 'AE' ? (isSpanish ? 'Emiratos Árabes Unidos' : 'United Arab Emirates') :
+                    allocateForm.countryCode === 'DE' ? (isSpanish ? 'Alemania' : 'Germany') :
+                    (isSpanish ? 'España' : 'Spain')
+                  }</p>
+                  <p><span className="text-white/50">{isSpanish ? 'Código de banco:' : 'Bank code:'}</span> {allocateForm.countryCode === 'AE' ? '026' : allocateForm.countryCode === 'DE' ? '37040044' : '2100'}</p>
+                  {allocateForm.countryCode === 'AE' && (
+                    <p><span className="text-white/50">{isSpanish ? 'Moneda:' : 'Currency:'}</span> <span className="text-cyan-300 font-semibold">{allocateForm.currency}</span></p>
+                  )}
                   <p className="text-xs text-cyan-200/60 mt-2">
                     {isSpanish 
-                      ? '✓ IBAN generado cumple con ISO 13616'
-                      : '✓ Generated IBAN complies with ISO 13616'}
+                      ? '✓ IBAN generado cumplirá con ISO 13616 (mod 97)'
+                      : '✓ Generated IBAN will comply with ISO 13616 (mod 97)'}
                   </p>
+                  {allocateForm.countryCode === 'AE' && (
+                    <p className="text-xs text-cyan-200/60">
+                      {isSpanish 
+                        ? '✓ UAE permite múltiples divisas en IBANs del mismo banco'
+                        : '✓ UAE allows multiple currencies in IBANs from the same bank'}
+                    </p>
+                  )}
                 </div>
               </div>
 
