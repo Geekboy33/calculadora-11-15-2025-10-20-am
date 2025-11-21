@@ -18,7 +18,8 @@ import {
   RefreshCw,
   Eye,
   Wallet,
-  DollarSign
+  DollarSign,
+  Trash2
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { useToast } from './ui/Toast';
@@ -402,6 +403,58 @@ export function BankSettlementModule() {
     }
   };
 
+  const handleDeleteSettlement = async (settlementId: string) => {
+    const settlement = settlements.find(s => s.id === settlementId);
+    if (!settlement) return;
+
+    const confirmMessage = isSpanish
+      ? `¿Eliminar settlement ${settlement.daesReferenceId}?\n\nMonto: ${settlement.currency} ${parseFloat(settlement.amount).toLocaleString()}\nStatus: ${settlement.status}\n\n⚠️ Esta acción no se puede deshacer.`
+      : `Delete settlement ${settlement.daesReferenceId}?\n\nAmount: ${settlement.currency} ${parseFloat(settlement.amount).toLocaleString()}\nStatus: ${settlement.status}\n\n⚠️ This action cannot be undone.`;
+
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      const updated = settlements.filter(s => s.id !== settlementId);
+      setSettlements(updated);
+      localStorage.setItem('bank_settlements', JSON.stringify(updated));
+
+      // Registrar eliminación en Transaction Events
+      const { transactionEventStore } = await import('../lib/transaction-event-store');
+      transactionEventStore.recordEvent(
+        'TRANSFER_CREATED',
+        'SYSTEM',
+        `Bank Settlement eliminado: ${settlement.daesReferenceId}`,
+        {
+          amount: parseFloat(settlement.amount),
+          currency: settlement.currency,
+          reference: settlement.daesReferenceId,
+          status: 'CANCELLED',
+          metadata: {
+            settlementId: settlement.id,
+            previousStatus: settlement.status,
+            operation: 'DELETE_SETTLEMENT'
+          }
+        }
+      );
+
+      addToast({
+        type: 'warning',
+        title: isSpanish ? 'Settlement eliminado' : 'Settlement deleted',
+        description: settlement.daesReferenceId
+      });
+
+      console.log('[BankSettlement] 🗑️ Settlement eliminado:', settlement.daesReferenceId);
+
+    } catch (error: any) {
+      console.error('[BankSettlement] Error eliminando:', error);
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Error' : 'Error',
+        description: error.message
+      });
+    }
+  };
+
   const handleShowAuditLog = (settlement: Settlement) => {
     setSelectedSettlement(settlement);
     // Simular audit logs
@@ -716,6 +769,13 @@ export function BankSettlementModule() {
                     >
                       <Eye className="w-4 h-4" />
                       {isSpanish ? 'Audit log' : 'Audit log'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSettlement(settlement.id)}
+                      className="px-3 py-2 rounded-xl bg-red-500/10 border border-red-400/30 text-red-300 text-sm font-semibold hover:bg-red-500/20 transition"
+                      title={isSpanish ? 'Eliminar settlement' : 'Delete settlement'}
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

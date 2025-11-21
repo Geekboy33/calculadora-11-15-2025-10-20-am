@@ -630,6 +630,20 @@ class ProfilesStore {
       }
     }
 
+    // Bank Settlements
+    const settlementsRaw = snapshot['bank_settlements'];
+    if (settlementsRaw) {
+      try {
+        const settlements = JSON.parse(settlementsRaw);
+        if (Array.isArray(settlements)) {
+          // Agregar al metadata pero no crear campo separado
+          console.log('[ProfilesStore] 📊 Bank Settlements en snapshot:', settlements.length);
+        }
+      } catch (error) {
+        console.warn('[ProfilesStore] Error leyendo bank settlements en snapshot:', error);
+      }
+    }
+
     // Ledger / Processing
     const processingRaw = snapshot['Digital Commercial Bank Ltd_processing_state'];
     if (processingRaw) {
@@ -745,6 +759,7 @@ class ProfilesStore {
       { id: 'pledges', label: 'Pledges', matcher: key => key.toLowerCase().includes('pledge') },
       { id: 'por', label: 'Proof of Reserves', matcher: key => key.toLowerCase().includes('por') },
       { id: 'events', label: 'Eventos', matcher: key => key.toLowerCase().includes('transactions') },
+      { id: 'settlements', label: 'Bank Settlements', matcher: key => key.toLowerCase().includes('bank_settlements') },
       { id: 'processing', label: 'Ledger / Processing', matcher: key => key.toLowerCase().includes('processing_state') },
     ];
 
