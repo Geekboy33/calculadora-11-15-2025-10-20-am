@@ -16,10 +16,13 @@ import {
   TrendingDown,
   AlertCircle,
   RefreshCw,
-  Eye
+  Eye,
+  Wallet,
+  DollarSign
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { useToast } from './ui/Toast';
+import { custodyStore, type CustodyAccount } from '../lib/custody-store';
 
 interface Settlement {
   id: string;
@@ -63,9 +66,11 @@ export function BankSettlementModule() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
 
   // Form states
   const [createForm, setCreateForm] = useState({
+    custodyAccountId: '',
     amount: 0,
     currency: 'USD' as 'AED' | 'USD' | 'EUR',
     reference: '',
@@ -83,6 +88,14 @@ export function BankSettlementModule() {
 
   useEffect(() => {
     loadSettlements();
+    loadCustodyAccounts();
+
+    // Suscribirse a cambios en custody accounts
+    const unsubscribe = custodyStore.subscribe(accounts => {
+      setCustodyAccounts(accounts);
+    });
+
+    return unsubscribe;
   }, []);
 
   const loadSettlements = () => {
@@ -97,7 +110,22 @@ export function BankSettlementModule() {
     }
   };
 
+  const loadCustodyAccounts = () => {
+    const accounts = custodyStore.getAccounts();
+    setCustodyAccounts(accounts);
+    console.log('[BankSettlement] ✅ Custody accounts cargadas:', accounts.length);
+  };
+
   const handleCreateSettlement = async () => {
+    if (!createForm.custodyAccountId) {
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Cuenta requerida' : 'Account required',
+        description: isSpanish ? 'Selecciona una cuenta custody' : 'Select a custody account'
+      });
+      return;
+    }
+
     if (createForm.amount <= 0) {
       addToast({
         type: 'error',
@@ -109,7 +137,40 @@ export function BankSettlementModule() {
 
     setLoading(true);
     try {
-      // Generar ID y reference localmente
+      // Obtener cuenta custody seleccionada
+      const custodyAccount = custodyAccounts.find(a => a.id === createForm.custodyAccountId);
+      
+      if (!custodyAccount) {
+        throw new Error(isSpanish ? 'Cuenta custody no encontrada' : 'Custody account not found');
+      }
+
+      // Validar que la moneda coincida
+      if (custodyAccount.currency !== createForm.currency) {
+        addToast({
+          type: 'error',
+          title: isSpanish ? 'Moneda incorrecta' : 'Wrong currency',
+          description: isSpanish
+            ? `La cuenta ${custodyAccount.accountName} es ${custodyAccount.currency}, no ${createForm.currency}`
+            : `Account ${custodyAccount.accountName} is ${custodyAccount.currency}, not ${createForm.currency}`
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Validar fondos disponibles en custody account
+      if (custodyAccount.availableBalance < createForm.amount) {
+        addToast({
+          type: 'error',
+          title: isSpanish ? 'Fondos insuficientes' : 'Insufficient funds',
+          description: isSpanish
+            ? `Disponible: ${custodyAccount.currency} ${custodyAccount.availableBalance.toLocaleString()}`
+            : `Available: ${custodyAccount.currency} ${custodyAccount.availableBalance.toLocaleString()}`
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Generar ID y reference
       const id = crypto.randomUUID();
       const date = new Date();
       const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
@@ -132,7 +193,7 @@ export function BankSettlementModule() {
         beneficiaryName: 'TRADEMORE VALUE CAPITAL FZE',
         beneficiaryIban: ibanMap[createForm.currency],
         swiftCode: 'EBILAEADXXX',
-        referenceText: createForm.reference,
+        referenceText: createForm.reference || `Settlement from ${custodyAccount.accountName}`,
         status: 'PENDING',
         ledgerDebitId,
         createdBy: createForm.requestedBy,
@@ -140,86 +201,84 @@ export function BankSettlementModule() {
         updatedAt: date.toISOString()
       };
 
-      // Debitar del sistema DAES usando custody-transfer-handler
-      const { balanceStore } = await import('../lib/balances-store');
-      const balanceStoreData = balanceStore.loadBalances();
+      // Usar custody-transfer-handler para débito completo
+      const { custodyTransferHandler } = await import('../lib/custody-transfer-handler');
       
-      if (balanceStoreData) {
-        const balanceIndex = balanceStoreData.balances.findIndex((b: any) => b.currency === createForm.currency);
-        
-        if (balanceIndex !== -1) {
-          const currentBalance = balanceStoreData.balances[balanceIndex];
-          
-          if (currentBalance.totalAmount < createForm.amount) {
-            addToast({
-              type: 'error',
-              title: isSpanish ? 'Fondos insuficientes' : 'Insufficient funds',
-              description: `${createForm.currency} ${currentBalance.totalAmount.toLocaleString()} ${isSpanish ? 'disponible' : 'available'}`
-            });
-            setLoading(false);
-            return;
-          }
+      const transferResult = await custodyTransferHandler.executeTransfer({
+        fromAccountId: createForm.custodyAccountId,
+        toDestination: 'TRADEMORE VALUE CAPITAL FZE (ENBD)',
+        amount: createForm.amount,
+        currency: createForm.currency,
+        reference: daesReferenceId,
+        description: `Bank Settlement to ENBD - ${createForm.reference || 'No reference'}`,
+        beneficiaryName: 'TRADEMORE VALUE CAPITAL FZE',
+        destinationType: 'external'
+      });
 
-          // Debitar
-          const oldAmount = currentBalance.totalAmount;
-          currentBalance.totalAmount -= createForm.amount;
-          currentBalance.balance = currentBalance.totalAmount;
-          
-          balanceStoreData.balances[balanceIndex] = currentBalance;
-          balanceStore.saveBalances(balanceStoreData);
-          
-          // Sincronizar Account Ledger y Black Screen
-          balanceStore.updateBalancesRealTime(
-            balanceStoreData.balances,
-            balanceStoreData.fileName,
-            balanceStoreData.fileSize,
-            100
-          );
-
-          console.log('[BankSettlement] ✅ DAES Ledger debitado:', {
-            currency: createForm.currency,
-            oldBalance: oldAmount,
-            newBalance: currentBalance.totalAmount,
-            debitId: ledgerDebitId
-          });
-
-          // Registrar en Transaction Events
-          const { transactionEventStore } = await import('../lib/transaction-event-store');
-          transactionEventStore.recordEvent(
-            'BALANCE_DECREASE',
-            'SYSTEM',
-            `Bank Settlement hacia ENBD: ${daesReferenceId}`,
-            {
-              amount: createForm.amount,
-              currency: createForm.currency,
-              reference: daesReferenceId,
-              status: 'COMPLETED',
-              metadata: {
-                fromBalance: oldAmount,
-                toBalance: currentBalance.totalAmount,
-                operation: 'BANK_SETTLEMENT',
-                beneficiary: 'TRADEMORE VALUE CAPITAL FZE',
-                bankCode: 'ENBD',
-                ledgerDebitId
-              }
-            }
-          );
-        }
+      if (!transferResult.success) {
+        throw new Error(transferResult.error || 'Transfer failed');
       }
+
+      console.log('[BankSettlement] ✅ TRANSFERENCIA COMPLETA CON SINCRONIZACIÓN:', {
+        transferId: transferResult.transferId,
+        custodyAccount: custodyAccount.accountName,
+        oldBalance: transferResult.oldBalance,
+        newBalance: transferResult.newBalance,
+        amount: createForm.amount,
+        currency: createForm.currency,
+        daesReferenceId,
+        ledgerDebitId
+      });
+      console.log('[BankSettlement] ✅ Custody Account actualizada');
+      console.log('[BankSettlement] ✅ Account Ledger debitado');
+      console.log('[BankSettlement] ✅ Black Screen sincronizado');
+      console.log('[BankSettlement] ✅ Transaction Events registrado');
+
+      // Registrar evento específico de Bank Settlement
+      const { transactionEventStore } = await import('../lib/transaction-event-store');
+      transactionEventStore.recordEvent(
+        'TRANSFER_CREATED',
+        'SYSTEM',
+        `Bank Settlement ENBD: ${daesReferenceId}`,
+        {
+          amount: createForm.amount,
+          currency: createForm.currency,
+          accountId: custodyAccount.id,
+          accountName: custodyAccount.accountName,
+          reference: daesReferenceId,
+          status: 'COMPLETED',
+          metadata: {
+            settlementId: id,
+            bankCode: 'ENBD',
+            beneficiary: 'TRADEMORE VALUE CAPITAL FZE',
+            iban: ibanMap[createForm.currency],
+            swift: 'EBILAEADXXX',
+            ledgerDebitId,
+            custodyAccountNumber: custodyAccount.accountNumber,
+            operation: 'BANK_SETTLEMENT_OUTBOUND'
+          }
+        }
+      );
 
       // Guardar settlement
       const updated = [newSettlement, ...settlements];
       setSettlements(updated);
       localStorage.setItem('bank_settlements', JSON.stringify(updated));
 
+      // Recargar custody accounts
+      loadCustodyAccounts();
+
       addToast({
         type: 'success',
         title: isSpanish ? 'Settlement creado' : 'Settlement created',
-        description: `${daesReferenceId} · ${createForm.currency} ${createForm.amount.toLocaleString()}`
+        description: isSpanish
+          ? `${daesReferenceId}\n${createForm.currency} ${createForm.amount.toLocaleString()}\nDe: ${custodyAccount.accountName}\n✅ Sincronizado con todo el sistema`
+          : `${daesReferenceId}\n${createForm.currency} ${createForm.amount.toLocaleString()}\nFrom: ${custodyAccount.accountName}\n✅ Synced across the system`
       });
 
       setShowCreateModal(false);
       setCreateForm({
+        custodyAccountId: '',
         amount: 0,
         currency: 'USD',
         reference: '',
@@ -573,8 +632,76 @@ export function BankSettlementModule() {
 
             <div className="space-y-4">
               <div>
+                <label className="block text-sm font-medium text-white/70 mb-2 flex items-center gap-2">
+                  <Wallet className="w-4 h-4" />
+                  {isSpanish ? 'Cuenta Custody origen' : 'Source Custody Account'}
+                </label>
+                <select
+                  value={createForm.custodyAccountId}
+                  onChange={e => {
+                    const account = custodyAccounts.find(a => a.id === e.target.value);
+                    setCreateForm({
+                      ...createForm,
+                      custodyAccountId: e.target.value,
+                      currency: (account?.currency || 'USD') as 'AED' | 'USD' | 'EUR'
+                    });
+                  }}
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
+                  required
+                >
+                  <option value="">
+                    {isSpanish ? '-- Seleccionar cuenta --' : '-- Select account --'}
+                  </option>
+                  {custodyAccounts
+                    .filter(a => ['AED', 'USD', 'EUR'].includes(a.currency))
+                    .map(account => (
+                      <option key={account.id} value={account.id}>
+                        {account.accountName} ({account.accountNumber}) · {account.currency} {account.availableBalance.toLocaleString()}
+                      </option>
+                    ))}
+                </select>
+                {custodyAccounts.filter(a => ['AED', 'USD', 'EUR'].includes(a.currency)).length === 0 && (
+                  <p className="text-xs text-red-300 mt-2">
+                    {isSpanish
+                      ? 'No hay cuentas custody con AED/USD/EUR. Crea una en el módulo Custody Accounts.'
+                      : 'No custody accounts with AED/USD/EUR. Create one in Custody Accounts module.'}
+                  </p>
+                )}
+              </div>
+
+              {createForm.custodyAccountId && (() => {
+                const selectedAccount = custodyAccounts.find(a => a.id === createForm.custodyAccountId);
+                return selectedAccount ? (
+                  <div className="bg-purple-500/10 border border-purple-400/30 rounded-xl p-4 text-sm">
+                    <p className="text-purple-300 font-semibold mb-2 flex items-center gap-2">
+                      <DollarSign className="w-4 h-4" />
+                      {isSpanish ? 'Balance de cuenta seleccionada:' : 'Selected account balance:'}
+                    </p>
+                    <div className="grid grid-cols-2 gap-3 text-white/70">
+                      <div>
+                        <span className="text-white/50">{isSpanish ? 'Total:' : 'Total:'}</span>
+                        <p className="text-white font-semibold">{selectedAccount.currency} {selectedAccount.totalBalance.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/50">{isSpanish ? 'Disponible:' : 'Available:'}</span>
+                        <p className="text-[#00ff88] font-semibold">{selectedAccount.currency} {selectedAccount.availableBalance.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/50">{isSpanish ? 'Reservado:' : 'Reserved:'}</span>
+                        <p className="text-orange-300">{selectedAccount.currency} {selectedAccount.reservedBalance.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/50">{isSpanish ? 'Tipo:' : 'Type:'}</span>
+                        <p className="text-white/80 capitalize">{selectedAccount.accountType}</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+
+              <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">
-                  {isSpanish ? 'Monto' : 'Amount'}
+                  {isSpanish ? 'Monto a transferir' : 'Amount to transfer'}
                 </label>
                 <input
                   type="number"
@@ -584,28 +711,30 @@ export function BankSettlementModule() {
                   placeholder="1000000.00"
                   min="0"
                   step="0.01"
+                  disabled={!createForm.custodyAccountId}
                 />
+                {createForm.custodyAccountId && (() => {
+                  const selectedAccount = custodyAccounts.find(a => a.id === createForm.custodyAccountId);
+                  return selectedAccount && createForm.amount > 0 ? (
+                    <p className="text-xs text-white/60 mt-2">
+                      {isSpanish ? 'Nuevo balance:' : 'New balance:'}{' '}
+                      <span className={`font-semibold ${selectedAccount.availableBalance - createForm.amount >= 0 ? 'text-[#00ff88]' : 'text-red-400'}`}>
+                        {selectedAccount.currency} {(selectedAccount.availableBalance - createForm.amount).toLocaleString()}
+                      </span>
+                    </p>
+                  ) : null;
+                })()}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">
-                  {isSpanish ? 'Moneda' : 'Currency'}
+                  {isSpanish ? 'Moneda destino' : 'Destination currency'}
                 </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {(['AED', 'USD', 'EUR'] as const).map(curr => (
-                    <button
-                      key={curr}
-                      type="button"
-                      onClick={() => setCreateForm({ ...createForm, currency: curr })}
-                      className={`px-4 py-3 rounded-xl font-semibold transition ${
-                        createForm.currency === curr
-                          ? 'bg-[#00ff88]/20 border-2 border-[#00ff88]/60 text-[#00ff88]'
-                          : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
-                      }`}
-                    >
-                      {curr}
-                    </button>
-                  ))}
+                <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+                  <p className="text-white font-semibold">{createForm.currency}</p>
+                  <p className="text-xs text-white/50 mt-1">
+                    {isSpanish ? 'Se ajusta automáticamente según la cuenta seleccionada' : 'Automatically set based on selected account'}
+                  </p>
                 </div>
               </div>
 
@@ -624,20 +753,37 @@ export function BankSettlementModule() {
               </div>
 
               <div className="bg-cyan-500/10 border border-cyan-400/30 rounded-xl p-4 text-sm">
-                <p className="text-cyan-300 font-semibold mb-2">{isSpanish ? 'Información del beneficiario:' : 'Beneficiary information:'}</p>
+                <p className="text-cyan-300 font-semibold mb-2 flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  {isSpanish ? 'Información del beneficiario:' : 'Beneficiary information:'}
+                </p>
                 <div className="space-y-1 text-white/70">
                   <p><span className="text-white/50">Bank:</span> EMIRATES NBD (ENBD)</p>
+                  <p><span className="text-white/50">Location:</span> Dubai, United Arab Emirates</p>
                   <p><span className="text-white/50">Beneficiary:</span> TRADEMORE VALUE CAPITAL FZE</p>
-                  <p><span className="text-white/50">SWIFT:</span> EBILAEADXXX</p>
+                  <p><span className="text-white/50">SWIFT/BIC:</span> EBILAEADXXX</p>
                   <p>
                     <span className="text-white/50">IBAN ({createForm.currency}):</span>
                     <span className="text-cyan-300 ml-2 font-mono text-xs">
-                      {createForm.currency === 'AED' && 'AE610260001015381452401'}
-                      {createForm.currency === 'USD' && 'AE690260001025381452402'}
-                      {createForm.currency === 'EUR' && 'AE420260001025381452403'}
+                      {createForm.currency === 'AED' && 'AE61 0260 0010 1538 1452 401'}
+                      {createForm.currency === 'USD' && 'AE69 0260 0010 2538 1452 402'}
+                      {createForm.currency === 'EUR' && 'AE42 0260 0010 2538 1452 403'}
                     </span>
                   </p>
                 </div>
+              </div>
+
+              <div className="bg-orange-500/10 border border-orange-400/30 rounded-xl p-4 text-sm">
+                <p className="text-orange-300 font-semibold mb-2 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {isSpanish ? 'Importante:' : 'Important:'}
+                </p>
+                <ul className="space-y-1 text-white/70 text-xs list-disc list-inside">
+                  <li>{isSpanish ? 'El monto se debitará de la cuenta custody seleccionada' : 'Amount will be debited from selected custody account'}</li>
+                  <li>{isSpanish ? 'Account Ledger y Black Screen se actualizarán automáticamente' : 'Account Ledger and Black Screen will update automatically'}</li>
+                  <li>{isSpanish ? 'La transacción se registrará en Transaction Events' : 'Transaction will be logged in Transaction Events'}</li>
+                  <li>{isSpanish ? 'Ejecuta manualmente en ENBD Online Banking después' : 'Execute manually in ENBD Online Banking after'}</li>
+                </ul>
               </div>
 
               <div className="flex gap-3 pt-4">
