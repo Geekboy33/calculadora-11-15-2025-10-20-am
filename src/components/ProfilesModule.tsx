@@ -21,7 +21,7 @@ import {
   AlertTriangle,
   Clock4
 } from 'lucide-react';
-import { profilesStore, ProfileRecord } from '../lib/profiles-store';
+import { profilesStore, ProfileRecord, SnapshotDiff } from '../lib/profiles-store';
 import { useLanguage } from '../lib/i18n';
 import { useToast } from './ui/Toast';
 import { StorageManager } from '../lib/storage-manager';
@@ -43,12 +43,16 @@ export function ProfilesModule() {
   const [importing, setImporting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewProfile, setPreviewProfile] = useState<ProfileRecord | null>(null);
+  const [showDiffModal, setShowDiffModal] = useState(false);
+  const [diffData, setDiffData] = useState<SnapshotDiff | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [autoConfig, setAutoConfig] = useState(profilesStore.getAutoSnapshotConfig());
 
   useEffect(() => {
     const unsubscribe = profilesStore.subscribe(state => {
       setProfiles(state.profiles);
       setActiveProfileId(state.activeProfileId);
+      setAutoConfig(state.autoSnapshotConfig);
 
       if (state.profiles.length === 0) {
         setSelectedProfileId(null);
@@ -260,6 +264,61 @@ export function ProfilesModule() {
     setPreviewProfile(null);
   };
 
+  const handleShowDiff = () => {
+    if (!selectedProfile || !selectedProfile.history || selectedProfile.history.length === 0) {
+      addToast({
+        type: 'info',
+        title: isSpanish ? 'Sin historial' : 'No history',
+        description: isSpanish
+          ? 'Este perfil no tiene versiones anteriores para comparar.'
+          : 'This profile has no previous versions to compare.'
+      });
+      return;
+    }
+
+    try {
+      const diff = profilesStore.getProfileDiff(selectedProfile.id, 0);
+      if (!diff) {
+        addToast({
+          type: 'info',
+          title: isSpanish ? 'Sin diferencias' : 'No differences',
+          description: isSpanish ? 'No hay cambios detectados.' : 'No changes detected.'
+        });
+        return;
+      }
+      setDiffData(diff);
+      setShowDiffModal(true);
+    } catch (error: any) {
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Error calculando diff' : 'Diff error',
+        description: error?.message || 'Unexpected error'
+      });
+    }
+  };
+
+  const handleCloseDiff = () => {
+    setShowDiffModal(false);
+    setDiffData(null);
+  };
+
+  const handleConfigureAutoSnapshots = () => {
+    const enabled = !autoConfig.enabled;
+    const updated = profilesStore.configureAutoSnapshots({ enabled });
+    setAutoConfig(updated);
+    addToast({
+      type: 'success',
+      title: isSpanish ? 'Auto-snapshot' : 'Auto-snapshot',
+      description: enabled
+        ? isSpanish
+          ? `Activado · Cada ${updated.intervalMinutes} minutos`
+          : `Enabled · Every ${updated.intervalMinutes} minutes`
+        : isSpanish
+          ? 'Desactivado'
+          : 'Disabled'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#030712] via-[#050b1c] to-[#000] text-white p-6">
       <div className="flex flex-col gap-2 mb-8">
@@ -372,6 +431,7 @@ export function ProfilesModule() {
               accept=".json,.daes-profile.json"
               onChange={handleImportProfile}
               className="hidden"
+              aria-label={isSpanish ? 'Importar perfil' : 'Import profile'}
             />
 
             {profiles.length === 0 ? (
@@ -585,6 +645,22 @@ export function ProfilesModule() {
                       {isSpanish ? 'Cargar Ledger1 en segundo plano' : 'Load Ledger1 in background'}
                     </button>
                   )}
+                  {selectedProfile.history && selectedProfile.history.length > 0 && (
+                    <button
+                      onClick={handleShowDiff}
+                      className="w-full flex items-center justify-center gap-2 bg-orange-500/10 border border-orange-400/30 rounded-xl py-3 font-semibold text-orange-200 hover:border-orange-400/60 transition"
+                    >
+                      <History className="w-4 h-4" />
+                      {isSpanish ? 'Ver cambios desde versión anterior' : 'View changes from previous version'}
+                    </button>
+                  )}
+                  <button
+                    onClick={handleExportProfile}
+                    className="w-full flex items-center justify-center gap-2 bg-green-500/10 border border-green-400/30 rounded-xl py-3 font-semibold text-green-200 hover:border-green-400/60 transition"
+                  >
+                    <Download className="w-4 h-4" />
+                    {isSpanish ? 'Exportar como archivo' : 'Export as file'}
+                  </button>
                 </div>
               </div>
             ) : (
@@ -612,6 +688,44 @@ export function ProfilesModule() {
                   ? 'Recomendado crear perfil tras cargar Ledger1 o completar conciliaciones.'
                   : 'Recommended after loading Ledger1 or finishing reconciliations.'}
               </p>
+            </div>
+          </div>
+          
+          {/* Panel de configuración */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock4 className="w-5 h-5 text-cyan-300" />
+              <h3 className="text-lg font-semibold">
+                {isSpanish ? 'Snapshots automáticos' : 'Auto-snapshots'}
+              </h3>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-white/70">
+                  {isSpanish ? 'Estado:' : 'Status:'}
+                </span>
+                <button
+                  onClick={handleConfigureAutoSnapshots}
+                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                    autoConfig.enabled
+                      ? 'bg-[#00ff88]/20 border border-[#00ff88]/40 text-[#00ff88]'
+                      : 'bg-white/5 border border-white/20 text-white/60'
+                  }`}
+                >
+                  {autoConfig.enabled ? (isSpanish ? 'Activado' : 'Enabled') : (isSpanish ? 'Desactivado' : 'Disabled')}
+                </button>
+              </div>
+              {autoConfig.enabled && (
+                <div className="text-xs text-white/60 bg-black/30 rounded-lg p-3">
+                  {isSpanish ? 'Próxima ejecución:' : 'Next run:'}{' '}
+                  <span className="text-white font-semibold">
+                    {autoConfig.nextRun ? new Date(autoConfig.nextRun).toLocaleTimeString(isSpanish ? 'es-ES' : 'en-US') : '—'}
+                  </span>
+                  <br />
+                  {isSpanish ? 'Intervalo:' : 'Interval:'}{' '}
+                  <span className="text-cyan-300 font-semibold">{autoConfig.intervalMinutes} min</span>
+                </div>
+              )}
             </div>
           </div>
         </aside>
@@ -762,6 +876,151 @@ export function ProfilesModule() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Diff */}
+      {showDiffModal && diffData && selectedProfile && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={handleCloseDiff}>
+          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-orange-400/30 rounded-3xl p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <GitCompare className="w-6 h-6 text-orange-400" />
+                <div>
+                  <h2 className="text-2xl font-bold">
+                    {isSpanish ? 'Diferencias desde versión anterior' : 'Changes from previous version'}
+                  </h2>
+                  <p className="text-sm text-white/60">{selectedProfile.name}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleCloseDiff}
+                className="px-4 py-2 rounded-xl border border-white/20 text-white/80 hover:border-white/40 transition"
+              >
+                {isSpanish ? 'Cerrar' : 'Close'}
+              </button>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 className="text-sm font-semibold text-white/70 mb-4">
+                  {isSpanish ? 'Resumen de cambios' : 'Changes summary'}
+                </h4>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/60">{isSpanish ? 'Keys agregadas:' : 'Keys added:'}</span>
+                    <span className="text-green-400 font-semibold">+{diffData.added.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/60">{isSpanish ? 'Keys eliminadas:' : 'Keys removed:'}</span>
+                    <span className="text-red-400 font-semibold">-{diffData.removed.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/60">{isSpanish ? 'Keys modificadas:' : 'Keys modified:'}</span>
+                    <span className="text-orange-400 font-semibold">~{diffData.changed.length}</span>
+                  </div>
+                  <div className="border-t border-white/10 pt-3 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/60">{isSpanish ? 'Total anterior:' : 'Previous total:'}</span>
+                      <span className="text-white">{diffData.summary.totalKeysBefore} keys</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/60">{isSpanish ? 'Total actual:' : 'Current total:'}</span>
+                      <span className="text-white">{diffData.summary.totalKeysAfter} keys</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h4 className="text-sm font-semibold text-white/70 mb-4">
+                  {isSpanish ? 'Tamaño del snapshot' : 'Snapshot size'}
+                </h4>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/60">{isSpanish ? 'Anterior:' : 'Previous:'}</span>
+                    <span className="text-white">{(diffData.summary.bytesBefore / 1024).toFixed(2)} KB</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-white/60">{isSpanish ? 'Actual:' : 'Current:'}</span>
+                    <span className="text-white">{(diffData.summary.bytesAfter / 1024).toFixed(2)} KB</span>
+                  </div>
+                  <div className="border-t border-white/10 pt-3 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/60">{isSpanish ? 'Diferencia:' : 'Difference:'}</span>
+                      <span className={`font-semibold ${
+                        diffData.summary.bytesAfter > diffData.summary.bytesBefore
+                          ? 'text-orange-400'
+                          : 'text-green-400'
+                      }`}>
+                        {diffData.summary.bytesAfter > diffData.summary.bytesBefore ? '+' : ''}
+                        {((diffData.summary.bytesAfter - diffData.summary.bytesBefore) / 1024).toFixed(2)} KB
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {diffData.added.length > 0 && (
+              <div className="mt-6 bg-green-500/10 border border-green-500/30 rounded-2xl p-5">
+                <h4 className="text-sm font-semibold text-green-300 mb-3">
+                  {isSpanish ? 'Keys agregadas' : 'Added keys'} ({diffData.added.length})
+                </h4>
+                <div className="max-h-40 overflow-y-auto">
+                  <div className="space-y-1 text-xs font-mono text-green-200">
+                    {diffData.added.map(key => (
+                      <div key={key} className="bg-green-500/10 px-2 py-1 rounded">+ {key}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {diffData.removed.length > 0 && (
+              <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-2xl p-5">
+                <h4 className="text-sm font-semibold text-red-300 mb-3">
+                  {isSpanish ? 'Keys eliminadas' : 'Removed keys'} ({diffData.removed.length})
+                </h4>
+                <div className="max-h-40 overflow-y-auto">
+                  <div className="space-y-1 text-xs font-mono text-red-200">
+                    {diffData.removed.map(key => (
+                      <div key={key} className="bg-red-500/10 px-2 py-1 rounded">- {key}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {diffData.changed.length > 0 && (
+              <div className="mt-4 bg-orange-500/10 border border-orange-500/30 rounded-2xl p-5">
+                <h4 className="text-sm font-semibold text-orange-300 mb-3">
+                  {isSpanish ? 'Keys modificadas' : 'Modified keys'} ({diffData.changed.length})
+                </h4>
+                <div className="max-h-60 overflow-y-auto pr-2">
+                  <div className="space-y-2 text-xs">
+                    {diffData.changed.map(change => (
+                      <div key={change.key} className="bg-orange-500/10 px-3 py-2 rounded">
+                        <div className="font-mono text-orange-200 mb-1">~ {change.key}</div>
+                        <div className="flex gap-4 text-white/60">
+                          {change.previous && (
+                            <span>
+                              {isSpanish ? 'Anterior:' : 'Previous:'} {(change.previous.size / 1024).toFixed(2)} KB
+                            </span>
+                          )}
+                          {change.current && (
+                            <span>
+                              {isSpanish ? 'Actual:' : 'Current:'} {(change.current.size / 1024).toFixed(2)} KB
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

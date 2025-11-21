@@ -79,6 +79,7 @@ export interface ProfileStats {
   porReports: number;
   eventsCount: number;
   checksum?: string;
+  compressionRatio?: number;
   sections?: SnapshotSectionMeta[];
   ledger?: {
     fileName?: string;
@@ -100,6 +101,7 @@ export interface ProfileRecord {
   snapshot: ProfileSnapshot | Record<string, string>;
   stats: ProfileStats;
   history?: ProfileHistoryEntry[];
+  compressionRatio?: number;
 }
 
 interface ProfilesState {
@@ -555,6 +557,8 @@ class ProfilesStore {
     encryptedSnapshot: ProfileSnapshot
   ): ProfileStats {
     const snapshotSize = new Blob([JSON.stringify(snapshot)]).size;
+    const encryptedSize = new Blob([encryptedSnapshot.payload]).size;
+    const compressionRatio = encryptedSize / snapshotSize;
 
     const summary: ProfileStats = {
       keysCount: Object.keys(snapshot).length,
@@ -567,6 +571,7 @@ class ProfilesStore {
       porReports: 0,
       eventsCount: 0,
       checksum: encryptedSnapshot.checksum,
+      compressionRatio: compressionRatio,
       sections: encryptedSnapshot.sections
     };
 
