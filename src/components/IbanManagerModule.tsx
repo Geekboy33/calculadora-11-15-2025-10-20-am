@@ -17,7 +17,8 @@ import {
   RefreshCw,
   Wallet,
   AlertTriangle,
-  Globe
+  Globe,
+  Trash2
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { useToast } from './ui/Toast';
@@ -322,6 +323,59 @@ export function IbanManagerModule() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteIban = async (ibanId: string) => {
+    const iban = ibans.find(i => i.id === ibanId);
+    if (!iban) return;
+
+    const confirmMessage = isSpanish
+      ? `¿Eliminar IBAN ${iban.ibanFormatted}?\n\nCuenta: ${iban.accountName}\nMoneda: ${iban.currency}\nStatus: ${iban.status}\n\n⚠️ Esta acción no se puede deshacer.`
+      : `Delete IBAN ${iban.ibanFormatted}?\n\nAccount: ${iban.accountName}\nCurrency: ${iban.currency}\nStatus: ${iban.status}\n\n⚠️ This action cannot be undone.`;
+
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      const updated = ibans.filter(i => i.id !== ibanId);
+      setIbans(updated);
+      localStorage.setItem('daes_ibans', JSON.stringify(updated));
+
+      // Registrar eliminación en Transaction Events
+      const { transactionEventStore } = await import('../lib/transaction-event-store');
+      transactionEventStore.recordEvent(
+        'ACCOUNT_DELETED',
+        'SYSTEM',
+        `IBAN eliminado: ${iban.ibanFormatted}`,
+        {
+          currency: iban.currency,
+          accountName: iban.accountName,
+          reference: iban.iban,
+          status: 'COMPLETED',
+          metadata: {
+            ibanId: iban.id,
+            countryCode: iban.countryCode,
+            previousStatus: iban.status,
+            operation: 'DELETE_IBAN'
+          }
+        }
+      );
+
+      addToast({
+        type: 'warning',
+        title: isSpanish ? 'IBAN eliminado' : 'IBAN deleted',
+        description: iban.ibanFormatted
+      });
+
+      console.log('[IbanManager] 🗑️ IBAN eliminado:', iban.ibanFormatted);
+
+    } catch (error: any) {
+      console.error('[IbanManager] Error eliminando:', error);
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Error' : 'Error',
+        description: error.message
+      });
     }
   };
 
@@ -641,6 +695,13 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                     >
                       <Eye className="w-4 h-4" />
                       {isSpanish ? 'Auditoría' : 'Audit'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteIban(iban.id)}
+                      className="px-3 py-2 rounded-xl bg-red-500/10 border border-red-400/30 text-red-300 text-sm font-semibold hover:bg-red-500/20 transition"
+                      title={isSpanish ? 'Eliminar IBAN' : 'Delete IBAN'}
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
