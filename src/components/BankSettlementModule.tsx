@@ -125,6 +125,13 @@ export function BankSettlementModule() {
   };
 
   const handleCreateSettlement = async () => {
+    console.log('[BankSettlement] 🔍 Validando form:', {
+      custodyAccountId: createForm.custodyAccountId,
+      amount: createForm.amount,
+      currency: createForm.currency,
+      type: typeof createForm.amount
+    });
+
     if (!createForm.custodyAccountId) {
       addToast({
         type: 'error',
@@ -134,11 +141,20 @@ export function BankSettlementModule() {
       return;
     }
 
-    if (createForm.amount <= 0) {
+    const amountValue = Number(createForm.amount);
+    console.log('[BankSettlement] 📊 Amount validation:', {
+      original: createForm.amount,
+      parsed: amountValue,
+      isValid: amountValue > 0
+    });
+
+    if (isNaN(amountValue) || amountValue <= 0) {
       addToast({
         type: 'error',
         title: isSpanish ? 'Monto inválido' : 'Invalid amount',
-        description: isSpanish ? 'El monto debe ser mayor a cero' : 'Amount must be greater than zero'
+        description: isSpanish 
+          ? `El monto debe ser mayor a cero. Valor recibido: ${createForm.amount}` 
+          : `Amount must be greater than zero. Received: ${createForm.amount}`
       });
       return;
     }
@@ -196,7 +212,7 @@ export function BankSettlementModule() {
       const newSettlement: Settlement = {
         id,
         daesReferenceId,
-        amount: createForm.amount.toFixed(2),
+        amount: amountValue.toFixed(2), // Usar valor validado
         currency: createForm.currency,
         beneficiaryName: 'TRADEMORE VALUE CAPITAL FZE',
         beneficiaryIban: ibanMap[createForm.currency],
@@ -215,7 +231,7 @@ export function BankSettlementModule() {
       const transferResult = await custodyTransferHandler.executeTransfer({
         fromAccountId: createForm.custodyAccountId,
         toDestination: 'TRADEMORE VALUE CAPITAL FZE (ENBD)',
-        amount: createForm.amount,
+        amount: amountValue, // Usar valor validado
         currency: createForm.currency,
         reference: daesReferenceId,
         description: `Bank Settlement to ENBD - ${createForm.reference || 'No reference'}`,
@@ -249,7 +265,7 @@ export function BankSettlementModule() {
         'SYSTEM',
         `Bank Settlement ENBD: ${daesReferenceId}`,
         {
-          amount: createForm.amount,
+          amount: amountValue, // Usar valor validado
           currency: createForm.currency,
           accountId: custodyAccount.id,
           accountName: custodyAccount.accountName,
@@ -280,8 +296,8 @@ export function BankSettlementModule() {
         type: 'success',
         title: isSpanish ? 'Settlement creado' : 'Settlement created',
         description: isSpanish
-          ? `${daesReferenceId}\n${createForm.currency} ${createForm.amount.toLocaleString()}\nDe: ${custodyAccount.accountName}\n✅ Sincronizado con todo el sistema`
-          : `${daesReferenceId}\n${createForm.currency} ${createForm.amount.toLocaleString()}\nFrom: ${custodyAccount.accountName}\n✅ Synced across the system`
+          ? `${daesReferenceId}\n${createForm.currency} ${amountValue.toLocaleString()}\nDe: ${custodyAccount.accountName}\n✅ Sincronizado con todo el sistema`
+          : `${daesReferenceId}\n${createForm.currency} ${amountValue.toLocaleString()}\nFrom: ${custodyAccount.accountName}\n✅ Synced across the system`
       });
 
       setShowCreateModal(false);
