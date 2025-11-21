@@ -1138,11 +1138,11 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
 
-              {/* Reservas */}
-              {account.reservations.length > 0 && (
+              {/* Reservas - Solo mostrar para cuentas blockchain */}
+              {account.accountType === 'blockchain' && account.reservations.length > 0 && (
                 <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
                   <h4 className="text-sm font-semibold text-[#00ff88] mb-3">
-                    {language === 'es' ? `Reservas para Tokenización (${account.reservations.length})` : `Tokenization Reserves (${account.reservations.length})`}
+                    {language === 'es' ? `Reservas Blockchain (${account.reservations.length})` : `Blockchain Reserves (${account.reservations.length})`}
                   </h4>
                   <div className="space-y-2">
                     {account.reservations.map(reservation => (
@@ -1164,7 +1164,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                           </div>
                           <div>
                             <span className="text-[#4d7c4d]">Tokens:</span> 
-                            <span className="text-cyan-400 ml-1">{reservation.tokenAmount.toLocaleString()} {account.tokenSymbol}</span>
+                            <span className="text-cyan-400 ml-1">{reservation.tokenAmount?.toLocaleString() || 0} {account.tokenSymbol}</span>
                           </div>
                           <div>
                             <span className="text-[#4d7c4d]">Blockchain:</span> 
@@ -1172,7 +1172,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                           </div>
                           <div className="col-span-2">
                             <span className="text-[#4d7c4d]">Contrato:</span> 
-                            <code className="text-purple-400 ml-1 text-xs">{reservation.contractAddress.substring(0, 20)}...</code>
+                            <code className="text-purple-400 ml-1 text-xs">{reservation.contractAddress?.substring(0, 20) || 'N/A'}...</code>
                           </div>
                         </div>
                         <div className="mt-2 flex gap-2">
@@ -2186,11 +2186,11 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
 
-              {/* Reservas */}
-              {selectedAccount.reservations && selectedAccount.reservations.length > 0 && (
+              {/* Reservas - Solo mostrar para cuentas blockchain */}
+              {selectedAccount.accountType === 'blockchain' && selectedAccount.reservations && selectedAccount.reservations.length > 0 && (
                 <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-6">
                   <h3 className="text-lg font-bold text-[#00ff88] mb-4">
-                    {language === 'es' ? `📜 Reservas (${selectedAccount.reservations.length})` : `📜 Reservations (${selectedAccount.reservations.length})`}
+                    {language === 'es' ? `📜 Reservas Blockchain (${selectedAccount.reservations.length})` : `📜 Blockchain Reserves (${selectedAccount.reservations.length})`}
                   </h3>
                   <div className="space-y-3">
                     {selectedAccount.reservations.map(r => (
@@ -2211,7 +2211,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                             <span className="text-[#4d7c4d]">{language === 'es' ? 'Monto:' : 'Amount:'}</span>
                             <span className="text-[#80ff80] ml-1">{selectedAccount.currency} {r.amount.toLocaleString()}</span>
                           </div>
-                          {r.type === 'blockchain' && r.tokenAmount && (
+                          {r.tokenAmount && (
                             <div>
                               <span className="text-[#4d7c4d]">{language === 'es' ? 'Tokens:' : 'Tokens:'}</span>
                               <span className="text-cyan-400 ml-1">{r.tokenAmount.toLocaleString()} {selectedAccount.tokenSymbol}</span>
@@ -2223,10 +2223,10 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                               <span className="text-[#80ff80] ml-1">{r.blockchain}</span>
                             </div>
                           )}
-                          {r.destinationBank && (
-                            <div>
-                              <span className="text-[#4d7c4d]">{language === 'es' ? 'Banco Destino:' : 'Dest. Bank:'}</span>
-                              <span className="text-[#80ff80] ml-1">{r.destinationBank}</span>
+                          {r.contractAddress && (
+                            <div className="col-span-2">
+                              <span className="text-[#4d7c4d]">{language === 'es' ? 'Contrato:' : 'Contract:'}</span>
+                              <span className="text-cyan-400 ml-1 font-mono text-[10px]">{r.contractAddress.substring(0, 10)}...</span>
                             </div>
                           )}
                         </div>

@@ -736,6 +736,7 @@ class CustodyStore {
     const reservation = account.reservations.find(r => r.id === reservationId);
     if (!reservation) return false;
 
+    // Liberar fondos reservados
     account.reservedBalance -= reservation.amount;
     account.availableBalance += reservation.amount;
     reservation.status = 'released';
@@ -744,7 +745,35 @@ class CustodyStore {
     this.saveAccounts(accounts);
     this.notifyListeners(accounts);
 
-    console.log('[CustodyStore] ✅ Fondos liberados:', reservationId);
+    // Registrar en Transaction Events
+    transactionEventStore.recordEvent(
+      'FUNDS_RELEASED',
+      'CUSTODY_ACCOUNTS',
+      `Fondos liberados en ${account.accountName}`,
+      {
+        amount: reservation.amount,
+        currency: account.currency,
+        accountId: account.id,
+        accountName: account.accountName,
+        reference: reservationId,
+        status: 'COMPLETED',
+        metadata: {
+          reservationId,
+          newAvailable: account.availableBalance,
+          newReserved: account.reservedBalance,
+          operation: 'RELEASE_RESERVATION'
+        }
+      }
+    );
+
+    console.log('[CustodyStore] ✅ Fondos liberados:', {
+      reservationId,
+      amount: reservation.amount,
+      currency: account.currency,
+      newAvailable: account.availableBalance,
+      newReserved: account.reservedBalance
+    });
+    
     return true;
   }
 
