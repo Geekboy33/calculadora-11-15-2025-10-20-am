@@ -190,7 +190,7 @@ export function APIDAESModule() {
   };
 
   // Ejecutar transferencia API
-  const handleExecuteTransfer = () => {
+  const handleExecuteTransfer = async () => {
     if (!selectedAPI || transferData.amount <= 0) {
       alert(language === 'es' ? 'Ingresa un monto válido' : 'Enter valid amount');
       return;
@@ -201,54 +201,84 @@ export function APIDAESModule() {
       return;
     }
 
-    const transferId = `API-TRF-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-    
-    console.log('[API DAES] 🚀 EJECUTANDO TRANSFERENCIA API:');
-    console.log(`  Transfer ID: ${transferId}`);
-    console.log(`  API ID Origen: ${selectedAPI.apiId}`);
-    console.log(`  Endpoint Origen: ${selectedAPI.apiEndpoint}`);
-    console.log(`  De: ${selectedAPI.accountName} (${selectedAPI.accountNumber})`);
-    console.log(`  Monto: ${selectedAPI.currency} ${transferData.amount.toLocaleString()}`);
-    console.log(`  Destino: ${transferData.destinationBank}`);
-    console.log(`  Beneficiario: ${transferData.beneficiaryName}`);
-    if (transferData.destinationAPIKey) {
-      console.log(`  API Key Destino: ${transferData.destinationAPIKey.substring(0, 10)}...`);
-    }
-    if (transferData.destinationAPISecret) {
-      console.log(`  Secret Destino: ${transferData.destinationAPISecret.substring(0, 5)}...`);
-    }
+    try {
+      // Usar custody-transfer-handler para sincronización total
+      const { custodyTransferHandler } = await import('../lib/custody-transfer-handler');
+      
+      const transferResult = await custodyTransferHandler.executeTransfer({
+        fromAccountId: selectedAPI.id,
+        toDestination: transferData.destinationBank,
+        amount: transferData.amount,
+        currency: selectedAPI.currency,
+        reference: transferData.reference || undefined,
+        description: `Transferencia API DAES a ${transferData.beneficiaryName}`,
+        beneficiaryName: transferData.beneficiaryName,
+        destinationType: 'api'
+      });
 
-    const message = language === 'es'
-      ? `✅ Transferencia API Ejecutada\n\n` +
-        `ID: ${transferId}\n` +
-        `API ID: ${selectedAPI.apiId}\n` +
-        `Monto: ${selectedAPI.currency} ${transferData.amount.toLocaleString()}\n` +
-        `Destino: ${transferData.beneficiaryName}\n` +
-        `Banco: ${transferData.destinationBank}\n\n` +
-        `Estado: PROCESANDO\n` +
-        `Tiempo: ${transferData.urgent ? '1-2 horas' : '24-48 horas'}`
-      : `✅ API Transfer Executed\n\n` +
-        `ID: ${transferId}\n` +
-        `API ID: ${selectedAPI.apiId}\n` +
-        `Amount: ${selectedAPI.currency} ${transferData.amount.toLocaleString()}\n` +
-        `To: ${transferData.beneficiaryName}\n` +
-        `Bank: ${transferData.destinationBank}\n\n` +
-        `Status: PROCESSING\n` +
-        `Time: ${transferData.urgent ? '1-2 hours' : '24-48 hours'}`;
+      if (!transferResult.success) {
+        alert(language === 'es' 
+          ? `Error: ${transferResult.error}` 
+          : `Error: ${transferResult.error}`
+        );
+        return;
+      }
 
-    alert(message);
-    setShowTransferModal(false);
-    setTransferData({
-      amount: 0,
-      destinationBank: '',
-      destinationAccount: '',
-      destinationIBAN: '',
-      beneficiaryName: '',
-      reference: '',
-      urgent: false,
-      destinationAPIKey: '',
-      destinationAPISecret: '',
-    });
+      console.log('[API DAES] ✅ Transferencia ejecutada con sincronización total');
+      console.log('[API DAES] 💰 Transfer ID:', transferResult.transferId);
+      console.log('[API DAES] 📊 Balance anterior:', transferResult.oldBalance);
+      console.log('[API DAES] 📊 Balance nuevo:', transferResult.newBalance);
+      console.log('[API DAES] ✅ Account Ledger + Black Screen + Transaction Events sincronizados');
+
+      const message = language === 'es'
+        ? `✅ Transferencia API Ejecutada\n\n` +
+          `ID: ${transferResult.transferId}\n` +
+          `API ID: ${selectedAPI.apiId}\n` +
+          `Monto: ${selectedAPI.currency} ${transferData.amount.toLocaleString()}\n` +
+          `Destino: ${transferData.beneficiaryName}\n` +
+          `Banco: ${transferData.destinationBank}\n\n` +
+          `Balance anterior: ${selectedAPI.currency} ${transferResult.oldBalance?.toLocaleString()}\n` +
+          `Balance nuevo: ${selectedAPI.currency} ${transferResult.newBalance?.toLocaleString()}\n\n` +
+          `✅ Sincronizado con Account Ledger y Black Screen\n` +
+          `✅ Registrado en Transaction Events\n\n` +
+          `Estado: COMPLETADO`
+        : `✅ API Transfer Executed\n\n` +
+          `ID: ${transferResult.transferId}\n` +
+          `API ID: ${selectedAPI.apiId}\n` +
+          `Amount: ${selectedAPI.currency} ${transferData.amount.toLocaleString()}\n` +
+          `To: ${transferData.beneficiaryName}\n` +
+          `Bank: ${transferData.destinationBank}\n\n` +
+          `Previous balance: ${selectedAPI.currency} ${transferResult.oldBalance?.toLocaleString()}\n` +
+          `New balance: ${selectedAPI.currency} ${transferResult.newBalance?.toLocaleString()}\n\n` +
+          `✅ Synced with Account Ledger and Black Screen\n` +
+          `✅ Logged in Transaction Events\n\n` +
+          `Status: COMPLETED`;
+
+      alert(message);
+      
+      // Recargar cuentas
+      loadAPIs();
+      
+      setShowTransferModal(false);
+      setTransferData({
+        amount: 0,
+        destinationBank: '',
+        destinationAccount: '',
+        destinationIBAN: '',
+        beneficiaryName: '',
+        reference: '',
+        urgent: false,
+        destinationAPIKey: '',
+        destinationAPISecret: '',
+      });
+
+    } catch (error: any) {
+      console.error('[API DAES] ❌ Error en transferencia:', error);
+      alert(language === 'es' 
+        ? `Error ejecutando transferencia: ${error.message}` 
+        : `Error executing transfer: ${error.message}`
+      );
+    }
   };
 
   return (

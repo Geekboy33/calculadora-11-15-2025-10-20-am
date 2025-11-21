@@ -561,18 +561,36 @@ export default function APIGlobalModule() {
 
       // Deduct from custody account only if COMPLETED
       if (transferStatus === 'COMPLETED') {
-        account.availableBalance -= transferForm.amount;
-        account.reservedBalance += transferForm.amount;
+        // Usar custody-transfer-handler para sincronización total
+        const { custodyTransferHandler } = await import('../lib/custody-transfer-handler');
+        
+        const transferResult = await custodyTransferHandler.executeTransfer({
+          fromAccountId: account.id,
+          toDestination: transferForm.receiving_name,
+          amount: transferForm.amount,
+          currency: transferForm.currency,
+          reference: transferRequestId,
+          description: transferForm.description,
+          beneficiaryName: transferForm.receiving_name,
+          destinationType: 'external'
+        });
+
+        if (!transferResult.success) {
+          throw new Error(transferResult.error || 'Transfer handler failed');
+        }
+
+        // Recargar cuentas custody actualizadas
         const accounts = custodyStore.getAccounts();
-        custodyStore.saveAccounts(accounts);
         setCustodyAccounts([...accounts]);
 
-        console.log('[API GLOBAL] 💰 Balance updated:', {
+        console.log('[API GLOBAL] 💰 Transferencia ejecutada con sincronización total:', {
+          transferId: transferResult.transferId,
           account: account.accountName,
-          deducted: transferForm.amount,
-          newAvailable: account.availableBalance,
-          newReserved: account.reservedBalance
+          oldBalance: transferResult.oldBalance,
+          newBalance: transferResult.newBalance,
+          deducted: transferForm.amount
         });
+        console.log('[API GLOBAL] ✅ Account Ledger + Black Screen + Transaction Events sincronizados');
       }
 
       loadData();

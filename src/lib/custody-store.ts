@@ -349,6 +349,7 @@ class CustodyStore {
 
   /**
    * Descontar fondos del balance del sistema DAES
+   * Sincroniza con Account Ledger, Black Screen y todos los módulos
    */
   private deductFromSystemBalance(currency: string, amount: number): void {
     try {
@@ -364,6 +365,7 @@ class CustodyStore {
       }
 
       const currentBalance = systemBalances[balanceIndex];
+      const oldTotal = currentBalance.totalAmount;
       
       console.log(`[CustodyStore] 📊 DESCUENTO AUTOMÁTICO:`);
       console.log(`  Divisa: ${currency}`);
@@ -372,6 +374,7 @@ class CustodyStore {
       
       // Descontar del balance total
       currentBalance.totalAmount -= amount;
+      currentBalance.balance = currentBalance.totalAmount; // Sincronizar
       
       console.log(`  Balance DESPUÉS: ${currentBalance.totalAmount.toLocaleString()}`);
       console.log(`  ✅ Fondos transferidos del sistema DAES a cuenta custodio`);
@@ -382,8 +385,17 @@ class CustodyStore {
         balanceStoreData.balances[balanceIndex] = currentBalance;
         balanceStore.saveBalances(balanceStoreData);
         
+        // 🔥 SINCRONIZAR CON ACCOUNT LEDGER Y BLACK SCREEN
+        balanceStore.updateBalancesRealTime(
+          balanceStoreData.balances,
+          balanceStoreData.fileName,
+          balanceStoreData.fileSize,
+          100
+        );
+        
         console.log(`[CustodyStore] ✅ Balance del sistema DAES actualizado`);
         console.log(`[CustodyStore] 💰 ${currency} disponible en DAES: ${currentBalance.totalAmount.toLocaleString()}`);
+        console.log(`[CustodyStore] 🔄 Sincronizado con Account Ledger y Black Screen`);
       }
     } catch (error) {
       console.error('[CustodyStore] ❌ Error al descontar del sistema:', error);
@@ -542,6 +554,7 @@ class CustodyStore {
       }
 
       const currentBalance = systemBalances[balanceIndex];
+      const oldTotal = currentBalance.totalAmount;
       
       console.log(`[CustodyStore] 📊 DEVOLUCIÓN AUTOMÁTICA:`);
       console.log(`  Divisa: ${currency}`);
@@ -550,6 +563,7 @@ class CustodyStore {
       
       // Sumar al balance total
       currentBalance.totalAmount += amount;
+      currentBalance.balance = currentBalance.totalAmount; // Sincronizar
       
       console.log(`  Balance DESPUÉS: ${currentBalance.totalAmount.toLocaleString()}`);
       console.log(`  ✅ Fondos devueltos al sistema DAES`);
@@ -560,7 +574,16 @@ class CustodyStore {
         balanceStoreData.balances[balanceIndex] = currentBalance;
         balanceStore.saveBalances(balanceStoreData);
         
+        // 🔥 SINCRONIZAR CON ACCOUNT LEDGER Y BLACK SCREEN
+        balanceStore.updateBalancesRealTime(
+          balanceStoreData.balances,
+          balanceStoreData.fileName,
+          balanceStoreData.fileSize,
+          100
+        );
+        
         console.log(`[CustodyStore] ✅ Balance del sistema DAES actualizado`);
+        console.log(`[CustodyStore] 🔄 Sincronizado con Account Ledger y Black Screen`);
       }
     } catch (error) {
       console.error('[CustodyStore] ❌ Error al devolver al sistema:', error);

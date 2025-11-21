@@ -351,6 +351,35 @@ export function APIDigitalModule() {
 
       console.log('[API DIGITAL] 💸 Creating domestic transfer:', domesticTransfer);
 
+      // Buscar cuenta custody por número de cuenta
+      const { custodyStore } = await import('../lib/custody-store');
+      const allAccounts = custodyStore.getAccounts();
+      const fromAccount = allAccounts.find(a => a.accountNumber === domesticTransfer.from_account_number);
+
+      if (fromAccount) {
+        // Usar custody-transfer-handler para sincronización total
+        const { custodyTransferHandler } = await import('../lib/custody-transfer-handler');
+        
+        const transferResult = await custodyTransferHandler.executeTransfer({
+          fromAccountId: fromAccount.id,
+          toDestination: domesticTransfer.to_account_number,
+          amount: domesticTransfer.amount,
+          currency: domesticTransfer.currency,
+          description: domesticTransfer.description || 'Domestic transfer via API Digital',
+          destinationType: 'custody'
+        });
+
+        if (!transferResult.success) {
+          throw new Error(transferResult.error || 'Transfer failed');
+        }
+
+        console.log('[API DIGITAL] ✅ Transfer ejecutada con sincronización total');
+        console.log('[API DIGITAL] 💰 Transfer ID:', transferResult.transferId);
+        console.log('[API DIGITAL] ✅ Account Ledger + Black Screen + Transaction Events sincronizados');
+      } else {
+        console.warn('[API DIGITAL] ⚠️ Cuenta custody no encontrada, creando sin sincronización de balances');
+      }
+
       const response: DomesticTransferResponse = {
         id: Date.now(),
         ...domesticTransfer,
@@ -364,7 +393,7 @@ export function APIDigitalModule() {
       setDomesticTransfers(updated);
       localStorage.setItem('api_digital_domestic_transfers', JSON.stringify(updated));
 
-      setSuccess(`✅ Domestic transfer created successfully! ID: ${response.id}`);
+      setSuccess(`✅ Domestic transfer created successfully! ID: ${response.id}${fromAccount ? '\n\n✅ Synced with Account Ledger and Black Screen\n✅ Logged in Transaction Events' : ''}`);
 
       // Reset form
       setDomesticTransfer({
