@@ -412,8 +412,8 @@ export function BankSettlementModule() {
 
       const txt = `
 ═══════════════════════════════════════════════════════════════════
-  DAES COREBANKING SYSTEM
-  COMPROBANTE DE LIQUIDACIÓN BANCARIA / BANK SETTLEMENT RECEIPT
+  ${isSpanish ? 'SISTEMA COREBANKING DAES' : 'DAES COREBANKING SYSTEM'}
+  ${isSpanish ? 'COMPROBANTE DE LIQUIDACIÓN BANCARIA' : 'BANK SETTLEMENT RECEIPT'}
 ═══════════════════════════════════════════════════════════════════
 
 ${isSpanish ? 'INFORMACIÓN DE LA INSTRUCCIÓN' : 'INSTRUCTION INFORMATION'}
@@ -472,12 +472,12 @@ ${isSpanish ? '5. Guardar referencia de transacción ENBD' : '5. Save ENBD trans
 ${isSpanish ? '6. Volver a DAES y confirmar ejecución' : '6. Return to DAES and confirm execution'}
 
 ═══════════════════════════════════════════════════════════════════
-  DAES CoreBanking System
-  Data and Exchange Settlement
+  ${isSpanish ? 'Sistema CoreBanking DAES' : 'DAES CoreBanking System'}
+  ${isSpanish ? 'Datos e Intercambio de Liquidación' : 'Data and Exchange Settlement'}
   
   Digital Commercial Bank Ltd
-  International Banking License Number: L 15446
-  Company Number: 15446
+  ${isSpanish ? 'Número de Licencia Bancaria Internacional: L 15446' : 'International Banking License Number: L 15446'}
+  ${isSpanish ? 'Número de Compañía: 15446' : 'Company Number: 15446'}
   
   © ${new Date().getFullYear()} - ${isSpanish ? 'Todos los derechos reservados' : 'All rights reserved'}
 ═══════════════════════════════════════════════════════════════════
