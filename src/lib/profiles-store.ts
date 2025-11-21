@@ -246,17 +246,6 @@ class ProfilesStore {
   // ==========================================
 
   createProfile(name: string, description?: string): ProfileRecord {
-    // Verificar que Ledger1 esté completamente cargado antes de permitir guardar
-    const processingState = processingStore.getState();
-    
-    if (processingState && processingState.status === 'processing' && processingState.progress < 100) {
-      throw new Error(
-        `No se puede guardar perfil mientras Ledger1 está cargando.\n\n` +
-        `Progreso actual: ${processingState.progress.toFixed(2)}%\n` +
-        `Espera a que complete al 100% antes de guardar.`
-      );
-    }
-    
     const profileName = name.trim() || `Perfil ${this.state.profiles.length + 1}`;
     const rawSnapshot = this.captureSnapshotData();
     const encryptedSnapshot = this.encryptSnapshot(rawSnapshot);
@@ -286,8 +275,15 @@ class ProfilesStore {
       stats.keysCount
     );
 
+    const ledgerProgress = stats.ledger?.progress?.toFixed(2) || '0';
     console.log('[ProfilesStore] 🆕 Perfil creado:', profileName);
-    console.log('[ProfilesStore] 📊 Ledger1 incluido:', stats.ledger?.fileName, stats.ledger?.progress?.toFixed(2) + '%');
+    console.log('[ProfilesStore] 📊 Ledger1 incluido:', stats.ledger?.fileName || 'N/A', ledgerProgress + '%');
+    
+    // Mensaje informativo si se guardó con progreso parcial
+    if (stats.ledger && stats.ledger.progress && stats.ledger.progress < 100) {
+      console.warn(`[ProfilesStore] ⚠️ Perfil guardado con Ledger1 parcial: ${ledgerProgress}%`);
+    }
+    
     return profile;
   }
 
