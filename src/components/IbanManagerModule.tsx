@@ -246,7 +246,9 @@ export function IbanManagerModule() {
       addToast({
         type: 'success',
         title: isSpanish ? 'IBAN emitido' : 'IBAN issued',
-        description: `${allocateForm.countryCode}: ${ibanFormatted}`
+        description: isSpanish
+          ? `${allocateForm.countryCode}: ${ibanFormatted}\nDigital Commercial Bank Ltd\nDubai, UAE`
+          : `${allocateForm.countryCode}: ${ibanFormatted}\nDigital Commercial Bank Ltd\nDubai, UAE`
       });
 
       setShowAllocateModal(false);
@@ -356,28 +358,35 @@ export function IbanManagerModule() {
 ═══════════════════════════════════════════════════════════════════
   ${isSpanish ? 'CERTIFICADO DE IBAN' : 'IBAN CERTIFICATE'}
   DIGITAL COMMERCIAL BANK LTD
+  B2B Tower, 15th Floor, Marasi Drive
+  Business Bay, Dubai, UAE
 ═══════════════════════════════════════════════════════════════════
 
 ${isSpanish ? 'INFORMACIÓN DEL IBAN' : 'IBAN INFORMATION'}
 ───────────────────────────────────────────────────────────────────
 
 IBAN:                       ${iban.ibanFormatted}
-${isSpanish ? 'País:' : 'Country:'}                      ${iban.countryCode}
+${isSpanish ? 'País:' : 'Country:'}                      ${iban.countryCode} - ${iban.countryCode === 'AE' ? 'United Arab Emirates' : iban.countryCode === 'DE' ? 'Germany' : 'Spain'}
 ${isSpanish ? 'Moneda:' : 'Currency:'}                     ${iban.currency}
 ${isSpanish ? 'Estado:' : 'Status:'}                     ${iban.status}
 
 ${isSpanish ? 'DETALLES BANCARIOS' : 'BANK DETAILS'}
 ───────────────────────────────────────────────────────────────────
 
+${isSpanish ? 'Banco emisor:' : 'Issuing bank:'}              Digital Commercial Bank Ltd
+${isSpanish ? 'Dirección:' : 'Address:'}                   B2B Tower, 15th Floor, Marasi Drive
+                             Business Bay, Dubai, UAE
 ${isSpanish ? 'Código de banco:' : 'Bank code:'}               ${iban.bankCode}
 ${iban.branchCode ? `${isSpanish ? 'Código de sucursal:' : 'Branch code:'}           ${iban.branchCode}` : ''}
 ${isSpanish ? 'Número de cuenta interno:' : 'Internal account number:'}  ${iban.internalAccountNumber}
+SWIFT/BIC:                  DIGCUSXX (Digital Commercial Bank Ltd)
 
 ${isSpanish ? 'CUENTA DAES VINCULADA' : 'LINKED DAES ACCOUNT'}
 ───────────────────────────────────────────────────────────────────
 
 ${isSpanish ? 'Nombre de cuenta:' : 'Account name:'}            ${iban.accountName || 'N/A'}
 ${isSpanish ? 'ID de cuenta DAES:' : 'DAES Account ID:'}         ${iban.daesAccountId}
+${isSpanish ? 'Tipo de cuenta:' : 'Account type:'}             ${isSpanish ? 'Cuenta corporativa' : 'Corporate account'}
 
 ${isSpanish ? 'EMISIÓN' : 'ISSUANCE'}
 ───────────────────────────────────────────────────────────────────
@@ -386,16 +395,39 @@ ${isSpanish ? 'Emitido por:' : 'Issued by:'}                ${iban.createdBy}
 ${isSpanish ? 'Fecha de emisión:' : 'Issue date:'}             ${new Date(iban.createdAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
 ${isSpanish ? 'Última actualización:' : 'Last update:'}            ${new Date(iban.updatedAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
 
+${isSpanish ? 'CAPACIDADES DE LA CUENTA' : 'ACCOUNT CAPABILITIES'}
+───────────────────────────────────────────────────────────────────
+
+${iban.countryCode === 'AE' ? `
+${isSpanish ? '✓ Recibir transferencias internacionales' : '✓ Receive international transfers'}
+${isSpanish ? '✓ Enviar transferencias internacionales' : '✓ Send international transfers'}
+${isSpanish ? '✓ Compatible con sistemas SWIFT' : '✓ Compatible with SWIFT systems'}
+${isSpanish ? '✓ Soporta múltiples divisas (AED, USD, EUR)' : '✓ Supports multiple currencies (AED, USD, EUR)'}
+${isSpanish ? '✓ Transferencias en tiempo real' : '✓ Real-time transfers'}
+${isSpanish ? '✓ Compatible con sistemas de pago ISO 20022' : '✓ Compatible with ISO 20022 payment systems'}
+` : `
+${isSpanish ? '✓ Transferencias SEPA (solo EUR)' : '✓ SEPA transfers (EUR only)'}
+${isSpanish ? '✓ Transferencias internacionales SWIFT' : '✓ International SWIFT transfers'}
+`}
+
 ═══════════════════════════════════════════════════════════════════
   Digital Commercial Bank Ltd
+  B2B Tower, 15th Floor, Marasi Drive
+  Business Bay, Dubai, United Arab Emirates
+  
   ${isSpanish ? 'Número de Licencia Bancaria Internacional: L 15446' : 'International Banking License Number: L 15446'}
   ${isSpanish ? 'Número de Compañía: 15446' : 'Company Number: 15446'}
+  SWIFT/BIC: DIGCUSXX
   
   ${isSpanish ? 'Este IBAN es emitido bajo nuestra licencia bancaria y cumple con' : 'This IBAN is issued under our banking license and complies with'}
   ISO 13616 ${isSpanish ? '(Estándar Internacional de Números de Cuenta Bancaria)' : '(International Bank Account Number Standard)'}
   
   © ${new Date().getFullYear()} - ${isSpanish ? 'Todos los derechos reservados' : 'All rights reserved'}
 ═══════════════════════════════════════════════════════════════════
+
+${isSpanish ? 'ADVERTENCIA:' : 'NOTICE:'}
+${isSpanish ? 'Este certificado es un documento oficial del banco.' : 'This certificate is an official bank document.'}
+${isSpanish ? 'Úselo únicamente para transacciones bancarias legítimas.' : 'Use it only for legitimate banking transactions.'}
 
 ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
 `;
@@ -752,9 +784,14 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                   {isSpanish ? 'IBAN que se generará:' : 'IBAN to be generated:'}
                 </p>
                 <div className="space-y-1 text-white/70">
-                  <p><span className="text-white/50">{isSpanish ? 'Banco:' : 'Bank:'}</span> Digital Commercial Bank Ltd</p>
-                  <p><span className="text-white/50">{isSpanish ? 'Licencia:' : 'License:'}</span> L 15446</p>
-                  <p><span className="text-white/50">{isSpanish ? 'País:' : 'Country:'}</span> {allocateForm.countryCode} - {
+                  <p><span className="text-white/50">{isSpanish ? 'Banco emisor:' : 'Issuing bank:'}</span> Digital Commercial Bank Ltd</p>
+                  <p className="text-xs text-white/60">
+                    B2B Tower, 15th Floor, Marasi Drive<br />
+                    Business Bay, Dubai, UAE
+                  </p>
+                  <p className="mt-2"><span className="text-white/50">{isSpanish ? 'Licencia bancaria:' : 'Banking license:'}</span> L 15446</p>
+                  <p><span className="text-white/50">SWIFT/BIC:</span> DIGCUSXX</p>
+                  <p><span className="text-white/50">{isSpanish ? 'País del IBAN:' : 'IBAN country:'}</span> {allocateForm.countryCode} - {
                     allocateForm.countryCode === 'AE' ? (isSpanish ? 'Emiratos Árabes Unidos' : 'United Arab Emirates') :
                     allocateForm.countryCode === 'DE' ? (isSpanish ? 'Alemania' : 'Germany') :
                     (isSpanish ? 'España' : 'Spain')
