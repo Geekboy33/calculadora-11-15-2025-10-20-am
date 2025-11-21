@@ -448,6 +448,10 @@ export function BankSettlementModule() {
   ${isSpanish ? 'SISTEMA COREBANKING DAES' : 'DAES COREBANKING SYSTEM'}
   ${isSpanish ? 'COMPROBANTE DE LIQUIDACIÓN BANCARIA' : 'BANK SETTLEMENT RECEIPT'}
 ═══════════════════════════════════════════════════════════════════
+${isSpanish ? 'DIGITAL COMMERCIAL BANK LTD' : 'DIGITAL COMMERCIAL BANK LTD'}
+${isSpanish ? 'B2B Tower, Piso 15, Marasi Drive' : 'B2B Tower, 15th Floor, Marasi Drive'}
+${isSpanish ? 'Business Bay, Dubai, EAU' : 'Business Bay, Dubai, UAE'}
+═══════════════════════════════════════════════════════════════════
 
 ${isSpanish ? 'INFORMACIÓN DE LA INSTRUCCIÓN' : 'INSTRUCTION INFORMATION'}
 ───────────────────────────────────────────────────────────────────
