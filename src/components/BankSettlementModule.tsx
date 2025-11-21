@@ -165,17 +165,32 @@ export function BankSettlementModule() {
 
   const handleCreateSettlement = async () => {
     console.log('[BankSettlement] 🔍 Validando form:', {
+      sourceIbanId: createForm.sourceIbanId,
       custodyAccountId: createForm.custodyAccountId,
       amount: createForm.amount,
       currency: createForm.currency,
       type: typeof createForm.amount
     });
 
+    // Validar que se haya seleccionado un IBAN de origen
+    if (!createForm.sourceIbanId) {
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'IBAN requerido' : 'IBAN required',
+        description: isSpanish 
+          ? 'Selecciona un IBAN de origen de Digital Commercial Bank'
+          : 'Select a source IBAN from Digital Commercial Bank'
+      });
+      return;
+    }
+
     if (!createForm.custodyAccountId) {
       addToast({
         type: 'error',
         title: isSpanish ? 'Cuenta requerida' : 'Account required',
-        description: isSpanish ? 'Selecciona una cuenta custody' : 'Select a custody account'
+        description: isSpanish 
+          ? 'No se pudo encontrar la cuenta vinculada al IBAN. Ve a IBAN Manager y verifica el IBAN.'
+          : 'Could not find account linked to IBAN. Go to IBAN Manager and verify the IBAN.'
       });
       return;
     }
