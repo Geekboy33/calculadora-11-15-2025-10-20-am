@@ -947,15 +947,15 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
       {/* Modal de creación */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowCreateModal(false)}>
-          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-[#00ff88]/30 rounded-3xl p-6 max-w-2xl w-full" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-6">
+          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-[#00ff88]/30 rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-6 sticky top-0 bg-gradient-to-br from-[#0a0f1c] to-[#000] pb-4 z-10">
               <Send className="w-6 h-6 text-[#00ff88]" />
               <h2 className="text-2xl font-bold">
                 {isSpanish ? 'Nueva instrucción de liquidación' : 'New settlement instruction'}
               </h2>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 pr-2">
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2 flex items-center gap-2">
                   <CreditCard className="w-4 h-4" />
