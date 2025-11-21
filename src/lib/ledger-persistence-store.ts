@@ -196,6 +196,12 @@ class LedgerPersistenceStore {
     console.log('[Ledger Store] ⏸️ Procesamiento pausado');
   }
 
+  refreshFromProfiles() {
+    this.loadFromStorage();
+    this.notifyListeners();
+    console.log('[Ledger Store] 🔄 Estado de Ledger sincronizado desde perfiles');
+  }
+
   resumeProcessing() {
     delete this.state.progress.pausedAt;
     this.state.isProcessing = true;

@@ -196,7 +196,14 @@ export function TransactionEventsModule() {
       'API_KEY_REVOKED': 'API Key Revocada',
       'PAYOUT_CREATED': 'Payout Creado',
       'PAYOUT_COMPLETED': 'Payout Completado',
-      'RECONCILIATION_RUN': 'Conciliación Ejecutada'
+      'RECONCILIATION_RUN': 'Conciliación Ejecutada',
+      'PROFILE_CREATED': 'Perfil Creado',
+      'PROFILE_UPDATED': 'Perfil Actualizado',
+      'PROFILE_ACTIVATED': 'Perfil Activado',
+      'PROFILE_DELETED': 'Perfil Eliminado',
+      'PROFILE_EXPORTED': 'Perfil Exportado',
+      'PROFILE_IMPORTED': 'Perfil Importado',
+      'PROFILE_AUTO_SNAPSHOT': 'Snapshot Automático'
     };
     
     return translations[type] || type;
@@ -217,7 +224,8 @@ export function TransactionEventsModule() {
       'ACCOUNT_LEDGER': 'Libro Mayor',
       'BLACK_SCREEN': 'Black Screen',
       'LARGE_FILE_ANALYZER': 'Analizador Archivos',
-      'SYSTEM': 'Sistema'
+      'SYSTEM': 'Sistema',
+      'PROFILES': 'Perfiles'
     };
     
     return translations[module] || module;

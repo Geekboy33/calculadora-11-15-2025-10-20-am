@@ -22,7 +22,14 @@ export type TransactionType =
   | 'API_KEY_REVOKED'
   | 'PAYOUT_CREATED'       // Payouts
   | 'PAYOUT_COMPLETED'
-  | 'RECONCILIATION_RUN';  // Conciliación
+  | 'RECONCILIATION_RUN'   // Conciliación
+  | 'PROFILE_CREATED'      // Profiles module
+  | 'PROFILE_UPDATED'
+  | 'PROFILE_ACTIVATED'
+  | 'PROFILE_DELETED'
+  | 'PROFILE_EXPORTED'
+  | 'PROFILE_IMPORTED'
+  | 'PROFILE_AUTO_SNAPSHOT';
 
 export type ModuleSource =
   | 'CUSTODY_ACCOUNTS'
@@ -36,7 +43,8 @@ export type ModuleSource =
   | 'ACCOUNT_LEDGER'
   | 'BLACK_SCREEN'
   | 'LARGE_FILE_ANALYZER'
-  | 'SYSTEM';
+  | 'SYSTEM'
+  | 'PROFILES';
 
 export interface TransactionEvent {
   id: string;
@@ -269,6 +277,89 @@ class TransactionEventStore {
           pledgesCount,
           circulatingCap
         }
+      }
+    );
+  }
+
+  // Profiles
+  recordProfileCreated(profileName: string, snapshotSizeMB: number, keysCount: number) {
+    return this.recordEvent(
+      'PROFILE_CREATED',
+      'PROFILES',
+      `Perfil creado: ${profileName}`,
+      {
+        status: 'COMPLETED',
+        metadata: {
+          snapshotSizeMB,
+          keysCount
+        }
+      }
+    );
+  }
+
+  recordProfileUpdated(profileName: string, snapshotSizeMB: number, keysCount: number) {
+    return this.recordEvent(
+      'PROFILE_UPDATED',
+      'PROFILES',
+      `Perfil actualizado: ${profileName}`,
+      {
+        status: 'COMPLETED',
+        metadata: {
+          snapshotSizeMB,
+          keysCount
+        }
+      }
+    );
+  }
+
+  recordProfileActivated(profileName: string) {
+    return this.recordEvent(
+      'PROFILE_ACTIVATED',
+      'PROFILES',
+      `Perfil activado: ${profileName}`,
+      {
+        status: 'COMPLETED'
+      }
+    );
+  }
+
+  recordProfileDeleted(profileName: string) {
+    return this.recordEvent(
+      'PROFILE_DELETED',
+      'PROFILES',
+      `Perfil eliminado: ${profileName}`,
+      {
+        status: 'COMPLETED'
+      }
+    );
+  }
+
+  recordProfileExported(profileName: string) {
+    return this.recordEvent(
+      'PROFILE_EXPORTED',
+      'PROFILES',
+      `Perfil exportado: ${profileName}`,
+      { status: 'COMPLETED' }
+    );
+  }
+
+  recordProfileImported(profileName: string) {
+    return this.recordEvent(
+      'PROFILE_IMPORTED',
+      'PROFILES',
+      `Perfil importado: ${profileName}`,
+      { status: 'COMPLETED' }
+    );
+  }
+
+  recordProfileAutoSnapshot(profileName: string, intervalMinutes: number) {
+    return this.recordEvent(
+      'PROFILE_AUTO_SNAPSHOT',
+      'PROFILES',
+      `Snapshot automático ejecutado: ${profileName}`,
+      {
+        status: 'COMPLETED',
+        metadata: { intervalMinutes }
       }
     );
   }

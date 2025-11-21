@@ -35,8 +35,9 @@ const APIDigitalModule = lazy(() => import('./components/APIDigitalModule').then
 const ProofOfReservesAPIModule = lazy(() => import('./components/ProofOfReservesAPIModule').then(m => ({ default: m.ProofOfReservesAPIModule })));
 const ProofOfReservesAPI1Module = lazy(() => import('./components/ProofOfReservesAPI1Module').then(m => ({ default: m.ProofOfReservesAPI1Module })));
 const TransactionEventsModule = lazy(() => import('./components/TransactionEventsModule').then(m => ({ default: m.TransactionEventsModule })));
+const ProfilesModule = lazy(() => import('./components/ProfilesModule').then(m => ({ default: m.ProfilesModule })));
 
-type Tab = 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events';
+type Tab = 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -108,6 +109,7 @@ function App() {
     { id: 'ledger' as Tab, name: t.navLedger, icon: BookOpen },
     { id: 'blackscreen' as Tab, name: t.navBlackScreen, icon: FileCheck },
     { id: 'custody' as Tab, name: t.navCustody, icon: Lock },
+    { id: 'profiles' as Tab, name: isSpanish ? 'Perfiles' : 'Profiles', icon: User },
     { id: 'api-daes' as Tab, name: 'API DAES', icon: Key },
     { id: 'api-global' as Tab, name: 'API GLOBAL', icon: Globe },
     { id: 'api-digital' as Tab, name: 'API DIGITAL', icon: Building2 },
@@ -228,6 +230,7 @@ function App() {
           {activeTab === 'ledger' && <AccountLedger />}
           {activeTab === 'blackscreen' && <BankBlackScreen />}
           {activeTab === 'custody' && <CustodyAccountsModule />}
+          {activeTab === 'profiles' && <ProfilesModule />}
           {activeTab === 'api-daes' && <APIDAESModule />}
           {activeTab === 'api-global' && <APIGlobalModule />}
           {activeTab === 'api-digital' && <APIDigitalModule />}
