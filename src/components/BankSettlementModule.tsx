@@ -591,10 +591,29 @@ export function BankSettlementModule() {
 
   const handleDownloadReceipt = (settlement: Settlement) => {
     try {
-      const custodyAccount = custodyAccounts.find(a => a.currency === settlement.currency);
-      const accountInfo = custodyAccount 
-        ? `${custodyAccount.accountName} (${custodyAccount.accountNumber})`
-        : 'N/A';
+      // Información del sender (origen)
+      const senderBankName = settlement.senderBankName || 'DIGITAL COMMERCIAL BANK LTD';
+      const senderBankAddress = settlement.senderBankAddress || 'B2B Tower, 15th Floor, Marasi Drive, Business Bay, Dubai, UAE';
+      const senderAccountName = settlement.senderAccountName || settlement.createdBy;
+      const senderIban = settlement.senderIbanFormatted || settlement.senderIban || 'N/A';
+      
+      // Información del beneficiario (destino)
+      const beneficiaryName = settlement.beneficiaryName;
+      const beneficiaryIban = settlement.beneficiaryIban;
+      const beneficiarySwift = settlement.swiftCode || 'N/A';
+      
+      // Buscar si es un beneficiario guardado o ENBD
+      let beneficiaryBankName = 'EMIRATES NBD';
+      let beneficiaryBankAddress = 'Dubai, United Arab Emirates';
+      
+      if (beneficiaryName !== 'TRADEMORE VALUE CAPITAL FZE') {
+        // Es un beneficiario personalizado, buscar sus datos
+        const savedBen = savedBeneficiaries.find(b => b.iban === beneficiaryIban);
+        if (savedBen) {
+          beneficiaryBankName = savedBen.bankName;
+          beneficiaryBankAddress = savedBen.bankAddress;
+        }
+      }
 
       const txt = `
 ═══════════════════════════════════════════════════════════════════
@@ -633,11 +652,11 @@ ${isSpanish ? 'Tipo de transferencia:' : 'Transfer type:'}           ${isSpanish
 ${isSpanish ? 'INFORMACIÓN DEL BENEFICIARIO (RECEIVER)' : 'BENEFICIARY INFORMATION (RECEIVER)'}
 ───────────────────────────────────────────────────────────────────
 
-${isSpanish ? 'Banco beneficiario:' : 'Beneficiary bank:'}          EMIRATES NBD (ENBD)
-${isSpanish ? 'Dirección:' : 'Address:'}                    DUBAI, UNITED ARAB EMIRATES
-${isSpanish ? 'Beneficiario:' : 'Beneficiary:'}                TRADEMORE VALUE CAPITAL FZE
-${isSpanish ? 'IBAN beneficiario:' : 'Beneficiary IBAN:'}          ${settlement.beneficiaryIban}
-SWIFT/BIC:                  ${settlement.swiftCode}
+${isSpanish ? 'Banco beneficiario:' : 'Beneficiary bank:'}          ${beneficiaryBankName}
+${isSpanish ? 'Dirección:' : 'Address:'}                    ${beneficiaryBankAddress}
+${isSpanish ? 'Beneficiario:' : 'Beneficiary:'}                ${beneficiaryName}
+${isSpanish ? 'IBAN beneficiario:' : 'Beneficiary IBAN:'}          ${beneficiaryIban}
+SWIFT/BIC:                  ${beneficiarySwift}
 
 ${isSpanish ? 'FECHAS Y AUDITORÍA' : 'DATES AND AUDIT'}
 ───────────────────────────────────────────────────────────────────
