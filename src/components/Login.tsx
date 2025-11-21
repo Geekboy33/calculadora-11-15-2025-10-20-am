@@ -21,9 +21,9 @@ export function Login({ onLogin }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
-  // Credenciales
+  // Credenciales actualizadas
   const VALID_USERNAME = 'ModoDios';
-  const VALID_PASSWORD = 'DAES3334';
+  const VALID_PASSWORD = 'DAES2025';
 
   // Efecto de animación de fondo
   useEffect(() => {
