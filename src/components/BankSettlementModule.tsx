@@ -403,6 +403,118 @@ export function BankSettlementModule() {
     }
   };
 
+  const handleDownloadReceipt = (settlement: Settlement) => {
+    try {
+      const custodyAccount = custodyAccounts.find(a => a.currency === settlement.currency);
+      const accountInfo = custodyAccount 
+        ? `${custodyAccount.accountName} (${custodyAccount.accountNumber})`
+        : 'N/A';
+
+      const txt = `
+═══════════════════════════════════════════════════════════════════
+  DAES COREBANKING SYSTEM
+  COMPROBANTE DE LIQUIDACIÓN BANCARIA / BANK SETTLEMENT RECEIPT
+═══════════════════════════════════════════════════════════════════
+
+${isSpanish ? 'INFORMACIÓN DE LA INSTRUCCIÓN' : 'INSTRUCTION INFORMATION'}
+───────────────────────────────────────────────────────────────────
+
+${isSpanish ? 'DAES Reference ID:' : 'DAES Reference ID:'}          ${settlement.daesReferenceId}
+${isSpanish ? 'Ledger Debit ID:' : 'Ledger Debit ID:'}            ${settlement.ledgerDebitId}
+${isSpanish ? 'Estado:' : 'Status:'}                     ${settlement.status}
+
+${isSpanish ? 'DETALLES DE LA TRANSFERENCIA' : 'TRANSFER DETAILS'}
+───────────────────────────────────────────────────────────────────
+
+${isSpanish ? 'Monto:' : 'Amount:'}                      ${settlement.currency} ${parseFloat(settlement.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+${isSpanish ? 'Moneda:' : 'Currency:'}                     ${settlement.currency}
+${isSpanish ? 'Cuenta origen DAES:' : 'Source DAES Account:'}         ${accountInfo}
+
+${isSpanish ? 'INFORMACIÓN DEL BENEFICIARIO' : 'BENEFICIARY INFORMATION'}
+───────────────────────────────────────────────────────────────────
+
+${isSpanish ? 'Banco:' : 'Bank:'}                       EMIRATES NBD (ENBD)
+${isSpanish ? 'Dirección:' : 'Address:'}                    DUBAI, UNITED ARAB EMIRATES
+${isSpanish ? 'Beneficiario:' : 'Beneficiary:'}                ${settlement.beneficiaryName}
+IBAN:                       ${settlement.beneficiaryIban}
+SWIFT/BIC:                  ${settlement.swiftCode}
+
+${isSpanish ? 'FECHAS Y AUDITORÍA' : 'DATES AND AUDIT'}
+───────────────────────────────────────────────────────────────────
+
+${isSpanish ? 'Creado por:' : 'Created by:'}                 ${settlement.createdBy}
+${isSpanish ? 'Fecha de creación:' : 'Creation date:'}            ${new Date(settlement.createdAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
+${isSpanish ? 'Última actualización:' : 'Last update:'}             ${new Date(settlement.updatedAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
+${settlement.executedBy ? `${isSpanish ? 'Ejecutado por:' : 'Executed by:'}             ${settlement.executedBy}` : ''}
+${settlement.executedAt ? `${isSpanish ? 'Fecha de ejecución:' : 'Execution date:'}          ${new Date(settlement.executedAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}` : ''}
+
+${settlement.enbdTransactionReference ? `${isSpanish ? 'CONFIRMACIÓN ENBD' : 'ENBD CONFIRMATION'}\n───────────────────────────────────────────────────────────────────\n\n${isSpanish ? 'Referencia ENBD:' : 'ENBD Reference:'}            ${settlement.enbdTransactionReference}` : ''}
+
+${settlement.referenceText ? `${isSpanish ? 'REFERENCIA ADICIONAL' : 'ADDITIONAL REFERENCE'}\n───────────────────────────────────────────────────────────────────\n\n${settlement.referenceText}` : ''}
+
+${settlement.failureReason ? `${isSpanish ? 'RAZÓN DE FALLO' : 'FAILURE REASON'}\n───────────────────────────────────────────────────────────────────\n\n${settlement.failureReason}` : ''}
+
+${isSpanish ? 'INSTRUCCIONES PARA EJECUCIÓN MANUAL' : 'MANUAL EXECUTION INSTRUCTIONS'}
+───────────────────────────────────────────────────────────────────
+
+${isSpanish ? '1. Acceder a ENBD Online Banking' : '1. Access ENBD Online Banking'}
+${isSpanish ? '2. Seleccionar transferencia internacional' : '2. Select international transfer'}
+${isSpanish ? '3. Ingresar los siguientes datos:' : '3. Enter the following data:'}
+
+   ${isSpanish ? 'Beneficiario:' : 'Beneficiary:'}       ${settlement.beneficiaryName}
+   IBAN:              ${settlement.beneficiaryIban}
+   SWIFT/BIC:         ${settlement.swiftCode}
+   ${isSpanish ? 'Monto:' : 'Amount:'}              ${settlement.currency} ${parseFloat(settlement.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+   ${isSpanish ? 'Referencia:' : 'Reference:'}          ${settlement.daesReferenceId}
+
+${isSpanish ? '4. Ejecutar transferencia' : '4. Execute transfer'}
+${isSpanish ? '5. Guardar referencia de transacción ENBD' : '5. Save ENBD transaction reference'}
+${isSpanish ? '6. Volver a DAES y confirmar ejecución' : '6. Return to DAES and confirm execution'}
+
+═══════════════════════════════════════════════════════════════════
+  DAES CoreBanking System
+  Data and Exchange Settlement
+  
+  Digital Commercial Bank Ltd
+  International Banking License Number: L 15446
+  Company Number: 15446
+  
+  © ${new Date().getFullYear()} - ${isSpanish ? 'Todos los derechos reservados' : 'All rights reserved'}
+═══════════════════════════════════════════════════════════════════
+
+${isSpanish ? 'ADVERTENCIA DE SEGURIDAD:' : 'SECURITY WARNING:'}
+${isSpanish ? 'Este documento contiene información confidencial bancaria.' : 'This document contains confidential banking information.'}
+${isSpanish ? 'Manténgalo en lugar seguro y no lo comparta con terceros no autorizados.' : 'Keep it in a secure place and do not share with unauthorized third parties.'}
+
+${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
+`;
+
+      const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `DAES_Settlement_Receipt_${settlement.daesReferenceId}.txt`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      addToast({
+        type: 'success',
+        title: isSpanish ? 'Comprobante descargado' : 'Receipt downloaded',
+        description: settlement.daesReferenceId
+      });
+
+      console.log('[BankSettlement] 📄 Comprobante generado:', settlement.daesReferenceId);
+
+    } catch (error: any) {
+      console.error('[BankSettlement] Error generando comprobante:', error);
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Error' : 'Error',
+        description: error.message
+      });
+    }
+  };
+
   const handleDeleteSettlement = async (settlementId: string) => {
     const settlement = settlements.find(s => s.id === settlementId);
     if (!settlement) return;
@@ -763,6 +875,13 @@ export function BankSettlementModule() {
                         {isSpanish ? 'Confirmar ejecución' : 'Confirm execution'}
                       </button>
                     )}
+                    <button
+                      onClick={() => handleDownloadReceipt(settlement)}
+                      className="px-4 py-2 rounded-xl bg-green-500/10 border border-green-400/30 text-green-300 text-sm font-semibold hover:bg-green-500/20 transition flex items-center gap-2"
+                    >
+                      <FileText className="w-4 h-4" />
+                      {isSpanish ? 'Descargar comprobante' : 'Download receipt'}
+                    </button>
                     <button
                       onClick={() => handleShowAuditLog(settlement)}
                       className="px-4 py-2 rounded-xl bg-purple-500/10 border border-purple-400/30 text-purple-300 text-sm font-semibold hover:bg-purple-500/20 transition flex items-center gap-2"
