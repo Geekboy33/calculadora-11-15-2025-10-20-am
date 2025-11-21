@@ -68,10 +68,12 @@ export function BankSettlementModule() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
+  const [issuedIbans, setIssuedIbans] = useState<any[]>([]);
 
   // Form states
   const [createForm, setCreateForm] = useState({
     custodyAccountId: '',
+    sourceIbanId: '', // IBAN de origen (Digital Commercial Bank)
     amount: 0,
     currency: 'USD' as 'AED' | 'USD' | 'EUR',
     destinationIban: 'AE690260001025381452402' as string,
@@ -80,6 +82,7 @@ export function BankSettlementModule() {
   });
 
   const [selectedCustodyAccount, setSelectedCustodyAccount] = useState<CustodyAccount | null>(null);
+  const [selectedSourceIban, setSelectedSourceIban] = useState<any | null>(null);
 
   const [confirmForm, setConfirmForm] = useState({
     status: 'COMPLETED' as 'COMPLETED' | 'FAILED' | 'SENT',
@@ -93,6 +96,7 @@ export function BankSettlementModule() {
   useEffect(() => {
     loadSettlements();
     loadCustodyAccounts();
+    loadIssuedIbans();
 
     // Suscribirse a cambios en custody accounts
     const unsubscribe = custodyStore.subscribe(accounts => {
@@ -107,6 +111,21 @@ export function BankSettlementModule() {
 
     return unsubscribe;
   }, [createForm.custodyAccountId]);
+
+  const loadIssuedIbans = () => {
+    try {
+      const saved = localStorage.getItem('daes_ibans');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Solo IBANs activos
+        const activeIbans = parsed.filter((i: any) => i.status === 'ACTIVE');
+        setIssuedIbans(activeIbans);
+        console.log('[BankSettlement] ✅ IBANs emitidos cargados:', activeIbans.length);
+      }
+    } catch (error) {
+      console.error('[BankSettlement] Error cargando IBANs:', error);
+    }
+  };
 
   const loadSettlements = () => {
     try {
@@ -316,12 +335,14 @@ export function BankSettlementModule() {
       setShowCreateModal(false);
       setCreateForm({
         custodyAccountId: '',
+        sourceIbanId: '',
         amount: 0,
         currency: 'USD',
         destinationIban: 'AE690260001025381452402',
         reference: '',
         requestedBy: createForm.requestedBy
       });
+      setSelectedSourceIban(null);
 
     } catch (error: any) {
       console.error('[BankSettlement] Error:', error);
@@ -920,64 +941,80 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2 flex items-center gap-2">
-                  <Wallet className="w-4 h-4" />
-                  {isSpanish ? 'Cuenta Custody origen' : 'Source Custody Account'}
+                  <CreditCard className="w-4 h-4" />
+                  {isSpanish ? 'IBAN de origen (Digital Commercial Bank)' : 'Source IBAN (Digital Commercial Bank)'}
                 </label>
                 <select
-                  value={createForm.custodyAccountId}
+                  value={createForm.sourceIbanId}
                   onChange={e => {
-                    const accountId = e.target.value;
-                    const account = custodyAccounts.find(a => a.id === accountId);
+                    const ibanId = e.target.value;
+                    const iban = issuedIbans.find(i => i.id === ibanId);
                     
-                    console.log('[BankSettlement] Cuenta seleccionada:', {
-                      id: accountId,
-                      account: account?.accountName,
-                      currency: account?.currency,
-                      total: account?.totalBalance,
-                      available: account?.availableBalance,
-                      reserved: account?.reservedBalance
-                    });
-                    
-                    // Mapear IBAN según currency de la cuenta
-                    const ibanMap: Record<string, string> = {
-                      'AED': 'AE610260001015381452401',
-                      'USD': 'AE690260001025381452402',
-                      'EUR': 'AE420260001025381452403'
-                    };
-                    
-                    const currency = (account?.currency || 'USD') as 'AED' | 'USD' | 'EUR';
-                    const destinationIban = ibanMap[currency] || 'AE690260001025381452402';
-                    
-                    setSelectedCustodyAccount(account || null);
-                    setCreateForm({
-                      ...createForm,
-                      custodyAccountId: accountId,
-                      currency,
-                      destinationIban,
-                      amount: 0 // Reset amount al cambiar cuenta
-                    });
+                    if (iban) {
+                      // Buscar cuenta custody vinculada
+                      const account = custodyAccounts.find(a => a.id === iban.daesAccountId);
+                      
+                      console.log('[BankSettlement] IBAN origen seleccionado:', {
+                        iban: iban.ibanFormatted,
+                        currency: iban.currency,
+                        account: account?.accountName
+                      });
+                      
+                      setSelectedSourceIban(iban);
+                      setSelectedCustodyAccount(account || null);
+                      
+                      // Mapear IBAN destino (ENBD) según currency
+                      const destinationIbanMap: Record<string, string> = {
+                        'AED': 'AE610260001015381452401',
+                        'USD': 'AE690260001025381452402',
+                        'EUR': 'AE420260001025381452403'
+                      };
+                      
+                      setCreateForm({
+                        ...createForm,
+                        sourceIbanId: ibanId,
+                        custodyAccountId: account?.id || '',
+                        currency: iban.currency as 'AED' | 'USD' | 'EUR',
+                        destinationIban: destinationIbanMap[iban.currency] || 'AE690260001025381452402',
+                        amount: 0
+                      });
+                    } else {
+                      setSelectedSourceIban(null);
+                      setSelectedCustodyAccount(null);
+                    }
                   }}
-                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40 font-mono text-sm"
                   required
                 >
                   <option value="">
-                    {isSpanish ? '-- Seleccionar cuenta --' : '-- Select account --'}
+                    {isSpanish ? '-- Seleccionar IBAN --' : '-- Select IBAN --'}
                   </option>
-                  {custodyAccounts
-                    .filter(a => ['AED', 'USD', 'EUR'].includes(a.currency))
-                    .map(account => (
-                      <option key={account.id} value={account.id}>
-                        {account.accountName} ({account.accountNumber}) · {account.currency} {account.availableBalance.toLocaleString()} {isSpanish ? 'disponible' : 'available'}
-                      </option>
-                    ))}
+                  {issuedIbans.map(iban => (
+                    <option key={iban.id} value={iban.id}>
+                      {iban.ibanFormatted} · {iban.currency} · {iban.accountName || 'N/A'}
+                    </option>
+                  ))}
                 </select>
-                {custodyAccounts.filter(a => ['AED', 'USD', 'EUR'].includes(a.currency)).length === 0 && (
-                  <p className="text-xs text-red-300 mt-2 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
+                {issuedIbans.length === 0 && (
+                  <p className="text-xs text-yellow-300 mt-2 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
                     {isSpanish
-                      ? 'No hay cuentas custody con AED/USD/EUR. Crea una en el módulo Custody Accounts.'
-                      : 'No custody accounts with AED/USD/EUR. Create one in Custody Accounts module.'}
+                      ? 'No hay IBANs activos. Ve al módulo IBAN Manager para emitir uno.'
+                      : 'No active IBANs. Go to IBAN Manager module to issue one.'}
                   </p>
+                )}
+                {selectedSourceIban && (
+                  <div className="mt-3 p-3 bg-cyan-500/10 border border-cyan-400/30 rounded-lg text-sm">
+                    <p className="text-cyan-300 font-semibold mb-2">
+                      {isSpanish ? 'IBAN de origen seleccionado:' : 'Selected source IBAN:'}
+                    </p>
+                    <div className="space-y-1 text-white/70">
+                      <p><span className="text-white/50">IBAN:</span> <span className="text-cyan-300 font-mono text-xs">{selectedSourceIban.ibanFormatted}</span></p>
+                      <p><span className="text-white/50">{isSpanish ? 'Banco:' : 'Bank:'}</span> DIGITAL COMMERCIAL BANK LTD</p>
+                      <p><span className="text-white/50">{isSpanish ? 'Dirección:' : 'Address:'}</span> B2B Tower, Dubai, UAE</p>
+                      <p><span className="text-white/50">{isSpanish ? 'Moneda:' : 'Currency:'}</span> <span className="text-[#00ff88] font-semibold">{selectedSourceIban.currency}</span></p>
+                    </div>
+                  </div>
                 )}
               </div>
 
@@ -1138,29 +1175,35 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                 />
               </div>
 
-              <div className="bg-cyan-500/10 border border-cyan-400/30 rounded-xl p-4 text-sm">
-                <p className="text-cyan-300 font-semibold mb-2 flex items-center gap-2">
-                  <Building2 className="w-4 h-4" />
-                  {isSpanish ? 'Información del beneficiario (IBAN seleccionado):' : 'Beneficiary information (Selected IBAN):'}
-                </p>
-                <div className="space-y-1 text-white/70">
-                  <p><span className="text-white/50">Bank:</span> EMIRATES NBD (ENBD)</p>
-                  <p><span className="text-white/50">Location:</span> Dubai, United Arab Emirates</p>
-                  <p><span className="text-white/50">Beneficiary:</span> TRADEMORE VALUE CAPITAL FZE</p>
-                  <p><span className="text-white/50">SWIFT/BIC:</span> EBILAEADXXX</p>
-                  <p>
-                    <span className="text-white/50">IBAN ({createForm.currency}):</span>
-                    <span className="text-cyan-300 ml-2 font-mono text-xs bg-black/30 px-2 py-1 rounded">
-                      {createForm.destinationIban.replace(/(.{4})/g, '$1 ').trim()}
-                    </span>
+              {selectedSourceIban && (
+                <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-4 text-sm">
+                  <p className="text-green-300 font-semibold mb-2 flex items-center gap-2">
+                    <Building2 className="w-4 h-4" />
+                    {isSpanish ? 'Transferencia:' : 'Transfer:'}
                   </p>
-                  <p className="text-xs text-cyan-200/60 mt-2">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <p className="text-white/50 text-xs uppercase mb-1">{isSpanish ? 'Desde' : 'From'}</p>
+                      <p className="text-white font-semibold">DIGITAL COMMERCIAL BANK LTD</p>
+                      <p className="text-white/60 text-xs">B2B Tower, Dubai, UAE</p>
+                      <p className="text-cyan-300 font-mono text-xs mt-1">{selectedSourceIban.ibanFormatted}</p>
+                      <p className="text-[#00ff88] text-xs mt-1">{selectedSourceIban.currency}</p>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <p className="text-white/50 text-xs uppercase mb-1">{isSpanish ? 'Hacia' : 'To'}</p>
+                      <p className="text-white font-semibold">TRADEMORE VALUE CAPITAL FZE</p>
+                      <p className="text-white/60 text-xs">EMIRATES NBD, Dubai</p>
+                      <p className="text-cyan-300 font-mono text-xs mt-1">{createForm.destinationIban.replace(/(.{4})/g, '$1 ').trim()}</p>
+                      <p className="text-[#00ff88] text-xs mt-1">{createForm.currency}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-green-200/60 mt-3">
                     {isSpanish 
-                      ? '✓ IBAN real verificado de Emirates NBD'
-                      : '✓ Verified real IBAN from Emirates NBD'}
+                      ? '✓ Transferencia entre cuentas IBAN verificadas'
+                      : '✓ Transfer between verified IBAN accounts'}
                   </p>
                 </div>
-              </div>
+              )}
 
               <div className="bg-orange-500/10 border border-orange-400/30 rounded-xl p-4 text-sm">
                 <p className="text-orange-300 font-semibold mb-2 flex items-center gap-2">
