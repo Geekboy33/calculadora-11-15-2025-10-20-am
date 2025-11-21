@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, ReactNode } from 'react';
+import { useEffect, useMemo, useState, ReactNode, useRef } from 'react';
 import {
   Layers,
   Save,
@@ -13,7 +13,13 @@ import {
   BookmarkCheck,
   UploadCloud,
   Gauge,
-  PlayCircle
+  PlayCircle,
+  Download,
+  Upload,
+  History,
+  GitCompare,
+  AlertTriangle,
+  Clock4
 } from 'lucide-react';
 import { profilesStore, ProfileRecord } from '../lib/profiles-store';
 import { useLanguage } from '../lib/i18n';
@@ -34,6 +40,10 @@ export function ProfilesModule() {
   const [creating, setCreating] = useState(false);
   const [loadingProfileId, setLoadingProfileId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewProfile, setPreviewProfile] = useState<ProfileRecord | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const unsubscribe = profilesStore.subscribe(state => {
@@ -91,15 +101,22 @@ export function ProfilesModule() {
   };
 
   const handleActivateProfile = async (profileId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
+    if (!profile) return;
+    
     setLoadingProfileId(profileId);
     try {
-      await profilesStore.activateProfile(profileId);
+      // Aplicar perfil con opción de carga en segundo plano si tiene Ledger1
+      const hasLedger = profile.stats.ledger?.fileName;
+      
+      await profilesStore.activateProfile(profileId, { backgroundLedgerLoad: hasLedger || false });
+      
       addToast({
         type: 'info',
         title: isSpanish ? 'Aplicando perfil' : 'Applying profile',
         description: isSpanish
-          ? 'Refrescando memora y Ledger1. La plataforma se recargará.'
-          : 'Refreshing memory & Ledger1. The platform will reload.'
+          ? `Balances restaurados. ${hasLedger ? 'Ledger1 se cargará en segundo plano.' : 'Plataforma se recargará.'}`
+          : `Balances restored. ${hasLedger ? 'Ledger1 will load in background.' : 'Platform will reload.'}`
       });
     } catch (error: any) {
       addToast({
@@ -155,7 +172,7 @@ export function ProfilesModule() {
   };
 
   const handleRefreshLedger = () => {
-    profilesStore.refreshLedgerFromActiveProfile();
+    profilesStore.refreshLedgerFromActiveProfile(false);
     addToast({
       type: 'info',
       title: isSpanish ? 'Ledger sincronizado' : 'Ledger refreshed',
@@ -163,6 +180,84 @@ export function ProfilesModule() {
         ? 'Releyendo progreso almacenado para Ledger1.'
         : 'Reloading stored Ledger1 progress.'
     });
+  };
+
+  const handleBackgroundLedgerLoad = () => {
+    if (!selectedProfile) return;
+    profilesStore.requestBackgroundLedgerLoad(selectedProfile.id);
+    addToast({
+      type: 'info',
+      title: isSpanish ? 'Carga programada' : 'Load scheduled',
+      description: isSpanish
+        ? 'Ledger1 se cargará en segundo plano. Ve a Large File Analyzer para ver progreso.'
+        : 'Ledger1 will load in background. Go to Large File Analyzer to see progress.'
+    });
+  };
+
+  const handleExportProfile = () => {
+    if (!selectedProfile) return;
+    try {
+      const data = profilesStore.exportProfile(selectedProfile.id);
+      const blob = new Blob([data], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${selectedProfile.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.daes-profile.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      addToast({
+        type: 'success',
+        title: isSpanish ? 'Perfil exportado' : 'Profile exported',
+        description: isSpanish ? 'Archivo .daes-profile.json generado' : 'File .daes-profile.json generated'
+      });
+    } catch (error: any) {
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Error exportando' : 'Export failed',
+        description: error?.message || 'Unexpected error'
+      });
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportProfile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const profile = profilesStore.importProfile(text);
+      setSelectedProfileId(profile.id);
+      addToast({
+        type: 'success',
+        title: isSpanish ? 'Perfil importado' : 'Profile imported',
+        description: isSpanish
+          ? `${profile.name} - ${profile.stats.storageHuman}`
+          : `${profile.name} - ${profile.stats.storageHuman}`
+      });
+    } catch (error: any) {
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Importación fallida' : 'Import failed',
+        description: error?.message || 'Unexpected error'
+      });
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleShowPreview = (profile: ProfileRecord) => {
+    setPreviewProfile(profile);
+    setShowPreview(true);
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setPreviewProfile(null);
   };
 
   return (
@@ -239,12 +334,45 @@ export function ProfilesModule() {
                     : `${profiles.length} profiles stored · ${storageStats.totalSizeMB} MB used`}
                 </p>
               </div>
-              <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-white/50">
-                <Gauge className="w-4 h-4 text-white/40" />
-                {isSpanish ? 'Uso de almacenamiento:' : 'Storage usage:'}{' '}
-                <span className="text-white">{storageStats.percentUsed}%</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-white/50">
+                  <Gauge className="w-4 h-4 text-white/40" />
+                  {isSpanish ? 'Uso de almacenamiento:' : 'Storage usage:'}{' '}
+                  <span className={`${Number(storageStats.percentUsed) >= 80 ? 'text-red-400' : 'text-white'}`}>
+                    {storageStats.percentUsed}%
+                  </span>
+                  {Number(storageStats.percentUsed) >= 80 && (
+                    <AlertTriangle className="w-4 h-4 text-red-400 animate-pulse" />
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleImportClick}
+                    disabled={importing}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-semibold hover:bg-blue-500/20 transition"
+                  >
+                    <Upload className="w-3 h-3" />
+                    {importing ? '...' : isSpanish ? 'Importar' : 'Import'}
+                  </button>
+                  <button
+                    onClick={handleExportProfile}
+                    disabled={!selectedProfile}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-400/30 text-green-300 text-xs font-semibold hover:bg-green-500/20 transition disabled:opacity-40"
+                  >
+                    <Download className="w-3 h-3" />
+                    {isSpanish ? 'Exportar' : 'Export'}
+                  </button>
+                </div>
               </div>
             </div>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,.daes-profile.json"
+              onChange={handleImportProfile}
+              className="hidden"
+            />
 
             {profiles.length === 0 ? (
               <div className="border border-dashed border-white/20 rounded-2xl p-10 text-center text-white/60">
@@ -286,6 +414,16 @@ export function ProfilesModule() {
                       </div>
 
                       <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleShowPreview(profile);
+                          }}
+                          title={isSpanish ? 'Ver detalles' : 'View details'}
+                          className="px-3 py-2 rounded-xl border border-purple-400/30 text-purple-300 text-sm font-semibold bg-purple-500/10 hover:bg-purple-500/20 transition"
+                        >
+                          <GitCompare className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={e => {
                             e.stopPropagation();
@@ -438,6 +576,15 @@ export function ProfilesModule() {
                     <Server className="w-4 h-4" />
                     {isSpanish ? 'Refrescar Ledger1' : 'Refresh Ledger1'}
                   </button>
+                  {selectedProfile.stats.ledger?.fileName && (
+                    <button
+                      onClick={handleBackgroundLedgerLoad}
+                      className="w-full flex items-center justify-center gap-2 bg-purple-500/10 border border-purple-400/30 rounded-xl py-3 font-semibold text-purple-200 hover:border-purple-400/60 transition"
+                    >
+                      <Activity className="w-4 h-4" />
+                      {isSpanish ? 'Cargar Ledger1 en segundo plano' : 'Load Ledger1 in background'}
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (
@@ -469,6 +616,155 @@ export function ProfilesModule() {
           </div>
         </aside>
       </div>
+
+      {/* Modal de Preview */}
+      {showPreview && previewProfile && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={handleClosePreview}>
+          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-[#00ff88]/30 rounded-3xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <GitCompare className="w-6 h-6 text-[#00ff88]" />
+                <h2 className="text-2xl font-bold">
+                  {isSpanish ? 'Vista previa de perfil' : 'Profile preview'}
+                </h2>
+              </div>
+              <button
+                onClick={handleClosePreview}
+                className="px-4 py-2 rounded-xl border border-white/20 text-white/80 hover:border-white/40 transition"
+              >
+                {isSpanish ? 'Cerrar' : 'Close'}
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h3 className="text-lg font-semibold mb-2">{previewProfile.name}</h3>
+                <p className="text-white/60 text-sm">{previewProfile.description || '—'}</p>
+                <div className="grid sm:grid-cols-2 gap-4 mt-4 text-xs">
+                  <div>
+                    <span className="text-white/50">{isSpanish ? 'Creado:' : 'Created:'}</span>
+                    <span className="text-white ml-2">{formatDate(previewProfile.createdAt)}</span>
+                  </div>
+                  <div>
+                    <span className="text-white/50">{isSpanish ? 'Actualizado:' : 'Updated:'}</span>
+                    <span className="text-white ml-2">{formatDate(previewProfile.updatedAt)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                  <h4 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2">
+                    <Database className="w-4 h-4" />
+                    {isSpanish ? 'Resumen de datos' : 'Data summary'}
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-white/60">{isSpanish ? 'Cuentas Custody:' : 'Custody Accounts:'}</span>
+                      <span className="text-white font-semibold">{previewProfile.stats.custodyAccounts}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/60">{isSpanish ? 'Capital Total:' : 'Total Capital:'}</span>
+                      <span className="text-white font-semibold">USD {formatCurrency(previewProfile.stats.custodyTotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/60">{isSpanish ? 'Pledges:' : 'Pledges:'}</span>
+                      <span className="text-white font-semibold">{previewProfile.stats.pledgesCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/60">{isSpanish ? 'Pledges USD:' : 'Pledges USD:'}</span>
+                      <span className="text-white font-semibold">USD {formatCurrency(previewProfile.stats.pledgesTotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/60">{isSpanish ? 'PoR Reports:' : 'PoR Reports:'}</span>
+                      <span className="text-white font-semibold">{previewProfile.stats.porReports}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/60">{isSpanish ? 'Eventos:' : 'Events:'}</span>
+                      <span className="text-white font-semibold">{previewProfile.stats.eventsCount}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                  <h4 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2">
+                    <HardDrive className="w-4 h-4" />
+                    {isSpanish ? 'Almacenamiento' : 'Storage'}
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-white/60">{isSpanish ? 'Tamaño snapshot:' : 'Snapshot size:'}</span>
+                      <span className="text-white font-semibold">{previewProfile.stats.storageHuman}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/60">{isSpanish ? 'Keys guardadas:' : 'Stored keys:'}</span>
+                      <span className="text-white font-semibold">{previewProfile.stats.keysCount}</span>
+                    </div>
+                    {previewProfile.stats.checksum && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-white/60">Checksum:</span>
+                        <span className="text-green-400 font-mono text-xs">✓ {previewProfile.stats.checksum.substring(0, 12)}...</span>
+                      </div>
+                    )}
+                    {previewProfile.stats.compressionRatio && (
+                      <div className="flex justify-between">
+                        <span className="text-white/60">{isSpanish ? 'Compresión:' : 'Compression:'}</span>
+                        <span className="text-cyan-400 font-semibold">-{(100 - previewProfile.stats.compressionRatio * 100).toFixed(0)}%</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {previewProfile.stats.ledger && (
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                  <h4 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2">
+                    <Server className="w-4 h-4" />
+                    Ledger1 {isSpanish ? 'incluido' : 'included'}
+                  </h4>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-white/60">{isSpanish ? 'Archivo:' : 'File:'}</span>
+                      <p className="text-white font-mono text-xs mt-1">{previewProfile.stats.ledger.fileName}</p>
+                    </div>
+                    <div>
+                      <span className="text-white/60">{isSpanish ? 'Progreso:' : 'Progress:'}</span>
+                      <p className="text-[#00ff88] font-semibold mt-1">{previewProfile.stats.ledger.progress?.toFixed(2)}%</p>
+                    </div>
+                    <div>
+                      <span className="text-white/60">{isSpanish ? 'Estado:' : 'Status:'}</span>
+                      <p className="text-white mt-1">{previewProfile.stats.ledger.status}</p>
+                    </div>
+                    <div>
+                      <span className="text-white/60">{isSpanish ? 'Bytes procesados:' : 'Bytes processed:'}</span>
+                      <p className="text-white mt-1">{previewProfile.stats.ledger.bytesProcessed?.toLocaleString()}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    handleClosePreview();
+                    handleActivateProfile(previewProfile.id);
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#00ff88]/20 border border-[#00ff88]/60 text-[#00ff88] rounded-xl py-3 font-semibold hover:bg-[#00ff88]/30 transition"
+                >
+                  <PlayCircle className="w-5 h-5" />
+                  {isSpanish ? 'Activar ahora' : 'Activate now'}
+                </button>
+                <button
+                  onClick={handleClosePreview}
+                  className="px-6 py-3 rounded-xl border border-white/20 text-white/80 hover:border-white/40 transition"
+                >
+                  {isSpanish ? 'Cancelar' : 'Cancel'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

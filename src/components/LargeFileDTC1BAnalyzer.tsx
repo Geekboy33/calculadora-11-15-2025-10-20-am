@@ -83,6 +83,53 @@ export function LargeFileDTC1BAnalyzer() {
           console.log('[LargeFileDTC1BAnalyzer] ✅ Balances cargados desde Ledger Store:', converted.length);
         }
         
+        // Escuchar evento de carga en segundo plano desde Profiles
+        const handleProfileLedgerLoad = async (event: CustomEvent) => {
+          const { profileId, profileName, ledgerInfo, mode } = event.detail;
+          console.log('[LargeFileDTC1BAnalyzer] 📡 Recibido evento de carga:', profileName, mode);
+          
+          if (mode === 'background' && ledgerInfo?.fileName) {
+            // Mostrar mensaje de que se necesita seleccionar el archivo
+            const confirmed = confirm(
+              `🔄 CARGA EN SEGUNDO PLANO\n\n` +
+              `Perfil: ${profileName}\n` +
+              `Archivo: ${ledgerInfo.fileName}\n` +
+              `Progreso guardado: ${ledgerInfo.progress?.toFixed(2) || 0}%\n\n` +
+              `Selecciona el archivo Ledger1 para continuar la carga en segundo plano.\n\n` +
+              `Los balances del perfil ya están activos. La carga de Ledger1 se hará mientras usas otros módulos.`
+            );
+            
+            if (confirmed && fileInputRef.current) {
+              fileInputRef.current.click();
+            }
+          }
+        };
+        
+        window.addEventListener('profiles:trigger-ledger-load', handleProfileLedgerLoad as EventListener);
+        
+        return () => {
+          window.removeEventListener('profiles:trigger-ledger-load', handleProfileLedgerLoad as EventListener);
+        };
+      } catch (error) {
+        console.error('[LargeFileDTC1BAnalyzer] Error en loadInitialData:', error);
+      }
+    };
+    
+    const cleanup = loadInitialData();
+    
+    return () => {
+      if (cleanup && typeof cleanup.then === 'function') {
+        cleanup.then((cleanupFn: any) => cleanupFn?.());
+      }
+    };
+  }, []);
+
+  // Continuar con carga de datos legacy
+  useEffect(() => {
+    const loadLegacyData = async () => {
+      try {
+        const ledgerBalances = ledgerPersistenceStore.getBalances();
+        
         // PRIORIDAD 2: Cargar desde balanceStore (legacy)
         const existing = balanceStore.loadBalances();
         if (existing && existing.balances.length > ledgerBalances.length) {
@@ -180,17 +227,13 @@ export function LargeFileDTC1BAnalyzer() {
           }
         }
         
-        console.log('[LargeFileDTC1BAnalyzer] ✅ Carga inicial completada');
+        console.log('[LargeFileDTC1BAnalyzer] ✅ Carga legacy completada');
       } catch (error) {
-        console.error('[LargeFileDTC1BAnalyzer] ❌ Error en loadInitialData:', error);
-        setError('Error al cargar datos iniciales');
-        // No lanzar el error - permitir que el componente se renderice
+        console.error('[LargeFileDTC1BAnalyzer] ❌ Error en loadLegacyData:', error);
       }
     };
 
-    loadInitialData().catch(err => {
-      console.error('[LargeFileDTC1BAnalyzer] ❌ Error crítico en loadInitialData:', err);
-    });
+    loadLegacyData();
 
     // Auto-guardado al cerrar o salir de la página
     const handleBeforeUnload = () => {

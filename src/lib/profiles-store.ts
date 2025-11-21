@@ -246,6 +246,17 @@ class ProfilesStore {
   // ==========================================
 
   createProfile(name: string, description?: string): ProfileRecord {
+    // Verificar que Ledger1 esté completamente cargado antes de permitir guardar
+    const processingState = processingStore.getState();
+    
+    if (processingState && processingState.status === 'processing' && processingState.progress < 100) {
+      throw new Error(
+        `No se puede guardar perfil mientras Ledger1 está cargando.\n\n` +
+        `Progreso actual: ${processingState.progress.toFixed(2)}%\n` +
+        `Espera a que complete al 100% antes de guardar.`
+      );
+    }
+    
     const profileName = name.trim() || `Perfil ${this.state.profiles.length + 1}`;
     const rawSnapshot = this.captureSnapshotData();
     const encryptedSnapshot = this.encryptSnapshot(rawSnapshot);
@@ -276,6 +287,7 @@ class ProfilesStore {
     );
 
     console.log('[ProfilesStore] 🆕 Perfil creado:', profileName);
+    console.log('[ProfilesStore] 📊 Ledger1 incluido:', stats.ledger?.fileName, stats.ledger?.progress?.toFixed(2) + '%');
     return profile;
   }
 
@@ -338,7 +350,7 @@ class ProfilesStore {
     console.log('[ProfilesStore] 🗑️ Perfil eliminado:', profile.name);
   }
 
-  async activateProfile(profileId: string, options?: { skipReload?: boolean }): Promise<ProfileRecord> {
+  async activateProfile(profileId: string, options?: { skipReload?: boolean; backgroundLedgerLoad?: boolean }): Promise<ProfileRecord> {
     const profile = this.state.profiles.find(p => p.id === profileId);
     if (!profile) {
       throw new Error('Perfil no encontrado');
@@ -358,6 +370,12 @@ class ProfilesStore {
     try {
       await processingStore.loadState();
       ledgerPersistenceStore.refreshFromProfiles();
+      
+      // Si hay un archivo Ledger1 asociado, programar carga en segundo plano
+      if (options?.backgroundLedgerLoad && profile.stats.ledger?.fileName) {
+        console.log('[ProfilesStore] 🔄 Programando carga de Ledger1 en segundo plano');
+        this.scheduleLedgerBackgroundLoad(profile);
+      }
     } catch (error) {
       console.warn('[ProfilesStore] ⚠️ No se pudo refrescar ledger automáticamente:', error);
     }
@@ -369,12 +387,45 @@ class ProfilesStore {
     return profile;
   }
 
-  refreshLedgerFromActiveProfile(): void {
+  private scheduleLedgerBackgroundLoad(profile: ProfileRecord): void {
+    // Disparar evento personalizado para que LargeFileDTC1BAnalyzer lo capture
+    const event = new CustomEvent('profiles:trigger-ledger-load', {
+      detail: {
+        profileId: profile.id,
+        profileName: profile.name,
+        ledgerInfo: profile.stats.ledger,
+        mode: 'background'
+      }
+    });
+    window.dispatchEvent(event);
+    console.log('[ProfilesStore] 📡 Evento de carga de Ledger1 disparado');
+  }
+
+  refreshLedgerFromActiveProfile(backgroundLoad: boolean = false): void {
     console.log('[ProfilesStore] 🔁 Solicitando refresco manual de ledger');
     processingStore.loadState().catch(err => {
       console.error('[ProfilesStore] Error recargando ProcessingStore:', err);
     });
     ledgerPersistenceStore.refreshFromProfiles();
+    
+    // Si se solicita carga en segundo plano, disparar evento
+    if (backgroundLoad) {
+      const activeProfile = this.getActiveProfile();
+      if (activeProfile && activeProfile.stats.ledger?.fileName) {
+        this.scheduleLedgerBackgroundLoad(activeProfile);
+      }
+    }
+  }
+
+  // Método público para solicitar carga en segundo plano
+  requestBackgroundLedgerLoad(profileId: string): void {
+    const profile = this.state.profiles.find(p => p.id === profileId);
+    if (!profile || !profile.stats.ledger?.fileName) {
+      console.warn('[ProfilesStore] No hay archivo Ledger1 asociado al perfil');
+      return;
+    }
+    
+    this.scheduleLedgerBackgroundLoad(profile);
   }
 
   exportProfile(profileId: string): string {
