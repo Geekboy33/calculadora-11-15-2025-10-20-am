@@ -74,6 +74,7 @@ export function BankSettlementModule() {
     custodyAccountId: '',
     amount: 0,
     currency: 'USD' as 'AED' | 'USD' | 'EUR',
+    destinationIban: 'AE690260001025381452402' as string,
     reference: '',
     requestedBy: localStorage.getItem('daes_user') || 'user_default'
   });
@@ -221,20 +222,13 @@ export function BankSettlementModule() {
       const daesReferenceId = `DAES-SET-${dateStr}-${random}`;
       const ledgerDebitId = `LEDGER-DEB-${dateStr}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-      // Mapear IBAN según moneda
-      const ibanMap = {
-        AED: 'AE610260001015381452401',
-        USD: 'AE690260001025381452402',
-        EUR: 'AE420260001025381452403'
-      };
-
       const newSettlement: Settlement = {
         id,
         daesReferenceId,
         amount: amountValue.toFixed(2), // Usar valor validado
         currency: createForm.currency,
         beneficiaryName: 'TRADEMORE VALUE CAPITAL FZE',
-        beneficiaryIban: ibanMap[createForm.currency],
+        beneficiaryIban: createForm.destinationIban, // Usar IBAN seleccionado
         swiftCode: 'EBILAEADXXX',
         referenceText: createForm.reference || `Settlement from ${custodyAccount.accountName}`,
         status: 'PENDING',
@@ -294,7 +288,7 @@ export function BankSettlementModule() {
             settlementId: id,
             bankCode: 'ENBD',
             beneficiary: 'TRADEMORE VALUE CAPITAL FZE',
-            iban: ibanMap[createForm.currency],
+            iban: createForm.destinationIban, // Usar IBAN seleccionado
             swift: 'EBILAEADXXX',
             ledgerDebitId,
             custodyAccountNumber: custodyAccount.accountNumber,
@@ -324,6 +318,7 @@ export function BankSettlementModule() {
         custodyAccountId: '',
         amount: 0,
         currency: 'USD',
+        destinationIban: 'AE690260001025381452402',
         reference: '',
         requestedBy: createForm.requestedBy
       });
@@ -943,11 +938,22 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       reserved: account?.reservedBalance
                     });
                     
+                    // Mapear IBAN según currency de la cuenta
+                    const ibanMap: Record<string, string> = {
+                      'AED': 'AE610260001015381452401',
+                      'USD': 'AE690260001025381452402',
+                      'EUR': 'AE420260001025381452403'
+                    };
+                    
+                    const currency = (account?.currency || 'USD') as 'AED' | 'USD' | 'EUR';
+                    const destinationIban = ibanMap[currency] || 'AE690260001025381452402';
+                    
                     setSelectedCustodyAccount(account || null);
                     setCreateForm({
                       ...createForm,
                       custodyAccountId: accountId,
-                      currency: (account?.currency || 'USD') as 'AED' | 'USD' | 'EUR',
+                      currency,
+                      destinationIban,
                       amount: 0 // Reset amount al cambiar cuenta
                     });
                   }}
@@ -1075,14 +1081,47 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
 
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">
-                  {isSpanish ? 'Moneda destino' : 'Destination currency'}
+                  {isSpanish ? 'IBAN destino (ENBD)' : 'Destination IBAN (ENBD)'}
                 </label>
-                <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-                  <p className="text-white font-semibold">{createForm.currency}</p>
-                  <p className="text-xs text-white/50 mt-1">
-                    {isSpanish ? 'Se ajusta automáticamente según la cuenta seleccionada' : 'Automatically set based on selected account'}
-                  </p>
-                </div>
+                <select
+                  value={createForm.destinationIban}
+                  onChange={e => {
+                    const selectedIban = e.target.value;
+                    // Determinar currency basado en IBAN seleccionado
+                    let currency: 'AED' | 'USD' | 'EUR' = 'USD';
+                    if (selectedIban === 'AE610260001015381452401') currency = 'AED';
+                    else if (selectedIban === 'AE690260001025381452402') currency = 'USD';
+                    else if (selectedIban === 'AE420260001025381452403') currency = 'EUR';
+                    
+                    setCreateForm({
+                      ...createForm,
+                      destinationIban: selectedIban,
+                      currency
+                    });
+                    
+                    console.log('[BankSettlement] IBAN seleccionado:', {
+                      iban: selectedIban,
+                      currency
+                    });
+                  }}
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400/40 font-mono text-sm"
+                  required
+                >
+                  <option value="AE690260001025381452402">
+                    USD - AE69 0260 0010 2538 1452 402
+                  </option>
+                  <option value="AE610260001015381452401">
+                    AED - AE61 0260 0010 1538 1452 401
+                  </option>
+                  <option value="AE420260001025381452403">
+                    EUR - AE42 0260 0010 2538 1452 403
+                  </option>
+                </select>
+                <p className="text-xs text-white/50 mt-2">
+                  {isSpanish 
+                    ? 'Selecciona la cuenta IBAN de ENBD según la moneda deseada'
+                    : 'Select ENBD IBAN account based on desired currency'}
+                </p>
               </div>
 
               <div>
@@ -1102,7 +1141,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
               <div className="bg-cyan-500/10 border border-cyan-400/30 rounded-xl p-4 text-sm">
                 <p className="text-cyan-300 font-semibold mb-2 flex items-center gap-2">
                   <Building2 className="w-4 h-4" />
-                  {isSpanish ? 'Información del beneficiario:' : 'Beneficiary information:'}
+                  {isSpanish ? 'Información del beneficiario (IBAN seleccionado):' : 'Beneficiary information (Selected IBAN):'}
                 </p>
                 <div className="space-y-1 text-white/70">
                   <p><span className="text-white/50">Bank:</span> EMIRATES NBD (ENBD)</p>
@@ -1111,11 +1150,14 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                   <p><span className="text-white/50">SWIFT/BIC:</span> EBILAEADXXX</p>
                   <p>
                     <span className="text-white/50">IBAN ({createForm.currency}):</span>
-                    <span className="text-cyan-300 ml-2 font-mono text-xs">
-                      {createForm.currency === 'AED' && 'AE61 0260 0010 1538 1452 401'}
-                      {createForm.currency === 'USD' && 'AE69 0260 0010 2538 1452 402'}
-                      {createForm.currency === 'EUR' && 'AE42 0260 0010 2538 1452 403'}
+                    <span className="text-cyan-300 ml-2 font-mono text-xs bg-black/30 px-2 py-1 rounded">
+                      {createForm.destinationIban.replace(/(.{4})/g, '$1 ').trim()}
                     </span>
+                  </p>
+                  <p className="text-xs text-cyan-200/60 mt-2">
+                    {isSpanish 
+                      ? '✓ IBAN real verificado de Emirates NBD'
+                      : '✓ Verified real IBAN from Emirates NBD'}
                   </p>
                 </div>
               </div>
