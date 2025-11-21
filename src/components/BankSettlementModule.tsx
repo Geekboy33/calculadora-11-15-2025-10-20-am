@@ -21,7 +21,8 @@ import {
   DollarSign,
   Trash2,
   CreditCard,
-  AlertTriangle
+  AlertTriangle,
+  Plus
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { useToast } from './ui/Toast';
@@ -63,6 +64,19 @@ interface AuditLogEntry {
   metadata?: Record<string, any>;
 }
 
+interface DestinationBeneficiary {
+  id: string;
+  beneficiaryName: string;
+  bankName: string;
+  bankAddress: string;
+  iban: string;
+  ibanFormatted: string;
+  swiftCode: string;
+  currency: string;
+  countryCode: string;
+  createdAt: string;
+}
+
 export function BankSettlementModule() {
   const { language } = useLanguage();
   const isSpanish = language === 'es';
@@ -77,6 +91,7 @@ export function BankSettlementModule() {
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
   const [issuedIbans, setIssuedIbans] = useState<any[]>([]);
+  const [savedBeneficiaries, setSavedBeneficiaries] = useState<DestinationBeneficiary[]>([]);
 
   // Form states
   const [createForm, setCreateForm] = useState({
@@ -85,12 +100,24 @@ export function BankSettlementModule() {
     amount: 0,
     currency: 'USD' as 'AED' | 'USD' | 'EUR',
     destinationIban: 'AE690260001025381452402' as string,
+    destinationBeneficiaryId: '', // ID de beneficiario guardado o 'ENBD' por defecto
     reference: '',
     requestedBy: localStorage.getItem('daes_user') || 'user_default'
   });
 
   const [selectedCustodyAccount, setSelectedCustodyAccount] = useState<CustodyAccount | null>(null);
   const [selectedSourceIban, setSelectedSourceIban] = useState<any | null>(null);
+  const [selectedDestinationBeneficiary, setSelectedDestinationBeneficiary] = useState<DestinationBeneficiary | null>(null);
+  const [showAddBeneficiaryModal, setShowAddBeneficiaryModal] = useState(false);
+
+  const [newBeneficiaryForm, setNewBeneficiaryForm] = useState({
+    beneficiaryName: '',
+    bankName: '',
+    bankAddress: '',
+    iban: '',
+    swiftCode: '',
+    countryCode: 'AE'
+  });
 
   const [confirmForm, setConfirmForm] = useState({
     status: 'COMPLETED' as 'COMPLETED' | 'FAILED' | 'SENT',
@@ -105,6 +132,7 @@ export function BankSettlementModule() {
     loadSettlements();
     loadCustodyAccounts();
     loadIssuedIbans();
+    loadSavedBeneficiaries();
 
     // Suscribirse a cambios en custody accounts
     const unsubscribe = custodyStore.subscribe(accounts => {
@@ -132,6 +160,84 @@ export function BankSettlementModule() {
       }
     } catch (error) {
       console.error('[BankSettlement] Error cargando IBANs:', error);
+    }
+  };
+
+  const loadSavedBeneficiaries = () => {
+    try {
+      const saved = localStorage.getItem('settlement_beneficiaries');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setSavedBeneficiaries(parsed);
+        console.log('[BankSettlement] ✅ Beneficiarios guardados:', parsed.length);
+      }
+    } catch (error) {
+      console.error('[BankSettlement] Error cargando beneficiarios:', error);
+    }
+  };
+
+  const handleAddBeneficiary = () => {
+    if (!newBeneficiaryForm.beneficiaryName || !newBeneficiaryForm.iban || !newBeneficiaryForm.bankName) {
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Datos incompletos' : 'Incomplete data',
+        description: isSpanish ? 'Completa todos los campos requeridos' : 'Fill in all required fields'
+      });
+      return;
+    }
+
+    try {
+      // Limpiar y formatear IBAN
+      const cleanedIban = newBeneficiaryForm.iban.replace(/\s+/g, '').toUpperCase();
+      const ibanFormatted = cleanedIban.replace(/(.{4})/g, '$1 ').trim();
+      
+      // Detectar currency del IBAN
+      let currency = 'USD';
+      if (cleanedIban.includes('AED') || newBeneficiaryForm.iban.startsWith('AE61')) currency = 'AED';
+      else if (cleanedIban.startsWith('AE42')) currency = 'EUR';
+      
+      const newBeneficiary: DestinationBeneficiary = {
+        id: crypto.randomUUID(),
+        beneficiaryName: newBeneficiaryForm.beneficiaryName,
+        bankName: newBeneficiaryForm.bankName,
+        bankAddress: newBeneficiaryForm.bankAddress || 'N/A',
+        iban: cleanedIban,
+        ibanFormatted,
+        swiftCode: newBeneficiaryForm.swiftCode || 'N/A',
+        currency,
+        countryCode: newBeneficiaryForm.countryCode,
+        createdAt: new Date().toISOString()
+      };
+
+      const updated = [newBeneficiary, ...savedBeneficiaries];
+      setSavedBeneficiaries(updated);
+      localStorage.setItem('settlement_beneficiaries', JSON.stringify(updated));
+
+      addToast({
+        type: 'success',
+        title: isSpanish ? 'Beneficiario guardado' : 'Beneficiary saved',
+        description: `${newBeneficiaryForm.beneficiaryName} - ${ibanFormatted}`
+      });
+
+      setShowAddBeneficiaryModal(false);
+      setNewBeneficiaryForm({
+        beneficiaryName: '',
+        bankName: '',
+        bankAddress: '',
+        iban: '',
+        swiftCode: '',
+        countryCode: 'AE'
+      });
+
+      console.log('[BankSettlement] ✅ Beneficiario guardado:', newBeneficiary);
+
+    } catch (error: any) {
+      console.error('[BankSettlement] Error:', error);
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Error' : 'Error',
+        description: error.message
+      });
     }
   };
 
@@ -264,14 +370,23 @@ export function BankSettlementModule() {
       const daesReferenceId = `DAES-SET-${dateStr}-${random}`;
       const ledgerDebitId = `LEDGER-DEB-${dateStr}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
+      // Determinar información del beneficiario
+      let beneficiaryName = 'TRADEMORE VALUE CAPITAL FZE';
+      let beneficiarySwift = 'EBILAEADXXX';
+      
+      if (selectedDestinationBeneficiary) {
+        beneficiaryName = selectedDestinationBeneficiary.beneficiaryName;
+        beneficiarySwift = selectedDestinationBeneficiary.swiftCode;
+      }
+
       const newSettlement: Settlement = {
         id,
         daesReferenceId,
         amount: amountValue.toFixed(2), // Usar valor validado
         currency: createForm.currency,
-        beneficiaryName: 'TRADEMORE VALUE CAPITAL FZE',
+        beneficiaryName,
         beneficiaryIban: createForm.destinationIban, // Usar IBAN seleccionado
-        swiftCode: 'EBILAEADXXX',
+        swiftCode: beneficiarySwift,
         referenceText: createForm.reference || `Settlement from ${custodyAccount.accountName}`,
         status: 'PENDING',
         ledgerDebitId,
@@ -291,12 +406,12 @@ export function BankSettlementModule() {
       
       const transferResult = await custodyTransferHandler.executeTransfer({
         fromAccountId: createForm.custodyAccountId,
-        toDestination: 'TRADEMORE VALUE CAPITAL FZE (ENBD)',
+        toDestination: `${beneficiaryName} (${selectedDestinationBeneficiary?.bankName || 'ENBD'})`,
         amount: amountValue, // Usar valor validado
         currency: createForm.currency,
         reference: daesReferenceId,
-        description: `Bank Settlement to ENBD - ${createForm.reference || 'No reference'}`,
-        beneficiaryName: 'TRADEMORE VALUE CAPITAL FZE',
+        description: `Bank Settlement to ${beneficiaryName} - ${createForm.reference || 'No reference'}`,
+        beneficiaryName,
         destinationType: 'external'
       });
 
@@ -368,10 +483,12 @@ export function BankSettlementModule() {
         amount: 0,
         currency: 'USD',
         destinationIban: 'AE690260001025381452402',
+        destinationBeneficiaryId: '',
         reference: '',
         requestedBy: createForm.requestedBy
       });
       setSelectedSourceIban(null);
+      setSelectedDestinationBeneficiary(null);
 
     } catch (error: any) {
       console.error('[BankSettlement] Error:', error);
@@ -1160,48 +1277,96 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">
-                  {isSpanish ? 'IBAN destino (ENBD)' : 'Destination IBAN (ENBD)'}
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-white/70 flex items-center gap-2">
+                    <Building2 className="w-4 h-4" />
+                    {isSpanish ? 'Beneficiario destino' : 'Destination beneficiary'}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddBeneficiaryModal(true)}
+                    className="flex items-center gap-1 px-3 py-1 rounded-lg bg-purple-500/10 border border-purple-400/30 text-purple-300 text-xs font-semibold hover:bg-purple-500/20 transition"
+                  >
+                    <Plus className="w-3 h-3" />
+                    {isSpanish ? 'Nuevo beneficiario' : 'New beneficiary'}
+                  </button>
+                </div>
                 <select
-                  value={createForm.destinationIban}
+                  value={createForm.destinationBeneficiaryId}
                   onChange={e => {
-                    const selectedIban = e.target.value;
-                    // Determinar currency basado en IBAN seleccionado
-                    let currency: 'AED' | 'USD' | 'EUR' = 'USD';
-                    if (selectedIban === 'AE610260001015381452401') currency = 'AED';
-                    else if (selectedIban === 'AE690260001025381452402') currency = 'USD';
-                    else if (selectedIban === 'AE420260001025381452403') currency = 'EUR';
+                    const beneficiaryId = e.target.value;
                     
-                    setCreateForm({
-                      ...createForm,
-                      destinationIban: selectedIban,
-                      currency
-                    });
-                    
-                    console.log('[BankSettlement] IBAN seleccionado:', {
-                      iban: selectedIban,
-                      currency
-                    });
+                    if (beneficiaryId === 'ENBD_USD') {
+                      setCreateForm({
+                        ...createForm,
+                        destinationBeneficiaryId: beneficiaryId,
+                        destinationIban: 'AE690260001025381452402',
+                        currency: 'USD'
+                      });
+                      setSelectedDestinationBeneficiary(null);
+                    } else if (beneficiaryId === 'ENBD_AED') {
+                      setCreateForm({
+                        ...createForm,
+                        destinationBeneficiaryId: beneficiaryId,
+                        destinationIban: 'AE610260001015381452401',
+                        currency: 'AED'
+                      });
+                      setSelectedDestinationBeneficiary(null);
+                    } else if (beneficiaryId === 'ENBD_EUR') {
+                      setCreateForm({
+                        ...createForm,
+                        destinationBeneficiaryId: beneficiaryId,
+                        destinationIban: 'AE420260001025381452403',
+                        currency: 'EUR'
+                      });
+                      setSelectedDestinationBeneficiary(null);
+                    } else {
+                      // Beneficiario personalizado
+                      const beneficiary = savedBeneficiaries.find(b => b.id === beneficiaryId);
+                      if (beneficiary) {
+                        setSelectedDestinationBeneficiary(beneficiary);
+                        setCreateForm({
+                          ...createForm,
+                          destinationBeneficiaryId: beneficiaryId,
+                          destinationIban: beneficiary.iban,
+                          currency: beneficiary.currency as 'AED' | 'USD' | 'EUR'
+                        });
+                      }
+                    }
                   }}
-                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400/40 font-mono text-sm"
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400/40 text-sm"
                   required
                 >
-                  <option value="AE690260001025381452402">
-                    USD - AE69 0260 0010 2538 1452 402
-                  </option>
-                  <option value="AE610260001015381452401">
-                    AED - AE61 0260 0010 1538 1452 401
-                  </option>
-                  <option value="AE420260001025381452403">
-                    EUR - AE42 0260 0010 2538 1452 403
-                  </option>
+                  <option value="">{isSpanish ? '-- Seleccionar beneficiario --' : '-- Select beneficiary --'}</option>
+                  <optgroup label={isSpanish ? 'ENBD - TRADEMORE VALUE CAPITAL FZE' : 'ENBD - TRADEMORE VALUE CAPITAL FZE'}>
+                    <option value="ENBD_USD">USD - AE69 0260 0010 2538 1452 402 - TRADEMORE (ENBD)</option>
+                    <option value="ENBD_AED">AED - AE61 0260 0010 1538 1452 401 - TRADEMORE (ENBD)</option>
+                    <option value="ENBD_EUR">EUR - AE42 0260 0010 2538 1452 403 - TRADEMORE (ENBD)</option>
+                  </optgroup>
+                  {savedBeneficiaries.length > 0 && (
+                    <optgroup label={isSpanish ? 'Beneficiarios guardados' : 'Saved beneficiaries'}>
+                      {savedBeneficiaries.map(ben => (
+                        <option key={ben.id} value={ben.id}>
+                          {ben.currency} - {ben.ibanFormatted} - {ben.beneficiaryName}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
-                <p className="text-xs text-white/50 mt-2">
-                  {isSpanish 
-                    ? 'Selecciona la cuenta IBAN de ENBD según la moneda deseada'
-                    : 'Select ENBD IBAN account based on desired currency'}
-                </p>
+                {selectedDestinationBeneficiary && (
+                  <div className="mt-3 p-3 bg-purple-500/10 border border-purple-400/30 rounded-lg text-sm">
+                    <p className="text-purple-300 font-semibold mb-2">
+                      {isSpanish ? 'Beneficiario personalizado:' : 'Custom beneficiary:'}
+                    </p>
+                    <div className="space-y-1 text-white/70">
+                      <p><span className="text-white/50">{isSpanish ? 'Beneficiario:' : 'Beneficiary:'}</span> {selectedDestinationBeneficiary.beneficiaryName}</p>
+                      <p><span className="text-white/50">{isSpanish ? 'Banco:' : 'Bank:'}</span> {selectedDestinationBeneficiary.bankName}</p>
+                      <p><span className="text-white/50">{isSpanish ? 'Dirección:' : 'Address:'}</span> {selectedDestinationBeneficiary.bankAddress}</p>
+                      <p><span className="text-white/50">IBAN:</span> <span className="text-cyan-300 font-mono text-xs">{selectedDestinationBeneficiary.ibanFormatted}</span></p>
+                      <p><span className="text-white/50">SWIFT:</span> {selectedDestinationBeneficiary.swiftCode}</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -1433,6 +1598,142 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Agregar Beneficiario */}
+      {showAddBeneficiaryModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowAddBeneficiaryModal(false)}>
+          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-purple-400/30 rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-6 sticky top-0 bg-gradient-to-br from-[#0a0f1c] to-[#000] pb-4 z-10">
+              <Plus className="w-6 h-6 text-purple-300" />
+              <h2 className="text-2xl font-bold">
+                {isSpanish ? 'Agregar nuevo beneficiario' : 'Add new beneficiary'}
+              </h2>
+            </div>
+
+            <div className="space-y-4 pr-2">
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">
+                  {isSpanish ? 'Nombre del beneficiario' : 'Beneficiary name'} *
+                </label>
+                <input
+                  type="text"
+                  value={newBeneficiaryForm.beneficiaryName}
+                  onChange={e => setNewBeneficiaryForm({ ...newBeneficiaryForm, beneficiaryName: e.target.value })}
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-400/40"
+                  placeholder="ACME Corporation Ltd"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">
+                  {isSpanish ? 'Nombre del banco' : 'Bank name'} *
+                </label>
+                <input
+                  type="text"
+                  value={newBeneficiaryForm.bankName}
+                  onChange={e => setNewBeneficiaryForm({ ...newBeneficiaryForm, bankName: e.target.value })}
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-400/40"
+                  placeholder="First Abu Dhabi Bank"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">
+                  {isSpanish ? 'Dirección del banco' : 'Bank address'}
+                </label>
+                <input
+                  type="text"
+                  value={newBeneficiaryForm.bankAddress}
+                  onChange={e => setNewBeneficiaryForm({ ...newBeneficiaryForm, bankAddress: e.target.value })}
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-400/40"
+                  placeholder="Abu Dhabi, United Arab Emirates"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">
+                  IBAN *
+                </label>
+                <input
+                  type="text"
+                  value={newBeneficiaryForm.iban}
+                  onChange={e => setNewBeneficiaryForm({ ...newBeneficiaryForm, iban: e.target.value.toUpperCase() })}
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white font-mono focus:outline-none focus:ring-2 focus:ring-purple-400/40"
+                  placeholder="AE070331234567890123456"
+                  required
+                />
+                <p className="text-xs text-white/50 mt-1">
+                  {isSpanish ? 'Ingresa el IBAN completo (con o sin espacios)' : 'Enter complete IBAN (with or without spaces)'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">
+                  SWIFT/BIC
+                </label>
+                <input
+                  type="text"
+                  value={newBeneficiaryForm.swiftCode}
+                  onChange={e => setNewBeneficiaryForm({ ...newBeneficiaryForm, swiftCode: e.target.value.toUpperCase() })}
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white font-mono focus:outline-none focus:ring-2 focus:ring-purple-400/40"
+                  placeholder="NBADAEAAXXX"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">
+                  {isSpanish ? 'País' : 'Country'}
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {(['AE', 'DE', 'ES'] as const).map(country => (
+                    <button
+                      key={country}
+                      type="button"
+                      onClick={() => setNewBeneficiaryForm({ ...newBeneficiaryForm, countryCode: country })}
+                      className={`px-4 py-2 rounded-xl font-semibold transition ${
+                        newBeneficiaryForm.countryCode === country
+                          ? 'bg-purple-500/20 border-2 border-purple-400/60 text-purple-300'
+                          : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
+                      }`}
+                    >
+                      {country}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-yellow-500/10 border border-yellow-400/30 rounded-xl p-4 text-sm">
+                <p className="text-yellow-300 font-semibold mb-2">
+                  {isSpanish ? '⚠️ Importante:' : '⚠️ Important:'}
+                </p>
+                <ul className="space-y-1 text-white/70 text-xs list-disc list-inside">
+                  <li>{isSpanish ? 'Verifica que el IBAN sea correcto antes de guardar' : 'Verify IBAN is correct before saving'}</li>
+                  <li>{isSpanish ? 'El beneficiario se guardará para futuros settlements' : 'Beneficiary will be saved for future settlements'}</li>
+                  <li>{isSpanish ? 'Puedes eliminarlo después si es necesario' : 'You can delete it later if needed'}</li>
+                </ul>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleAddBeneficiary}
+                  className="flex-1 flex items-center justify-center gap-2 bg-purple-500/20 border border-purple-400/60 text-purple-300 rounded-xl py-3 font-semibold hover:bg-purple-500/30 transition"
+                >
+                  <Plus className="w-5 h-5" />
+                  {isSpanish ? 'Guardar beneficiario' : 'Save beneficiary'}
+                </button>
+                <button
+                  onClick={() => setShowAddBeneficiaryModal(false)}
+                  className="px-6 py-3 rounded-xl border border-white/20 text-white/80 hover:border-white/40 transition"
+                >
+                  {isSpanish ? 'Cancelar' : 'Cancel'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
