@@ -19,7 +19,8 @@ import {
   Eye,
   Wallet,
   DollarSign,
-  Trash2
+  Trash2,
+  CreditCard
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { useToast } from './ui/Toast';
