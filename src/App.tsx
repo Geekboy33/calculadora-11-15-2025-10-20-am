@@ -36,8 +36,9 @@ const ProofOfReservesAPIModule = lazy(() => import('./components/ProofOfReserves
 const ProofOfReservesAPI1Module = lazy(() => import('./components/ProofOfReservesAPI1Module').then(m => ({ default: m.ProofOfReservesAPI1Module })));
 const TransactionEventsModule = lazy(() => import('./components/TransactionEventsModule').then(m => ({ default: m.TransactionEventsModule })));
 const ProfilesModule = lazy(() => import('./components/ProfilesModule').then(m => ({ default: m.ProfilesModule })));
+const BankSettlementModule = lazy(() => import('./components/BankSettlementModule').then(m => ({ default: m.BankSettlementModule })));
 
-type Tab = 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events';
+type Tab = 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -118,6 +119,7 @@ function App() {
     { id: 'proof-of-reserves' as Tab, name: 'Proof of Reserves API', icon: Shield },
     { id: 'proof-of-reserves-api1' as Tab, name: 'PoR API1 - Anchor VUSD', icon: Zap },
     { id: 'transactions-events' as Tab, name: isSpanish ? 'Transacciones y Eventos' : 'Transactions & Events', icon: Activity },
+    { id: 'bank-settlement' as Tab, name: isSpanish ? 'Liquidación Bancaria' : 'Bank Settlement', icon: Building2 },
     { id: 'api-daes-pledge' as Tab, name: 'DAES Pledge/Escrow', icon: TrendingUp },
     { id: 'audit-bank' as Tab, name: t.navAuditBank, icon: FileSearch },
     { id: 'corebanking-api' as Tab, name: 'CoreBanking API', icon: ArrowRightLeft },
@@ -239,6 +241,7 @@ function App() {
           {activeTab === 'proof-of-reserves' && <ProofOfReservesAPIModule />}
           {activeTab === 'proof-of-reserves-api1' && <ProofOfReservesAPI1Module />}
           {activeTab === 'transactions-events' && <TransactionEventsModule />}
+          {activeTab === 'bank-settlement' && <BankSettlementModule />}
           {activeTab === 'api-daes-pledge' && <APIDAESPledgeModule />}
           {activeTab === 'audit-bank' && <AuditBankWindow />}
           {activeTab === 'corebanking-api' && <CoreBankingAPIModule />}
