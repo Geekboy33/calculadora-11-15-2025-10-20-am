@@ -45,6 +45,12 @@ interface Settlement {
   executedBy?: string;
   executedAt?: string;
   failureReason?: string;
+  // Sender information (Digital Commercial Bank IBAN)
+  senderIban?: string;
+  senderIbanFormatted?: string;
+  senderBankName?: string;
+  senderBankAddress?: string;
+  senderAccountName?: string;
 }
 
 interface AuditLogEntry {
@@ -271,7 +277,13 @@ export function BankSettlementModule() {
         ledgerDebitId,
         createdBy: createForm.requestedBy,
         createdAt: date.toISOString(),
-        updatedAt: date.toISOString()
+        updatedAt: date.toISOString(),
+        // Sender information (si hay IBAN seleccionado)
+        senderIban: selectedSourceIban?.iban,
+        senderIbanFormatted: selectedSourceIban?.ibanFormatted,
+        senderBankName: 'DIGITAL COMMERCIAL BANK LTD',
+        senderBankAddress: 'B2B Tower, 15th Floor, Marasi Drive, Business Bay, Dubai, UAE',
+        senderAccountName: custodyAccount.accountName
       };
 
       // Usar custody-transfer-handler para débito completo
@@ -460,20 +472,30 @@ ${isSpanish ? 'DAES Reference ID:' : 'DAES Reference ID:'}          ${settlement
 ${isSpanish ? 'Ledger Debit ID:' : 'Ledger Debit ID:'}            ${settlement.ledgerDebitId}
 ${isSpanish ? 'Estado:' : 'Status:'}                     ${settlement.status}
 
+${isSpanish ? 'INFORMACIÓN DEL REMITENTE (SENDER)' : 'SENDER INFORMATION'}
+───────────────────────────────────────────────────────────────────
+
+${isSpanish ? 'Banco remitente:' : 'Sender bank:'}              ${settlement.senderBankName || 'DIGITAL COMMERCIAL BANK LTD'}
+${isSpanish ? 'Dirección:' : 'Address:'}                   ${settlement.senderBankAddress || 'B2B Tower, 15th Floor, Marasi Drive, Business Bay, Dubai, UAE'}
+${isSpanish ? 'Cuenta:' : 'Account:'}                     ${settlement.senderAccountName || accountInfo}
+${settlement.senderIbanFormatted ? `${isSpanish ? 'IBAN remitente:' : 'Sender IBAN:'}            ${settlement.senderIbanFormatted}` : ''}
+${settlement.senderIban ? `SWIFT/BIC:                  DIGCUSXX` : ''}
+${isSpanish ? 'Moneda de la cuenta:' : 'Account currency:'}          ${settlement.currency}
+
 ${isSpanish ? 'DETALLES DE LA TRANSFERENCIA' : 'TRANSFER DETAILS'}
 ───────────────────────────────────────────────────────────────────
 
 ${isSpanish ? 'Monto:' : 'Amount:'}                      ${settlement.currency} ${parseFloat(settlement.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 ${isSpanish ? 'Moneda:' : 'Currency:'}                     ${settlement.currency}
-${isSpanish ? 'Cuenta origen DAES:' : 'Source DAES Account:'}         ${accountInfo}
+${isSpanish ? 'Tipo de transferencia:' : 'Transfer type:'}           ${isSpanish ? 'Internacional SWIFT' : 'International SWIFT'}
 
-${isSpanish ? 'INFORMACIÓN DEL BENEFICIARIO' : 'BENEFICIARY INFORMATION'}
+${isSpanish ? 'INFORMACIÓN DEL BENEFICIARIO (RECEIVER)' : 'BENEFICIARY INFORMATION (RECEIVER)'}
 ───────────────────────────────────────────────────────────────────
 
-${isSpanish ? 'Banco:' : 'Bank:'}                       EMIRATES NBD (ENBD)
+${isSpanish ? 'Banco beneficiario:' : 'Beneficiary bank:'}          EMIRATES NBD (ENBD)
 ${isSpanish ? 'Dirección:' : 'Address:'}                    DUBAI, UNITED ARAB EMIRATES
-${isSpanish ? 'Beneficiario:' : 'Beneficiary:'}                ${settlement.beneficiaryName}
-IBAN:                       ${settlement.beneficiaryIban}
+${isSpanish ? 'Beneficiario:' : 'Beneficiary:'}                TRADEMORE VALUE CAPITAL FZE
+${isSpanish ? 'IBAN beneficiario:' : 'Beneficiary IBAN:'}          ${settlement.beneficiaryIban}
 SWIFT/BIC:                  ${settlement.swiftCode}
 
 ${isSpanish ? 'FECHAS Y AUDITORÍA' : 'DATES AND AUDIT'}
