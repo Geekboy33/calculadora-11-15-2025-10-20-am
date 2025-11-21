@@ -77,6 +77,8 @@ export function BankSettlementModule() {
     requestedBy: localStorage.getItem('daes_user') || 'user_default'
   });
 
+  const [selectedCustodyAccount, setSelectedCustodyAccount] = useState<CustodyAccount | null>(null);
+
   const [confirmForm, setConfirmForm] = useState({
     status: 'COMPLETED' as 'COMPLETED' | 'FAILED' | 'SENT',
     enbdTransactionReference: '',
@@ -93,10 +95,16 @@ export function BankSettlementModule() {
     // Suscribirse a cambios en custody accounts
     const unsubscribe = custodyStore.subscribe(accounts => {
       setCustodyAccounts(accounts);
+      
+      // Actualizar cuenta seleccionada si cambió
+      if (createForm.custodyAccountId) {
+        const updated = accounts.find(a => a.id === createForm.custodyAccountId);
+        setSelectedCustodyAccount(updated || null);
+      }
     });
 
     return unsubscribe;
-  }, []);
+  }, [createForm.custodyAccountId]);
 
   const loadSettlements = () => {
     try {
@@ -639,11 +647,24 @@ export function BankSettlementModule() {
                 <select
                   value={createForm.custodyAccountId}
                   onChange={e => {
-                    const account = custodyAccounts.find(a => a.id === e.target.value);
+                    const accountId = e.target.value;
+                    const account = custodyAccounts.find(a => a.id === accountId);
+                    
+                    console.log('[BankSettlement] Cuenta seleccionada:', {
+                      id: accountId,
+                      account: account?.accountName,
+                      currency: account?.currency,
+                      total: account?.totalBalance,
+                      available: account?.availableBalance,
+                      reserved: account?.reservedBalance
+                    });
+                    
+                    setSelectedCustodyAccount(account || null);
                     setCreateForm({
                       ...createForm,
-                      custodyAccountId: e.target.value,
-                      currency: (account?.currency || 'USD') as 'AED' | 'USD' | 'EUR'
+                      custodyAccountId: accountId,
+                      currency: (account?.currency || 'USD') as 'AED' | 'USD' | 'EUR',
+                      amount: 0 // Reset amount al cambiar cuenta
                     });
                   }}
                   className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
@@ -656,12 +677,13 @@ export function BankSettlementModule() {
                     .filter(a => ['AED', 'USD', 'EUR'].includes(a.currency))
                     .map(account => (
                       <option key={account.id} value={account.id}>
-                        {account.accountName} ({account.accountNumber}) · {account.currency} {account.availableBalance.toLocaleString()}
+                        {account.accountName} ({account.accountNumber}) · {account.currency} {account.availableBalance.toLocaleString()} {isSpanish ? 'disponible' : 'available'}
                       </option>
                     ))}
                 </select>
                 {custodyAccounts.filter(a => ['AED', 'USD', 'EUR'].includes(a.currency)).length === 0 && (
-                  <p className="text-xs text-red-300 mt-2">
+                  <p className="text-xs text-red-300 mt-2 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
                     {isSpanish
                       ? 'No hay cuentas custody con AED/USD/EUR. Crea una en el módulo Custody Accounts.'
                       : 'No custody accounts with AED/USD/EUR. Create one in Custody Accounts module.'}
@@ -669,35 +691,55 @@ export function BankSettlementModule() {
                 )}
               </div>
 
-              {createForm.custodyAccountId && (() => {
-                const selectedAccount = custodyAccounts.find(a => a.id === createForm.custodyAccountId);
-                return selectedAccount ? (
-                  <div className="bg-purple-500/10 border border-purple-400/30 rounded-xl p-4 text-sm">
-                    <p className="text-purple-300 font-semibold mb-2 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
-                      {isSpanish ? 'Balance de cuenta seleccionada:' : 'Selected account balance:'}
-                    </p>
-                    <div className="grid grid-cols-2 gap-3 text-white/70">
-                      <div>
-                        <span className="text-white/50">{isSpanish ? 'Total:' : 'Total:'}</span>
-                        <p className="text-white font-semibold">{selectedAccount.currency} {selectedAccount.totalBalance.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <span className="text-white/50">{isSpanish ? 'Disponible:' : 'Available:'}</span>
-                        <p className="text-[#00ff88] font-semibold">{selectedAccount.currency} {selectedAccount.availableBalance.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <span className="text-white/50">{isSpanish ? 'Reservado:' : 'Reserved:'}</span>
-                        <p className="text-orange-300">{selectedAccount.currency} {selectedAccount.reservedBalance.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <span className="text-white/50">{isSpanish ? 'Tipo:' : 'Type:'}</span>
-                        <p className="text-white/80 capitalize">{selectedAccount.accountType}</p>
-                      </div>
+              {selectedCustodyAccount && (
+                <div className="bg-purple-500/10 border border-purple-400/30 rounded-xl p-5">
+                  <p className="text-purple-300 font-semibold mb-3 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5" />
+                    {isSpanish ? 'Balance de cuenta seleccionada:' : 'Selected account balance:'}
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <span className="text-white/50 text-xs uppercase tracking-wider block mb-1">
+                        {isSpanish ? 'Total' : 'Total'}
+                      </span>
+                      <p className="text-white font-bold text-lg">
+                        {selectedCustodyAccount.currency} {selectedCustodyAccount.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <span className="text-white/50 text-xs uppercase tracking-wider block mb-1">
+                        {isSpanish ? 'Disponible' : 'Available'}
+                      </span>
+                      <p className="text-[#00ff88] font-bold text-lg">
+                        {selectedCustodyAccount.currency} {selectedCustodyAccount.availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <span className="text-white/50 text-xs uppercase tracking-wider block mb-1">
+                        {isSpanish ? 'Reservado' : 'Reserved'}
+                      </span>
+                      <p className="text-orange-300 font-bold text-lg">
+                        {selectedCustodyAccount.currency} {selectedCustodyAccount.reservedBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <span className="text-white/50 text-xs uppercase tracking-wider block mb-1">
+                        {isSpanish ? 'Tipo' : 'Type'}
+                      </span>
+                      <p className="text-white/80 capitalize font-semibold">
+                        {selectedCustodyAccount.accountType === 'banking' 
+                          ? (isSpanish ? 'Bancaria' : 'Banking')
+                          : 'Blockchain'}
+                      </p>
                     </div>
                   </div>
-                ) : null;
-              })()}
+                  <div className="mt-3 pt-3 border-t border-purple-400/20">
+                    <p className="text-xs text-purple-200/70">
+                      <span className="font-semibold">{isSpanish ? 'Número de cuenta:' : 'Account number:'}</span> {selectedCustodyAccount.accountNumber}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">
@@ -707,23 +749,40 @@ export function BankSettlementModule() {
                   type="number"
                   value={createForm.amount || ''}
                   onChange={e => setCreateForm({ ...createForm, amount: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
                   placeholder="1000000.00"
                   min="0"
                   step="0.01"
                   disabled={!createForm.custodyAccountId}
                 />
-                {createForm.custodyAccountId && (() => {
-                  const selectedAccount = custodyAccounts.find(a => a.id === createForm.custodyAccountId);
-                  return selectedAccount && createForm.amount > 0 ? (
-                    <p className="text-xs text-white/60 mt-2">
-                      {isSpanish ? 'Nuevo balance:' : 'New balance:'}{' '}
-                      <span className={`font-semibold ${selectedAccount.availableBalance - createForm.amount >= 0 ? 'text-[#00ff88]' : 'text-red-400'}`}>
-                        {selectedAccount.currency} {(selectedAccount.availableBalance - createForm.amount).toLocaleString()}
+                {selectedCustodyAccount && createForm.amount > 0 && (
+                  <div className="mt-3 p-3 bg-black/40 border border-white/10 rounded-lg">
+                    <div className="flex justify-between items-center text-sm mb-2">
+                      <span className="text-white/60">{isSpanish ? 'Balance actual:' : 'Current balance:'}</span>
+                      <span className="text-white font-semibold">
+                        {selectedCustodyAccount.currency} {selectedCustodyAccount.availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
-                    </p>
-                  ) : null;
-                })()}
+                    </div>
+                    <div className="flex justify-between items-center text-sm mb-2">
+                      <span className="text-white/60">{isSpanish ? 'Monto a debitar:' : 'Amount to debit:'}</span>
+                      <span className="text-red-300 font-semibold">
+                        - {selectedCustodyAccount.currency} {createForm.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm pt-2 border-t border-white/10">
+                      <span className="text-white/70 font-semibold">{isSpanish ? 'Nuevo balance disponible:' : 'New available balance:'}</span>
+                      <span className={`font-bold text-lg ${selectedCustodyAccount.availableBalance - createForm.amount >= 0 ? 'text-[#00ff88]' : 'text-red-400'}`}>
+                        {selectedCustodyAccount.currency} {(selectedCustodyAccount.availableBalance - createForm.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    {selectedCustodyAccount.availableBalance - createForm.amount < 0 && (
+                      <p className="text-xs text-red-300 mt-2 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {isSpanish ? 'Fondos insuficientes' : 'Insufficient funds'}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>
