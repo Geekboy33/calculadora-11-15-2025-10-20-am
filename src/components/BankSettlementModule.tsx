@@ -1437,7 +1437,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                 />
               </div>
 
-              {selectedSourceIban && (
+              {selectedSourceIban && createForm.destinationBeneficiaryId && (
                 <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-4 text-sm">
                   <p className="text-green-300 font-semibold mb-2 flex items-center gap-2">
                     <Building2 className="w-4 h-4" />
@@ -1446,17 +1446,21 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="bg-black/30 rounded-lg p-3">
                       <p className="text-white/50 text-xs uppercase mb-1">{isSpanish ? 'Desde' : 'From'}</p>
-                      <p className="text-white font-semibold">DIGITAL COMMERCIAL BANK LTD</p>
+                      <p className="text-white font-semibold text-sm">DIGITAL COMMERCIAL BANK LTD</p>
                       <p className="text-white/60 text-xs">B2B Tower, Dubai, UAE</p>
-                      <p className="text-cyan-300 font-mono text-xs mt-1">{selectedSourceIban.ibanFormatted}</p>
-                      <p className="text-[#00ff88] text-xs mt-1">{selectedSourceIban.currency}</p>
+                      <p className="text-cyan-300 font-mono text-[11px] mt-2">{selectedSourceIban.ibanFormatted}</p>
+                      <p className="text-[#00ff88] font-semibold text-xs mt-1">{selectedSourceIban.currency}</p>
                     </div>
                     <div className="bg-black/30 rounded-lg p-3">
                       <p className="text-white/50 text-xs uppercase mb-1">{isSpanish ? 'Hacia' : 'To'}</p>
-                      <p className="text-white font-semibold">TRADEMORE VALUE CAPITAL FZE</p>
-                      <p className="text-white/60 text-xs">EMIRATES NBD, Dubai</p>
-                      <p className="text-cyan-300 font-mono text-xs mt-1">{createForm.destinationIban.replace(/(.{4})/g, '$1 ').trim()}</p>
-                      <p className="text-[#00ff88] text-xs mt-1">{createForm.currency}</p>
+                      <p className="text-white font-semibold text-sm">
+                        {selectedDestinationBeneficiary?.accountHolderName || 'TRADEMORE VALUE CAPITAL FZE'}
+                      </p>
+                      <p className="text-white/60 text-xs">
+                        {selectedDestinationBeneficiary?.bankName || 'EMIRATES NBD'}, {selectedDestinationBeneficiary?.bankAddress?.split(',')[0] || 'Dubai'}
+                      </p>
+                      <p className="text-cyan-300 font-mono text-[11px] mt-2">{createForm.destinationIban.replace(/(.{4})/g, '$1 ').trim()}</p>
+                      <p className="text-[#00ff88] font-semibold text-xs mt-1">{createForm.currency}</p>
                     </div>
                   </div>
                   <p className="text-xs text-green-200/60 mt-3">
