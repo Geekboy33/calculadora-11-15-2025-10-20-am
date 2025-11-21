@@ -108,13 +108,31 @@ export function BankSettlementModule() {
 
   const loadSettlements = () => {
     try {
-      // Cargar desde localStorage (simulado)
+      // Cargar desde localStorage
       const saved = localStorage.getItem('bank_settlements');
       if (saved) {
-        setSettlements(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setSettlements(parsed);
+        console.log('[BankSettlement] ✅ Settlements cargados:', parsed.length);
+      } else {
+        setSettlements([]);
+        console.log('[BankSettlement] ℹ️ No hay settlements guardados');
       }
+      
+      addToast({
+        type: 'info',
+        title: isSpanish ? 'Actualizado' : 'Refreshed',
+        description: isSpanish 
+          ? `${saved ? JSON.parse(saved).length : 0} liquidaciones cargadas`
+          : `${saved ? JSON.parse(saved).length : 0} settlements loaded`
+      });
     } catch (error) {
       console.error('[BankSettlement] Error cargando settlements:', error);
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Error' : 'Error',
+        description: isSpanish ? 'No se pudo cargar settlements' : 'Failed to load settlements'
+      });
     }
   };
 
@@ -413,34 +431,105 @@ export function BankSettlementModule() {
   };
 
   const downloadReport = () => {
-    const csv = ['DAES Reference,Currency,Amount,IBAN,ENBD Ref,Status,Executed By,Executed At'];
-    
-    settlements.forEach(s => {
-      csv.push([
-        s.daesReferenceId,
-        s.currency,
-        s.amount,
-        s.beneficiaryIban,
-        s.enbdTransactionReference || '',
-        s.status,
-        s.executedBy || '',
-        s.executedAt || ''
-      ].join(','));
-    });
+    if (settlements.length === 0) {
+      addToast({
+        type: 'warning',
+        title: isSpanish ? 'Sin datos' : 'No data',
+        description: isSpanish 
+          ? 'No hay settlements para exportar. Crea uno primero.'
+          : 'No settlements to export. Create one first.'
+      });
+      return;
+    }
 
-    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `DAES_Bank_Settlements_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    try {
+      // Calcular totales por moneda
+      const totalsByCurrency: Record<string, number> = {};
+      settlements.forEach(s => {
+        totalsByCurrency[s.currency] = (totalsByCurrency[s.currency] || 0) + parseFloat(s.amount);
+      });
 
-    addToast({
-      type: 'success',
-      title: isSpanish ? 'Reporte descargado' : 'Report downloaded',
-      description: `${settlements.length} ${isSpanish ? 'registros' : 'records'}`
-    });
+      // Header del CSV
+      const csv = [
+        '═══════════════════════════════════════════════════════════',
+        'DAES COREBANKING SYSTEM - BANK SETTLEMENT REPORT',
+        '═══════════════════════════════════════════════════════════',
+        `Date Generated: ${new Date().toLocaleString(isSpanish ? 'es-ES' : 'en-US')}`,
+        `Bank: EMIRATES NBD (ENBD)`,
+        `Beneficiary: TRADEMORE VALUE CAPITAL FZE`,
+        `Total Settlements: ${settlements.length}`,
+        '',
+        'SUMMARY BY STATUS:',
+        `- Pending: ${stats.pending}`,
+        `- Completed: ${stats.completed}`,
+        `- Failed: ${stats.failed}`,
+        '',
+        'TOTAL BY CURRENCY:',
+        ...Object.entries(totalsByCurrency).map(([curr, total]) => 
+          `- ${curr}: ${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        ),
+        '',
+        '═══════════════════════════════════════════════════════════',
+        'SETTLEMENT INSTRUCTIONS',
+        '═══════════════════════════════════════════════════════════',
+        '',
+        'DAES Reference,Currency,Amount,IBAN,SWIFT,Beneficiary,Status,ENBD Ref,Created By,Created At,Executed By,Executed At,Reference Text'
+      ];
+      
+      settlements.forEach(s => {
+        csv.push([
+          s.daesReferenceId,
+          s.currency,
+          s.amount,
+          s.beneficiaryIban,
+          s.swiftCode,
+          s.beneficiaryName,
+          s.status,
+          s.enbdTransactionReference || '',
+          s.createdBy,
+          new Date(s.createdAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US'),
+          s.executedBy || '',
+          s.executedAt ? new Date(s.executedAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US') : '',
+          `"${s.referenceText || ''}"`
+        ].join(','));
+      });
+
+      csv.push('');
+      csv.push('═══════════════════════════════════════════════════════════');
+      csv.push('DAES CoreBanking System - Data and Exchange Settlement');
+      csv.push(`© ${new Date().getFullYear()} Digital Commercial Bank Ltd`);
+      csv.push('═══════════════════════════════════════════════════════════');
+
+      const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `DAES_Bank_Settlements_Report_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      console.log('[BankSettlement] ✅ Reporte CSV generado:', {
+        settlements: settlements.length,
+        pending: stats.pending,
+        completed: stats.completed,
+        failed: stats.failed
+      });
+
+      addToast({
+        type: 'success',
+        title: isSpanish ? 'Reporte descargado' : 'Report downloaded',
+        description: isSpanish
+          ? `${settlements.length} liquidaciones · ${stats.completed} completadas`
+          : `${settlements.length} settlements · ${stats.completed} completed`
+      });
+    } catch (error: any) {
+      console.error('[BankSettlement] Error generando reporte:', error);
+      addToast({
+        type: 'error',
+        title: isSpanish ? 'Error' : 'Error',
+        description: error.message
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
