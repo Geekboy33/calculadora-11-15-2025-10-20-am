@@ -1361,22 +1361,27 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                   className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400/40 text-sm"
                   required
                 >
-                  <option value="">{isSpanish ? '-- Seleccionar beneficiario --' : '-- Select beneficiary --'}</option>
-                  <optgroup label={isSpanish ? 'ENBD - TRADEMORE VALUE CAPITAL FZE' : 'ENBD - TRADEMORE VALUE CAPITAL FZE'}>
-                    <option value="ENBD_USD">USD - AE69 0260 0010 2538 1452 402 - TRADEMORE (ENBD)</option>
-                    <option value="ENBD_AED">AED - AE61 0260 0010 1538 1452 401 - TRADEMORE (ENBD)</option>
-                    <option value="ENBD_EUR">EUR - AE42 0260 0010 2538 1452 403 - TRADEMORE (ENBD)</option>
-                  </optgroup>
+                  <option value="">{isSpanish ? '-- Seleccionar beneficiario destino --' : '-- Select destination beneficiary --'}</option>
                   {savedBeneficiaries.length > 0 && (
-                    <optgroup label={isSpanish ? 'Beneficiarios guardados' : 'Saved beneficiaries'}>
+                    <optgroup label={isSpanish ? '💼 Beneficiarios guardados' : '💼 Saved beneficiaries'}>
                       {savedBeneficiaries.map(ben => (
                         <option key={ben.id} value={ben.id}>
-                          {ben.currency} - {ben.ibanFormatted} - {ben.beneficiaryName}
+                          {ben.currency} - {ben.ibanFormatted} - {ben.accountHolderName} ({ben.bankName})
                         </option>
                       ))}
                     </optgroup>
                   )}
+                  <optgroup label={isSpanish ? '🏦 ENBD - TRADEMORE VALUE CAPITAL FZE (predeterminado)' : '🏦 ENBD - TRADEMORE VALUE CAPITAL FZE (default)'}>
+                    <option value="ENBD_USD">USD - AE69 0260 0010 2538 1452 402 - TRADEMORE (ENBD)</option>
+                    <option value="ENBD_AED">AED - AE61 0260 0010 1538 1452 401 - TRADEMORE (ENBD)</option>
+                    <option value="ENBD_EUR">EUR - AE42 0260 0010 2538 1452 403 - TRADEMORE (ENBD)</option>
+                  </optgroup>
                 </select>
+                <p className="text-xs text-white/50 mt-2">
+                  {isSpanish 
+                    ? 'Selecciona un beneficiario guardado o usa las cuentas ENBD predeterminadas'
+                    : 'Select a saved beneficiary or use default ENBD accounts'}
+                </p>
                 {selectedDestinationBeneficiary && (
                   <div className="mt-3 p-3 bg-purple-500/10 border border-purple-400/30 rounded-lg text-sm">
                     <p className="text-purple-300 font-semibold mb-2">
