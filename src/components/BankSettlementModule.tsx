@@ -747,11 +747,15 @@ export function BankSettlementModule() {
                 </label>
                 <input
                   type="number"
-                  value={createForm.amount || ''}
-                  onChange={e => setCreateForm({ ...createForm, amount: parseFloat(e.target.value) || 0 })}
+                  value={createForm.amount > 0 ? createForm.amount : ''}
+                  onChange={e => {
+                    const value = e.target.value;
+                    const numValue = value === '' ? 0 : parseFloat(value);
+                    setCreateForm({ ...createForm, amount: isNaN(numValue) ? 0 : numValue });
+                  }}
                   className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
                   placeholder="1000000.00"
-                  min="0"
+                  min="0.01"
                   step="0.01"
                   disabled={!createForm.custodyAccountId}
                 />
