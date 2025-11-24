@@ -9,9 +9,7 @@ import {
   Shield,
   Lock,
   Unlock,
-  DollarSign,
   TrendingUp,
-  TrendingDown,
   Send,
   RefreshCw,
   CheckCircle,
@@ -21,7 +19,6 @@ import {
   Download,
   FileText,
   Activity,
-  Eye,
   Settings,
   Webhook,
   Database,
@@ -35,7 +32,9 @@ import { daesPledgeStore, type Pledge, type Payout, type ReserveSummary, type At
 type ViewType = 'overview' | 'pledges' | 'payouts' | 'attestations' | 'webhooks' | 'settings';
 
 export function APIDAESPledgeModule() {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
+  // Translation hook available if needed
+  // const t = useLanguage().t;
   const [selectedView, setSelectedView] = useState<ViewType>('overview');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
