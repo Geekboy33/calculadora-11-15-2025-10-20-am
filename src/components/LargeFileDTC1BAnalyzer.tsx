@@ -677,7 +677,8 @@ export function LargeFileDTC1BAnalyzer() {
       `• Podrás usarlos para transferencias\n` +
       `• Estarán disponibles en Dashboard\n` +
       `• Aparecerán en Account Ledger\n` +
-      `• Se guardarán en Profiles\n\n` +
+      `• Se guardarán en Profiles\n` +
+      `• Podrás REANUDAR cuando quieras\n\n` +
       `¿Continuar y detener?`;
     
     if (!confirm(confirmMessage)) {
@@ -775,6 +776,81 @@ export function LargeFileDTC1BAnalyzer() {
     console.log('[LargeFileDTC1BAnalyzer] ⏹️ Procesamiento detenido con balances guardados');
   };
 
+  // ✅ NUEVO: Función para REANUDAR después de detener
+  const handleResume = async () => {
+    const currentState = await processingStore.loadState();
+    
+    if (!currentState || !currentFileRef.current) {
+      alert('⚠️ No hay archivo para reanudar.\n\nCarga un archivo nuevo para comenzar.');
+      return;
+    }
+    
+    const confirmMessage = 
+      `🔄 ¿Reanudar procesamiento?\n\n` +
+      `Archivo: ${currentState.fileName}\n` +
+      `Progreso guardado: ${currentState.progress.toFixed(2)}%\n` +
+      `Divisas detectadas: ${currentState.balances?.length || 0}\n\n` +
+      `Se continuará desde donde se detuvo.\n` +
+      `¿Reanudar ahora?`;
+    
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+    
+    setIsProcessing(true);
+    setIsPaused(false);
+    processingRef.current = true;
+    setHasPendingProcess(false);
+    setPendingProcessInfo(null);
+    
+    console.log('[LargeFileDTC1BAnalyzer] 🔄 Reanudando procesamiento desde', currentState.progress.toFixed(2) + '%');
+    
+    try {
+      ledgerPersistenceStore.setProcessing(true);
+      
+      await processingStore.startGlobalProcessing(
+        currentFileRef.current, 
+        currentState.bytesProcessed, // Continuar desde aquí
+        (progress, balances) => {
+          // Actualizar UI en cada chunk
+          setAnalysis(prev => prev ? {
+            ...prev,
+            progress,
+            bytesProcessed: (currentFileRef.current!.size * progress) / 100,
+            balances,
+            status: 'processing'
+          } : {
+            fileName: currentFileRef.current!.name,
+            fileSize: currentFileRef.current!.size,
+            bytesProcessed: (currentFileRef.current!.size * progress) / 100,
+            progress,
+            magicNumber: '',
+            entropy: 0,
+            isEncrypted: false,
+            detectedAlgorithm: 'Reanudado...',
+            ivBytes: '',
+            saltBytes: '',
+            balances,
+            status: 'processing'
+          });
+        }
+      );
+      
+      // Procesamiento completado
+      ledgerPersistenceStore.setProcessing(false);
+      setIsProcessing(false);
+      processingRef.current = false;
+      
+      alert('✅ Procesamiento completado al 100%\n\nTodos los balances están disponibles.');
+      
+    } catch (error) {
+      console.error('[LargeFileDTC1BAnalyzer] Error reanudando:', error);
+      setIsProcessing(false);
+      processingRef.current = false;
+      alert('❌ Error al reanudar:\n\n' + (error instanceof Error ? error.message : 'Error desconocido'));
+    }
+  };
+
   const handleDecrypt = async () => {
     if (!username || !password) {
       alert(t.analyzerUsernamePasswordRequired);
@@ -854,8 +930,8 @@ export function LargeFileDTC1BAnalyzer() {
   };
 
   return (
-    <div className="min-h-screen bg-black p-3 sm:p-6">
-      <div className="max-w-7xl mx-auto pb-20 sm:pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-[#030712] via-[#050b1c] to-[#000] p-3 sm:p-6">
+      <div className="max-w-7xl mx-auto pb-20 sm:pb-24 space-y-4 sm:space-y-6">
         {/* Header con tema consistente */}
         <div className="bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] rounded-xl shadow-[0_0_30px_rgba(0,255,136,0.2)] p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 border border-[#00ff88]/20">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -1030,6 +1106,17 @@ export function LargeFileDTC1BAnalyzer() {
               </>
             )}
 
+            {/* ✅ NUEVO: Botón REANUDAR si hay balances y no está procesando */}
+            {loadedBalances.length > 0 && !isProcessing && analysis && analysis.progress < 100 && (
+              <button
+                onClick={handleResume}
+                className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-2 border-blue-400/50 hover:border-blue-400 text-blue-300 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-sm sm:text-base shadow-lg hover:shadow-blue-500/30 hover:scale-105 active:scale-95"
+              >
+                <Play className="w-4 h-4 sm:w-5 sm:h-5" />
+                🔄 {t.analyzerResume || 'REANUDAR CARGA'}
+              </button>
+            )}
+
             {loadedBalances.length > 0 && !isProcessing && (
               <button
                 onClick={clearSavedBalances}
@@ -1112,9 +1199,9 @@ export function LargeFileDTC1BAnalyzer() {
           )}
         </div>
 
-        {/* Sección de balances */}
+        {/* ✅ Sección de balances MEJORADA con scroll optimizado */}
         {analysis && analysis.balances.length > 0 && (
-          <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl shadow-[0_0_20px_rgba(0,255,136,0.1)] p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border-2 border-[#00ff88]/20 rounded-2xl shadow-2xl shadow-[#00ff88]/10 p-4 sm:p-6 mb-4 sm:mb-6 backdrop-blur-xl">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
               <h3 className="text-xl sm:text-2xl font-bold text-[#e0ffe0] flex items-center gap-2">
                 <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-[#00ff88]" />
