@@ -933,9 +933,41 @@ class ProcessingStore {
         throw new Error('Tamaño de archivo inválido');
       }
 
-      const processId = this.startProcessing(file.name, totalSize, new ArrayBuffer(0), fileHash, file.lastModified);
+      // ✅ FIX: No inicializar desde 0 si estamos resumiendo
       const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
       let currentChunk = Math.floor(resumeFrom / CHUNK_SIZE);
+      
+      // ✅ Inicializar estado con el progreso correcto
+      if (resumeFrom > 0) {
+        // Estamos resumiendo - NO sobrescribir el progreso
+        const initialProgress = (resumeFrom / totalSize) * 100;
+        logger.log(`[ProcessingStore] 📊 Resumiendo procesamiento desde ${initialProgress.toFixed(2)}% (${resumeFrom} bytes)`);
+        
+        if (!this.currentState || this.currentState.fileHash !== fileHash) {
+          // Solo crear nuevo estado si no existe o es archivo diferente
+          this.currentState = {
+            id: `process_${Date.now()}`,
+            fileName: file.name,
+            fileSize: totalSize,
+            bytesProcessed: resumeFrom,  // ✅ USAR VALOR GUARDADO
+            progress: initialProgress,   // ✅ USAR PROGRESO REAL
+            status: 'processing',
+            startTime: new Date().toISOString(),
+            lastUpdateTime: new Date().toISOString(),
+            balances: lastCheckpoint?.balances || existingProcess?.balances || [],
+            chunkIndex: currentChunk,
+            totalChunks,
+            fileHash,
+            fileLastModified: file.lastModified,
+            syncStatus: 'syncing',
+            retryCount: 0
+          };
+          this.notifyListeners();
+        }
+      } else {
+        // Empezando desde 0 - inicializar normal
+        const processId = this.startProcessing(file.name, totalSize, new ArrayBuffer(0), fileHash, file.lastModified);
+      }
 
       let offset = resumeFrom;
 
