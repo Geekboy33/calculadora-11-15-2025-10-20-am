@@ -25,6 +25,7 @@ import { profilesStore, ProfileRecord, SnapshotDiff } from '../lib/profiles-stor
 import { useLanguage } from '../lib/i18n';
 import { useToast } from './ui/Toast';
 import { StorageManager } from '../lib/storage-manager';
+import { formatters } from '../lib/formatters';
 
 export function ProfilesModule() {
   const { language } = useLanguage();
@@ -70,14 +71,12 @@ export function ProfilesModule() {
   const storageStats = useMemo(() => StorageManager.getStats(), [profiles]);
   const selectedProfile = profiles.find(p => p.id === selectedProfileId) || profiles[0];
 
+  // ✅ Usar formatters profesional
   const formatCurrency = (value: number) =>
-    value.toLocaleString(isSpanish ? 'es-ES' : 'en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    formatters.number(value, isSpanish ? 'es-ES' : 'en-US', 2);
 
   const formatDate = (iso?: string) =>
-    iso ? new Date(iso).toLocaleString(isSpanish ? 'es-ES' : 'en-US') : '—';
+    iso ? formatters.dateTime(iso, isSpanish ? 'es-ES' : 'en-US') : '—';
 
   const handleCreateProfile = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -336,7 +335,7 @@ export function ProfilesModule() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2 space-y-6">
+        <div className="xl:col-span-2 space-y-6 min-h-0">
           <form
             onSubmit={handleCreateProfile}
             className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
@@ -389,8 +388,8 @@ export function ProfilesModule() {
                 </h2>
                 <p className="text-white/60 text-sm">
                   {isSpanish
-                    ? `${profiles.length} perfiles guardados · ${storageStats.totalSizeMB} MB en uso`
-                    : `${profiles.length} profiles stored · ${storageStats.totalSizeMB} MB used`}
+                    ? `${profiles.length} ${profiles.length === 1 ? 'perfil guardado' : 'perfiles guardados'} · ${storageStats.totalSizeMB} MB en uso`
+                    : `${profiles.length} ${profiles.length === 1 ? 'profile stored' : 'profiles stored'} · ${storageStats.totalSizeMB} MB used`}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -441,17 +440,38 @@ export function ProfilesModule() {
                   : 'No profiles saved yet. Create one to preserve the full bank memory.'}
               </div>
             ) : (
-              <div className="space-y-4 max-h-[calc(100vh-330px)] overflow-y-auto pr-2">
-                {profiles.map(profile => (
+              <div className="space-y-4 max-h-[600px] lg:max-h-[calc(100vh-350px)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#00ff88]/30 scrollbar-track-white/5 hover:scrollbar-thumb-[#00ff88]/50">
+                {profiles.map((profile, idx) => (
                   <div
                     key={profile.id}
                     onClick={() => setSelectedProfileId(profile.id)}
-                    className={`rounded-2xl border p-5 transition shadow-lg cursor-pointer ${
-                      profile.id === selectedProfileId
-                        ? 'border-[#00ff88]/70 bg-[#00ff88]/5'
-                        : 'border-white/10 bg-black/40 hover:border-white/30'
-                    }`}
+                    style={{ animationDelay: `${idx * 50}ms` }}
+                    className={`
+                      relative overflow-hidden
+                      rounded-3xl border-2 p-6 
+                      transition-all duration-300 
+                      shadow-2xl 
+                      cursor-pointer
+                      group
+                      animate-fade-in-up
+                      ${
+                        profile.id === selectedProfileId
+                          ? 'border-[#00ff88]/70 bg-gradient-to-br from-[#00ff88]/10 to-[#00cc6a]/5 shadow-[#00ff88]/30'
+                          : 'border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] hover:border-[#00ff88]/40 hover:shadow-[#00ff88]/20'
+                      }
+                      hover:scale-[1.02] hover:-translate-y-1
+                    `}
                   >
+                    {/* ✨ Efecto holográfico al hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00ff88]/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+                    
+                    {/* Glow effect si está seleccionado */}
+                    {profile.id === selectedProfileId && (
+                      <div className="absolute -inset-1 bg-gradient-to-r from-[#00ff88]/20 to-[#00cc6a]/20 rounded-3xl blur-xl -z-10" />
+                    )}
+                    
+                    {/* Contenido */}
+                    <div className="relative z-10">
                     <div className="flex flex-wrap gap-4 justify-between items-start">
                       <div>
                         <div className="flex items-center gap-2">
@@ -513,6 +533,8 @@ export function ProfilesModule() {
                             e.stopPropagation();
                             handleDeleteProfile(profile.id);
                           }}
+                          title={isSpanish ? 'Eliminar perfil' : 'Delete profile'}
+                          aria-label={isSpanish ? 'Eliminar perfil' : 'Delete profile'}
                           className="px-3 py-2 rounded-xl border border-red-500/40 text-red-300 text-sm hover:bg-red-500/10 transition"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -524,12 +546,12 @@ export function ProfilesModule() {
                       <MetricCard
                         label={isSpanish ? 'Cuentas Custody' : 'Custody Accounts'}
                         value={profile.stats.custodyAccounts}
-                        sub={`${isSpanish ? 'Capital' : 'Capital'} USD ${formatCurrency(profile.stats.custodyTotal)}`}
+                        sub={`${isSpanish ? 'Capital' : 'Capital'} ${formatters.currency(profile.stats.custodyTotal, 'USD')}`}
                       />
                       <MetricCard
                         label={isSpanish ? 'Pledges Totales' : 'Total Pledges'}
                         value={profile.stats.pledgesCount}
-                        sub={`USD ${formatCurrency(profile.stats.pledgesTotal)}`}
+                        sub={formatters.currency(profile.stats.pledgesTotal, 'USD')}
                       />
                       <MetricCard
                         label={isSpanish ? 'Eventos registrados' : 'Events logged'}
@@ -560,12 +582,15 @@ export function ProfilesModule() {
                             />
                           </div>
                           <p className="text-xs text-white/50 mt-1">
-                            {isSpanish ? 'Bytes procesados' : 'Bytes processed'}:{' '}
-                            {profile.stats.ledger.bytesProcessed?.toLocaleString() || 0}
+                            {isSpanish ? 'Procesado' : 'Processed'}:{' '}
+                            <span className="text-[#00ff88] font-semibold">
+                              {formatters.bytes(profile.stats.ledger.bytesProcessed || 0)}
+                            </span>
                           </p>
                         </div>
                       </div>
                     )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -573,7 +598,7 @@ export function ProfilesModule() {
           </div>
         </div>
 
-        <aside className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl space-y-6">
+        <aside className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
           <div>
             <div className="flex items-center gap-2 mb-3">
               <ShieldCheck className="w-5 h-5 text-[#00ff88]" />
@@ -1014,9 +1039,9 @@ export function ProfilesModule() {
                               {isSpanish ? 'Actual:' : 'Current:'} {(change.current.size / 1024).toFixed(2)} KB
                             </span>
                           )}
-                        </div>
-                      </div>
-                    ))}
+                    </div>
+                  </div>
+                ))}
                   </div>
                 </div>
               </div>

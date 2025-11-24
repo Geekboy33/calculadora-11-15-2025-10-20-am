@@ -8,6 +8,8 @@ import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 import { processingStore } from '../lib/processing-store';
 import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
 import { useLanguage } from '../lib/i18n.tsx';
+import { formatters } from '../lib/formatters';
+import { Progress } from './ui/Progress';
 
 // CurrencyBalance is now imported from balances-store
 
@@ -39,8 +41,10 @@ export function LargeFileDTC1BAnalyzer() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loadedBalances, setLoadedBalances] = useState<CurrencyBalance[]>([]);
   const [hasPendingProcess, setHasPendingProcess] = useState(false);
-  const [pendingProcessInfo, setPendingProcessInfo] = useState<{ fileName: string; progress: number } | null>(null);
+  const [pendingProcessInfo, setPendingProcessInfo] = useState<{ fileName: string; progress: number; bytesProcessed: number; fileSize: number; lastSaved: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [storageStats, setStorageStats] = useState<any>(null);
+  const [lastAutoSave, setLastAutoSave] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const processingRef = useRef<boolean>(false);
   const currentFileRef = useRef<File | null>(null);
@@ -53,9 +57,35 @@ export function LargeFileDTC1BAnalyzer() {
 
   // Load existing balances and check for pending processes on mount
   useEffect(() => {
+    let isMounted = true; // ✅ Flag para prevenir actualizaciones si el componente se desmonta
+    
     const loadInitialData = async () => {
       try {
         console.log('[LargeFileDTC1BAnalyzer] 🔄 Iniciando carga de datos...');
+        
+        // 🆕 PASO 0: Verificar checkpoints guardados en disco
+        const state = await processingStore.loadState();
+        if (isMounted && state && state.fileHash) {
+          const checkpoint = await processingStore.getLastCheckpoint(state.fileHash);
+          if (isMounted && checkpoint && checkpoint.status !== 'completed' && checkpoint.progress < 100) {
+            setHasPendingProcess(true);
+            setPendingProcessInfo({
+              fileName: checkpoint.fileName,
+              progress: checkpoint.progress,
+              bytesProcessed: checkpoint.bytesProcessed,
+              fileSize: checkpoint.fileSize,
+              lastSaved: new Date(checkpoint.timestamp).toLocaleString('es-ES')
+            });
+            console.log('[LargeFileDTC1BAnalyzer] 🔄 CHECKPOINT DETECTADO:', checkpoint.progress.toFixed(2) + '%');
+          }
+        }
+
+        // Obtener estadísticas de almacenamiento (solo una vez)
+        if (isMounted) {
+          const stats = await processingStore.getPersistentStorageStats();
+          setStorageStats(stats);
+          console.log('[LargeFileDTC1BAnalyzer] 💾 Storage Stats:', stats);
+        }
         
         // PRIORIDAD 1: Cargar desde ledgerPersistenceStore (más confiable)
         const ledgerStatus = ledgerPersistenceStore.getStatus();
@@ -115,14 +145,12 @@ export function LargeFileDTC1BAnalyzer() {
       }
     };
     
-    const cleanup = loadInitialData();
+    loadInitialData();
     
     return () => {
-      if (cleanup && typeof cleanup.then === 'function') {
-        cleanup.then((cleanupFn: any) => cleanupFn?.());
-      }
+      isMounted = false; // ✅ Limpiar flag al desmontar
     };
-  }, []);
+  }, []); // ✅ Dependencias vacías - solo se ejecuta UNA VEZ al montar
 
   // Continuar con carga de datos legacy
   useEffect(() => {
@@ -634,43 +662,79 @@ export function LargeFileDTC1BAnalyzer() {
             <span className="text-cyber">{t.analyzerLoadFileForAnalysis}</span>
           </h2>
 
-          {/* Alerta de proceso pendiente CON BOTÓN PROMINENTE */}
+          {/* 🆕 Alerta de proceso pendiente MEJORADA con información detallada */}
           {hasPendingProcess && pendingProcessInfo && (
-            <div className="mb-4 bg-gradient-to-r from-[#ff8c00]/30 to-[#ffa500]/30 border-2 border-[#ff8c00]/50 rounded-xl p-4 sm:p-6 shadow-[0_0_25px_rgba(255,140,0,0.4)] animate-pulse">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="bg-[#ffa500] rounded-full p-2">
-                    <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-black flex-shrink-0" />
+            <div className="mb-6 bg-gradient-to-br from-[#ff8c00]/40 via-[#ffa500]/30 to-[#ff6b00]/40 border-3 border-[#ff8c00]/70 rounded-2xl p-5 sm:p-7 shadow-[0_0_35px_rgba(255,140,0,0.6)] relative overflow-hidden">
+              {/* Efecto de brillo animado */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+              
+              <div className="relative z-10 flex flex-col gap-5">
+                <div className="flex items-start gap-4">
+                  <div className="bg-gradient-to-br from-[#ffa500] to-[#ff8c00] rounded-full p-3 shadow-lg animate-pulse">
+                    <Save className="w-7 h-7 sm:w-9 sm:h-9 text-black flex-shrink-0" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-[#ffa500] font-black text-lg sm:text-xl mb-2">
-                      {t.analyzerProcessInterrupted}
+                    <p className="text-[#ffa500] font-black text-xl sm:text-2xl mb-3 flex items-center gap-2">
+                      💾 {t.analyzerProcessInterrupted || 'CARGA GUARDADA AUTOMÁTICAMENTE'}
                     </p>
-                    <p className="text-[#e0ffe0] text-sm sm:text-base mb-1">
-                      <strong>{t.analyzerFile}:</strong> {pendingProcessInfo.fileName}
-                    </p>
+                    <div className="space-y-2 bg-black/30 rounded-xl p-4 backdrop-blur-sm">
+                      <p className="text-[#e0ffe0] text-sm sm:text-base">
+                        <strong className="text-[#00ff88]">📂 Archivo:</strong> {pendingProcessInfo.fileName}
+                      </p>
                     <p className="text-[#00ff88] text-base sm:text-lg font-bold">
-                      {t.analyzerSavedProgress}: {pendingProcessInfo.progress.toFixed(2)}%
+                      <strong>🎯 Progreso guardado:</strong>{' '}
+                      <span className="font-mono text-2xl">
+                        {formatters.percentage(pendingProcessInfo.progress, 2)}
+                      </span>
                     </p>
+                      <p className="text-[#e0ffe0] text-sm">
+                        <strong className="text-[#00ff88]">📊 Procesado:</strong> {(pendingProcessInfo.bytesProcessed / (1024*1024*1024)).toFixed(2)} GB de {(pendingProcessInfo.fileSize / (1024*1024*1024)).toFixed(2)} GB
+                      </p>
+                      <p className="text-[#e0ffe0] text-xs">
+                        <strong className="text-[#ffa500]">🕐 Último guardado:</strong> {pendingProcessInfo.lastSaved}
+                      </p>
+                    </div>
                   </div>
                 </div>
                 
-                {/* Botón GRANDE de reanudación */}
+                {/* Barra de progreso visual */}
+                <div className="w-full bg-black/40 rounded-full h-4 overflow-hidden shadow-inner">
+                  <div 
+                    className="h-full bg-gradient-to-r from-[#00ff88] via-[#00cc6a] to-[#00aa55] transition-all duration-500 relative overflow-hidden"
+                    style={{ width: `${pendingProcessInfo.progress}%` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+                  </div>
+                </div>
+                
+                {/* Botones de acción MEJORADOS */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={resumePendingProcess}
-                    className="flex-1 bg-gradient-to-r from-[#00ff88] to-[#00cc6a] hover:from-[#00cc6a] hover:to-[#00aa55] text-black px-6 py-4 rounded-xl font-black text-base sm:text-lg transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(0,255,136,0.5)] hover:shadow-[0_0_30px_rgba(0,255,136,0.7)] transform hover:scale-105"
+                    className="flex-1 bg-gradient-to-r from-[#00ff88] to-[#00cc6a] hover:from-[#00cc6a] hover:to-[#00aa55] text-black px-6 py-5 rounded-xl font-black text-lg sm:text-xl transition-all flex items-center justify-center gap-3 shadow-[0_0_25px_rgba(0,255,136,0.6)] hover:shadow-[0_0_40px_rgba(0,255,136,0.9)] transform hover:scale-105 active:scale-95"
                   >
-                    <RotateCcw className="w-6 h-6 sm:w-7 sm:h-7 animate-spin" />
-                    {t.analyzerContinueFrom} {pendingProcessInfo.progress.toFixed(0)}%
+                    <Play className="w-7 h-7 sm:w-8 sm:h-8" />
+                    🚀 {t.analyzerContinueFrom || 'CONTINUAR DESDE'} {pendingProcessInfo.progress.toFixed(0)}%
                   </button>
                   <button
                     onClick={cancelPendingProcess}
-                    className="sm:flex-none bg-[#1a1a1a] hover:bg-[#2a2a2a] text-[#ff6b6b] border-2 border-[#ff6b6b]/50 px-4 py-3 rounded-lg font-semibold transition-all text-sm"
+                    className="sm:flex-none bg-[#1a1a1a] hover:bg-[#2a2a2a] text-[#ff6b6b] border-2 border-[#ff6b6b]/50 hover:border-[#ff6b6b] px-6 py-4 rounded-xl font-bold transition-all text-sm shadow-lg"
                   >
-                    {t.analyzerCancelProcess}
+                    ✕ {t.analyzerCancelProcess || 'Cancelar y Reiniciar'}
                   </button>
                 </div>
+
+                {/* Información adicional del almacenamiento */}
+                {storageStats && (
+                  <div className="text-xs text-white/60 bg-black/20 rounded-lg p-3 flex items-center gap-2">
+                    <Database className="w-4 h-4 text-[#00ff88]" />
+                    <span>
+                      💾 Checkpoints guardados: <strong className="text-[#00ff88]">{storageStats.totalCheckpoints}</strong> | 
+                      Espacio usado: <strong className="text-[#00ff88]">{formatters.bytes(storageStats.storageUsage.used)}</strong>{' '}
+                      (<strong>{formatters.percentage(storageStats.storageUsage.percentage, 1)}</strong> del almacenamiento local)
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -758,21 +822,55 @@ export function LargeFileDTC1BAnalyzer() {
             <div className="mt-4 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-3 sm:p-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-1 sm:gap-0">
                 <span className="text-[#e0ffe0] font-semibold text-sm sm:text-base truncate max-w-full sm:max-w-md">{analysis.fileName}</span>
-                <span className="text-[#00ff88] font-mono text-xs sm:text-sm">
-                  {(analysis.fileSize / (1024 * 1024 * 1024)).toFixed(2)} GB
+                <span className="text-[#00ff88] font-mono text-xs sm:text-sm font-bold">
+                  {formatters.bytes(analysis.fileSize)}
                 </span>
               </div>
-              <div className="w-full bg-[#1a1a1a] rounded-full h-3 sm:h-4 mb-2 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-[#00ff88] to-[#00cc6a] h-full rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(0,255,136,0.5)]"
-                  style={{ width: `${analysis.progress}%` }}
+              {/* ✅ Progress bar cinematográfico profesional */}
+              <div className="relative h-8 bg-black/60 rounded-full overflow-hidden border-2 border-[#00ff88]/30 mb-3">
+                {/* Pattern de fondo */}
+                <div 
+                  className="absolute inset-0" 
+                  style={{
+                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(0,255,136,0.05) 10px, rgba(0,255,136,0.05) 20px)',
+                  }} 
                 />
+                
+                {/* Barra de progreso con gradiente */}
+                <div 
+                  className="relative h-full bg-gradient-to-r from-[#00ff88] via-[#00cc6a] to-[#00aa55] transition-all duration-500 ease-out"
+                  style={{ width: `${analysis.progress}%` }}
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+                  
+                  {/* Porcentaje dentro de la barra */}
+                  {analysis.progress > 10 && (
+                    <div className="absolute inset-0 flex items-center justify-end pr-3">
+                      <span className="text-black font-bold text-sm drop-shadow-lg">
+                        {formatters.percentage(analysis.progress, 2)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Milestone markers */}
+                {[25, 50, 75].map(milestone => (
+                  <div 
+                    key={milestone}
+                    className="absolute top-0 bottom-0 w-0.5 bg-white/20"
+                    style={{ left: `${milestone}%` }}
+                  />
+                ))}
               </div>
-              <div className="flex justify-between text-xs sm:text-sm text-[#80ff80] mb-2">
-                <span className="font-semibold">{analysis.progress.toFixed(1)}% {t.analyzerProcessed}</span>
-                <span className="font-mono">
-                  {(analysis.bytesProcessed / (1024 * 1024)).toFixed(0)} MB /{' '}
-                  {(analysis.fileSize / (1024 * 1024)).toFixed(0)} MB
+              
+              {/* Info de progreso */}
+              <div className="flex justify-between text-xs sm:text-sm text-white/70">
+                <span className="font-semibold text-[#00ff88]">
+                  {formatters.percentage(analysis.progress, 1)} {t.analyzerProcessed}
+                </span>
+                <span className="font-mono text-white">
+                  {formatters.bytes(analysis.bytesProcessed)} / {formatters.bytes(analysis.fileSize)}
                 </span>
               </div>
               {isProcessing && (

@@ -32,11 +32,45 @@ const DEFAULT_LIMITS: { [key: string]: RateLimitConfig } = {
 
 class RateLimiter {
   private records: Map<string, RequestRecord> = new Map();
-  private cleanupInterval: NodeJS.Timeout;
+  private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     this.loadFromStorage();
-    this.cleanupInterval = setInterval(() => this.cleanup(), 60000); // Cleanup every minute
+    this.startCleanupTimer();
+  }
+
+  /**
+   * Inicia timer de limpieza - solo cuando hay registros
+   */
+  private startCleanupTimer(): void {
+    if (this.cleanupInterval !== null) return;
+    
+    this.cleanupInterval = setInterval(() => {
+      this.cleanup();
+      
+      // Detener si no hay registros
+      if (this.records.size === 0) {
+        this.stopCleanupTimer();
+      }
+    }, 60000); // Cada minuto
+  }
+
+  /**
+   * Detiene timer de limpieza
+   */
+  private stopCleanupTimer(): void {
+    if (this.cleanupInterval !== null) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+  }
+
+  /**
+   * Limpia recursos al destruir
+   */
+  destroy(): void {
+    this.stopCleanupTimer();
+    this.records.clear();
   }
 
   /**

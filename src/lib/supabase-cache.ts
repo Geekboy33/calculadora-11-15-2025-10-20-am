@@ -18,6 +18,7 @@ class SupabaseCache {
   private cache: Map<string, CacheEntry<any>> = new Map();
   private pendingRequests: Map<string, Promise<any>> = new Map();
   private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
+  private cleanupTimer: number | null = null;
   private readonly MAX_CACHE_SIZE = 100;
 
   /**
@@ -95,6 +96,11 @@ class SupabaseCache {
         expiresAt: now + ttl,
       });
 
+      // ✅ Si es el primer dato en caché, iniciar timer de limpieza
+      if (this.cache.size === 1) {
+        this.startCleanupTimer();
+      }
+
       // Enforce cache size limit (LRU)
       this.enforceCacheLimit();
 
@@ -150,6 +156,7 @@ class SupabaseCache {
   clear(): void {
     this.cache.clear();
     this.pendingRequests.clear();
+    this.stopCleanupTimer(); // ✅ Detener timer al limpiar
     console.log('[SupabaseCache] Cache cleared');
   }
 
@@ -214,15 +221,66 @@ class SupabaseCache {
   }
 }
 
+  /**
+   * Inicia el timer de limpieza - SOLO cuando hay datos en caché
+   */
+  private startCleanupTimer(): void {
+    // Solo iniciar si hay datos y no hay timer activo
+    if (this.cache.size === 0 || this.cleanupTimer !== null) {
+      return;
+    }
+
+    this.cleanupTimer = setInterval(() => {
+      const cleaned = this.cleanup();
+      
+      // Si no quedan datos después de limpiar, detener el timer
+      if (this.cache.size === 0) {
+        this.stopCleanupTimer();
+      }
+    }, 5 * 60 * 1000) as unknown as number;
+
+    console.log('[SupabaseCache] ✅ Cleanup timer iniciado');
+  }
+
+  /**
+   * Detiene el timer de limpieza
+   */
+  private stopCleanupTimer(): void {
+    if (this.cleanupTimer !== null) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = null;
+      console.log('[SupabaseCache] 🛑 Cleanup timer detenido (caché vacío)');
+    }
+  }
+
+  /**
+   * Set data in cache - inicia timer si es necesario
+   */
+  set<T>(key: string, data: T, ttl: number): void {
+    const expiresAt = Date.now() + ttl;
+    this.cache.set(key, { data, expiresAt });
+    
+    // Si es el primer dato, iniciar timer
+    if (this.cache.size === 1) {
+      this.startCleanupTimer();
+    }
+  }
+
+  /**
+   * Clear all cache - detiene timer
+   */
+  clear(): void {
+    this.cache.clear();
+    this.pendingRequests.clear();
+    this.stopCleanupTimer();
+    console.log('[SupabaseCache] 🧹 Cache limpiado completamente');
+  }
+}
+
 // Global cache instance
 export const supabaseCache = new SupabaseCache();
 
-// Auto-cleanup every 5 minutes
-if (typeof window !== 'undefined') {
-  setInterval(() => {
-    supabaseCache.cleanup();
-  }, 5 * 60 * 1000);
-}
+// ✅ NO MÁS TIMER GLOBAL - Ahora se maneja internamente
 
 /**
  * Helper function for common Supabase query patterns

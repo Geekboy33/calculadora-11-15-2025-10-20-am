@@ -9,6 +9,8 @@ import { balanceStore, formatCurrency, getCurrencyName, type CurrencyBalance } f
 import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
 import { LedgerStatusIndicator } from './LedgerStatusIndicator';
 import { useLanguage } from '../lib/i18n.tsx';
+import { formatters } from '../lib/formatters';
+import { StatusBadge } from './ui/Badge';
 
 export function AccountLedger() {
   const { t } = useLanguage();

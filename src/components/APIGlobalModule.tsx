@@ -118,6 +118,7 @@ export default function APIGlobalModule() {
   const [m2Balance, setM2Balance] = useState<{ total: number; currency: string; validated: boolean } | null>(null);
   const [digitalSignaturesCount, setDigitalSignaturesCount] = useState<number>(0);
 
+  // ✅ OPTIMIZACIÓN: useEffect con dependencias correctas
   useEffect(() => {
     console.log('[API GLOBAL] Component mounted, initializing...');
     loadData();
@@ -140,9 +141,10 @@ export default function APIGlobalModule() {
       unsubscribe();
       unsubscribeCustody();
     };
-  }, []);
+  }, [loadData, checkAPIConnection, loadM2Balance]); // ✅ Dependencias correctas
 
-  const loadM2Balance = () => {
+  // ✅ OPTIMIZACIÓN: useCallback para evitar recrear función en cada render
+  const loadM2Balance = useCallback(() => {
     try {
       const m2Data = iso20022Store.extractM2Balance();
       setM2Balance(m2Data);
@@ -157,9 +159,10 @@ export default function APIGlobalModule() {
       setM2Balance(null);
       setDigitalSignaturesCount(0);
     }
-  };
+  }, []);
 
-  const checkAPIConnection = async () => {
+  // ✅ OPTIMIZACIÓN: useCallback para checkAPIConnection
+  const checkAPIConnection = useCallback(async () => {
     try {
       setApiStatus('checking');
       console.log('[API GLOBAL] 🔍 Checking MindCloud API connectivity...');
@@ -208,9 +211,10 @@ export default function APIGlobalModule() {
       setApiStatus('error');
       console.error('[API GLOBAL] ❌ Error checking API connection:', error);
     }
-  };
+  }, []); // ✅ Sin dependencias - función estable
 
-  const loadData = () => {
+  // ✅ OPTIMIZACIÓN: useCallback para loadData
+  const loadData = useCallback(() => {
     console.log('[API GLOBAL] ========== LOADING DATA ==========');
 
     // Load custody accounts
@@ -280,7 +284,7 @@ export default function APIGlobalModule() {
         failed_transfers: parsedTransfers.filter((t: Transfer) => t.status === 'FAILED').length
       });
     }
-  };
+  }, []); // ✅ Cerrar useCallback correctamente
 
   // Auto-scroll to submit button when account is selected
   const handleAccountSelect = (accountId: string) => {

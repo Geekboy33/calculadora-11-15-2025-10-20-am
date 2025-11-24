@@ -107,11 +107,34 @@ class LedgerPersistenceStore {
 
   private startAutoSave() {
     // Guardar automáticamente cada 10 segundos
+    // ✅ OPTIMIZACIÓN: Solo si no existe ya
+    if (this.autoSaveInterval) return;
+    
     this.autoSaveInterval = window.setInterval(() => {
       if (this.state.isProcessing) {
         this.saveToStorage();
+      } else {
+        // Si no está procesando, detener timer
+        this.stopAutoSave();
       }
     }, 10000) as unknown as number;
+  }
+
+  /**
+   * Detiene el auto-guardado
+   */
+  private stopAutoSave() {
+    if (this.autoSaveInterval) {
+      window.clearInterval(this.autoSaveInterval);
+      this.autoSaveInterval = undefined;
+    }
+  }
+
+  /**
+   * Limpia recursos al destruir
+   */
+  destroy(): void {
+    this.stopAutoSave();
   }
 
   // ==========================================
