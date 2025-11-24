@@ -219,7 +219,6 @@ class SupabaseCache {
       console.log(`[SupabaseCache] Cleaned up ${removed} expired entries`);
     }
   }
-}
 
   /**
    * Inicia el timer de limpieza - SOLO cuando hay datos en caché
@@ -251,29 +250,6 @@ class SupabaseCache {
       this.cleanupTimer = null;
       console.log('[SupabaseCache] 🛑 Cleanup timer detenido (caché vacío)');
     }
-  }
-
-  /**
-   * Set data in cache - inicia timer si es necesario
-   */
-  set<T>(key: string, data: T, ttl: number): void {
-    const expiresAt = Date.now() + ttl;
-    this.cache.set(key, { data, expiresAt });
-    
-    // Si es el primer dato, iniciar timer
-    if (this.cache.size === 1) {
-      this.startCleanupTimer();
-    }
-  }
-
-  /**
-   * Clear all cache - detiene timer
-   */
-  clear(): void {
-    this.cache.clear();
-    this.pendingRequests.clear();
-    this.stopCleanupTimer();
-    console.log('[SupabaseCache] 🧹 Cache limpiado completamente');
   }
 }
 
