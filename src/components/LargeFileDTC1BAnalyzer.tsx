@@ -49,6 +49,7 @@ export function LargeFileDTC1BAnalyzer() {
   const processingRef = useRef<boolean>(false);
   const currentFileRef = useRef<File | null>(null);
   const analysisRef = useRef<StreamingAnalysisResult | null>(null);
+  const lastProgressUpdate = useRef<number>(0); // ✅ Para throttle de re-renders
 
   // Mantener analysisRef actualizado
   useEffect(() => {
@@ -483,31 +484,37 @@ export function LargeFileDTC1BAnalyzer() {
       logger.log(`[LargeFileDTC1BAnalyzer] 🔄 Reanudando desde: ${pendingState.bytesProcessed} bytes (${pendingState.progress.toFixed(2)}%)`);
       
       await processingStore.startGlobalProcessing(file, pendingState.bytesProcessed, (progress, balances) => {
-        // ✅ Obtener bytesProcessed real del estado actual
-        const currentState = processingStore.getState();
-        const actualBytesProcessed = currentState?.bytesProcessed || (file.size * progress) / 100;
-        
-        // Callback de progreso
-        setAnalysis(prev => prev ? {
-          ...prev,
-          progress,
-          bytesProcessed: actualBytesProcessed, // ✅ Usar valor real
-          balances,
-          status: 'processing'
-        } : {
-          fileName: file.name,
-          fileSize: file.size,
-          bytesProcessed: actualBytesProcessed, // ✅ Usar valor real
-          progress,
-          magicNumber: '',
-          entropy: 0,
-          isEncrypted: false,
-          detectedAlgorithm: 'Procesando...',
-          ivBytes: '',
-          saltBytes: '',
-          balances,
-          status: 'processing'
-        });
+        // ✅ THROTTLE: Solo actualizar UI cada 1% para evitar re-renders masivos
+        const progressInt = Math.floor(progress);
+        if (progressInt > lastProgressUpdate.current || balances.length !== (analysisRef.current?.balances.length || 0)) {
+          lastProgressUpdate.current = progressInt;
+          
+          // ✅ Obtener bytesProcessed real del estado actual
+          const currentState = processingStore.getState();
+          const actualBytesProcessed = currentState?.bytesProcessed || (file.size * progress) / 100;
+          
+          // Callback de progreso - SOLO cada 1% o cuando cambian balances
+          setAnalysis(prev => prev ? {
+            ...prev,
+            progress,
+            bytesProcessed: actualBytesProcessed, // ✅ Usar valor real
+            balances,
+            status: 'processing'
+          } : {
+            fileName: file.name,
+            fileSize: file.size,
+            bytesProcessed: actualBytesProcessed, // ✅ Usar valor real
+            progress,
+            magicNumber: '',
+            entropy: 0,
+            isEncrypted: false,
+            detectedAlgorithm: 'Procesando...',
+            ivBytes: '',
+            saltBytes: '',
+            balances,
+            status: 'processing'
+          });
+        }
 
         // Guardar balances periódicamente
         if (balances.length > 0 && Math.floor(progress) % 10 === 0) {

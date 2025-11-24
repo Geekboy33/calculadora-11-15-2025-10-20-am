@@ -42,6 +42,8 @@ class ProcessingStore {
   private saveTimeoutId: NodeJS.Timeout | null = null;
   private lastCheckpointTime: number = 0;
   private autoCheckpointTimer: NodeJS.Timeout | null = null;
+  private lastProgressNotified: number = -1; // ✅ Para throttle de updateProgress
+  private notifyTimer: NodeJS.Timeout | null = null; // ✅ Para debounce de notificaciones
 
   private currencyPatterns: Map<string, Uint8Array> = new Map();
 
@@ -716,14 +718,22 @@ class ProcessingStore {
     };
   }
 
+  // ✅ OPTIMIZACIÓN: Debounce de notificaciones para no saturar suscriptores
   private notifyListeners(): void {
-    this.listeners.forEach(listener => {
-      try {
-        listener(this.currentState);
-      } catch (error) {
-        logger.error('[ProcessingStore] Error in listener:', error);
-      }
-    });
+    if (this.notifyTimer) {
+      clearTimeout(this.notifyTimer);
+    }
+    
+    this.notifyTimer = setTimeout(() => {
+      this.listeners.forEach(listener => {
+        try {
+          listener(this.currentState);
+        } catch (error) {
+          logger.error('[ProcessingStore] Error in listener:', error);
+        }
+      });
+      this.notifyTimer = null;
+    }, 100); // Máximo 10 notificaciones por segundo
   }
 
   async saveFileDataToIndexedDB(fileData: ArrayBuffer): Promise<boolean> {
@@ -991,15 +1001,11 @@ class ProcessingStore {
           currentChunk++;
 
           const progress = (bytesProcessed / totalSize) * 100;
+          const progressInt = Math.floor(progress);
           
           // Log detallado cada 10%
-          if (Math.floor(progress) % 10 === 0 && Math.floor(progress) !== Math.floor((bytesProcessed - chunk.length) / totalSize * 100)) {
+          if (progressInt % 10 === 0 && progressInt !== Math.floor((bytesProcessed - chunk.length) / totalSize * 100)) {
             logger.log(`[ProcessingStore] 📊 Progreso: ${progress.toFixed(2)}% (${(bytesProcessed / 1024 / 1024 / 1024).toFixed(2)} GB de ${(totalSize / 1024 / 1024 / 1024).toFixed(2)} GB) - Chunk ${currentChunk}/${totalChunks}`);
-          }
-          
-          // CRÍTICO: Log específico en 29-30% para debugging
-          if (progress >= 29 && progress <= 31 && currentChunk % 10 === 0) {
-            logger.warn(`[ProcessingStore] ⚠️ ZONA CRÍTICA 29-30%: Chunk ${currentChunk}, Offset ${(offset / 1024 / 1024 / 1024).toFixed(2)} GB`);
           }
           
           const balancesArray = Object.values(balanceTracker).sort((a, b) => {
@@ -1010,10 +1016,30 @@ class ProcessingStore {
             return b.totalAmount - a.totalAmount;
           });
 
-          // ✅ OPTIMIZACIÓN: Solo actualizar UI cada 5 chunks (reduce overhead)
-          if (currentChunk % 5 === 0) {
-            await this.updateProgress(bytesProcessed, progress, balancesArray, currentChunk);
+          // ✅ OPTIMIZACIÓN CRÍTICA: Solo actualizar UI cada 1% (no cada 5 chunks)
+          // Esto reduce de 1,600 updates a solo 100 updates
+          if (progressInt > this.lastProgressNotified) {
+            this.lastProgressNotified = progressInt;
+            
+            // Actualizar estado en memoria (ligero)
+            this.currentState = {
+              ...this.currentState,
+              bytesProcessed,
+              progress,
+              balances: balancesArray,
+              chunkIndex: currentChunk,
+              lastUpdateTime: new Date().toISOString()
+            };
+            
+            // ✅ Solo guardar en disco cada 5% (no cada 1%)
+            if (progressInt % 5 === 0) {
+              await this.saveState(this.currentState);
+            } else {
+              // Solo notificar (sin guardar en disco)
+              this.notifyListeners();
+            }
 
+            // ✅ Callback solo cada 1% para evitar re-renders masivos
             if (onProgress) {
               onProgress(progress, balancesArray);
             }
