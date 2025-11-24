@@ -320,16 +320,28 @@ class ProcessingStore {
     }
 
     try {
+      // ✅ VALIDACIÓN: Asegurar que no haya valores NaN o inválidos
+      const bytesProcessed = this.currentState.bytesProcessed || 0;
+      const fileSize = this.currentState.fileSize || 0;
+      const progress = this.currentState.progress || 0;
+      
+      // Validar que los valores sean números válidos
+      if (isNaN(bytesProcessed) || isNaN(fileSize) || isNaN(progress)) {
+        logger.error('[ProcessingStore] ⚠️ Valores inválidos detectados en checkpoint - Saltando guardado');
+        logger.error('[ProcessingStore] bytesProcessed:', bytesProcessed, 'fileSize:', fileSize, 'progress:', progress);
+        return;
+      }
+
       const checkpoint: ProcessingCheckpoint = {
         id: `checkpoint_${this.currentState.fileHash}_${now}`,
         fileHash: this.currentState.fileHash,
-        fileName: this.currentState.fileName,
-        fileSize: this.currentState.fileSize,
-        lastChunkIndex: this.currentState.chunkIndex,
-        bytesProcessed: this.currentState.bytesProcessed,
-        progress: this.currentState.progress,
+        fileName: this.currentState.fileName || 'Unknown',
+        fileSize: fileSize,
+        lastChunkIndex: this.currentState.chunkIndex || 0,
+        bytesProcessed: bytesProcessed,
+        progress: progress,
         timestamp: now,
-        balances: this.currentState.balances,
+        balances: this.currentState.balances || [],
         status: this.currentState.status === 'processing' ? 'active' : 
                 this.currentState.status === 'paused' ? 'paused' : 
                 this.currentState.status === 'completed' ? 'completed' : 'error'
@@ -338,7 +350,7 @@ class ProcessingStore {
       await persistentStorage.saveCheckpoint(checkpoint);
       this.lastCheckpointTime = now;
 
-      logger.log(`[ProcessingStore] 💾 AUTO-GUARDADO: ${checkpoint.progress.toFixed(2)}% (${(checkpoint.bytesProcessed / (1024*1024*1024)).toFixed(2)} GB)`);
+      logger.log(`[ProcessingStore] 💾 AUTO-GUARDADO: ${checkpoint.progress.toFixed(2)}% (${(checkpoint.bytesProcessed / (1024*1024*1024)).toFixed(2)} GB de ${(checkpoint.fileSize / (1024*1024*1024)).toFixed(2)} GB)`);
 
       // Limpiar checkpoints antiguos (mantener solo los últimos 3)
       await persistentStorage.pruneOldCheckpoints(this.currentState.fileHash);
@@ -647,6 +659,13 @@ class ProcessingStore {
 
   startProcessing(fileName: string, fileSize: number, fileData: ArrayBuffer, fileHash: string, fileLastModified: number): string {
     const id = `process_${Date.now()}`;
+    
+    // ✅ VALIDACIÓN: Asegurar que fileSize es válido
+    if (isNaN(fileSize) || fileSize <= 0) {
+      logger.error('[ProcessingStore] ❌ fileSize inválido en startProcessing:', fileSize);
+      fileSize = 1; // Evitar división por cero
+    }
+    
     const totalChunks = Math.ceil(fileSize / (10 * 1024 * 1024));
 
     this.currentState = {
@@ -895,6 +914,12 @@ class ProcessingStore {
         } catch (error) {
           logger.warn('[ProcessingStore] No se pudo guardar en IndexedDB:', error);
         }
+      }
+
+      // ✅ VALIDACIÓN: Asegurar que totalSize es un número válido
+      if (isNaN(totalSize) || totalSize <= 0) {
+        logger.error('[ProcessingStore] ❌ Tamaño de archivo inválido:', totalSize);
+        throw new Error('Tamaño de archivo inválido');
       }
 
       const processId = this.startProcessing(file.name, totalSize, new ArrayBuffer(0), fileHash, file.lastModified);

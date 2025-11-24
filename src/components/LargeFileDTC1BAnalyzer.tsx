@@ -243,7 +243,10 @@ export function LargeFileDTC1BAnalyzer() {
             setHasPendingProcess(true);
             setPendingProcessInfo({
               fileName: recoveryInfo.fileName || 'Archivo Ledger',
-              progress: recoveryInfo.percentage
+              progress: recoveryInfo.percentage || 0,
+              bytesProcessed: recoveryInfo.bytesProcessed || 0,
+              fileSize: recoveryInfo.fileSize || 0,
+              lastSaved: new Date().toLocaleString('es-ES')
             });
             console.log('[LargeFileDTC1BAnalyzer] 🔄 Recuperación disponible:', recoveryInfo);
             
@@ -286,8 +289,11 @@ export function LargeFileDTC1BAnalyzer() {
             if (pendingState && (pendingState.status === 'processing' || pendingState.status === 'paused')) {
               setHasPendingProcess(true);
               setPendingProcessInfo({
-                fileName: pendingState.fileName,
-                progress: pendingState.progress
+                fileName: pendingState.fileName || 'Archivo',
+                progress: pendingState.progress || 0,
+                bytesProcessed: pendingState.bytesProcessed || 0,
+                fileSize: pendingState.fileSize || 0,
+                lastSaved: pendingState.lastUpdateTime ? new Date(pendingState.lastUpdateTime).toLocaleString('es-ES') : new Date().toLocaleString('es-ES')
               });
               console.log('[LargeFileDTC1BAnalyzer] Proceso pendiente detectado (Supabase):', pendingState.fileName, pendingState.progress + '%');
 
