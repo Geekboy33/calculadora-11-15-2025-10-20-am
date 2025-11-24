@@ -3,8 +3,6 @@
  * Progress bars cinematográficos con animaciones
  */
 
-import { ReactNode } from 'react';
-
 export interface ProgressProps {
   value: number; // 0-100
   label?: string;
@@ -188,5 +186,4 @@ export function ProgressCircle({
   );
 }
 
-export default EmptyState;
-
+export default Progress;
