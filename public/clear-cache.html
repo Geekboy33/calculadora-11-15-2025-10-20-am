@@ -1,114 +1,187 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Limpiar Caché - DAES CoreBanking</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #000;
-            color: #00ff88;
-            font-family: 'Courier New', monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            text-align: center;
-            padding: 40px;
-            border: 2px solid #00ff88;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.9);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
-        }
-        h1 {
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-        button {
-            background: linear-gradient(to right, #00ff88, #00cc6a);
-            color: #000;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2em;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 10px;
-            transition: all 0.3s;
-        }
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
-        }
-        .info {
-            margin: 20px 0;
-            padding: 20px;
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid #00ff88;
-            border-radius: 5px;
-        }
-        .success {
-            color: #00ff88;
-            font-size: 1.5em;
-            margin: 20px 0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Limpiar Caché - DAES CoreBanking</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
+      color: #00ff88;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 600px;
+      padding: 40px;
+      background: rgba(13, 13, 13, 0.9);
+      border: 2px solid #00ff88;
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(0, 255, 136, 0.3);
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 20px;
+      color: #00ff88;
+      font-size: 2em;
+      text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+    }
+    p {
+      margin: 15px 0;
+      color: #e0ffe0;
+      line-height: 1.6;
+    }
+    button {
+      margin: 10px;
+      padding: 15px 40px;
+      font-size: 16px;
+      font-weight: bold;
+      border: 2px solid #00ff88;
+      background: linear-gradient(135deg, #00ff88, #00cc6a);
+      color: #000;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+    }
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid #00ff88;
+      border-radius: 10px;
+      display: none;
+    }
+    .status.show {
+      display: block;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #00ff88;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🧹 Limpieza de Caché DAES</h1>
-        
-        <div class="info">
-            <p>Esta página limpiará toda la caché y localStorage del sistema.</p>
-            <p>Útil si experimentas pantalla negra o problemas de carga.</p>
-        </div>
-
-        <button onclick="clearAll()">🗑️ Limpiar Todo y Reiniciar</button>
-        
-        <div id="result"></div>
-
-        <div class="info" style="margin-top: 30px; font-size: 0.9em;">
-            <p><strong>Qué se limpiará:</strong></p>
-            <ul style="list-style: none; padding: 0;">
-                <li>✓ localStorage completo</li>
-                <li>✓ sessionStorage</li>
-                <li>✓ Cookies</li>
-                <li>✓ Caché del navegador</li>
-            </ul>
-        </div>
+  <div class="container">
+    <h1>🔧 Limpiar Caché</h1>
+    <p>Si experimentas errores al cargar módulos, usa esta herramienta para limpiar la caché del navegador.</p>
+    
+    <button onclick="clearAll()">
+      🧹 Limpiar Todo y Recargar
+    </button>
+    
+    <button onclick="clearServiceWorker()">
+      ⚙️ Limpiar Service Worker
+    </button>
+    
+    <button onclick="goToApp()">
+      ← Volver a la Aplicación
+    </button>
+    
+    <div id="status" class="status">
+      <div class="spinner"></div>
+      <p id="statusText">Procesando...</p>
     </div>
+  </div>
 
-    <script>
-        function clearAll() {
-            try {
-                // Limpiar localStorage
-                localStorage.clear();
-                console.log('✅ localStorage limpiado');
-                
-                // Limpiar sessionStorage
-                sessionStorage.clear();
-                console.log('✅ sessionStorage limpiado');
-                
-                // Mostrar resultado
-                document.getElementById('result').innerHTML = 
-                    '<div class="success">✅ Caché limpiada exitosamente</div>' +
-                    '<p>Redirigiendo al login en 2 segundos...</p>';
-                
-                // Redirigir después de 2 segundos
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 2000);
-                
-            } catch (error) {
-                document.getElementById('result').innerHTML = 
-                    '<div style="color: red;">❌ Error: ' + error.message + '</div>';
-            }
+  <script>
+    function showStatus(text) {
+      const status = document.getElementById('status');
+      const statusText = document.getElementById('statusText');
+      statusText.textContent = text;
+      status.classList.add('show');
+      
+      setTimeout(() => {
+        status.classList.remove('show');
+      }, 3000);
+    }
+
+    async function clearAll() {
+      try {
+        // Limpiar localStorage
+        localStorage.clear();
+        console.log('✅ localStorage limpiado');
+        
+        // Limpiar sessionStorage
+        sessionStorage.clear();
+        console.log('✅ sessionStorage limpiado');
+        
+        // Limpiar IndexedDB
+        const databases = await indexedDB.databases();
+        for (const db of databases) {
+          if (db.name) {
+            indexedDB.deleteDatabase(db.name);
+            console.log('✅ IndexedDB eliminado:', db.name);
+          }
         }
-    </script>
+        
+        // Limpiar caché de navegador
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          for (const name of cacheNames) {
+            await caches.delete(name);
+            console.log('✅ Caché eliminado:', name);
+          }
+        }
+        
+        // Desregistrar Service Worker
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            await registration.unregister();
+            console.log('✅ Service Worker desregistrado');
+          }
+        }
+        
+        showStatus('✅ Caché limpiada. Recargando...');
+        
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
+        
+      } catch (error) {
+        console.error('Error limpiando caché:', error);
+        alert('Error al limpiar caché: ' + error.message);
+      }
+    }
+
+    async function clearServiceWorker() {
+      try {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            await registration.unregister();
+          }
+          showStatus('✅ Service Worker limpiado. Recarga la página (Ctrl+Shift+R)');
+        } else {
+          showStatus('⚠️ Service Worker no soportado en este navegador');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error: ' + error.message);
+      }
+    }
+
+    function goToApp() {
+      window.location.href = '/';
+    }
+  </script>
 </body>
 </html>
-
