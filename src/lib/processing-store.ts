@@ -978,16 +978,24 @@ class ProcessingStore {
             return b.totalAmount - a.totalAmount;
           });
 
-          await this.updateProgress(bytesProcessed, progress, balancesArray, currentChunk);
+          // ✅ OPTIMIZACIÓN: Solo actualizar UI cada 5 chunks (reduce overhead)
+          if (currentChunk % 5 === 0) {
+            await this.updateProgress(bytesProcessed, progress, balancesArray, currentChunk);
 
-          if (onProgress) {
-            onProgress(progress, balancesArray);
+            if (onProgress) {
+              onProgress(progress, balancesArray);
+            }
           }
 
-          // 🔥 UPDATE: Usar setTimeout en lugar de requestIdleCallback
-          // requestIdleCallback se pausa cuando la ventana está minimizada
-          // setTimeout continúa funcionando en segundo plano
-          await new Promise(resolve => setTimeout(resolve, 0));
+          // ✅ OPTIMIZACIÓN CRÍTICA: Dar tiempo al navegador para mantener UI responsive
+          // Cada 10 chunks, esperar más tiempo para renderizar UI
+          if (currentChunk % 10 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 100)); // 100ms cada 10 chunks = Navegación fluida
+          } else if (currentChunk % 3 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 10)); // 10ms cada 3 chunks
+          } else {
+            await new Promise(resolve => setTimeout(resolve, 1)); // Yield mínimo pero presente
+          }
           
         } catch (chunkError) {
           logger.error(`[ProcessingStore] ❌ Error procesando chunk ${currentChunk} en ${(offset / 1024 / 1024 / 1024).toFixed(2)} GB:`, chunkError);
