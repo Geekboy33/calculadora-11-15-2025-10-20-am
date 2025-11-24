@@ -170,9 +170,9 @@ export function CustodyAccountsModule() {
     const tokenSymbol = formData.tokenSymbol || `${formData.currency}T`;
     
     console.log('[CustodyModule] 💸 TRANSFERENCIA DE FONDOS:');
-    console.log(`  Balance DAES ANTES: ${formData.currency} ${balanceBefore.toLocaleString()}`);
-    console.log(`  Monto a transferir: ${formData.currency} ${formData.amount.toLocaleString()}`);
-    console.log(`  Balance DAES DESPUÉS: ${formData.currency} ${(balanceBefore - formData.amount).toLocaleString()}`);
+    console.log(`  Balance DAES ANTES: ${formData.currency} ${(balanceBefore || 0).toLocaleString()}`);
+    console.log(`  Monto a transferir: ${formData.currency} ${(formData.amount || 0).toLocaleString()}`);
+    console.log(`  Balance DAES DESPUÉS: ${formData.currency} ${((balanceBefore || 0) - (formData.amount || 0)).toLocaleString()}`);
     console.log(`  Destino: Cuenta Custodio (${formData.accountType})`);
     
     custodyStore.createAccount(
@@ -216,20 +216,20 @@ export function CustodyAccountsModule() {
         `Cuenta: ${account.accountName}\n` +
         `Tipo: ${account.accountType === 'blockchain' ? 'BLOCKCHAIN CUSTODY' : 'BANKING ACCOUNT'}\n` +
         `Número: ${account.accountNumber || 'N/A'}\n\n` +
-        `Total de fondos: ${account.currency} ${account.totalBalance.toLocaleString()}\n` +
-        `Reservado: ${account.currency} ${account.reservedBalance.toLocaleString()}\n` +
-        `Disponible: ${account.currency} ${account.availableBalance.toLocaleString()}\n\n` +
-        `⚠️ Los fondos (${account.currency} ${account.totalBalance.toLocaleString()}) se devolverán automáticamente al sistema DAES.\n` +
+        `Total de fondos: ${account.currency} ${(account.totalBalance || 0).toLocaleString()}\n` +
+        `Reservado: ${account.currency} ${(account.reservedBalance || 0).toLocaleString()}\n` +
+        `Disponible: ${account.currency} ${(account.availableBalance || 0).toLocaleString()}\n\n` +
+        `⚠️ Los fondos (${account.currency} ${(account.totalBalance || 0).toLocaleString()}) se devolverán automáticamente al sistema DAES.\n` +
         `⚠️ Se eliminarán todos los pledges asociados (API VUSD y API VUSD1).\n\n` +
         `Esta acción NO se puede deshacer.`
       : `Are you sure you want to delete this account?\n\n` +
         `Account: ${account.accountName}\n` +
         `Type: ${account.accountType === 'blockchain' ? 'BLOCKCHAIN CUSTODY' : 'BANKING ACCOUNT'}\n` +
         `Number: ${account.accountNumber || 'N/A'}\n\n` +
-        `Total funds: ${account.currency} ${account.totalBalance.toLocaleString()}\n` +
-        `Reserved: ${account.currency} ${account.reservedBalance.toLocaleString()}\n` +
-        `Available: ${account.currency} ${account.availableBalance.toLocaleString()}\n\n` +
-        `⚠️ Funds (${account.currency} ${account.totalBalance.toLocaleString()}) will be automatically returned to DAES system.\n` +
+        `Total funds: ${account.currency} ${(account.totalBalance || 0).toLocaleString()}\n` +
+        `Reserved: ${account.currency} ${(account.reservedBalance || 0).toLocaleString()}\n` +
+        `Available: ${account.currency} ${(account.availableBalance || 0).toLocaleString()}\n\n` +
+        `⚠️ Funds (${account.currency} ${(account.totalBalance || 0).toLocaleString()}) will be automatically returned to DAES system.\n` +
         `⚠️ All associated pledges will be deleted (API VUSD and API VUSD1).\n\n` +
         `This action CANNOT be undone.`;
 
@@ -238,7 +238,7 @@ export function CustodyAccountsModule() {
       console.log(`  Cuenta: ${account.accountName}`);
       console.log(`  Tipo: ${account.accountType === 'blockchain' ? 'BLOCKCHAIN' : 'BANKING'}`);
       console.log(`  Número: ${account.accountNumber}`);
-      console.log(`  Fondos a devolver: ${account.currency} ${account.totalBalance.toLocaleString()}`);
+      console.log(`  Fondos a devolver: ${account.currency} ${(account.totalBalance || 0).toLocaleString()}`);
 
       const balanceBefore = systemBalances.find(b => b.currency === account.currency)?.totalAmount || 0;
 
@@ -267,9 +267,9 @@ export function CustodyAccountsModule() {
         const balanceAfter = balanceBefore + account.totalBalance;
 
         console.log('[CustodyModule] ✅ CUENTA ELIMINADA Y FONDOS DEVUELTOS');
-        console.log(`  Balance DAES ANTES: ${account.currency} ${balanceBefore.toLocaleString()}`);
-        console.log(`  Fondos devueltos: ${account.currency} ${account.totalBalance.toLocaleString()}`);
-        console.log(`  Balance DAES DESPUÉS: ${account.currency} ${balanceAfter.toLocaleString()}`);
+        console.log(`  Balance DAES ANTES: ${account.currency} ${(balanceBefore || 0).toLocaleString()}`);
+        console.log(`  Fondos devueltos: ${account.currency} ${(account.totalBalance || 0).toLocaleString()}`);
+        console.log(`  Balance DAES DESPUÉS: ${account.currency} ${(balanceAfter || 0).toLocaleString()}`);
         console.log(`  Pledges API VUSD1 eliminados: ${vusd1DeletedCount}`);
 
         // Mostrar confirmación
