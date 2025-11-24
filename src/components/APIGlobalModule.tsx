@@ -22,18 +22,16 @@ import {
   User,
   FileText,
   Zap,
-  Shield,
-  FileCheck,
   Download
 } from 'lucide-react';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
 import { iso20022Store, type PaymentInstruction } from '../lib/iso20022-store';
-import { auditStore } from '../lib/audit-store';
+// import { auditStore } from '../lib/audit-store';
 import { balanceStore } from '../lib/balances-store';
 import {
   generateBlackScreenData,
   downloadBlackScreenHTML,
-  type BlackScreenData,
+  // type BlackScreenData,
 } from '../lib/blackscreen-generator';
 
 interface Transfer {
@@ -115,8 +113,8 @@ export default function APIGlobalModule() {
   const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
 
   // M2 Balance from Digital Commercial Bank Ltd
-  const [m2Balance, setM2Balance] = useState<{ total: number; currency: string; validated: boolean } | null>(null);
-  const [digitalSignaturesCount, setDigitalSignaturesCount] = useState<number>(0);
+  const [, setM2Balance] = useState<{ total: number; currency: string; validated: boolean } | null>(null);
+  // Removed unused digitalSignaturesCount state
 
   // ✅ DEFINIR FUNCIONES ANTES DEL useEffect
   // ✅ OPTIMIZACIÓN: useCallback para evitar recrear función en cada render
@@ -126,14 +124,14 @@ export default function APIGlobalModule() {
       setM2Balance(m2Data);
 
       const signatures = iso20022Store.extractDigitalSignatures();
-      setDigitalSignaturesCount(signatures.length);
+      // setDigitalSignaturesCount(signatures.length); // Commented out unused setter
 
       console.log('[API GLOBAL] 📊 M2 Balance loaded:', m2Data);
       console.log('[API GLOBAL] 🔐 Digital signatures:', signatures.length);
     } catch (error) {
       console.warn('[API GLOBAL] ⚠️ No Digital Commercial Bank Ltd data available:', error);
       setM2Balance(null);
-      setDigitalSignaturesCount(0);
+      // setDigitalSignaturesCount(0); // Commented out unused setter
     }
   }, []);
 

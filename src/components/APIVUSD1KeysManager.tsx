@@ -5,13 +5,13 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Key, Plus, Trash2, Eye, EyeOff, Copy, CheckCircle, AlertCircle,
-  Settings, TrendingUp, Clock, Shield, RefreshCw, ExternalLink, DollarSign, Lock, Download, Database
+  Key, Plus, Trash2, Copy, CheckCircle, AlertCircle,
+  TrendingUp, Clock, Shield, RefreshCw, ExternalLink, Lock
 } from 'lucide-react';
 import { apiKeysStore, type ApiKey, type ApiKeyUsage } from '../lib/api-keys-store';
 import { getSupabaseClient } from '../lib/supabase-client';
-import { proofOfReservesAPI, type ProofOfReservesAPIKey } from '../lib/proof-of-reserves-api';
-import { unifiedPledgeStore } from '../lib/unified-pledge-store';
+import { proofOfReservesAPI } from '../lib/proof-of-reserves-api';
+// import { unifiedPledgeStore } from '../lib/unified-pledge-store';
 
 interface Pledge {
   id: string;
@@ -29,19 +29,19 @@ export function APIVUSD1KeysManager() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newKey, setNewKey] = useState<ApiKey | null>(null);
-  const [showSecret, setShowSecret] = useState<Record<string, boolean>>({});
+  // const [showSecret, setShowSecret] = useState<Record<string, boolean>>({});
   const [selectedKeyUsage, setSelectedKeyUsage] = useState<{ keyId: string; usage: ApiKeyUsage } | null>(null);
 
   // Pledges
   const [pledges, setPledges] = useState<Pledge[]>([]);
   const [loadingData, setLoadingData] = useState(false);
 
-  // Proof of Reserves API Keys
-  const [porKeys, setPorKeys] = useState<ProofOfReservesAPIKey[]>([]);
-  const [showPorModal, setShowPorModal] = useState(false);
-  const [porKeyName, setPorKeyName] = useState('');
-  const [selectedPledgeIds, setSelectedPledgeIds] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<'standard' | 'por'>('standard');
+  // Proof of Reserves API Keys (commented out unused states)
+  // const [porKeys, setPorKeys] = useState<ProofOfReservesAPIKey[]>([]);
+  // const [showPorModal, setShowPorModal] = useState(false);
+  // const [porKeyName, setPorKeyName] = useState('');
+  // const [selectedPledgeIds, setSelectedPledgeIds] = useState<string[]>([]);
+  // const [viewMode, setViewMode] = useState<'standard' | 'por'>('standard');
 
   // Form state
   const [keyName, setKeyName] = useState('');
@@ -65,7 +65,7 @@ export function APIVUSD1KeysManager() {
 
   const loadPorKeys = () => {
     const keys = proofOfReservesAPI.getAllAPIKeys();
-    setPorKeys(keys);
+    // setPorKeys(keys); // Commented out unused setter
     console.log('[PoR Keys] Loaded', keys.length, 'API keys');
   };
 
