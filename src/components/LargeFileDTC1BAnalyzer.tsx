@@ -55,6 +55,77 @@ export function LargeFileDTC1BAnalyzer() {
     analysisRef.current = analysis;
   }, [analysis]);
 
+  // ✅ NUEVO: Suscribirse al processingStore para mantener sincronización
+  useEffect(() => {
+    const unsubscribe = processingStore.subscribe((state) => {
+      if (!state) return;
+
+      // Si hay procesamiento activo, actualizar la UI
+      if (state.status === 'processing' || state.status === 'paused') {
+        console.log('[LargeFileDTC1BAnalyzer] 🔄 Sincronizando con procesamiento en segundo plano:', state.progress.toFixed(2) + '%');
+        
+        setIsProcessing(state.status === 'processing');
+        setIsPaused(state.status === 'paused');
+        processingRef.current = state.status === 'processing';
+
+        // Actualizar análisis con el estado actual
+        setAnalysis({
+          fileName: state.fileName,
+          fileSize: state.fileSize,
+          bytesProcessed: state.bytesProcessed,
+          progress: state.progress,
+          magicNumber: '',
+          entropy: 0,
+          isEncrypted: false,
+          detectedAlgorithm: 'Procesando...',
+          ivBytes: '',
+          saltBytes: '',
+          balances: state.balances || [],
+          status: state.status === 'processing' ? 'processing' : 
+                  state.status === 'paused' ? 'idle' :
+                  state.status === 'completed' ? 'completed' : 'idle'
+        });
+
+        // Si el procesamiento terminó, limpiar referencias
+        if (state.status === 'completed') {
+          setIsProcessing(false);
+          processingRef.current = false;
+          console.log('[LargeFileDTC1BAnalyzer] ✅ Procesamiento completado al 100%');
+        }
+      }
+    });
+
+    // Al montar, verificar si hay procesamiento activo
+    processingStore.loadState().then((state) => {
+      if (state && (state.status === 'processing' || state.status === 'paused')) {
+        console.log('[LargeFileDTC1BAnalyzer] 🔄 Procesamiento activo detectado al montar:', state.progress.toFixed(2) + '%');
+        
+        setIsProcessing(state.status === 'processing');
+        setIsPaused(state.status === 'paused');
+        processingRef.current = state.status === 'processing';
+
+        setAnalysis({
+          fileName: state.fileName,
+          fileSize: state.fileSize,
+          bytesProcessed: state.bytesProcessed,
+          progress: state.progress,
+          magicNumber: '',
+          entropy: 0,
+          isEncrypted: false,
+          detectedAlgorithm: 'Procesando...',
+          ivBytes: '',
+          saltBytes: '',
+          balances: state.balances || [],
+          status: state.status === 'processing' ? 'processing' : 'idle'
+        });
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   // Load existing balances and check for pending processes on mount
   useEffect(() => {
     let isMounted = true; // ✅ Flag para prevenir actualizaciones si el componente se desmonta
@@ -276,11 +347,20 @@ export function LargeFileDTC1BAnalyzer() {
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      // Guardar al desmontar el componente
+      
+      // ✅ IMPORTANTE: NO detener el procesamiento al desmontar
+      // El procesamiento continúa en processingStore en segundo plano
+      // Solo guardar el estado actual
       const currentAnalysis = analysisRef.current;
       if (currentAnalysis && currentAnalysis.balances.length > 0) {
         saveBalancesToStorage(currentAnalysis.balances, currentAnalysis.fileName, currentAnalysis.fileSize);
+        console.log('[LargeFileDTC1BAnalyzer] 💾 Estado guardado al cambiar de módulo');
+        console.log('[LargeFileDTC1BAnalyzer] ℹ️ El procesamiento continúa en segundo plano');
       }
+      
+      // NO llamar a processingStore.stopProcessing()
+      // NO cambiar processingRef.current
+      // El procesamiento sigue activo en el store
     };
   }, []);
 
@@ -447,10 +527,28 @@ export function LargeFileDTC1BAnalyzer() {
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // ✅ Verificar si ya hay un procesamiento activo de este archivo
+      const currentState = await processingStore.loadState();
+      if (currentState && currentState.status === 'processing') {
+        const isSameFile = currentState.fileName === file.name && currentState.fileSize === file.size;
+        if (isSameFile) {
+          alert('⚠️ Este archivo ya se está procesando en segundo plano.\n\nEl progreso actual es: ' + currentState.progress.toFixed(2) + '%\n\nNo es necesario cargarlo de nuevo.');
+          return;
+        }
+      }
+
       setIsProcessing(true);
       processingRef.current = true;
       currentFileRef.current = file;
       setError(null);
+      
+      // ✅ Guardar referencia del archivo en sessionStorage para recuperación
+      try {
+        sessionStorage.setItem('current_processing_file_name', file.name);
+        sessionStorage.setItem('current_processing_file_size', file.size.toString());
+      } catch (err) {
+        console.warn('[LargeFileDTC1BAnalyzer] No se pudo guardar en sessionStorage:', err);
+      }
 
       // Registrar archivo en ledgerPersistenceStore
       ledgerPersistenceStore.setFileState(file.name, file.size, file.lastModified);
