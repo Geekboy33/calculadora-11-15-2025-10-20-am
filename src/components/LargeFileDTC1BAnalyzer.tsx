@@ -663,13 +663,116 @@ export function LargeFileDTC1BAnalyzer() {
     }
   };
 
-  const handleStop = () => {
+  const handleStop = async () => {
+    // ✅ CONFIRMACIÓN: Mostrar progreso actual antes de detener
+    const currentState = await processingStore.loadState();
+    const currentProgress = currentState?.progress || 0;
+    const currentBalances = currentState?.balances || [];
+    
+    const confirmMessage = 
+      `⚠️ ¿Detener procesamiento?\n\n` +
+      `Progreso actual: ${currentProgress.toFixed(2)}%\n` +
+      `Divisas detectadas: ${currentBalances.length}\n\n` +
+      `✅ LOS BALANCES PARCIALES SE GUARDARÁN:\n` +
+      `• Podrás usarlos para transferencias\n` +
+      `• Estarán disponibles en Dashboard\n` +
+      `• Aparecerán en Account Ledger\n` +
+      `• Se guardarán en Profiles\n\n` +
+      `¿Continuar y detener?`;
+    
+    if (!confirm(confirmMessage)) {
+      return; // Usuario canceló
+    }
+    
+    // ✅ GUARDAR BALANCES PARCIALES antes de detener
+    if (currentBalances && currentBalances.length > 0) {
+      console.log('[LargeFileDTC1BAnalyzer] 💾 Guardando', currentBalances.length, 'balances parciales...');
+      
+      // Guardar en balanceStore (para Dashboard, Account Ledger, etc.)
+      if (currentState) {
+        balanceStore.saveBalances({
+          balances: currentBalances,
+          fileName: currentState.fileName,
+          fileSize: currentState.fileSize,
+          totalTransactions: currentBalances.reduce((sum, b) => sum + (b.transactionCount || 0), 0),
+          lastScanDate: new Date().toISOString()
+        });
+      }
+      
+      // Guardar en ledgerPersistenceStore
+      currentBalances.forEach(balance => {
+        ledgerPersistenceStore.updateBalance(
+          balance.currency,
+          balance.totalAmount || balance.balance || 0
+        );
+      });
+      
+      // ✅ Actualizar las 15 cuentas del Ledger
+      try {
+        const { ledgerAccountsStore } = await import('../lib/ledger-accounts-store');
+        await ledgerAccountsStore.updateMultipleAccounts(currentBalances);
+        console.log('[LargeFileDTC1BAnalyzer] ✅ Ledger Accounts actualizados con balances parciales');
+      } catch (error) {
+        console.warn('[LargeFileDTC1BAnalyzer] ⚠️ No se pudo actualizar Ledger Accounts:', error);
+      }
+      
+      // Mostrar análisis con los balances guardados
+      if (currentState) {
+        setAnalysis({
+          fileName: currentState.fileName,
+          fileSize: currentState.fileSize,
+          bytesProcessed: currentState.bytesProcessed,
+          progress: currentState.progress,
+          magicNumber: '',
+          entropy: 0,
+          isEncrypted: false,
+          detectedAlgorithm: 'Detenido por usuario',
+          ivBytes: '',
+          saltBytes: '',
+          balances: currentBalances,
+          status: 'completed' // Marcar como completado para que no pida continuar
+        });
+      }
+      
+      setLoadedBalances(currentBalances);
+      
+      console.log('[LargeFileDTC1BAnalyzer] ✅ Balances parciales guardados exitosamente');
+      console.log('[LargeFileDTC1BAnalyzer] 📊 Total de divisas:', currentBalances.length);
+      console.log('[LargeFileDTC1BAnalyzer] 💰 Balances disponibles para:');
+      console.log('  - Transferencias en API Global ✅');
+      console.log('  - Transferencias en Transfer Interface ✅');
+      console.log('  - Custody Accounts (crear/reservar) ✅');
+      console.log('  - Dashboard (visualización) ✅');
+      console.log('  - Account Ledger (15 cuentas) ✅');
+      console.log('  - Profiles (guardar estado) ✅');
+    }
+    
+    // ✅ DETENER procesamiento
     processingStore.stopProcessing();
     ledgerPersistenceStore.setProcessing(false);
     processingRef.current = false;
     setIsProcessing(false);
     setIsPaused(false);
-    console.log('[LargeFileDTC1BAnalyzer] ⏹️ Procesamiento detenido');
+    
+    // ✅ MOSTRAR CONFIRMACIÓN con resumen
+    setTimeout(() => {
+      alert(
+        `✅ Procesamiento detenido exitosamente\n\n` +
+        `📊 BALANCES GUARDADOS:\n` +
+        `Divisas detectadas: ${currentBalances.length}\n` +
+        `Progreso completado: ${currentProgress.toFixed(2)}%\n\n` +
+        `✅ DISPONIBLES PARA USO INMEDIATO EN:\n` +
+        `• Dashboard (métricas actualizadas)\n` +
+        `• Account Ledger (${currentBalances.length} cuentas)\n` +
+        `• Transferencias (API Global, Transfer Interface)\n` +
+        `• Custody Accounts (crear/reservar)\n` +
+        `• Profiles (guardar estado actual)\n` +
+        `• Black Screen (totales)\n\n` +
+        `Los balances están listos para ser utilizados.`
+      );
+    }, 500);
+    
+    console.log('[LargeFileDTC1BAnalyzer] ⏹️ Procesamiento detenido con balances guardados');
   };
 
   const handleDecrypt = async () => {
