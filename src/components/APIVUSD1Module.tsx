@@ -3,10 +3,10 @@
  * Complete DAES API implementation with HMAC security
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Lock, Send, FileText, Activity, CheckCircle, Clock,
-  AlertCircle, Database, Shield, Zap, Download, RefreshCw, Trash2, Key, DollarSign, Edit
+  Lock, Send, FileText, Activity, CheckCircle,
+  AlertCircle, Database, Shield, Zap, RefreshCw, Trash2, Key, DollarSign, Edit
 } from 'lucide-react';
 import { apiVUSD1Store, type ApiPledge, type ApiPayout, type ApiAttestation, type ReserveSummary } from '../lib/api-vusd1-store';
 import { APIVUSD1KeysManager } from './APIVUSD1KeysManager';
@@ -20,7 +20,7 @@ export default function APIVUSD1Module() {
 
   // Data states
   const [pledges, setPledges] = useState<ApiPledge[]>([]);
-  const [payouts, setPayouts] = useState<ApiPayout[]>([]);
+  // const [payouts, setPayouts] = useState<ApiPayout[]>([]);
   const [attestation, setAttestation] = useState<ApiAttestation | null>(null);
   const [reserveSummary, setReserveSummary] = useState<ReserveSummary | null>(null);
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
@@ -85,10 +85,11 @@ export default function APIVUSD1Module() {
         currency: up.currency,
         beneficiary: up.beneficiary,
         expires_at: up.expires_at || '',
-        metadata: JSON.stringify({
+        segregation_priority: 0, // Default value (MEDIUM = 0)
+        metadata: {
           custody_account_id: up.custody_account_id,
           source: up.source_module
-        }),
+        },
         created_at: up.created_at,
         updated_at: up.created_at
       }));
@@ -194,9 +195,14 @@ export default function APIVUSD1Module() {
       if (selectedCustodyAccount) {
         try {
           const existingPledges = await apiVUSD1Store.listPledges({ status: 'ACTIVE' });
-          const duplicatePledge = existingPledges.find(p => 
-            p.metadata && JSON.parse(p.metadata).custody_account_id === selectedCustodyAccount
-          );
+          const duplicatePledge = existingPledges.find(p => {
+            try {
+              const metadata = typeof p.metadata === 'string' ? JSON.parse(p.metadata) : p.metadata;
+              return metadata && metadata.custody_account_id === selectedCustodyAccount;
+            } catch {
+              return false;
+            }
+          });
           
           if (duplicatePledge) {
             console.warn('[APIVUSD1] ⚠️ Ya existe pledge para esta cuenta');
@@ -223,11 +229,11 @@ export default function APIVUSD1Module() {
         external_ref: pledgeForm.external_ref || undefined,
         expires_at: pledgeForm.expires_at || undefined,
         idempotency_key: `PLEDGE_${Date.now()}`,
-        metadata: selectedCustodyAccount ? JSON.stringify({
+        metadata: selectedCustodyAccount ? {
           custody_account_id: selectedCustodyAccount,
           reserved_amount: pledgeForm.amount,
           source: 'APIVUSD1Module'
-        }) : undefined
+        } : {}
       });
 
       console.log('[APIVUSD1] ✅ Pledge created:', result);
@@ -246,10 +252,11 @@ export default function APIVUSD1Module() {
         currency: pledgeForm.currency,
         beneficiary: pledgeForm.beneficiary,
         expires_at: pledgeForm.expires_at || '',
-        metadata: selectedCustodyAccount ? JSON.stringify({
+        segregation_priority: 0,
+        metadata: selectedCustodyAccount ? {
           custody_account_id: selectedCustodyAccount,
           source: 'APIVUSD1Module'
-        }) : '',
+        } : {},
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };

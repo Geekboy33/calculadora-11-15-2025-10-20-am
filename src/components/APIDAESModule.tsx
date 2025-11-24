@@ -257,7 +257,7 @@ export function APIDAESModule() {
       alert(message);
       
       // Recargar cuentas
-      loadAPIs();
+      // loadAPIs(); // Función no definida - comentada
       
       setShowTransferModal(false);
       setTransferData({

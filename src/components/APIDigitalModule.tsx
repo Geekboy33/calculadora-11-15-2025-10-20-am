@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Send,
   Globe,
@@ -9,11 +9,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Download,
   RefreshCw,
   AlertCircle,
-  CreditCard,
-  Building2,
   Lock,
   Unlock,
   Server,

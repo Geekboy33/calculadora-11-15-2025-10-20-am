@@ -388,8 +388,8 @@ export function LargeFileDTC1BAnalyzer() {
           status: 'processing'
         });
 
-        // Guardar balances periódicamente
-        if (balances.length > 0 && Math.floor(progress) % 10 === 0) {
+        // Guardar balances cada 10%
+        if (balances.length > 0 && progressInt % 10 === 0 && progressInt > 0) {
           saveBalancesToStorage(balances, file.name, file.size);
         }
       });
@@ -455,39 +455,45 @@ export function LargeFileDTC1BAnalyzer() {
         ledgerPersistenceStore.setProcessing(true);
 
         await processingStore.startGlobalProcessing(file, startFromByte, (progress, balances) => {
-          // Calcular bytes procesados y chunk index
+          // ✅ TIEMPO REAL: Actualizar con cada callback (ya throttled en processing-store)
           const bytesProcessed = (file.size * progress) / 100;
-          const chunkIndex = Math.floor(bytesProcessed / (10 * 1024 * 1024)); // 10MB chunks
-          
+          const chunkIndex = Math.floor(bytesProcessed / (10 * 1024 * 1024));
+          const progressInt = Math.floor(progress);
+
           // Actualizar ledgerPersistenceStore
           ledgerPersistenceStore.updateProgress(bytesProcessed, file.size, chunkIndex);
-          
-          // Callback de progreso para actualizar UI local
-          setAnalysis(prev => prev ? {
-            ...prev,
-            progress,
-            bytesProcessed,
-            balances,
-            status: 'processing'
-          } : {
-            fileName: file.name,
-            fileSize: file.size,
-            bytesProcessed,
-            progress,
-            magicNumber: '',
-            entropy: 0,
-            isEncrypted: false,
-            detectedAlgorithm: t.analyzerProcessing,
-            ivBytes: '',
-            saltBytes: '',
-            balances,
-            status: 'processing'
+
+          // ✅ requestAnimationFrame para actualizaciones suaves a 60fps
+          requestAnimationFrame(() => {
+            setAnalysis(prev => prev ? {
+              ...prev,
+              progress,
+              bytesProcessed,
+              balances, // ✅ Se actualiza en TIEMPO REAL
+              status: 'processing'
+            } : {
+              fileName: file.name,
+              fileSize: file.size,
+              bytesProcessed,
+              progress,
+              magicNumber: '',
+              entropy: 0,
+              isEncrypted: false,
+              detectedAlgorithm: t.analyzerProcessing,
+              ivBytes: '',
+              saltBytes: '',
+              balances,
+              status: 'processing'
+            });
           });
 
-          // Guardar balances periódicamente en ambos stores
-          if (balances.length > 0 && Math.floor(progress) % 10 === 0) {
-            saveBalancesToStorage(balances, file.name, file.size);
-            console.log('[LargeFileDTC1BAnalyzer] 💾 Auto-guardado en progreso:', progress.toFixed(1) + '%');
+          // Guardar cada 10%
+          if (balances.length > 0 && progressInt % 10 === 0 && progressInt > 0) {
+            const prevProgressInt = Math.floor(((file.size * progress) / 100 - 1) / file.size * 100);
+            if (progressInt !== prevProgressInt) {
+              saveBalancesToStorage(balances, file.name, file.size);
+              console.log('[LargeFileDTC1BAnalyzer] 💾 Auto-guardado:', progressInt + '%');
+            }
           }
         });
 
