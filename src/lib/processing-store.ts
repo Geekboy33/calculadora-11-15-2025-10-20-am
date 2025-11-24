@@ -527,9 +527,9 @@ class ProcessingStore {
       await this.saveState(this.currentState);
       await this.saveBalancesToSupabase(balances, progress);
       
-      // 🔥 UPDATE: Actualizar balanceStore en TIEMPO REAL
-      // Esto notifica a Account Ledger y BankBlackScreen instantáneamente
-      // Funciona incluso si el usuario está en otro módulo o minimiza el navegador
+      // ✅ UPDATE EN TIEMPO REAL: Actualizar TODOS los módulos
+      // Esto notifica a Account Ledger, Dashboard, BankBlackScreen instantáneamente
+      // Funciona incluso si el usuario está en otro módulo
       const { balanceStore } = await import('./balances-store');
       balanceStore.updateBalancesRealTime(
         balances, 
@@ -537,6 +537,17 @@ class ProcessingStore {
         this.currentState.fileSize, 
         progress
       );
+
+      // ✅ NUEVO: Actualizar Ledger Accounts en tiempo real
+      if (balances && balances.length > 0) {
+        try {
+          const { ledgerAccountsStore } = await import('./ledger-accounts-store');
+          await ledgerAccountsStore.updateMultipleAccounts(balances);
+          logger.log('[ProcessingStore] ✅ Ledger Accounts actualizados en tiempo real');
+        } catch (error) {
+          logger.warn('[ProcessingStore] ⚠️ No se pudo actualizar Ledger Accounts:', error);
+        }
+      }
     } catch (error) {
       logger.error('[ProcessingStore] Error updating progress:', error);
     }

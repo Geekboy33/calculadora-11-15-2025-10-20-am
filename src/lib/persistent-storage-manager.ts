@@ -242,7 +242,22 @@ class PersistentStorageManager {
         }
         // Ordenar por timestamp y obtener el más reciente
         checkpoints.sort((a, b) => b.timestamp - a.timestamp);
-        resolve(checkpoints[0]);
+        
+        const checkpoint = checkpoints[0];
+        
+        // ✅ VALIDACIÓN CRÍTICA: Asegurar que no haya valores NaN o inválidos
+        if (!checkpoint || 
+            isNaN(checkpoint.bytesProcessed) || 
+            isNaN(checkpoint.fileSize) || 
+            isNaN(checkpoint.progress) ||
+            checkpoint.fileSize <= 0) {
+          logger.error('[PersistentStorage] ⚠️ Checkpoint inválido detectado - valores NaN o corruptos');
+          logger.error('[PersistentStorage] Checkpoint:', checkpoint);
+          resolve(null); // Devolver null en lugar de checkpoint corrupto
+          return;
+        }
+        
+        resolve(checkpoint);
       };
       request.onerror = () => reject(request.error);
     });

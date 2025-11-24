@@ -792,7 +792,14 @@ export function LargeFileDTC1BAnalyzer() {
                       </span>
                     </p>
                       <p className="text-[#e0ffe0] text-sm">
-                        <strong className="text-[#00ff88]">📊 Procesado:</strong> {(pendingProcessInfo.bytesProcessed / (1024*1024*1024)).toFixed(2)} GB de {(pendingProcessInfo.fileSize / (1024*1024*1024)).toFixed(2)} GB
+                        <strong className="text-[#00ff88]">📊 Procesado:</strong>{' '}
+                        <span className="font-mono font-bold text-[#00ff88]">
+                          {formatters.bytes(pendingProcessInfo?.bytesProcessed || 0)}
+                        </span>
+                        {' '}de{' '}
+                        <span className="font-mono font-bold text-white">
+                          {formatters.bytes(pendingProcessInfo?.fileSize || 0)}
+                        </span>
                       </p>
                       <p className="text-[#e0ffe0] text-xs">
                         <strong className="text-[#ffa500]">🕐 Último guardado:</strong> {pendingProcessInfo.lastSaved}
