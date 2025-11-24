@@ -118,31 +118,7 @@ export default function APIGlobalModule() {
   const [m2Balance, setM2Balance] = useState<{ total: number; currency: string; validated: boolean } | null>(null);
   const [digitalSignaturesCount, setDigitalSignaturesCount] = useState<number>(0);
 
-  // ✅ OPTIMIZACIÓN: useEffect con dependencias correctas
-  useEffect(() => {
-    console.log('[API GLOBAL] Component mounted, initializing...');
-    loadData();
-    checkAPIConnection();
-    loadM2Balance();
-
-    // Listen to balance changes
-    const unsubscribe = balanceStore.subscribe((balances) => {
-      console.log('[API GLOBAL] Balance store updated with', balances.length, 'balances, reloading data...');
-      loadData();
-    });
-
-    // Listen to custody store changes
-    const unsubscribeCustody = custodyStore.subscribe(() => {
-      console.log('[API GLOBAL] Custody store updated, reloading data...');
-      loadData();
-    });
-
-    return () => {
-      unsubscribe();
-      unsubscribeCustody();
-    };
-  }, [loadData, checkAPIConnection, loadM2Balance]); // ✅ Dependencias correctas
-
+  // ✅ DEFINIR FUNCIONES ANTES DEL useEffect
   // ✅ OPTIMIZACIÓN: useCallback para evitar recrear función en cada render
   const loadM2Balance = useCallback(() => {
     try {
@@ -285,6 +261,31 @@ export default function APIGlobalModule() {
       });
     }
   }, []); // ✅ Cerrar useCallback correctamente
+
+  // ✅ useEffect para cargar datos iniciales
+  useEffect(() => {
+    console.log('[API GLOBAL] Component mounted, initializing...');
+    loadData();
+    checkAPIConnection();
+    loadM2Balance();
+
+    // Listen to balance changes
+    const unsubscribe = balanceStore.subscribe((balances) => {
+      console.log('[API GLOBAL] Balance store updated with', balances.length, 'balances, reloading data...');
+      loadData();
+    });
+
+    // Listen to custody store changes
+    const unsubscribeCustody = custodyStore.subscribe(() => {
+      console.log('[API GLOBAL] Custody store updated, reloading data...');
+      loadData();
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeCustody();
+    };
+  }, [loadData, checkAPIConnection, loadM2Balance]);
 
   // Auto-scroll to submit button when account is selected
   const handleAccountSelect = (accountId: string) => {
