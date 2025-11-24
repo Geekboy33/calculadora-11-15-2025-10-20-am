@@ -336,7 +336,7 @@ export function CustodyAccountsModule() {
           
           console.log('[CustodyModule] ✅ RESERVA BANCARIA AUTO-APROBADA');
           console.log(`  Cuenta: ${selectedAccount.accountName}`);
-          console.log(`  Monto: ${selectedAccount.currency} ${reserveData.(amount || 0).toLocaleString()}`);
+          console.log(`  Monto: ${selectedAccount.currency} ${(reserveData.amount || 0).toLocaleString()}`);
           console.log(`  Estado: RESERVED → CONFIRMED (automático)`);
           console.log(`  Motivo: Cuenta bancaria no requiere confirmación manual`);
         }
@@ -356,11 +356,11 @@ export function CustodyAccountsModule() {
       // Mensaje de confirmación
       const message = isBanking
         ? (language === 'es' 
-          ? `✅ Fondos reservados y aprobados automáticamente\n\nCuenta bancaria: ${selectedAccount.accountName}\nMonto: ${selectedAccount.currency} ${reserveData.(amount || 0).toLocaleString()}\n\nEstado: CONFIRMED\nListo para transferencia API` 
-          : `✅ Funds reserved and auto-approved\n\nBanking account: ${selectedAccount.accountName}\nAmount: ${selectedAccount.currency} ${reserveData.(amount || 0).toLocaleString()}\n\nStatus: CONFIRMED\nReady for API transfer`)
+          ? `✅ Fondos reservados y aprobados automáticamente\n\nCuenta bancaria: ${selectedAccount.accountName}\nMonto: ${selectedAccount.currency} ${(reserveData.amount || 0).toLocaleString()}\n\nEstado: CONFIRMED\nListo para transferencia API` 
+          : `✅ Funds reserved and auto-approved\n\nBanking account: ${selectedAccount.accountName}\nAmount: ${selectedAccount.currency} ${(reserveData.amount || 0).toLocaleString()}\n\nStatus: CONFIRMED\nReady for API transfer`)
         : (language === 'es'
-          ? `✅ Fondos reservados para tokenización\n\nMonto: ${selectedAccount.currency} ${reserveData.(amount || 0).toLocaleString()}\nTokens: ${reserveData.(tokenAmount || 0).toLocaleString()} ${selectedAccount.tokenSymbol}\n\nEstado: RESERVED (requiere confirmación manual)`
-          : `✅ Funds reserved for tokenization\n\nAmount: ${selectedAccount.currency} ${reserveData.(amount || 0).toLocaleString()}\nTokens: ${reserveData.(tokenAmount || 0).toLocaleString()} ${selectedAccount.tokenSymbol}\n\nStatus: RESERVED (requires manual confirmation)`);
+          ? `✅ Fondos reservados para tokenización\n\nMonto: ${selectedAccount.currency} ${(reserveData.amount || 0).toLocaleString()}\nTokens: ${(reserveData.tokenAmount || 0).toLocaleString()} ${selectedAccount.tokenSymbol}\n\nEstado: RESERVED (requiere confirmación manual)`
+          : `✅ Funds reserved for tokenization\n\nAmount: ${selectedAccount.currency} ${(reserveData.amount || 0).toLocaleString()}\nTokens: ${(reserveData.tokenAmount || 0).toLocaleString()} ${selectedAccount.tokenSymbol}\n\nStatus: RESERVED (requires manual confirmation)`);
 
       setTimeout(() => alert(message), 100);
     } else {
@@ -492,7 +492,7 @@ ${language === 'es' ? 'RESERVAS ACTIVAS' : 'ACTIVE RESERVATIONS'} (${account.res
 
 ${account.reservations && account.reservations.length > 0 ? account.reservations.map((r, i) => `
 ${i + 1}. ${language === 'es' ? 'Reserva' : 'Reservation'} ${r.id}
-   ${language === 'es' ? 'Monto' : 'Amount'}:                 ${account.currency} ${r.(amount || 0).toLocaleString()}
+   ${language === 'es' ? 'Monto' : 'Amount'}:                 ${account.currency} ${(r.amount || 0).toLocaleString()}
    ${language === 'es' ? 'Estado' : 'Status'}:                ${r.status.toUpperCase()}
    ${r.type === 'blockchain' ? `Blockchain:             ${r.blockchain || 'N/A'}
    ${language === 'es' ? 'Contrato' : 'Contract'}:            ${r.contractAddress || 'N/A'}
@@ -586,10 +586,10 @@ RESERVAS ACTIVAS (${account.reservations.length})
 
 ${account.reservations.map((r, i) => `
 ${i + 1}. Reserva ${r.id}
-   Monto Reservado:     ${account.currency} ${r.(amount || 0).toLocaleString()}
+   Monto Reservado:     ${account.currency} ${(r.amount || 0).toLocaleString()}
    Blockchain:          ${r.blockchain}
    Contrato:            ${r.contractAddress}
-   Tokens Emitidos:     ${r.(tokenAmount || 0).toLocaleString()} ${account.tokenSymbol}
+   Tokens Emitidos:     ${(r.tokenAmount || 0).toLocaleString()} ${account.tokenSymbol}
    Estado:              ${r.status.toUpperCase()}
    Timestamp:           ${new Date(r.timestamp).toLocaleString()}
 `).join('\n')}
@@ -685,7 +685,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
             <Lock className="w-5 h-5 text-yellow-400" />
             <span className="text-[#4d7c4d] text-sm">{language === 'es' ? 'Fondos Reservados' : 'Reserved Funds'}</span>
           </div>
-          <p className="text-3xl font-bold text-yellow-400">${stats.(totalReserved || 0).toLocaleString()}</p>
+          <p className="text-3xl font-bold text-yellow-400">${(stats.totalReserved || 0).toLocaleString()}</p>
         </div>
 
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
@@ -693,7 +693,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
             <Unlock className="w-5 h-5 text-green-400" />
             <span className="text-[#4d7c4d] text-sm">{language === 'es' ? 'Fondos Disponibles' : 'Available Funds'}</span>
           </div>
-          <p className="text-3xl font-bold text-green-400">${stats.(totalAvailable || 0).toLocaleString()}</p>
+          <p className="text-3xl font-bold text-green-400">${(stats.totalAvailable || 0).toLocaleString()}</p>
         </div>
 
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
@@ -716,7 +716,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               <div key={bal.currency} className="bg-[#0a0a0a] border border-[#00ff88]/20 rounded-lg p-3 text-center">
                 <div className="text-sm text-[#4d7c4d]">{bal.currency}</div>
                 <div className="text-lg font-bold text-[#00ff88] font-mono">
-                  {bal.(totalAmount || 0).toLocaleString()}
+                  {(bal.totalAmount || 0).toLocaleString()}
                 </div>
               </div>
             ))}
@@ -1160,7 +1160,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div>
                             <span className="text-[#4d7c4d]">Monto:</span> 
-                            <span className="text-[#80ff80] ml-1">{account.currency} {reservation.(amount || 0).toLocaleString()}</span>
+                            <span className="text-[#80ff80] ml-1">{account.currency} {(reservation.amount || 0).toLocaleString()}</span>
                           </div>
                           <div>
                             <span className="text-[#4d7c4d]">Tokens:</span> 
@@ -1346,7 +1346,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   >
                     {systemBalances.map(bal => (
                       <option key={bal.currency} value={bal.currency}>
-                        {bal.currency} - {language === 'es' ? 'Disponible' : 'Available'}: {bal.(totalAmount || 0).toLocaleString()}
+                        {bal.currency} - {language === 'es' ? 'Disponible' : 'Available'}: {(bal.totalAmount || 0).toLocaleString()}
                       </option>
                     ))}
                   </select>
@@ -1724,14 +1724,14 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     </div>
                     <div className="mt-3 text-xs text-gray-400 text-center">
                       {language === 'es'
-                        ? `💰 Monto Reservado: ${selectedAccount.currency} ${reserveData.(amount || 0).toLocaleString()}`
-                        : `💰 Reserved Amount: ${selectedAccount.currency} ${reserveData.(amount || 0).toLocaleString()}`
+                        ? `💰 Monto Reservado: ${selectedAccount.currency} ${(reserveData.amount || 0).toLocaleString()}`
+                        : `💰 Reserved Amount: ${selectedAccount.currency} ${(reserveData.amount || 0).toLocaleString()}`
                       }
                     </div>
                     <div className="mt-2 text-xs text-cyan-300 text-center">
                       {language === 'es'
-                        ? `ℹ️ 100% = 1:1 ratio (${reserveData.(amount || 0).toLocaleString()} ${selectedAccount.tokenSymbol})`
-                        : `ℹ️ 100% = 1:1 ratio (${reserveData.(amount || 0).toLocaleString()} ${selectedAccount.tokenSymbol})`
+                        ? `ℹ️ 100% = 1:1 ratio (${(reserveData.amount || 0).toLocaleString()} ${selectedAccount.tokenSymbol})`
+                        : `ℹ️ 100% = 1:1 ratio (${(reserveData.amount || 0).toLocaleString()} ${selectedAccount.tokenSymbol})`
                       }
                     </div>
                   </div>
@@ -2209,12 +2209,12 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div>
                             <span className="text-[#4d7c4d]">{language === 'es' ? 'Monto:' : 'Amount:'}</span>
-                            <span className="text-[#80ff80] ml-1">{selectedAccount.currency} {r.(amount || 0).toLocaleString()}</span>
+                            <span className="text-[#80ff80] ml-1">{selectedAccount.currency} {(r.amount || 0).toLocaleString()}</span>
                           </div>
                           {r.tokenAmount && (
                             <div>
                               <span className="text-[#4d7c4d]">{language === 'es' ? 'Tokens:' : 'Tokens:'}</span>
-                              <span className="text-cyan-400 ml-1">{r.(tokenAmount || 0).toLocaleString()} {selectedAccount.tokenSymbol}</span>
+                              <span className="text-cyan-400 ml-1">{(r.tokenAmount || 0).toLocaleString()} {selectedAccount.tokenSymbol}</span>
                             </div>
                           )}
                           {r.blockchain && (
@@ -2497,6 +2497,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
     </div>
   );
 }
+
 
 
 
