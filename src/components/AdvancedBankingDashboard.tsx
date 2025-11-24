@@ -99,13 +99,19 @@ export function AdvancedBankingDashboard() {
     setCustodyAccounts(custodyStore.getAccounts());
     setProfiles(profilesStore.getProfiles());
     setPledges(unifiedPledgeStore.getPledges());
-    setRecentEvents(transactionEventStore.getRecentEvents(10));
+    
+    // ✅ FIX: Obtener eventos recientes (últimos 10)
+    const allEvents = transactionEventStore.getEvents();
+    setRecentEvents(allEvents.slice(0, 10));
 
     // Auto-refresh cada 10 segundos (optimizado)
     const intervalId = setInterval(() => {
       console.log('[Dashboard] Auto-refresh');
       loadDashboardData(false);
-      setRecentEvents(transactionEventStore.getRecentEvents(10));
+      
+      // ✅ Actualizar eventos recientes
+      const allEvents = transactionEventStore.getEvents();
+      setRecentEvents(allEvents.slice(0, 10));
     }, 10000); // Cada 10 segundos en lugar de 5
 
     return () => {
