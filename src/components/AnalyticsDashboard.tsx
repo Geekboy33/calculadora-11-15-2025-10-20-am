@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown, Minus, RefreshCw, Download } from 'lucide-rea
 import { analyticsStore, AnalyticsData, KPIData } from '../lib/analytics-store';
 import { getIcon } from '../lib/icon-mapping';
 import { useLanguage } from '../lib/i18n';
+import { formatters } from '../lib/formatters';
 
 export function AnalyticsDashboard() {
   const { language } = useLanguage();
@@ -116,7 +117,7 @@ export function AnalyticsDashboard() {
               {isSpanish ? 'Dashboard Analytics' : 'Analytics Dashboard'}
             </h1>
             <p className="text-[#80ff80]">
-              {isSpanish ? 'Última actualización:' : 'Last update:'} {new Date(analytics.lastUpdated).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
+              {isSpanish ? 'Última actualización:' : 'Last update:'} {analytics?.lastUpdated ? formatters.dateTime(analytics.lastUpdated, isSpanish ? 'es-ES' : 'en-US') : 'N/A'}
             </p>
           </div>
 
@@ -166,7 +167,7 @@ export function AnalyticsDashboard() {
                     <div
                       className="w-full bg-gradient-to-t from-[#00ff88] to-[#00cc6a] rounded-t transition-all hover:from-[#00cc6a] hover:to-[#00aa55] cursor-pointer"
                       style={{ height: `${height}%` }}
-                      title={`${point.label}: ${point.value.toLocaleString()}`}
+                      title={`${point?.label || 'N/A'}: ${(point?.value || 0).toLocaleString()}`}
                     />
                     <div className="text-xs text-[#4d7c4d] rotate-45 origin-left whitespace-nowrap">
                       {point.label}
@@ -254,9 +255,9 @@ export function AnalyticsDashboard() {
 
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[#e0ffe0] font-bold">{item.currency}</span>
-                        <span className="text-[#80ff80]">
-                          ${item.value.toLocaleString()}
+                        <span className="text-[#e0ffe0] font-bold">{item?.currency || 'N/A'}</span>
+                        <span className="text-[#80ff80] font-mono">
+                          {formatters.currency(item?.value || 0, 'USD')}
                         </span>
                       </div>
                       <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
