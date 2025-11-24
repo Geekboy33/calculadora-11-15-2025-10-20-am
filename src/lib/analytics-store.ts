@@ -445,13 +445,12 @@ class AnalyticsStore {
   }
 
   /**
-   * Start auto-refresh - DESACTIVADO (se carga bajo demanda)
-   * ✅ OPTIMIZACIÓN: No necesitamos auto-refresh constante
-   * Los datos se actualizan cuando el usuario visita Analytics Dashboard
+   * Start auto-refresh
    */
   private startAutoRefresh(): void {
-    // Timer desactivado para mejor performance
-    // Los analytics se cargan cuando se necesitan vía getAnalytics()
+    setInterval(() => {
+      this.getAnalytics();
+    }, CACHE_DURATION);
   }
 
   /**

@@ -254,7 +254,7 @@ export function APIVUSDModule() {
     } else {
       console.log('[VUSD] ✅ Se cargaron', allAccounts.length, 'cuentas correctamente');
       allAccounts.forEach(account => {
-        console.log('[VUSD] 📊', account.accountName, '-', account.currency, (account.totalBalance || 0).toLocaleString());
+        console.log('[VUSD] 📊', account.accountName, '-', account.currency, account.totalBalance.toLocaleString());
       });
     }
 
@@ -1524,7 +1524,7 @@ export function APIVUSDModule() {
                                   const newTotal = otherPledges + amount;
                                   
                                   if (newTotal > account.totalBalance) {
-                                    alert(`❌ Error\n\n${language === 'es' ? 'El nuevo monto excede el balance total de la cuenta' : 'New amount exceeds account total balance'}\n\n${language === 'es' ? 'Balance total:' : 'Total balance:'} ${(account.totalBalance || 0).toLocaleString()}\n${language === 'es' ? 'Otros pledges:' : 'Other pledges:'} ${(otherPledges || 0).toLocaleString()}\n${language === 'es' ? 'Máximo permitido:' : 'Maximum allowed:'} ${((account.totalBalance || 0) - (otherPledges || 0)).toLocaleString()}`);
+                                    alert(`❌ Error\n\n${language === 'es' ? 'El nuevo monto excede el balance total de la cuenta' : 'New amount exceeds account total balance'}\n\n${language === 'es' ? 'Balance total:' : 'Total balance:'} ${account.totalBalance.toLocaleString()}\n${language === 'es' ? 'Otros pledges:' : 'Other pledges:'} ${otherPledges.toLocaleString()}\n${language === 'es' ? 'Máximo permitido:' : 'Maximum allowed:'} ${(account.totalBalance - otherPledges).toLocaleString()}`);
                                     return;
                                   }
                                 }

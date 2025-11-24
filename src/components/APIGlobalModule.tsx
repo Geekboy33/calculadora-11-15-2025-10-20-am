@@ -6,7 +6,7 @@
  * Deducts from M2 balance directly from Digital Commercial Bank Ltd file
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Globe,
   Send,
@@ -118,9 +118,31 @@ export default function APIGlobalModule() {
   const [m2Balance, setM2Balance] = useState<{ total: number; currency: string; validated: boolean } | null>(null);
   const [digitalSignaturesCount, setDigitalSignaturesCount] = useState<number>(0);
 
-  // ✅ DEFINIR FUNCIONES ANTES DEL useEffect
-  // ✅ OPTIMIZACIÓN: useCallback para evitar recrear función en cada render
-  const loadM2Balance = useCallback(() => {
+  useEffect(() => {
+    console.log('[API GLOBAL] Component mounted, initializing...');
+    loadData();
+    checkAPIConnection();
+    loadM2Balance();
+
+    // Listen to balance changes
+    const unsubscribe = balanceStore.subscribe((balances) => {
+      console.log('[API GLOBAL] Balance store updated with', balances.length, 'balances, reloading data...');
+      loadData();
+    });
+
+    // Listen to custody store changes
+    const unsubscribeCustody = custodyStore.subscribe(() => {
+      console.log('[API GLOBAL] Custody store updated, reloading data...');
+      loadData();
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeCustody();
+    };
+  }, []);
+
+  const loadM2Balance = () => {
     try {
       const m2Data = iso20022Store.extractM2Balance();
       setM2Balance(m2Data);
@@ -135,10 +157,9 @@ export default function APIGlobalModule() {
       setM2Balance(null);
       setDigitalSignaturesCount(0);
     }
-  }, []);
+  };
 
-  // ✅ OPTIMIZACIÓN: useCallback para checkAPIConnection
-  const checkAPIConnection = useCallback(async () => {
+  const checkAPIConnection = async () => {
     try {
       setApiStatus('checking');
       console.log('[API GLOBAL] 🔍 Checking MindCloud API connectivity...');
@@ -187,10 +208,9 @@ export default function APIGlobalModule() {
       setApiStatus('error');
       console.error('[API GLOBAL] ❌ Error checking API connection:', error);
     }
-  }, []); // ✅ Sin dependencias - función estable
+  };
 
-  // ✅ OPTIMIZACIÓN: useCallback para loadData
-  const loadData = useCallback(() => {
+  const loadData = () => {
     console.log('[API GLOBAL] ========== LOADING DATA ==========');
 
     // Load custody accounts
@@ -260,32 +280,7 @@ export default function APIGlobalModule() {
         failed_transfers: parsedTransfers.filter((t: Transfer) => t.status === 'FAILED').length
       });
     }
-  }, []); // ✅ Cerrar useCallback correctamente
-
-  // ✅ useEffect para cargar datos iniciales
-  useEffect(() => {
-    console.log('[API GLOBAL] Component mounted, initializing...');
-    loadData();
-    checkAPIConnection();
-    loadM2Balance();
-
-    // Listen to balance changes
-    const unsubscribe = balanceStore.subscribe((balances) => {
-      console.log('[API GLOBAL] Balance store updated with', balances.length, 'balances, reloading data...');
-      loadData();
-    });
-
-    // Listen to custody store changes
-    const unsubscribeCustody = custodyStore.subscribe(() => {
-      console.log('[API GLOBAL] Custody store updated, reloading data...');
-      loadData();
-    });
-
-    return () => {
-      unsubscribe();
-      unsubscribeCustody();
-    };
-  }, [loadData, checkAPIConnection, loadM2Balance]);
+  };
 
   // Auto-scroll to submit button when account is selected
   const handleAccountSelect = (accountId: string) => {

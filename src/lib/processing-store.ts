@@ -1,7 +1,5 @@
-import { CurrencyBalance, balanceStore } from './balances-store';
+import { CurrencyBalance } from './balances-store';
 import { getSupabaseClient } from './supabase-client';
-import { persistentStorage, ProcessingCheckpoint } from './persistent-storage-manager';
-import { logger } from './logger';
 
 const getSupabase = () => getSupabaseClient();
 
@@ -29,7 +27,6 @@ export interface ProcessingState {
 class ProcessingStore {
   private static STORAGE_KEY = 'Digital Commercial Bank Ltd_processing_state';
   private static SAVE_INTERVAL_MS = 5000;
-  private static AUTO_CHECKPOINT_INTERVAL_MS = 30000; // 30 segundos para auto-guardado
   private listeners: Array<(state: ProcessingState | null) => void> = [];
   private currentState: ProcessingState | null = null;
   private isProcessingActive: boolean = false;
@@ -40,10 +37,6 @@ class ProcessingStore {
   private lastSaveTime: number = 0;
   private pendingSave: ProcessingState | null = null;
   private saveTimeoutId: NodeJS.Timeout | null = null;
-  private lastCheckpointTime: number = 0;
-  private autoCheckpointTimer: NodeJS.Timeout | null = null;
-  private lastProgressNotified: number = -1; // ✅ Para throttle de updateProgress
-  private notifyTimer: NodeJS.Timeout | null = null; // ✅ Para debounce de notificaciones
 
   private currencyPatterns: Map<string, Uint8Array> = new Map();
 
@@ -52,26 +45,21 @@ class ProcessingStore {
     this.initializeCurrencyPatterns();
     this.userIdPromise.then(() => this.loadState());
 
-    window.addEventListener('beforeunload', () => {
-      this.flushPendingSave();
-      this.saveCheckpointNow();
-    });
-
-    // NO iniciar timer aquí - solo cuando haya procesamiento activo
+    window.addEventListener('beforeunload', () => this.flushPendingSave());
   }
 
   private async initializeUser(): Promise<string | null> {
     try {
       const supabase = getSupabase();
       if (!supabase) {
-        logger.warn('[ProcessingStore] Sin conexión a Supabase');
+        console.warn('[ProcessingStore] Sin conexión a Supabase');
         return null;
       }
       const { data: { user } } = await supabase.auth.getUser();
       this.currentUserId = user?.id || null;
       return this.currentUserId;
     } catch (error) {
-      logger.error('[ProcessingStore] Error getting user:', error);
+      console.error('[ProcessingStore] Error getting user:', error);
       return null;
     }
   }
@@ -120,7 +108,7 @@ class ProcessingStore {
 
       return `${hashHex}-${file.size}-${file.lastModified}`;
     } catch (error) {
-      logger.error('[ProcessingStore] Error calculating file hash:', error);
+      console.error('[ProcessingStore] Error calculating file hash:', error);
       return `fallback-${file.name}-${file.size}-${file.lastModified}`;
     }
   }
@@ -161,7 +149,7 @@ class ProcessingStore {
         }, ProcessingStore.SAVE_INTERVAL_MS - timeSinceLastSave);
       }
     } catch (error) {
-      logger.error('[ProcessingStore] Error guardando estado:', error);
+      console.error('[ProcessingStore] Error guardando estado:', error);
     }
   }
 
@@ -186,7 +174,7 @@ class ProcessingStore {
         return true;
       } catch (error) {
         lastError = error;
-        logger.warn(`[ProcessingStore] Intento ${attempt}/${maxRetries} falló:`, error);
+        console.warn(`[ProcessingStore] Intento ${attempt}/${maxRetries} falló:`, error);
 
         if (attempt < maxRetries) {
           await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
@@ -194,7 +182,7 @@ class ProcessingStore {
       }
     }
 
-    logger.error('[ProcessingStore] Todos los intentos fallaron:', lastError);
+    console.error('[ProcessingStore] Todos los intentos fallaron:', lastError);
 
     this.currentState = {
       ...state,
@@ -218,7 +206,7 @@ class ProcessingStore {
 
     const userId = await this.ensureUserId();
     if (!userId) {
-      logger.warn('[ProcessingStore] No hay usuario autenticado');
+      console.warn('[ProcessingStore] No hay usuario autenticado');
       if (this.currentState) {
         this.currentState.syncStatus = 'local-only';
         this.notifyListeners();
@@ -265,7 +253,7 @@ class ProcessingStore {
       if (data) this.currentDbId = data.id;
     }
 
-    logger.log('[ProcessingStore] Estado guardado en Supabase');
+    console.log('[ProcessingStore] Estado guardado en Supabase');
   }
 
   async flushPendingSave(): Promise<void> {
@@ -280,133 +268,23 @@ class ProcessingStore {
     }
   }
 
-  /**
-   * Inicia el temporizador de auto-guardado de checkpoints
-   * SOLO cuando hay procesamiento activo
-   */
-  private startAutoCheckpointTimer(): void {
-    // Solo iniciar si no existe ya
-    if (this.autoCheckpointTimer) {
-      return;
-    }
-
-    this.autoCheckpointTimer = setInterval(() => {
-      if (this.isProcessingActive && this.currentState) {
-        this.saveCheckpointNow();
-      }
-    }, ProcessingStore.AUTO_CHECKPOINT_INTERVAL_MS);
-  }
-
-  /**
-   * Detiene el temporizador de auto-guardado
-   */
-  private stopAutoCheckpointTimer(): void {
-    if (this.autoCheckpointTimer) {
-      clearInterval(this.autoCheckpointTimer);
-      this.autoCheckpointTimer = null;
-    }
-  }
-
-  /**
-   * Guarda un checkpoint inmediatamente
-   */
-  private async saveCheckpointNow(): Promise<void> {
-    if (!this.currentState || !this.currentState.fileHash) return;
-
-    const now = Date.now();
-    const timeSinceLastCheckpoint = now - this.lastCheckpointTime;
-
-    // Solo guardar si ha pasado al menos 25 segundos desde el último checkpoint
-    if (timeSinceLastCheckpoint < 25000 && this.lastCheckpointTime > 0) {
-      return;
-    }
-
-    try {
-      // ✅ VALIDACIÓN: Asegurar que no haya valores NaN o inválidos
-      const bytesProcessed = this.currentState.bytesProcessed || 0;
-      const fileSize = this.currentState.fileSize || 0;
-      const progress = this.currentState.progress || 0;
-      
-      // Validar que los valores sean números válidos
-      if (isNaN(bytesProcessed) || isNaN(fileSize) || isNaN(progress)) {
-        logger.error('[ProcessingStore] ⚠️ Valores inválidos detectados en checkpoint - Saltando guardado');
-        logger.error('[ProcessingStore] bytesProcessed:', bytesProcessed, 'fileSize:', fileSize, 'progress:', progress);
-        return;
-      }
-
-      const checkpoint: ProcessingCheckpoint = {
-        id: `checkpoint_${this.currentState.fileHash}_${now}`,
-        fileHash: this.currentState.fileHash,
-        fileName: this.currentState.fileName || 'Unknown',
-        fileSize: fileSize,
-        lastChunkIndex: this.currentState.chunkIndex || 0,
-        bytesProcessed: bytesProcessed,
-        progress: progress,
-        timestamp: now,
-        balances: this.currentState.balances || [],
-        status: this.currentState.status === 'processing' ? 'active' : 
-                this.currentState.status === 'paused' ? 'paused' : 
-                this.currentState.status === 'completed' ? 'completed' : 'error'
-      };
-
-      await persistentStorage.saveCheckpoint(checkpoint);
-      this.lastCheckpointTime = now;
-
-      logger.log(`[ProcessingStore] 💾 AUTO-GUARDADO: ${checkpoint.progress.toFixed(2)}% (${(checkpoint.bytesProcessed / (1024*1024*1024)).toFixed(2)} GB de ${(checkpoint.fileSize / (1024*1024*1024)).toFixed(2)} GB)`);
-
-      // Limpiar checkpoints antiguos (mantener solo los últimos 3)
-      await persistentStorage.pruneOldCheckpoints(this.currentState.fileHash);
-    } catch (error) {
-      logger.error('[ProcessingStore] Error guardando checkpoint:', error);
-    }
-  }
-
-  /**
-   * Recupera el último checkpoint guardado para un archivo
-   */
-  async getLastCheckpoint(fileHash: string): Promise<ProcessingCheckpoint | null> {
-    try {
-      return await persistentStorage.getLastCheckpoint(fileHash);
-    } catch (error) {
-      logger.error('[ProcessingStore] Error recuperando checkpoint:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Obtiene estadísticas del almacenamiento persistente
-   */
-  async getPersistentStorageStats() {
-    try {
-      return await persistentStorage.getStats();
-    } catch (error) {
-      logger.error('[ProcessingStore] Error obteniendo stats:', error);
-      return {
-        totalChunks: 0,
-        totalCheckpoints: 0,
-        totalFiles: 0,
-        storageUsage: { used: 0, available: 0, percentage: 0 }
-      };
-    }
-  }
-
   async loadState(): Promise<ProcessingState | null> {
     try {
       const fromSupabase = await this.loadFromSupabase();
       if (fromSupabase) {
         this.currentState = fromSupabase;
-        logger.log('[ProcessingStore] Estado cargado desde Supabase:', this.currentState?.progress + '%');
+        console.log('[ProcessingStore] Estado cargado desde Supabase:', this.currentState?.progress + '%');
         return this.currentState;
       }
 
       const saved = localStorage.getItem(ProcessingStore.STORAGE_KEY);
       if (saved) {
         this.currentState = JSON.parse(saved);
-        logger.log('[ProcessingStore] Estado cargado desde localStorage:', this.currentState?.progress + '%');
+        console.log('[ProcessingStore] Estado cargado desde localStorage:', this.currentState?.progress + '%');
         return this.currentState;
       }
     } catch (error) {
-      logger.error('[ProcessingStore] Error cargando estado:', error);
+      console.error('[ProcessingStore] Error cargando estado:', error);
       await this.clearState();
     }
     return null;
@@ -451,7 +329,7 @@ class ProcessingStore {
         };
       }
     } catch (error) {
-      logger.error('[ProcessingStore] Error cargando desde Supabase:', error);
+      console.error('[ProcessingStore] Error cargando desde Supabase:', error);
     }
 
     return null;
@@ -476,7 +354,7 @@ class ProcessingStore {
 
       if (data) {
         this.currentDbId = data.id;
-        logger.log('[ProcessingStore] Archivo reconocido! Progreso:', data.progress + '%');
+        console.log('[ProcessingStore] Archivo reconocido! Progreso:', data.progress + '%');
         return {
           id: data.id,
           fileName: data.file_name,
@@ -498,7 +376,7 @@ class ProcessingStore {
         };
       }
     } catch (error) {
-      logger.error('[ProcessingStore] Error buscando por hash:', error);
+      console.error('[ProcessingStore] Error buscando por hash:', error);
     }
 
     return null;
@@ -529,9 +407,9 @@ class ProcessingStore {
       await this.saveState(this.currentState);
       await this.saveBalancesToSupabase(balances, progress);
       
-      // ✅ UPDATE EN TIEMPO REAL: Actualizar TODOS los módulos
-      // Esto notifica a Account Ledger, Dashboard, BankBlackScreen instantáneamente
-      // Funciona incluso si el usuario está en otro módulo
+      // 🔥 UPDATE: Actualizar balanceStore en TIEMPO REAL
+      // Esto notifica a Account Ledger y BankBlackScreen instantáneamente
+      // Funciona incluso si el usuario está en otro módulo o minimiza el navegador
       const { balanceStore } = await import('./balances-store');
       balanceStore.updateBalancesRealTime(
         balances, 
@@ -539,19 +417,8 @@ class ProcessingStore {
         this.currentState.fileSize, 
         progress
       );
-
-      // ✅ NUEVO: Actualizar Ledger Accounts en tiempo real
-      if (balances && balances.length > 0) {
-        try {
-          const { ledgerAccountsStore } = await import('./ledger-accounts-store');
-          await ledgerAccountsStore.updateMultipleAccounts(balances);
-          logger.log('[ProcessingStore] ✅ Ledger Accounts actualizados en tiempo real');
-        } catch (error) {
-          logger.warn('[ProcessingStore] ⚠️ No se pudo actualizar Ledger Accounts:', error);
-        }
-      }
     } catch (error) {
-      logger.error('[ProcessingStore] Error updating progress:', error);
+      console.error('[ProcessingStore] Error updating progress:', error);
     }
   }
 
@@ -567,7 +434,7 @@ class ProcessingStore {
 
       await this.saveState(this.currentState);
     } catch (error) {
-      logger.error('[ProcessingStore] Error pausing:', error);
+      console.error('[ProcessingStore] Error pausing:', error);
     }
   }
 
@@ -583,7 +450,7 @@ class ProcessingStore {
 
       await this.saveState(this.currentState);
     } catch (error) {
-      logger.error('[ProcessingStore] Error resuming:', error);
+      console.error('[ProcessingStore] Error resuming:', error);
     }
   }
 
@@ -613,7 +480,7 @@ class ProcessingStore {
 
       await this.updateLedgerAccounts(balances);
     } catch (error) {
-      logger.error('[ProcessingStore] Error completing:', error);
+      console.error('[ProcessingStore] Error completing:', error);
     }
   }
 
@@ -621,12 +488,12 @@ class ProcessingStore {
     try {
       const { ledgerAccountsStore } = await import('./ledger-accounts-store');
 
-      logger.log('[ProcessingStore] Updating ledger accounts with new balances');
+      console.log('[ProcessingStore] Updating ledger accounts with new balances');
       await ledgerAccountsStore.updateMultipleAccounts(balances);
 
-      logger.log('[ProcessingStore] ✓ Ledger accounts updated successfully');
+      console.log('[ProcessingStore] ✓ Ledger accounts updated successfully');
     } catch (error) {
-      logger.error('[ProcessingStore] Error updating ledger accounts:', error);
+      console.error('[ProcessingStore] Error updating ledger accounts:', error);
     }
   }
 
@@ -643,7 +510,7 @@ class ProcessingStore {
 
       await this.saveState(this.currentState);
     } catch (error) {
-      logger.error('[ProcessingStore] Error setting error state:', error);
+      console.error('[ProcessingStore] Error setting error state:', error);
     }
   }
 
@@ -657,9 +524,9 @@ class ProcessingStore {
           .delete()
           .eq('id', this.currentDbId)
           .eq('user_id', this.currentUserId);
-        logger.log('[ProcessingStore] Estado eliminado de Supabase');
+        console.log('[ProcessingStore] Estado eliminado de Supabase');
       } catch (error) {
-        logger.error('[ProcessingStore] Error eliminando de Supabase:', error);
+        console.error('[ProcessingStore] Error eliminando de Supabase:', error);
       }
     }
 
@@ -667,18 +534,11 @@ class ProcessingStore {
     this.currentDbId = null;
     localStorage.removeItem(ProcessingStore.STORAGE_KEY);
     this.notifyListeners();
-    logger.log('[ProcessingStore] Estado limpiado');
+    console.log('[ProcessingStore] Estado limpiado');
   }
 
   startProcessing(fileName: string, fileSize: number, fileData: ArrayBuffer, fileHash: string, fileLastModified: number): string {
     const id = `process_${Date.now()}`;
-    
-    // ✅ VALIDACIÓN: Asegurar que fileSize es válido
-    if (isNaN(fileSize) || fileSize <= 0) {
-      logger.error('[ProcessingStore] ❌ fileSize inválido en startProcessing:', fileSize);
-      fileSize = 1; // Evitar división por cero
-    }
-    
     const totalChunks = Math.ceil(fileSize / (10 * 1024 * 1024));
 
     this.currentState = {
@@ -718,13 +578,12 @@ class ProcessingStore {
     };
   }
 
-  // ✅ Notificaciones inmediatas para velocidad máxima
   private notifyListeners(): void {
     this.listeners.forEach(listener => {
       try {
         listener(this.currentState);
       } catch (error) {
-        logger.error('[ProcessingStore] Error in listener:', error);
+        console.error('[ProcessingStore] Error in listener:', error);
       }
     });
   }
@@ -734,7 +593,7 @@ class ProcessingStore {
       const request = indexedDB.open('DTC1BProcessing', 1);
 
       request.onerror = () => {
-        logger.error('[ProcessingStore] IndexedDB error:', request.error);
+        console.error('[ProcessingStore] IndexedDB error:', request.error);
         resolve(false);
       };
 
@@ -751,16 +610,16 @@ class ProcessingStore {
 
         putRequest.onerror = () => {
           if (putRequest.error?.name === 'QuotaExceededError') {
-            logger.warn('[ProcessingStore] Espacio insuficiente en IndexedDB');
+            console.warn('[ProcessingStore] Espacio insuficiente en IndexedDB');
             this.clearIndexedDB().then(() => {
-              logger.log('[ProcessingStore] IndexedDB limpiado');
+              console.log('[ProcessingStore] IndexedDB limpiado');
             });
           }
           resolve(false);
         };
 
         transaction.oncomplete = () => {
-          logger.log('[ProcessingStore] FileData guardado en IndexedDB');
+          console.log('[ProcessingStore] FileData guardado en IndexedDB');
           resolve(true);
         };
       };
@@ -789,7 +648,7 @@ class ProcessingStore {
         getRequest.onsuccess = () => {
           const result = getRequest.result;
           if (result && result.data) {
-            logger.log('[ProcessingStore] FileData cargado desde IndexedDB');
+            console.log('[ProcessingStore] FileData cargado desde IndexedDB');
             resolve(result.data);
           } else {
             resolve(null);
@@ -819,7 +678,7 @@ class ProcessingStore {
         store.clear();
 
         transaction.oncomplete = () => {
-          logger.log('[ProcessingStore] IndexedDB limpiado');
+          console.log('[ProcessingStore] IndexedDB limpiado');
           resolve();
         };
 
@@ -840,8 +699,6 @@ class ProcessingStore {
       this.processingController = null;
     }
     this.isProcessingActive = false;
-    // ✅ DETENER timer cuando se detiene el procesamiento
-    this.stopAutoCheckpointTimer();
     if (this.currentState) {
       this.pauseProcessing();
     }
@@ -853,67 +710,35 @@ class ProcessingStore {
     onProgress?: (progress: number, balances: CurrencyBalance[]) => void
   ): Promise<void> {
     if (this.isProcessingActive) {
-      logger.warn('[ProcessingStore] ⚠️ Ya hay un procesamiento activo - Ignorando nueva solicitud');
+      console.warn('[ProcessingStore] ⚠️ Ya hay un procesamiento activo - Ignorando nueva solicitud');
       return;
     }
 
-    logger.log('[ProcessingStore] 🚀 Iniciando procesamiento GLOBAL - Independiente de navegación');
+    console.log('[ProcessingStore] 🚀 Iniciando procesamiento GLOBAL - Independiente de navegación');
 
     this.isProcessingActive = true;
     this.processingController = new AbortController();
     const signal = this.processingController.signal;
 
-    // ✅ INICIAR timer de auto-checkpoint SOLO cuando hay procesamiento
-    this.startAutoCheckpointTimer();
-
     try {
-      logger.log('[ProcessingStore] 📂 Archivo:', file.name, '| Tamaño:', (file.size / (1024*1024*1024)).toFixed(2), 'GB');
-      logger.log('[ProcessingStore] ℹ️ El procesamiento continuará en segundo plano sin importar la navegación');
+      console.log('[ProcessingStore] 📂 Archivo:', file.name, '| Tamaño:', (file.size / (1024*1024*1024)).toFixed(2), 'GB');
+      console.log('[ProcessingStore] ℹ️ El procesamiento continuará en segundo plano sin importar la navegación');
 
       const fileHash = await this.calculateFileHash(file);
-
-      // 🆕 RECUPERACIÓN AUTOMÁTICA: Buscar checkpoint guardado
-      const lastCheckpoint = await this.getLastCheckpoint(fileHash);
-      if (lastCheckpoint && resumeFrom === 0 && lastCheckpoint.status !== 'completed') {
-        resumeFrom = lastCheckpoint.bytesProcessed;
-        logger.log(`[ProcessingStore] 🔄 CHECKPOINT ENCONTRADO! Recuperando desde ${lastCheckpoint.progress.toFixed(2)}%`);
-        logger.log(`[ProcessingStore] 📦 Datos recuperados: ${(lastCheckpoint.bytesProcessed / (1024*1024*1024)).toFixed(2)} GB procesados`);
-      }
 
       const existingProcess = await this.findProcessingByFileHash(fileHash);
       if (existingProcess && resumeFrom === 0) {
         resumeFrom = existingProcess.bytesProcessed;
-        logger.log(`[ProcessingStore] 🎯 Archivo reconocido! Reanudando desde ${existingProcess.progress.toFixed(2)}%`);
+        console.log(`[ProcessingStore] 🎯 Archivo reconocido! Reanudando desde ${existingProcess.progress.toFixed(2)}%`);
 
         this.currentState = existingProcess;
         this.notifyListeners();
       }
 
-      // 🆕 OPTIMIZACIÓN: Chunks adaptativos según tamaño del archivo
-      // Para archivos > 100 GB, usar chunks de 50 MB
-      // Para archivos > 500 GB, usar chunks de 100 MB
-      const fileSize_GB = file.size / (1024 * 1024 * 1024);
-      let CHUNK_SIZE = 10 * 1024 * 1024; // 10 MB por defecto
-      
-      if (fileSize_GB > 500) {
-        CHUNK_SIZE = 100 * 1024 * 1024; // 100 MB para archivos gigantes
-        logger.log('[ProcessingStore] 📊 Archivo muy grande detectado: usando chunks de 100 MB');
-      } else if (fileSize_GB > 100) {
-        CHUNK_SIZE = 50 * 1024 * 1024; // 50 MB para archivos grandes
-        logger.log('[ProcessingStore] 📊 Archivo grande detectado: usando chunks de 50 MB');
-      }
-
+      const CHUNK_SIZE = 10 * 1024 * 1024;
       const totalSize = file.size;
       let bytesProcessed = resumeFrom;
       const balanceTracker: { [currency: string]: CurrencyBalance } = {};
-
-      // Recuperar balances del checkpoint si existen
-      if (lastCheckpoint && lastCheckpoint.balances) {
-        lastCheckpoint.balances.forEach(balance => {
-          balanceTracker[balance.currency] = balance;
-        });
-        logger.log(`[ProcessingStore] 💰 ${lastCheckpoint.balances.length} balances recuperados del checkpoint`);
-      }
 
       if (existingProcess && existingProcess.balances) {
         existingProcess.balances.forEach(balance => {
@@ -926,51 +751,13 @@ class ProcessingStore {
           const buffer = await file.arrayBuffer();
           await this.saveFileDataToIndexedDB(buffer);
         } catch (error) {
-          logger.warn('[ProcessingStore] No se pudo guardar en IndexedDB:', error);
+          console.warn('[ProcessingStore] No se pudo guardar en IndexedDB:', error);
         }
       }
 
-      // ✅ VALIDACIÓN: Asegurar que totalSize es un número válido
-      if (isNaN(totalSize) || totalSize <= 0) {
-        logger.error('[ProcessingStore] ❌ Tamaño de archivo inválido:', totalSize);
-        throw new Error('Tamaño de archivo inválido');
-      }
-
-      // ✅ FIX: No inicializar desde 0 si estamos resumiendo
+      const processId = this.startProcessing(file.name, totalSize, new ArrayBuffer(0), fileHash, file.lastModified);
       const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
       let currentChunk = Math.floor(resumeFrom / CHUNK_SIZE);
-      
-      // ✅ Inicializar estado con el progreso correcto
-      if (resumeFrom > 0) {
-        // Estamos resumiendo - NO sobrescribir el progreso
-        const initialProgress = (resumeFrom / totalSize) * 100;
-        logger.log(`[ProcessingStore] 📊 Resumiendo procesamiento desde ${initialProgress.toFixed(2)}% (${resumeFrom} bytes)`);
-        
-        if (!this.currentState || this.currentState.fileHash !== fileHash) {
-          // Solo crear nuevo estado si no existe o es archivo diferente
-          this.currentState = {
-            id: `process_${Date.now()}`,
-            fileName: file.name,
-            fileSize: totalSize,
-            bytesProcessed: resumeFrom,  // ✅ USAR VALOR GUARDADO
-            progress: initialProgress,   // ✅ USAR PROGRESO REAL
-            status: 'processing',
-            startTime: new Date().toISOString(),
-            lastUpdateTime: new Date().toISOString(),
-            balances: lastCheckpoint?.balances || existingProcess?.balances || [],
-            chunkIndex: currentChunk,
-            totalChunks,
-            fileHash,
-            fileLastModified: file.lastModified,
-            syncStatus: 'syncing',
-            retryCount: 0
-          };
-          this.notifyListeners();
-        }
-      } else {
-        // Empezando desde 0 - inicializar normal
-        const processId = this.startProcessing(file.name, totalSize, new ArrayBuffer(0), fileHash, file.lastModified);
-      }
 
       let offset = resumeFrom;
 
@@ -994,11 +781,15 @@ class ProcessingStore {
           currentChunk++;
 
           const progress = (bytesProcessed / totalSize) * 100;
-          const progressInt = Math.floor(progress);
           
           // Log detallado cada 10%
-          if (progressInt % 10 === 0 && progressInt !== Math.floor((bytesProcessed - chunk.length) / totalSize * 100)) {
-            logger.log(`[ProcessingStore] 📊 Progreso: ${progress.toFixed(2)}% (${(bytesProcessed / 1024 / 1024 / 1024).toFixed(2)} GB de ${(totalSize / 1024 / 1024 / 1024).toFixed(2)} GB) - Chunk ${currentChunk}/${totalChunks}`);
+          if (Math.floor(progress) % 10 === 0 && Math.floor(progress) !== Math.floor((bytesProcessed - chunk.length) / totalSize * 100)) {
+            console.log(`[ProcessingStore] 📊 Progreso: ${progress.toFixed(2)}% (${(bytesProcessed / 1024 / 1024 / 1024).toFixed(2)} GB de ${(totalSize / 1024 / 1024 / 1024).toFixed(2)} GB) - Chunk ${currentChunk}/${totalChunks}`);
+          }
+          
+          // CRÍTICO: Log específico en 29-30% para debugging
+          if (progress >= 29 && progress <= 31 && currentChunk % 10 === 0) {
+            console.warn(`[ProcessingStore] ⚠️ ZONA CRÍTICA 29-30%: Chunk ${currentChunk}, Offset ${(offset / 1024 / 1024 / 1024).toFixed(2)} GB`);
           }
           
           const balancesArray = Object.values(balanceTracker).sort((a, b) => {
@@ -1009,45 +800,19 @@ class ProcessingStore {
             return b.totalAmount - a.totalAmount;
           });
 
-          // ✅ OPTIMIZACIÓN CRÍTICA: Solo actualizar UI cada 1% (no cada 5 chunks)
-          // Esto reduce de 1,600 updates a solo 100 updates
-          if (progressInt > this.lastProgressNotified) {
-            this.lastProgressNotified = progressInt;
-            
-            // Actualizar estado en memoria (ligero)
-            this.currentState = {
-              ...this.currentState,
-              bytesProcessed,
-              progress,
-              balances: balancesArray,
-              chunkIndex: currentChunk,
-              lastUpdateTime: new Date().toISOString()
-            };
-            
-            // ✅ Solo guardar en disco cada 5% (no cada 1%)
-            if (progressInt % 5 === 0) {
-              await this.saveState(this.currentState);
-            } else {
-              // Solo notificar (sin guardar en disco)
-              this.notifyListeners();
-            }
+          await this.updateProgress(bytesProcessed, progress, balancesArray, currentChunk);
 
-            // ✅ Callback solo cada 1% para evitar re-renders masivos
-            if (onProgress) {
-              onProgress(progress, balancesArray);
-            }
+          if (onProgress) {
+            onProgress(progress, balancesArray);
           }
 
-          // ✅ OPTIMIZACIÓN: Yield mínimo para máxima velocidad
-          // Solo dar control al navegador ocasionalmente para evitar bloqueo total
-          if (currentChunk % 50 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 10)); // Solo 10ms cada 50 chunks
-          } else {
-            await new Promise(resolve => setTimeout(resolve, 0)); // Yield instantáneo
-          }
+          // 🔥 UPDATE: Usar setTimeout en lugar de requestIdleCallback
+          // requestIdleCallback se pausa cuando la ventana está minimizada
+          // setTimeout continúa funcionando en segundo plano
+          await new Promise(resolve => setTimeout(resolve, 0));
           
         } catch (chunkError) {
-          logger.error(`[ProcessingStore] ❌ Error procesando chunk ${currentChunk} en ${(offset / 1024 / 1024 / 1024).toFixed(2)} GB:`, chunkError);
+          console.error(`[ProcessingStore] ❌ Error procesando chunk ${currentChunk} en ${(offset / 1024 / 1024 / 1024).toFixed(2)} GB:`, chunkError);
           
           // Intentar continuar con siguiente chunk
           offset = chunkEnd;
@@ -1055,7 +820,7 @@ class ProcessingStore {
           
           // Si hay muchos errores consecutivos, detener
           if (currentChunk % 100 === 0) {
-            logger.warn(`[ProcessingStore] ⚠️ Errores detectados pero continuando... Chunk ${currentChunk}`);
+            console.warn(`[ProcessingStore] ⚠️ Errores detectados pero continuando... Chunk ${currentChunk}`);
           }
         }
       }
@@ -1063,21 +828,19 @@ class ProcessingStore {
       if (!signal.aborted) {
         const balancesArray = Object.values(balanceTracker);
         await this.completeProcessing(balancesArray);
-        logger.log('[ProcessingStore] ✅ Procesamiento completado al 100%');
-        logger.log('[ProcessingStore] 📊 Total de monedas detectadas:', balancesArray.length);
-        logger.log('[ProcessingStore] 💾 Datos guardados en Supabase y localStorage');
+        console.log('[ProcessingStore] ✅ Procesamiento completado al 100%');
+        console.log('[ProcessingStore] 📊 Total de monedas detectadas:', balancesArray.length);
+        console.log('[ProcessingStore] 💾 Datos guardados en Supabase y localStorage');
       } else {
-        logger.log('[ProcessingStore] ⚠️ Procesamiento detenido por el usuario');
+        console.log('[ProcessingStore] ⚠️ Procesamiento detenido por el usuario');
       }
 
     } catch (error) {
-      logger.error('[ProcessingStore] Error en procesamiento:', error);
+      console.error('[ProcessingStore] Error en procesamiento:', error);
       await this.setError(error instanceof Error ? error.message : 'Error desconocido');
     } finally {
       this.isProcessingActive = false;
       this.processingController = null;
-      // ✅ DETENER timer cuando termina el procesamiento
-      this.stopAutoCheckpointTimer();
       await this.flushPendingSave();
     }
   }
@@ -1225,13 +988,13 @@ class ProcessingStore {
           });
 
         if (error) {
-          logger.error('[ProcessingStore] Error saving balance:', error);
+          console.error('[ProcessingStore] Error saving balance:', error);
         }
       }
 
-      logger.log(`[ProcessingStore] Balances saved to Supabase (${balances.length} currencies)`);
+      console.log(`[ProcessingStore] Balances saved to Supabase (${balances.length} currencies)`);
     } catch (error) {
-      logger.error('[ProcessingStore] Error in saveBalancesToSupabase:', error);
+      console.error('[ProcessingStore] Error in saveBalancesToSupabase:', error);
     }
   }
 
@@ -1250,7 +1013,7 @@ class ProcessingStore {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        logger.log(`[ProcessingStore] Loaded ${data.length} balances from Supabase`);
+        console.log(`[ProcessingStore] Loaded ${data.length} balances from Supabase`);
         return data.map(row => ({
           currency: row.currency,
           accountName: row.account_name,
@@ -1264,7 +1027,7 @@ class ProcessingStore {
         }));
       }
     } catch (error) {
-      logger.error('[ProcessingStore] Error loading balances:', error);
+      console.error('[ProcessingStore] Error loading balances:', error);
     }
 
     return [];
@@ -1282,9 +1045,9 @@ class ProcessingStore {
         .eq('file_hash', fileHash);
 
       if (error) throw error;
-      logger.log('[ProcessingStore] Balances deleted from Supabase');
+      console.log('[ProcessingStore] Balances deleted from Supabase');
     } catch (error) {
-      logger.error('[ProcessingStore] Error deleting balances:', error);
+      console.error('[ProcessingStore] Error deleting balances:', error);
     }
   }
 }

@@ -2,15 +2,13 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard } from 'lucide-react';
 import { LanguageSelector } from './components/LanguageSelector';
 import { Login } from './components/Login';
+import { PublicVerificationPage } from './components/PublicVerificationPage';
 import { useLanguage } from './lib/i18n.tsx';
 import { useAuth } from './lib/auth.tsx';
-
-// ✅ Lazy loading de componentes no críticos
-const PublicVerificationPage = lazy(() => import('./components/PublicVerificationPage').then(m => ({ default: m.PublicVerificationPage })));
-const MobileMenu = lazy(() => import('./components/ui/MobileMenu').then(m => ({ default: m.MobileMenu })));
-const GlobalProcessingIndicator = lazy(() => import('./components/GlobalProcessingIndicator').then(m => ({ default: m.GlobalProcessingIndicator })));
-const NotificationCenter = lazy(() => import('./components/NotificationCenter').then(m => ({ default: m.NotificationCenter })));
-const ToastNotification = lazy(() => import('./components/ToastNotification').then(m => ({ default: m.ToastNotification })));
+import { MobileMenu } from './components/ui/MobileMenu';
+import { GlobalProcessingIndicator } from './components/GlobalProcessingIndicator';
+import { NotificationCenter } from './components/NotificationCenter';
+import { ToastNotification } from './components/ToastNotification';
 import { processingStore } from './lib/processing-store';
 
 const AdvancedBankingDashboard = lazy(() => import(/* webpackPrefetch: true */ './components/AdvancedBankingDashboard').then(m => ({ default: m.AdvancedBankingDashboard })));
