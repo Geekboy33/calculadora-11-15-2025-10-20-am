@@ -533,6 +533,12 @@ export function LargeFileDTC1BAnalyzer() {
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // ✅ LIMPIAR ESTADO ANTERIOR PRIMERO para evitar NaN
+      setHasPendingProcess(false);
+      setPendingProcessInfo(null);
+      setError(null);
+      setAnalysis(null);
+      
       // ✅ Verificar si ya hay un procesamiento activo de este archivo
       const currentState = await processingStore.loadState();
       if (currentState && currentState.status === 'processing') {
@@ -540,6 +546,10 @@ export function LargeFileDTC1BAnalyzer() {
         if (isSameFile) {
           alert('⚠️ Este archivo ya se está procesando en segundo plano.\n\nEl progreso actual es: ' + currentState.progress.toFixed(2) + '%\n\nNo es necesario cargarlo de nuevo.');
           return;
+        } else {
+          // Es un archivo diferente - limpiar estado del anterior
+          await processingStore.clearState();
+          logger.log('[LargeFileDTC1BAnalyzer] 🧹 Estado anterior limpiado para nuevo archivo');
         }
       }
 
