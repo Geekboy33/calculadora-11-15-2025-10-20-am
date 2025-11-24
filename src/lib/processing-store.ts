@@ -718,22 +718,15 @@ class ProcessingStore {
     };
   }
 
-  // ✅ OPTIMIZACIÓN: Debounce de notificaciones para no saturar suscriptores
+  // ✅ Notificaciones inmediatas para velocidad máxima
   private notifyListeners(): void {
-    if (this.notifyTimer) {
-      clearTimeout(this.notifyTimer);
-    }
-    
-    this.notifyTimer = setTimeout(() => {
-      this.listeners.forEach(listener => {
-        try {
-          listener(this.currentState);
-        } catch (error) {
-          logger.error('[ProcessingStore] Error in listener:', error);
-        }
-      });
-      this.notifyTimer = null;
-    }, 100); // Máximo 10 notificaciones por segundo
+    this.listeners.forEach(listener => {
+      try {
+        listener(this.currentState);
+      } catch (error) {
+        logger.error('[ProcessingStore] Error in listener:', error);
+      }
+    });
   }
 
   async saveFileDataToIndexedDB(fileData: ArrayBuffer): Promise<boolean> {
@@ -1045,14 +1038,12 @@ class ProcessingStore {
             }
           }
 
-          // ✅ OPTIMIZACIÓN CRÍTICA: Dar tiempo al navegador para mantener UI responsive
-          // Cada 10 chunks, esperar más tiempo para renderizar UI
-          if (currentChunk % 10 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 100)); // 100ms cada 10 chunks = Navegación fluida
-          } else if (currentChunk % 3 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 10)); // 10ms cada 3 chunks
+          // ✅ OPTIMIZACIÓN: Yield mínimo para máxima velocidad
+          // Solo dar control al navegador ocasionalmente para evitar bloqueo total
+          if (currentChunk % 50 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 10)); // Solo 10ms cada 50 chunks
           } else {
-            await new Promise(resolve => setTimeout(resolve, 1)); // Yield mínimo pero presente
+            await new Promise(resolve => setTimeout(resolve, 0)); // Yield instantáneo
           }
           
         } catch (chunkError) {
