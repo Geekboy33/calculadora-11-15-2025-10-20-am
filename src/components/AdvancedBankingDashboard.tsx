@@ -104,15 +104,18 @@ export function AdvancedBankingDashboard() {
     const allEvents = transactionEventStore.getEvents();
     setRecentEvents(allEvents.slice(0, 10));
 
-    // Auto-refresh cada 10 segundos (optimizado)
+    // ✅ OPTIMIZACIÓN: Auto-refresh cada 30 segundos (en lugar de 10)
+    // Solo refrescar cuando la página está visible
     const intervalId = setInterval(() => {
-      console.log('[Dashboard] Auto-refresh');
-      loadDashboardData(false);
-      
-      // ✅ Actualizar eventos recientes
-      const allEvents = transactionEventStore.getEvents();
-      setRecentEvents(allEvents.slice(0, 10));
-    }, 10000); // Cada 10 segundos en lugar de 5
+      if (document.visibilityState === 'visible') {
+        console.log('[Dashboard] Auto-refresh');
+        loadDashboardData(false);
+        
+        // Actualizar eventos recientes
+        const allEvents = transactionEventStore.getEvents();
+        setRecentEvents(allEvents.slice(0, 10));
+      }
+    }, 30000); // Cada 30 segundos para mejor performance
 
     return () => {
       unsubscribeLedger();
