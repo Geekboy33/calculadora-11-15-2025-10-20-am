@@ -996,17 +996,19 @@ class ProcessingStore {
 
           const progress = (bytesProcessed / totalSize) * 100;
           const progressInt = Math.floor(progress);
-          
+
           // Log detallado cada 10%
           if (progressInt % 10 === 0 && progressInt !== Math.floor((bytesProcessed - chunk.length) / totalSize * 100)) {
             logger.log(`[ProcessingStore] 📊 Progreso: ${progress.toFixed(2)}% (${(bytesProcessed / 1024 / 1024 / 1024).toFixed(2)} GB de ${(totalSize / 1024 / 1024 / 1024).toFixed(2)} GB) - Chunk ${currentChunk}/${totalChunks}`);
           }
-          
-          // ✅ MEGA-OPTIMIZACIÓN: Solo actualizar UI cada 1% y ordenar solo cuando sea necesario
-          if (progressInt > this.lastProgressNotified) {
-            this.lastProgressNotified = progressInt;
 
-            // Ordenar balances SOLO cuando sea necesario (cada 1%)
+          // ✅ OPTIMIZACIÓN: Actualizar cada 0.1% para balances en tiempo real fluido
+          const progressDecimal = Math.floor(progress * 10) / 10; // Redondear a 0.1%
+
+          if (progressDecimal > this.lastProgressNotified || currentChunk % 10 === 0) {
+            this.lastProgressNotified = progressDecimal;
+
+            // Ordenar balances (más frecuente para ver cambios en tiempo real)
             const balancesArray = Object.values(balanceTracker).sort((a, b) => {
               if (a.currency === 'USD') return -1;
               if (b.currency === 'USD') return 1;
@@ -1025,15 +1027,15 @@ class ProcessingStore {
               lastUpdateTime: new Date().toISOString()
             };
 
-            // ✅ Guardar en disco cada 5% (no cada 1%)
-            if (progressInt % 5 === 0) {
+            // ✅ Guardar en disco cada 5% (no más frecuente)
+            if (progressInt % 5 === 0 && progressInt !== Math.floor((bytesProcessed - chunk.length) / totalSize * 100)) {
               await this.saveState(this.currentState);
             } else {
               // Solo notificar listeners (sin I/O)
               this.notifyListeners();
             }
 
-            // ✅ Callback UI cada 1%
+            // ✅ Callback UI cada 0.1% para ver balances en tiempo real
             if (onProgress) {
               onProgress(progress, balancesArray);
             }
