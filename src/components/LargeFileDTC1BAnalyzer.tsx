@@ -127,6 +127,11 @@ export function LargeFileDTC1BAnalyzer() {
     };
   }, []);
 
+  // ✅ Sincronizar analysisRef cada vez que cambie analysis para comparaciones
+  useEffect(() => {
+    analysisRef.current = analysis;
+  }, [analysis]);
+
   // Load existing balances and check for pending processes on mount
   useEffect(() => {
     let isMounted = true; // ✅ Flag para prevenir actualizaciones si el componente se desmonta
@@ -484,19 +489,19 @@ export function LargeFileDTC1BAnalyzer() {
       logger.log(`[LargeFileDTC1BAnalyzer] 🔄 Reanudando desde: ${pendingState.bytesProcessed} bytes (${pendingState.progress.toFixed(2)}%)`);
       
       await processingStore.startGlobalProcessing(file, pendingState.bytesProcessed, (progress, balances) => {
-        // ✅ MEGA-THROTTLE: Solo actualizar UI cada 2% para máxima fluidez
+        // ✅ OPTIMIZADO: Actualizar cada 1% con requestAnimationFrame
         const progressInt = Math.floor(progress);
-        const shouldUpdate = progressInt > lastProgressUpdate.current && progressInt % 2 === 0;
         const balancesChanged = balances.length !== (analysisRef.current?.balances.length || 0);
+        const shouldUpdate = progressInt > lastProgressUpdate.current || balancesChanged;
 
-        if (shouldUpdate || balancesChanged) {
+        if (shouldUpdate) {
           lastProgressUpdate.current = progressInt;
 
           // ✅ Obtener bytesProcessed real del estado actual
           const currentState = processingStore.getState();
           const actualBytesProcessed = currentState?.bytesProcessed || (file.size * progress) / 100;
 
-          // ✅ Usar requestAnimationFrame para actualizaciones suaves
+          // ✅ requestAnimationFrame para actualizaciones suaves a 60fps
           requestAnimationFrame(() => {
             setAnalysis(prev => prev ? {
               ...prev,
@@ -521,8 +526,8 @@ export function LargeFileDTC1BAnalyzer() {
           });
         }
 
-        // Guardar balances cada 10% (no más frecuente)
-        if (balances.length > 0 && progressInt % 10 === 0 && progressInt !== lastProgressUpdate.current) {
+        // Guardar balances cada 10%
+        if (balances.length > 0 && progressInt % 10 === 0 && progressInt > 0) {
           saveBalancesToStorage(balances, file.name, file.size);
         }
       });
@@ -616,20 +621,20 @@ export function LargeFileDTC1BAnalyzer() {
         ledgerPersistenceStore.setProcessing(true);
 
         await processingStore.startGlobalProcessing(file, startFromByte, (progress, balances) => {
-          // ✅ MEGA-THROTTLE: Actualizar cada 2% para máxima fluidez
+          // ✅ OPTIMIZADO: Actualizar cada 1% con requestAnimationFrame para fluidez
           const progressInt = Math.floor(progress);
-          const shouldUpdate = progressInt % 2 === 0 || balances.length !== (analysisRef.current?.balances.length || 0);
+          const balancesChanged = balances.length !== (analysisRef.current?.balances.length || 0);
+          const shouldUpdate = progressInt > lastProgressUpdate.current || balancesChanged;
 
           if (shouldUpdate) {
+            lastProgressUpdate.current = progressInt;
             const bytesProcessed = (file.size * progress) / 100;
             const chunkIndex = Math.floor(bytesProcessed / (10 * 1024 * 1024));
 
-            // Actualizar ledgerPersistenceStore cada 2% (no cada callback)
-            if (progressInt % 2 === 0) {
-              ledgerPersistenceStore.updateProgress(bytesProcessed, file.size, chunkIndex);
-            }
+            // Actualizar ledgerPersistenceStore cada 1%
+            ledgerPersistenceStore.updateProgress(bytesProcessed, file.size, chunkIndex);
 
-            // ✅ requestAnimationFrame para animaciones suaves
+            // ✅ requestAnimationFrame para actualizaciones suaves a 60fps
             requestAnimationFrame(() => {
               setAnalysis(prev => prev ? {
                 ...prev,
@@ -654,7 +659,7 @@ export function LargeFileDTC1BAnalyzer() {
             });
           }
 
-          // Guardar cada 10% solamente
+          // Guardar cada 10%
           if (balances.length > 0 && progressInt % 10 === 0 && progressInt > 0) {
             saveBalancesToStorage(balances, file.name, file.size);
             console.log('[LargeFileDTC1BAnalyzer] 💾 Auto-guardado:', progressInt + '%');

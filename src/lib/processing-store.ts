@@ -1039,11 +1039,11 @@ class ProcessingStore {
             }
           }
 
-          // ✅ ULTRA-OPTIMIZACIÓN: Yield estratégico
-          // Dar control al navegador solo cada 100 chunks (en lugar de cada 50)
-          // Para archivos grandes esto mejora velocidad 2x
-          if (currentChunk % 100 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 5)); // Solo 5ms cada 100 chunks
+          // ✅ ULTRA-OPTIMIZACIÓN: Yield estratégico pero frecuente para UI fluida
+          // Dar control al navegador cada 50 chunks con mínima espera
+          // Balance perfecto entre velocidad y fluidez
+          if (currentChunk % 50 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 1)); // Solo 1ms cada 50 chunks
           }
           
         } catch (chunkError) {
