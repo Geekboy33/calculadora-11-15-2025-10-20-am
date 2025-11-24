@@ -202,10 +202,10 @@ export function CustodyAccountsModule() {
     setTimeout(() => {
       alert(`✅ Cuenta custodio creada\n\n` +
             `Fondos transferidos del sistema DAES:\n` +
-            `${formData.currency} ${formData.(amount || 0).toLocaleString()}\n\n` +
+            `${formData.currency} ${(formData.amount || 0).toLocaleString()}\n\n` +
             `Balance DAES actualizado:\n` +
             `ANTES: ${formData.currency} ${(balanceBefore || 0).toLocaleString()}\n` +
-            `DESPUÉS: ${formData.currency} ${(balanceBefore - formData.amount).toLocaleString()}`);
+            `DESPUÉS: ${formData.currency} ${((balanceBefore || 0) - (formData.amount || 0)).toLocaleString()}`);
     }, 100);
   };
 
@@ -285,7 +285,7 @@ export function CustodyAccountsModule() {
             `Los fondos están nuevamente disponibles en el sistema.`
           : `✅ Account deleted successfully\n\n` +
             `Funds returned to DAES system:\n` +
-            `${account.currency} ${account.(totalBalance || 0).toLocaleString()}\n\n` +
+            `${account.currency} ${(account.totalBalance || 0).toLocaleString()}\n\n` +
             `DAES Balance updated:\n` +
             `BEFORE: ${account.currency} ${(balanceBefore || 0).toLocaleString()}\n` +
             `AFTER: ${account.currency} ${(balanceAfter || 0).toLocaleString()}\n\n` +
