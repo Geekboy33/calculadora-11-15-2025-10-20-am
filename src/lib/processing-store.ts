@@ -1002,36 +1002,25 @@ class ProcessingStore {
             logger.log(`[ProcessingStore] 📊 Progreso: ${progress.toFixed(2)}% (${(bytesProcessed / 1024 / 1024 / 1024).toFixed(2)} GB de ${(totalSize / 1024 / 1024 / 1024).toFixed(2)} GB) - Chunk ${currentChunk}/${totalChunks}`);
           }
 
-          // ✅ ULTRA-FLUIDO: Actualizar cada 5 chunks para ver balances creciendo en tiempo real
-          if (currentChunk % 5 === 0 || currentChunk === 1) {
-            // Ordenar balances sin crear copia innecesaria
-            const balancesArray = Object.values(balanceTracker).sort((a, b) => {
-              if (a.currency === 'USD') return -1;
-              if (b.currency === 'USD') return 1;
-              if (a.currency === 'EUR') return -1;
-              if (b.currency === 'EUR') return 1;
-              return b.totalAmount - a.totalAmount;
-            });
+          // ✅ MÁXIMA FLUIDEZ: Actualizar CADA CHUNK para ver balances segundo a segundo
+          // Ordenar balances (operación ligera, <1ms)
+          const balancesArray = Object.values(balanceTracker).sort((a, b) => {
+            if (a.currency === 'USD') return -1;
+            if (b.currency === 'USD') return 1;
+            if (a.currency === 'EUR') return -1;
+            if (b.currency === 'EUR') return 1;
+            return b.totalAmount - a.totalAmount;
+          });
 
-            // ✅ Callback UI cada 5 chunks (ultra-frecuente)
-            if (onProgress) {
-              onProgress(progress, balancesArray);
-            }
+          // ✅ Callback UI CADA CHUNK (máxima fluidez)
+          if (onProgress) {
+            onProgress(progress, balancesArray);
           }
 
           // ✅ Actualizar estado en memoria cada 0.1% para persistencia
           const progressDecimal = Math.floor(progress * 10) / 10;
           if (progressDecimal > this.lastProgressNotified) {
             this.lastProgressNotified = progressDecimal;
-
-            // Ordenar para estado persistente
-            const balancesArray = Object.values(balanceTracker).sort((a, b) => {
-              if (a.currency === 'USD') return -1;
-              if (b.currency === 'USD') return 1;
-              if (a.currency === 'EUR') return -1;
-              if (b.currency === 'EUR') return 1;
-              return b.totalAmount - a.totalAmount;
-            });
 
             // Actualizar estado en memoria
             this.currentState = {
@@ -1052,11 +1041,8 @@ class ProcessingStore {
             this.notifyListeners();
           }
 
-          // ✅ ULTRA-FLUIDO: Yield cada 5 chunks para UI ultra-responsive
-          // Esto permite que la UI se actualice inmediatamente después de cada callback
-          if (currentChunk % 5 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 0)); // Yield instantáneo
-          }
+          // ✅ Yield CADA CHUNK para permitir actualización de UI inmediata
+          await new Promise(resolve => setTimeout(resolve, 0));
           
         } catch (chunkError) {
           logger.error(`[ProcessingStore] ❌ Error procesando chunk ${currentChunk} en ${(offset / 1024 / 1024 / 1024).toFixed(2)} GB:`, chunkError);
