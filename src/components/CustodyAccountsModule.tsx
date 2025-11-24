@@ -276,7 +276,7 @@ export function CustodyAccountsModule() {
         const confirmationMsg = language === 'es'
           ? `✅ Cuenta eliminada exitosamente\n\n` +
             `Fondos devueltos al sistema DAES:\n` +
-            `${account.currency} ${account.(totalBalance || 0).toLocaleString()}\n\n` +
+            `${account.currency} ${(account.totalBalance || 0).toLocaleString()}\n\n` +
             `Balance DAES actualizado:\n` +
             `ANTES: ${account.currency} ${(balanceBefore || 0).toLocaleString()}\n` +
             `DESPUÉS: ${account.currency} ${(balanceAfter || 0).toLocaleString()}\n\n` +
@@ -412,9 +412,9 @@ ${language === 'es' ? 'Fecha de Creación' : 'Creation Date'}:        ${new Date
 ${language === 'es' ? 'RESUMEN DE BALANCES' : 'BALANCE SUMMARY'}
 ═══════════════════════════════════════════════════════════════════════
 
-${language === 'es' ? 'Balance Total' : 'Total Balance'}:             ${account.currency} ${account.(totalBalance || 0).toLocaleString()}
-${language === 'es' ? 'Fondos Reservados' : 'Reserved Funds'}:        ${account.currency} ${account.(reservedBalance || 0).toLocaleString()}
-${language === 'es' ? 'Fondos Disponibles' : 'Available Funds'}:      ${account.currency} ${account.(availableBalance || 0).toLocaleString()}
+${language === 'es' ? 'Balance Total' : 'Total Balance'}:             ${account.currency} ${(account.totalBalance || 0).toLocaleString()}
+${language === 'es' ? 'Fondos Reservados' : 'Reserved Funds'}:        ${account.currency} ${(account.reservedBalance || 0).toLocaleString()}
+${language === 'es' ? 'Fondos Disponibles' : 'Available Funds'}:      ${account.currency} ${(account.availableBalance || 0).toLocaleString()}
 
 ${language === 'es' ? 'Porcentaje Reservado' : 'Reserved Percentage'}:  ${account.totalBalance > 0 ? ((account.reservedBalance / account.totalBalance) * 100).toFixed(2) : 0}%
 ${language === 'es' ? 'Porcentaje Disponible' : 'Available Percentage'}: ${account.totalBalance > 0 ? ((account.availableBalance / account.totalBalance) * 100).toFixed(2) : 0}%
@@ -559,9 +559,9 @@ Moneda:                 ${account.currency}
 BALANCES
 ───────────────────────────────────────────────────────────────────────
 
-Total:                  ${account.currency} ${account.(totalBalance || 0).toLocaleString()}
-Reservado:              ${account.currency} ${account.(reservedBalance || 0).toLocaleString()}
-Disponible:             ${account.currency} ${account.(availableBalance || 0).toLocaleString()}
+Total:                  ${account.currency} ${(account.totalBalance || 0).toLocaleString()}
+Reservado:              ${account.currency} ${(account.reservedBalance || 0).toLocaleString()}
+Disponible:             ${account.currency} ${(account.availableBalance || 0).toLocaleString()}
 
 INFORMACIÓN BLOCKCHAIN
 ───────────────────────────────────────────────────────────────────────
@@ -838,7 +838,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     </button>
                   </div>
                   <div className="text-2xl font-bold text-[#00ff88] font-mono">
-                    {account.currency} {account.(totalBalance || 0).toLocaleString()}
+                    {account.currency} {(account.totalBalance || 0).toLocaleString()}
                   </div>
                 </div>
                 <div className="bg-[#0a0a0a] border border-yellow-900/30 rounded-lg p-4">
@@ -846,7 +846,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     {language === 'es' ? 'Reservado' : 'Reserved'}
                   </div>
                   <div className="text-2xl font-bold text-yellow-400 font-mono">
-                    {account.currency} {account.(reservedBalance || 0).toLocaleString()}
+                    {account.currency} {(account.reservedBalance || 0).toLocaleString()}
                   </div>
                 </div>
                 <div className="bg-[#0a0a0a] border border-green-900/30 rounded-lg p-4">
@@ -854,7 +854,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     {language === 'es' ? 'Disponible' : 'Available'}
                   </div>
                   <div className="text-2xl font-bold text-green-400 font-mono">
-                    {account.currency} {account.(availableBalance || 0).toLocaleString()}
+                    {account.currency} {(account.availableBalance || 0).toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -1595,7 +1595,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               </div>
               <div className="text-lg font-bold text-[#00ff88]">{selectedAccount.accountName}</div>
               <div className="text-sm text-green-400 mt-1">
-                {language === 'es' ? 'Disponible:' : 'Available:'} {selectedAccount.currency} {selectedAccount.(availableBalance || 0).toLocaleString()}
+                {language === 'es' ? 'Disponible:' : 'Available:'} {selectedAccount.currency} {selected(account.availableBalance || 0).toLocaleString()}
               </div>
             </div>
 
@@ -1641,8 +1641,8 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
                 <div className="mt-3 text-xs text-gray-400 text-center">
                   {language === 'es'
-                    ? `💰 Disponible: ${selectedAccount.currency} ${selectedAccount.(availableBalance || 0).toLocaleString()}`
-                    : `💰 Available: ${selectedAccount.currency} ${selectedAccount.(availableBalance || 0).toLocaleString()}`
+                    ? `💰 Disponible: ${selectedAccount.currency} ${selected(account.availableBalance || 0).toLocaleString()}`
+                    : `💰 Available: ${selectedAccount.currency} ${selected(account.availableBalance || 0).toLocaleString()}`
                   }
                 </div>
               </div>
@@ -1929,19 +1929,19 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   <div className="bg-[#0a0a0a] border border-cyan-500/30 rounded-lg p-4 text-center">
                     <div className="text-xs text-[#4d7c4d] mb-1">{language === 'es' ? 'Total' : 'Total'}</div>
                     <div className="text-2xl font-bold text-cyan-400 font-mono">
-                      {selectedAccount.currency} {selectedAccount.(totalBalance || 0).toLocaleString()}
+                      {selectedAccount.currency} {selected(account.totalBalance || 0).toLocaleString()}
                     </div>
                   </div>
                   <div className="bg-[#0a0a0a] border border-yellow-500/30 rounded-lg p-4 text-center">
                     <div className="text-xs text-[#4d7c4d] mb-1">{language === 'es' ? 'Reservado' : 'Reserved'}</div>
                     <div className="text-2xl font-bold text-yellow-400 font-mono">
-                      {selectedAccount.currency} {selectedAccount.(reservedBalance || 0).toLocaleString()}
+                      {selectedAccount.currency} {selected(account.reservedBalance || 0).toLocaleString()}
                     </div>
                   </div>
                   <div className="bg-[#0a0a0a] border border-green-500/30 rounded-lg p-4 text-center">
                     <div className="text-xs text-[#4d7c4d] mb-1">{language === 'es' ? 'Disponible' : 'Available'}</div>
                     <div className="text-2xl font-bold text-green-400 font-mono">
-                      {selectedAccount.currency} {selectedAccount.(availableBalance || 0).toLocaleString()}
+                      {selectedAccount.currency} {selected(account.availableBalance || 0).toLocaleString()}
                     </div>
                   </div>
                 </div>
@@ -2303,19 +2303,19 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 <div className="bg-black/30 rounded p-2">
                   <div className="text-cyan-300/60 mb-1">{isSpanish ? 'Total Actual' : 'Current Total'}</div>
                   <div className="text-cyan-300 font-mono font-bold">
-                    {selectedAccount.currency} {selectedAccount.(totalBalance || 0).toLocaleString()}
+                    {selectedAccount.currency} {selected(account.totalBalance || 0).toLocaleString()}
                   </div>
                 </div>
                 <div className="bg-black/30 rounded p-2">
                   <div className="text-yellow-300/60 mb-1">{isSpanish ? 'Reservado' : 'Reserved'}</div>
                   <div className="text-yellow-300 font-mono font-bold">
-                    {selectedAccount.currency} {selectedAccount.(reservedBalance || 0).toLocaleString()}
+                    {selectedAccount.currency} {selected(account.reservedBalance || 0).toLocaleString()}
                   </div>
                 </div>
                 <div className="bg-black/30 rounded p-2">
                   <div className="text-green-300/60 mb-1">{isSpanish ? 'Disponible' : 'Available'}</div>
                   <div className="text-green-300 font-mono font-bold">
-                    {selectedAccount.currency} {selectedAccount.(availableBalance || 0).toLocaleString()}
+                    {selectedAccount.currency} {selected(account.availableBalance || 0).toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -2404,7 +2404,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   <div>
                     <div className="text-white/60 mb-1">{isSpanish ? 'Actual' : 'Current'}</div>
                     <div className="font-mono font-bold text-white">
-                      {selectedAccount.(totalBalance || 0).toLocaleString()}
+                      {selected(account.totalBalance || 0).toLocaleString()}
                     </div>
                   </div>
                   <div>
@@ -2429,8 +2429,8 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 {balanceOperation === 'subtract' && (selectedAccount.totalBalance - balanceAmount) < selectedAccount.reservedBalance && (
                   <div className="mt-3 text-xs text-red-300 bg-red-500/10 border border-red-500/30 rounded p-2">
                     ⚠️ {isSpanish 
-                      ? `No puedes reducir el balance por debajo del monto reservado (${selectedAccount.currency} ${selectedAccount.(reservedBalance || 0).toLocaleString()})`
-                      : `Cannot reduce balance below reserved amount (${selectedAccount.currency} ${selectedAccount.(reservedBalance || 0).toLocaleString()})`}
+                      ? `No puedes reducir el balance por debajo del monto reservado (${selectedAccount.currency} ${selected(account.reservedBalance || 0).toLocaleString()})`
+                      : `Cannot reduce balance below reserved amount (${selectedAccount.currency} ${selected(account.reservedBalance || 0).toLocaleString()})`}
                   </div>
                 )}
               </div>
@@ -2471,7 +2471,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                       `✅ ${isSpanish ? 'Balance actualizado correctamente' : 'Balance updated successfully'}\n\n` +
                       `${isSpanish ? 'Operación:' : 'Operation:'} ${balanceOperation === 'add' ? '➕ ' + (isSpanish ? 'Aumentar' : 'Add') : '➖ ' + (isSpanish ? 'Disminuir' : 'Subtract')}\n` +
                       `${isSpanish ? 'Monto:' : 'Amount:'} ${selectedAccount.currency} ${(balanceAmount || 0).toLocaleString()}\n` +
-                      `${isSpanish ? 'Balance anterior:' : 'Previous balance:'} ${selectedAccount.currency} ${selectedAccount.(totalBalance || 0).toLocaleString()}\n` +
+                      `${isSpanish ? 'Balance anterior:' : 'Previous balance:'} ${selectedAccount.currency} ${selected(account.totalBalance || 0).toLocaleString()}\n` +
                       `${isSpanish ? 'Nuevo balance:' : 'New balance:'} ${selectedAccount.currency} ${(newTotal || 0).toLocaleString()}`
                     );
                   } else {
@@ -2497,5 +2497,6 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
     </div>
   );
 }
+
 
 
