@@ -6,7 +6,7 @@
  * Deducts from M2 balance directly from Digital Commercial Bank Ltd file
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Globe,
   Send,
