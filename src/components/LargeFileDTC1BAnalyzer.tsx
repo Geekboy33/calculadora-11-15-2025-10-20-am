@@ -484,40 +484,45 @@ export function LargeFileDTC1BAnalyzer() {
       logger.log(`[LargeFileDTC1BAnalyzer] 🔄 Reanudando desde: ${pendingState.bytesProcessed} bytes (${pendingState.progress.toFixed(2)}%)`);
       
       await processingStore.startGlobalProcessing(file, pendingState.bytesProcessed, (progress, balances) => {
-        // ✅ THROTTLE: Solo actualizar UI cada 1% para evitar re-renders masivos
+        // ✅ MEGA-THROTTLE: Solo actualizar UI cada 2% para máxima fluidez
         const progressInt = Math.floor(progress);
-        if (progressInt > lastProgressUpdate.current || balances.length !== (analysisRef.current?.balances.length || 0)) {
+        const shouldUpdate = progressInt > lastProgressUpdate.current && progressInt % 2 === 0;
+        const balancesChanged = balances.length !== (analysisRef.current?.balances.length || 0);
+
+        if (shouldUpdate || balancesChanged) {
           lastProgressUpdate.current = progressInt;
-          
+
           // ✅ Obtener bytesProcessed real del estado actual
           const currentState = processingStore.getState();
           const actualBytesProcessed = currentState?.bytesProcessed || (file.size * progress) / 100;
-          
-          // Callback de progreso - SOLO cada 1% o cuando cambian balances
-          setAnalysis(prev => prev ? {
-            ...prev,
-            progress,
-            bytesProcessed: actualBytesProcessed, // ✅ Usar valor real
-            balances,
-            status: 'processing'
-          } : {
-            fileName: file.name,
-            fileSize: file.size,
-            bytesProcessed: actualBytesProcessed, // ✅ Usar valor real
-            progress,
-            magicNumber: '',
-            entropy: 0,
-            isEncrypted: false,
-            detectedAlgorithm: 'Procesando...',
-            ivBytes: '',
-            saltBytes: '',
-            balances,
-            status: 'processing'
+
+          // ✅ Usar requestAnimationFrame para actualizaciones suaves
+          requestAnimationFrame(() => {
+            setAnalysis(prev => prev ? {
+              ...prev,
+              progress,
+              bytesProcessed: actualBytesProcessed,
+              balances,
+              status: 'processing'
+            } : {
+              fileName: file.name,
+              fileSize: file.size,
+              bytesProcessed: actualBytesProcessed,
+              progress,
+              magicNumber: '',
+              entropy: 0,
+              isEncrypted: false,
+              detectedAlgorithm: 'Procesando...',
+              ivBytes: '',
+              saltBytes: '',
+              balances,
+              status: 'processing'
+            });
           });
         }
 
-        // Guardar balances periódicamente
-        if (balances.length > 0 && Math.floor(progress) % 10 === 0) {
+        // Guardar balances cada 10% (no más frecuente)
+        if (balances.length > 0 && progressInt % 10 === 0 && progressInt !== lastProgressUpdate.current) {
           saveBalancesToStorage(balances, file.name, file.size);
         }
       });
@@ -611,39 +616,48 @@ export function LargeFileDTC1BAnalyzer() {
         ledgerPersistenceStore.setProcessing(true);
 
         await processingStore.startGlobalProcessing(file, startFromByte, (progress, balances) => {
-          // Calcular bytes procesados y chunk index
-          const bytesProcessed = (file.size * progress) / 100;
-          const chunkIndex = Math.floor(bytesProcessed / (10 * 1024 * 1024)); // 10MB chunks
-          
-          // Actualizar ledgerPersistenceStore
-          ledgerPersistenceStore.updateProgress(bytesProcessed, file.size, chunkIndex);
-          
-          // Callback de progreso para actualizar UI local
-          setAnalysis(prev => prev ? {
-            ...prev,
-            progress,
-            bytesProcessed,
-            balances,
-            status: 'processing'
-          } : {
-            fileName: file.name,
-            fileSize: file.size,
-            bytesProcessed,
-            progress,
-            magicNumber: '',
-            entropy: 0,
-            isEncrypted: false,
-            detectedAlgorithm: t.analyzerProcessing,
-            ivBytes: '',
-            saltBytes: '',
-            balances,
-            status: 'processing'
-          });
+          // ✅ MEGA-THROTTLE: Actualizar cada 2% para máxima fluidez
+          const progressInt = Math.floor(progress);
+          const shouldUpdate = progressInt % 2 === 0 || balances.length !== (analysisRef.current?.balances.length || 0);
 
-          // Guardar balances periódicamente en ambos stores
-          if (balances.length > 0 && Math.floor(progress) % 10 === 0) {
+          if (shouldUpdate) {
+            const bytesProcessed = (file.size * progress) / 100;
+            const chunkIndex = Math.floor(bytesProcessed / (10 * 1024 * 1024));
+
+            // Actualizar ledgerPersistenceStore cada 2% (no cada callback)
+            if (progressInt % 2 === 0) {
+              ledgerPersistenceStore.updateProgress(bytesProcessed, file.size, chunkIndex);
+            }
+
+            // ✅ requestAnimationFrame para animaciones suaves
+            requestAnimationFrame(() => {
+              setAnalysis(prev => prev ? {
+                ...prev,
+                progress,
+                bytesProcessed,
+                balances,
+                status: 'processing'
+              } : {
+                fileName: file.name,
+                fileSize: file.size,
+                bytesProcessed,
+                progress,
+                magicNumber: '',
+                entropy: 0,
+                isEncrypted: false,
+                detectedAlgorithm: t.analyzerProcessing,
+                ivBytes: '',
+                saltBytes: '',
+                balances,
+                status: 'processing'
+              });
+            });
+          }
+
+          // Guardar cada 10% solamente
+          if (balances.length > 0 && progressInt % 10 === 0 && progressInt > 0) {
             saveBalancesToStorage(balances, file.name, file.size);
-            console.log('[LargeFileDTC1BAnalyzer] 💾 Auto-guardado en progreso:', progress.toFixed(1) + '%');
+            console.log('[LargeFileDTC1BAnalyzer] 💾 Auto-guardado:', progressInt + '%');
           }
         });
 
