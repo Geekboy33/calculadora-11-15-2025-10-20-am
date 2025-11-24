@@ -740,14 +740,14 @@ export function AuditBankWindow() {
       Object.entries(montoPorDivisa).forEach(([currency, values]: [string, any]) => {
         const total = values.reduce((sum: number, v: number) => sum + v, 0);
         const totalUsd = total * (EXCHANGE_RATES[currency] || 1);
-        console.log(`  ${currency}: ${values.length} montos | TOTAL: ${currency} ${total.toLocaleString()} = USD $${totalUsd.toLocaleString()}`);
-        console.log(`    → TODOS los montos ${currency}:`, values.map((v: number) => v.toLocaleString()).join(', '));
+        console.log(`  ${currency}: ${values.length} montos | TOTAL: ${currency} ${total.toLocaleString?.() ?? "0"} = USD $${totalUsd.toLocaleString?.() ?? "0"}`);
+        console.log(`    → TODOS los montos ${currency}:`, values.map((v: number) => v.toLocaleString?.() ?? "0").join(', '));
       });
       
       console.log('[AuditBank] 📊 PRIMEROS 15 MONTOS CON OFFSET:');
       amounts.slice(0, 15).forEach((amt, i) => {
         const usdEquiv = amt.value * (EXCHANGE_RATES[amt.currency] || 1);
-        console.log(`  ${i + 1}. ${amt.currency} ${amt.value.toLocaleString()} = USD ${usdEquiv.toLocaleString()} (Offset: ${amt.offset})`);
+        console.log(`  ${i + 1}. ${amt.currency} ${amt.value.toLocaleString?.() ?? "0"} = USD ${usdEquiv.toLocaleString?.() ?? "0"} (Offset: ${amt.offset})`);
       });
 
     if (extracted.reverseEngineering) {
@@ -807,7 +807,7 @@ export function AuditBankWindow() {
       setProgress(20);
       console.log('[AuditBank] 📁 Archivo:', file.name);
       console.log('[AuditBank] 📊 Tamaño:', (data.length / 1024).toFixed(2), 'KB');
-      console.log('[AuditBank] 📊 Bytes totales:', data.length.toLocaleString());
+      console.log('[AuditBank] 📊 Bytes totales:', data.length.toLocaleString?.() ?? "0");
       
       // Mostrar muestra del contenido
       const textDecoder = new TextDecoder('utf-8', { fatal: false });
@@ -870,7 +870,7 @@ export function AuditBankWindow() {
         
         // Log para montos USD específicamente
         if (amt.currency === 'USD' && index < 20) {
-          console.log(`[AuditBank] 🔍 USD Monto #${index + 1}: ${amt.currency} ${amt.value.toLocaleString()} = USD $${valueUsd.toLocaleString()}`);
+          console.log(`[AuditBank] 🔍 USD Monto #${index + 1}: ${amt.currency} ${amt.value.toLocaleString?.() ?? "0"} = USD $${valueUsd.toLocaleString?.() ?? "0"}`);
         }
         
         // Asignar a la categoría correcta
@@ -894,12 +894,12 @@ export function AuditBankWindow() {
         
         // Log para montos USD en M1, M2, M3 específicamente
         if (amt.currency === 'USD' && (categoria === 'M1' || categoria === 'M2' || categoria === 'M3')) {
-          console.log(`[AuditBank] ✅ ${categoria} DETECTADO: USD ${amt.value.toLocaleString()} (USD $${valueUsd.toLocaleString()}) → ${categoria}`);
+          console.log(`[AuditBank] ✅ ${categoria} DETECTADO: USD ${amt.value.toLocaleString?.() ?? "0"} (USD $${valueUsd.toLocaleString?.() ?? "0"}) → ${categoria}`);
         }
         
         // Log para TODOS los montos M3 (todas las divisas)
         if (categoria === 'M3') {
-          console.log(`[AuditBank] 🟡 M3: ${amt.currency} ${amt.value.toLocaleString()} = USD $${valueUsd.toLocaleString()}`);
+          console.log(`[AuditBank] 🟡 M3: ${amt.currency} ${amt.value.toLocaleString?.() ?? "0"} = USD $${valueUsd.toLocaleString?.() ?? "0"}`);
         }
       });
       
@@ -911,12 +911,12 @@ export function AuditBankWindow() {
       // Mostrar distribución para TODAS las divisas
       Array.from(currencyData.entries()).forEach(([currency, data]) => {
         console.log(`\n  💰 ${currency}:`);
-        console.log(`     Total: ${currency} ${data.total.toLocaleString()}`);
-        if (data.M0 > 0) console.log(`     M0 (<$10K): ${currency} ${data.M0.toLocaleString()} (${((data.M0/data.total)*100).toFixed(1)}%)`);
-        if (data.M1 > 0) console.log(`     M1 ($10K-$100K): ${currency} ${data.M1.toLocaleString()} (${((data.M1/data.total)*100).toFixed(1)}%)`);
-        if (data.M2 > 0) console.log(`     M2 ($100K-$1M): ${currency} ${data.M2.toLocaleString()} (${((data.M2/data.total)*100).toFixed(1)}%)`);
-        if (data.M3 > 0) console.log(`     M3 ($1M-$5M): ${currency} ${data.M3.toLocaleString()} (${((data.M3/data.total)*100).toFixed(1)}%)`);
-        if (data.M4 > 0) console.log(`     M4 (>$5M): ${currency} ${data.M4.toLocaleString()} (${((data.M4/data.total)*100).toFixed(1)}%)`);
+        console.log(`     Total: ${currency} ${data.total.toLocaleString?.() ?? "0"}`);
+        if (data.M0 > 0) console.log(`     M0 (<$10K): ${currency} ${data.M0.toLocaleString?.() ?? "0"} (${((data.M0/data.total)*100).toFixed(1)}%)`);
+        if (data.M1 > 0) console.log(`     M1 ($10K-$100K): ${currency} ${data.M1.toLocaleString?.() ?? "0"} (${((data.M1/data.total)*100).toFixed(1)}%)`);
+        if (data.M2 > 0) console.log(`     M2 ($100K-$1M): ${currency} ${data.M2.toLocaleString?.() ?? "0"} (${((data.M2/data.total)*100).toFixed(1)}%)`);
+        if (data.M3 > 0) console.log(`     M3 ($1M-$5M): ${currency} ${data.M3.toLocaleString?.() ?? "0"} (${((data.M3/data.total)*100).toFixed(1)}%)`);
+        if (data.M4 > 0) console.log(`     M4 (>$5M): ${currency} ${data.M4.toLocaleString?.() ?? "0"} (${((data.M4/data.total)*100).toFixed(1)}%)`);
       });
       
       console.log('\n[AuditBank] ═══════════════════════════════════════════════════════');
@@ -1047,7 +1047,7 @@ export function AuditBankWindow() {
         const realContext = extractRealContext(amt.offset, fullText, amt);
         
         // Construir evidencia con datos REALES (no simulados)
-        let evidencia = `Monto: ${amt.currency} ${amt.value.toLocaleString()} (USD ${valueUsd.toLocaleString()})`;
+        let evidencia = `Monto: ${amt.currency} ${amt.value.toLocaleString?.() ?? "0"} (USD ${valueUsd.toLocaleString?.() ?? "0"})`;
         
         if (realContext.account) {
           evidencia += ` | Cuenta detectada: ${realContext.account}`;
@@ -1114,8 +1114,8 @@ export function AuditBankWindow() {
       agregados.forEach(a => {
         const totalDivisa = a.M0 + a.M1 + a.M2 + a.M3 + a.M4;
         console.log(`\n  💰 ${a.currency}:`);
-        console.log(`     TOTAL EN ${a.currency}: ${totalDivisa.toLocaleString()}`);
-        console.log(`     TOTAL EN USD: $${a.equiv_usd.toLocaleString()}`);
+        console.log(`     TOTAL EN ${a.currency}: ${totalDivisa.toLocaleString?.() ?? "0"}`);
+        console.log(`     TOTAL EN USD: $${a.equiv_usd.toLocaleString?.() ?? "0"}`);
         console.log(`     Distribución:`);
         
         const amountInCategory = [
@@ -1129,7 +1129,7 @@ export function AuditBankWindow() {
         amountInCategory.forEach(x => {
           if (x.val > 0) {
             const percentage = totalDivisa > 0 ? ((x.val / totalDivisa) * 100).toFixed(1) : '0';
-            console.log(`     ├─ ${x.cat}: ${a.currency} ${x.val.toLocaleString()} (${percentage}%) = USD $${x.usd.toLocaleString()}`);
+            console.log(`     ├─ ${x.cat}: ${a.currency} ${x.val.toLocaleString?.() ?? "0"} (${percentage}%) = USD $${x.usd.toLocaleString?.() ?? "0"}`);
           }
         });
         
@@ -1143,12 +1143,12 @@ export function AuditBankWindow() {
       console.log('\n[AuditBank] ═══════════════════════════════════════════════════════');
       
       console.log('[AuditBank] 💰 TOTALES POR CATEGORÍA (USD):');
-      console.log(`  M0 (<$10K): $${totalM0.toLocaleString()} | ${hallazgos.filter(h => h.classification === 'M0').length} montos`);
-      console.log(`  M1 ($10K-$100K): $${totalM1.toLocaleString()} | ${hallazgos.filter(h => h.classification === 'M1').length} montos`);
-      console.log(`  M2 ($100K-$1M): $${totalM2.toLocaleString()} | ${hallazgos.filter(h => h.classification === 'M2').length} montos`);
-      console.log(`  M3 ($1M-$5M): $${totalM3.toLocaleString()} | ${hallazgos.filter(h => h.classification === 'M3').length} montos`);
-      console.log(`  M4 (>$5M): $${totalM4.toLocaleString()} | ${hallazgos.filter(h => h.classification === 'M4').length} montos`);
-      console.log(`  TOTAL: $${(totalM0+totalM1+totalM2+totalM3+totalM4).toLocaleString()} | ${hallazgos.length} montos totales`);
+      console.log(`  M0 (<$10K): $${totalM0.toLocaleString?.() ?? "0"} | ${hallazgos.filter(h => h.classification === 'M0').length} montos`);
+      console.log(`  M1 ($10K-$100K): $${totalM1.toLocaleString?.() ?? "0"} | ${hallazgos.filter(h => h.classification === 'M1').length} montos`);
+      console.log(`  M2 ($100K-$1M): $${totalM2.toLocaleString?.() ?? "0"} | ${hallazgos.filter(h => h.classification === 'M2').length} montos`);
+      console.log(`  M3 ($1M-$5M): $${totalM3.toLocaleString?.() ?? "0"} | ${hallazgos.filter(h => h.classification === 'M3').length} montos`);
+      console.log(`  M4 (>$5M): $${totalM4.toLocaleString?.() ?? "0"} | ${hallazgos.filter(h => h.classification === 'M4').length} montos`);
+      console.log(`  TOTAL: $${(totalM0+totalM1+totalM2+totalM3+totalM4).toLocaleString?.() ?? "0"} | ${hallazgos.length} montos totales`);
       
       // 🔥 VERIFICAR TODOS LOS MONTOS M3 🔥
       const montosM3 = hallazgos.filter(h => h.classification === 'M3');
@@ -1158,29 +1158,29 @@ export function AuditBankWindow() {
         console.log('  LISTADO COMPLETO:');
         montosM3.forEach((h, i) => {
           const usdEquiv = h.money.amount * (EXCHANGE_RATES[h.money.currency] || 1);
-          console.log(`    ${(i + 1).toString().padStart(3, ' ')}. ${h.money.currency} ${h.money.amount.toLocaleString().padStart(15, ' ')} = USD $${usdEquiv.toLocaleString().padStart(15, ' ')}`);
+          console.log(`    ${(i + 1).toString().padStart(3, ' ')}. ${h.money.currency} ${h.money.amount.toLocaleString?.() ?? "0".padStart(15, ' ')} = USD $${usdEquiv.toLocaleString?.() ?? "0".padStart(15, ' ')}`);
         });
         console.log(`  ─────────────────────────────────────────────────`);
-        console.log(`  SUMA TOTAL M3 (USD): $${totalM3.toLocaleString()}`);
+        console.log(`  SUMA TOTAL M3 (USD): $${totalM3.toLocaleString?.() ?? "0"}`);
         console.log(`  VERIFICACIÓN: ${montosM3.length} montos sumados`);
       }
       
       // Mostrar ejemplos de montos en cada categoría
       console.log('\n[AuditBank] 📋 EJEMPLOS POR CATEGORÍA:');
       if (hallazgos.filter(h => h.classification === 'M0').length > 0) {
-        console.log('  M0:', hallazgos.filter(h => h.classification === 'M0').slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString()}`).join(', '));
+        console.log('  M0:', hallazgos.filter(h => h.classification === 'M0').slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString?.() ?? "0"}`).join(', '));
       }
       if (hallazgos.filter(h => h.classification === 'M1').length > 0) {
-        console.log('  M1:', hallazgos.filter(h => h.classification === 'M1').slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString()}`).join(', '));
+        console.log('  M1:', hallazgos.filter(h => h.classification === 'M1').slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString?.() ?? "0"}`).join(', '));
       }
       if (hallazgos.filter(h => h.classification === 'M2').length > 0) {
-        console.log('  M2:', hallazgos.filter(h => h.classification === 'M2').slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString()}`).join(', '));
+        console.log('  M2:', hallazgos.filter(h => h.classification === 'M2').slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString?.() ?? "0"}`).join(', '));
       }
       if (hallazgos.filter(h => h.classification === 'M3').length > 0) {
-        console.log('  M3:', hallazgos.filter(h => h.classification === 'M3').slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString()}`).join(', '));
+        console.log('  M3:', hallazgos.filter(h => h.classification === 'M3').slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString?.() ?? "0"}`).join(', '));
       }
       if (hallazgos.filter(h => h.classification === 'M4').length > 0) {
-        console.log('  M4:', hallazgos.filter(h => h.classification === 'M4').slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString()}`).join(', '));
+        console.log('  M4:', hallazgos.filter(h => h.classification === 'M4').slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString?.() ?? "0"}`).join(', '));
       }
       
       console.log('[AuditBank] 💾 Datos persistidos - permanecerán al cambiar de pestaña');
@@ -1276,7 +1276,7 @@ export function AuditBankWindow() {
           swift_code: null,
           money: { amount: bal.totalAmount, currency: bal.currency },
           classification,
-          evidencia_fragmento: `${bal.currency}: ${bal.totalAmount.toLocaleString()} | ${bal.transactionCount} transacciones | Mayor: ${bal.largestTransaction.toLocaleString()} | Menor: ${bal.smallestTransaction.toLocaleString()} | Promedio: ${bal.averageTransaction.toLocaleString()} | Clasificación: ${classification}`,
+          evidencia_fragmento: `${bal.currency}: ${bal.totalAmount.toLocaleString?.() ?? "0"} | ${bal.transactionCount} transacciones | Mayor: ${bal.largestTransaction.toLocaleString?.() ?? "0"} | Menor: ${bal.smallestTransaction.toLocaleString?.() ?? "0"} | Promedio: ${bal.averageTransaction.toLocaleString?.() ?? "0"} | Clasificación: ${classification}`,
           score_confianza: 98,
           timestamp_detectado: new Date().toISOString(),
         };
@@ -1315,7 +1315,7 @@ export function AuditBankWindow() {
         if (amountInCategory.length > 0) {
           console.log(`  ${a.currency}:`);
           amountInCategory.forEach(x => {
-            console.log(`    ${x.cat}: ${a.currency} ${x.val.toLocaleString()} (USD $${x.usd.toLocaleString()})`);
+            console.log(`    ${x.cat}: ${a.currency} ${x.val.toLocaleString?.() ?? "0"} (USD $${x.usd.toLocaleString?.() ?? "0"})`);
           });
         }
         
@@ -1327,19 +1327,19 @@ export function AuditBankWindow() {
       });
       
       console.log('[AuditBank] 💰 TOTALES POR CATEGORÍA (USD):');
-      console.log(`  M0 (<$10K): $${totalM0.toLocaleString()} | ${hallazgos.filter(h => h.classification === 'M0').length} montos`);
-      console.log(`  M1 ($10K-$100K): $${totalM1.toLocaleString()} | ${hallazgos.filter(h => h.classification === 'M1').length} montos`);
-      console.log(`  M2 ($100K-$1M): $${totalM2.toLocaleString()} | ${hallazgos.filter(h => h.classification === 'M2').length} montos`);
-      console.log(`  M3 ($1M-$5M): $${totalM3.toLocaleString()} | ${hallazgos.filter(h => h.classification === 'M3').length} montos`);
-      console.log(`  M4 (>$5M): $${totalM4.toLocaleString()} | ${hallazgos.filter(h => h.classification === 'M4').length} montos`);
-      console.log(`  TOTAL: $${(totalM0+totalM1+totalM2+totalM3+totalM4).toLocaleString()} | ${hallazgos.length} montos totales`);
+      console.log(`  M0 (<$10K): $${totalM0.toLocaleString?.() ?? "0"} | ${hallazgos.filter(h => h.classification === 'M0').length} montos`);
+      console.log(`  M1 ($10K-$100K): $${totalM1.toLocaleString?.() ?? "0"} | ${hallazgos.filter(h => h.classification === 'M1').length} montos`);
+      console.log(`  M2 ($100K-$1M): $${totalM2.toLocaleString?.() ?? "0"} | ${hallazgos.filter(h => h.classification === 'M2').length} montos`);
+      console.log(`  M3 ($1M-$5M): $${totalM3.toLocaleString?.() ?? "0"} | ${hallazgos.filter(h => h.classification === 'M3').length} montos`);
+      console.log(`  M4 (>$5M): $${totalM4.toLocaleString?.() ?? "0"} | ${hallazgos.filter(h => h.classification === 'M4').length} montos`);
+      console.log(`  TOTAL: $${(totalM0+totalM1+totalM2+totalM3+totalM4).toLocaleString?.() ?? "0"} | ${hallazgos.length} montos totales`);
       
       // Mostrar ejemplos
       console.log('[AuditBank] 📋 EJEMPLOS POR CATEGORÍA:');
       ['M0', 'M1', 'M2', 'M3', 'M4'].forEach(cat => {
         const montosEnCategoria = hallazgos.filter(h => h.classification === cat);
         if (montosEnCategoria.length > 0) {
-          console.log(`  ${cat}:`, montosEnCategoria.slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString()}`).join(', '));
+          console.log(`  ${cat}:`, montosEnCategoria.slice(0, 3).map(h => `${h.money.currency} ${h.money.amount.toLocaleString?.() ?? "0"}`).join(', '));
         }
       });
       
@@ -1492,7 +1492,7 @@ MONTOS DETECTADOS (${extractedData.amounts.length})
 
 ${extractedData.amounts.slice(0, 50).map((amt, i) => {
   const usdEquiv = amt.value * (EXCHANGE_RATES[amt.currency] || 1);
-  return `${(i + 1).toString().padStart(3, ' ')}. ${amt.currency} ${amt.value.toLocaleString()} (USD $${usdEquiv.toLocaleString()})`;
+  return `${(i + 1).toString().padStart(3, ' ')}. ${amt.currency} ${amt.value.toLocaleString?.() ?? "0"} (USD $${usdEquiv.toLocaleString?.() ?? "0"})`;
 }).join('\n')}
 ${extractedData.amounts.length > 50 ? `\n... y ${extractedData.amounts.length - 50} montos más` : ''}
 
@@ -1501,26 +1501,26 @@ CLASIFICACIÓN MONETARIA M0-M4
 ═══════════════════════════════════════════════════════════════════════
 
 M0 - Efectivo Físico (< $10,000 USD):
-  Total: $${totalM0.toLocaleString()}
+  Total: $${totalM0.toLocaleString?.() ?? "0"}
   Montos: ${results.hallazgos.filter(h => h.classification === 'M0').length}
   
 M1 - Depósitos a la Vista ($10,000 - $100,000 USD):
-  Total: $${totalM1.toLocaleString()}
+  Total: $${totalM1.toLocaleString?.() ?? "0"}
   Montos: ${results.hallazgos.filter(h => h.classification === 'M1').length}
 
 M2 - Ahorro y Depósitos a Plazo ($100,000 - $1,000,000 USD):
-  Total: $${totalM2.toLocaleString()}
+  Total: $${totalM2.toLocaleString?.() ?? "0"}
   Montos: ${results.hallazgos.filter(h => h.classification === 'M2').length}
 
 M3 - Depósitos Institucionales ($1,000,000 - $5,000,000 USD):
-  Total: $${totalM3.toLocaleString()}
+  Total: $${totalM3.toLocaleString?.() ?? "0"}
   Montos: ${results.hallazgos.filter(h => h.classification === 'M3').length}
 
 M4 - Instrumentos Financieros (> $5,000,000 USD):
-  Total: $${totalM4.toLocaleString()}
+  Total: $${totalM4.toLocaleString?.() ?? "0"}
   Montos: ${results.hallazgos.filter(h => h.classification === 'M4').length}
 
-TOTAL GENERAL: $${(totalM0 + totalM1 + totalM2 + totalM3 + totalM4).toLocaleString()}
+TOTAL GENERAL: $${(totalM0 + totalM1 + totalM2 + totalM3 + totalM4).toLocaleString?.() ?? "0"}
 
 ═══════════════════════════════════════════════════════════════════════
 TOTALES POR DIVISA
@@ -1530,13 +1530,13 @@ ${results.agregados.map(a => {
   const total = a.M0 + a.M1 + a.M2 + a.M3 + a.M4;
   return `
 ${a.currency}:
-  Total en ${a.currency}: ${total.toLocaleString()}
-  M0: ${a.M0 > 0 ? a.M0.toLocaleString() : '-'}
-  M1: ${a.M1 > 0 ? a.M1.toLocaleString() : '-'}
-  M2: ${a.M2 > 0 ? a.M2.toLocaleString() : '-'}
-  M3: ${a.M3 > 0 ? a.M3.toLocaleString() : '-'}
-  M4: ${a.M4 > 0 ? a.M4.toLocaleString() : '-'}
-  Equivalente USD: $${a.equiv_usd.toLocaleString()}`;
+  Total en ${a.currency}: ${total.toLocaleString?.() ?? "0"}
+  M0: ${a.M0 > 0 ? a.M0.toLocaleString?.() ?? "0" : '-'}
+  M1: ${a.M1 > 0 ? a.M1.toLocaleString?.() ?? "0" : '-'}
+  M2: ${a.M2 > 0 ? a.M2.toLocaleString?.() ?? "0" : '-'}
+  M3: ${a.M3 > 0 ? a.M3.toLocaleString?.() ?? "0" : '-'}
+  M4: ${a.M4 > 0 ? a.M4.toLocaleString?.() ?? "0" : '-'}
+  Equivalente USD: $${a.equiv_usd.toLocaleString?.() ?? "0"}`;
 }).join('\n')}
 
 ═══════════════════════════════════════════════════════════════════════
@@ -1545,13 +1545,13 @@ HALLAZGOS DETALLADOS (${results.hallazgos.length})
 
 ${results.hallazgos.map((h, i) => `
 HALLAZGO #${i + 1}:
-  Monto: ${h.money.currency} ${h.money.amount.toLocaleString()}
+  Monto: ${h.money.currency} ${h.money.amount.toLocaleString?.() ?? "0"}
   Clasificación: ${h.classification}
   Banco: ${h.banco_detectado}
   Cuenta: ${showFullData ? (h.numero_cuenta_full || h.numero_cuenta_mask) : h.numero_cuenta_mask}
   ${h.iban_full ? `IBAN: ${showFullData ? h.iban_full : h.iban_full.slice(0, 4) + '****' + h.iban_full.slice(-4)}` : ''}
   ${h.swift_code ? `SWIFT: ${h.swift_code}` : ''}
-  USD Equivalente: $${(h.money.amount * (EXCHANGE_RATES[h.money.currency] || 1)).toLocaleString()}
+  USD Equivalente: $${(h.money.amount * (EXCHANGE_RATES[h.money.currency] || 1)).toLocaleString?.() ?? "0"}
   Confianza: ${h.score_confianza}%
   Evidencia: ${h.evidencia_fragmento}
   Timestamp: ${new Date(h.timestamp_detectado).toLocaleString('es-ES')}
@@ -1561,7 +1561,7 @@ HALLAZGO #${i + 1}:
 METADATOS DEL ANÁLISIS
 ═══════════════════════════════════════════════════════════════════════
 
-Tamaño del Archivo: ${extractedData.metadata.fileSize.toLocaleString()} bytes
+Tamaño del Archivo: ${extractedData.metadata.fileSize.toLocaleString?.() ?? "0"} bytes
 Bloques Detectados: ${extractedData.metadata.blocksDetected}
 Nivel de Entropía: ${extractedData.metadata.entropyLevel.toFixed(2)} bits/byte
 Archivo Encriptado: ${extractedData.metadata.hasEncryption ? 'SÍ' : 'NO'}
@@ -1721,7 +1721,7 @@ Versión: 5.0
             <div className="flex flex-wrap gap-1 mb-3">
               {systemBalances.map(b => (
                 <span key={b.currency} className="px-2 py-1 bg-[#1a1a1a] border border-[#00ff88]/30 rounded text-xs text-[#00ff88] font-mono">
-                  {b.currency}: {b.totalAmount.toLocaleString()}
+                  {b.currency}: {b.totalAmount.toLocaleString?.() ?? "0"}
                 </span>
               ))}
             </div>
@@ -1956,7 +1956,7 @@ Versión: 5.0
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
                 {extractedData.amounts.map((amt, i) => (
                   <div key={i} className="bg-[#000] border border-cyan-500/20 rounded p-2 hover:border-cyan-400/50 transition-colors">
-                    <div className="text-lg text-cyan-300 font-mono font-bold">{amt.currency} {amt.value.toLocaleString()}</div>
+                    <div className="text-lg text-cyan-300 font-mono font-bold">{amt.currency} {amt.value.toLocaleString?.() ?? "0"}</div>
                     <div className="text-xs text-[#4d7c4d]">Offset: {amt.offset} | Monto #{i + 1}</div>
                   </div>
                 ))}
@@ -2051,7 +2051,7 @@ Versión: 5.0
                           <span className="text-purple-400 font-mono">{field.type}</span>
                         </div>
                         <div className="text-sm text-[#00ff88] font-mono font-bold mt-1">
-                          {typeof field.value === 'number' ? field.value.toLocaleString() : field.value}
+                          {typeof field.value === 'number' ? field.value.toLocaleString?.() ?? "0" : field.value}
                         </div>
                         <div className="text-xs text-[#4d7c4d] mt-1">{field.interpretation}</div>
                       </div>
@@ -2199,7 +2199,7 @@ Versión: 5.0
                     </div>
                     <div className="text-xs text-[#4d7c4d] mb-2">{descriptions[classification]}</div>
                     <div className={`text-lg font-mono font-bold ${colors[classification].text}`}>
-                      ${totalUsdForClass.toLocaleString()}
+                      ${totalUsdForClass.toLocaleString?.() ?? "0"}
                     </div>
                     <div className="text-xs text-[#4d7c4d] mt-1">
                       {results.agregados.filter(a => a[classification] > 0).length} divisas
@@ -2238,36 +2238,36 @@ Versión: 5.0
                       <tr key={a.currency} className="border-b border-[#1a1a1a] hover:bg-[#141414]">
                         <td className="py-3 px-4 text-[#80ff80] font-bold">{a.currency}</td>
                         <td className="py-3 px-4 text-right font-mono text-cyan-400 font-bold">
-                          {total.toLocaleString()}
+                          {total.toLocaleString?.() ?? "0"}
                         </td>
                         <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M0' ? 'text-purple-400 font-bold' : 'text-[#4d7c4d]'}`}>
-                          {a.M0 > 0 ? a.M0.toLocaleString() : '-'}
+                          {a.M0 > 0 ? a.M0.toLocaleString?.() ?? "0" : '-'}
                         </td>
                         <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M1' ? 'text-blue-400 font-bold' : 'text-[#4d7c4d]'}`}>
-                          {a.M1 > 0 ? a.M1.toLocaleString() : '-'}
+                          {a.M1 > 0 ? a.M1.toLocaleString?.() ?? "0" : '-'}
                         </td>
                         <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M2' ? 'text-green-400 font-bold' : 'text-[#4d7c4d]'}`}>
-                          {a.M2 > 0 ? a.M2.toLocaleString() : '-'}
+                          {a.M2 > 0 ? a.M2.toLocaleString?.() ?? "0" : '-'}
                         </td>
                         <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M3' ? 'text-yellow-400 font-bold' : 'text-[#4d7c4d]'}`}>
-                          {a.M3 > 0 ? a.M3.toLocaleString() : '-'}
+                          {a.M3 > 0 ? a.M3.toLocaleString?.() ?? "0" : '-'}
                         </td>
                         <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M4' ? 'text-red-400 font-bold' : 'text-[#4d7c4d]'}`}>
-                          {a.M4 > 0 ? a.M4.toLocaleString() : '-'}
+                          {a.M4 > 0 ? a.M4.toLocaleString?.() ?? "0" : '-'}
                         </td>
-                        <td className="py-3 px-4 text-right text-[#00ff88] font-mono font-bold">${a.equiv_usd.toLocaleString()}</td>
+                        <td className="py-3 px-4 text-right text-[#00ff88] font-mono font-bold">${a.equiv_usd.toLocaleString?.() ?? "0"}</td>
                       </tr>
                     );
                   })}
                   <tr className="bg-[#141414] font-bold border-t-2 border-[#00ff88]/30">
                     <td className="py-3 px-4 text-[#00ff88] text-lg">TOTAL USD</td>
                     <td className="py-3 px-4 text-right text-cyan-400 font-mono text-lg">-</td>
-                    <td className="py-3 px-4 text-right text-purple-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M0 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString()}</td>
-                    <td className="py-3 px-4 text-right text-blue-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M1 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString()}</td>
-                    <td className="py-3 px-4 text-right text-green-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M2 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString()}</td>
-                    <td className="py-3 px-4 text-right text-yellow-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M3 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString()}</td>
-                    <td className="py-3 px-4 text-right text-red-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M4 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString()}</td>
-                    <td className="py-3 px-4 text-right text-[#00ff88] font-mono text-lg">${totalUsd.toLocaleString()}</td>
+                    <td className="py-3 px-4 text-right text-purple-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M0 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
+                    <td className="py-3 px-4 text-right text-blue-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M1 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
+                    <td className="py-3 px-4 text-right text-green-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M2 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
+                    <td className="py-3 px-4 text-right text-yellow-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M3 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
+                    <td className="py-3 px-4 text-right text-red-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M4 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
+                    <td className="py-3 px-4 text-right text-[#00ff88] font-mono text-lg">${totalUsd.toLocaleString?.() ?? "0"}</td>
                   </tr>
                 </tbody>
               </table>
@@ -2298,7 +2298,7 @@ Versión: 5.0
                 return (
                   <div key={h.id_registro} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4 hover:border-[#00ff88]/30 transition-colors">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-[#00ff88] font-bold text-lg">{h.money.currency} {h.money.amount.toLocaleString()}</span>
+                      <span className="text-[#00ff88] font-bold text-lg">{h.money.currency} {h.money.amount.toLocaleString?.() ?? "0"}</span>
                       <span className={`px-3 py-1 rounded-full text-xs font-bold border ${color.bg} ${color.text}`}>
                         {h.classification}
                       </span>
@@ -2360,7 +2360,7 @@ Versión: 5.0
                       <div className="bg-[#000] border border-cyan-500/20 rounded p-2">
                         <span className="text-[#4d7c4d] text-xs">💵 USD Equivalente:</span> 
                         <div className="text-cyan-300 font-bold text-lg mt-1">
-                          ${(h.money.amount * (EXCHANGE_RATES[h.money.currency] || 1)).toLocaleString()}
+                          ${(h.money.amount * (EXCHANGE_RATES[h.money.currency] || 1)).toLocaleString?.() ?? "0"}
                         </div>
                       </div>
                     </div>
@@ -2412,3 +2412,4 @@ Versión: 5.0
     </div>
   );
 }
+
