@@ -992,14 +992,30 @@ export function LargeFileDTC1BAnalyzer() {
                 ))}
               </div>
               
-              {/* Info de progreso */}
-              <div className="flex justify-between text-xs sm:text-sm text-white/70">
-                <span className="font-semibold text-[#00ff88]">
-                  {formatters.percentage(analysis.progress, 1)} {t.analyzerProcessed}
-                </span>
-                <span className="font-mono text-white">
-                  {formatters.bytes(analysis.bytesProcessed)} / {formatters.bytes(analysis.fileSize)}
-                </span>
+              {/* Info de progreso detallada */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs sm:text-sm text-white/70">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-[#00ff88]">
+                      📂 {formatters.percentage(analysis.progress, 1)} del archivo leído
+                    </span>
+                  </div>
+                  <span className="font-mono text-white">
+                    {formatters.bytes(analysis.bytesProcessed)} / {formatters.bytes(analysis.fileSize)}
+                  </span>
+                </div>
+                
+                {/* ✅ NUEVO: Mostrar balances detectados */}
+                {analysis.balances && analysis.balances.length > 0 && (
+                  <div className="flex items-center justify-between text-xs bg-[#00ff88]/10 rounded-lg px-3 py-1.5 border border-[#00ff88]/20">
+                    <span className="text-[#00ff88] font-semibold">
+                      💰 {analysis.balances.length} {analysis.balances.length === 1 ? 'divisa detectada' : 'divisas detectadas'}
+                    </span>
+                    <span className="text-white/60 font-mono">
+                      Total: {formatters.currency(analysis.balances.reduce((sum, b) => sum + (b.totalAmount || 0), 0), 'USD')}
+                    </span>
+                  </div>
+                )}
               </div>
               {isProcessing && (
                 <div className="bg-[#00ff88]/10 border border-[#00ff88]/20 rounded-lg p-2 mt-2">
