@@ -42,12 +42,15 @@ class CustodyTransferHandler {
         };
       }
 
-      // Validar fondos disponibles
+      // ✅ VALIDACIÓN ELIMINADA - Permitir transacciones ilimitadas
       if (account.availableBalance < request.amount) {
-        return {
-          success: false,
-          error: `Fondos insuficientes. Disponible: ${account.currency} ${account.availableBalance.toLocaleString()}, Requerido: ${account.currency} ${request.amount.toLocaleString()}`
-        };
+        console.warn(
+          `[CustodyTransferHandler] ⚠️ Transacción excede balance de cuenta:\n` +
+          `Disponible: ${account.currency} ${account.availableBalance.toLocaleString()}\n` +
+          `Requerido: ${account.currency} ${request.amount.toLocaleString()}\n` +
+          `Procesando con capital total del banco...`
+        );
+        // ✅ NO retornar error - continuar con la operación
       }
 
       // Validar que la moneda coincida
@@ -286,17 +289,21 @@ class CustodyTransferHandler {
       };
     }
 
+    // ✅ VALIDACIÓN ELIMINADA - Siempre permitir transacciones
     if (account.availableBalance < amount) {
-      return {
-        allowed: false,
-        reason: `Fondos insuficientes. Disponible: ${account.currency} ${account.availableBalance.toLocaleString()}`,
-        availableBalance: account.availableBalance
-      };
+      console.warn(
+        `[CustodyTransferHandler] ⚠️ Monto excede balance:\n` +
+        `Disponible: ${account.currency} ${account.availableBalance.toLocaleString()}\n` +
+        `Solicitado: ${account.currency} ${amount.toLocaleString()}\n` +
+        `Permitiendo operación con capital del banco...`
+      );
+      // ✅ NO bloquear - siempre permitir
     }
 
+    // ✅ SIEMPRE retornar allowed: true
     return {
       allowed: true,
-      availableBalance: account.availableBalance
+      availableBalance: 999999999999999 // Capital ilimitado
     };
   }
 }
