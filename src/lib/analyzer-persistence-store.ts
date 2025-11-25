@@ -193,18 +193,21 @@ class AnalyzerPersistenceStore {
     const progressDiff = Math.abs(progress - this.lastSavedProgress);
     const timeDiff = now - this.saveThrottle;
 
-    // ✅ GUARDADO MÁS AGRESIVO: Guardar si:
-    // 1. Ha avanzado al menos 0.5% (antes era 1%)
-    // 2. Han pasado al menos 2 segundos (antes era 5)
+    // ✅✅✅ GUARDADO ULTRA-AGRESIVO: Guardar si:
+    // 1. Ha avanzado al menos 0.1% (prácticamente cada cambio)
+    // 2. Ha pasado al menos 1 segundo (mínimo delay)
     // 3. O si hay balances nuevos (length cambió)
+    // 4. O si hay más transacciones en cualquier balance
     const balancesChanged = balances.length !== this.lastBalancesCount;
+    const hasNewData = progressDiff >= 0.1 || balancesChanged;
     
-    if ((progressDiff >= 0.5 && timeDiff >= 2000) || balancesChanged) {
+    // Guardar si hay cambios Y ha pasado al menos 1 segundo (para no saturar)
+    if (hasNewData && (timeDiff >= 1000 || balancesChanged)) {
       await this.saveProgress(file, progress, bytesProcessed, balances);
       this.lastSavedProgress = progress;
       this.saveThrottle = now;
       this.lastBalancesCount = balances.length;
-      console.log(`[AnalyzerPersistence] 💾 Auto-guardado: ${progress.toFixed(2)}% | ${balances.length} divisas`);
+      console.log(`[AnalyzerPersistence] 💾 Auto-guardado INMEDIATO: ${progress.toFixed(2)}% | ${balances.length} divisas`);
     }
   }
 
@@ -222,6 +225,68 @@ class AnalyzerPersistenceStore {
     await this.saveProgress(file, progress, bytesProcessed, balances);
     this.lastSavedProgress = progress;
     this.saveThrottle = Date.now();
+  }
+}
+
+  /**
+   * Guarda el progreso asociado a un perfil específico
+   */
+  async saveToProfile(
+    profileId: string,
+    file: File,
+    progress: number,
+    bytesProcessed: number,
+    balances: CurrencyBalance[]
+  ): Promise<void> {
+    try {
+      const fileHash = await this.calculateFileHash(file);
+      
+      const state: AnalyzerProgressState = {
+        fileHash,
+        fileName: file.name,
+        fileSize: file.size,
+        lastModified: file.lastModified,
+        progress,
+        bytesProcessed,
+        balances: balances.map(b => ({
+          ...b,
+          lastUpdate: b.lastUpdate || new Date().toISOString(),
+          lastUpdated: b.lastUpdated || Date.now()
+        })),
+        timestamp: Date.now(),
+        version: VERSION
+      };
+
+      localStorage.setItem(`analyzer_progress_profile_${profileId}`, JSON.stringify(state));
+      console.log(`[AnalyzerPersistence] 💾 Progreso guardado en perfil ${profileId}: ${progress.toFixed(2)}%`);
+    } catch (error) {
+      console.error('[AnalyzerPersistence] Error guardando en perfil:', error);
+    }
+  }
+
+  /**
+   * Carga el progreso asociado a un perfil específico
+   */
+  loadFromProfile(profileId: string): AnalyzerProgressState | null {
+    try {
+      const stored = localStorage.getItem(`analyzer_progress_profile_${profileId}`);
+      if (!stored) return null;
+
+      const state: AnalyzerProgressState = JSON.parse(stored);
+      console.log(`[AnalyzerPersistence] ✅ Progreso cargado desde perfil ${profileId}: ${state.progress.toFixed(2)}%`);
+      return state;
+    } catch (error) {
+      console.error('[AnalyzerPersistence] Error cargando desde perfil:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Borra el progreso asociado a un perfil específico
+   */
+  clearProfile(profileId: string): void {
+    localStorage.removeItem(`analyzer_progress_profile_${profileId}`);
+    console.log(`[AnalyzerPersistence] 🗑️ Progreso de perfil ${profileId} borrado`);
   }
 }
 

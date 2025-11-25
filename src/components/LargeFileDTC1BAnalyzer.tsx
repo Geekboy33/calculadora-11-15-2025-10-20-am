@@ -8,6 +8,7 @@ import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 import { processingStore } from '../lib/processing-store';
 import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
 import { analyzerPersistenceStore } from '../lib/analyzer-persistence-store';
+import { profilesStore } from '../lib/profiles-store';
 import { useLanguage } from '../lib/i18n.tsx';
 
 // CurrencyBalance is now imported from balances-store
@@ -471,51 +472,41 @@ export function LargeFileDTC1BAnalyzer() {
         // ✅ PRIORIDAD ABSOLUTA: Sistema de persistencia nuevo (analyzerPersistenceStore)
         // SIEMPRE usa savedProgress si existe, ignorando otros sistemas
         if (savedProgress) {
-          console.log('[AnalyzerPersistence] 🎯 Progreso encontrado, mostrando diálogo...');
-          const resume = confirm(
-            `🔄 PROGRESO GUARDADO DETECTADO\n\n` +
-            `Archivo: ${savedProgress.fileName}\n` +
-            `Progreso: ${savedProgress.progress.toFixed(2)}%\n` +
-            `Divisas: ${savedProgress.balances.length}\n` +
-            `Guardado: ${new Date(savedProgress.timestamp).toLocaleString()}\n\n` +
-            `¿Continuar desde ${savedProgress.progress.toFixed(1)}%?`
+          console.log('[AnalyzerPersistence] 🎯 Progreso encontrado, RESTAURANDO AUTOMÁTICAMENTE...');
+          
+          // ✅✅✅ RESTAURACIÓN AUTOMÁTICA - SIN preguntar, SIEMPRE restaurar
+          startFromByte = savedProgress.bytesProcessed;
+          
+          // ✅ CRÍTICO: Restaurar balances INMEDIATAMENTE antes de continuar
+          setAnalysis({
+            fileName: file.name,
+            fileSize: file.size,
+            bytesProcessed: savedProgress.bytesProcessed,
+            progress: savedProgress.progress,
+            magicNumber: '',
+            entropy: 0,
+            isEncrypted: false,
+            detectedAlgorithm: `✅ Continuando desde ${savedProgress.progress.toFixed(1)}%...`,
+            ivBytes: '',
+            saltBytes: '',
+            balances: savedProgress.balances, // ✅ Balances restaurados aquí
+            status: 'processing'
+          });
+          
+          console.log(`[AnalyzerPersistence] ✅✅✅ RESTAURADO AUTOMÁTICAMENTE: ${savedProgress.progress.toFixed(2)}% | ${savedProgress.balances.length} divisas`);
+          
+          // Guardar también en ledgerPersistenceStore para compatibilidad
+          ledgerPersistenceStore.updateBalances(
+            savedProgress.balances.map(b => ({
+              currency: b.currency,
+              balance: b.balance,
+              account: b.accountName,
+              lastUpdate: Date.now()
+            }))
           );
-
-          if (resume) {
-            startFromByte = savedProgress.bytesProcessed;
-            
-            // ✅ CRÍTICO: Restaurar balances INMEDIATAMENTE antes de continuar
-            setAnalysis({
-              fileName: file.name,
-              fileSize: file.size,
-              bytesProcessed: savedProgress.bytesProcessed,
-              progress: savedProgress.progress,
-              magicNumber: '',
-              entropy: 0,
-              isEncrypted: false,
-              detectedAlgorithm: 'Recuperando progreso guardado...',
-              ivBytes: '',
-              saltBytes: '',
-              balances: savedProgress.balances, // ✅ Balances restaurados aquí
-              status: 'processing'
-            });
-            
-            console.log(`[AnalyzerPersistence] ✅ Continuando desde ${savedProgress.progress.toFixed(2)}% con ${savedProgress.balances.length} divisas`);
-            
-            // Guardar también en ledgerPersistenceStore para compatibilidad
-            ledgerPersistenceStore.updateBalances(
-              savedProgress.balances.map(b => ({
-                currency: b.currency,
-                balance: b.balance,
-                account: b.accountName,
-                lastUpdate: Date.now()
-              }))
-            );
-          } else {
-            analyzerPersistenceStore.clearProgress();
-            startFromByte = 0;
-            console.log('[AnalyzerPersistence] 🔄 Reiniciando desde 0%');
-          }
+          
+          // Mostrar notificación breve
+          alert(`✅ PROGRESO RESTAURADO\n\nArchivo: ${savedProgress.fileName}\nProgreso: ${savedProgress.progress.toFixed(2)}%\nDivisas: ${savedProgress.balances.length}\n\nContinuando...`);
         }
         // PRIORIDAD 2: Sistema legacy (processingStore y ledgerPersistenceStore) - solo si NO hay savedProgress
         else if (existingProcess || ledgerRecovery) {
@@ -748,6 +739,55 @@ export function LargeFileDTC1BAnalyzer() {
     }
   };
 
+  const saveAnalysisAsProfile = async () => {
+    if (!analysis || !currentFileRef.current) {
+      alert('⚠️ No hay análisis activo para guardar');
+      return;
+    }
+
+    const profileName = prompt(
+      '📁 GUARDAR ANÁLISIS COMO PERFIL\n\n' +
+      `Archivo: ${analysis.fileName}\n` +
+      `Progreso: ${analysis.progress.toFixed(2)}%\n` +
+      `Divisas: ${analysis.balances.length}\n\n` +
+      'Ingresa un nombre para el perfil:'
+    );
+
+    if (!profileName || profileName.trim() === '') {
+      return;
+    }
+
+    try {
+      // Crear perfil con el estado actual del banco
+      const profile = profilesStore.createProfile(
+        profileName.trim(),
+        `Análisis de ${analysis.fileName} - Progreso: ${analysis.progress.toFixed(2)}% - ${analysis.balances.length} divisas`
+      );
+
+      // Guardar el progreso del análisis asociado al perfil
+      await analyzerPersistenceStore.saveToProfile(
+        profile.id,
+        currentFileRef.current,
+        analysis.progress,
+        analysis.bytesProcessed,
+        analysis.balances
+      );
+
+      alert(
+        '✅ PERFIL CREADO EXITOSAMENTE\n\n' +
+        `Nombre: ${profileName}\n` +
+        `Progreso guardado: ${analysis.progress.toFixed(2)}%\n` +
+        `Balances: ${analysis.balances.length} divisas\n\n` +
+        'Puedes cargar este perfil desde el Módulo de Perfiles para restaurar este análisis.'
+      );
+
+      console.log(`[AnalyzerPersistence] ✅ Perfil "${profileName}" creado con análisis guardado`);
+    } catch (error) {
+      console.error('[AnalyzerPersistence] Error creando perfil:', error);
+      alert('❌ Error al crear el perfil: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+    }
+  };
+
   const formatCurrency = (amount: number, currency: string): string => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -971,6 +1011,15 @@ export function LargeFileDTC1BAnalyzer() {
                   >
                     <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                     {t.analyzerExportReport}
+                  </button>
+                )}
+                {analysis && analysis.balances.length > 0 && (
+                  <button
+                    onClick={saveAnalysisAsProfile}
+                    className="flex-1 sm:flex-none bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(59,130,246,0.4)] text-xs sm:text-sm"
+                  >
+                    <Save className="w-3 h-3 sm:w-4 sm:h-4" />
+                    💾 Guardar como Perfil
                   </button>
                 )}
               </div>
