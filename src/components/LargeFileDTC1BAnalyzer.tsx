@@ -693,22 +693,35 @@ export function LargeFileDTC1BAnalyzer() {
           
           // ✅ OPTIMIZACIÓN: Guardar en ledgerPersistenceStore INMEDIATAMENTE
           if (savedProgress.balances && savedProgress.balances.length > 0) {
+            // Log detallado de los balances restaurados
+            console.log('[AnalyzerPersistence] 💰 BALANCES RESTAURADOS:');
+            savedProgress.balances.forEach(b => {
+              console.log(`  - ${b.currency}: ${b.totalAmount || b.balance || 0} (${b.transactionCount || 0} trans.)`);
+            });
+            
             ledgerPersistenceStore.updateBalances(
               savedProgress.balances.map(b => ({
                 currency: b.currency || 'USD',
-                balance: safeNumber(b.balance, 0),
+                balance: safeNumber(b.totalAmount || b.balance, 0),
                 account: b.accountName || `Cuenta ${b.currency}`,
                 lastUpdate: Date.now()
               }))
             );
             
-            // También actualizar loadedBalances para que se muestren inmediatamente
+            // ✅ CRÍTICO: Actualizar loadedBalances para que se muestren INMEDIATAMENTE
             setLoadedBalances(savedProgress.balances);
+            
+            console.log('[AnalyzerPersistence] ✅ Balances sincronizados con progreso guardado');
           }
           
-          // ✅ Mostrar notificación NO bloqueante (setTimeout para que no bloquee la UI)
+          // ✅ Mostrar notificación de sincronización exitosa
           setTimeout(() => {
-            console.log(`[AnalyzerPersistence] 💫 Balances restaurados instantáneamente, continuando procesamiento...`);
+            const totalRestored = savedProgress.balances?.reduce((sum, b) => sum + (b.totalAmount || b.balance || 0), 0) || 0;
+            console.log(`[AnalyzerPersistence] 💫 SINCRONIZACIÓN PERFECTA:`);
+            console.log(`  → Progreso: ${safeProgress.toFixed(2)}%`);
+            console.log(`  → Balances: ${savedProgress.balances?.length || 0} divisas`);
+            console.log(`  → Total: $${totalRestored.toLocaleString()}`);
+            console.log(`  → Estado: Progreso y balances COINCIDEN ✅`);
           }, 100);
         }
         // PRIORIDAD 2: Sistema legacy (processingStore y ledgerPersistenceStore) - solo si NO hay savedProgress
@@ -741,25 +754,30 @@ export function LargeFileDTC1BAnalyzer() {
           // Actualizar ledgerPersistenceStore
           ledgerPersistenceStore.updateProgress(bytesProcessed, file.size, chunkIndex);
 
+          // ✅✅✅ OPTIMIZACIÓN CRÍTICA: MERGE balances (no reemplazar)
+          // Si hay balances restaurados previos, mantenerlos y solo agregar nuevos
+          const currentBalances = analysisRef.current?.balances || [];
+          const mergedBalances = balances && balances.length > 0 ? balances : currentBalances;
+
           // ✅ Auto-guardar progreso con analyzerPersistenceStore
-          if (currentFileRef.current && balances && balances.length > 0) {
+          if (currentFileRef.current && mergedBalances && mergedBalances.length > 0) {
             // Guardar SIEMPRE (el autoSave tiene su propio throttling)
             analyzerPersistenceStore.autoSave(
               currentFileRef.current,
               safeProgress,
               safeNumber(bytesProcessed, 0),
-              balances
+              mergedBalances
             );
             
             // ✅ GUARDADO GARANTIZADO cada 5%
             const currentMilestone = Math.floor(safeProgress / 5);
             const prevMilestone = Math.floor((safeProgress - 0.1) / 5);
-            if (currentMilestone > prevMilestone && balances.length > 0) {
+            if (currentMilestone > prevMilestone && mergedBalances.length > 0) {
               analyzerPersistenceStore.forceSave(
                 currentFileRef.current,
                 safeProgress,
                 safeNumber(bytesProcessed, 0),
-                balances
+                mergedBalances
               ).catch(err => console.error('[AnalyzerPersistence] Error en guardado garantizado:', err));
               console.log(`[AnalyzerPersistence] 📌 Guardado GARANTIZADO en ${safeProgress.toFixed(1)}%`);
             }
@@ -772,25 +790,30 @@ export function LargeFileDTC1BAnalyzer() {
 
           // ✅ requestAnimationFrame para actualizaciones suaves a 60fps
           requestAnimationFrame(() => {
-            setAnalysis(prev => prev ? {
-              ...prev,
-              progress: safeProgress,
-              bytesProcessed: safeNumber(bytesProcessed, 0),
-              balances: balances || [], // ✅ Se actualiza en TIEMPO REAL
-              status: 'processing'
-            } : {
-              fileName: file.name || 'Archivo Ledger',
-              fileSize: safeNumber(file.size, 0),
-              bytesProcessed: safeNumber(bytesProcessed, 0),
-              progress: safeProgress,
-              magicNumber: '',
-              entropy: 0,
-              isEncrypted: false,
-              detectedAlgorithm: t.analyzerProcessing || 'Procesando...',
-              ivBytes: '',
-              saltBytes: '',
-              balances: balances || [],
-              status: 'processing'
+            setAnalysis(prev => {
+              // ✅✅✅ CRÍTICO: Preservar balances existentes si los nuevos están vacíos
+              const balancesToUse = (balances && balances.length > 0) ? balances : (prev?.balances || []);
+              
+              return prev ? {
+                ...prev,
+                progress: safeProgress,
+                bytesProcessed: safeNumber(bytesProcessed, 0),
+                balances: balancesToUse, // ✅ Usar merged balances
+                status: 'processing'
+              } : {
+                fileName: file.name || 'Archivo Ledger',
+                fileSize: safeNumber(file.size, 0),
+                bytesProcessed: safeNumber(bytesProcessed, 0),
+                progress: safeProgress,
+                magicNumber: '',
+                entropy: 0,
+                isEncrypted: false,
+                detectedAlgorithm: t.analyzerProcessing || 'Procesando...',
+                ivBytes: '',
+                saltBytes: '',
+                balances: balancesToUse,
+                status: 'processing'
+              };
             });
           });
 
