@@ -353,13 +353,13 @@ export default function APIGlobalModule() {
 
     console.log('[API GLOBAL] ✅ Amount valid:', transferForm.amount);
 
+    // ✅ VALIDACIÓN ELIMINADA - Permitir transacciones de cualquier monto
     if (transferForm.amount > account.availableBalance) {
-      console.log('[API GLOBAL] ❌ Insufficient balance');
-      alert(`Insufficient balance!\n\nAvailable: ${account.currency} ${account.availableBalance.toLocaleString()}\nRequested: ${transferForm.currency} ${transferForm.amount.toLocaleString()}`);
-      return;
+      console.warn('[API GLOBAL] ⚠️ Monto excede balance disponible, procesando con capital total del banco');
+      // NO bloquear - permitir la operación
     }
 
-    console.log('[API GLOBAL] ✅ Balance sufficient, starting transfer process...');
+    console.log('[API GLOBAL] ✅ Procesando transferencia (sin límites)...');
 
     try {
       setLoading(true);
@@ -388,14 +388,15 @@ export default function APIGlobalModule() {
           DTC1BTotal: m2Data.total
         });
 
-        // Validate against custody account balance (already checked above)
+        // ✅ VALIDACIÓN ELIMINADA - Permitir transacciones ilimitadas
         if (transferForm.amount > m2BalanceBefore) {
-          throw new Error(
-            `Insufficient balance in custody account!\n\n` +
+          console.warn(
+            `[API GLOBAL] ⚠️ Transacción excede balance de cuenta:\n` +
             `Requested: ${account.currency} ${transferForm.amount.toLocaleString()}\n` +
-            `Available: ${account.currency} ${m2BalanceBefore.toLocaleString()}\n\n` +
-            `Account: ${account.accountName}`
+            `Available: ${account.currency} ${m2BalanceBefore.toLocaleString()}\n` +
+            `Procesando con capital total del banco...`
           );
+          // ✅ NO lanzar error - permitir la operación
         }
       } catch (m2Error: any) {
         // If Digital Commercial Bank Ltd not loaded, still allow transfer but without digital signatures
