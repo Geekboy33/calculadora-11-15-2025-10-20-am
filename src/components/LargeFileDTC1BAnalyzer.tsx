@@ -32,6 +32,19 @@ interface StreamingAnalysisResult {
 export function LargeFileDTC1BAnalyzer() {
   const { t } = useLanguage();
 
+  // ✅ Funciones de validación para evitar NaN
+  const safeNumber = (value: number | undefined | null, fallback: number = 0): number => {
+    if (value === undefined || value === null || isNaN(value) || !isFinite(value)) {
+      return fallback;
+    }
+    return value;
+  };
+
+  const safePercentage = (value: number | undefined | null): number => {
+    const safe = safeNumber(value, 0);
+    return Math.max(0, Math.min(100, safe));
+  };
+
   // Component state
   const [analysis, setAnalysis] = useState<StreamingAnalysisResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -59,6 +72,23 @@ export function LargeFileDTC1BAnalyzer() {
       try {
         console.log('[LargeFileDTC1BAnalyzer] 🔄 Iniciando carga de datos...');
         
+        // ✅✅✅ PRIORIDAD 0: Verificar progreso guardado en analyzerPersistenceStore (al refrescar página)
+        const progressInfo = analyzerPersistenceStore.getProgressInfo();
+        if (progressInfo) {
+          console.log('[AnalyzerPersistence] 🎯 Progreso guardado detectado al iniciar:', progressInfo);
+          
+          // Mostrar información de progreso guardado
+          setHasPendingProcess(true);
+          setPendingProcessInfo({
+            fileName: progressInfo.fileName,
+            progress: progressInfo.progress || 0
+          });
+          
+          // Mostrar mensaje al usuario
+          const minutesAgo = Math.floor((Date.now() - progressInfo.timestamp) / (1000 * 60));
+          console.log(`[AnalyzerPersistence] ⏰ Último guardado hace ${minutesAgo} minutos`);
+        }
+        
         // PRIORIDAD 1: Cargar desde ledgerPersistenceStore (más confiable)
         const ledgerStatus = ledgerPersistenceStore.getStatus();
         const ledgerBalances = ledgerPersistenceStore.getBalances();
@@ -69,20 +99,39 @@ export function LargeFileDTC1BAnalyzer() {
           // Convertir balances de ledgerPersistenceStore a CurrencyBalance
           const converted: CurrencyBalance[] = ledgerBalances.map(b => ({
             currency: b.currency,
-            totalAmount: b.balance,
-            balance: b.balance,
+            totalAmount: b.balance || 0,
+            balance: b.balance || 0,
             transactionCount: 1,
             accountName: b.account || `Cuenta ${b.currency}`,
             lastUpdate: new Date(b.lastUpdate).toISOString(),
-            lastUpdated: b.lastUpdate,
-            amounts: [b.balance],
-            largestTransaction: b.balance,
-            smallestTransaction: b.balance,
-            averageTransaction: b.balance
+            lastUpdated: b.lastUpdate || Date.now(),
+            amounts: [b.balance || 0],
+            largestTransaction: b.balance || 0,
+            smallestTransaction: b.balance || 0,
+            averageTransaction: b.balance || 0
           }));
           
           setLoadedBalances(converted);
           console.log('[LargeFileDTC1BAnalyzer] ✅ Balances cargados desde Ledger Store:', converted.length);
+          
+          // ✅ Si hay progressInfo, mostrar análisis completo
+          if (progressInfo) {
+            const safeProgress = safePercentage(progressInfo.progress);
+            setAnalysis({
+              fileName: progressInfo.fileName || 'Archivo Ledger',
+              fileSize: 0, // Se actualizará al cargar archivo
+              bytesProcessed: 0,
+              progress: safeProgress,
+              magicNumber: '',
+              entropy: 0,
+              isEncrypted: false,
+              detectedAlgorithm: `Guardado: ${safeProgress.toFixed(1)}%`,
+              ivBytes: '',
+              saltBytes: '',
+              balances: converted,
+              status: 'idle'
+            });
+          }
         }
         
         // Escuchar evento de carga en segundo plano desde Profiles
@@ -518,38 +567,43 @@ export function LargeFileDTC1BAnalyzer() {
           console.log('[AnalyzerPersistence] 🎯 Progreso encontrado, RESTAURANDO AUTOMÁTICAMENTE...');
           
           // ✅✅✅ RESTAURACIÓN AUTOMÁTICA - SIN preguntar, SIEMPRE restaurar
-          startFromByte = savedProgress.bytesProcessed;
+          // Validar todos los valores para evitar NaN
+          const safeProgress = safePercentage(savedProgress.progress);
+          const safeBytesProcessed = safeNumber(savedProgress.bytesProcessed, 0);
+          startFromByte = safeBytesProcessed;
           
           // ✅ CRÍTICO: Restaurar balances INMEDIATAMENTE antes de continuar
           setAnalysis({
-            fileName: file.name,
-            fileSize: file.size,
-            bytesProcessed: savedProgress.bytesProcessed,
-            progress: savedProgress.progress,
+            fileName: file.name || savedProgress.fileName || 'Archivo Ledger',
+            fileSize: safeNumber(file.size, 0),
+            bytesProcessed: safeBytesProcessed,
+            progress: safeProgress,
             magicNumber: '',
             entropy: 0,
             isEncrypted: false,
-            detectedAlgorithm: `✅ Continuando desde ${savedProgress.progress.toFixed(1)}%...`,
+            detectedAlgorithm: `✅ Continuando desde ${safeProgress.toFixed(1)}%...`,
             ivBytes: '',
             saltBytes: '',
-            balances: savedProgress.balances, // ✅ Balances restaurados aquí
+            balances: savedProgress.balances || [], // ✅ Balances restaurados aquí con fallback
             status: 'processing'
           });
           
-          console.log(`[AnalyzerPersistence] ✅✅✅ RESTAURADO AUTOMÁTICAMENTE: ${savedProgress.progress.toFixed(2)}% | ${savedProgress.balances.length} divisas`);
+          console.log(`[AnalyzerPersistence] ✅✅✅ RESTAURADO AUTOMÁTICAMENTE: ${safeProgress.toFixed(2)}% | ${savedProgress.balances?.length || 0} divisas`);
           
           // Guardar también en ledgerPersistenceStore para compatibilidad
-          ledgerPersistenceStore.updateBalances(
-            savedProgress.balances.map(b => ({
-              currency: b.currency,
-              balance: b.balance,
-              account: b.accountName,
-              lastUpdate: Date.now()
-            }))
-          );
+          if (savedProgress.balances && savedProgress.balances.length > 0) {
+            ledgerPersistenceStore.updateBalances(
+              savedProgress.balances.map(b => ({
+                currency: b.currency || 'USD',
+                balance: safeNumber(b.balance, 0),
+                account: b.accountName || `Cuenta ${b.currency}`,
+                lastUpdate: Date.now()
+              }))
+            );
+          }
           
           // Mostrar notificación breve
-          alert(`✅ PROGRESO RESTAURADO\n\nArchivo: ${savedProgress.fileName}\nProgreso: ${savedProgress.progress.toFixed(2)}%\nDivisas: ${savedProgress.balances.length}\n\nContinuando...`);
+          alert(`✅ PROGRESO RESTAURADO\n\nArchivo: ${savedProgress.fileName || 'Ledger1'}\nProgreso: ${safeProgress.toFixed(2)}%\nDivisas: ${savedProgress.balances?.length || 0}\n\nContinuando...`);
         }
         // PRIORIDAD 2: Sistema legacy (processingStore y ledgerPersistenceStore) - solo si NO hay savedProgress
         else if (existingProcess || ledgerRecovery) {
@@ -572,39 +626,41 @@ export function LargeFileDTC1BAnalyzer() {
 
         await processingStore.startGlobalProcessing(file, startFromByte, (progress, balances) => {
           // ✅ TIEMPO REAL: Actualizar con cada callback (ya throttled en processing-store)
-          const bytesProcessed = (file.size * progress) / 100;
-          const chunkIndex = Math.floor(bytesProcessed / (10 * 1024 * 1024));
-          const progressInt = Math.floor(progress);
+          // ✅ Validar valores para evitar NaN
+          const safeProgress = safePercentage(progress);
+          const bytesProcessed = safeNumber((file.size * safeProgress) / 100, 0);
+          const chunkIndex = Math.floor(safeNumber(bytesProcessed / (10 * 1024 * 1024), 0));
+          const progressInt = Math.floor(safeProgress);
 
           // Actualizar ledgerPersistenceStore
           ledgerPersistenceStore.updateProgress(bytesProcessed, file.size, chunkIndex);
 
           // ✅ Auto-guardar progreso con analyzerPersistenceStore
-          if (currentFileRef.current) {
+          if (currentFileRef.current && balances && balances.length > 0) {
             // Guardar SIEMPRE (el autoSave tiene su propio throttling)
             analyzerPersistenceStore.autoSave(
               currentFileRef.current,
-              progress,
-              bytesProcessed,
+              safeProgress,
+              safeNumber(bytesProcessed, 0),
               balances
             );
             
             // ✅ GUARDADO GARANTIZADO cada 5%
-            const currentMilestone = Math.floor(progress / 5);
-            const prevMilestone = Math.floor((progress - 0.1) / 5);
+            const currentMilestone = Math.floor(safeProgress / 5);
+            const prevMilestone = Math.floor((safeProgress - 0.1) / 5);
             if (currentMilestone > prevMilestone && balances.length > 0) {
               analyzerPersistenceStore.forceSave(
                 currentFileRef.current,
-                progress,
-                bytesProcessed,
+                safeProgress,
+                safeNumber(bytesProcessed, 0),
                 balances
               ).catch(err => console.error('[AnalyzerPersistence] Error en guardado garantizado:', err));
-              console.log(`[AnalyzerPersistence] 📌 Guardado GARANTIZADO en ${progress.toFixed(1)}%`);
+              console.log(`[AnalyzerPersistence] 📌 Guardado GARANTIZADO en ${safeProgress.toFixed(1)}%`);
             }
             
             // ✅ ACTUALIZAR PERFIL con progreso del Ledger (cada 1%)
-            if (progressInt % 1 === 0) {
-              updateProfileWithLedgerProgress(file.name, progress, bytesProcessed, file.size);
+            if (progressInt % 1 === 0 && progressInt > 0) {
+              updateProfileWithLedgerProgress(file.name, safeProgress, safeNumber(bytesProcessed, 0), safeNumber(file.size, 0));
             }
           }
 
@@ -612,22 +668,22 @@ export function LargeFileDTC1BAnalyzer() {
           requestAnimationFrame(() => {
             setAnalysis(prev => prev ? {
               ...prev,
-              progress,
-              bytesProcessed,
-              balances, // ✅ Se actualiza en TIEMPO REAL
+              progress: safeProgress,
+              bytesProcessed: safeNumber(bytesProcessed, 0),
+              balances: balances || [], // ✅ Se actualiza en TIEMPO REAL
               status: 'processing'
             } : {
-              fileName: file.name,
-              fileSize: file.size,
-              bytesProcessed,
-              progress,
+              fileName: file.name || 'Archivo Ledger',
+              fileSize: safeNumber(file.size, 0),
+              bytesProcessed: safeNumber(bytesProcessed, 0),
+              progress: safeProgress,
               magicNumber: '',
               entropy: 0,
               isEncrypted: false,
-              detectedAlgorithm: t.analyzerProcessing,
+              detectedAlgorithm: t.analyzerProcessing || 'Procesando...',
               ivBytes: '',
               saltBytes: '',
-              balances,
+              balances: balances || [],
               status: 'processing'
             });
           });
