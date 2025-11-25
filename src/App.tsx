@@ -222,7 +222,7 @@ function App() {
         </nav>
       </header>
 
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-y-auto">
         <Suspense fallback={
           <div className="h-full flex items-center justify-center bg-black">
             <div className="text-center">

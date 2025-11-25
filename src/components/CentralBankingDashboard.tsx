@@ -7,18 +7,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   TrendingUp, DollarSign, Database, Activity, Shield, Wallet,
-  ArrowUpRight, ArrowDownRight, Clock, CheckCircle, AlertCircle,
-  Lock, Eye, ChevronLeft, ChevronRight, BarChart3, Zap, Globe,
-  Server, Building2, Coins, Star, Bell, RefreshCw, Download,
-  Calendar, Target, Sparkles, Layers, Users, CreditCard, FileText,
-  Award, TrendingDown, ArrowRight, Filter, Search, MoreHorizontal
+  Clock, CheckCircle, Lock, ChevronLeft, ChevronRight, BarChart3,
+  Globe, Building2, Coins, Bell, RefreshCw, Sparkles, Users,
+  FileText, ArrowRight
 } from 'lucide-react';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
 import { unifiedPledgeStore, type UnifiedPledge } from '../lib/unified-pledge-store';
-import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
 import { analyzerPersistenceStore } from '../lib/analyzer-persistence-store';
-import { profilesStore } from '../lib/profiles-store';
 import { useLanguage } from '../lib/i18n';
 import { useFormatters } from '../lib/professional-formatters';
 import { BankingStyles, cn } from '../lib/design-system';
@@ -234,7 +230,7 @@ export function CentralBankingDashboard() {
   const currencyIndex = currencies.indexOf(selectedCurrency);
 
   return (
-    <div className="min-h-screen bg-slate-950 p-4 sm:p-6 lg:p-8">
+    <div className="w-full bg-slate-950 p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-6">
         
         {/* Professional Header */}
