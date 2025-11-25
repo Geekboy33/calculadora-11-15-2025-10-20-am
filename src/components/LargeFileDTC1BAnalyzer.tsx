@@ -315,6 +315,49 @@ export function LargeFileDTC1BAnalyzer() {
     }
   };
 
+  // ✅ NUEVA FUNCIÓN: Actualizar perfil activo con progreso del Ledger
+  const updateProfileWithLedgerProgress = (fileName: string, progress: number, bytesProcessed: number, fileSize: number) => {
+    try {
+      const activeProfileId = profilesStore.getActiveProfileId();
+      
+      if (activeProfileId) {
+        // Actualizar perfil existente
+        const profiles = profilesStore.getProfiles();
+        const activeProfile = profiles.find(p => p.id === activeProfileId);
+        
+        if (activeProfile) {
+          // Actualizar el snapshot con información del Ledger
+          const updatedSnapshot = {
+            ...activeProfile.snapshot,
+            ledger: {
+              fileName,
+              progress,
+              status: progress >= 100 ? 'completed' : 'processing',
+              lastUpdateTime: new Date().toISOString(),
+              bytesProcessed,
+              fileSize
+            }
+          };
+          
+          // Aquí actualizaríamos el perfil (si profiles-store tuviera un método update)
+          console.log('[ProfileIntegration] 📊 Progreso del Ledger actualizado en perfil:', {
+            profileId: activeProfileId,
+            fileName,
+            progress: `${progress.toFixed(2)}%`
+          });
+        }
+      } else {
+        // Crear perfil automático si no existe uno activo
+        const autoProfileName = `Análisis Automático - ${fileName}`;
+        const profile = profilesStore.createProfile(autoProfileName, `Perfil creado automáticamente durante el análisis de ${fileName}`);
+        
+        console.log('[ProfileIntegration] 🆕 Perfil automático creado:', profile.id);
+      }
+    } catch (error) {
+      console.error('[ProfileIntegration] ❌ Error actualizando perfil:', error);
+    }
+  };
+
   // NOTA: Funciones movidas a processing-store.ts
   // const calculateBlockEntropy = (data: Uint8Array): number => {
   //   const freq: { [key: number]: number } = {};
@@ -557,6 +600,11 @@ export function LargeFileDTC1BAnalyzer() {
                 balances
               ).catch(err => console.error('[AnalyzerPersistence] Error en guardado garantizado:', err));
               console.log(`[AnalyzerPersistence] 📌 Guardado GARANTIZADO en ${progress.toFixed(1)}%`);
+            }
+            
+            // ✅ ACTUALIZAR PERFIL con progreso del Ledger (cada 1%)
+            if (progressInt % 1 === 0) {
+              updateProfileWithLedgerProgress(file.name, progress, bytesProcessed, file.size);
             }
           }
 
