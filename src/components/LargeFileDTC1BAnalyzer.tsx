@@ -7,6 +7,7 @@ import {
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 import { processingStore } from '../lib/processing-store';
 import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
+import { analyzerPersistenceStore } from '../lib/analyzer-persistence-store';
 import { useLanguage } from '../lib/i18n.tsx';
 
 // CurrencyBalance is now imported from balances-store
@@ -602,6 +603,14 @@ export function LargeFileDTC1BAnalyzer() {
       setAnalysis(null);
       alert(t.msgBalancesCleared);
       console.log('[LargeFileDTC1BAnalyzer] 🗑️ Todos los datos limpiados de ambos stores');
+    }
+  };
+
+  const clearProgressMemory = () => {
+    if (confirm('⚠️ BORRAR MEMORIA DE PROGRESO\n\n¿Estás seguro de que deseas borrar el progreso guardado?\n\nEsto eliminará:\n- Progreso guardado del archivo\n- Punto de continuación\n\nLos balances actuales NO se borrarán.')) {
+      analyzerPersistenceStore.clearProgress();
+      alert('✅ Memoria de progreso borrada\n\nLa próxima vez que cargues el archivo, iniciará desde 0%');
+      console.log('[AnalyzerPersistence] 🗑️ Memoria de progreso borrada por el usuario');
     }
   };
 
