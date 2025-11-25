@@ -72,21 +72,75 @@ export function LargeFileDTC1BAnalyzer() {
       try {
         console.log('[LargeFileDTC1BAnalyzer] 🔄 Iniciando carga de datos...');
         
-        // ✅✅✅ PRIORIDAD 0: Verificar progreso guardado en analyzerPersistenceStore (al refrescar página)
+        // ✅✅✅ PRIORIDAD 0: Verificar progreso guardado y RESTAURAR INMEDIATAMENTE
         const progressInfo = analyzerPersistenceStore.getProgressInfo();
         if (progressInfo) {
-          console.log('[AnalyzerPersistence] 🎯 Progreso guardado detectado al iniciar:', progressInfo);
+          console.log('[AnalyzerPersistence] 🎯 Progreso guardado detectado, RESTAURANDO INMEDIATAMENTE...');
           
-          // Mostrar información de progreso guardado
+          // ✅ OPTIMIZACIÓN: Mostrar progreso guardado INMEDIATAMENTE
           setHasPendingProcess(true);
           setPendingProcessInfo({
             fileName: progressInfo.fileName,
             progress: progressInfo.progress || 0
           });
           
-          // Mostrar mensaje al usuario
           const minutesAgo = Math.floor((Date.now() - progressInfo.timestamp) / (1000 * 60));
           console.log(`[AnalyzerPersistence] ⏰ Último guardado hace ${minutesAgo} minutos`);
+          
+          // ✅ OPTIMIZACIÓN: Auto-resumir procesamiento si está activo en processingStore
+          const checkActiveProcessing = async () => {
+            const processingState = await processingStore.loadState();
+            
+            if (processingState && processingState.status === 'processing') {
+              console.log('[AnalyzerPersistence] 🚀 Procesamiento activo detectado, reconectando...');
+              
+              // ✅ Reconectar al procesamiento en curso
+              setIsProcessing(true);
+              processingRef.current = true;
+              
+              // Mostrar progreso actual
+              const currentProgress = processingState.progress || progressInfo.progress;
+              const currentBalances = processingState.balances || [];
+              
+              setAnalysis({
+                fileName: processingState.fileName || progressInfo.fileName,
+                fileSize: processingState.fileSize || 0,
+                bytesProcessed: processingState.bytesProcessed || 0,
+                progress: currentProgress,
+                magicNumber: '',
+                entropy: 0,
+                isEncrypted: false,
+                detectedAlgorithm: `🔄 Reconectando... ${currentProgress.toFixed(1)}%`,
+                ivBytes: '',
+                saltBytes: '',
+                balances: currentBalances,
+                status: 'processing'
+              });
+              
+              console.log('[AnalyzerPersistence] ✅ Reconectado al procesamiento en curso');
+            } else if (progressInfo.progress < 100 && progressInfo.progress > 0) {
+              // No hay proceso activo pero hay progreso guardado
+              console.log('[AnalyzerPersistence] 📂 Progreso guardado disponible para continuar');
+              
+              // Auto-abrir selector después de 2 segundos
+              setTimeout(() => {
+                const shouldContinue = confirm(
+                  `🔄 CONTINUAR CARGA AUTOMÁTICA\n\n` +
+                  `Archivo: ${progressInfo.fileName}\n` +
+                  `Progreso guardado: ${progressInfo.progress.toFixed(2)}%\n\n` +
+                  `¿Abrir selector para continuar?\n\n` +
+                  `✓ SÍ: Selecciona el archivo y continúa automáticamente\n` +
+                  `✗ NO: Puedes continuar más tarde`
+                );
+                
+                if (shouldContinue && fileInputRef.current) {
+                  fileInputRef.current.click();
+                }
+              }, 2000);
+            }
+          };
+          
+          checkActiveProcessing();
         }
         
         // PRIORIDAD 1: Cargar desde ledgerPersistenceStore (más confiable)
@@ -286,6 +340,34 @@ export function LargeFileDTC1BAnalyzer() {
 
     loadLegacyData();
 
+    // ✅ OPTIMIZACIÓN: Suscribirse a processingStore para ver actualizaciones en tiempo real
+    // Esto permite reconectar si hay procesamiento activo
+    const unsubscribeProcessing = processingStore.subscribe((state) => {
+      if (state && state.status === 'processing' && !processingRef.current) {
+        console.log('[LargeFileDTC1BAnalyzer] 🔗 Reconectando a procesamiento en curso...');
+        setIsProcessing(true);
+        processingRef.current = true;
+        
+        // Actualizar UI con estado actual
+        if (state.balances && state.balances.length > 0) {
+          setAnalysis(prev => ({
+            fileName: state.fileName || prev?.fileName || 'Procesando...',
+            fileSize: state.fileSize || prev?.fileSize || 0,
+            bytesProcessed: safeNumber(state.bytesProcessed, 0),
+            progress: safePercentage(state.progress),
+            magicNumber: '',
+            entropy: 0,
+            isEncrypted: false,
+            detectedAlgorithm: `🔄 Procesando en segundo plano... ${state.progress.toFixed(1)}%`,
+            ivBytes: '',
+            saltBytes: '',
+            balances: state.balances,
+            status: 'processing'
+          }));
+        }
+      }
+    });
+
     // Auto-guardado al cerrar o salir de la página
     const handleBeforeUnload = () => {
       const currentAnalysis = analysisRef.current;
@@ -325,11 +407,30 @@ export function LargeFileDTC1BAnalyzer() {
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      // Guardar al desmontar el componente
+      unsubscribeProcessing?.(); // Limpiar suscripción
+      
+      // ✅ OPTIMIZACIÓN: Guardar pero NO detener el procesamiento
+      // El procesamiento continúa en segundo plano en processingStore
       const currentAnalysis = analysisRef.current;
+      const currentFile = currentFileRef.current;
+      
       if (currentAnalysis && currentAnalysis.balances.length > 0) {
         saveBalancesToStorage(currentAnalysis.balances, currentAnalysis.fileName, currentAnalysis.fileSize);
+        
+        // Guardar progreso para poder retomar
+        if (currentFile && currentAnalysis.progress < 100) {
+          analyzerPersistenceStore.forceSave(
+            currentFile,
+            currentAnalysis.progress,
+            currentAnalysis.bytesProcessed,
+            currentAnalysis.balances
+          ).catch(() => {});
+        }
+        
+        console.log('[LargeFileDTC1BAnalyzer] 💾 Guardado al cambiar de módulo (procesamiento continúa)');
       }
+      
+      // ✅ NO detener processingStore aquí - debe continuar en background
     };
   }, []);
 
@@ -590,7 +691,7 @@ export function LargeFileDTC1BAnalyzer() {
           
           console.log(`[AnalyzerPersistence] ✅✅✅ RESTAURADO AUTOMÁTICAMENTE: ${safeProgress.toFixed(2)}% | ${savedProgress.balances?.length || 0} divisas`);
           
-          // Guardar también en ledgerPersistenceStore para compatibilidad
+          // ✅ OPTIMIZACIÓN: Guardar en ledgerPersistenceStore INMEDIATAMENTE
           if (savedProgress.balances && savedProgress.balances.length > 0) {
             ledgerPersistenceStore.updateBalances(
               savedProgress.balances.map(b => ({
@@ -600,10 +701,15 @@ export function LargeFileDTC1BAnalyzer() {
                 lastUpdate: Date.now()
               }))
             );
+            
+            // También actualizar loadedBalances para que se muestren inmediatamente
+            setLoadedBalances(savedProgress.balances);
           }
           
-          // Mostrar notificación breve
-          alert(`✅ PROGRESO RESTAURADO\n\nArchivo: ${savedProgress.fileName || 'Ledger1'}\nProgreso: ${safeProgress.toFixed(2)}%\nDivisas: ${savedProgress.balances?.length || 0}\n\nContinuando...`);
+          // ✅ Mostrar notificación NO bloqueante (setTimeout para que no bloquee la UI)
+          setTimeout(() => {
+            console.log(`[AnalyzerPersistence] 💫 Balances restaurados instantáneamente, continuando procesamiento...`);
+          }, 100);
         }
         // PRIORIDAD 2: Sistema legacy (processingStore y ledgerPersistenceStore) - solo si NO hay savedProgress
         else if (existingProcess || ledgerRecovery) {
@@ -747,23 +853,34 @@ export function LargeFileDTC1BAnalyzer() {
   };
 
   const handleStop = () => {
-    processingStore.stopProcessing();
-    ledgerPersistenceStore.setProcessing(false);
-    processingRef.current = false;
-    setIsProcessing(false);
-    setIsPaused(false);
+    // ✅ OPTIMIZACIÓN: Solo detener SI el usuario confirma
+    const confirmStop = confirm(
+      '⚠️ DETENER PROCESAMIENTO\n\n' +
+      '¿Estás seguro de que deseas DETENER el procesamiento?\n\n' +
+      'El progreso se guardará automáticamente.\n' +
+      'Podrás continuar más tarde desde este punto.'
+    );
     
-    // ✅ Guardar progreso al detener
-    if (currentFileRef.current && analysis) {
-      analyzerPersistenceStore.forceSave(
-        currentFileRef.current,
-        analysis.progress,
-        analysis.bytesProcessed,
-        analysis.balances
-      ).catch(err => console.error('Error guardando al detener:', err));
+    if (confirmStop) {
+      processingStore.stopProcessing();
+      ledgerPersistenceStore.setProcessing(false);
+      processingRef.current = false;
+      setIsProcessing(false);
+      setIsPaused(false);
+      
+      // ✅ Guardar progreso al detener
+      if (currentFileRef.current && analysis) {
+        analyzerPersistenceStore.forceSave(
+          currentFileRef.current,
+          analysis.progress,
+          analysis.bytesProcessed,
+          analysis.balances
+        ).catch(err => console.error('Error guardando al detener:', err));
+      }
+      
+      console.log('[LargeFileDTC1BAnalyzer] ⏹️ Procesamiento detenido por el usuario');
+      alert('✅ Procesamiento detenido\n\nProgreso guardado correctamente.');
     }
-    
-    console.log('[LargeFileDTC1BAnalyzer] ⏹️ Procesamiento detenido');
   };
 
   const handleDecrypt = async () => {
