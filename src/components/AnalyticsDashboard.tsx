@@ -158,15 +158,15 @@ export function AnalyticsDashboard() {
             {analytics.charts.volumeOverTime.length > 0 ? (
             <div className="h-64 flex items-end justify-between gap-2">
               {analytics.charts.volumeOverTime.slice(-15).map((point, index) => {
-                const maxValue = Math.max(...analytics.charts.volumeOverTime.map(p => p.value));
-                const height = (point.value / maxValue) * 100;
+                const maxValue = Math.max(...analytics.charts.volumeOverTime.map(p => p.value ?? 0).filter(v => v > 0), 1);
+                const height = ((point.value ?? 0) / maxValue) * 100;
 
                 return (
                   <div key={index} className="flex-1 flex flex-col items-center gap-2">
                     <div
                       className="w-full bg-gradient-to-t from-[#00ff88] to-[#00cc6a] rounded-t transition-all hover:from-[#00cc6a] hover:to-[#00aa55] cursor-pointer"
                       style={{ height: `${height}%` }}
-                      title={`${point.label}: ${point.value.toLocaleString()}`}
+                      title={`${point.label}: ${point.value?.toLocaleString() ?? '0'}`}
                     />
                     <div className="text-xs text-[#4d7c4d] rotate-45 origin-left whitespace-nowrap">
                       {point.label}
@@ -220,16 +220,16 @@ export function AnalyticsDashboard() {
             <h3 className="text-xl font-bold text-[#e0ffe0] mb-6">Tendencia de Transacciones (7 días)</h3>
             <div className="h-48 flex items-end justify-between gap-3">
               {analytics.charts.transactionTrends.map((point, index) => {
-                const maxValue = Math.max(...analytics.charts.transactionTrends.map(p => p.value));
-                const height = (point.value / maxValue) * 100;
+                const maxValue = Math.max(...analytics.charts.transactionTrends.map(p => p.value ?? 0).filter(v => v > 0), 1);
+                const height = ((point.value ?? 0) / maxValue) * 100;
 
                 return (
                   <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                    <div className="text-sm font-bold text-[#00ff88]">{point.value}</div>
+                    <div className="text-sm font-bold text-[#00ff88]">{point.value ?? 0}</div>
                     <div
                       className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t transition-all hover:from-blue-400 hover:to-blue-300 cursor-pointer"
                       style={{ height: `${height}%` }}
-                      title={`${point.label}: ${point.value} transacciones`}
+                      title={`${point.label}: ${point.value ?? 0} transacciones`}
                     />
                     <div className="text-xs text-[#4d7c4d]">{point.label}</div>
                   </div>
@@ -243,8 +243,8 @@ export function AnalyticsDashboard() {
             <h3 className="text-xl font-bold text-[#e0ffe0] mb-6">Top 5 Divisas por Volumen</h3>
             <div className="space-y-4">
               {analytics.charts.topCurrencies.map((item, index) => {
-                const maxValue = analytics.charts.topCurrencies[0].value;
-                const percentage = (item.value / maxValue) * 100;
+                const maxValue = analytics.charts.topCurrencies[0]?.value ?? 1;
+                const percentage = ((item.value ?? 0) / maxValue) * 100;
 
                 return (
                   <div key={index} className="flex items-center gap-4">
@@ -256,7 +256,7 @@ export function AnalyticsDashboard() {
                       <div className="flex items-center justify-between">
                         <span className="text-[#e0ffe0] font-bold">{item.currency}</span>
                         <span className="text-[#80ff80]">
-                          ${item.value.toLocaleString()}
+                          ${item.value?.toLocaleString() ?? '0'}
                         </span>
                       </div>
                       <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
