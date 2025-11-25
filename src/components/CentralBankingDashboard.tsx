@@ -9,7 +9,7 @@ import {
   TrendingUp, DollarSign, Database, Activity, Shield, Wallet,
   Clock, CheckCircle, Lock, ChevronLeft, ChevronRight, BarChart3,
   Globe, Building2, Coins, Bell, RefreshCw, Sparkles, Users,
-  FileText, ArrowRight
+  FileText, ArrowRight, Download
 } from 'lucide-react';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
@@ -18,6 +18,7 @@ import { analyzerPersistenceStore } from '../lib/analyzer-persistence-store';
 import { useLanguage } from '../lib/i18n';
 import { useFormatters } from '../lib/professional-formatters';
 import { BankingStyles, cn } from '../lib/design-system';
+import { StatementExporter } from '../lib/statement-exporter';
 
 interface DashboardMetrics {
   totalBalances: { [currency: string]: number };
@@ -146,6 +147,41 @@ export function CentralBankingDashboard() {
     setRefreshing(true);
     loadData();
     setTimeout(() => setRefreshing(false), 800);
+  };
+
+  const handleExportStatement = () => {
+    if (!metrics) return;
+
+    const statementData = {
+      metrics: {
+        totalBalances: metrics.totalBalances,
+        totalAccounts: metrics.totalAccounts,
+        activePledges: metrics.activePledges,
+        totalTransactions: metrics.totalTransactions,
+        activeCurrencies: metrics.activeCurrencies,
+        ledgerProgress: metrics.ledgerProgress,
+        systemHealth: metrics.systemHealth,
+        totalCustodyValue: metrics.totalCustodyValue,
+        totalPledgedValue: metrics.totalPledgedValue
+      },
+      balances,
+      custodyAccounts,
+      pledges,
+      recentActivity: recentActivity.map(a => ({
+        type: a.type,
+        title: a.title,
+        description: a.description,
+        timestamp: a.timestamp
+      }))
+    };
+
+    StatementExporter.downloadStatement(statementData, locale);
+    
+    // Show confirmation
+    alert(isSpanish 
+      ? '✅ Estado de cuentas descargado exitosamente'
+      : '✅ Account statement downloaded successfully'
+    );
   };
 
   // Sorted currencies
@@ -281,6 +317,15 @@ export function CentralBankingDashboard() {
                   {isSpanish ? 'Sistema Operativo' : 'System Operational'}
                 </span>
               </div>
+
+              {/* Export Button */}
+              <button
+                onClick={handleExportStatement}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold transition-all shadow-lg hover:shadow-sky"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">{isSpanish ? 'Exportar TXT' : 'Export TXT'}</span>
+              </button>
 
               {/* Refresh Button */}
               <button
