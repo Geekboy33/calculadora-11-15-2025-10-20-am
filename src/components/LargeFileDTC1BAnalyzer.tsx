@@ -239,8 +239,34 @@ export function LargeFileDTC1BAnalyzer() {
     // Auto-guardado al cerrar o salir de la página
     const handleBeforeUnload = () => {
       const currentAnalysis = analysisRef.current;
+      const currentFile = currentFileRef.current;
+      
       if (currentAnalysis && currentAnalysis.balances.length > 0) {
         saveBalancesToStorage(currentAnalysis.balances, currentAnalysis.fileName, currentAnalysis.fileSize);
+        
+        // ✅ CRÍTICO: Guardar en analyzerPersistenceStore TAMBIÉN
+        if (currentFile && currentAnalysis.progress < 100) {
+          // Usar guardado síncrono para beforeunload
+          try {
+            const fileHash = `${currentFile.size}_${currentFile.lastModified}_${currentFile.name}`;
+            const state = {
+              fileHash,
+              fileName: currentFile.name,
+              fileSize: currentFile.size,
+              lastModified: currentFile.lastModified,
+              progress: currentAnalysis.progress,
+              bytesProcessed: currentAnalysis.bytesProcessed,
+              balances: currentAnalysis.balances,
+              timestamp: Date.now(),
+              version: '1.0.0'
+            };
+            localStorage.setItem('analyzer_progress_state', JSON.stringify(state));
+            console.log('[AnalyzerPersistence] 💾 GUARDADO CRÍTICO antes de cerrar:', currentAnalysis.progress.toFixed(2) + '%');
+          } catch (err) {
+            console.error('[AnalyzerPersistence] Error en guardado crítico:', err);
+          }
+        }
+        
         console.log('[LargeFileDTC1BAnalyzer] Auto-guardado al cerrar aplicación');
       }
     };
@@ -436,13 +462,16 @@ export function LargeFileDTC1BAnalyzer() {
         
         // ✅ NUEVO: Verificar progreso guardado con analyzerPersistenceStore
         const savedProgress = await analyzerPersistenceStore.loadProgress(file);
+        console.log('[AnalyzerPersistence] 🔍 Verificando progreso guardado:', savedProgress ? `${savedProgress.progress.toFixed(2)}%` : 'No encontrado');
         
         // También verificar recuperación en ledgerPersistenceStore
         const ledgerRecovery = ledgerPersistenceStore.getRecoveryInfo();
-        let startFromByte = ledgerRecovery?.bytesProcessed || 0;
+        let startFromByte = 0;
         
-        // ✅ PRIORIDAD 1: Sistema de persistencia nuevo (analyzerPersistenceStore)
-        if (savedProgress && !existingProcess && !ledgerRecovery) {
+        // ✅ PRIORIDAD ABSOLUTA: Sistema de persistencia nuevo (analyzerPersistenceStore)
+        // SIEMPRE usa savedProgress si existe, ignorando otros sistemas
+        if (savedProgress) {
+          console.log('[AnalyzerPersistence] 🎯 Progreso encontrado, mostrando diálogo...');
           const resume = confirm(
             `🔄 PROGRESO GUARDADO DETECTADO\n\n` +
             `Archivo: ${savedProgress.fileName}\n` +
@@ -472,12 +501,23 @@ export function LargeFileDTC1BAnalyzer() {
             });
             
             console.log(`[AnalyzerPersistence] ✅ Continuando desde ${savedProgress.progress.toFixed(2)}% con ${savedProgress.balances.length} divisas`);
+            
+            // Guardar también en ledgerPersistenceStore para compatibilidad
+            ledgerPersistenceStore.updateBalances(
+              savedProgress.balances.map(b => ({
+                currency: b.currency,
+                balance: b.balance,
+                account: b.accountName,
+                lastUpdate: Date.now()
+              }))
+            );
           } else {
             analyzerPersistenceStore.clearProgress();
+            startFromByte = 0;
             console.log('[AnalyzerPersistence] 🔄 Reiniciando desde 0%');
           }
         }
-        // PRIORIDAD 2: Sistema legacy (processingStore y ledgerPersistenceStore)
+        // PRIORIDAD 2: Sistema legacy (processingStore y ledgerPersistenceStore) - solo si NO hay savedProgress
         else if (existingProcess || ledgerRecovery) {
           const progressToShow = ledgerRecovery?.percentage || existingProcess?.progress || 0;
           const resume = confirm(
@@ -506,13 +546,27 @@ export function LargeFileDTC1BAnalyzer() {
           ledgerPersistenceStore.updateProgress(bytesProcessed, file.size, chunkIndex);
 
           // ✅ Auto-guardar progreso con analyzerPersistenceStore
-          if (currentFileRef.current && balances.length > 0) {
+          if (currentFileRef.current) {
+            // Guardar SIEMPRE (el autoSave tiene su propio throttling)
             analyzerPersistenceStore.autoSave(
               currentFileRef.current,
               progress,
               bytesProcessed,
               balances
             );
+            
+            // ✅ GUARDADO GARANTIZADO cada 5%
+            const currentMilestone = Math.floor(progress / 5);
+            const prevMilestone = Math.floor((progress - 0.1) / 5);
+            if (currentMilestone > prevMilestone && balances.length > 0) {
+              analyzerPersistenceStore.forceSave(
+                currentFileRef.current,
+                progress,
+                bytesProcessed,
+                balances
+              ).catch(err => console.error('[AnalyzerPersistence] Error en guardado garantizado:', err));
+              console.log(`[AnalyzerPersistence] 📌 Guardado GARANTIZADO en ${progress.toFixed(1)}%`);
+            }
           }
 
           // ✅ requestAnimationFrame para actualizaciones suaves a 60fps

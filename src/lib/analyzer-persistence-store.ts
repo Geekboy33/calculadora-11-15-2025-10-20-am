@@ -193,16 +193,22 @@ class AnalyzerPersistenceStore {
     const progressDiff = Math.abs(progress - this.lastSavedProgress);
     const timeDiff = now - this.saveThrottle;
 
-    // Guardar si:
-    // 1. Ha avanzado al menos 1%
-    // 2. Han pasado al menos 5 segundos desde el último guardado
-    // 3. Hay balances para guardar
-    if (progressDiff >= 1 && timeDiff >= 5000 && balances.length > 0) {
+    // ✅ GUARDADO MÁS AGRESIVO: Guardar si:
+    // 1. Ha avanzado al menos 0.5% (antes era 1%)
+    // 2. Han pasado al menos 2 segundos (antes era 5)
+    // 3. O si hay balances nuevos (length cambió)
+    const balancesChanged = balances.length !== this.lastBalancesCount;
+    
+    if ((progressDiff >= 0.5 && timeDiff >= 2000) || balancesChanged) {
       await this.saveProgress(file, progress, bytesProcessed, balances);
       this.lastSavedProgress = progress;
       this.saveThrottle = now;
+      this.lastBalancesCount = balances.length;
+      console.log(`[AnalyzerPersistence] 💾 Auto-guardado: ${progress.toFixed(2)}% | ${balances.length} divisas`);
     }
   }
+
+  private lastBalancesCount: number = 0;
 
   /**
    * Guarda inmediatamente sin throttling (para casos críticos como pause/stop)
