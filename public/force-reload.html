@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Force Reload - Digital Commercial Bank Ltd</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        body {
+            background: #0F172A;
+            color: #F1F5F9;
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            text-align: center;
+            background: #1E293B;
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid #0EA5E9;
+            box-shadow: 0 0 40px rgba(14, 165, 233, 0.3);
+        }
+        h1 { color: #0EA5E9; font-size: 32px; margin-bottom: 20px; }
+        p { font-size: 18px; margin: 15px 0; }
+        button {
+            background: linear-gradient(to right, #0EA5E9, #0284C7);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+        }
+        button:hover {
+            background: linear-gradient(to right, #0284C7, #0369A1);
+            transform: scale(1.05);
+        }
+        .code {
+            background: #0F172A;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            color: #10B981;
+            margin: 20px 0;
+            border: 1px solid #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Forzar Recarga Completa</h1>
+        <p>La aplicación tiene actualizaciones importantes.</p>
+        <p>Para ver los cambios, debes limpiar la caché.</p>
+        
+        <div class="code">
+            Presiona: <strong>Ctrl + Shift + R</strong>
+        </div>
+        
+        <button onclick="forceReload()">🔄 Limpiar Caché y Recargar</button>
+        <button onclick="goToApp()">➡️ Ir a la Aplicación</button>
+        
+        <p style="margin-top: 30px; font-size: 14px; color: #94A3B8;">
+            Esto eliminará la caché y cargará la última versión.<br>
+            Commit: 27d552b - Transacciones ilimitadas habilitadas
+        </p>
+    </div>
+    
+    <script>
+        function forceReload() {
+            // Limpiar todos los caches posibles
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+            
+            // Limpiar localStorage de versiones antiguas
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes('cache') || key.includes('version')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            // Agregar timestamp para evitar caché
+            const url = new URL(window.location.origin);
+            url.searchParams.set('_', Date.now().toString());
+            
+            alert('✅ Caché limpiada\n\nRecargando aplicación...');
+            
+            // Recargar con cache bust
+            window.location.href = url.toString();
+        }
+        
+        function goToApp() {
+            window.location.href = '/';
+        }
+        
+        // Auto-limpieza después de 3 segundos si el usuario no hace nada
+        setTimeout(() => {
+            const auto = confirm(
+                '🔄 AUTO-LIMPIEZA DE CACHÉ\n\n' +
+                '¿Deseas limpiar la caché automáticamente?\n\n' +
+                'Esto cargará la última versión con transacciones ilimitadas.'
+            );
+            if (auto) {
+                forceReload();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
+
