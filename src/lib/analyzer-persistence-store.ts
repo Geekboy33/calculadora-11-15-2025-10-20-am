@@ -226,7 +226,6 @@ class AnalyzerPersistenceStore {
     this.lastSavedProgress = progress;
     this.saveThrottle = Date.now();
   }
-}
 
   /**
    * Guarda el progreso asociado a un perfil específico
