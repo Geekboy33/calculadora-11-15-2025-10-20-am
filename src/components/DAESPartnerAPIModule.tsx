@@ -28,9 +28,33 @@ export function DAESPartnerAPIModule() {
   const [showSecret, setShowSecret] = useState(false);
   const [newPartner, setNewPartner] = useState({
     name: '',
-    allowedCurrencies: ['USD', 'EUR', 'MXN']
+    allowedCurrencies: ['USD']
   });
   const [createdCredentials, setCreatedCredentials] = useState<{clientId: string; clientSecret: string} | null>(null);
+  
+  // 15 monedas completas
+  const availableCurrencies = [
+    { code: 'USD', name: 'US Dollar', flag: '🇺🇸' },
+    { code: 'EUR', name: 'Euro', flag: '🇪🇺' },
+    { code: 'GBP', name: 'British Pound', flag: '🇬🇧' },
+    { code: 'CAD', name: 'Canadian Dollar', flag: '🇨🇦' },
+    { code: 'AUD', name: 'Australian Dollar', flag: '🇦🇺' },
+    { code: 'JPY', name: 'Japanese Yen', flag: '🇯🇵' },
+    { code: 'CHF', name: 'Swiss Franc', flag: '🇨🇭' },
+    { code: 'CNY', name: 'Chinese Yuan', flag: '🇨🇳' },
+    { code: 'INR', name: 'Indian Rupee', flag: '🇮🇳' },
+    { code: 'MXN', name: 'Mexican Peso', flag: '🇲🇽' },
+    { code: 'BRL', name: 'Brazilian Real', flag: '🇧🇷' },
+    { code: 'RUB', name: 'Russian Ruble', flag: '🇷🇺' },
+    { code: 'KRW', name: 'South Korean Won', flag: '🇰🇷' },
+    { code: 'SGD', name: 'Singapore Dollar', flag: '🇸🇬' },
+    { code: 'HKD', name: 'Hong Kong Dollar', flag: '🇭🇰' }
+  ];
+  
+  const [selectedTab, setSelectedTab] = useState<'partners' | 'clients' | 'accounts' | 'transfers'>('partners');
+  const [clients, setClients] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [transfers, setTransfers] = useState<any[]>([]);
 
   const handleCreatePartner = () => {
     // Generar credenciales
@@ -98,26 +122,77 @@ export function DAESPartnerAPIModule() {
           />
           <BankingMetric
             label={isSpanish ? "Clientes" : "Clients"}
-            value="0"
+            value={clients.length}
             icon={Wallet}
             color="emerald"
           />
           <BankingMetric
             label={isSpanish ? "Cuentas" : "Accounts"}
-            value="0"
+            value={accounts.length}
             icon={Key}
             color="amber"
           />
           <BankingMetric
             label={isSpanish ? "Transferencias" : "Transfers"}
-            value="0"
+            value={transfers.length}
             icon={ArrowRight}
             color="purple"
           />
         </div>
 
-        {/* Crear Nuevo Partner */}
-        <BankingSection
+        {/* Navigation Tabs */}
+        <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 p-2 rounded-xl">
+          <button
+            onClick={() => setSelectedTab('partners')}
+            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+              selectedTab === 'partners'
+                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg'
+                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+            }`}
+          >
+            <Users className="w-5 h-5 inline mr-2" />
+            {isSpanish ? 'Partners' : 'Partners'}
+          </button>
+          <button
+            onClick={() => setSelectedTab('clients')}
+            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+              selectedTab === 'clients'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
+                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+            }`}
+          >
+            <Wallet className="w-5 h-5 inline mr-2" />
+            {isSpanish ? 'Clientes' : 'Clients'}
+          </button>
+          <button
+            onClick={() => setSelectedTab('accounts')}
+            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+              selectedTab === 'accounts'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
+                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+            }`}
+          >
+            <Key className="w-5 h-5 inline mr-2" />
+            {isSpanish ? 'Cuentas' : 'Accounts'}
+          </button>
+          <button
+            onClick={() => setSelectedTab('transfers')}
+            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+              selectedTab === 'transfers'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
+                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+            }`}
+          >
+            <ArrowRight className="w-5 h-5 inline mr-2" />
+            {isSpanish ? 'Transferencias' : 'Transfers'}
+          </button>
+        </div>
+
+        {/* Content by Tab */}
+        {selectedTab === 'partners' && (
+          <>
+            {/* Crear Nuevo Partner */}
+            <BankingSection
           title={isSpanish ? "Crear Nuevo Partner" : "Create New Partner"}
           icon={Plus}
           color="sky"
@@ -136,29 +211,31 @@ export function DAESPartnerAPIModule() {
                 {isSpanish ? "Divisas Permitidas" : "Allowed Currencies"}
               </label>
               <div className="flex flex-wrap gap-2">
-                {['USD', 'EUR', 'MXN', 'GBP', 'CAD'].map(curr => (
+                {availableCurrencies.map(currency => (
                   <button
-                    key={curr}
+                    key={currency.code}
                     onClick={() => {
-                      if (newPartner.allowedCurrencies.includes(curr)) {
+                      if (newPartner.allowedCurrencies.includes(currency.code)) {
                         setNewPartner({
                           ...newPartner,
-                          allowedCurrencies: newPartner.allowedCurrencies.filter(c => c !== curr)
+                          allowedCurrencies: newPartner.allowedCurrencies.filter(c => c !== currency.code)
                         });
                       } else {
                         setNewPartner({
                           ...newPartner,
-                          allowedCurrencies: [...newPartner.allowedCurrencies, curr]
+                          allowedCurrencies: [...newPartner.allowedCurrencies, currency.code]
                         });
                       }
                     }}
-                    className={`px-4 py-2 rounded-lg border-2 font-semibold transition-all ${
-                      newPartner.allowedCurrencies.includes(curr)
+                    className={`px-4 py-2 rounded-lg border-2 font-semibold transition-all flex items-center gap-2 ${
+                      newPartner.allowedCurrencies.includes(currency.code)
                         ? 'bg-sky-500/20 border-sky-500 text-sky-400'
                         : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-500'
                     }`}
+                    title={currency.name}
                   >
-                    {curr}
+                    <span>{currency.flag}</span>
+                    <span>{currency.code}</span>
                   </button>
                 ))}
               </div>
@@ -367,6 +444,26 @@ export function DAESPartnerAPIModule() {
               </div>
             </div>
 
+            {/* Divisas Soportadas */}
+            <div>
+              <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-sky-400" />
+                {isSpanish ? "15 Divisas Soportadas" : "15 Supported Currencies"}
+              </h3>
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                {availableCurrencies.map(curr => (
+                  <div
+                    key={curr.code}
+                    className="bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-center hover:border-sky-500/50 transition-all"
+                  >
+                    <div className="text-2xl mb-1">{curr.flag}</div>
+                    <p className="text-slate-100 font-bold text-sm">{curr.code}</p>
+                    <p className="text-slate-500 text-xs">{curr.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Ejemplo CashTransfer.v1 */}
             <div>
               <h3 className="text-lg font-bold text-slate-100 mb-4">
@@ -398,6 +495,94 @@ export function DAESPartnerAPIModule() {
             </div>
           </div>
         </BankingSection>
+
+          </>
+        )}
+
+        {/* Tab: Clientes */}
+        {selectedTab === 'clients' && (
+          <BankingSection
+            title={isSpanish ? "Gestión de Clientes" : "Client Management"}
+            icon={Wallet}
+            color="emerald"
+          >
+            <div className="text-center py-16">
+              <Wallet className="w-20 h-20 text-slate-700 mx-auto mb-4" />
+              <p className="text-slate-400 text-lg font-medium mb-2">
+                {isSpanish ? "Panel de Clientes" : "Client Panel"}
+              </p>
+              <p className="text-slate-600 text-sm">
+                {isSpanish ? "Gestión de clientes asociados a partners" : "Management of clients associated with partners"}
+              </p>
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <BankingBadge variant="info">
+                  {clients.length} {isSpanish ? "clientes registrados" : "registered clients"}
+                </BankingBadge>
+              </div>
+            </div>
+          </BankingSection>
+        )}
+
+        {/* Tab: Cuentas */}
+        {selectedTab === 'accounts' && (
+          <BankingSection
+            title={isSpanish ? "Gestión de Cuentas Multi-Moneda" : "Multi-Currency Account Management"}
+            icon={Key}
+            color="amber"
+          >
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {availableCurrencies.map(curr => (
+                  <div
+                    key={curr.code}
+                    className="bg-slate-900/50 border border-slate-700 hover:border-amber-500/50 rounded-xl p-4 transition-all text-center"
+                  >
+                    <div className="text-3xl mb-2">{curr.flag}</div>
+                    <p className="text-slate-100 font-bold">{curr.code}</p>
+                    <p className="text-slate-500 text-xs">{curr.name}</p>
+                    <div className="mt-3">
+                      <BankingBadge variant="info">
+                        {accounts.filter(a => a.currency === curr.code).length} {isSpanish ? "cuentas" : "accounts"}
+                      </BankingBadge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-center py-8">
+                <p className="text-slate-400">
+                  {isSpanish ? "Cuentas disponibles en las 15 monedas principales" : "Accounts available in 15 major currencies"}
+                </p>
+              </div>
+            </div>
+          </BankingSection>
+        )}
+
+        {/* Tab: Transferencias */}
+        {selectedTab === 'transfers' && (
+          <BankingSection
+            title={isSpanish ? "Transferencias CashTransfer.v1" : "CashTransfer.v1 Transfers"}
+            icon={ArrowRight}
+            color="purple"
+          >
+            <div className="text-center py-16">
+              <ArrowRight className="w-20 h-20 text-slate-700 mx-auto mb-4" />
+              <p className="text-slate-400 text-lg font-medium mb-2">
+                {isSpanish ? "Panel de Transferencias" : "Transfer Panel"}
+              </p>
+              <p className="text-slate-600 text-sm">
+                {isSpanish ? "Transferencias multi-moneda con estructura CashTransfer.v1" : "Multi-currency transfers with CashTransfer.v1 structure"}
+              </p>
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <BankingBadge variant="success">
+                  {transfers.length} {isSpanish ? "transferencias procesadas" : "transfers processed"}
+                </BankingBadge>
+                <BankingBadge variant="info">
+                  {availableCurrencies.length} {isSpanish ? "divisas disponibles" : "currencies available"}
+                </BankingBadge>
+              </div>
+            </div>
+          </BankingSection>
+        )}
 
         {/* Footer - API Info */}
         <BankingCard className="p-6">
