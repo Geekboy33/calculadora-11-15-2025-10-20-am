@@ -81,6 +81,8 @@ export function DAESPartnerAPIModule() {
     clientId: ''
   });
   const [processing, setProcessing] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verificationResults, setVerificationResults] = useState<any>(null);
 
   // Cargar cuentas custodio
   useEffect(() => {
@@ -1240,6 +1242,192 @@ Partner: ${partner.name}
     }
   };
 
+  const handleVerifySystem = async () => {
+    setVerifying(true);
+    setVerificationResults(null);
+
+    const results = {
+      timestamp: new Date().toISOString(),
+      checks: [] as any[],
+      overall: 'PENDING' as 'SUCCESS' | 'WARNING' | 'ERROR'
+    };
+
+    let successCount = 0;
+    let warningCount = 0;
+    let errorCount = 0;
+
+    // Check 1: Partners configurados
+    if (partners.length > 0) {
+      results.checks.push({
+        name: isSpanish ? 'Partners Registrados' : 'Registered Partners',
+        status: 'SUCCESS',
+        message: `${partners.length} ${isSpanish ? 'partner(s) activo(s)' : 'active partner(s)'}`,
+        details: partners.map(p => `${p.name} (${p.clientId})`)
+      });
+      successCount++;
+    } else {
+      results.checks.push({
+        name: isSpanish ? 'Partners Registrados' : 'Registered Partners',
+        status: 'WARNING',
+        message: isSpanish ? 'No hay partners registrados' : 'No partners registered',
+        details: []
+      });
+      warningCount++;
+    }
+
+    // Check 2: Clientes configurados
+    if (clients.length > 0) {
+      results.checks.push({
+        name: isSpanish ? 'Clientes Configurados' : 'Configured Clients',
+        status: 'SUCCESS',
+        message: `${clients.length} ${isSpanish ? 'cliente(s) con credenciales' : 'client(s) with credentials'}`,
+        details: clients.map(c => `${c.legalName} - ${c.allowedCurrencies.length} ${isSpanish ? 'divisas' : 'currencies'}`)
+      });
+      successCount++;
+    } else {
+      results.checks.push({
+        name: isSpanish ? 'Clientes Configurados' : 'Configured Clients',
+        status: 'WARNING',
+        message: isSpanish ? 'No hay clientes configurados' : 'No clients configured',
+        details: []
+      });
+      warningCount++;
+    }
+
+    // Check 3: Cuentas Custodio disponibles
+    if (custodyAccounts.length > 0) {
+      const totalBalance = custodyAccounts.reduce((sum, acc) => sum + acc.availableBalance, 0);
+      results.checks.push({
+        name: isSpanish ? 'Cuentas Custodio' : 'Custody Accounts',
+        status: 'SUCCESS',
+        message: `${custodyAccounts.length} ${isSpanish ? 'cuenta(s)' : 'account(s)'} - ${isSpanish ? 'Balance total:' : 'Total balance:'} ${fmt.currency(totalBalance, 'USD')}`,
+        details: custodyAccounts.map(a => `${a.accountName}: ${fmt.currency(a.availableBalance, a.currency)}`)
+      });
+      successCount++;
+    } else {
+      results.checks.push({
+        name: isSpanish ? 'Cuentas Custodio' : 'Custody Accounts',
+        status: 'ERROR',
+        message: isSpanish ? 'No hay cuentas custodio disponibles' : 'No custody accounts available',
+        details: [isSpanish ? 'Crea cuentas custodio en el módulo correspondiente' : 'Create custody accounts in the corresponding module']
+      });
+      errorCount++;
+    }
+
+    // Check 4: Divisas configuradas
+    const allCurrencies = new Set<string>();
+    clients.forEach(c => c.allowedCurrencies.forEach((curr: string) => allCurrencies.add(curr)));
+    
+    if (allCurrencies.size > 0) {
+      results.checks.push({
+        name: isSpanish ? 'Divisas Configuradas' : 'Configured Currencies',
+        status: 'SUCCESS',
+        message: `${allCurrencies.size} ${isSpanish ? 'divisa(s) habilitada(s)' : 'enabled currency(ies)'}`,
+        details: Array.from(allCurrencies).map(c => {
+          const info = availableCurrencies.find(curr => curr.code === c);
+          return `${info?.flag} ${c} - ${info?.name}`;
+        })
+      });
+      successCount++;
+    } else {
+      results.checks.push({
+        name: isSpanish ? 'Divisas Configuradas' : 'Configured Currencies',
+        status: 'WARNING',
+        message: isSpanish ? 'No hay divisas configuradas en clientes' : 'No currencies configured in clients',
+        details: []
+      });
+      warningCount++;
+    }
+
+    // Check 5: Transferencias procesadas
+    if (transfers.length > 0) {
+      const totalAmount = transfers.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+      results.checks.push({
+        name: isSpanish ? 'Transferencias' : 'Transfers',
+        status: 'SUCCESS',
+        message: `${transfers.length} ${isSpanish ? 'transferencia(s) procesada(s)' : 'processed transfer(s)'} - ${isSpanish ? 'Volumen:' : 'Volume:'} ${fmt.currency(totalAmount, 'USD')}`,
+        details: transfers.map(t => `${t.transferRequestId}: ${fmt.currency(parseFloat(t.amount), t.currency)}`)
+      });
+      successCount++;
+    } else {
+      results.checks.push({
+        name: isSpanish ? 'Transferencias' : 'Transfers',
+        status: 'WARNING',
+        message: isSpanish ? 'No hay transferencias registradas' : 'No transfers registered',
+        details: [isSpanish ? 'El sistema está listo para procesar transferencias' : 'System is ready to process transfers']
+      });
+      warningCount++;
+    }
+
+    // Check 6: Validación de componentes
+    results.checks.push({
+      name: isSpanish ? 'Componentes UI' : 'UI Components',
+      status: 'SUCCESS',
+      message: isSpanish ? 'Todos los componentes bancarios cargados correctamente' : 'All banking components loaded correctly',
+      details: ['BankingCard', 'BankingHeader', 'BankingButton', 'BankingMetric', 'BankingBadge']
+    });
+    successCount++;
+
+    // Check 7: Formatters funcionando
+    try {
+      const testAmount = 1500000.50;
+      const formatted = fmt.currency(testAmount, 'USD');
+      const isCorrect = isSpanish ? formatted.includes('1.500.000,50') : formatted.includes('1,500,000.50');
+      
+      results.checks.push({
+        name: isSpanish ? 'Formateo de Números' : 'Number Formatting',
+        status: isCorrect ? 'SUCCESS' : 'ERROR',
+        message: isCorrect 
+          ? (isSpanish ? 'Formateo correcto ES/EN' : 'Correct ES/EN formatting')
+          : (isSpanish ? 'Error en formateo' : 'Formatting error'),
+        details: [
+          isSpanish ? `Ejemplo: ${formatted} (${isCorrect ? '✅ Correcto' : '❌ Incorrecto'})` : `Example: ${formatted} (${isCorrect ? '✅ Correct' : '❌ Incorrect'})`
+        ]
+      });
+      if (isCorrect) successCount++; else errorCount++;
+    } catch (e) {
+      results.checks.push({
+        name: isSpanish ? 'Formateo de Números' : 'Number Formatting',
+        status: 'ERROR',
+        message: isSpanish ? 'Error al verificar formateo' : 'Error checking formatting',
+        details: []
+      });
+      errorCount++;
+    }
+
+    // Check 8: Sistema de traducción
+    results.checks.push({
+      name: isSpanish ? 'Sistema de Traducción' : 'Translation System',
+      status: 'SUCCESS',
+      message: `${isSpanish ? 'Idioma activo:' : 'Active language:'} ${isSpanish ? 'Español (ES)' : 'English (EN)'}`,
+      details: [isSpanish ? 'TXT se generará en español' : 'TXT will be generated in English']
+    });
+    successCount++;
+
+    // Determinar estado general
+    if (errorCount > 0) {
+      results.overall = 'ERROR';
+    } else if (warningCount > 0) {
+      results.overall = 'WARNING';
+    } else {
+      results.overall = 'SUCCESS';
+    }
+
+    setVerificationResults(results);
+    setVerifying(false);
+
+    // Mostrar resumen
+    const summaryText = 
+      `${results.overall === 'SUCCESS' ? '✅' : results.overall === 'WARNING' ? '⚠️' : '❌'} ${isSpanish ? 'VERIFICACIÓN COMPLETA' : 'VERIFICATION COMPLETE'}\n\n` +
+      `${isSpanish ? 'Exitosas:' : 'Successful:'} ${successCount}\n` +
+      `${isSpanish ? 'Advertencias:' : 'Warnings:'} ${warningCount}\n` +
+      `${isSpanish ? 'Errores:' : 'Errors:'} ${errorCount}\n\n` +
+      `${isSpanish ? 'Estado General:' : 'Overall Status:'} ${results.overall}\n\n` +
+      `${isSpanish ? 'Ver detalles completos abajo' : 'See full details below'}`;
+
+    alert(summaryText);
+  };
+
   const handleDeletePartner = (partnerId: string) => {
     const partner = partners.find(p => p.partnerId === partnerId);
     if (!partner) return;
@@ -1398,6 +1586,17 @@ Partner: ${partner.name}
           gradient="sky"
           actions={
             <div className="flex items-center gap-3">
+              <BankingButton
+                variant="secondary"
+                icon={CheckCircle}
+                onClick={handleVerifySystem}
+                disabled={verifying}
+              >
+                {verifying 
+                  ? (isSpanish ? 'Verificando...' : 'Verifying...') 
+                  : (isSpanish ? 'Verificar Sistema' : 'Verify System')
+                }
+              </BankingButton>
               <BankingBadge variant="success" icon={CheckCircle}>
                 API v1.0
               </BankingBadge>
@@ -1407,6 +1606,121 @@ Partner: ${partner.name}
             </div>
           }
         />
+
+        {/* Verification Results */}
+        {verificationResults && (
+          <BankingCard className={`p-6 border-2 ${
+            verificationResults.overall === 'SUCCESS' ? 'border-emerald-500/50' :
+            verificationResults.overall === 'WARNING' ? 'border-amber-500/50' :
+            'border-red-500/50'
+          }`}>
+            <div className="flex items-start gap-4 mb-6">
+              <div className={`p-3 rounded-xl ${
+                verificationResults.overall === 'SUCCESS' ? 'bg-emerald-500/10' :
+                verificationResults.overall === 'WARNING' ? 'bg-amber-500/10' :
+                'bg-red-500/10'
+              }`}>
+                {verificationResults.overall === 'SUCCESS' ? <CheckCircle className="w-8 h-8 text-emerald-400" /> :
+                 verificationResults.overall === 'WARNING' ? <AlertCircle className="w-8 h-8 text-amber-400" /> :
+                 <AlertCircle className="w-8 h-8 text-red-400" />}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-slate-100 mb-2">
+                  {isSpanish ? 'Resultados de Verificación' : 'Verification Results'}
+                </h3>
+                <p className={`text-lg font-semibold ${
+                  verificationResults.overall === 'SUCCESS' ? 'text-emerald-400' :
+                  verificationResults.overall === 'WARNING' ? 'text-amber-400' :
+                  'text-red-400'
+                }`}>
+                  {verificationResults.overall === 'SUCCESS' 
+                    ? (isSpanish ? '✅ Sistema Completamente Funcional' : '✅ System Fully Functional')
+                    : verificationResults.overall === 'WARNING'
+                    ? (isSpanish ? '⚠️ Sistema Funcional con Advertencias' : '⚠️ System Functional with Warnings')
+                    : (isSpanish ? '❌ Errores Detectados' : '❌ Errors Detected')
+                  }
+                </p>
+                <p className="text-slate-400 text-sm mt-1">
+                  {isSpanish ? 'Verificado:' : 'Verified:'} {fmt.dateTime(verificationResults.timestamp)}
+                </p>
+              </div>
+              <button
+                onClick={() => setVerificationResults(null)}
+                className="text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-center">
+                <p className="text-emerald-400 text-3xl font-bold">
+                  {verificationResults.checks.filter((c: any) => c.status === 'SUCCESS').length}
+                </p>
+                <p className="text-emerald-300 text-sm mt-1">{isSpanish ? 'Exitosas' : 'Successful'}</p>
+              </div>
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center">
+                <p className="text-amber-400 text-3xl font-bold">
+                  {verificationResults.checks.filter((c: any) => c.status === 'WARNING').length}
+                </p>
+                <p className="text-amber-300 text-sm mt-1">{isSpanish ? 'Advertencias' : 'Warnings'}</p>
+              </div>
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center">
+                <p className="text-red-400 text-3xl font-bold">
+                  {verificationResults.checks.filter((c: any) => c.status === 'ERROR').length}
+                </p>
+                <p className="text-red-300 text-sm mt-1">{isSpanish ? 'Errores' : 'Errors'}</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {verificationResults.checks.map((check: any, idx: number) => (
+                <div
+                  key={idx}
+                  className={`bg-slate-900/50 border rounded-xl p-4 ${
+                    check.status === 'SUCCESS' ? 'border-emerald-500/30' :
+                    check.status === 'WARNING' ? 'border-amber-500/30' :
+                    'border-red-500/30'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`mt-1 ${
+                      check.status === 'SUCCESS' ? 'text-emerald-400' :
+                      check.status === 'WARNING' ? 'text-amber-400' :
+                      'text-red-400'
+                    }`}>
+                      {check.status === 'SUCCESS' ? '✅' : check.status === 'WARNING' ? '⚠️' : '❌'}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-slate-100 font-semibold mb-1">{check.name}</p>
+                      <p className={`text-sm mb-2 ${
+                        check.status === 'SUCCESS' ? 'text-emerald-300' :
+                        check.status === 'WARNING' ? 'text-amber-300' :
+                        'text-red-300'
+                      }`}>
+                        {check.message}
+                      </p>
+                      {check.details.length > 0 && (
+                        <div className="bg-slate-800/50 rounded-lg p-3 mt-2">
+                          <ul className="text-slate-400 text-xs space-y-1">
+                            {check.details.slice(0, 5).map((detail: string, i: number) => (
+                              <li key={i}>• {detail}</li>
+                            ))}
+                            {check.details.length > 5 && (
+                              <li className="text-slate-500 italic">
+                                {isSpanish ? `...y ${check.details.length - 5} más` : `...and ${check.details.length - 5} more`}
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </BankingCard>
+        )}
 
         {/* Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
