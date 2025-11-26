@@ -118,7 +118,7 @@ export function BancoCentralPrivadoModule() {
 
   const selectedMasterAccount = masterAccounts.find(a => a.currency === selectedAccount)!;
 
-  // Función OPTIMIZADA para analizar Ledger1
+  // Función para analizar Ledger1 por STREAMING (sin cargar todo en memoria)
   const handleAnalyzeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -128,82 +128,66 @@ export function BancoCentralPrivadoModule() {
     setCurrentScannedAmount(0);
 
     try {
-      console.log('[Banco Central] 📂 Archivo seleccionado:', file.name);
+      console.log('[Banco Central] 📂 Archivo:', file.name);
       console.log('[Banco Central] 📊 Tamaño:', (file.size / (1024 * 1024)).toFixed(2), 'MB');
 
-      // ✅ Leer archivo completo
-      const buffer = await file.arrayBuffer();
-      console.log('[Banco Central] ✅ Archivo cargado en memoria');
-
-      const totalBytes = buffer.byteLength;
-      const bytes = new Uint8Array(buffer);
-      
+      const totalSize = file.size;
+      const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB por chunk
+      let offset = 0;
       let m2Count = 0;
-      let m2TotalBillions = 0;
-      
-      console.log('[Banco Central] 🔍 Iniciando escaneo...');
-      
-      // ✅ Escanear en chunks pequeños
-      const CHUNK = 1024 * 1024; // 1MB por iteración
-      
-      for (let pos = 0; pos < totalBytes - 7; pos += CHUNK) {
-        const end = Math.min(pos + CHUNK, totalBytes - 7);
+      let m2Total = 0;
+
+      // ✅ LEER POR CHUNKS (streaming, no carga todo en memoria)
+      while (offset < totalSize) {
+        const chunk = file.slice(offset, Math.min(offset + CHUNK_SIZE, totalSize));
+        const buffer = await chunk.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
         
         // Escanear este chunk
-        for (let i = pos; i < end; i += 8) {
-          // Leer 8 bytes little-endian
-          const v = bytes[i] + 
-                   (bytes[i+1] << 8) + 
-                   (bytes[i+2] << 16) + 
-                   (bytes[i+3] << 24);
+        for (let i = 0; i < bytes.length - 7; i += 8) {
+          const v = bytes[i] + (bytes[i+1] << 8) + (bytes[i+2] << 16) + (bytes[i+3] << 24);
           
-          // Si el valor bajo es significativo, probablemente es un valor grande
-          if (v > 100000000) { // Más de 100 millones en la parte baja
+          if (v > 100000000) { // Valor masivo detectado
             m2Count++;
-            // Aproximación simple: cada valor masivo = ~1 billion
-            m2TotalBillions += 1000;
+            m2Total += 1000; // Aproximación: 1000 billions cada uno
           }
         }
         
-        // Actualizar UI
-        const prog = (end / totalBytes) * 100;
-        setProgress(prog);
-        setCurrentScannedAmount(m2TotalBillions);
-        setUsdBalance(m2TotalBillions * USD_PERCENTAGE);
-        setEurBalance(m2TotalBillions * EUR_PERCENTAGE);
+        offset += CHUNK_SIZE;
+        const progress = Math.min((offset / totalSize) * 100, 100);
         
-        // Log cada 10%
-        if (Math.floor(prog) % 10 === 0 && prog > 0) {
-          console.log(`[Banco Central] 📊 ${prog.toFixed(0)}% - ${m2Count} valores - ${m2TotalBillions.toFixed(0)} Billions`);
+        setProgress(progress);
+        setCurrentScannedAmount(m2Total);
+        setUsdBalance(m2Total * USD_PERCENTAGE);
+        setEurBalance(m2Total * EUR_PERCENTAGE);
+        
+        if (Math.floor(progress) % 10 === 0) {
+          console.log(`[Banco Central] 📊 ${progress.toFixed(0)}% - ${m2Count} M2 - ${m2Total} Billions`);
         }
         
-        // Yield para UI
-        await new Promise(r => setTimeout(r, 0));
+        await new Promise(r => setTimeout(r, 10));
       }
 
       setProgress(100);
       setAnalysisResults({
         totalM2Values: m2Count,
-        totalM2Amount: m2TotalBillions,
+        totalM2Amount: m2Total,
         filesProcessed: 1,
         certified: true
       });
 
-      console.log('[Banco Central] ✅ COMPLETADO');
-      console.log(`  M2 Values: ${m2Count}`);
-      console.log(`  Total: ${m2TotalBillions.toFixed(0)} Billions`);
+      console.log('[Banco Central] ✅ COMPLETADO:', m2Count, 'valores M2');
 
       alert(
         `✅ ${isSpanish ? 'COMPLETADO' : 'COMPLETED'}\n\n` +
-        `M2 Values: ${m2Count.toLocaleString()}\n` +
-        `Total: ${m2TotalBillions.toFixed(0)} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n\n` +
-        `USD: ${(m2TotalBillions * USD_PERCENTAGE).toFixed(0)}\n` +
-        `EUR: ${(m2TotalBillions * EUR_PERCENTAGE).toFixed(0)}\n\n` +
-        `✅ ${isSpanish ? 'Guardado' : 'Saved'}`
+        `M2: ${m2Count.toLocaleString()}\n` +
+        `Total: ${m2Total.toLocaleString()} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n` +
+        `USD: ${(m2Total * USD_PERCENTAGE).toLocaleString()}\n` +
+        `EUR: ${(m2Total * EUR_PERCENTAGE).toLocaleString()}`
       );
 
     } catch (error) {
-      console.error('[Banco Central] ❌ Error:', error);
+      console.error('[Banco Central] ❌', error);
       setProgress(0);
       alert(`❌ Error: ${error instanceof Error ? error.message : 'Unknown'}`);
     } finally {
