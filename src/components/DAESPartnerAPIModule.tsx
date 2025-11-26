@@ -664,7 +664,7 @@ class DAESPartnerAPIClient {
     }
 
     const data = await response.json();
-    console.log(\`✅ Cuenta \${currency} creada:\`, data.data.accountId);
+    console.log(\`✅ ${isSpanish ? 'Cuenta' : 'Account'} \${currency} ${isSpanish ? 'creada:' : 'created:'}\`, data.data.accountId);
     return data.data;
   }
 
