@@ -1138,7 +1138,7 @@ EVENTOS DE WEBHOOK:
 ═══════════════════════════════════════════════════════════════════════════════
 
 Soporte Técnico:
-  Email:                    support@digcommbank.com
+  Email:                    operation@digcommbank.com
   Portal:                   https://luxliqdaes.cloud/support
   Horario:                  24/7
 
