@@ -58,6 +58,16 @@ export function DAESPartnerAPIModule() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [transfers, setTransfers] = useState<any[]>([]);
   
+  // Formulario de crear cliente
+  const [newClient, setNewClient] = useState({
+    partnerIdForClient: '',
+    externalClientId: '',
+    legalName: '',
+    country: 'US',
+    type: 'WALLET' as 'FINTECH' | 'PSP' | 'WALLET' | 'EXCHANGE',
+    allowedCurrencies: ['USD']
+  });
+  
   // Integración con Cuentas Custodio
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
   const [selectedPartner, setSelectedPartner] = useState<string>('');
@@ -118,6 +128,104 @@ export function DAESPartnerAPIModule() {
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     alert(`✅ ${label} copiado al portapapeles`);
+  };
+
+  const handleCreateClient = () => {
+    if (!newClient.partnerIdForClient) {
+      alert(isSpanish ? '⚠️ Selecciona un Partner' : '⚠️ Select a Partner');
+      return;
+    }
+
+    if (!newClient.legalName || !newClient.externalClientId) {
+      alert(isSpanish ? '⚠️ Completa todos los campos obligatorios' : '⚠️ Complete all required fields');
+      return;
+    }
+
+    const partner = partners.find(p => p.partnerId === newClient.partnerIdForClient);
+    if (!partner) return;
+
+    const clientId = `CLT_${Date.now()}_${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+    const apiKey = Array.from({length: 48}, () => Math.random().toString(36).charAt(2)).join('');
+
+    const client = {
+      clientId,
+      partnerId: partner.partnerId,
+      partnerName: partner.name,
+      externalClientId: newClient.externalClientId,
+      legalName: newClient.legalName,
+      country: newClient.country,
+      type: newClient.type,
+      allowedCurrencies: newClient.allowedCurrencies,
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+      apiKey,
+      apiEndpoint: 'https://luxliqdaes.cloud/partner-api/v1'
+    };
+
+    setClients([...clients, client]);
+    generateClientCredentialsTXT(client, partner);
+    setNewClient({
+      partnerIdForClient: '',
+      externalClientId: '',
+      legalName: '',
+      country: 'US',
+      type: 'WALLET',
+      allowedCurrencies: ['USD']
+    });
+
+    alert(`✅ ${isSpanish ? 'CLIENTE CREADO' : 'CLIENT CREATED'}\n\n${client.legalName}\n\n📄 ${isSpanish ? 'TXT con credenciales descargado' : 'Credentials TXT downloaded'}`);
+  };
+
+  const generateClientCredentialsTXT = (client: any, partner: Partner) => {
+    const baseUrl = 'https://luxliqdaes.cloud/partner-api/v1';
+    const currenciesText = client.allowedCurrencies.map((curr: string) => {
+      const currInfo = availableCurrencies.find(c => c.code === curr);
+      return `${currInfo?.flag || ''} ${curr} - ${currInfo?.name || curr}`;
+    }).join('\\n');
+
+    const txtContent = `
+DIGITAL COMMERCIAL BANK LTD / DAES - CREDENCIALES DE API
+Cliente: ${client.legalName}
+ID: ${client.clientId}
+Partner: ${partner.name}
+Tipo: ${client.type}
+
+CREDENCIALES:
+Partner Client ID: ${partner.clientId}
+Client API Key: ${client.apiKey}
+
+DIVISAS HABILITADAS:
+${currenciesText}
+
+ENDPOINTS:
+Base URL: ${baseUrl}
+
+1. Auth: POST ${baseUrl}/auth/token
+2. Accounts: POST ${baseUrl}/clients/${client.clientId}/accounts
+3. Transfers: POST ${baseUrl}/transfers
+
+Generado: ${fmt.dateTime(new Date())}
+`;
+
+    const blob = new Blob([txtContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `DAES_API_${client.legalName.replace(/\\s+/g, '_')}_${client.clientId}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDeleteClient = (clientId: string) => {
+    const client = clients.find(c => c.clientId === clientId);
+    if (!client) return;
+
+    if (confirm(`⚠️ ${isSpanish ? 'Eliminar' : 'Delete'}: ${client.legalName}?`)) {
+      setClients(clients.filter(c => c.clientId !== clientId));
+      alert(`✅ ${isSpanish ? 'Cliente eliminado' : 'Client deleted'}`);
+    }
   };
 
   // Ejecutar transferencia desde cuenta custodio
@@ -639,26 +747,189 @@ export function DAESPartnerAPIModule() {
 
         {/* Tab: Clientes */}
         {selectedTab === 'clients' && (
-          <BankingSection
-            title={isSpanish ? "Gestión de Clientes" : "Client Management"}
-            icon={Wallet}
-            color="emerald"
-          >
-            <div className="text-center py-16">
-              <Wallet className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-              <p className="text-slate-400 text-lg font-medium mb-2">
-                {isSpanish ? "Panel de Clientes" : "Client Panel"}
-              </p>
-              <p className="text-slate-600 text-sm">
-                {isSpanish ? "Gestión de clientes asociados a partners" : "Management of clients associated with partners"}
-              </p>
-              <div className="mt-6 flex items-center justify-center gap-3">
-                <BankingBadge variant="info">
-                  {clients.length} {isSpanish ? "clientes registrados" : "registered clients"}
-                </BankingBadge>
+          <div className="space-y-6">
+            {/* Crear Cliente */}
+            <BankingSection
+              title={isSpanish ? "Crear Nuevo Cliente" : "Create New Client"}
+              icon={Plus}
+              color="emerald"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-300 mb-2">
+                      {isSpanish ? "Partner" : "Partner"} <span className="text-red-400">*</span>
+                    </label>
+                    <select
+                      value={newClient.partnerIdForClient}
+                      onChange={(e) => setNewClient({...newClient, partnerIdForClient: e.target.value})}
+                      aria-label="Select Partner"
+                      className="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
+                    >
+                      <option value="">{isSpanish ? "-- Selecciona Partner --" : "-- Select Partner --"}</option>
+                      {partners.map(p => (
+                        <option key={p.partnerId} value={p.partnerId}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <BankingInput
+                    label={isSpanish ? "ID Externo del Cliente" : "External Client ID"}
+                    value={newClient.externalClientId}
+                    onChange={(val) => setNewClient({...newClient, externalClientId: val})}
+                    placeholder="PLK-USER-001"
+                    required
+                  />
+
+                  <BankingInput
+                    label={isSpanish ? "Nombre Legal" : "Legal Name"}
+                    value={newClient.legalName}
+                    onChange={(val) => setNewClient({...newClient, legalName: val})}
+                    placeholder={isSpanish ? "Nombre completo o razón social" : "Full name or company name"}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-300 mb-2">
+                      {isSpanish ? "Tipo de Cliente" : "Client Type"}
+                    </label>
+                    <select
+                      value={newClient.type}
+                      onChange={(e) => setNewClient({...newClient, type: e.target.value as any})}
+                      aria-label="Client Type"
+                      className="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
+                    >
+                      <option value="WALLET">Wallet</option>
+                      <option value="FINTECH">Fintech</option>
+                      <option value="PSP">PSP (Payment Service Provider)</option>
+                      <option value="EXCHANGE">Exchange</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-300 mb-2">
+                      {isSpanish ? "Divisas para API" : "API Currencies"} <span className="text-red-400">*</span>
+                    </label>
+                    <div className="flex flex-wrap gap-2 bg-slate-900/50 border border-slate-700 rounded-xl p-4 max-h-48 overflow-y-auto">
+                      {availableCurrencies.map(currency => (
+                        <button
+                          key={currency.code}
+                          onClick={() => {
+                            if (newClient.allowedCurrencies.includes(currency.code)) {
+                              setNewClient({
+                                ...newClient,
+                                allowedCurrencies: newClient.allowedCurrencies.filter(c => c !== currency.code)
+                              });
+                            } else {
+                              setNewClient({
+                                ...newClient,
+                                allowedCurrencies: [...newClient.allowedCurrencies, currency.code]
+                              });
+                            }
+                          }}
+                          className={`px-3 py-2 rounded-lg border font-semibold text-sm transition-all ${
+                            newClient.allowedCurrencies.includes(currency.code)
+                              ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
+                              : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-500'
+                          }`}
+                        >
+                          {currency.flag} {currency.code}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-slate-500 text-xs mt-2">
+                      {isSpanish ? "Selecciona las divisas que este cliente podrá usar" : "Select currencies this client will be able to use"}
+                    </p>
+                  </div>
+
+                  <BankingButton
+                    variant="primary"
+                    icon={Plus}
+                    onClick={handleCreateClient}
+                    disabled={!newClient.partnerIdForClient || !newClient.legalName || !newClient.externalClientId || newClient.allowedCurrencies.length === 0}
+                    className="w-full mt-4"
+                  >
+                    {isSpanish ? "Crear Cliente y Descargar Credenciales" : "Create Client & Download Credentials"}
+                  </BankingButton>
+                </div>
               </div>
-            </div>
-          </BankingSection>
+            </BankingSection>
+
+            {/* Lista de Clientes */}
+            <BankingSection
+              title={isSpanish ? "Clientes Registrados" : "Registered Clients"}
+              icon={Wallet}
+              color="sky"
+            >
+              {clients.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {clients.map((client) => (
+                    <div
+                      key={client.clientId}
+                      className="bg-slate-900/50 border border-slate-700 hover:border-emerald-500/50 rounded-xl p-5 transition-all group"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="text-slate-100 font-bold text-lg mb-1 group-hover:text-emerald-400 transition-colors">
+                            {client.legalName}
+                          </h4>
+                          <p className="text-slate-500 text-sm mb-2">{client.externalClientId}</p>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <BankingBadge variant="success">{client.status}</BankingBadge>
+                            <BankingBadge variant="info">{client.type}</BankingBadge>
+                            <span className="text-slate-600 text-xs">{client.country}</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteClient(client.clientId)}
+                          className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500 text-red-400 rounded-lg transition-all"
+                          title={isSpanish ? "Eliminar cliente" : "Delete client"}
+                        >
+                          <AlertCircle className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="text-xs">
+                          <span className="text-slate-500">{isSpanish ? "Partner:" : "Partner:"}</span>
+                          <span className="text-slate-300 ml-2">{client.partnerName}</span>
+                        </div>
+                        <div className="text-xs">
+                          <span className="text-slate-500">Client ID:</span>
+                          <code className="text-sky-400 ml-2 font-mono">{client.clientId}</code>
+                        </div>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {client.allowedCurrencies.map((curr: string) => {
+                            const currInfo = availableCurrencies.find(c => c.code === curr);
+                            return (
+                              <span key={curr} className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">
+                                {currInfo?.flag} {curr}
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <div className="text-slate-600 text-xs mt-2">
+                          {fmt.dateTime(client.createdAt)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <Wallet className="w-20 h-20 text-slate-700 mx-auto mb-4" />
+                  <p className="text-slate-400 text-lg font-medium">
+                    {isSpanish ? "No hay clientes registrados" : "No clients registered"}
+                  </p>
+                  <p className="text-slate-600 text-sm mt-2">
+                    {isSpanish ? "Crea tu primer cliente para comenzar" : "Create your first client to get started"}
+                  </p>
+                </div>
+              )}
+            </BankingSection>
+          </div>
         )}
 
         {/* Tab: Cuentas */}
