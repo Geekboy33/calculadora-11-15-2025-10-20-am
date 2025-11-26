@@ -1240,6 +1240,44 @@ Partner: ${partner.name}
     }
   };
 
+  const handleDeletePartner = (partnerId: string) => {
+    const partner = partners.find(p => p.partnerId === partnerId);
+    if (!partner) return;
+
+    // Contar clientes asociados
+    const associatedClients = clients.filter(c => c.partnerId === partnerId);
+    
+    const confirmed = confirm(
+      `⚠️ ${isSpanish ? 'ELIMINAR PARTNER' : 'DELETE PARTNER'}\n\n` +
+      `Partner: ${partner.name}\n` +
+      `Partner ID: ${partner.partnerId}\n\n` +
+      `${isSpanish ? 'También se eliminarán:' : 'This will also delete:'}\n` +
+      `- ${associatedClients.length} ${isSpanish ? 'cliente(s) asociado(s)' : 'associated client(s)'}\n` +
+      `- ${isSpanish ? 'Todas las cuentas de esos clientes' : 'All accounts of those clients'}\n` +
+      `- ${isSpanish ? 'Todo el historial de transferencias' : 'All transfer history'}\n\n` +
+      `${isSpanish ? '¿Estás SEGURO?' : 'Are you SURE?'}\n` +
+      `${isSpanish ? 'Esta acción NO se puede deshacer.' : 'This action CANNOT be undone.'}`
+    );
+
+    if (confirmed) {
+      // Eliminar partner
+      setPartners(partners.filter(p => p.partnerId !== partnerId));
+      
+      // Eliminar TODOS los clientes asociados
+      setClients(clients.filter(c => c.partnerId !== partnerId));
+      
+      // Eliminar transferencias asociadas
+      setTransfers(transfers.filter(t => t.partnerId !== partnerId));
+
+      alert(
+        `✅ ${isSpanish ? 'ELIMINADO EXITOSAMENTE' : 'DELETED SUCCESSFULLY'}\n\n` +
+        `Partner: ${partner.name}\n` +
+        `${isSpanish ? 'Clientes eliminados:' : 'Clients deleted:'} ${associatedClients.length}\n` +
+        `${isSpanish ? 'Transferencias eliminadas:' : 'Transfers deleted:'} ${transfers.filter(t => t.partnerId === partnerId).length}`
+      );
+    }
+  };
+
   // Ejecutar transferencia desde cuenta custodio
   const handleExecuteTransfer = async () => {
     if (!selectedPartner) {
@@ -1582,30 +1620,46 @@ Partner: ${partner.name}
         >
           {partners.length > 0 ? (
             <div className="space-y-3">
-              {partners.map((partner) => (
-                <div
-                  key={partner.partnerId}
-                  className="bg-slate-900/50 border border-slate-700 hover:border-sky-500/50 rounded-xl p-5 transition-all group"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h4 className="text-slate-100 font-bold text-lg mb-2 group-hover:text-sky-400 transition-colors">
-                        {partner.name}
-                      </h4>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <BankingBadge variant="success">
-                          {partner.status}
-                        </BankingBadge>
-                        <span className="text-slate-500 text-sm">ID: {partner.partnerId}</span>
+              {partners.map((partner) => {
+                const associatedClientsCount = clients.filter(c => c.partnerId === partner.partnerId).length;
+                return (
+                  <div
+                    key={partner.partnerId}
+                    className="bg-slate-900/50 border border-slate-700 hover:border-sky-500/50 rounded-xl p-5 transition-all group"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h4 className="text-slate-100 font-bold text-lg mb-2 group-hover:text-sky-400 transition-colors">
+                          {partner.name}
+                        </h4>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <BankingBadge variant="success">
+                            {partner.status}
+                          </BankingBadge>
+                          <span className="text-slate-500 text-sm">ID: {partner.partnerId}</span>
+                          {associatedClientsCount > 0 && (
+                            <BankingBadge variant="info">
+                              {associatedClientsCount} {isSpanish ? 'clientes' : 'clients'}
+                            </BankingBadge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="text-slate-400 text-sm mb-1">Client ID:</p>
+                          <code className="text-sky-400 text-xs font-mono bg-slate-800 px-2 py-1 rounded">
+                            {partner.clientId}
+                          </code>
+                        </div>
+                        <button
+                          onClick={() => handleDeletePartner(partner.partnerId)}
+                          className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500 text-red-400 rounded-lg transition-all"
+                          title={isSpanish ? "Eliminar partner y todos sus clientes" : "Delete partner and all clients"}
+                        >
+                          <AlertCircle className="w-5 h-5" />
+                        </button>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-slate-400 text-sm mb-1">Client ID:</p>
-                      <code className="text-sky-400 text-xs font-mono bg-slate-800 px-2 py-1 rounded">
-                        {partner.clientId}
-                      </code>
-                    </div>
-                  </div>
 
                   <div className="flex flex-wrap gap-2 mt-3">
                     {partner.allowedCurrencies.map(curr => (
@@ -1622,7 +1676,8 @@ Partner: ${partner.name}
                     {isSpanish ? "Creado:" : "Created:"} {fmt.dateTime(partner.createdAt)}
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           ) : (
             <div className="text-center py-16">
