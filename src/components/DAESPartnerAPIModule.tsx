@@ -26,7 +26,11 @@ interface Partner {
 export function DAESPartnerAPIModule() {
   const { fmt, isSpanish } = useBankingTheme();
   
-  const [partners, setPartners] = useState<Partner[]>([]);
+  // ✅ PERSISTENCIA: Cargar desde localStorage al iniciar
+  const [partners, setPartners] = useState<Partner[]>(() => {
+    const saved = localStorage.getItem('daes_partner_api_partners');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [showSecret, setShowSecret] = useState(false);
   const [newPartner, setNewPartner] = useState({
     name: '',
@@ -54,9 +58,20 @@ export function DAESPartnerAPIModule() {
   ];
   
   const [selectedTab, setSelectedTab] = useState<'partners' | 'clients' | 'accounts' | 'transfers'>('partners');
-  const [clients, setClients] = useState<any[]>([]);
-  const [accounts, setAccounts] = useState<any[]>([]);
-  const [transfers, setTransfers] = useState<any[]>([]);
+  
+  // ✅ PERSISTENCIA: Cargar desde localStorage
+  const [clients, setClients] = useState<any[]>(() => {
+    const saved = localStorage.getItem('daes_partner_api_clients');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [accounts, setAccounts] = useState<any[]>(() => {
+    const saved = localStorage.getItem('daes_partner_api_accounts');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [transfers, setTransfers] = useState<any[]>(() => {
+    const saved = localStorage.getItem('daes_partner_api_transfers');
+    return saved ? JSON.parse(saved) : [];
+  });
   
   // Formulario de crear cliente
   const [newClient, setNewClient] = useState({
@@ -83,6 +98,26 @@ export function DAESPartnerAPIModule() {
   const [processing, setProcessing] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [verificationResults, setVerificationResults] = useState<any>(null);
+
+  // ✅ PERSISTENCIA: Guardar automáticamente cuando cambien los datos
+  useEffect(() => {
+    localStorage.setItem('daes_partner_api_partners', JSON.stringify(partners));
+    console.log('[DAES Partner API] 💾 Partners guardados:', partners.length);
+  }, [partners]);
+
+  useEffect(() => {
+    localStorage.setItem('daes_partner_api_clients', JSON.stringify(clients));
+    console.log('[DAES Partner API] 💾 Clientes guardados:', clients.length);
+  }, [clients]);
+
+  useEffect(() => {
+    localStorage.setItem('daes_partner_api_accounts', JSON.stringify(accounts));
+  }, [accounts]);
+
+  useEffect(() => {
+    localStorage.setItem('daes_partner_api_transfers', JSON.stringify(transfers));
+    console.log('[DAES Partner API] 💾 Transferencias guardadas:', transfers.length);
+  }, [transfers]);
 
   // Cargar cuentas custodio
   useEffect(() => {
