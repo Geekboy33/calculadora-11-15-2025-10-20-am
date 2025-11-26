@@ -51,9 +51,41 @@ export function BancoCentralPrivadoModule() {
     filesProcessed: number;
     certified: boolean;
   } | null>(null);
-  const [usdBalance, setUsdBalance] = useState(usdMasterBalance);
-  const [eurBalance, setEurBalance] = useState(eurMasterBalance);
+  const [usdBalance, setUsdBalance] = useState(() => {
+    const saved = localStorage.getItem('banco_central_usd_balance');
+    return saved ? parseFloat(saved) : usdMasterBalance;
+  });
+  const [eurBalance, setEurBalance] = useState(() => {
+    const saved = localStorage.getItem('banco_central_eur_balance');
+    return saved ? parseFloat(saved) : eurMasterBalance;
+  });
+  const [analysisResultsSaved, setAnalysisResultsSaved] = useState(() => {
+    const saved = localStorage.getItem('banco_central_analysis_results');
+    return saved ? JSON.parse(saved) : null;
+  });
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // ✅ Cargar resultados guardados al iniciar
+  React.useEffect(() => {
+    if (analysisResultsSaved) {
+      setAnalysisResults(analysisResultsSaved);
+    }
+  }, []);
+
+  // ✅ Guardar balances cuando cambien
+  React.useEffect(() => {
+    localStorage.setItem('banco_central_usd_balance', usdBalance.toString());
+  }, [usdBalance]);
+
+  React.useEffect(() => {
+    localStorage.setItem('banco_central_eur_balance', eurBalance.toString());
+  }, [eurBalance]);
+
+  React.useEffect(() => {
+    if (analysisResults) {
+      localStorage.setItem('banco_central_analysis_results', JSON.stringify(analysisResults));
+    }
+  }, [analysisResults]);
 
   // Master Accounts (usando balances actualizados si hay análisis)
   const masterAccounts = [
@@ -175,6 +207,29 @@ export function BancoCentralPrivadoModule() {
       );
     } finally {
       setAnalyzing(false);
+    }
+  };
+
+  const handleClearAnalysis = () => {
+    const confirmed = confirm(
+      `⚠️ ${isSpanish ? 'LIMPIAR ANÁLISIS' : 'CLEAR ANALYSIS'}\n\n` +
+      `${isSpanish ? '¿Eliminar los balances analizados y volver a cargar?' : 'Delete analyzed balances and reload?'}\n\n` +
+      `${isSpanish ? 'Esto restaurará los valores de auditoría por defecto.' : 'This will restore default audit values.'}`
+    );
+
+    if (confirmed) {
+      // Limpiar localStorage
+      localStorage.removeItem('banco_central_usd_balance');
+      localStorage.removeItem('banco_central_eur_balance');
+      localStorage.removeItem('banco_central_analysis_results');
+
+      // Restaurar valores por defecto
+      setUsdBalance(usdMasterBalance);
+      setEurBalance(eurMasterBalance);
+      setAnalysisResults(null);
+
+      alert(`✅ ${isSpanish ? 'Análisis limpiado. Puede cargar un nuevo archivo.' : 'Analysis cleared. You can load a new file.'}`);
+      console.log('[Banco Central] 🗑️ Análisis limpiado, balances restaurados');
     }
   };
 
@@ -366,6 +421,16 @@ Timestamp: ${AUDIT_DATA.timestamp}
               >
                 {isSpanish ? "Descargar Auditoría" : "Download Audit"}
               </BankingButton>
+              {analysisResults?.certified && (
+                <BankingButton
+                  variant="ghost"
+                  icon={RefreshCw}
+                  onClick={handleClearAnalysis}
+                  className="border border-amber-500/30 hover:border-amber-500 text-amber-400"
+                >
+                  {isSpanish ? "Limpiar y Recargar" : "Clear & Reload"}
+                </BankingButton>
+              )}
               <button
                 onClick={() => setBalancesVisible(!balancesVisible)}
                 className="p-3 bg-slate-800 border border-slate-600 hover:border-slate-500 text-slate-300 rounded-xl transition-all"
