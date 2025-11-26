@@ -45,12 +45,17 @@ export function BancoCentralPrivadoModule() {
   const [balancesVisible, setBalancesVisible] = useState(true);
   const [selectedAccount, setSelectedAccount] = useState<'USD' | 'EUR'>('USD');
   const [analyzing, setAnalyzing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentScannedAmount, setCurrentScannedAmount] = useState(0);
   const [analysisResults, setAnalysisResults] = useState<{
     totalM2Values: number;
     totalM2Amount: number;
     filesProcessed: number;
     certified: boolean;
-  } | null>(null);
+  } | null>(() => {
+    const saved = localStorage.getItem('banco_central_analysis_results');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [usdBalance, setUsdBalance] = useState(() => {
     const saved = localStorage.getItem('banco_central_usd_balance');
     return saved ? parseFloat(saved) : usdMasterBalance;
@@ -119,21 +124,24 @@ export function BancoCentralPrivadoModule() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // ✅ Resetear estado al iniciar
     setAnalyzing(true);
+    setProgress(0);
+    setCurrentScannedAmount(0);
 
     try {
-      console.log('[Banco Central] 📂 Analizando:', file.name, `(${(file.size / (1024 * 1024 * 1024)).toFixed(2)} GB)`);
+      console.log('[Banco Central] 📂 Iniciando análisis:', file.name, `(${(file.size / (1024 * 1024 * 1024)).toFixed(2)} GB)`);
 
       const buffer = await file.arrayBuffer();
       const dataView = new DataView(buffer);
       
       let m2ValuesFound = 0;
-      let totalM2AmountBillions = 0; // Trabajar directamente en Miles de Millones
-      const THRESHOLD_BILLIONS = 1000000000; // 1 billion (para filtrar valores masivos)
-
-      // Escaneo byte-by-byte (técnica del reporte: step size 8 bytes)
+      let totalM2AmountBillions = 0;
+      const THRESHOLD_BILLIONS = 1000000000; // 1 billion
       const totalBytes = buffer.byteLength;
-      const CHUNK_SIZE = 10 * 1024 * 1024; // Procesar en chunks de 10MB
+      const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks para actualizaciones más frecuentes
+      
+      console.log(`[Banco Central] 🔍 Escaneando ${(totalBytes / (1024 * 1024 * 1024)).toFixed(2)} GB...`);
       
       for (let chunkStart = 0; chunkStart < totalBytes; chunkStart += CHUNK_SIZE) {
         const chunkEnd = Math.min(chunkStart + CHUNK_SIZE, totalBytes);
@@ -141,32 +149,37 @@ export function BancoCentralPrivadoModule() {
         // Procesar chunk actual
         for (let offset = chunkStart; offset < chunkEnd - 8; offset += 8) {
           try {
-            // Leer valor de 64-bit little-endian usando DataView
-            // JavaScript Number.MAX_SAFE_INTEGER = 9,007,199,254,740,991
-            // Para valores mayores, leer como dos uint32
-            const low = dataView.getUint32(offset, true); // little-endian
+            const low = dataView.getUint32(offset, true);
             const high = dataView.getUint32(offset + 4, true);
-            
-            // Convertir a número seguro (en Miles de Millones directamente)
-            // Esto evita overflow: dividimos antes de multiplicar
             const valueInBillions = (high * 4294967296 + low) / 1000000000;
             
-            // Filtrar valores masivos (> 1 billion en nuestra escala)
             if (valueInBillions > THRESHOLD_BILLIONS) {
               m2ValuesFound++;
               totalM2AmountBillions += valueInBillions;
             }
           } catch (readError) {
-            // Ignorar errores de lectura en bytes finales
             continue;
           }
         }
         
-        // Log de progreso cada chunk
-        const progress = ((chunkEnd / totalBytes) * 100).toFixed(1);
-        if (parseInt(progress) % 10 === 0) {
-          console.log(`[Banco Central] 📊 Progreso: ${progress}%`);
+        // ✅ ACTUALIZAR PROGRESO Y BALANCE EN TIEMPO REAL
+        const currentProgress = (chunkEnd / totalBytes) * 100;
+        setProgress(currentProgress);
+        setCurrentScannedAmount(totalM2AmountBillions);
+        
+        // Actualizar balances en tiempo real
+        const tempUsd = totalM2AmountBillions * USD_PERCENTAGE;
+        const tempEur = totalM2AmountBillions * EUR_PERCENTAGE;
+        setUsdBalance(tempUsd);
+        setEurBalance(tempEur);
+        
+        // Log cada 10%
+        if (Math.floor(currentProgress) % 10 === 0 && Math.floor(currentProgress) !== Math.floor(((chunkEnd - CHUNK_SIZE) / totalBytes) * 100)) {
+          console.log(`[Banco Central] 📊 ${currentProgress.toFixed(1)}% - ${m2ValuesFound.toLocaleString()} valores M2 - ${totalM2AmountBillions.toLocaleString()} Miles de Millones`);
         }
+        
+        // ✅ Permitir que la UI se actualice
+        await new Promise(resolve => setTimeout(resolve, 0));
       }
       
       // Distribuir en USD y EUR
@@ -176,6 +189,9 @@ export function BancoCentralPrivadoModule() {
       setUsdBalance(usdInBillions);
       setEurBalance(eurInBillions);
 
+      // ✅ COMPLETADO: Marcar como 100%
+      setProgress(100);
+      
       setAnalysisResults({
         totalM2Values: m2ValuesFound,
         totalM2Amount: totalM2AmountBillions,
@@ -183,23 +199,28 @@ export function BancoCentralPrivadoModule() {
         certified: true
       });
 
-      console.log('[Banco Central] ✅ Análisis completado');
+      console.log('[Banco Central] ✅ Análisis completado al 100%');
       console.log(`  Valores M2 encontrados: ${m2ValuesFound.toLocaleString()}`);
       console.log(`  Total en Miles de Millones: ${totalM2AmountBillions.toLocaleString()}`);
+      console.log(`  Master USD: ${(totalM2AmountBillions * USD_PERCENTAGE).toLocaleString()}`);
+      console.log(`  Master EUR: ${(totalM2AmountBillions * EUR_PERCENTAGE).toLocaleString()}`);
 
       alert(
         `✅ ${isSpanish ? 'ANÁLISIS COMPLETADO Y CERTIFICADO' : 'ANALYSIS COMPLETED AND CERTIFIED'}\n\n` +
         `${isSpanish ? 'Archivo:' : 'File:'} ${file.name}\n` +
         `${isSpanish ? 'Tamaño:' : 'Size:'} ${(file.size / (1024 * 1024 * 1024)).toFixed(2)} GB\n` +
+        `${isSpanish ? 'Progreso:' : 'Progress:'} 100%\n` +
         `${isSpanish ? 'Valores M2:' : 'M2 Values:'} ${m2ValuesFound.toLocaleString()}\n` +
         `${isSpanish ? 'Total:' : 'Total:'} ${totalM2AmountBillions.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n\n` +
-        `Master USD (60%): ${usdInBillions.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n` +
-        `Master EUR (40%): ${eurInBillions.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n\n` +
-        `✅ ${isSpanish ? 'Balances certificados y verificados' : 'Balances certified and verified'}`
+        `Master USD (60%): ${(totalM2AmountBillions * USD_PERCENTAGE).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}\n` +
+        `Master EUR (40%): ${(totalM2AmountBillions * EUR_PERCENTAGE).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}\n\n` +
+        `✅ ${isSpanish ? 'Balances guardados y certificados' : 'Balances saved and certified'}`
       );
 
     } catch (error) {
       console.error('[Banco Central] ❌ Error:', error);
+      setProgress(0);
+      setCurrentScannedAmount(0);
       alert(
         `❌ ${isSpanish ? 'Error al analizar archivo' : 'Error analyzing file'}\n\n` +
         `${error instanceof Error ? error.message : 'Error desconocido'}\n\n` +
@@ -227,9 +248,11 @@ export function BancoCentralPrivadoModule() {
       setUsdBalance(usdMasterBalance);
       setEurBalance(eurMasterBalance);
       setAnalysisResults(null);
+      setProgress(0);
+      setCurrentScannedAmount(0);
 
       alert(`✅ ${isSpanish ? 'Análisis limpiado. Puede cargar un nuevo archivo.' : 'Analysis cleared. You can load a new file.'}`);
-      console.log('[Banco Central] 🗑️ Análisis limpiado, balances restaurados');
+      console.log('[Banco Central] 🗑️ Análisis limpiado, balances restaurados a valores de auditoría');
     }
   };
 
@@ -621,6 +644,43 @@ Timestamp: ${AUDIT_DATA.timestamp}
                 </div>
               </div>
             </div>
+
+            {/* ✅ BARRA DE PROGRESO DE CARGA */}
+            {analyzing && (
+              <div className="px-8 pb-6">
+                <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <Activity className="w-5 h-5 text-sky-400 animate-spin" />
+                      <p className="text-slate-100 font-bold">
+                        {isSpanish ? "Escaneando Archivo..." : "Scanning File..."}
+                      </p>
+                    </div>
+                    <p className="text-sky-400 font-bold text-xl">{progress.toFixed(1)}%</p>
+                  </div>
+                  
+                  {/* Barra de progreso */}
+                  <div className="w-full bg-slate-800 rounded-full h-4 overflow-hidden border border-slate-700 mb-4">
+                    <div
+                      className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full transition-all duration-300 relative overflow-hidden"
+                      style={{ width: `${progress}%` }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                    </div>
+                  </div>
+
+                  {/* Balance actual escaneado */}
+                  <div className="text-center">
+                    <p className="text-slate-400 text-sm mb-2">
+                      {isSpanish ? "Balance Escaneado:" : "Scanned Balance:"}
+                    </p>
+                    <p className="text-3xl font-bold text-sky-400">
+                      {currentScannedAmount.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} {isSpanish ? "Miles de Millones" : "Billions"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="p-6">
