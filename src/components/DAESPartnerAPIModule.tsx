@@ -178,44 +178,884 @@ export function DAESPartnerAPIModule() {
 
   const generateClientCredentialsTXT = (client: any, partner: Partner) => {
     const baseUrl = 'https://luxliqdaes.cloud/partner-api/v1';
-    const currenciesText = client.allowedCurrencies.map((curr: string) => {
-      const currInfo = availableCurrencies.find(c => c.code === curr);
-      return `${currInfo?.flag || ''} ${curr} - ${currInfo?.name || curr}`;
-    }).join('\\n');
-
+    
     const txtContent = `
-DIGITAL COMMERCIAL BANK LTD / DAES - CREDENCIALES DE API
-Cliente: ${client.legalName}
-ID: ${client.clientId}
+═══════════════════════════════════════════════════════════════════════════════
+                      DIGITAL COMMERCIAL BANK LTD / DAES
+                    DOCUMENTACIÓN COMPLETA DE API PARA CLIENTE
+                              Partner API v1.0
+═══════════════════════════════════════════════════════════════════════════════
+
+INFORMACIÓN DEL CLIENTE
+═══════════════════════════════════════════════════════════════════════════════
+
+Cliente ID:                 ${client.clientId}
+ID Externo:                 ${client.externalClientId}
+Nombre Legal:               ${client.legalName}
+Tipo:                       ${client.type}
+País:                       ${client.country}
+Estado:                     ${client.status}
+Partner:                    ${partner.name}
+Partner ID:                 ${partner.partnerId}
+Fecha de Creación:          ${fmt.dateTime(client.createdAt)}
+
+CREDENCIALES DE AUTENTICACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANTE: Guarda estas credenciales de forma segura y NO las compartas
+
+Partner Client ID:          ${partner.clientId}
+Partner Client Secret:      [Solicita al administrador del partner]
+Client API Key:             ${client.apiKey}
+
+DIVISAS HABILITADAS PARA ESTE CLIENTE
+═══════════════════════════════════════════════════════════════════════════════
+
+${client.allowedCurrencies.map((curr: string) => {
+  const currInfo = availableCurrencies.find(c => c.code === curr);
+  return `${currInfo?.flag || ''} ${curr.padEnd(6)} - ${currInfo?.name || curr}`;
+}).join('\n')}
+
+Total: ${client.allowedCurrencies.length} divisas disponibles
+
+BASE URL DE LA API
+═══════════════════════════════════════════════════════════════════════════════
+
+Producción:                 ${baseUrl}
+Documentación:              https://luxliqdaes.cloud/docs/partner-api
+Portal de Partners:         https://luxliqdaes.cloud/partner-portal
+
+═══════════════════════════════════════════════════════════════════════════════
+                         GUÍA DE INTEGRACIÓN COMPLETA
+═══════════════════════════════════════════════════════════════════════════════
+
+PASO 1: AUTENTICACIÓN (Obtener Token de Acceso)
+═══════════════════════════════════════════════════════════════════════════════
+
+Endpoint:   POST ${baseUrl}/auth/token
+Propósito:  Obtener token JWT para autenticar todas las demás peticiones
+
+Headers:
+  Content-Type: application/json
+
+Body:
+{
+  "grant_type": "client_credentials",
+  "client_id": "${partner.clientId}",
+  "client_secret": "[TU_CLIENT_SECRET]"
+}
+
+Response (200 OK):
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "scope": "partners:read partners:write"
+}
+
+⚠️ IMPORTANTE:
+- El token expira en 1 hora (3600 segundos)
+- Guarda el access_token para usarlo en las siguientes peticiones
+- Cuando expire, solicita uno nuevo
+
+Ejemplo en JavaScript/TypeScript:
+\`\`\`typescript
+const getAccessToken = async () => {
+  const response = await fetch('${baseUrl}/auth/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      grant_type: 'client_credentials',
+      client_id: '${partner.clientId}',
+      client_secret: process.env.DAES_CLIENT_SECRET
+    })
+  });
+  
+  const data = await response.json();
+  return data.access_token;
+};
+\`\`\`
+
+PASO 2: CREAR CUENTA PARA EL CLIENTE
+═══════════════════════════════════════════════════════════════════════════════
+
+Endpoint:   POST ${baseUrl}/clients/${client.clientId}/accounts
+Propósito:  Crear cuenta en una divisa específica
+
+Headers:
+  Authorization: Bearer [ACCESS_TOKEN]
+  Content-Type: application/json
+
+Body:
+{
+  "currency": "USD",
+  "initialBalance": "0.00"
+}
+
+Response (201 Created):
+{
+  "success": true,
+  "data": {
+    "accountId": "ACC_USD_1234567890_ABC12",
+    "clientId": "${client.clientId}",
+    "currency": "USD",
+    "balance": "0.00",
+    "availableBalance": "0.00",
+    "status": "ACTIVE",
+    "createdAt": "2025-11-26T12:00:00.000Z"
+  }
+}
+
+Ejemplo en código:
+\`\`\`typescript
+const createAccount = async (accessToken: string, currency: string) => {
+  const response = await fetch('${baseUrl}/clients/${client.clientId}/accounts', {
+    method: 'POST',
+    headers: {
+      'Authorization': \`Bearer \${accessToken}\`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      currency: currency,
+      initialBalance: '0.00'
+    })
+  });
+  
+  return await response.json();
+};
+
+// Crear cuentas para las divisas habilitadas
+${client.allowedCurrencies.map((curr: string) => `await createAccount(token, '${curr}');`).join('\n')}
+\`\`\`
+
+PASO 3: CONSULTAR CUENTAS DEL CLIENTE
+═══════════════════════════════════════════════════════════════════════════════
+
+Endpoint:   GET ${baseUrl}/clients/${client.clientId}/accounts
+Propósito:  Obtener todas las cuentas y sus balances
+
+Headers:
+  Authorization: Bearer [ACCESS_TOKEN]
+
+Response (200 OK):
+{
+  "success": true,
+  "data": [
+    {
+      "accountId": "ACC_USD_1234567890_ABC12",
+      "currency": "USD",
+      "balance": "1500.00",
+      "availableBalance": "1500.00",
+      "reservedBalance": "0.00",
+      "status": "ACTIVE"
+    },
+    {
+      "accountId": "ACC_EUR_1234567891_XYZ45",
+      "currency": "EUR",
+      "balance": "850.00",
+      "availableBalance": "850.00",
+      "reservedBalance": "0.00",
+      "status": "ACTIVE"
+    }
+  ]
+}
+
+Ejemplo en código:
+\`\`\`typescript
+const getAccounts = async (accessToken: string) => {
+  const response = await fetch('${baseUrl}/clients/${client.clientId}/accounts', {
+    method: 'GET',
+    headers: {
+      'Authorization': \`Bearer \${accessToken}\`
+    }
+  });
+  
+  const data = await response.json();
+  return data.data; // Array de cuentas
+};
+\`\`\`
+
+PASO 4: CREAR TRANSFERENCIA (CashTransfer.v1)
+═══════════════════════════════════════════════════════════════════════════════
+
+⭐ ESTE ES EL ENDPOINT PRINCIPAL PARA TRANSFERENCIAS
+
+Endpoint:   POST ${baseUrl}/transfers
+Propósito:  Crear transferencia usando estructura CashTransfer.v1
+
+Headers:
+  Authorization: Bearer [ACCESS_TOKEN]
+  Content-Type: application/json
+
+Body (Estructura CashTransfer.v1):
+{
+  "CashTransfer.v1": {
+    "SendingName": "${client.legalName}",
+    "SendingAccount": "[TU_ACCOUNT_ID]",
+    "ReceivingName": "[NOMBRE_DESTINO]",
+    "ReceivingAccount": "[CUENTA_DESTINO]",
+    "Datetime": "2025-11-26T12:00:00.000Z",
+    "Amount": "1000.00",
+    "SendingCurrency": "USD",
+    "ReceivingCurrency": "USD",
+    "Description": "Payment for services",
+    "TransferRequestID": "[TU_ID_UNICO]",
+    "ReceivingInstitution": "Digital Commercial Bank DAES",
+    "SendingInstitution": "Digital Commercial Bank DAES",
+    "method": "API",
+    "purpose": "PAYMENT",
+    "source": "DAES_PARTNER_API"
+  }
+}
+
+⚠️ IMPORTANTE SOBRE CashTransfer.v1:
+- SendingAccount: Usa el accountId obtenido en PASO 2
+- ReceivingAccount: Cuenta destino en DAES
+- TransferRequestID: ID único para idempotencia (ej: TX-20251126-001)
+- Amount: Formato con 2 decimales (1000.00)
+- Datetime: ISO 8601 format
+
+Response (201 Created):
+{
+  "success": true,
+  "data": {
+    "transferId": "TRF_1234567890_XYZ123",
+    "DCBReference": "TRF_1234567890_XYZ123",
+    "TransferRequestID": "[TU_ID_UNICO]",
+    "state": "PENDING",
+    "amount": "1000.00",
+    "sendingCurrency": "USD",
+    "receivingCurrency": "USD",
+    "createdAt": "2025-11-26T12:00:00.000Z",
+    "estimatedSettlement": "2025-11-26T12:05:00.000Z"
+  }
+}
+
+Ejemplo COMPLETO en código:
+\`\`\`typescript
+const createTransfer = async (
+  accessToken: string,
+  fromAccountId: string,
+  toAccountName: string,
+  toAccountId: string,
+  amount: number,
+  currency: string
+) => {
+  const transferRequestId = \`TX-\${Date.now()}\`;
+  
+  const response = await fetch('${baseUrl}/transfers', {
+    method: 'POST',
+    headers: {
+      'Authorization': \`Bearer \${accessToken}\`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      'CashTransfer.v1': {
+        SendingName: '${client.legalName}',
+        SendingAccount: fromAccountId,
+        ReceivingName: toAccountName,
+        ReceivingAccount: toAccountId,
+        Datetime: new Date().toISOString(),
+        Amount: amount.toFixed(2),
+        SendingCurrency: currency,
+        ReceivingCurrency: currency,
+        Description: 'Payment via DAES Partner API',
+        TransferRequestID: transferRequestId,
+        ReceivingInstitution: 'Digital Commercial Bank DAES',
+        SendingInstitution: 'Digital Commercial Bank DAES',
+        method: 'API',
+        purpose: 'PAYMENT',
+        source: 'DAES_PARTNER_API'
+      }
+    })
+  });
+  
+  const data = await response.json();
+  
+  // Guardar DCBReference para tracking
+  console.log('Transfer created:', data.data.DCBReference);
+  
+  return data.data;
+};
+\`\`\`
+
+PASO 5: CONSULTAR ESTADO DE TRANSFERENCIA
+═══════════════════════════════════════════════════════════════════════════════
+
+Endpoint:   GET ${baseUrl}/transfers/[TRANSFER_REQUEST_ID]
+Propósito:  Verificar estado de una transferencia
+
+Headers:
+  Authorization: Bearer [ACCESS_TOKEN]
+
+Ejemplo URL:
+GET ${baseUrl}/transfers/TX-20251126-001
+
+Response (200 OK):
+{
+  "success": true,
+  "data": {
+    "transferId": "TRF_1234567890_XYZ123",
+    "DCBReference": "TRF_1234567890_XYZ123",
+    "TransferRequestID": "TX-20251126-001",
+    "state": "SETTLED",
+    "amount": "1000.00",
+    "sendingCurrency": "USD",
+    "receivingCurrency": "USD",
+    "createdAt": "2025-11-26T12:00:00.000Z",
+    "settledAt": "2025-11-26T12:01:30.000Z"
+  }
+}
+
+Estados posibles:
+- PENDING: Esperando procesamiento
+- PROCESSING: En procesamiento
+- SETTLED: Completada exitosamente
+- REJECTED: Rechazada
+- FAILED: Falló
+
+Ejemplo en código:
+\`\`\`typescript
+const checkTransferStatus = async (
+  accessToken: string,
+  transferRequestId: string
+) => {
+  const response = await fetch(
+    \`${baseUrl}/transfers/\${transferRequestId}\`,
+    {
+      method: 'GET',
+      headers: {
+        'Authorization': \`Bearer \${accessToken}\`
+      }
+    }
+  );
+  
+  const data = await response.json();
+  return data.data.state;
+};
+
+// Polling para esperar settlement
+const waitForSettlement = async (token: string, requestId: string) => {
+  let state = 'PENDING';
+  while (state === 'PENDING' || state === 'PROCESSING') {
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Esperar 2s
+    state = await checkTransferStatus(token, requestId);
+  }
+  return state;
+};
+\`\`\`
+
+═══════════════════════════════════════════════════════════════════════════════
+                  MÓDULO COMPLETO DE INTEGRACIÓN (TypeScript)
+═══════════════════════════════════════════════════════════════════════════════
+
+A continuación, código completo listo para copiar y pegar en tu proyecto:
+
+\`\`\`typescript
+/**
+ * Digital Commercial Bank DAES - Partner API Client
+ * Módulo completo para: ${client.legalName}
+ * Cliente ID: ${client.clientId}
+ */
+
+interface DAESConfig {
+  baseUrl: string;
+  clientId: string;
+  clientSecret: string;
+  apiKey: string;
+}
+
+interface CashTransferV1 {
+  SendingName: string;
+  SendingAccount: string;
+  ReceivingName: string;
+  ReceivingAccount: string;
+  Datetime: string;
+  Amount: string;
+  SendingCurrency: string;
+  ReceivingCurrency: string;
+  Description: string;
+  TransferRequestID: string;
+  ReceivingInstitution: string;
+  SendingInstitution: string;
+  method: 'API';
+  purpose: string;
+  source: string;
+}
+
+class DAESPartnerAPIClient {
+  private config: DAESConfig;
+  private accessToken: string | null = null;
+  private tokenExpiresAt: number = 0;
+
+  constructor(config: DAESConfig) {
+    this.config = config;
+  }
+
+  /**
+   * Obtener token de acceso (con auto-refresh)
+   */
+  async getAccessToken(): Promise<string> {
+    // Si hay token válido, retornarlo
+    if (this.accessToken && Date.now() < this.tokenExpiresAt) {
+      return this.accessToken;
+    }
+
+    // Solicitar nuevo token
+    const response = await fetch(\`\${this.config.baseUrl}/auth/token\`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        grant_type: 'client_credentials',
+        client_id: this.config.clientId,
+        client_secret: this.config.clientSecret
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Authentication failed');
+    }
+
+    const data = await response.json();
+    this.accessToken = data.access_token;
+    this.tokenExpiresAt = Date.now() + (data.expires_in * 1000);
+
+    console.log('✅ Token obtenido, expira en', data.expires_in, 'segundos');
+    return this.accessToken;
+  }
+
+  /**
+   * Crear cuenta en una divisa
+   */
+  async createAccount(currency: string, initialBalance: string = '0.00') {
+    const token = await this.getAccessToken();
+
+    const response = await fetch(
+      \`\${this.config.baseUrl}/clients/${client.clientId}/accounts\`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': \`Bearer \${token}\`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          currency,
+          initialBalance
+        })
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(\`Failed to create account: \${response.statusText}\`);
+    }
+
+    const data = await response.json();
+    console.log(\`✅ Cuenta \${currency} creada:\`, data.data.accountId);
+    return data.data;
+  }
+
+  /**
+   * Obtener todas las cuentas
+   */
+  async getAccounts() {
+    const token = await this.getAccessToken();
+
+    const response = await fetch(
+      \`\${this.config.baseUrl}/clients/${client.clientId}/accounts\`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': \`Bearer \${token}\`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch accounts');
+    }
+
+    const data = await response.json();
+    return data.data;
+  }
+
+  /**
+   * Crear transferencia (CashTransfer.v1)
+   */
+  async createTransfer(params: {
+    fromAccountId: string;
+    toName: string;
+    toAccount: string;
+    amount: number;
+    currency: string;
+    description: string;
+  }) {
+    const token = await this.getAccessToken();
+    const transferRequestId = \`TX-\${Date.now()}-\${Math.random().toString(36).substr(2, 9)}\`;
+
+    const cashTransfer: CashTransferV1 = {
+      SendingName: '${client.legalName}',
+      SendingAccount: params.fromAccountId,
+      ReceivingName: params.toName,
+      ReceivingAccount: params.toAccount,
+      Datetime: new Date().toISOString(),
+      Amount: params.amount.toFixed(2),
+      SendingCurrency: params.currency,
+      ReceivingCurrency: params.currency,
+      Description: params.description,
+      TransferRequestID: transferRequestId,
+      ReceivingInstitution: 'Digital Commercial Bank DAES',
+      SendingInstitution: 'Digital Commercial Bank DAES',
+      method: 'API',
+      purpose: 'PAYMENT',
+      source: 'DAES_PARTNER_API'
+    };
+
+    const response = await fetch(\`\${this.config.baseUrl}/transfers\`, {
+      method: 'POST',
+      headers: {
+        'Authorization': \`Bearer \${token}\`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        'CashTransfer.v1': cashTransfer
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Transfer failed');
+    }
+
+    const data = await response.json();
+    console.log('✅ Transferencia creada:', data.data.DCBReference);
+    return data.data;
+  }
+
+  /**
+   * Consultar estado de transferencia
+   */
+  async getTransferStatus(transferRequestId: string) {
+    const token = await this.getAccessToken();
+
+    const response = await fetch(
+      \`\${this.config.baseUrl}/transfers/\${transferRequestId}\`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': \`Bearer \${token}\`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to get transfer status');
+    }
+
+    const data = await response.json();
+    return data.data;
+  }
+
+  /**
+   * Esperar a que la transferencia se complete
+   */
+  async waitForSettlement(
+    transferRequestId: string,
+    maxAttempts: number = 30
+  ): Promise<'SETTLED' | 'REJECTED' | 'FAILED'> {
+    for (let i = 0; i < maxAttempts; i++) {
+      const status = await this.getTransferStatus(transferRequestId);
+      
+      if (status.state === 'SETTLED' || status.state === 'REJECTED' || status.state === 'FAILED') {
+        return status.state;
+      }
+      
+      // Esperar 2 segundos antes de reintentar
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+    
+    throw new Error('Transfer timeout');
+  }
+}
+
+// INICIALIZACIÓN DEL CLIENTE
+const daesClient = new DAESPartnerAPIClient({
+  baseUrl: '${baseUrl}',
+  clientId: '${partner.clientId}',
+  clientSecret: '[TU_CLIENT_SECRET]',
+  apiKey: '${client.apiKey}'
+});
+
+// EJEMPLO DE USO COMPLETO
+async function ejemploCompleto() {
+  try {
+    // 1. Crear cuenta USD
+    const usdAccount = await daesClient.createAccount('USD');
+    console.log('Cuenta USD creada:', usdAccount.accountId);
+
+    // 2. Crear transferencia
+    const transfer = await daesClient.createTransfer({
+      fromAccountId: usdAccount.accountId,
+      toName: 'Empresa Destino S.A.',
+      toAccount: 'ACC-USD-DESTINO-001',
+      amount: 1000.00,
+      currency: 'USD',
+      description: 'Pago de factura #12345'
+    });
+
+    console.log('Transferencia creada:', transfer.DCBReference);
+    console.log('ID para tracking:', transfer.TransferRequestID);
+
+    // 3. Esperar settlement
+    const finalState = await daesClient.waitForSettlement(transfer.TransferRequestID);
+    console.log('Estado final:', finalState);
+
+    if (finalState === 'SETTLED') {
+      console.log('✅ Transferencia completada exitosamente');
+    } else {
+      console.error('❌ Transferencia falló:', finalState);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+\`\`\`
+
+═══════════════════════════════════════════════════════════════════════════════
+                              MANEJO DE ERRORES
+═══════════════════════════════════════════════════════════════════════════════
+
+La API retorna errores en formato estándar:
+
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_CREDENTIALS",
+    "message": "Invalid client credentials",
+    "details": {}
+  },
+  "timestamp": "2025-11-26T12:00:00.000Z"
+}
+
+Códigos de Error Comunes:
+- INVALID_CREDENTIALS: Credenciales incorrectas
+- EXPIRED_TOKEN: Token expirado (solicita uno nuevo)
+- INSUFFICIENT_BALANCE: Balance insuficiente
+- CURRENCY_NOT_ALLOWED: Divisa no permitida para este cliente
+- INVALID_AMOUNT: Monto inválido
+- DUPLICATE_TRANSFER_REQUEST: TransferRequestID duplicado
+
+Ejemplo de manejo:
+\`\`\`typescript
+try {
+  const result = await daesClient.createTransfer({...});
+} catch (error) {
+  if (error.response) {
+    const errorData = await error.response.json();
+    console.error('Error code:', errorData.error.code);
+    console.error('Message:', errorData.error.message);
+  }
+}
+\`\`\`
+
+═══════════════════════════════════════════════════════════════════════════════
+                            MEJORES PRÁCTICAS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. SEGURIDAD:
+   ✓ NUNCA expongas el client_secret en el frontend
+   ✓ Almacena credenciales en variables de entorno
+   ✓ Usa HTTPS siempre
+   ✓ Renueva tokens antes de expirar
+
+2. IDEMPOTENCIA:
+   ✓ Usa TransferRequestID único para cada transferencia
+   ✓ Si reintentas, usa el MISMO ID (evita duplicados)
+   ✓ Formato recomendado: TX-[fecha]-[secuencia]
+
+3. DIVISAS:
+   ✓ Solo usa divisas habilitadas: ${client.allowedCurrencies.join(', ')}
+   ✓ Formato de montos: 2 decimales (1000.00)
+   ✓ Verifica balance antes de transferir
+
+4. POLLING:
+   ✓ Consulta estado cada 2-5 segundos
+   ✓ Implementa timeout (máximo 30 intentos)
+   ✓ Maneja todos los estados posibles
+
+5. LOGGING:
+   ✓ Registra todas las operaciones
+   ✓ Guarda DCBReference para soporte
+   ✓ Implementa monitoreo de errores
+
+═══════════════════════════════════════════════════════════════════════════════
+                          TESTING Y SANDBOX
+═══════════════════════════════════════════════════════════════════════════════
+
+Ambiente de Pruebas (Sandbox):
+URL: https://luxliqdaes.cloud/partner-api/sandbox/v1
+Usa las mismas credenciales pero en modo sandbox
+
+Diferencias:
+- No mueve fondos reales
+- Todas las transferencias se marcan como SETTLED automáticamente
+- Límite de rate más alto para testing
+
+Recomendación:
+1. Prueba primero en sandbox
+2. Verifica que todo funcione
+3. Cambia a producción cuando estés listo
+
+═══════════════════════════════════════════════════════════════════════════════
+                          LÍMITES Y RATE LIMITING
+═══════════════════════════════════════════════════════════════════════════════
+
+Límites por Partner:
+- Requests por minuto: 60
+- Requests por hora: 1000
+- Transferencias por día: Sin límite
+- Monto máximo por transferencia: Sin límite
+
+Headers de Rate Limit en Response:
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1640000000
+
+Si excedes el límite:
+Response (429 Too Many Requests):
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Too many requests",
+    "details": {
+      "retryAfter": 30
+    }
+  }
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+                          WEBHOOKS (Opcional)
+═══════════════════════════════════════════════════════════════════════════════
+
+Si configuraste un webhook URL, recibirás notificaciones cuando:
+- Una transferencia cambie de estado
+- Se complete una transferencia
+- Haya un error en procesamiento
+
+Formato del webhook:
+POST [TU_WEBHOOK_URL]
+{
+  "event": "transfer.settled",
+  "data": {
+    "transferId": "TRF_1234567890_XYZ123",
+    "TransferRequestID": "TX-20251126-001",
+    "state": "SETTLED",
+    "settledAt": "2025-11-26T12:01:30.000Z"
+  },
+  "timestamp": "2025-11-26T12:01:30.000Z"
+}
+
+⚠️ Valida el webhook:
+Cada webhook incluye header X-DAES-Signature con HMAC-SHA256
+
+═══════════════════════════════════════════════════════════════════════════════
+                        SOPORTE Y CONTACTO
+═══════════════════════════════════════════════════════════════════════════════
+
+Soporte Técnico:
+  Email:                    support@digcommbank.com
+  Portal:                   https://luxliqdaes.cloud/support
+  Horario:                  24/7
+
+Documentación Adicional:
+  API Reference:            https://luxliqdaes.cloud/docs/api
+  Integration Guide:        https://luxliqdaes.cloud/docs/integration
+  Code Examples:            https://luxliqdaes.cloud/docs/examples
+
+Status de la API:
+  Status Page:              https://status.digcommbank.com
+  Incidents:                https://status.digcommbank.com/incidents
+
+═══════════════════════════════════════════════════════════════════════════════
+                        COMPLIANCE Y SEGURIDAD
+═══════════════════════════════════════════════════════════════════════════════
+
+Certificaciones:
+✓ ISO 27001:2013 - Information Security Management
+✓ SOC 2 Type II - Security, Availability, Confidentiality
+✓ PCI DSS Level 1 - Payment Card Industry Data Security
+✓ GDPR Compliant - General Data Protection Regulation
+
+Seguridad:
+✓ TLS 1.3 encryption
+✓ SHA-256 hashing para secrets
+✓ JWT con HS256 algorithm
+✓ Rate limiting por partner
+✓ IP whitelisting (opcional)
+✓ 2FA para operaciones críticas (opcional)
+
+Auditoría:
+✓ Todas las operaciones son auditadas
+✓ Logs disponibles en el portal
+✓ Retención de logs: 7 años
+✓ Compliance reports disponibles
+
+═══════════════════════════════════════════════════════════════════════════════
+                        TÉRMINOS DE SERVICIO
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Este documento y las credenciales son confidenciales
+2. Uso exclusivo para: ${client.legalName}
+3. No transferir ni compartir credenciales
+4. Reportar inmediatamente si hay compromiso de credenciales
+5. Cumplir con todas las regulaciones bancarias aplicables
+6. Digital Commercial Bank Ltd se reserva el derecho de suspender acceso
+
+Aceptación:
+Al usar esta API, aceptas los términos completos en:
+https://luxliqdaes.cloud/terms
+
+═══════════════════════════════════════════════════════════════════════════════
+                              CHANGELOG
+═══════════════════════════════════════════════════════════════════════════════
+
+v1.0.0 (2025-11-26):
+- Lanzamiento inicial de Partner API
+- Soporte para 15 divisas
+- CashTransfer.v1 implementation
+- OAuth 2.0 client_credentials
+- Multi-tenant architecture
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Documento generado el: ${fmt.dateTime(new Date())}
+Versión de API: v1.0.0
+Cliente ID: ${client.clientId}
 Partner: ${partner.name}
-Tipo: ${client.type}
 
-CREDENCIALES:
-Partner Client ID: ${partner.clientId}
-Client API Key: ${client.apiKey}
+                    Digital Commercial Bank Ltd © 2025
+                         www.digcommbank.com
+                      Todos los derechos reservados
 
-DIVISAS HABILITADAS:
-${currenciesText}
-
-ENDPOINTS:
-Base URL: ${baseUrl}
-
-1. Auth: POST ${baseUrl}/auth/token
-2. Accounts: POST ${baseUrl}/clients/${client.clientId}/accounts
-3. Transfers: POST ${baseUrl}/transfers
-
-Generado: ${fmt.dateTime(new Date())}
+═══════════════════════════════════════════════════════════════════════════════
+                      FIN DE LA DOCUMENTACIÓN
+═══════════════════════════════════════════════════════════════════════════════
 `;
 
-    const blob = new Blob([txtContent], { type: 'text/plain' });
+    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `DAES_API_${client.legalName.replace(/\\s+/g, '_')}_${client.clientId}.txt`;
+    a.download = `DAES_Partner_API_Documentation_${client.legalName.replace(/\s+/g, '_')}_${client.clientId}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    console.log(`[DAES Partner API] 📄 Documentación completa generada para: ${client.legalName}`);
   };
 
   const handleDeleteClient = (clientId: string) => {
