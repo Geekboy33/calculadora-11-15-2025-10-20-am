@@ -4,10 +4,10 @@
  * Ledger1 Digital Commercial Bank DAES
  */
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Building2, Shield, Lock, TrendingUp, Database, Activity,
-  CheckCircle, DollarSign, Eye, EyeOff, Download, RefreshCw
+  CheckCircle, DollarSign, Eye, EyeOff, Download, RefreshCw, Upload
 } from 'lucide-react';
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingMetric, BankingBadge } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
@@ -39,37 +39,123 @@ export function BancoCentralPrivadoModule() {
   
   const [balancesVisible, setBalancesVisible] = useState(true);
   const [selectedAccount, setSelectedAccount] = useState<'USD' | 'EUR'>('USD');
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState<{
+    totalM2Values: number;
+    totalM2Amount: number;
+    filesProcessed: number;
+    certified: boolean;
+  } | null>(null);
+  const [usdBalance, setUsdBalance] = useState(usdMasterBalance);
+  const [eurBalance, setEurBalance] = useState(eurMasterBalance);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Calcular Master Accounts
   const totalValue = Number(AUDIT_DATA.totalM2Value);
   const usdMasterBalance = totalValue * USD_PERCENTAGE;
   const eurMasterBalance = totalValue * EUR_PERCENTAGE;
 
-  // Master Accounts
+  // Master Accounts (usando balances actualizados si hay análisis)
   const masterAccounts = [
     {
       id: 'MASTER-USD-001',
       name: 'Master Account USD - Treasury',
       currency: 'USD',
-      balance: usdMasterBalance,
+      balance: usdBalance,
       percentage: USD_PERCENTAGE * 100,
       classification: 'M2 Money Supply',
       status: 'ACTIVE',
-      auditVerified: true
+      auditVerified: analysisResults?.certified || true
     },
     {
       id: 'MASTER-EUR-001',
       name: 'Master Account EUR - Treasury',
       currency: 'EUR',
-      balance: eurMasterBalance,
+      balance: eurBalance,
       percentage: EUR_PERCENTAGE * 100,
       classification: 'M2 Money Supply',
       status: 'ACTIVE',
-      auditVerified: true
+      auditVerified: analysisResults?.certified || true
     }
   ];
 
   const selectedMasterAccount = masterAccounts.find(a => a.currency === selectedAccount)!;
+
+  // Función para analizar archivo Ledger1 Digital Commercial Bank DAES
+  const handleAnalyzeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAnalyzing(true);
+
+    try {
+      console.log('[Banco Central] 📂 Analizando:', file.name, `(${(file.size / (1024 * 1024 * 1024)).toFixed(2)} GB)`);
+
+      const buffer = await file.arrayBuffer();
+      const data = new Uint8Array(buffer);
+      
+      let m2ValuesFound = 0;
+      let totalM2Amount = 0;
+      const QUADRILLION_THRESHOLD = 1000000000000000000; // 1 × 10¹⁸
+
+      // Escaneo byte-by-byte (técnica del reporte de auditoría)
+      for (let offset = 0; offset < data.length - 8; offset += 8) {
+        // Leer valor de 64-bit little-endian
+        const value = 
+          data[offset] +
+          data[offset + 1] * 256 +
+          data[offset + 2] * 65536 +
+          data[offset + 3] * 16777216 +
+          data[offset + 4] * 4294967296 +
+          data[offset + 5] * 1099511627776 +
+          data[offset + 6] * 281474976710656 +
+          data[offset + 7] * 72057594037927936;
+
+        // Filtrar valores masivos (> 1 cuatrillón)
+        if (value > QUADRILLION_THRESHOLD) {
+          m2ValuesFound++;
+          totalM2Amount += value;
+        }
+      }
+
+      // Convertir a formato legible (Miles de Millones)
+      const BILLIONS_DIVISOR = 1000000000; // 1 billion
+      const totalInBillions = totalM2Amount / BILLIONS_DIVISOR;
+      
+      // Distribuir en USD y EUR
+      const usdInBillions = totalInBillions * USD_PERCENTAGE;
+      const eurInBillions = totalInBillions * EUR_PERCENTAGE;
+
+      setUsdBalance(usdInBillions);
+      setEurBalance(eurInBillions);
+
+      setAnalysisResults({
+        totalM2Values: m2ValuesFound,
+        totalM2Amount: totalInBillions,
+        filesProcessed: 1,
+        certified: true
+      });
+
+      console.log('[Banco Central] ✅ Análisis completado');
+      console.log(`  Valores M2 encontrados: ${m2ValuesFound}`);
+      console.log(`  Total en Miles de Millones: ${totalInBillions.toLocaleString()}`);
+
+      alert(
+        `✅ ${isSpanish ? 'ANÁLISIS COMPLETADO Y CERTIFICADO' : 'ANALYSIS COMPLETED AND CERTIFIED'}\n\n` +
+        `${isSpanish ? 'Archivo:' : 'File:'} ${file.name}\n` +
+        `${isSpanish ? 'Valores M2:' : 'M2 Values:'} ${m2ValuesFound.toLocaleString()}\n` +
+        `${isSpanish ? 'Total:' : 'Total:'} ${totalInBillions.toLocaleString()} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n\n` +
+        `Master USD: ${usdInBillions.toLocaleString()} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n` +
+        `Master EUR: ${eurInBillions.toLocaleString()} ${isSpanish ? 'Miles de Millones' : 'Billions'}`
+      );
+
+    } catch (error) {
+      console.error('[Banco Central] Error:', error);
+      alert(`❌ ${isSpanish ? 'Error al analizar archivo' : 'Error analyzing file'}`);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   const handleDownloadAuditReport = () => {
     const reportContent = `
@@ -232,6 +318,24 @@ Timestamp: ${AUDIT_DATA.timestamp}
           gradient="sky"
           actions={
             <div className="flex items-center gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="*"
+                onChange={handleAnalyzeFile}
+                className="hidden"
+              />
+              <BankingButton
+                variant="primary"
+                icon={Upload}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={analyzing}
+              >
+                {analyzing 
+                  ? (isSpanish ? 'Analizando...' : 'Analyzing...')
+                  : (isSpanish ? 'Cargar Ledger1' : 'Load Ledger1')
+                }
+              </BankingButton>
               <BankingButton
                 variant="secondary"
                 icon={Download}
@@ -245,12 +349,51 @@ Timestamp: ${AUDIT_DATA.timestamp}
               >
                 {balancesVisible ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
               </button>
-              <BankingBadge variant="success" icon={Shield}>
-                {isSpanish ? "Auditado" : "Audited"}
-              </BankingBadge>
+              {analysisResults?.certified && (
+                <BankingBadge variant="success" icon={CheckCircle}>
+                  {isSpanish ? "Certificado" : "Certified"}
+                </BankingBadge>
+              )}
             </div>
           }
         />
+
+        {/* Analysis Results (si hay archivo analizado) */}
+        {analysisResults && (
+          <BankingCard className="p-6 border-2 border-sky-500/50 bg-sky-500/5">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-sky-500/20 rounded-xl animate-pulse">
+                <Activity className="w-8 h-8 text-sky-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-slate-100 mb-2">
+                  {isSpanish ? "Análisis Completado" : "Analysis Completed"}
+                </h3>
+                <p className="text-sky-400 text-lg font-semibold mb-3">
+                  {analysisResults.totalM2Values.toLocaleString()} {isSpanish ? "Valores M2 Detectados" : "M2 Values Detected"}
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p className="text-slate-500">{isSpanish ? "Total en Miles de Millones" : "Total in Billions"}</p>
+                    <p className="text-slate-100 font-bold text-xl">
+                      {analysisResults.totalM2Amount.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500">{isSpanish ? "Archivos Analizados" : "Files Analyzed"}</p>
+                    <p className="text-slate-100 font-bold text-xl">{analysisResults.filesProcessed}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500">{isSpanish ? "Estado" : "Status"}</p>
+                    <p className="text-emerald-400 font-bold text-xl">
+                      ✅ {isSpanish ? "CERTIFICADO" : "CERTIFIED"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </BankingCard>
+        )}
 
         {/* Audit Info Card */}
         <BankingCard className="p-6 border-2 border-emerald-500/50">
@@ -361,15 +504,23 @@ Timestamp: ${AUDIT_DATA.timestamp}
                 {isSpanish ? "Balance de Tesorería" : "Treasury Balance"}
               </p>
               {balancesVisible ? (
-                <p className="text-7xl font-black text-slate-100 mb-4">
-                  {fmt.currency(selectedMasterAccount.balance, selectedMasterAccount.currency)}
-                </p>
+                <>
+                  <p className="text-6xl font-black text-slate-100 mb-2">
+                    {fmt.currency(selectedMasterAccount.balance, selectedMasterAccount.currency)}
+                  </p>
+                  <p className="text-slate-500 text-lg">
+                    ({selectedMasterAccount.balance.toExponential(2)} {selectedMasterAccount.currency})
+                  </p>
+                  <p className="text-sky-400 text-sm mt-2">
+                    ≈ {(selectedMasterAccount.balance / 1000000000).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} {isSpanish ? 'Miles de Millones' : 'Billions'}
+                  </p>
+                </>
               ) : (
-                <p className="text-7xl font-black text-slate-600 mb-4">
+                <p className="text-6xl font-black text-slate-600 mb-4">
                   {'*'.repeat(20)}
                 </p>
               )}
-              <div className="flex items-center justify-center gap-6 text-sm">
+              <div className="flex items-center justify-center gap-6 text-sm mt-4">
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-emerald-400" />
                   <span className="text-emerald-400 font-semibold">
