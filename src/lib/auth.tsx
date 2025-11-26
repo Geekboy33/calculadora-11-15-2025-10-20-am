@@ -40,24 +40,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
   };
 
-  // Auto-logout después de 12 horas
-  useEffect(() => {
-    if (isAuthenticated) {
-      const loginTime = localStorage.getItem('daes_login_time');
-      if (loginTime) {
-        const elapsed = Date.now() - new Date(loginTime).getTime();
-        const twelveHours = 12 * 60 * 60 * 1000;
-        
-        if (elapsed > twelveHours) {
-          logout();
-        } else {
-          const remaining = twelveHours - elapsed;
-          const timeout = setTimeout(logout, remaining);
-          return () => clearTimeout(timeout);
-        }
-      }
-    }
-  }, [isAuthenticated]);
+  // ✅ AUTO-LOGOUT DESHABILITADO
+  // La sesión permanece abierta indefinidamente hasta logout manual
+  // Esto permite que el Analizador de Archivos Grandes procese archivos
+  // de 800+ GB que pueden tardar horas o días sin interrupciones
+  
+  // ANTES: Auto-logout después de 12 horas (REMOVIDO)
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     const loginTime = localStorage.getItem('daes_login_time');
+  //     if (loginTime) {
+  //       const elapsed = Date.now() - new Date(loginTime).getTime();
+  //       const twelveHours = 12 * 60 * 60 * 1000;
+  //       
+  //       if (elapsed > twelveHours) {
+  //         logout();
+  //       } else {
+  //         const remaining = twelveHours - elapsed;
+  //         const timeout = setTimeout(logout, remaining);
+  //         return () => clearTimeout(timeout);
+  //       }
+  //     }
+  //   }
+  // }, [isAuthenticated]);
 
   const value = {
     isAuthenticated,
