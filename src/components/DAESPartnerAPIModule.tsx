@@ -12,6 +12,7 @@ import {
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingMetric, BankingBadge, BankingInput } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
+import { downloadTXT } from '../lib/download-helper';
 import { useEffect } from 'react';
 
 interface Partner {
@@ -1254,16 +1255,10 @@ Partner: ${partner.name}
 ═══════════════════════════════════════════════════════════════════════════════
 `;
 
-    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `DAES_Partner_API_Documentation_${client.legalName.replace(/\s+/g, '_')}_${client.clientId}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
+    // ✅ Usar helper de descarga seguro (previene errores de removeChild)
+    const filename = `DAES_Partner_API_Documentation_${client.legalName.replace(/\s+/g, '_')}_${client.clientId}.txt`;
+    downloadTXT(txtContent, filename);
+    
     console.log(`[DAES Partner API] 📄 Documentación completa generada para: ${client.legalName}`);
   };
 
