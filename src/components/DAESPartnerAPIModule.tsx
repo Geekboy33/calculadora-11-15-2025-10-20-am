@@ -608,7 +608,7 @@ class DAESPartnerAPIClient {
    * Obtener token de acceso (con auto-refresh)
    */
   async getAccessToken(): Promise<string> {
-    // Si hay token válido, retornarlo
+    // ${isSpanish ? 'Si hay token válido, retornarlo' : 'If there is a valid token, return it'}
     if (this.accessToken && Date.now() < this.tokenExpiresAt) {
       return this.accessToken;
     }
@@ -634,7 +634,7 @@ class DAESPartnerAPIClient {
     this.accessToken = data.access_token;
     this.tokenExpiresAt = Date.now() + (data.expires_in * 1000);
 
-    console.log('✅ Token obtenido, expira en', data.expires_in, 'segundos');
+    console.log(\`✅ ${isSpanish ? 'Token obtenido, expira en' : 'Token obtained, expires in'} \${data.expires_in} ${isSpanish ? 'segundos' : 'seconds'}\`);
     return this.accessToken;
   }
 
