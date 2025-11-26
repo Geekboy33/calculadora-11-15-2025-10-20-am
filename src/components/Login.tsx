@@ -1,6 +1,6 @@
 /**
  * Login Component - Sistema de Autenticación DAES
- * Usuario: ModoDios
+ * Digital Commercial Bank Ltd - Authentication System
  * Esquema: Negro + Verde Futurista
  */
 
@@ -21,8 +21,8 @@ export function Login({ onLogin }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
-  // Credenciales actualizadas
-  const VALID_USERNAME = 'ModoDios';
+  // Credenciales profesionales
+  const VALID_USERNAME = 'admin';
   const VALID_PASSWORD = 'DAES2025';
 
   // Efecto de animación de fondo
@@ -36,7 +36,7 @@ export function Login({ onLogin }: LoginProps) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const chars = 'DAES01ModoDios';
+    const chars = 'DAES01DIGITAL';
     const fontSize = 14;
     const columns = canvas.width / fontSize;
     const drops: number[] = [];
