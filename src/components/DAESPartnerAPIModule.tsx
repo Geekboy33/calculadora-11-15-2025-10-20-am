@@ -182,33 +182,33 @@ export function DAESPartnerAPIModule() {
     const txtContent = `
 ═══════════════════════════════════════════════════════════════════════════════
                       DIGITAL COMMERCIAL BANK LTD / DAES
-                    DOCUMENTACIÓN COMPLETA DE API PARA CLIENTE
+           ${isSpanish ? 'DOCUMENTACIÓN COMPLETA DE API PARA CLIENTE' : 'COMPLETE API DOCUMENTATION FOR CLIENT'}
                               Partner API v1.0
 ═══════════════════════════════════════════════════════════════════════════════
 
-INFORMACIÓN DEL CLIENTE
+${isSpanish ? 'INFORMACIÓN DEL CLIENTE' : 'CLIENT INFORMATION'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-Cliente ID:                 ${client.clientId}
-ID Externo:                 ${client.externalClientId}
-Nombre Legal:               ${client.legalName}
-Tipo:                       ${client.type}
-País:                       ${client.country}
-Estado:                     ${client.status}
+${isSpanish ? 'Cliente ID:' : 'Client ID:'}                 ${client.clientId}
+${isSpanish ? 'ID Externo:' : 'External ID:'}                 ${client.externalClientId}
+${isSpanish ? 'Nombre Legal:' : 'Legal Name:'}               ${client.legalName}
+${isSpanish ? 'Tipo:' : 'Type:'}                       ${client.type}
+${isSpanish ? 'País:' : 'Country:'}                       ${client.country}
+${isSpanish ? 'Estado:' : 'Status:'}                     ${client.status}
 Partner:                    ${partner.name}
 Partner ID:                 ${partner.partnerId}
-Fecha de Creación:          ${fmt.dateTime(client.createdAt)}
+${isSpanish ? 'Fecha de Creación:' : 'Created At:'}          ${fmt.dateTime(client.createdAt)}
 
-CREDENCIALES DE AUTENTICACIÓN
+${isSpanish ? 'CREDENCIALES DE AUTENTICACIÓN' : 'AUTHENTICATION CREDENTIALS'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-⚠️ IMPORTANTE: Guarda estas credenciales de forma segura y NO las compartas
+⚠️ ${isSpanish ? 'IMPORTANTE: Guarda estas credenciales de forma segura y NO las compartas' : 'IMPORTANT: Save these credentials securely and DO NOT share them'}
 
 Partner Client ID:          ${partner.clientId}
-Partner Client Secret:      [Solicita al administrador del partner]
+Partner Client Secret:      ${isSpanish ? '[Solicita al administrador del partner]' : '[Request from partner administrator]'}
 Client API Key:             ${client.apiKey}
 
-DIVISAS HABILITADAS PARA ESTE CLIENTE
+${isSpanish ? 'DIVISAS HABILITADAS PARA ESTE CLIENTE' : 'ENABLED CURRENCIES FOR THIS CLIENT'}
 ═══════════════════════════════════════════════════════════════════════════════
 
 ${client.allowedCurrencies.map((curr: string) => {
@@ -216,24 +216,24 @@ ${client.allowedCurrencies.map((curr: string) => {
   return `${currInfo?.flag || ''} ${curr.padEnd(6)} - ${currInfo?.name || curr}`;
 }).join('\n')}
 
-Total: ${client.allowedCurrencies.length} divisas disponibles
+Total: ${client.allowedCurrencies.length} ${isSpanish ? 'divisas disponibles' : 'available currencies'}
 
-BASE URL DE LA API
+${isSpanish ? 'BASE URL DE LA API' : 'API BASE URL'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-Producción:                 ${baseUrl}
-Documentación:              https://luxliqdaes.cloud/docs/partner-api
-Portal de Partners:         https://luxliqdaes.cloud/partner-portal
+${isSpanish ? 'Producción:' : 'Production:'}                 ${baseUrl}
+${isSpanish ? 'Documentación:' : 'Documentation:'}              https://luxliqdaes.cloud/docs/partner-api
+${isSpanish ? 'Portal de Partners:' : 'Partner Portal:'}         https://luxliqdaes.cloud/partner-portal
 
 ═══════════════════════════════════════════════════════════════════════════════
-                         GUÍA DE INTEGRACIÓN COMPLETA
+                         ${isSpanish ? 'GUÍA DE INTEGRACIÓN COMPLETA' : 'COMPLETE INTEGRATION GUIDE'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-PASO 1: AUTENTICACIÓN (Obtener Token de Acceso)
+${isSpanish ? 'PASO 1: AUTENTICACIÓN (Obtener Token de Acceso)' : 'STEP 1: AUTHENTICATION (Get Access Token)'}
 ═══════════════════════════════════════════════════════════════════════════════
 
 Endpoint:   POST ${baseUrl}/auth/token
-Propósito:  Obtener token JWT para autenticar todas las demás peticiones
+${isSpanish ? 'Propósito:  Obtener token JWT para autenticar todas las demás peticiones' : 'Purpose:    Get JWT token to authenticate all other requests'}
 
 Headers:
   Content-Type: application/json
@@ -253,12 +253,12 @@ Response (200 OK):
   "scope": "partners:read partners:write"
 }
 
-⚠️ IMPORTANTE:
-- El token expira en 1 hora (3600 segundos)
-- Guarda el access_token para usarlo en las siguientes peticiones
-- Cuando expire, solicita uno nuevo
+⚠️ ${isSpanish ? 'IMPORTANTE:' : 'IMPORTANT:'}
+- ${isSpanish ? 'El token expira en 1 hora (3600 segundos)' : 'Token expires in 1 hour (3600 seconds)'}
+- ${isSpanish ? 'Guarda el access_token para usarlo en las siguientes peticiones' : 'Save the access_token to use in subsequent requests'}
+- ${isSpanish ? 'Cuando expire, solicita uno nuevo' : 'When it expires, request a new one'}
 
-Ejemplo en JavaScript/TypeScript:
+${isSpanish ? 'Ejemplo en JavaScript/TypeScript:' : 'Example in JavaScript/TypeScript:'}
 \`\`\`typescript
 const getAccessToken = async () => {
   const response = await fetch('${baseUrl}/auth/token', {
@@ -1137,17 +1137,17 @@ EVENTOS DE WEBHOOK:
                         SOPORTE Y CONTACTO
 ═══════════════════════════════════════════════════════════════════════════════
 
-Soporte Técnico:
+${isSpanish ? 'Soporte Técnico:' : 'Technical Support:'}
   Email:                    operation@digcommbank.com
   Portal:                   https://luxliqdaes.cloud/support
-  Horario:                  24/7
+  ${isSpanish ? 'Horario:' : 'Schedule:'}                  24/7
 
-Documentación Adicional:
+${isSpanish ? 'Documentación Adicional:' : 'Additional Documentation:'}
   API Reference:            https://luxliqdaes.cloud/docs/api
   Integration Guide:        https://luxliqdaes.cloud/docs/integration
   Code Examples:            https://luxliqdaes.cloud/docs/examples
 
-Status de la API:
+${isSpanish ? 'Estado de la API:' : 'API Status:'}
   Status Page:              https://status.digcommbank.com
   Incidents:                https://status.digcommbank.com/incidents
 
@@ -1949,13 +1949,27 @@ Partner: ${partner.name}
                             <span className="text-slate-600 text-xs">{client.country}</span>
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleDeleteClient(client.clientId)}
-                          className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500 text-red-400 rounded-lg transition-all"
-                          title={isSpanish ? "Eliminar cliente" : "Delete client"}
-                        >
-                          <AlertCircle className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              const partnerForClient = partners.find(p => p.partnerId === client.partnerId);
+                              if (partnerForClient) {
+                                generateClientCredentialsTXT(client, partnerForClient);
+                              }
+                            }}
+                            className="p-2 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 hover:border-sky-500 text-sky-400 rounded-lg transition-all"
+                            title={isSpanish ? "Descargar credenciales TXT" : "Download credentials TXT"}
+                          >
+                            <Download className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClient(client.clientId)}
+                            className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500 text-red-400 rounded-lg transition-all"
+                            title={isSpanish ? "Eliminar cliente" : "Delete client"}
+                          >
+                            <AlertCircle className="w-5 h-5" />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="space-y-2">
