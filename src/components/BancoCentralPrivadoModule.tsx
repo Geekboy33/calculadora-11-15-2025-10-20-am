@@ -37,6 +37,11 @@ const EUR_PERCENTAGE = 0.40;
 export function BancoCentralPrivadoModule() {
   const { fmt, isSpanish } = useBankingTheme();
   
+  // Calcular Master Accounts PRIMERO
+  const totalValue = Number(AUDIT_DATA.totalM2Value);
+  const usdMasterBalance = totalValue * USD_PERCENTAGE;
+  const eurMasterBalance = totalValue * EUR_PERCENTAGE;
+  
   const [balancesVisible, setBalancesVisible] = useState(true);
   const [selectedAccount, setSelectedAccount] = useState<'USD' | 'EUR'>('USD');
   const [analyzing, setAnalyzing] = useState(false);
@@ -49,11 +54,6 @@ export function BancoCentralPrivadoModule() {
   const [usdBalance, setUsdBalance] = useState(usdMasterBalance);
   const [eurBalance, setEurBalance] = useState(eurMasterBalance);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  // Calcular Master Accounts
-  const totalValue = Number(AUDIT_DATA.totalM2Value);
-  const usdMasterBalance = totalValue * USD_PERCENTAGE;
-  const eurMasterBalance = totalValue * EUR_PERCENTAGE;
 
   // Master Accounts (usando balances actualizados si hay análisis)
   const masterAccounts = [
@@ -323,6 +323,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
                 type="file"
                 accept="*"
                 onChange={handleAnalyzeFile}
+                aria-label={isSpanish ? "Seleccionar archivo Ledger1" : "Select Ledger1 file"}
+                title={isSpanish ? "Seleccionar archivo Ledger1 para análisis" : "Select Ledger1 file for analysis"}
                 className="hidden"
               />
               <BankingButton
