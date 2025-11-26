@@ -377,61 +377,65 @@ const getAccounts = async (accessToken: string) => {
 };
 \`\`\`
 
-PASO 4: CREAR TRANSFERENCIA (CashTransfer.v1)
+PASO 4: RECIBIR TRANSFERENCIAS (Módulo de Recepción)
 ═══════════════════════════════════════════════════════════════════════════════
 
-⭐ ESTE ES EL ENDPOINT PRINCIPAL PARA TRANSFERENCIAS
+⭐ CÓMO FUNCIONA:
 
-Endpoint:   POST ${baseUrl}/transfers
-Propósito:  Crear transferencia usando estructura CashTransfer.v1
+Digital Commercial Bank DAES → ENVÍA → Tu Cliente
+Tú construyes el módulo para RECIBIR las transferencias que nosotros enviamos
+
+Endpoint para consultar transferencias RECIBIDAS:
+GET ${baseUrl}/transfers/incoming/${client.clientId}
 
 Headers:
   Authorization: Bearer [ACCESS_TOKEN]
-  Content-Type: application/json
 
-Body (Estructura CashTransfer.v1):
-{
-  "CashTransfer.v1": {
-    "SendingName": "${client.legalName}",
-    "SendingAccount": "[TU_ACCOUNT_ID]",
-    "ReceivingName": "[NOMBRE_DESTINO]",
-    "ReceivingAccount": "[CUENTA_DESTINO]",
-    "Datetime": "2025-11-26T12:00:00.000Z",
-    "Amount": "1000.00",
-    "SendingCurrency": "USD",
-    "ReceivingCurrency": "USD",
-    "Description": "Payment for services",
-    "TransferRequestID": "[TU_ID_UNICO]",
-    "ReceivingInstitution": "Digital Commercial Bank DAES",
-    "SendingInstitution": "Digital Commercial Bank DAES",
-    "method": "API",
-    "purpose": "PAYMENT",
-    "source": "DAES_PARTNER_API"
-  }
-}
+Query Params:
+  ?status=SETTLED          (opcional: filtrar por estado)
+  ?currency=USD            (opcional: filtrar por divisa)
+  ?limit=50                (opcional: límite de resultados)
 
-⚠️ IMPORTANTE SOBRE CashTransfer.v1:
-- SendingAccount: Usa el accountId obtenido en PASO 2
-- ReceivingAccount: Cuenta destino en DAES
-- TransferRequestID: ID único para idempotencia (ej: TX-20251126-001)
-- Amount: Formato con 2 decimales (1000.00)
-- Datetime: ISO 8601 format
-
-Response (201 Created):
+Response (200 OK):
 {
   "success": true,
-  "data": {
-    "transferId": "TRF_1234567890_XYZ123",
-    "DCBReference": "TRF_1234567890_XYZ123",
-    "TransferRequestID": "[TU_ID_UNICO]",
-    "state": "PENDING",
-    "amount": "1000.00",
-    "sendingCurrency": "USD",
-    "receivingCurrency": "USD",
-    "createdAt": "2025-11-26T12:00:00.000Z",
-    "estimatedSettlement": "2025-11-26T12:05:00.000Z"
-  }
+  "data": [
+    {
+      "transferId": "TRF_1234567890_XYZ123",
+      "DCBReference": "TRF_1234567890_XYZ123",
+      "receivingAccount": "${client.clientId}-ACC-USD-001",
+      "amount": "1000.00",
+      "currency": "USD",
+      "state": "SETTLED",
+      "settledAt": "2025-11-26T12:01:30.000Z",
+      "cashTransfer": {
+        "SendingName": "Digital Commercial Bank DAES",
+        "SendingAccount": "DCB-MASTER-USD-001",
+        "ReceivingName": "${client.legalName}",
+        "ReceivingAccount": "${client.clientId}-ACC-USD-001",
+        "Datetime": "2025-11-26T12:00:00.000Z",
+        "Amount": "1000.00",
+        "SendingCurrency": "USD",
+        "ReceivingCurrency": "USD",
+        "Description": "Transfer from DAES",
+        "TransferRequestID": "DAES-TX-20251126-001",
+        "ReceivingInstitution": "${client.legalName}",
+        "SendingInstitution": "Digital Commercial Bank DAES",
+        "method": "API",
+        "purpose": "PAYMENT",
+        "source": "DAES"
+      }
+    }
+  ],
+  "total": 1,
+  "page": 1
 }
+
+⚠️ IMPORTANTE:
+- Digital Commercial Bank DAES te ENVÍA las transferencias
+- Tú las RECIBES en las cuentas que creaste
+- Consulta este endpoint para ver transferencias recibidas
+- El campo cashTransfer contiene toda la información CashTransfer.v1
 
 Ejemplo COMPLETO en código:
 \`\`\`typescript
@@ -548,8 +552,12 @@ const waitForSettlement = async (token: string, requestId: string) => {
 \`\`\`
 
 ═══════════════════════════════════════════════════════════════════════════════
-                  MÓDULO COMPLETO DE INTEGRACIÓN (TypeScript)
+              MÓDULO COMPLETO DE RECEPCIÓN DE TRANSFERENCIAS (TypeScript)
 ═══════════════════════════════════════════════════════════════════════════════
+
+⭐ IMPORTANTE: Este módulo es para RECIBIR transferencias que DAES te envía
+
+Digital Commercial Bank DAES → ENVÍA → Tú RECIBES
 
 A continuación, código completo listo para copiar y pegar en tu proyecto:
 
@@ -683,65 +691,46 @@ class DAESPartnerAPIClient {
   }
 
   /**
-   * Crear transferencia (CashTransfer.v1)
+   * Consultar transferencias RECIBIDAS (que DAES te envió)
    */
-  async createTransfer(params: {
-    fromAccountId: string;
-    toName: string;
-    toAccount: string;
-    amount: number;
-    currency: string;
-    description: string;
+  async getIncomingTransfers(params?: {
+    status?: 'SETTLED' | 'PENDING' | 'PROCESSING';
+    currency?: string;
+    limit?: number;
   }) {
     const token = await this.getAccessToken();
-    const transferRequestId = \`TX-\${Date.now()}-\${Math.random().toString(36).substr(2, 9)}\`;
+    
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.currency) queryParams.append('currency', params.currency);
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
 
-    const cashTransfer: CashTransferV1 = {
-      SendingName: '${client.legalName}',
-      SendingAccount: params.fromAccountId,
-      ReceivingName: params.toName,
-      ReceivingAccount: params.toAccount,
-      Datetime: new Date().toISOString(),
-      Amount: params.amount.toFixed(2),
-      SendingCurrency: params.currency,
-      ReceivingCurrency: params.currency,
-      Description: params.description,
-      TransferRequestID: transferRequestId,
-      ReceivingInstitution: 'Digital Commercial Bank DAES',
-      SendingInstitution: 'Digital Commercial Bank DAES',
-      method: 'API',
-      purpose: 'PAYMENT',
-      source: 'DAES_PARTNER_API'
-    };
+    const url = \`\${this.config.baseUrl}/transfers/incoming/${client.clientId}?\${queryParams}\`;
 
-    const response = await fetch(\`\${this.config.baseUrl}/transfers\`, {
-      method: 'POST',
+    const response = await fetch(url, {
+      method: 'GET',
       headers: {
-        'Authorization': \`Bearer \${token}\`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        'CashTransfer.v1': cashTransfer
-      })
+        'Authorization': \`Bearer \${token}\`
+      }
     });
 
     if (!response.ok) {
-      throw new Error('Transfer failed');
+      throw new Error('Failed to fetch incoming transfers');
     }
 
     const data = await response.json();
-    console.log('✅ Transferencia creada:', data.data.DCBReference);
+    console.log(\`✅ Transferencias recibidas: \${data.data.length}\`);
     return data.data;
   }
 
   /**
-   * Consultar estado de transferencia
+   * Obtener detalles de una transferencia específica
    */
-  async getTransferStatus(transferRequestId: string) {
+  async getTransferDetails(dcbReference: string) {
     const token = await this.getAccessToken();
 
     const response = await fetch(
-      \`\${this.config.baseUrl}/transfers/\${transferRequestId}\`,
+      \`\${this.config.baseUrl}/transfers/details/\${dcbReference}\`,
       {
         method: 'GET',
         headers: {
@@ -751,7 +740,7 @@ class DAESPartnerAPIClient {
     );
 
     if (!response.ok) {
-      throw new Error('Failed to get transfer status');
+      throw new Error('Failed to get transfer details');
     }
 
     const data = await response.json();
@@ -759,24 +748,54 @@ class DAESPartnerAPIClient {
   }
 
   /**
-   * Esperar a que la transferencia se complete
+   * Procesar transferencia recibida (actualizar tu sistema)
    */
-  async waitForSettlement(
-    transferRequestId: string,
-    maxAttempts: number = 30
-  ): Promise<'SETTLED' | 'REJECTED' | 'FAILED'> {
-    for (let i = 0; i < maxAttempts; i++) {
-      const status = await this.getTransferStatus(transferRequestId);
-      
-      if (status.state === 'SETTLED' || status.state === 'REJECTED' || status.state === 'FAILED') {
-        return status.state;
-      }
-      
-      // Esperar 2 segundos antes de reintentar
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
+  async processIncomingTransfer(dcbReference: string) {
+    const transfer = await this.getTransferDetails(dcbReference);
     
-    throw new Error('Transfer timeout');
+    // Extraer información de CashTransfer.v1
+    const cashTransfer = transfer.cashTransfer;
+    
+    console.log('📥 TRANSFERENCIA RECIBIDA:');
+    console.log('  De:', cashTransfer.SendingName);
+    console.log('  Monto:', cashTransfer.Amount, cashTransfer.SendingCurrency);
+    console.log('  Para:', cashTransfer.ReceivingName);
+    console.log('  Cuenta destino:', cashTransfer.ReceivingAccount);
+    console.log('  Descripción:', cashTransfer.Description);
+    
+    // Aquí actualizas TU base de datos local
+    // con la información de la transferencia recibida
+    
+    return {
+      processed: true,
+      amount: parseFloat(cashTransfer.Amount),
+      currency: cashTransfer.SendingCurrency,
+      reference: dcbReference
+    };
+  }
+
+  /**
+   * Polling de transferencias nuevas (ejecutar periódicamente)
+   */
+  async pollNewTransfers(lastCheckedTimestamp?: string) {
+    const transfers = await this.getIncomingTransfers({
+      status: 'SETTLED',
+      limit: 100
+    });
+
+    // Filtrar solo las nuevas desde el último check
+    const newTransfers = lastCheckedTimestamp
+      ? transfers.filter((t: any) => new Date(t.settledAt) > new Date(lastCheckedTimestamp))
+      : transfers;
+
+    console.log(\`📥 Nuevas transferencias: \${newTransfers.length}\`);
+
+    // Procesar cada una
+    for (const transfer of newTransfers) {
+      await this.processIncomingTransfer(transfer.DCBReference);
+    }
+
+    return newTransfers;
   }
 }
 
@@ -788,39 +807,98 @@ const daesClient = new DAESPartnerAPIClient({
   apiKey: '${client.apiKey}'
 });
 
-// EJEMPLO DE USO COMPLETO
-async function ejemploCompleto() {
+// EJEMPLO DE USO COMPLETO - MÓDULO DE RECEPCIÓN
+async function ejemploModuloRecepcion() {
   try {
-    // 1. Crear cuenta USD
-    const usdAccount = await daesClient.createAccount('USD');
-    console.log('Cuenta USD creada:', usdAccount.accountId);
+    // 1. Crear cuentas para RECIBIR en las divisas habilitadas
+    ${client.allowedCurrencies.map((curr: string) => 
+      `const ${curr.toLowerCase()}Account = await daesClient.createAccount('${curr}');
+    console.log('Cuenta ${curr} lista para RECIBIR:', ${curr.toLowerCase()}Account.accountId);`
+    ).join('\n    ')}
 
-    // 2. Crear transferencia
-    const transfer = await daesClient.createTransfer({
-      fromAccountId: usdAccount.accountId,
-      toName: 'Empresa Destino S.A.',
-      toAccount: 'ACC-USD-DESTINO-001',
-      amount: 1000.00,
-      currency: 'USD',
-      description: 'Pago de factura #12345'
+    // 2. Consultar transferencias RECIBIDAS de DAES
+    const incomingTransfers = await daesClient.getIncomingTransfers({
+      status: 'SETTLED'
     });
 
-    console.log('Transferencia creada:', transfer.DCBReference);
-    console.log('ID para tracking:', transfer.TransferRequestID);
+    console.log(\`📥 Transferencias recibidas: \${incomingTransfers.length}\`);
 
-    // 3. Esperar settlement
-    const finalState = await daesClient.waitForSettlement(transfer.TransferRequestID);
-    console.log('Estado final:', finalState);
+    // 3. Procesar cada transferencia recibida
+    for (const transfer of incomingTransfers) {
+      console.log('\\n📥 PROCESANDO TRANSFERENCIA RECIBIDA:');
+      console.log('  DCB Reference:', transfer.DCBReference);
+      console.log('  Monto:', transfer.amount, transfer.currency);
+      console.log('  Estado:', transfer.state);
 
-    if (finalState === 'SETTLED') {
-      console.log('✅ Transferencia completada exitosamente');
-    } else {
-      console.error('❌ Transferencia falló:', finalState);
+      // Obtener detalles completos con CashTransfer.v1
+      const details = await daesClient.getTransferDetails(transfer.DCBReference);
+      const cashTransfer = details.cashTransfer;
+
+      console.log('\\n  📋 CashTransfer.v1 Info:');
+      console.log('    Remitente:', cashTransfer.SendingName);
+      console.log('    Institución:', cashTransfer.SendingInstitution);
+      console.log('    Para:', cashTransfer.ReceivingName);
+      console.log('    Descripción:', cashTransfer.Description);
+
+      // 4. Actualizar TU base de datos con la transferencia recibida
+      await actualizarBaseDatosLocal({
+        dcbReference: transfer.DCBReference,
+        amount: parseFloat(transfer.amount),
+        currency: transfer.currency,
+        receivedAt: transfer.settledAt,
+        senderName: cashTransfer.SendingName,
+        description: cashTransfer.Description
+      });
+
+      console.log('  ✅ Transferencia procesada y registrada en tu sistema');
     }
   } catch (error) {
     console.error('Error:', error);
   }
 }
+
+// FUNCIÓN PARA ACTUALIZAR TU BASE DE DATOS LOCAL
+// (Implementa según tu sistema)
+async function actualizarBaseDatosLocal(transferData: {
+  dcbReference: string;
+  amount: number;
+  currency: string;
+  receivedAt: string;
+  senderName: string;
+  description: string;
+}) {
+  // EJEMPLO: Guardar en tu base de datos
+  // await db.transfers.insert({
+  //   id: transferData.dcbReference,
+  //   amount: transferData.amount,
+  //   currency: transferData.currency,
+  //   status: 'RECEIVED',
+  //   receivedAt: transferData.receivedAt,
+  //   sender: transferData.senderName,
+  //   description: transferData.description
+  // });
+
+  console.log('💾 Guardado en base de datos local');
+}
+
+// POLLING AUTOMÁTICO (Ejecutar cada X minutos)
+setInterval(async () => {
+  console.log('🔄 Verificando nuevas transferencias...');
+  
+  const lastCheck = localStorage.getItem('lastTransferCheck') || new Date(0).toISOString();
+  const newTransfers = await daesClient.pollNewTransfers(lastCheck);
+
+  if (newTransfers.length > 0) {
+    console.log(\`📥 ¡\${newTransfers.length} nuevas transferencias recibidas!\`);
+    
+    // Procesar cada una
+    for (const transfer of newTransfers) {
+      await daesClient.processIncomingTransfer(transfer.DCBReference);
+    }
+  }
+
+  localStorage.setItem('lastTransferCheck', new Date().toISOString());
+}, 60000); // Cada 1 minuto
 \`\`\`
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -937,29 +1015,123 @@ Response (429 Too Many Requests):
 }
 
 ═══════════════════════════════════════════════════════════════════════════════
-                          WEBHOOKS (Opcional)
+                    WEBHOOKS - RECEPCIÓN EN TIEMPO REAL (Recomendado)
 ═══════════════════════════════════════════════════════════════════════════════
 
-Si configuraste un webhook URL, recibirás notificaciones cuando:
-- Una transferencia cambie de estado
-- Se complete una transferencia
-- Haya un error en procesamiento
+⭐ RECOMENDADO: Configura un webhook para recibir notificaciones instantáneas
 
-Formato del webhook:
+Cuando Digital Commercial Bank DAES te envía una transferencia, 
+recibirás una notificación inmediata en tu webhook endpoint.
+
+CONFIGURACIÓN:
+1. Crea un endpoint en tu servidor (ej: https://tuapp.com/webhooks/daes)
+2. Regístralo con el partner
+3. DAES enviará notificaciones a ese endpoint
+
+FORMATO DEL WEBHOOK (Lo que recibirás):
 POST [TU_WEBHOOK_URL]
+Headers:
+  Content-Type: application/json
+  X-DAES-Signature: [HMAC-SHA256]
+
+Body:
 {
-  "event": "transfer.settled",
+  "event": "transfer.incoming.settled",
+  "partnerId": "${partner.partnerId}",
+  "clientId": "${client.clientId}",
   "data": {
-    "transferId": "TRF_1234567890_XYZ123",
-    "TransferRequestID": "TX-20251126-001",
+    "DCBReference": "TRF_1234567890_XYZ123",
+    "receivingAccount": "${client.clientId}-ACC-USD-001",
+    "amount": "1000.00",
+    "currency": "USD",
     "state": "SETTLED",
-    "settledAt": "2025-11-26T12:01:30.000Z"
+    "settledAt": "2025-11-26T12:01:30.000Z",
+    "cashTransfer": {
+      "SendingName": "Digital Commercial Bank DAES",
+      "ReceivingName": "${client.legalName}",
+      "Amount": "1000.00",
+      "Description": "Payment from DAES",
+      "TransferRequestID": "DAES-TX-001"
+    }
   },
   "timestamp": "2025-11-26T12:01:30.000Z"
 }
 
-⚠️ Valida el webhook:
-Cada webhook incluye header X-DAES-Signature con HMAC-SHA256
+IMPLEMENTACIÓN DEL WEBHOOK EN TU SERVIDOR:
+
+\`\`\`typescript
+import express from 'express';
+import crypto from 'crypto';
+
+const app = express();
+app.use(express.json());
+
+// Endpoint webhook (lo que debes crear en TU servidor)
+app.post('/webhooks/daes', async (req, res) => {
+  try {
+    // 1. Validar firma HMAC
+    const signature = req.headers['x-daes-signature'];
+    const webhookSecret = process.env.DAES_WEBHOOK_SECRET; // Te lo proporciona DAES
+    
+    const expectedSignature = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(JSON.stringify(req.body))
+      .digest('hex');
+
+    if (signature !== expectedSignature) {
+      console.error('❌ Webhook signature inválida');
+      return res.status(401).json({ error: 'Invalid signature' });
+    }
+
+    // 2. Procesar evento
+    const { event, data } = req.body;
+
+    if (event === 'transfer.incoming.settled') {
+      console.log('📥 TRANSFERENCIA RECIBIDA DE DAES:');
+      console.log('  DCB Reference:', data.DCBReference);
+      console.log('  Monto:', data.amount, data.currency);
+      console.log('  Para cuenta:', data.receivingAccount);
+
+      // 3. Actualizar TU base de datos
+      await tuBaseDeDatos.transfers.insert({
+        id: data.DCBReference,
+        amount: parseFloat(data.amount),
+        currency: data.currency,
+        status: 'RECEIVED',
+        receivedAt: data.settledAt,
+        sender: data.cashTransfer.SendingName,
+        description: data.cashTransfer.Description,
+        cashTransferData: data.cashTransfer
+      });
+
+      // 4. Notificar a tu usuario final (opcional)
+      await enviarNotificacionAUsuario({
+        userId: extraerUserIdDeCuenta(data.receivingAccount),
+        message: \`Recibiste \${data.amount} \${data.currency}\`,
+        reference: data.DCBReference
+      });
+
+      console.log('✅ Transferencia procesada y guardada');
+    }
+
+    // 5. Responder 200 OK (importante)
+    res.json({ received: true });
+
+  } catch (error) {
+    console.error('Error procesando webhook:', error);
+    res.status(500).json({ error: 'Internal error' });
+  }
+});
+
+app.listen(3000, () => {
+  console.log('Webhook server running on port 3000');
+});
+\`\`\`
+
+EVENTOS DE WEBHOOK:
+- transfer.incoming.settled: Transferencia recibida y completada
+- transfer.incoming.pending: Transferencia recibida (procesando)
+- transfer.incoming.failed: Transferencia recibida falló
 
 ═══════════════════════════════════════════════════════════════════════════════
                         SOPORTE Y CONTACTO
