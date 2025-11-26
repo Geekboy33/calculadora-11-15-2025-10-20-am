@@ -2013,38 +2013,198 @@ Partner: ${partner.name}
           </div>
         )}
 
-        {/* Tab: Cuentas */}
+        {/* Tab: Cuentas - Organizado por Partner */}
         {selectedTab === 'accounts' && (
-          <BankingSection
-            title={isSpanish ? "Gestión de Cuentas Multi-Moneda" : "Multi-Currency Account Management"}
-            icon={Key}
-            color="amber"
-          >
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {availableCurrencies.map(curr => (
-                  <div
-                    key={curr.code}
-                    className="bg-slate-900/50 border border-slate-700 hover:border-amber-500/50 rounded-xl p-4 transition-all text-center"
-                  >
-                    <div className="text-3xl mb-2">{curr.flag}</div>
-                    <p className="text-slate-100 font-bold">{curr.code}</p>
-                    <p className="text-slate-500 text-xs">{curr.name}</p>
-                    <div className="mt-3">
-                      <BankingBadge variant="info">
-                        {accounts.filter(a => a.currency === curr.code).length} {isSpanish ? "cuentas" : "accounts"}
-                      </BankingBadge>
+          <div className="space-y-6 max-h-[800px] overflow-y-auto pr-2">
+            {partners.length > 0 ? (
+              partners.map((partner) => {
+                // Obtener clientes y transferencias de este partner
+                const partnerClients = clients.filter(c => c.partnerId === partner.partnerId);
+                const partnerTransfers = transfers.filter(t => t.partnerId === partner.partnerId);
+                
+                // Calcular estadísticas por divisa
+                const statsByCurrency: {[key: string]: {
+                  total: number;
+                  count: number;
+                  lastTransfer?: string;
+                }} = {};
+
+                partnerTransfers.forEach(t => {
+                  if (!statsByCurrency[t.currency]) {
+                    statsByCurrency[t.currency] = { total: 0, count: 0 };
+                  }
+                  statsByCurrency[t.currency].total += parseFloat(t.amount);
+                  statsByCurrency[t.currency].count += 1;
+                  statsByCurrency[t.currency].lastTransfer = t.createdAt;
+                });
+
+                const totalVolume = Object.values(statsByCurrency).reduce((sum, s) => sum + s.total, 0);
+                const totalTransactionsCount = partnerTransfers.length;
+
+                return (
+                  <BankingCard key={partner.partnerId} className="overflow-hidden">
+                    {/* Header del Partner */}
+                    <div className="p-6 border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 bg-sky-500/10 rounded-xl">
+                            <Users className="w-6 h-6 text-sky-400" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-slate-100">{partner.name}</h3>
+                            <p className="text-slate-400 text-sm">Partner ID: {partner.partnerId}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <BankingBadge variant="success">{partner.status}</BankingBadge>
+                          <BankingBadge variant="info">
+                            {partnerClients.length} {isSpanish ? 'clientes' : 'clients'}
+                          </BankingBadge>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              <div className="text-center py-8">
-                <p className="text-slate-400">
-                  {isSpanish ? "Cuentas disponibles en las 15 monedas principales" : "Accounts available in 15 major currencies"}
-                </p>
-              </div>
-            </div>
-          </BankingSection>
+
+                    {/* Estadísticas del Partner */}
+                    <div className="p-6 border-b border-slate-700">
+                      <h4 className="text-lg font-bold text-slate-100 mb-4">
+                        {isSpanish ? 'Estadísticas Generales' : 'General Statistics'}
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                          <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Volumen Total' : 'Total Volume'}</p>
+                          <p className="text-2xl font-bold text-emerald-400">{fmt.currency(totalVolume, 'USD')}</p>
+                        </div>
+                        <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                          <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Transferencias' : 'Transfers'}</p>
+                          <p className="text-2xl font-bold text-sky-400">{totalTransactionsCount}</p>
+                        </div>
+                        <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                          <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Clientes' : 'Clients'}</p>
+                          <p className="text-2xl font-bold text-purple-400">{partnerClients.length}</p>
+                        </div>
+                        <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                          <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Divisas Activas' : 'Active Currencies'}</p>
+                          <p className="text-2xl font-bold text-amber-400">{Object.keys(statsByCurrency).length}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Desglose por Divisa */}
+                    <div className="p-6 border-b border-slate-700">
+                      <h4 className="text-lg font-bold text-slate-100 mb-4">
+                        {isSpanish ? 'Desglose por Divisa' : 'Breakdown by Currency'}
+                      </h4>
+                      <div className="space-y-3">
+                        {Object.entries(statsByCurrency).map(([currency, stats]) => {
+                          const currInfo = availableCurrencies.find(c => c.code === currency);
+                          const percentage = totalVolume > 0 ? (stats.total / totalVolume) * 100 : 0;
+                          
+                          return (
+                            <div key={currency} className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-2xl">{currInfo?.flag}</span>
+                                  <div>
+                                    <p className="text-slate-100 font-bold">{currency}</p>
+                                    <p className="text-slate-500 text-xs">{currInfo?.name}</p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-emerald-400 font-bold text-xl">{fmt.currency(stats.total, currency)}</p>
+                                  <p className="text-slate-500 text-xs">{stats.count} {isSpanish ? 'transferencias' : 'transfers'}</p>
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-slate-400">{isSpanish ? 'Porcentaje del total:' : 'Percentage of total:'}</span>
+                                  <span className="text-sky-400 font-semibold">{percentage.toFixed(1)}%</span>
+                                </div>
+                                {stats.lastTransfer && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-slate-400">{isSpanish ? 'Última transferencia:' : 'Last transfer:'}</span>
+                                    <span className="text-slate-300">{fmt.dateTime(stats.lastTransfer)}</span>
+                                  </div>
+                                )}
+                                <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden mt-2">
+                                  <div
+                                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full transition-all duration-500"
+                                    style={{ width: `${percentage}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Lista de Transferencias del Partner */}
+                    <div className="p-6">
+                      <h4 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+                        <ArrowRight className="w-5 h-5 text-purple-400" />
+                        {isSpanish ? 'Historial de Transferencias' : 'Transfer History'}
+                      </h4>
+                      {partnerTransfers.length > 0 ? (
+                        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                          {partnerTransfers.map((transfer, idx) => (
+                            <div
+                              key={idx}
+                              className="bg-slate-900/50 border border-slate-700 hover:border-purple-500/50 rounded-lg p-4 transition-all"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-slate-100 font-semibold">{transfer.transferRequestId}</span>
+                                    <BankingBadge variant="success">{transfer.state}</BankingBadge>
+                                  </div>
+                                  <div className="space-y-1 text-sm">
+                                    <div className="flex items-center gap-2 text-slate-400">
+                                      <ArrowRight className="w-3 h-3" />
+                                      <span>{transfer.fromAccount} → {transfer.toAccount}</span>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-xs text-slate-500">
+                                      <span className="flex items-center gap-1">
+                                        <Clock className="w-3 h-3" />
+                                        {fmt.dateTime(transfer.createdAt)}
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        {transfer.currency}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-emerald-400 font-black text-xl">
+                                    {fmt.currency(parseFloat(transfer.amount), transfer.currency)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-slate-500">
+                          {isSpanish ? 'Sin transferencias aún' : 'No transfers yet'}
+                        </div>
+                      )}
+                    </div>
+                  </BankingCard>
+                );
+              })
+            ) : (
+              <BankingCard className="p-12">
+                <div className="text-center">
+                  <Users className="w-20 h-20 text-slate-700 mx-auto mb-4" />
+                  <p className="text-slate-400 text-lg font-medium">
+                    {isSpanish ? 'No hay partners registrados' : 'No partners registered'}
+                  </p>
+                  <p className="text-slate-600 text-sm mt-2">
+                    {isSpanish ? 'Crea tu primer partner para comenzar' : 'Create your first partner to get started'}
+                  </p>
+                </div>
+              </BankingCard>
+            )}
+          </div>
         )}
 
         {/* Tab: Transferencias */}
