@@ -12,6 +12,7 @@ import { ToastNotification } from './components/ToastNotification';
 import { processingStore } from './lib/processing-store';
 
 const CentralBankingDashboard = lazy(() => import(/* webpackPrefetch: true */ './components/CentralBankingDashboard').then(m => ({ default: m.CentralBankingDashboard })));
+const DAESPartnerAPIModule = lazy(() => import('./components/DAESPartnerAPIModule').then(m => ({ default: m.DAESPartnerAPIModule })));
 const AdvancedBankingDashboard = lazy(() => import(/* webpackPrefetch: true */ './components/AdvancedBankingDashboard').then(m => ({ default: m.AdvancedBankingDashboard })));
 const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard').then(m => ({ default: m.AnalyticsDashboard })));
 const DTC1BProcessor = lazy(() => import(/* webpackPrefetch: true */ './components/DTC1BProcessor').then(m => ({ default: m.DTC1BProcessor })));
@@ -40,7 +41,7 @@ const ProfilesModule = lazy(() => import('./components/ProfilesModule').then(m =
 const BankSettlementModule = lazy(() => import('./components/BankSettlementModule').then(m => ({ default: m.BankSettlementModule })));
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 
-type Tab = 'central-dashboard' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager';
+type Tab = 'central-dashboard' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -108,6 +109,7 @@ function App() {
 
   const tabs = [
     { id: 'central-dashboard' as Tab, name: isSpanish ? '🏦 Panel Central' : '🏦 Central Panel', icon: Building2 },
+    { id: 'daes-partner-api' as Tab, name: isSpanish ? '🌐 APIs Partner DAES' : '🌐 DAES Partner APIs', icon: Globe },
     { id: 'dashboard' as Tab, name: t.navDashboard, icon: LayoutDashboard },
     { id: 'analytics' as Tab, name: 'Analytics', icon: TrendingUp },
     { id: 'ledger' as Tab, name: t.navLedger, icon: BookOpen },
@@ -232,6 +234,7 @@ function App() {
           </div>
         }>
           {activeTab === 'central-dashboard' && <CentralBankingDashboard />}
+          {activeTab === 'daes-partner-api' && <DAESPartnerAPIModule />}
           {activeTab === 'dashboard' && <AdvancedBankingDashboard />}
           {activeTab === 'analytics' && <AnalyticsDashboard />}
           {activeTab === 'ledger' && <AccountLedger />}
