@@ -645,40 +645,112 @@ Timestamp: ${AUDIT_DATA.timestamp}
               </div>
             </div>
 
-            {/* ✅ BARRA DE PROGRESO DE CARGA */}
+            {/* ✅ PANTALLA DE VERIFICACIÓN Y CARGA EN TIEMPO REAL */}
             {analyzing && (
               <div className="px-8 pb-6">
-                <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-6">
-                  <div className="flex items-center justify-between mb-3">
+                <BankingCard className="p-6 border-2 border-sky-500/50 bg-sky-500/5">
+                  <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <Activity className="w-5 h-5 text-sky-400 animate-spin" />
-                      <p className="text-slate-100 font-bold">
-                        {isSpanish ? "Escaneando Archivo..." : "Scanning File..."}
-                      </p>
+                      <div className="p-3 bg-sky-500/20 rounded-xl">
+                        <Activity className="w-6 h-6 text-sky-400 animate-spin" />
+                      </div>
+                      <div>
+                        <p className="text-sky-400 font-bold text-xl">
+                          {isSpanish ? "Escaneando y Verificando Ledger1" : "Scanning and Verifying Ledger1"}
+                        </p>
+                        <p className="text-slate-400 text-sm">
+                          {isSpanish ? "Extracción de valores M2 en proceso..." : "M2 values extraction in progress..."}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-sky-400 font-bold text-xl">{progress.toFixed(1)}%</p>
+                    <div className="text-right">
+                      <p className="text-sky-400 font-black text-3xl">{progress.toFixed(1)}%</p>
+                      <p className="text-slate-500 text-xs">{isSpanish ? "Completado" : "Completed"}</p>
+                    </div>
                   </div>
                   
-                  {/* Barra de progreso */}
-                  <div className="w-full bg-slate-800 rounded-full h-4 overflow-hidden border border-slate-700 mb-4">
+                  {/* Barra de progreso principal */}
+                  <div className="w-full bg-slate-800 rounded-full h-5 overflow-hidden border border-slate-700 mb-6">
                     <div
-                      className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full transition-all duration-300 relative overflow-hidden"
+                      className="h-full bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 rounded-full transition-all duration-300 relative overflow-hidden"
                       style={{ width: `${progress}%` }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
                     </div>
                   </div>
 
-                  {/* Balance actual escaneado */}
-                  <div className="text-center">
-                    <p className="text-slate-400 text-sm mb-2">
-                      {isSpanish ? "Balance Escaneado:" : "Scanned Balance:"}
-                    </p>
-                    <p className="text-3xl font-bold text-sky-400">
-                      {currentScannedAmount.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} {isSpanish ? "Miles de Millones" : "Billions"}
+                  {/* VERIFICACIÓN DUAL: USD y EUR en paralelo */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Master USD en tiempo real */}
+                    <div className="bg-slate-900/80 border border-slate-700 rounded-xl p-5">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-sky-500/10 rounded-lg">
+                          <DollarSign className="w-5 h-5 text-sky-400" />
+                        </div>
+                        <div>
+                          <p className="text-slate-100 font-bold">MASTER USD (60%)</p>
+                          <p className="text-slate-500 text-xs">MASTER-USD-001</p>
+                        </div>
+                      </div>
+                      <div className="text-center py-4">
+                        <p className="text-slate-400 text-xs mb-2">
+                          {isSpanish ? "Balance Actual:" : "Current Balance:"}
+                        </p>
+                        <p className="text-sky-400 font-black text-2xl">
+                          {(currentScannedAmount * USD_PERCENTAGE).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
+                        </p>
+                        <p className="text-slate-500 text-xs mt-1">
+                          {isSpanish ? "Miles de Millones" : "Billions"}
+                        </p>
+                      </div>
+                      <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full transition-all duration-500"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Master EUR en tiempo real */}
+                    <div className="bg-slate-900/80 border border-slate-700 rounded-xl p-5">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-emerald-500/10 rounded-lg">
+                          <DollarSign className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-slate-100 font-bold">MASTER EUR (40%)</p>
+                          <p className="text-slate-500 text-xs">MASTER-EUR-001</p>
+                        </div>
+                      </div>
+                      <div className="text-center py-4">
+                        <p className="text-slate-400 text-xs mb-2">
+                          {isSpanish ? "Balance Actual:" : "Current Balance:"}
+                        </p>
+                        <p className="text-emerald-400 font-black text-2xl">
+                          {(currentScannedAmount * EUR_PERCENTAGE).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
+                        </p>
+                        <p className="text-slate-500 text-xs mt-1">
+                          {isSpanish ? "Miles de Millones" : "Billions"}
+                        </p>
+                      </div>
+                      <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full transition-all duration-500"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Info adicional */}
+                  <div className="mt-4 text-center text-sm text-slate-400">
+                    <p>
+                      {isSpanish ? "Técnica:" : "Technique:"} Byte-by-byte 64-bit Little-endian | 
+                      {isSpanish ? " Filtro:" : " Filter:"} {'>'}1 Billion | 
+                      {isSpanish ? " Clasificación:" : " Classification:"} M2 Money Supply
                     </p>
                   </div>
-                </div>
+                </BankingCard>
               </div>
             )}
           </div>
