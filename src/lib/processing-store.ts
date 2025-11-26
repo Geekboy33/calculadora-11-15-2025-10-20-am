@@ -735,10 +735,16 @@ class ProcessingStore {
         this.notifyListeners();
       }
 
-      const CHUNK_SIZE = 10 * 1024 * 1024;
+      const CHUNK_SIZE = 10 * 1024 * 1024; // 10 MB por chunk
       const totalSize = file.size;
       let bytesProcessed = resumeFrom;
       const balanceTracker: { [currency: string]: CurrencyBalance } = {};
+      
+      // ✅ Log para archivos muy grandes
+      const sizeInGB = totalSize / (1024 * 1024 * 1024);
+      console.log(`[ProcessingStore] 📂 Procesando archivo: ${sizeInGB.toFixed(2)} GB`);
+      console.log(`[ProcessingStore] ✅ SIN LÍMITES: Procesará TODO el archivo sin restricciones`);
+      console.log(`[ProcessingStore] 🎯 Iniciando desde: ${(resumeFrom / 1024 / 1024 / 1024).toFixed(2)} GB`);
 
       if (existingProcess && existingProcess.balances) {
         existingProcess.balances.forEach(balance => {
@@ -784,7 +790,14 @@ class ProcessingStore {
           
           // Log detallado cada 10%
           if (Math.floor(progress) % 10 === 0 && Math.floor(progress) !== Math.floor((bytesProcessed - chunk.length) / totalSize * 100)) {
-            console.log(`[ProcessingStore] 📊 Progreso: ${progress.toFixed(2)}% (${(bytesProcessed / 1024 / 1024 / 1024).toFixed(2)} GB de ${(totalSize / 1024 / 1024 / 1024).toFixed(2)} GB) - Chunk ${currentChunk}/${totalChunks}`);
+            const gbProcessed = (bytesProcessed / 1024 / 1024 / 1024).toFixed(2);
+            const gbTotal = (totalSize / 1024 / 1024 / 1024).toFixed(2);
+            console.log(`[ProcessingStore] 📊 Progreso: ${progress.toFixed(2)}% (${gbProcessed} GB de ${gbTotal} GB) - Chunk ${currentChunk}/${totalChunks}`);
+            
+            // ✅ Log especial para archivos >800 GB
+            if (parseFloat(gbProcessed) >= 800) {
+              console.log(`[ProcessingStore] 🚀 ARCHIVO GRANDE: Procesando ${gbProcessed} GB - SIN LÍMITES - Continuando hasta ${gbTotal} GB`);
+            }
           }
           
           // CRÍTICO: Log específico en 29-30% para debugging
@@ -829,10 +842,17 @@ class ProcessingStore {
 
       if (!signal.aborted) {
         const balancesArray = Object.values(balanceTracker);
+        const finalSizeGB = (totalSize / 1024 / 1024 / 1024).toFixed(2);
         await this.completeProcessing(balancesArray);
         console.log('[ProcessingStore] ✅ Procesamiento completado al 100%');
+        console.log(`[ProcessingStore] 📂 Archivo procesado completamente: ${finalSizeGB} GB`);
         console.log('[ProcessingStore] 📊 Total de monedas detectadas:', balancesArray.length);
         console.log('[ProcessingStore] 💾 Datos guardados en Supabase y localStorage');
+        
+        // ✅ Confirmación para archivos muy grandes
+        if (parseFloat(finalSizeGB) >= 800) {
+          console.log(`[ProcessingStore] 🎉 ARCHIVO GRANDE COMPLETADO: ${finalSizeGB} GB procesados SIN LÍMITES`);
+        }
       } else {
         console.log('[ProcessingStore] ⚠️ Procesamiento detenido por el usuario');
       }
