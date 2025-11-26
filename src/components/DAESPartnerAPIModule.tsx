@@ -308,7 +308,7 @@ Response (201 Created):
   }
 }
 
-Ejemplo en código:
+${isSpanish ? 'Ejemplo en código:' : 'Code example:'}
 \`\`\`typescript
 const createAccount = async (accessToken: string, currency: string) => {
   const response = await fetch('${baseUrl}/clients/${client.clientId}/accounts', {
