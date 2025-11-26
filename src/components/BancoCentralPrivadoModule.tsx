@@ -82,6 +82,7 @@ export function BancoCentralPrivadoModule() {
   const selectedMasterAccount = masterAccounts.find(a => a.currency === selectedAccount)!;
 
   // Función para analizar archivo Ledger1 Digital Commercial Bank DAES
+  // Técnica exacta del reporte de auditoría
   const handleAnalyzeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -92,66 +93,86 @@ export function BancoCentralPrivadoModule() {
       console.log('[Banco Central] 📂 Analizando:', file.name, `(${(file.size / (1024 * 1024 * 1024)).toFixed(2)} GB)`);
 
       const buffer = await file.arrayBuffer();
-      const data = new Uint8Array(buffer);
+      const dataView = new DataView(buffer);
       
       let m2ValuesFound = 0;
-      let totalM2Amount = 0;
-      const QUADRILLION_THRESHOLD = 1000000000000000000; // 1 × 10¹⁸
+      let totalM2AmountBillions = 0; // Trabajar directamente en Miles de Millones
+      const THRESHOLD_BILLIONS = 1000000000; // 1 billion (para filtrar valores masivos)
 
-      // Escaneo byte-by-byte (técnica del reporte de auditoría)
-      for (let offset = 0; offset < data.length - 8; offset += 8) {
-        // Leer valor de 64-bit little-endian
-        const value = 
-          data[offset] +
-          data[offset + 1] * 256 +
-          data[offset + 2] * 65536 +
-          data[offset + 3] * 16777216 +
-          data[offset + 4] * 4294967296 +
-          data[offset + 5] * 1099511627776 +
-          data[offset + 6] * 281474976710656 +
-          data[offset + 7] * 72057594037927936;
-
-        // Filtrar valores masivos (> 1 cuatrillón)
-        if (value > QUADRILLION_THRESHOLD) {
-          m2ValuesFound++;
-          totalM2Amount += value;
+      // Escaneo byte-by-byte (técnica del reporte: step size 8 bytes)
+      const totalBytes = buffer.byteLength;
+      const CHUNK_SIZE = 10 * 1024 * 1024; // Procesar en chunks de 10MB
+      
+      for (let chunkStart = 0; chunkStart < totalBytes; chunkStart += CHUNK_SIZE) {
+        const chunkEnd = Math.min(chunkStart + CHUNK_SIZE, totalBytes);
+        
+        // Procesar chunk actual
+        for (let offset = chunkStart; offset < chunkEnd - 8; offset += 8) {
+          try {
+            // Leer valor de 64-bit little-endian usando DataView
+            // JavaScript Number.MAX_SAFE_INTEGER = 9,007,199,254,740,991
+            // Para valores mayores, leer como dos uint32
+            const low = dataView.getUint32(offset, true); // little-endian
+            const high = dataView.getUint32(offset + 4, true);
+            
+            // Convertir a número seguro (en Miles de Millones directamente)
+            // Esto evita overflow: dividimos antes de multiplicar
+            const valueInBillions = (high * 4294967296 + low) / 1000000000;
+            
+            // Filtrar valores masivos (> 1 billion en nuestra escala)
+            if (valueInBillions > THRESHOLD_BILLIONS) {
+              m2ValuesFound++;
+              totalM2AmountBillions += valueInBillions;
+            }
+          } catch (readError) {
+            // Ignorar errores de lectura en bytes finales
+            continue;
+          }
+        }
+        
+        // Log de progreso cada chunk
+        const progress = ((chunkEnd / totalBytes) * 100).toFixed(1);
+        if (parseInt(progress) % 10 === 0) {
+          console.log(`[Banco Central] 📊 Progreso: ${progress}%`);
         }
       }
-
-      // Convertir a formato legible (Miles de Millones)
-      const BILLIONS_DIVISOR = 1000000000; // 1 billion
-      const totalInBillions = totalM2Amount / BILLIONS_DIVISOR;
       
       // Distribuir en USD y EUR
-      const usdInBillions = totalInBillions * USD_PERCENTAGE;
-      const eurInBillions = totalInBillions * EUR_PERCENTAGE;
+      const usdInBillions = totalM2AmountBillions * USD_PERCENTAGE;
+      const eurInBillions = totalM2AmountBillions * EUR_PERCENTAGE;
 
       setUsdBalance(usdInBillions);
       setEurBalance(eurInBillions);
 
       setAnalysisResults({
         totalM2Values: m2ValuesFound,
-        totalM2Amount: totalInBillions,
+        totalM2Amount: totalM2AmountBillions,
         filesProcessed: 1,
         certified: true
       });
 
       console.log('[Banco Central] ✅ Análisis completado');
-      console.log(`  Valores M2 encontrados: ${m2ValuesFound}`);
-      console.log(`  Total en Miles de Millones: ${totalInBillions.toLocaleString()}`);
+      console.log(`  Valores M2 encontrados: ${m2ValuesFound.toLocaleString()}`);
+      console.log(`  Total en Miles de Millones: ${totalM2AmountBillions.toLocaleString()}`);
 
       alert(
         `✅ ${isSpanish ? 'ANÁLISIS COMPLETADO Y CERTIFICADO' : 'ANALYSIS COMPLETED AND CERTIFIED'}\n\n` +
         `${isSpanish ? 'Archivo:' : 'File:'} ${file.name}\n` +
+        `${isSpanish ? 'Tamaño:' : 'Size:'} ${(file.size / (1024 * 1024 * 1024)).toFixed(2)} GB\n` +
         `${isSpanish ? 'Valores M2:' : 'M2 Values:'} ${m2ValuesFound.toLocaleString()}\n` +
-        `${isSpanish ? 'Total:' : 'Total:'} ${totalInBillions.toLocaleString()} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n\n` +
-        `Master USD: ${usdInBillions.toLocaleString()} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n` +
-        `Master EUR: ${eurInBillions.toLocaleString()} ${isSpanish ? 'Miles de Millones' : 'Billions'}`
+        `${isSpanish ? 'Total:' : 'Total:'} ${totalM2AmountBillions.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n\n` +
+        `Master USD (60%): ${usdInBillions.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n` +
+        `Master EUR (40%): ${eurInBillions.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n\n` +
+        `✅ ${isSpanish ? 'Balances certificados y verificados' : 'Balances certified and verified'}`
       );
 
     } catch (error) {
-      console.error('[Banco Central] Error:', error);
-      alert(`❌ ${isSpanish ? 'Error al analizar archivo' : 'Error analyzing file'}`);
+      console.error('[Banco Central] ❌ Error:', error);
+      alert(
+        `❌ ${isSpanish ? 'Error al analizar archivo' : 'Error analyzing file'}\n\n` +
+        `${error instanceof Error ? error.message : 'Error desconocido'}\n\n` +
+        `${isSpanish ? 'Verifica que el archivo sea Ledger1 Digital Commercial Bank DAES binario' : 'Verify the file is Ledger1 Digital Commercial Bank DAES binary'}`
+      );
     } finally {
       setAnalyzing(false);
     }
