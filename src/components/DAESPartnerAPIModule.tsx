@@ -278,17 +278,17 @@ const getAccessToken = async () => {
 };
 \`\`\`
 
-PASO 2: CREAR CUENTA PARA EL CLIENTE
+${isSpanish ? 'PASO 2: CREAR CUENTA PARA EL CLIENTE' : 'STEP 2: CREATE ACCOUNT FOR CLIENT'}
 ═══════════════════════════════════════════════════════════════════════════════
 
 Endpoint:   POST ${baseUrl}/clients/${client.clientId}/accounts
-Propósito:  Crear cuenta en una divisa específica
+${isSpanish ? 'Propósito:  Crear cuenta en una divisa específica' : 'Purpose:    Create account in specific currency'}
 
 Headers:
   Authorization: Bearer [ACCESS_TOKEN]
   Content-Type: application/json
 
-Body:
+${isSpanish ? 'Body:' : 'Body:'}
 {
   "currency": "USD",
   "initialBalance": "0.00"
