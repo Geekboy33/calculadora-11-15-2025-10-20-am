@@ -68,7 +68,15 @@ export function BancoCentralPrivadoModule() {
     const saved = localStorage.getItem('banco_central_analysis_results');
     return saved ? JSON.parse(saved) : null;
   });
+  const [lastProcessedOffset, setLastProcessedOffset] = useState(() => {
+    const saved = localStorage.getItem('banco_central_last_offset');
+    return saved ? parseInt(saved) : 0;
+  });
+  const [currentFileName, setCurrentFileName] = useState(() => {
+    return localStorage.getItem('banco_central_current_file') || '';
+  });
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const processingRef = React.useRef(false);
 
   // ✅ Cargar resultados guardados al iniciar
   React.useEffect(() => {
@@ -91,6 +99,21 @@ export function BancoCentralPrivadoModule() {
       localStorage.setItem('banco_central_analysis_results', JSON.stringify(analysisResults));
     }
   }, [analysisResults]);
+
+  // ✅ Guardar progreso del offset
+  React.useEffect(() => {
+    if (lastProcessedOffset > 0) {
+      localStorage.setItem('banco_central_last_offset', lastProcessedOffset.toString());
+    }
+  }, [lastProcessedOffset]);
+
+  // ✅ NO detener el procesamiento al desmontar
+  React.useEffect(() => {
+    return () => {
+      // El procesamiento continúa en background
+      console.log('[Banco Central] 💾 Componente desmontado, procesamiento continúa en background');
+    };
+  }, []);
 
   // Master Accounts (usando balances actualizados si hay análisis)
   const masterAccounts = [
@@ -123,22 +146,39 @@ export function BancoCentralPrivadoModule() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    processingRef.current = true;
     setAnalyzing(true);
-    setProgress(0);
-    setCurrentScannedAmount(0);
 
     try {
+      const fileIdentifier = `${file.name}_${file.size}_${file.lastModified}`;
+      const isSameFile = currentFileName === fileIdentifier;
+
       console.log('[Banco Central] 📂 Archivo:', file.name);
       console.log('[Banco Central] 📊 Tamaño:', (file.size / (1024 * 1024)).toFixed(2), 'MB');
 
       const totalSize = file.size;
       const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB por chunk
-      let offset = 0;
-      let m2Count = 0;
-      let m2Total = 0;
+      
+      // ✅ CONTINUAR desde donde quedó si es el mismo archivo
+      let offset = isSameFile ? lastProcessedOffset : 0;
+      let m2Count = isSameFile && analysisResults ? analysisResults.totalM2Values : 0;
+      let m2Total = isSameFile && analysisResults ? analysisResults.totalM2Amount : 0;
 
-      // ✅ LEER POR CHUNKS (streaming, no carga todo en memoria)
-      while (offset < totalSize) {
+      if (isSameFile && offset > 0) {
+        console.log(`[Banco Central] 🔄 Continuando desde ${((offset / totalSize) * 100).toFixed(1)}%`);
+        setProgress((offset / totalSize) * 100);
+        setCurrentScannedAmount(m2Total);
+        alert(`🔄 ${isSpanish ? 'Continuando desde' : 'Resuming from'} ${((offset / totalSize) * 100).toFixed(1)}%`);
+      } else {
+        console.log('[Banco Central] 🆕 Nuevo archivo, iniciando desde 0%');
+        setProgress(0);
+        setCurrentScannedAmount(0);
+        setCurrentFileName(fileIdentifier);
+        localStorage.setItem('banco_central_current_file', fileIdentifier);
+      }
+
+      // ✅ LEER POR CHUNKS (streaming, continúa en background)
+      while (offset < totalSize && processingRef.current) {
         const chunk = file.slice(offset, Math.min(offset + CHUNK_SIZE, totalSize));
         const buffer = await chunk.arrayBuffer();
         const bytes = new Uint8Array(buffer);
@@ -147,44 +187,60 @@ export function BancoCentralPrivadoModule() {
         for (let i = 0; i < bytes.length - 7; i += 8) {
           const v = bytes[i] + (bytes[i+1] << 8) + (bytes[i+2] << 16) + (bytes[i+3] << 24);
           
-          if (v > 100000000) { // Valor masivo detectado
+          if (v > 100000000) {
             m2Count++;
-            m2Total += 1000; // Aproximación: 1000 billions cada uno
+            m2Total += 1000;
           }
         }
         
         offset += CHUNK_SIZE;
-        const progress = Math.min((offset / totalSize) * 100, 100);
+        const progressPercent = Math.min((offset / totalSize) * 100, 100);
         
-        setProgress(progress);
+        // ✅ Actualizar estado y GUARDAR progreso
+        setProgress(progressPercent);
         setCurrentScannedAmount(m2Total);
         setUsdBalance(m2Total * USD_PERCENTAGE);
         setEurBalance(m2Total * EUR_PERCENTAGE);
+        setLastProcessedOffset(offset);
         
-        if (Math.floor(progress) % 10 === 0) {
-          console.log(`[Banco Central] 📊 ${progress.toFixed(0)}% - ${m2Count} M2 - ${m2Total} Billions`);
+        // Log cada 10%
+        if (Math.floor(progressPercent) % 10 === 0 && Math.floor(progressPercent) !== Math.floor(((offset - CHUNK_SIZE) / totalSize) * 100)) {
+          console.log(`[Banco Central] 📊 ${progressPercent.toFixed(0)}% - ${m2Count} M2 - ${m2Total} Billions`);
+          
+          // ✅ GUARDAR PROGRESO cada 10%
+          localStorage.setItem('banco_central_last_offset', offset.toString());
+          localStorage.setItem('banco_central_usd_balance', (m2Total * USD_PERCENTAGE).toString());
+          localStorage.setItem('banco_central_eur_balance', (m2Total * EUR_PERCENTAGE).toString());
         }
         
         await new Promise(r => setTimeout(r, 10));
       }
 
-      setProgress(100);
-      setAnalysisResults({
-        totalM2Values: m2Count,
-        totalM2Amount: m2Total,
-        filesProcessed: 1,
-        certified: true
-      });
+      if (processingRef.current) {
+        setProgress(100);
+        setLastProcessedOffset(totalSize); // Marcar como completado
+        
+        setAnalysisResults({
+          totalM2Values: m2Count,
+          totalM2Amount: m2Total,
+          filesProcessed: 1,
+          certified: true
+        });
 
-      console.log('[Banco Central] ✅ COMPLETADO:', m2Count, 'valores M2');
+        console.log('[Banco Central] ✅ COMPLETADO 100%');
+        console.log(`  M2: ${m2Count}, Total: ${m2Total} Billions`);
 
-      alert(
-        `✅ ${isSpanish ? 'COMPLETADO' : 'COMPLETED'}\n\n` +
-        `M2: ${m2Count.toLocaleString()}\n` +
-        `Total: ${m2Total.toLocaleString()} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n` +
-        `USD: ${(m2Total * USD_PERCENTAGE).toLocaleString()}\n` +
-        `EUR: ${(m2Total * EUR_PERCENTAGE).toLocaleString()}`
-      );
+        alert(
+          `✅ ${isSpanish ? 'COMPLETADO' : 'COMPLETED'}\n\n` +
+          `M2: ${m2Count.toLocaleString()}\n` +
+          `Total: ${m2Total.toLocaleString()}\n` +
+          `USD: ${(m2Total * USD_PERCENTAGE).toLocaleString()}\n` +
+          `EUR: ${(m2Total * EUR_PERCENTAGE).toLocaleString()}\n\n` +
+          `✅ ${isSpanish ? 'Guardado' : 'Saved'}`
+        );
+      } else {
+        console.log('[Banco Central] ⏸️ Procesamiento pausado, progreso guardado');
+      }
 
     } catch (error) {
       console.error('[Banco Central] ❌', error);
@@ -192,21 +248,27 @@ export function BancoCentralPrivadoModule() {
       alert(`❌ Error: ${error instanceof Error ? error.message : 'Unknown'}`);
     } finally {
       setAnalyzing(false);
+      processingRef.current = false;
     }
   };
 
   const handleClearAnalysis = () => {
     const confirmed = confirm(
-      `⚠️ ${isSpanish ? 'LIMPIAR ANÁLISIS' : 'CLEAR ANALYSIS'}\n\n` +
-      `${isSpanish ? '¿Eliminar los balances analizados y volver a cargar?' : 'Delete analyzed balances and reload?'}\n\n` +
-      `${isSpanish ? 'Esto restaurará los valores de auditoría por defecto.' : 'This will restore default audit values.'}`
+      `⚠️ ${isSpanish ? 'LIMPIAR ANÁLISIS Y PROGRESO' : 'CLEAR ANALYSIS AND PROGRESS'}\n\n` +
+      `${isSpanish ? '¿Eliminar los balances y el progreso guardado?' : 'Delete balances and saved progress?'}\n\n` +
+      `${isSpanish ? 'El próximo archivo empezará desde 0%' : 'Next file will start from 0%'}`
     );
 
     if (confirmed) {
-      // Limpiar localStorage
+      // ✅ Detener procesamiento si está activo
+      processingRef.current = false;
+
+      // Limpiar TODO de localStorage
       localStorage.removeItem('banco_central_usd_balance');
       localStorage.removeItem('banco_central_eur_balance');
       localStorage.removeItem('banco_central_analysis_results');
+      localStorage.removeItem('banco_central_last_offset');
+      localStorage.removeItem('banco_central_current_file');
 
       // Restaurar valores por defecto
       setUsdBalance(usdMasterBalance);
@@ -214,9 +276,11 @@ export function BancoCentralPrivadoModule() {
       setAnalysisResults(null);
       setProgress(0);
       setCurrentScannedAmount(0);
+      setLastProcessedOffset(0);
+      setCurrentFileName('');
 
-      alert(`✅ ${isSpanish ? 'Análisis limpiado. Puede cargar un nuevo archivo.' : 'Analysis cleared. You can load a new file.'}`);
-      console.log('[Banco Central] 🗑️ Análisis limpiado, balances restaurados a valores de auditoría');
+      alert(`✅ ${isSpanish ? 'Análisis limpiado. Puede cargar un nuevo archivo desde 0%.' : 'Analysis cleared. You can load a new file from 0%.'}`);
+      console.log('[Banco Central] 🗑️ TODO limpiado: balances, progreso y archivo');
     }
   };
 
