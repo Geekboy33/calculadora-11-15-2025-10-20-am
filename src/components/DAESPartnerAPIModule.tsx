@@ -6,8 +6,8 @@
 
 import { useState } from 'react';
 import { 
-  Globe, Key, Users, Wallet, Shield, Lock, Copy, Eye, EyeOff,
-  CheckCircle, AlertCircle, ArrowRight, Plus, RefreshCw, Download
+  Globe, Key, Users, Wallet, Shield, Copy, Eye, EyeOff,
+  CheckCircle, AlertCircle, ArrowRight, Plus, RefreshCw, Download, Clock
 } from 'lucide-react';
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingMetric, BankingBadge, BankingInput } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
@@ -336,7 +336,7 @@ PASO 3: CONSULTAR CUENTAS DEL CLIENTE
 ═══════════════════════════════════════════════════════════════════════════════
 
 Endpoint:   GET ${baseUrl}/clients/${client.clientId}/accounts
-Propósito:  Obtener todas las cuentas y sus balances
+${isSpanish ? 'Propósito:  Obtener todas las cuentas y sus balances' : 'Purpose:    Get all accounts and their balances'}
 
 Headers:
   Authorization: Bearer [ACCESS_TOKEN]
@@ -364,7 +364,7 @@ Response (200 OK):
   ]
 }
 
-Ejemplo en código:
+${isSpanish ? 'Ejemplo en código:' : 'Code example:'}
 \`\`\`typescript
 const getAccounts = async (accessToken: string) => {
   const response = await fetch('${baseUrl}/clients/${client.clientId}/accounts', {
@@ -491,7 +491,7 @@ PASO 5: CONSULTAR ESTADO DE TRANSFERENCIA
 ═══════════════════════════════════════════════════════════════════════════════
 
 Endpoint:   GET ${baseUrl}/transfers/[TRANSFER_REQUEST_ID]
-Propósito:  Verificar estado de una transferencia
+${isSpanish ? 'Propósito:  Verificar estado de una transferencia' : 'Purpose:    Check transfer status'}
 
 Headers:
   Authorization: Bearer [ACCESS_TOKEN]
@@ -515,14 +515,14 @@ Response (200 OK):
   }
 }
 
-Estados posibles:
-- PENDING: Esperando procesamiento
-- PROCESSING: En procesamiento
-- SETTLED: Completada exitosamente
-- REJECTED: Rechazada
-- FAILED: Falló
+${isSpanish ? 'Estados posibles:' : 'Possible states:'}
+- PENDING: ${isSpanish ? 'Esperando procesamiento' : 'Awaiting processing'}
+- PROCESSING: ${isSpanish ? 'En procesamiento' : 'Processing'}
+- SETTLED: ${isSpanish ? 'Completada exitosamente' : 'Successfully completed'}
+- REJECTED: ${isSpanish ? 'Rechazada' : 'Rejected'}
+- FAILED: ${isSpanish ? 'Falló' : 'Failed'}
 
-Ejemplo en código:
+${isSpanish ? 'Ejemplo en código:' : 'Code example:'}
 \`\`\`typescript
 const checkTransferStatus = async (
   accessToken: string,
@@ -613,7 +613,7 @@ class DAESPartnerAPIClient {
       return this.accessToken;
     }
 
-    // Solicitar nuevo token
+    // ${isSpanish ? 'Solicitar nuevo token' : 'Request new token'}
     const response = await fetch(\`\${this.config.baseUrl}/auth/token\`, {
       method: 'POST',
       headers: {
@@ -919,15 +919,15 @@ La API retorna errores en formato estándar:
   "timestamp": "2025-11-26T12:00:00.000Z"
 }
 
-Códigos de Error Comunes:
-- INVALID_CREDENTIALS: Credenciales incorrectas
-- EXPIRED_TOKEN: Token expirado (solicita uno nuevo)
-- INSUFFICIENT_BALANCE: Balance insuficiente
-- CURRENCY_NOT_ALLOWED: Divisa no permitida para este cliente
-- INVALID_AMOUNT: Monto inválido
-- DUPLICATE_TRANSFER_REQUEST: TransferRequestID duplicado
+${isSpanish ? 'Códigos de Error Comunes:' : 'Common Error Codes:'}
+- INVALID_CREDENTIALS: ${isSpanish ? 'Credenciales incorrectas' : 'Invalid credentials'}
+- EXPIRED_TOKEN: ${isSpanish ? 'Token expirado (solicita uno nuevo)' : 'Token expired (request a new one)'}
+- INSUFFICIENT_BALANCE: ${isSpanish ? 'Balance insuficiente' : 'Insufficient balance'}
+- CURRENCY_NOT_ALLOWED: ${isSpanish ? 'Divisa no permitida para este cliente' : 'Currency not allowed for this client'}
+- INVALID_AMOUNT: ${isSpanish ? 'Monto inválido' : 'Invalid amount'}
+- DUPLICATE_TRANSFER_REQUEST: ${isSpanish ? 'TransferRequestID duplicado' : 'Duplicate TransferRequestID'}
 
-Ejemplo de manejo:
+${isSpanish ? 'Ejemplo de manejo:' : 'Error handling example:'}
 \`\`\`typescript
 try {
   const result = await daesClient.createTransfer({...});
@@ -1163,33 +1163,33 @@ Certificaciones:
 ✓ PCI DSS Level 1 - Payment Card Industry Data Security
 ✓ GDPR Compliant - General Data Protection Regulation
 
-Seguridad:
+${isSpanish ? 'Seguridad:' : 'Security:'}
 ✓ TLS 1.3 encryption
-✓ SHA-256 hashing para secrets
-✓ JWT con HS256 algorithm
-✓ Rate limiting por partner
-✓ IP whitelisting (opcional)
-✓ 2FA para operaciones críticas (opcional)
+✓ SHA-256 hashing ${isSpanish ? 'para secrets' : 'for secrets'}
+✓ JWT ${isSpanish ? 'con' : 'with'} HS256 algorithm
+✓ Rate limiting ${isSpanish ? 'por partner' : 'per partner'}
+✓ IP whitelisting (${isSpanish ? 'opcional' : 'optional'})
+✓ 2FA ${isSpanish ? 'para operaciones críticas (opcional)' : 'for critical operations (optional)'}
 
-Auditoría:
-✓ Todas las operaciones son auditadas
-✓ Logs disponibles en el portal
-✓ Retención de logs: 7 años
-✓ Compliance reports disponibles
+${isSpanish ? 'Auditoría:' : 'Auditing:'}
+✓ ${isSpanish ? 'Todas las operaciones son auditadas' : 'All operations are audited'}
+✓ Logs ${isSpanish ? 'disponibles en el portal' : 'available in the portal'}
+✓ ${isSpanish ? 'Retención de logs: 7 años' : 'Log retention: 7 years'}
+✓ Compliance reports ${isSpanish ? 'disponibles' : 'available'}
 
 ═══════════════════════════════════════════════════════════════════════════════
-                        TÉRMINOS DE SERVICIO
+                        ${isSpanish ? 'TÉRMINOS DE SERVICIO' : 'TERMS OF SERVICE'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-1. Este documento y las credenciales son confidenciales
-2. Uso exclusivo para: ${client.legalName}
-3. No transferir ni compartir credenciales
-4. Reportar inmediatamente si hay compromiso de credenciales
-5. Cumplir con todas las regulaciones bancarias aplicables
-6. Digital Commercial Bank Ltd se reserva el derecho de suspender acceso
+1. ${isSpanish ? 'Este documento y las credenciales son confidenciales' : 'This document and credentials are confidential'}
+2. ${isSpanish ? 'Uso exclusivo para:' : 'Exclusive use for:'} ${client.legalName}
+3. ${isSpanish ? 'No transferir ni compartir credenciales' : 'Do not transfer or share credentials'}
+4. ${isSpanish ? 'Reportar inmediatamente si hay compromiso de credenciales' : 'Report immediately if credentials are compromised'}
+5. ${isSpanish ? 'Cumplir con todas las regulaciones bancarias aplicables' : 'Comply with all applicable banking regulations'}
+6. ${isSpanish ? 'Digital Commercial Bank Ltd se reserva el derecho de suspender acceso' : 'Digital Commercial Bank Ltd reserves the right to suspend access'}
 
-Aceptación:
-Al usar esta API, aceptas los términos completos en:
+${isSpanish ? 'Aceptación:' : 'Acceptance:'}
+${isSpanish ? 'Al usar esta API, aceptas los términos completos en:' : 'By using this API, you accept the complete terms at:'}
 https://luxliqdaes.cloud/terms
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -1205,17 +1205,17 @@ v1.0.0 (2025-11-26):
 
 ═══════════════════════════════════════════════════════════════════════════════
 
-Documento generado el: ${fmt.dateTime(new Date())}
-Versión de API: v1.0.0
-Cliente ID: ${client.clientId}
+${isSpanish ? 'Documento generado el:' : 'Document generated on:'} ${fmt.dateTime(new Date())}
+${isSpanish ? 'Versión de API:' : 'API Version:'} v1.0.0
+${isSpanish ? 'Cliente ID:' : 'Client ID:'} ${client.clientId}
 Partner: ${partner.name}
 
                     Digital Commercial Bank Ltd © 2025
                          www.digcommbank.com
-                      Todos los derechos reservados
+                      ${isSpanish ? 'Todos los derechos reservados' : 'All rights reserved'}
 
 ═══════════════════════════════════════════════════════════════════════════════
-                      FIN DE LA DOCUMENTACIÓN
+                      ${isSpanish ? 'FIN DE LA DOCUMENTACIÓN' : 'END OF DOCUMENTATION'}
 ═══════════════════════════════════════════════════════════════════════════════
 `;
 
