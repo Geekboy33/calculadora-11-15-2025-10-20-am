@@ -1,5 +1,13 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard } from 'lucide-react';
+import { 
+  CentralPanelIcon, 
+  PrivateCentralBankIcon, 
+  SourceOfFundsIcon, 
+  TheKingdomBankIcon, 
+  DAESPartnerAPIIcon,
+  ModuleIconWidget 
+} from './components/ui/ModuleIcons';
 import { LanguageSelector } from './components/LanguageSelector';
 import { Login } from './components/Login';
 import { PublicVerificationPage } from './components/PublicVerificationPage';
@@ -110,12 +118,21 @@ function App() {
     return <Login onLogin={login} />;
   }
 
+  // Módulos principales con iconos personalizados
+  const featuredModules = [
+    { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel' },
+    { id: 'banco-central-privado' as Tab, name: isSpanish ? 'Banco Central Privado' : 'Private Central Bank' },
+    { id: 'origen-fondos' as Tab, name: isSpanish ? 'Origen de Fondos' : 'Source of Funds' },
+    { id: 'the-kingdom-bank' as Tab, name: 'The Kingdom Bank' },
+    { id: 'daes-partner-api' as Tab, name: isSpanish ? 'APIs Partner DAES' : 'DAES Partner APIs' }
+  ];
+
   const tabs = [
-    { id: 'central-dashboard' as Tab, name: isSpanish ? '🏦 Panel Central' : '🏦 Central Panel', icon: Building2 },
-    { id: 'banco-central-privado' as Tab, name: isSpanish ? '🏛️ Banco Central Privado' : '🏛️ Private Central Bank', icon: Shield },
-    { id: 'origen-fondos' as Tab, name: isSpanish ? '🔍 Origen de Fondos' : '🔍 Source of Funds', icon: FileSearch },
-    { id: 'the-kingdom-bank' as Tab, name: isSpanish ? '👑 The Kingdom Bank' : '👑 The Kingdom Bank', icon: Key },
-    { id: 'daes-partner-api' as Tab, name: isSpanish ? '🌐 APIs Partner DAES' : '🌐 DAES Partner APIs', icon: Globe },
+    { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel', icon: Building2 },
+    { id: 'banco-central-privado' as Tab, name: isSpanish ? 'Banco Central Privado' : 'Private Central Bank', icon: Shield },
+    { id: 'origen-fondos' as Tab, name: isSpanish ? 'Origen de Fondos' : 'Source of Funds', icon: FileSearch },
+    { id: 'the-kingdom-bank' as Tab, name: 'The Kingdom Bank', icon: Key },
+    { id: 'daes-partner-api' as Tab, name: isSpanish ? 'APIs Partner DAES' : 'DAES Partner APIs', icon: Globe },
     { id: 'dashboard' as Tab, name: t.navDashboard, icon: LayoutDashboard },
     { id: 'analytics' as Tab, name: 'Analytics', icon: TrendingUp },
     { id: 'ledger' as Tab, name: t.navLedger, icon: BookOpen },
@@ -199,6 +216,34 @@ function App() {
               <span className="text-sm font-semibold">{t.logout}</span>
             </button>
           </div>
+          </div>
+        </div>
+
+        {/* Featured Modules - Widgets Personalizados */}
+        <div className="px-6 py-4 bg-gradient-to-b from-slate-950 to-slate-900 border-b border-slate-800 hidden lg:block">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3">
+              {isSpanish ? 'Módulos Principales' : 'Featured Modules'}
+            </span>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
+          </div>
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {featuredModules.map(module => (
+              <ModuleIconWidget
+                key={`${module.id}-${activeTab}`}
+                icon={
+                  module.id === 'central-dashboard' ? <CentralPanelIcon size={28} active={activeTab === module.id} /> :
+                  module.id === 'banco-central-privado' ? <PrivateCentralBankIcon size={28} active={activeTab === module.id} /> :
+                  module.id === 'origen-fondos' ? <SourceOfFundsIcon size={28} active={activeTab === module.id} /> :
+                  module.id === 'the-kingdom-bank' ? <TheKingdomBankIcon size={28} active={activeTab === module.id} /> :
+                  <DAESPartnerAPIIcon size={28} active={activeTab === module.id} />
+                }
+                label={module.name}
+                active={activeTab === module.id}
+                onClick={() => setActiveTab(module.id)}
+              />
+            ))}
           </div>
         </div>
 
