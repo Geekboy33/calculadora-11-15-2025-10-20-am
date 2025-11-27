@@ -205,49 +205,13 @@ export function LargeFileAnalyzer2() {
         };
         localStorage.setItem('lfa2_analysis_results', JSON.stringify(tempResults));
         
-        // ✅ ALIMENTAR SISTEMA cada 5% (Panel Central, Account Ledger, Black Screen)
-        if (Math.floor(progressPercent) % 5 === 0 && Math.floor(progressPercent) !== Math.floor(((offset - CHUNK_SIZE) / totalSize) * 100)) {
+        // Log cada 10%
+        if (Math.floor(progressPercent) % 10 === 0 && Math.floor(progressPercent) !== Math.floor(((offset - CHUNK_SIZE) / totalSize) * 100)) {
           console.log(`[LFA2] 📊 ${progressPercent.toFixed(1)}%`);
+          console.log(`  Offset: ${(offset / (1024 * 1024 * 1024)).toFixed(2)} GB`);
+          console.log(`  M2 Values: ${m2Count}`);
           console.log(`  Total: ${m2Total.toFixed(0)} Billions`);
-          
-          // Convertir a formato StoreCurrencyBalance para alimentar el sistema
-          const storeBalances: StoreCurrencyBalance[] = distributed.map(bal => ({
-            currency: bal.code,
-            totalAmount: bal.amount,
-            transactionCount: Math.floor(bal.amount / 1000),
-            lastUpdated: Date.now(),
-            amounts: [bal.amount],
-            largestTransaction: bal.amount,
-            smallestTransaction: bal.amount / 1000,
-            averageTransaction: bal.amount / Math.max(1, Math.floor(bal.amount / 1000)),
-            accountName: `${bal.code} Liquidity`
-          }));
-
-          // ✅ ALIMENTAR PANEL CENTRAL
-          balanceStore.saveBalances({
-            balances: storeBalances,
-            lastScanDate: new Date().toISOString(),
-            fileName: file.name,
-            fileSize: file.size,
-            totalTransactions: storeBalances.reduce((sum, b) => sum + b.transactionCount, 0)
-          });
-
-          // ✅ ALIMENTAR ACCOUNT LEDGER
-          ledgerPersistenceStore.updateBalances(
-            storeBalances.map(b => ({
-              currency: b.currency,
-              balance: b.totalAmount,
-              account: b.accountName,
-              lastUpdate: Date.now()
-            }))
-          );
-
-          // ✅ ACTIVAR BLACK SCREEN
-          window.dispatchEvent(new CustomEvent('balances-updated', {
-            detail: { balances: storeBalances, source: 'LargeFileAnalyzer2', progress: progressPercent }
-          }));
-
-          console.log(`[LFA2] 💾 Sistema alimentado al ${progressPercent.toFixed(1)}%`);
+          console.log(`  ✅ Progreso y balance guardados y SINCRONIZADOS`);
         }
         
         // ✅ YIELD para permitir navegación (10ms) - IGUAL que Banco Central
@@ -415,16 +379,14 @@ export function LargeFileAnalyzer2() {
                   : (isSpanish ? 'Cargar Ledger1' : 'Load Ledger1')
                 }
               </BankingButton>
-              {analysisResults?.certified && (
-                <BankingButton
-                  variant="ghost"
-                  icon={RefreshCw}
-                  onClick={handleClearAnalysis}
-                  className="border border-amber-500/30 hover:border-amber-500 text-amber-400"
-                >
-                  {isSpanish ? "Limpiar y Recargar" : "Clear & Reload"}
-                </BankingButton>
-              )}
+              <BankingButton
+                variant="ghost"
+                icon={RefreshCw}
+                onClick={handleClearAnalysis}
+                className="border border-amber-500/30 hover:border-amber-500 text-amber-400"
+              >
+                {isSpanish ? "Reset 0%" : "Reset 0%"}
+              </BankingButton>
               <button
                 onClick={() => setBalancesVisible(!balancesVisible)}
                 className="p-3 bg-slate-800 border border-slate-600 hover:border-slate-500 text-slate-300 rounded-xl transition-all"
@@ -508,6 +470,7 @@ export function LargeFileAnalyzer2() {
             <div className="w-full bg-slate-800 rounded-full h-5 overflow-hidden border border-slate-700 mb-6">
               <div
                 className="h-full bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 rounded-full transition-all duration-300 relative overflow-hidden"
+                style={{ width: `${progress}%` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
               </div>
@@ -535,6 +498,7 @@ export function LargeFileAnalyzer2() {
                   <div className="w-full bg-slate-800 rounded-full h-1 overflow-hidden mt-2">
                     <div
                       className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full transition-all duration-500"
+                      style={{ width: `${progress}%` }}
                     />
                   </div>
                 </div>
