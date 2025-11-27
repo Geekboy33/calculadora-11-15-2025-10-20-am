@@ -243,25 +243,25 @@ function App() {
         </div>
 
         <nav className="px-6 bg-[#0a0a0a] border-t border-[#1a1a1a] hidden lg:block">
-          <div className="flex gap-1 overflow-x-auto">
+          <div className="flex gap-1 overflow-x-auto scrollbar-hide">
             {tabs.map(tab => {
               const isActive = activeTab === tab.id;
-              const CustomIcon = getModuleIcon(tab.id, 18, isActive);
+              const CustomIcon = getModuleIcon(tab.id, 20, isActive);
 
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-3 font-medium transition-all relative ${
+                  className={`flex items-center gap-2.5 px-4 py-3 font-medium transition-all relative min-w-fit ${
                     isActive
                       ? 'text-[#00ffaa] text-shadow-[0_0_10px_rgba(0,255,136,0.8)]'
                       : 'text-[#4d7c4d] hover:text-[#80ff80]'
                   }`}
                 >
-                  <span className="flex items-center justify-center">
+                  <span className="flex items-center justify-center w-5 h-5 flex-shrink-0">
                     {CustomIcon}
                   </span>
-                  {tab.name}
+                  <span className="whitespace-nowrap">{tab.name}</span>
                   {isActive && (
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00ff88] shadow-[0_0_10px_rgba(0,255,136,0.8)]" />
                   )}
