@@ -55,20 +55,40 @@ export function OrigenDeFondosModule() {
   const [selectedBank, setSelectedBank] = useState<string>('ALL');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const processingRef = React.useRef(false);
+  const [lastProcessedOffset, setLastProcessedOffset] = useState(() => {
+    const saved = localStorage.getItem('origen_fondos_offset');
+    return saved ? parseInt(saved) : 0;
+  });
+  const [currentFileName, setCurrentFileName] = useState(() => {
+    return localStorage.getItem('origen_fondos_current_file') || '';
+  });
 
   // ✅ Guardar cuentas cuando cambien
   React.useEffect(() => {
     if (accounts.length > 0) {
       localStorage.setItem('origen_fondos_accounts', JSON.stringify(accounts));
-      console.log('[Origen Fondos] 💾 Cuentas guardadas:', accounts.length);
     }
   }, [accounts]);
 
-  // ✅ NO detener procesamiento al desmontar (igual que Private Central Bank)
+  // ✅ Guardar progreso
+  React.useEffect(() => {
+    if (lastProcessedOffset > 0) {
+      localStorage.setItem('origen_fondos_offset', lastProcessedOffset.toString());
+    }
+  }, [lastProcessedOffset]);
+
+  // ✅ NO detener procesamiento al desmontar
   React.useEffect(() => {
     return () => {
+      // ✅ CRÍTICO: NO detener processingRef
       // El procesamiento continúa en background
       console.log('[Origen Fondos] 💾 Componente desmontado, procesamiento continúa en background');
+      console.log('[Origen Fondos] 🔄 Detección de cuentas sigue activa');
+      
+      // Guardar estado actual
+      if (processingRef.current) {
+        localStorage.setItem('origen_fondos_processing', 'true');
+      }
     };
   }, []);
 
@@ -81,14 +101,36 @@ export function OrigenDeFondosModule() {
     setProgress(0);
 
     try {
+      const fileIdentifier = `${file.name}_${file.size}_${file.lastModified}`;
+      const isSameFile = currentFileName === fileIdentifier;
+
       console.log('[Origen Fondos] 📂 Analizando:', file.name);
       console.log('[Origen Fondos] 📊 Tamaño:', (file.size / (1024 * 1024)).toFixed(2), 'MB');
 
       const totalSize = file.size;
       const CHUNK_SIZE = 10 * 1024 * 1024;
-      let offset = 0;
-      const foundAccounts: BankAccount[] = [...accounts]; // Mantener cuentas existentes
+      
+      // ✅ CONTINUAR desde donde quedó si es el mismo archivo
+      let offset = isSameFile ? lastProcessedOffset : 0;
+      const foundAccounts: BankAccount[] = isSameFile ? [...accounts] : [];
       let accountIdCounter = 1;
+
+      if (isSameFile && offset > 0) {
+        const savedProgress = (offset / totalSize) * 100;
+        console.log(`[Origen Fondos] 🔄 Continuando desde ${savedProgress.toFixed(1)}%`);
+        console.log(`[Origen Fondos] 📊 Cuentas actuales: ${foundAccounts.length}`);
+        setProgress(savedProgress);
+        
+        alert(
+          `🔄 ${isSpanish ? 'CONTINUANDO DESDE' : 'RESUMING FROM'} ${savedProgress.toFixed(1)}%\n\n` +
+          `${isSpanish ? 'Cuentas detectadas:' : 'Detected accounts:'} ${foundAccounts.length}`
+        );
+      } else {
+        console.log('[Origen Fondos] 🆕 Nuevo archivo, iniciando desde 0%');
+        setProgress(0);
+        setCurrentFileName(fileIdentifier);
+        localStorage.setItem('origen_fondos_current_file', fileIdentifier);
+      }
 
       // ✅ TÉCNICA MEJORADA: Detección avanzada y creación en tiempo real
       const accountsMap = new Map<string, BankAccount>();
@@ -169,10 +211,16 @@ export function OrigenDeFondosModule() {
         const progressPercent = Math.min((offset / totalSize) * 100, 100);
         
         setProgress(progressPercent);
+        setLastProcessedOffset(offset); // ✅ Guardar offset para continuar
+        
+        // ✅ Guardar estado cada chunk
+        localStorage.setItem('origen_fondos_offset', offset.toString());
+        localStorage.setItem('origen_fondos_accounts', JSON.stringify(foundAccounts));
         
         // Log cada 10%
         if (Math.floor(progressPercent) % 10 === 0 && Math.floor(progressPercent) !== Math.floor(((offset - CHUNK_SIZE) / totalSize) * 100)) {
-          console.log(`[Origen Fondos] 📊 ${progressPercent.toFixed(0)}% - ${foundAccounts.length} cuentas detectadas`);
+          console.log(`[Origen Fondos] 📊 ${progressPercent.toFixed(0)}% - ${foundAccounts.length} cuentas`);
+          console.log(`[Origen Fondos] 💾 Progreso guardado: ${(offset / (1024 * 1024)).toFixed(0)} MB`);
         }
         
         await new Promise(r => setTimeout(r, 0));
@@ -264,16 +312,23 @@ ${idx + 1}. ${acc.bankName}
     );
     
     if (confirmed) {
-      // ✅ Detener procesamiento si está activo
+      // ✅ Detener procesamiento
       processingRef.current = false;
       
+      // ✅ Limpiar TODO de localStorage
       localStorage.removeItem('origen_fondos_accounts');
+      localStorage.removeItem('origen_fondos_offset');
+      localStorage.removeItem('origen_fondos_current_file');
+      localStorage.removeItem('origen_fondos_processing');
+      
       setAccounts([]);
       setProgress(0);
       setSelectedBank('ALL');
+      setLastProcessedOffset(0);
+      setCurrentFileName('');
       
-      alert(`✅ ${isSpanish ? 'Todo limpiado' : 'All cleared'}`);
-      console.log('[Origen Fondos] 🗑️ Todas las cuentas eliminadas y procesamiento detenido');
+      alert(`✅ ${isSpanish ? 'Todo limpiado. Puede cargar nuevo archivo desde 0%' : 'All cleared. Can load new file from 0%'}`);
+      console.log('[Origen Fondos] 🗑️ TODO limpiado: cuentas, progreso y offset');
     }
   };
 
