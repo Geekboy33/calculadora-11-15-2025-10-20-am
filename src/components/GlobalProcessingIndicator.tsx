@@ -55,7 +55,7 @@ export function GlobalProcessingIndicator() {
       case 'paused':
         return 'bg-yellow-600';
       case 'completed':
-        return 'bg-green-600';
+        return 'bg-white/20';
       case 'error':
         return 'bg-red-600';
       default:
@@ -111,7 +111,7 @@ export function GlobalProcessingIndicator() {
 
   return (
     <div className="fixed bottom-4 right-4 z-[9999] w-96 animate-fade-in">
-      <div className="bg-[#0d0d0d] border border-[#00ff88]/30 rounded-lg shadow-[0_0_20px_rgba(0,255,136,0.2)] overflow-hidden">
+      <div className="bg-[#0d0d0d] border border-[#ffffff]/30 rounded-lg shadow-[0_0_20px_rgba(255, 255, 255,0.2)] overflow-hidden">
         {/* Header */}
         <div className={`${getStatusColor()} px-4 py-3 flex items-center justify-between`}>
           <div className="flex items-center gap-2">
@@ -142,15 +142,15 @@ export function GlobalProcessingIndicator() {
         <div className="p-4 space-y-3">
           {/* Nombre del archivo */}
           <div>
-            <div className="text-xs text-[#80ff80] mb-1">{isSpanish ? 'Archivo:' : 'File:'}</div>
-            <div className="text-sm text-[#e0ffe0] font-mono truncate" title={processingState.fileName}>
+            <div className="text-xs text-[#ffffff] mb-1">{isSpanish ? 'Archivo:' : 'File:'}</div>
+            <div className="text-sm text-[#ffffff] font-mono truncate" title={processingState.fileName}>
               {processingState.fileName}
             </div>
           </div>
 
           {/* Barra de progreso */}
           <div>
-            <div className="flex justify-between text-xs text-[#80ff80] mb-2">
+            <div className="flex justify-between text-xs text-[#ffffff] mb-2">
               <span>{isSpanish ? 'Progreso' : 'Progress'}</span>
               <span className="font-semibold">{processingState.progress.toFixed(2)}%</span>
             </div>
@@ -158,10 +158,10 @@ export function GlobalProcessingIndicator() {
               <div
                 className={`h-full transition-all duration-300 ${
                   processingState.status === 'completed'
-                    ? 'bg-green-500'
+                    ? 'bg-white/20'
                     : processingState.status === 'error'
                     ? 'bg-red-500'
-                    : 'bg-[#00ff88]'
+                    : 'bg-[#ffffff]'
                 }`}
                 style={{ width: `${processingState.progress}%` }}
               />
@@ -171,26 +171,26 @@ export function GlobalProcessingIndicator() {
           {/* Estadísticas */}
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div>
-              <div className="text-[#4d7c4d]">{isSpanish ? 'Procesado:' : 'Processed:'}</div>
-              <div className="text-[#e0ffe0] font-semibold">
+              <div className="text-[#ffffff]">{isSpanish ? 'Procesado:' : 'Processed:'}</div>
+              <div className="text-[#ffffff] font-semibold">
                 {formatBytes(processingState.bytesProcessed)}
               </div>
             </div>
             <div>
-              <div className="text-[#4d7c4d]">{isSpanish ? 'Total:' : 'Total:'}</div>
-              <div className="text-[#e0ffe0] font-semibold">
+              <div className="text-[#ffffff]">{isSpanish ? 'Total:' : 'Total:'}</div>
+              <div className="text-[#ffffff] font-semibold">
                 {formatBytes(processingState.fileSize)}
               </div>
             </div>
             <div>
-              <div className="text-[#4d7c4d]">Chunk:</div>
-              <div className="text-[#e0ffe0] font-semibold">
+              <div className="text-[#ffffff]">Chunk:</div>
+              <div className="text-[#ffffff] font-semibold">
                 {processingState.chunkIndex} / {processingState.totalChunks}
               </div>
             </div>
             <div>
-              <div className="text-[#4d7c4d]">{isSpanish ? 'Monedas:' : 'Currencies:'}</div>
-              <div className="text-[#00ff88] font-semibold">
+              <div className="text-[#ffffff]">{isSpanish ? 'Monedas:' : 'Currencies:'}</div>
+              <div className="text-[#ffffff] font-semibold">
                 {processingState.balances.length}
               </div>
             </div>
@@ -198,7 +198,7 @@ export function GlobalProcessingIndicator() {
 
           {/* Estado de sincronización */}
           <div className="flex items-center justify-between text-xs">
-            <span className="text-[#4d7c4d]">
+            <span className="text-[#ffffff]">
               {isSpanish ? 'Última actualización:' : 'Last update:'} {formatTime(processingState.lastUpdateTime)}
             </span>
             {processingState.syncStatus === 'syncing' && (
@@ -208,7 +208,7 @@ export function GlobalProcessingIndicator() {
               </div>
             )}
             {processingState.syncStatus === 'synced' && processingState.lastSyncTime && (
-              <div className="flex items-center gap-1 text-green-400">
+              <div className="flex items-center gap-1 text-white">
                 <CheckCircle className="w-3 h-3" />
                 <span className="font-semibold">{isSpanish ? 'Guardado en nube' : 'Saved to cloud'}</span>
               </div>
@@ -249,14 +249,14 @@ export function GlobalProcessingIndicator() {
 
           {/* Mensaje de proceso activo */}
           {processingState.status === 'processing' && (
-            <div className="bg-[#00ff88]/10 border border-[#00ff88]/30 rounded p-3 text-center">
-              <p className="text-[#00ff88] text-xs font-semibold flex items-center justify-center gap-2">
+            <div className="bg-[#ffffff]/10 border border-[#ffffff]/30 rounded p-3 text-center">
+              <p className="text-[#ffffff] text-xs font-semibold flex items-center justify-center gap-2">
                 <Activity className="w-3 h-3 animate-spin" />
                 {isSpanish 
                   ? 'El archivo se está procesando en segundo plano'
                   : 'File is being processed in the background'}
               </p>
-              <p className="text-[#4d7c4d] text-xs mt-1">
+              <p className="text-[#ffffff] text-xs mt-1">
                 ✓ {isSpanish 
                   ? 'Puedes navegar libremente sin interrumpir la carga'
                   : 'You can navigate freely without interrupting the load'}
@@ -266,7 +266,7 @@ export function GlobalProcessingIndicator() {
 
           {/* Mensaje de éxito */}
           {processingState.status === 'completed' && (
-            <div className="bg-green-900/20 border border-green-500/30 rounded p-2 text-xs text-green-300">
+            <div className="bg-white/10/20 border border-white/30/30 rounded p-2 text-xs text-white">
               ✓ Procesamiento completado exitosamente
             </div>
           )}

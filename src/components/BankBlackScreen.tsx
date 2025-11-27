@@ -219,24 +219,24 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
   return (
     <div className="flex flex-col h-full bg-black overflow-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#0d0d0d] to-[#0a0a0a] border-b border-[#00ff88]/30 p-8 sticky top-0 z-10 shadow-[0_4px_20px_rgba(0,255,136,0.2)]">
+      <div className="bg-gradient-to-r from-[#0d0d0d] to-[#0a0a0a] border-b border-[#ffffff]/30 p-8 sticky top-0 z-10 shadow-[0_4px_20px_rgba(255, 255, 255,0.2)]">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#e0ffe0] mb-2 flex items-center gap-3">
-              <Shield className="w-10 h-10 text-[#00ff88] pulse-green" />
+            <h1 className="text-3xl font-bold text-[#ffffff] mb-2 flex items-center gap-3">
+              <Shield className="w-10 h-10 text-[#ffffff] pulse-green" />
               {t.blackScreenTitle}
             </h1>
-            <p className="text-[#80ff80]">
+            <p className="text-[#ffffff]">
               {t.blackScreenSubtitle}
             </p>
-            <p className="text-[#4d7c4d] text-sm mt-1">
+            <p className="text-[#ffffff] text-sm mt-1">
               MT799/MT999 Compliant • Digital Commercial Bank Ltd Verified • SWIFT Compatible
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="bg-[#00ff88]/20 border border-[#00ff88] px-4 py-2 rounded-lg">
-              <div className="text-xs text-[#80ff80]">{t.blackScreenAvailableAccounts}</div>
-              <div className="text-2xl font-bold text-[#00ff88]">{balances.length}</div>
+            <div className="bg-[#ffffff]/20 border border-[#ffffff] px-4 py-2 rounded-lg">
+              <div className="text-xs text-[#ffffff]">{t.blackScreenAvailableAccounts}</div>
+              <div className="text-2xl font-bold text-[#ffffff]">{balances.length}</div>
             </div>
           </div>
         </div>
@@ -246,9 +246,9 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
       <div className="p-6">
         {balances.length === 0 ? (
           <div className="glass-panel border-[#1a1a1a] rounded-xl p-12 text-center">
-            <Database className="w-16 h-16 text-[#4d7c4d] mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-[#80ff80] mb-2">{t.blackScreenNoBalances}</h3>
-            <p className="text-[#4d7c4d]">
+            <Database className="w-16 h-16 text-[#ffffff] mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-[#ffffff] mb-2">{t.blackScreenNoBalances}</h3>
+            <p className="text-[#ffffff]">
               {t.blackScreenUseAnalyzer}
             </p>
           </div>
@@ -259,35 +259,35 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
               return (
                 <div
                   key={balance.currency}
-                  className="glass-panel border-[#00ff88]/30 rounded-xl p-6 hover:border-[#00ff88] transition-all group"
+                  className="glass-panel border-[#ffffff]/30 rounded-xl p-6 hover:border-[#ffffff] transition-all group"
                 >
                   {/* Currency Header */}
                   <div className="flex items-center justify-between mb-4 pb-4 border-b border-[#1a1a1a]">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <Building2 className="w-5 h-5 text-[#00ff88]" />
-                        <h3 className="text-2xl font-bold text-[#e0ffe0]">{balance.currency}</h3>
+                        <Building2 className="w-5 h-5 text-[#ffffff]" />
+                        <h3 className="text-2xl font-bold text-[#ffffff]">{balance.currency}</h3>
                         {isMainCurrency && (
-                          <span className="bg-[#00ff88]/20 border border-[#00ff88] text-[#00ff88] px-2 py-0.5 rounded-full text-xs font-bold">
+                          <span className="bg-[#ffffff]/20 border border-[#ffffff] text-[#ffffff] px-2 py-0.5 rounded-full text-xs font-bold">
                             ★ {t.blackScreenPrincipal}
                           </span>
                         )}
                       </div>
-                      <p className="text-[#80ff80] text-sm">{getCurrencyName(balance.currency)}</p>
+                      <p className="text-[#ffffff] text-sm">{getCurrencyName(balance.currency)}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-[#4d7c4d] text-xs">{t.blackScreenAccount}</div>
-                      <div className="text-[#00ff88] font-mono text-lg font-bold">#{index + 1}</div>
+                      <div className="text-[#ffffff] text-xs">{t.blackScreenAccount}</div>
+                      <div className="text-[#ffffff] font-mono text-lg font-bold">#{index + 1}</div>
                     </div>
                   </div>
 
                   {/* Balance Display */}
                   <div className="mb-4 bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4">
-                    <p className="text-[#80ff80] text-xs mb-1 uppercase tracking-wide">{t.blackScreenTotalAvailable}</p>
-                    <p className="text-3xl font-black text-[#00ff88] mb-2">
+                    <p className="text-[#ffffff] text-xs mb-1 uppercase tracking-wide">{t.blackScreenTotalAvailable}</p>
+                    <p className="text-3xl font-black text-[#ffffff] mb-2">
                       {formatCurrency(balance.totalAmount, balance.currency)}
                     </p>
-                    <div className="flex items-center gap-4 text-xs text-[#4d7c4d]">
+                    <div className="flex items-center gap-4 text-xs text-[#ffffff]">
                       <span>🔄 {balance.transactionCount.toLocaleString()} txns</span>
                       <span>📅 {new Date(balance.lastUpdated).toLocaleDateString()}</span>
                     </div>
@@ -296,26 +296,26 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
                   {/* Quick Stats */}
                   <div className="grid grid-cols-2 gap-2 mb-4">
                     <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded p-2">
-                      <div className="text-[#4d7c4d] text-xs">M1 (Liquid)</div>
-                      <div className="text-[#80ff80] text-sm font-bold">
+                      <div className="text-[#ffffff] text-xs">M1 (Liquid)</div>
+                      <div className="text-[#ffffff] text-sm font-bold">
                         {formatCurrency(balance.totalAmount * 0.30, balance.currency)}
                       </div>
                     </div>
                     <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded p-2">
-                      <div className="text-[#4d7c4d] text-xs">M2 (Near)</div>
-                      <div className="text-[#80ff80] text-sm font-bold">
+                      <div className="text-[#ffffff] text-xs">M2 (Near)</div>
+                      <div className="text-[#ffffff] text-sm font-bold">
                         {formatCurrency(balance.totalAmount * 0.60, balance.currency)}
                       </div>
                     </div>
                     <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded p-2">
-                      <div className="text-[#4d7c4d] text-xs">M3 (Broad)</div>
-                      <div className="text-[#80ff80] text-sm font-bold">
+                      <div className="text-[#ffffff] text-xs">M3 (Broad)</div>
+                      <div className="text-[#ffffff] text-sm font-bold">
                         {formatCurrency(balance.totalAmount * 0.85, balance.currency)}
                       </div>
                     </div>
                     <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded p-2">
-                      <div className="text-[#4d7c4d] text-xs">M4 (Total)</div>
-                      <div className="text-[#00ff88] text-sm font-bold">
+                      <div className="text-[#ffffff] text-xs">M4 (Total)</div>
+                      <div className="text-[#ffffff] text-sm font-bold">
                         {formatCurrency(balance.totalAmount, balance.currency)}
                       </div>
                     </div>
@@ -324,7 +324,7 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
                   {/* Generate Black Screen Button */}
                   <button
                     onClick={() => handleGenerateBlackScreen(balance)}
-                    className="w-full bg-gradient-to-r from-[#00ff88] to-[#00cc6a] hover:from-[#00ffaa] hover:to-[#00ff88] text-black font-bold py-3 px-4 rounded-lg transition-all shadow-[0_0_20px_rgba(0,255,136,0.4)] hover:shadow-[0_0_30px_rgba(0,255,136,0.6)] flex items-center justify-center gap-2"
+                    className="w-full bg-gradient-to-r from-[#ffffff] to-[#e0e0e0] hover:from-[#ffffff] hover:to-[#ffffff] text-black font-bold py-3 px-4 rounded-lg transition-all shadow-[0_0_20px_rgba(255, 255, 255,0.4)] hover:shadow-[0_0_30px_rgba(255, 255, 255,0.6)] flex items-center justify-center gap-2"
                   >
                     <FileText className="w-5 h-5" />
                     {t.blackScreenGenerate}
@@ -341,22 +341,22 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
         <div className="fixed inset-0 bg-black/95 z-50 overflow-auto">
           <div className="min-h-screen p-8">
             {/* Controls */}
-            <div className="max-w-5xl mx-auto mb-4 flex items-center justify-between bg-[#0d0d0d] border border-[#00ff88] rounded-lg p-4">
+            <div className="max-w-5xl mx-auto mb-4 flex items-center justify-between bg-[#0d0d0d] border border-[#ffffff] rounded-lg p-4">
               <div className="flex items-center gap-3">
-                <Lock className="w-5 h-5 text-[#00ff88]" />
-                <span className="text-[#00ff88] font-bold">{t.blackScreenConfidential}</span>
+                <Lock className="w-5 h-5 text-[#ffffff]" />
+                <span className="text-[#ffffff] font-bold">{t.blackScreenConfidential}</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleDownload}
-                  className="bg-[#0d0d0d] border border-[#00ff88] hover:bg-[#00ff88]/20 text-[#00ff88] px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+                  className="bg-[#0d0d0d] border border-[#ffffff] hover:bg-[#ffffff]/20 text-[#ffffff] px-4 py-2 rounded-lg transition-all flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
                   {t.blackScreenDownloadTxt}
                 </button>
                 <button
                   onClick={handlePrint}
-                  className="bg-[#0d0d0d] border border-[#00ff88] hover:bg-[#00ff88]/20 text-[#00ff88] px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+                  className="bg-[#0d0d0d] border border-[#ffffff] hover:bg-[#ffffff]/20 text-[#ffffff] px-4 py-2 rounded-lg transition-all flex items-center gap-2"
                 >
                   <Printer className="w-4 h-4" />
                   {t.blackScreenPrint}
@@ -372,14 +372,14 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
             </div>
 
             {/* Black Screen Content */}
-            <div ref={blackScreenRef} className="max-w-5xl mx-auto bg-black border-4 border-[#00ff88] rounded-xl p-8 font-mono shadow-[0_0_50px_rgba(0,255,136,0.5)]">
+            <div ref={blackScreenRef} className="max-w-5xl mx-auto bg-black border-4 border-[#ffffff] rounded-xl p-8 font-mono shadow-[0_0_50px_rgba(255, 255, 255,0.5)]">
               {/* Header */}
-              <div className="text-center mb-8 border-b-2 border-[#00ff88] pb-6">
-                <div className="text-[#00ff88] text-sm mb-2">═══════════════════════════════════════════════════════════════</div>
-                <h1 className="text-3xl font-bold text-[#00ff88] mb-2">{t.blackScreenBankConfirmation.split(' - ')[0]}</h1>
-                <h2 className="text-xl text-[#00ff88] mb-2">{t.blackScreenBankConfirmation.split(' - ')[1]}</h2>
-                <h3 className="text-lg text-[#00ff88]">{t.blackScreenXcpBank}</h3>
-                <div className="text-[#00ff88] text-sm mt-2">═══════════════════════════════════════════════════════════════</div>
+              <div className="text-center mb-8 border-b-2 border-[#ffffff] pb-6">
+                <div className="text-[#ffffff] text-sm mb-2">═══════════════════════════════════════════════════════════════</div>
+                <h1 className="text-3xl font-bold text-[#ffffff] mb-2">{t.blackScreenBankConfirmation.split(' - ')[0]}</h1>
+                <h2 className="text-xl text-[#ffffff] mb-2">{t.blackScreenBankConfirmation.split(' - ')[1]}</h2>
+                <h3 className="text-lg text-[#ffffff]">{t.blackScreenXcpBank}</h3>
+                <div className="text-[#ffffff] text-sm mt-2">═══════════════════════════════════════════════════════════════</div>
                 <div className="mt-4 flex items-center justify-center gap-2 text-red-400 text-sm">
                   <AlertTriangle className="w-4 h-4" />
                   <span>{t.blackScreenDocumentConfidential}</span>
@@ -388,118 +388,118 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
               </div>
 
               {/* Beneficiary Information */}
-              <div className="mb-6 bg-[#0d0d0d] border border-[#00ff88] rounded-lg p-6">
-                <h3 className="text-[#00ff88] text-lg font-bold mb-4 flex items-center gap-2">
+              <div className="mb-6 bg-[#0d0d0d] border border-[#ffffff] rounded-lg p-6">
+                <h3 className="text-[#ffffff] text-lg font-bold mb-4 flex items-center gap-2">
                   <Building2 className="w-5 h-5" />
                   {t.blackScreenBeneficiaryInfo}
                 </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenHolder}:</span>
-                    <div className="text-[#e0ffe0] font-bold">{blackScreenData.beneficiaryName}</div>
+                    <span className="text-[#ffffff]">{t.blackScreenHolder}:</span>
+                    <div className="text-[#ffffff] font-bold">{blackScreenData.beneficiaryName}</div>
                   </div>
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenAccount}:</span>
-                    <div className="text-[#e0ffe0] font-bold">{blackScreenData.accountNumber}</div>
+                    <span className="text-[#ffffff]">{t.blackScreenAccount}:</span>
+                    <div className="text-[#ffffff] font-bold">{blackScreenData.accountNumber}</div>
                   </div>
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenBank}:</span>
-                    <div className="text-[#e0ffe0] font-bold">{blackScreenData.beneficiaryBank}</div>
+                    <span className="text-[#ffffff]">{t.blackScreenBank}:</span>
+                    <div className="text-[#ffffff] font-bold">{blackScreenData.beneficiaryBank}</div>
                   </div>
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenSwift}:</span>
-                    <div className="text-[#e0ffe0] font-bold">{blackScreenData.swiftCode}</div>
+                    <span className="text-[#ffffff]">{t.blackScreenSwift}:</span>
+                    <div className="text-[#ffffff] font-bold">{blackScreenData.swiftCode}</div>
                   </div>
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenRoutingNumber}:</span>
-                    <div className="text-[#e0ffe0] font-bold">{blackScreenData.routingNumber}</div>
+                    <span className="text-[#ffffff]">{t.blackScreenRoutingNumber}:</span>
+                    <div className="text-[#ffffff] font-bold">{blackScreenData.routingNumber}</div>
                   </div>
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenCurrency}:</span>
-                    <div className="text-[#e0ffe0] font-bold">{blackScreenData.currency} ({getCurrencyName(blackScreenData.currency)})</div>
+                    <span className="text-[#ffffff]">{t.blackScreenCurrency}:</span>
+                    <div className="text-[#ffffff] font-bold">{blackScreenData.currency} ({getCurrencyName(blackScreenData.currency)})</div>
                   </div>
                 </div>
               </div>
 
               {/* Monetary Aggregates */}
-              <div className="mb-6 bg-[#0d0d0d] border border-[#00ff88] rounded-lg p-6">
-                <h3 className="text-[#00ff88] text-lg font-bold mb-4 flex items-center gap-2">
+              <div className="mb-6 bg-[#0d0d0d] border border-[#ffffff] rounded-lg p-6">
+                <h3 className="text-[#ffffff] text-lg font-bold mb-4 flex items-center gap-2">
                   <DollarSign className="w-5 h-5" />
                   {t.blackScreenMonetaryAggregates}
                 </h3>
                 
                 <div className="space-y-4">
-                  <div className="border-l-4 border-[#00ff88] pl-4">
+                  <div className="border-l-4 border-[#ffffff] pl-4">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[#00ff88] font-bold">{t.blackScreenM1Liquid}</span>
-                      <span className="text-[#e0ffe0] font-bold text-xl">{formatCurrency(blackScreenData.balanceM1, blackScreenData.currency)}</span>
+                      <span className="text-[#ffffff] font-bold">{t.blackScreenM1Liquid}</span>
+                      <span className="text-[#ffffff] font-bold text-xl">{formatCurrency(blackScreenData.balanceM1, blackScreenData.currency)}</span>
                     </div>
-                    <div className="text-[#80ff80] text-xs">└─ {t.blackScreenM1Description}</div>
+                    <div className="text-[#ffffff] text-xs">└─ {t.blackScreenM1Description}</div>
                   </div>
 
-                  <div className="border-l-4 border-[#00ff88] pl-4">
+                  <div className="border-l-4 border-[#ffffff] pl-4">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[#00ff88] font-bold">{t.blackScreenM2Near}</span>
-                      <span className="text-[#e0ffe0] font-bold text-xl">{formatCurrency(blackScreenData.balanceM2, blackScreenData.currency)}</span>
+                      <span className="text-[#ffffff] font-bold">{t.blackScreenM2Near}</span>
+                      <span className="text-[#ffffff] font-bold text-xl">{formatCurrency(blackScreenData.balanceM2, blackScreenData.currency)}</span>
                     </div>
-                    <div className="text-[#80ff80] text-xs">└─ {t.blackScreenM2Description}</div>
+                    <div className="text-[#ffffff] text-xs">└─ {t.blackScreenM2Description}</div>
                   </div>
 
-                  <div className="border-l-4 border-[#00ff88] pl-4">
+                  <div className="border-l-4 border-[#ffffff] pl-4">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[#00ff88] font-bold">{t.blackScreenM3Broad}</span>
-                      <span className="text-[#e0ffe0] font-bold text-xl">{formatCurrency(blackScreenData.balanceM3, blackScreenData.currency)}</span>
+                      <span className="text-[#ffffff] font-bold">{t.blackScreenM3Broad}</span>
+                      <span className="text-[#ffffff] font-bold text-xl">{formatCurrency(blackScreenData.balanceM3, blackScreenData.currency)}</span>
                     </div>
-                    <div className="text-[#80ff80] text-xs">└─ {t.blackScreenM3Description}</div>
+                    <div className="text-[#ffffff] text-xs">└─ {t.blackScreenM3Description}</div>
                   </div>
 
-                  <div className="border-l-4 border-[#39ff14] pl-4 bg-[#00ff88]/10 p-3 rounded">
+                  <div className="border-l-4 border-[#39ff14] pl-4 bg-[#ffffff]/10 p-3 rounded">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[#39ff14] font-bold text-lg">{t.blackScreenM4Total}</span>
-                      <span className="text-[#e0ffe0] font-bold text-2xl">{formatCurrency(blackScreenData.balanceM4, blackScreenData.currency)}</span>
+                      <span className="text-[#ffffff] font-bold text-2xl">{formatCurrency(blackScreenData.balanceM4, blackScreenData.currency)}</span>
                     </div>
-                    <div className="text-[#80ff80] text-xs">└─ {t.blackScreenM4Description}</div>
+                    <div className="text-[#ffffff] text-xs">└─ {t.blackScreenM4Description}</div>
                   </div>
 
-                  <div className="border-t-2 border-[#00ff88] pt-4 mt-4">
+                  <div className="border-t-2 border-[#ffffff] pt-4 mt-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-[#00ff88] font-bold text-xl">{t.blackScreenVerifiedBalance}:</span>
-                      <span className="text-[#00ff88] font-bold text-3xl">{formatCurrency(blackScreenData.totalLiquid, blackScreenData.currency)}</span>
+                      <span className="text-[#ffffff] font-bold text-xl">{t.blackScreenVerifiedBalance}:</span>
+                      <span className="text-[#ffffff] font-bold text-3xl">{formatCurrency(blackScreenData.totalLiquid, blackScreenData.currency)}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Technical Information */}
-              <div className="mb-6 bg-[#0d0d0d] border border-[#00ff88] rounded-lg p-6">
-                <h3 className="text-[#00ff88] text-lg font-bold mb-4 flex items-center gap-2">
+              <div className="mb-6 bg-[#0d0d0d] border border-[#ffffff] rounded-lg p-6">
+                <h3 className="text-[#ffffff] text-lg font-bold mb-4 flex items-center gap-2">
                   <Database className="w-5 h-5" />
                   {t.blackScreenTechnicalInfo}
                 </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenDtcReference}:</span>
-                    <div className="text-[#e0ffe0] font-mono font-bold">{blackScreenData.DTC1BReference}</div>
+                    <span className="text-[#ffffff]">{t.blackScreenDtcReference}:</span>
+                    <div className="text-[#ffffff] font-mono font-bold">{blackScreenData.DTC1BReference}</div>
                   </div>
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenVerificationHash}:</span>
-                    <div className="text-[#e0ffe0] font-mono font-bold">{blackScreenData.verificationHash}</div>
+                    <span className="text-[#ffffff]">{t.blackScreenVerificationHash}:</span>
+                    <div className="text-[#ffffff] font-mono font-bold">{blackScreenData.verificationHash}</div>
                   </div>
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenTransactionsProcessed}:</span>
-                    <div className="text-[#e0ffe0] font-bold">{blackScreenData.transactionCount.toLocaleString()}</div>
+                    <span className="text-[#ffffff]">{t.blackScreenTransactionsProcessed}:</span>
+                    <div className="text-[#ffffff] font-bold">{blackScreenData.transactionCount.toLocaleString()}</div>
                   </div>
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenIssueDate}:</span>
-                    <div className="text-[#e0ffe0] font-bold">{blackScreenData.issueDate.toLocaleString()}</div>
+                    <span className="text-[#ffffff]">{t.blackScreenIssueDate}:</span>
+                    <div className="text-[#ffffff] font-bold">{blackScreenData.issueDate.toLocaleString()}</div>
                   </div>
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenExpiryDate}:</span>
-                    <div className="text-[#e0ffe0] font-bold">{blackScreenData.expiryDate.toLocaleString()}</div>
+                    <span className="text-[#ffffff]">{t.blackScreenExpiryDate}:</span>
+                    <div className="text-[#ffffff] font-bold">{blackScreenData.expiryDate.toLocaleString()}</div>
                   </div>
                   <div>
-                    <span className="text-[#80ff80]">{t.blackScreenVerificationStatus}:</span>
-                    <div className="text-[#00ff88] font-bold flex items-center gap-2">
+                    <span className="text-[#ffffff]">{t.blackScreenVerificationStatus}:</span>
+                    <div className="text-[#ffffff] font-bold flex items-center gap-2">
                       <CheckCircle className="w-4 h-4" />
                       {t.blackScreenVerified} ✓
                     </div>
@@ -508,35 +508,35 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
               </div>
 
               {/* Certification */}
-              <div className="bg-[#0d0d0d] border-2 border-[#00ff88] rounded-lg p-6">
-                <h3 className="text-[#00ff88] text-lg font-bold mb-4 flex items-center gap-2">
+              <div className="bg-[#0d0d0d] border-2 border-[#ffffff] rounded-lg p-6">
+                <h3 className="text-[#ffffff] text-lg font-bold mb-4 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5" />
                   {t.blackScreenCertification}
                 </h3>
-                <div className="text-[#80ff80] text-sm space-y-3">
+                <div className="text-[#ffffff] text-sm space-y-3">
                   <p>
                     {t.blackScreenCertificationText}
                   </p>
-                  <p className="text-[#e0ffe0]">
+                  <p className="text-[#ffffff]">
                     {t.blackScreenCertificationStandards}
                   </p>
-                  <div className="border-t border-[#00ff88] pt-3 mt-4">
+                  <div className="border-t border-[#ffffff] pt-3 mt-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-[#80ff80]">{t.blackScreenDigitallySigned}:</span>
-                      <span className="text-[#e0ffe0] font-mono">{new Date().toISOString()}</span>
+                      <span className="text-[#ffffff]">{t.blackScreenDigitallySigned}:</span>
+                      <span className="text-[#ffffff] font-mono">{new Date().toISOString()}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="mt-8 border-t-2 border-[#00ff88] pt-6 text-center">
-                <div className="text-[#00ff88] text-sm">═══════════════════════════════════════════════════════════════</div>
-                <div className="text-[#80ff80] text-sm my-2">
+              <div className="mt-8 border-t-2 border-[#ffffff] pt-6 text-center">
+                <div className="text-[#ffffff] text-sm">═══════════════════════════════════════════════════════════════</div>
+                <div className="text-[#ffffff] text-sm my-2">
                   {t.blackScreenGeneratedBy} {t.headerTitle}
                 </div>
-                <div className="text-[#00ff88] font-bold">{t.blackScreenCopyright}</div>
-                <div className="text-[#00ff88] text-sm mt-2">═══════════════════════════════════════════════════════════════</div>
+                <div className="text-[#ffffff] font-bold">{t.blackScreenCopyright}</div>
+                <div className="text-[#ffffff] text-sm mt-2">═══════════════════════════════════════════════════════════════</div>
               </div>
             </div>
           </div>

@@ -918,7 +918,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETED': return 'bg-green-500/20 text-green-300 border-green-500/40';
+      case 'COMPLETED': return 'bg-white/20/20 text-white border-white/30/40';
       case 'PENDING': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40';
       case 'SENT': return 'bg-blue-500/20 text-blue-300 border-blue-500/40';
       case 'FAILED': return 'bg-red-500/20 text-red-300 border-red-500/40';
@@ -949,7 +949,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
       <div className="flex flex-col gap-2 mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Building2 className="w-8 h-8 text-[#00ff88]" />
+            <Building2 className="w-8 h-8 text-[#ffffff]" />
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
                 {isSpanish ? 'Liquidaciones Bancarias' : 'Bank Settlements'}
@@ -969,14 +969,14 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
             </button>
             <button
               onClick={downloadReport}
-              className="flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-400/30 rounded-xl text-green-300 hover:bg-green-500/20 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-white/20/10 border border-white/30/30 rounded-xl text-white hover:bg-white/20/20 transition"
             >
               <Download className="w-4 h-4" />
               {isSpanish ? 'Descargar reporte' : 'Download report'}
             </button>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-6 py-2 bg-[#00ff88]/20 border border-[#00ff88]/40 text-[#00ff88] rounded-xl font-semibold hover:bg-[#00ff88]/30 transition"
+              className="flex items-center gap-2 px-6 py-2 bg-[#ffffff]/20 border border-[#ffffff]/40 text-[#ffffff] rounded-xl font-semibold hover:bg-[#ffffff]/30 transition"
             >
               <Send className="w-5 h-5" />
               {isSpanish ? 'Nueva liquidación' : 'New settlement'}
@@ -1003,17 +1003,17 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
         </div>
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-2">
-            <CheckCircle className="w-5 h-5 text-green-300" />
+            <CheckCircle className="w-5 h-5 text-white" />
             <span className="text-sm text-white/60">{isSpanish ? 'Completados' : 'Completed'}</span>
           </div>
-          <p className="text-3xl font-bold text-green-300">{stats.completed}</p>
+          <p className="text-3xl font-bold text-white">{stats.completed}</p>
         </div>
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-2">
-            <TrendingDown className="w-5 h-5 text-[#00ff88]" />
+            <TrendingDown className="w-5 h-5 text-[#ffffff]" />
             <span className="text-sm text-white/60">{isSpanish ? 'Total enviado' : 'Total sent'}</span>
           </div>
-          <p className="text-2xl font-bold text-[#00ff88]">USD {stats.totalAmount.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-[#ffffff]">USD {stats.totalAmount.toLocaleString()}</p>
         </div>
       </div>
 
@@ -1035,7 +1035,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
             {settlements.map(settlement => (
               <div
                 key={settlement.id}
-                className="bg-black/40 border border-white/10 rounded-xl p-5 hover:border-[#00ff88]/30 transition"
+                className="bg-black/40 border border-white/10 rounded-xl p-5 hover:border-[#ffffff]/30 transition"
               >
                 <div className="flex flex-wrap gap-4 justify-between items-start mb-3">
                   <div className="flex-1">
@@ -1049,7 +1049,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                     <div className="grid md:grid-cols-2 gap-x-6 gap-y-2 text-sm">
                       <div>
                         <span className="text-white/50">{isSpanish ? 'Monto:' : 'Amount:'}</span>
-                        <span className="text-[#00ff88] font-semibold ml-2">
+                        <span className="text-[#ffffff] font-semibold ml-2">
                           {settlement.currency} {parseFloat(settlement.amount).toLocaleString()}
                         </span>
                       </div>
@@ -1096,7 +1096,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                     )}
                     <button
                       onClick={() => handleDownloadReceipt(settlement)}
-                      className="px-4 py-2 rounded-xl bg-green-500/10 border border-green-400/30 text-green-300 text-sm font-semibold hover:bg-green-500/20 transition flex items-center gap-2"
+                      className="px-4 py-2 rounded-xl bg-white/20/10 border border-white/30/30 text-white text-sm font-semibold hover:bg-white/20/20 transition flex items-center gap-2"
                     >
                       <FileText className="w-4 h-4" />
                       {isSpanish ? 'Descargar comprobante' : 'Download receipt'}
@@ -1133,9 +1133,9 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
       {/* Modal de creación */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowCreateModal(false)}>
-          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-[#00ff88]/30 rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-[#ffffff]/30 rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-6 sticky top-0 bg-gradient-to-br from-[#0a0f1c] to-[#000] pb-4 z-10">
-              <Send className="w-6 h-6 text-[#00ff88]" />
+              <Send className="w-6 h-6 text-[#ffffff]" />
               <h2 className="text-2xl font-bold">
                 {isSpanish ? 'Nueva instrucción de liquidación' : 'New settlement instruction'}
               </h2>
@@ -1186,7 +1186,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       setSelectedCustodyAccount(null);
                     }
                   }}
-                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40 font-mono text-sm"
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff]/40 font-mono text-sm"
                   required
                 >
                   <option value="">
@@ -1215,7 +1215,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       <p><span className="text-white/50">IBAN:</span> <span className="text-cyan-300 font-mono text-xs">{selectedSourceIban.ibanFormatted}</span></p>
                       <p><span className="text-white/50">{isSpanish ? 'Banco:' : 'Bank:'}</span> DIGITAL COMMERCIAL BANK LTD</p>
                       <p><span className="text-white/50">{isSpanish ? 'Dirección:' : 'Address:'}</span> B2B Tower, Dubai, UAE</p>
-                      <p><span className="text-white/50">{isSpanish ? 'Moneda:' : 'Currency:'}</span> <span className="text-[#00ff88] font-semibold">{selectedSourceIban.currency}</span></p>
+                      <p><span className="text-white/50">{isSpanish ? 'Moneda:' : 'Currency:'}</span> <span className="text-[#ffffff] font-semibold">{selectedSourceIban.currency}</span></p>
                     </div>
                   </div>
                 )}
@@ -1240,7 +1240,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       <span className="text-white/50 text-xs uppercase tracking-wider block mb-1">
                         {isSpanish ? 'Disponible' : 'Available'}
                       </span>
-                      <p className="text-[#00ff88] font-bold text-lg">
+                      <p className="text-[#ffffff] font-bold text-lg">
                         {selectedCustodyAccount.currency} {selectedCustodyAccount.availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
@@ -1283,7 +1283,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                     const numValue = value === '' ? 0 : parseFloat(value);
                     setCreateForm({ ...createForm, amount: isNaN(numValue) ? 0 : numValue });
                   }}
-                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#ffffff]/40"
                   placeholder="1000000.00"
                   min="0.01"
                   step="0.01"
@@ -1305,7 +1305,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                     </div>
                     <div className="flex justify-between items-center text-sm pt-2 border-t border-white/10">
                       <span className="text-white/70 font-semibold">{isSpanish ? 'Nuevo balance disponible:' : 'New available balance:'}</span>
-                      <span className={`font-bold text-lg ${selectedCustodyAccount.availableBalance - createForm.amount >= 0 ? 'text-[#00ff88]' : 'text-red-400'}`}>
+                      <span className={`font-bold text-lg ${selectedCustodyAccount.availableBalance - createForm.amount >= 0 ? 'text-[#ffffff]' : 'text-red-400'}`}>
                         {selectedCustodyAccount.currency} {(selectedCustodyAccount.availableBalance - createForm.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
@@ -1421,7 +1421,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       </div>
                       <div>
                         <span className="text-white/50 text-xs">{isSpanish ? 'Moneda:' : 'Currency:'}</span>
-                        <p className="text-green-300 font-semibold">{selectedDestinationBeneficiary.currency}</p>
+                        <p className="text-white font-semibold">{selectedDestinationBeneficiary.currency}</p>
                       </div>
                       <div className="col-span-2">
                         <span className="text-white/50 text-xs">IBAN:</span>
@@ -1450,15 +1450,15 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                   type="text"
                   value={createForm.reference}
                   onChange={e => setCreateForm({ ...createForm, reference: e.target.value })}
-                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff]/40"
                   placeholder={isSpanish ? 'Liquidación mensual Nov 2025' : 'Monthly settlement Nov 2025'}
                   maxLength={140}
                 />
               </div>
 
               {selectedSourceIban && createForm.destinationBeneficiaryId && (
-                <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-4 text-sm">
-                  <p className="text-green-300 font-semibold mb-2 flex items-center gap-2">
+                <div className="bg-white/20/10 border border-white/30/30 rounded-xl p-4 text-sm">
+                  <p className="text-white font-semibold mb-2 flex items-center gap-2">
                     <Building2 className="w-4 h-4" />
                     {isSpanish ? 'Transferencia:' : 'Transfer:'}
                   </p>
@@ -1468,7 +1468,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       <p className="text-white font-semibold text-sm">DIGITAL COMMERCIAL BANK LTD</p>
                       <p className="text-white/60 text-xs">B2B Tower, Dubai, UAE</p>
                       <p className="text-cyan-300 font-mono text-[11px] mt-2">{selectedSourceIban.ibanFormatted}</p>
-                      <p className="text-[#00ff88] font-semibold text-xs mt-1">{selectedSourceIban.currency}</p>
+                      <p className="text-[#ffffff] font-semibold text-xs mt-1">{selectedSourceIban.currency}</p>
                     </div>
                     <div className="bg-black/30 rounded-lg p-3">
                       <p className="text-white/50 text-xs uppercase mb-1">{isSpanish ? 'Hacia' : 'To'}</p>
@@ -1479,10 +1479,10 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                         {selectedDestinationBeneficiary?.bankName || 'EMIRATES NBD'}, {selectedDestinationBeneficiary?.bankAddress?.split(',')[0] || 'Dubai'}
                       </p>
                       <p className="text-cyan-300 font-mono text-[11px] mt-2">{createForm.destinationIban.replace(/(.{4})/g, '$1 ').trim()}</p>
-                      <p className="text-[#00ff88] font-semibold text-xs mt-1">{createForm.currency}</p>
+                      <p className="text-[#ffffff] font-semibold text-xs mt-1">{createForm.currency}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-green-200/60 mt-3">
+                  <p className="text-xs text-white/60 mt-3">
                     {isSpanish 
                       ? '✓ Transferencia entre cuentas IBAN verificadas'
                       : '✓ Transfer between verified IBAN accounts'}
@@ -1507,7 +1507,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                 <button
                   onClick={handleCreateSettlement}
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 bg-[#00ff88]/20 border border-[#00ff88]/60 text-[#00ff88] rounded-xl py-3 font-semibold hover:bg-[#00ff88]/30 transition disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#ffffff]/20 border border-[#ffffff]/60 text-[#ffffff] rounded-xl py-3 font-semibold hover:bg-[#ffffff]/30 transition disabled:opacity-50"
                 >
                   <Send className="w-5 h-5" />
                   {loading ? (isSpanish ? 'Creando...' : 'Creating...') : (isSpanish ? 'Crear instrucción' : 'Create instruction')}
@@ -1563,7 +1563,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       className={`px-4 py-3 rounded-xl font-semibold transition ${
                         confirmForm.status === status
                           ? status === 'COMPLETED'
-                            ? 'bg-green-500/20 border-2 border-green-400/60 text-green-300'
+                            ? 'bg-white/20/20 border-2 border-white/30/60 text-white'
                             : status === 'FAILED'
                             ? 'bg-red-500/20 border-2 border-red-400/60 text-red-300'
                             : 'bg-blue-500/20 border-2 border-blue-400/60 text-blue-300'
@@ -1670,7 +1670,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                     <div className="flex items-center gap-2 text-sm mt-2">
                       <span className="px-2 py-1 rounded bg-white/10 text-white/70">{log.previousStatus}</span>
                       <span className="text-white/40">→</span>
-                      <span className="px-2 py-1 rounded bg-[#00ff88]/20 text-[#00ff88]">{log.newStatus}</span>
+                      <span className="px-2 py-1 rounded bg-[#ffffff]/20 text-[#ffffff]">{log.newStatus}</span>
                     </div>
                   )}
                 </div>
@@ -1784,7 +1784,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       onClick={() => setNewBeneficiaryForm({ ...newBeneficiaryForm, currency: curr })}
                       className={`px-4 py-3 rounded-xl font-semibold transition ${
                         newBeneficiaryForm.currency === curr
-                          ? 'bg-green-500/20 border-2 border-green-400/60 text-green-300'
+                          ? 'bg-white/20/20 border-2 border-white/30/60 text-white'
                           : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
                       }`}
                     >

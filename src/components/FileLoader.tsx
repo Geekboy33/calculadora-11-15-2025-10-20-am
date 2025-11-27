@@ -235,9 +235,9 @@ export function FileLoader({ onFileLoaded }: FileLoaderProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2 p-3 bg-green-900/20 border border-green-700 rounded">
-                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                    <div className="text-xs text-green-300">
+                  <div className="flex items-start gap-2 p-3 bg-white/10/20 border border-white/30 rounded">
+                    <CheckCircle className="w-4 h-4 text-white flex-shrink-0 mt-0.5" />
+                    <div className="text-xs text-white">
                       El archivo es válido y contiene {preview.blocks} cuenta(s) que se pueden cargar.
                     </div>
                   </div>

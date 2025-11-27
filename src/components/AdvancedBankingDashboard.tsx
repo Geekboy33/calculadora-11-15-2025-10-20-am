@@ -204,7 +204,7 @@ export function AdvancedBankingDashboard() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="w-4 h-4 text-[#00ff88]" />;
+      case 'completed': return <CheckCircle className="w-4 h-4 text-[#ffffff]" />;
       case 'pending': return <Clock className="w-4 h-4 text-yellow-500" />;
       case 'failed': return <XCircle className="w-4 h-4 text-red-500" />;
       default: return <AlertCircle className="w-4 h-4 text-gray-500" />;
@@ -213,7 +213,7 @@ export function AdvancedBankingDashboard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'text-[#00ff88]';
+      case 'completed': return 'text-[#ffffff]';
       case 'pending': return 'text-yellow-500';
       case 'failed': return 'text-red-500';
       default: return 'text-gray-500';
@@ -224,8 +224,8 @@ export function AdvancedBankingDashboard() {
     return (
       <div className="min-h-screen bg-black p-6 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Activity className="w-12 h-12 text-[#00ff88] animate-spin" />
-          <p className="text-[#80ff80] text-lg">Cargando dashboard bancario...</p>
+          <Activity className="w-12 h-12 text-[#ffffff] animate-spin" />
+          <p className="text-[#ffffff] text-lg">Cargando dashboard bancario...</p>
         </div>
       </div>
     );
@@ -236,21 +236,21 @@ export function AdvancedBankingDashboard() {
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] rounded-xl border border-[#00ff88]/20 p-6 shadow-[0_0_30px_rgba(0,255,136,0.1)]">
+        <div className="bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] rounded-xl border border-[#ffffff]/20 p-6 shadow-[0_0_30px_rgba(255, 255, 255,0.1)]">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(0,255,136,0.3)]">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(255, 255, 255,0.3)]">
                 <Shield className="w-8 h-8 text-black" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-[#e0ffe0]">{t.advDashboardTitle}</h1>
-                <p className="text-[#80ff80] text-sm">{t.advDashboardSubtitle}</p>
+                <h1 className="text-3xl font-bold text-[#ffffff]">{t.advDashboardTitle}</h1>
+                <p className="text-[#ffffff] text-sm">{t.advDashboardSubtitle}</p>
               </div>
             </div>
             <button
               onClick={refreshData}
               disabled={refreshing}
-              className="flex items-center gap-2 bg-[#00ff88] hover:bg-[#00cc6a] text-black px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 bg-[#ffffff] hover:bg-[#e0e0e0] text-black px-4 py-2 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? t.advDashboardUpdating : t.advDashboardUpdate}
@@ -261,55 +261,55 @@ export function AdvancedBankingDashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Balance */}
-          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#00ff88]/30 rounded-xl p-6 hover:shadow-[0_0_20px_rgba(0,255,136,0.2)] transition-all">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#ffffff]/30 rounded-xl p-6 hover:shadow-[0_0_20px_rgba(255, 255, 255,0.2)] transition-all">
             <div className="flex items-center justify-between mb-4">
-              <Wallet className="w-10 h-10 text-[#00ff88]" />
-              <button onClick={() => setBalanceVisible(!balanceVisible)} className="text-[#80ff80] hover:text-[#00ff88]">
+              <Wallet className="w-10 h-10 text-[#ffffff]" />
+              <button onClick={() => setBalanceVisible(!balanceVisible)} className="text-[#ffffff] hover:text-[#ffffff]">
                 {balanceVisible ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
               </button>
             </div>
-            <p className="text-[#80ff80] text-sm mb-2">{t.advDashboardTotalBalance}</p>
-            <p className="text-3xl font-black text-[#e0ffe0] drop-shadow-[0_0_10px_rgba(0,255,136,0.5)]">
+            <p className="text-[#ffffff] text-sm mb-2">{t.advDashboardTotalBalance}</p>
+            <p className="text-3xl font-black text-[#ffffff] drop-shadow-[0_0_10px_rgba(255, 255, 255,0.5)]">
               {balanceVisible ? `$${dashboardStats.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '••••••'}
             </p>
-            <p className="text-[#4d7c4d] text-xs mt-2">{dashboardStats.totalCurrencies} {t.dashboardCurrenciesDetected}</p>
+            <p className="text-[#ffffff] text-xs mt-2">{dashboardStats.totalCurrencies} {t.dashboardCurrenciesDetected}</p>
           </div>
 
           {/* Accounts */}
-          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#00ff88]/30 rounded-xl p-6 hover:shadow-[0_0_20px_rgba(0,255,136,0.2)] transition-all">
-            <Database className="w-10 h-10 text-[#00ff88] mb-4" />
-            <p className="text-[#80ff80] text-sm mb-2">{t.advDashboardActiveAccounts}</p>
-            <p className="text-3xl font-black text-[#e0ffe0]">{dashboardStats.totalAccounts}</p>
-            <p className="text-[#4d7c4d] text-xs mt-2">{dashboardStats.totalCurrencies} divisas</p>
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#ffffff]/30 rounded-xl p-6 hover:shadow-[0_0_20px_rgba(255, 255, 255,0.2)] transition-all">
+            <Database className="w-10 h-10 text-[#ffffff] mb-4" />
+            <p className="text-[#ffffff] text-sm mb-2">{t.advDashboardActiveAccounts}</p>
+            <p className="text-3xl font-black text-[#ffffff]">{dashboardStats.totalAccounts}</p>
+            <p className="text-[#ffffff] text-xs mt-2">{dashboardStats.totalCurrencies} divisas</p>
           </div>
 
           {/* Transactions */}
-          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#00ff88]/30 rounded-xl p-6 hover:shadow-[0_0_20px_rgba(0,255,136,0.2)] transition-all">
-            <Activity className="w-10 h-10 text-[#00ff88] mb-4" />
-            <p className="text-[#80ff80] text-sm mb-2">Transacciones</p>
-            <p className="text-3xl font-black text-[#e0ffe0]">{dashboardStats.totalTransactions}</p>
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#ffffff]/30 rounded-xl p-6 hover:shadow-[0_0_20px_rgba(255, 255, 255,0.2)] transition-all">
+            <Activity className="w-10 h-10 text-[#ffffff] mb-4" />
+            <p className="text-[#ffffff] text-sm mb-2">Transacciones</p>
+            <p className="text-3xl font-black text-[#ffffff]">{dashboardStats.totalTransactions}</p>
             <div className="flex items-center gap-3 mt-2">
-              <span className="text-[#00ff88] text-xs">✓ {dashboardStats.completedTransactions}</span>
+              <span className="text-[#ffffff] text-xs">✓ {dashboardStats.completedTransactions}</span>
               <span className="text-yellow-500 text-xs">⏱ {dashboardStats.pendingTransactions}</span>
               <span className="text-red-500 text-xs">✗ {dashboardStats.failedTransactions}</span>
             </div>
           </div>
 
           {/* Movement Summary */}
-          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#00ff88]/30 rounded-xl p-6 hover:shadow-[0_0_20px_rgba(0,255,136,0.2)] transition-all">
-            <TrendingUp className="w-10 h-10 text-[#00ff88] mb-4" />
-            <p className="text-[#80ff80] text-sm mb-2">{t.advDashboardMovements}</p>
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#ffffff]/30 rounded-xl p-6 hover:shadow-[0_0_20px_rgba(255, 255, 255,0.2)] transition-all">
+            <TrendingUp className="w-10 h-10 text-[#ffffff] mb-4" />
+            <p className="text-[#ffffff] text-sm mb-2">{t.advDashboardMovements}</p>
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-[#80ff80]">{t.advDashboardDebits}:</span>
+                <span className="text-xs text-[#ffffff]">{t.advDashboardDebits}:</span>
                 <span className="text-sm font-bold text-red-400">${dashboardStats.totalDebits.toFixed(2)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-[#80ff80]">{t.advDashboardCredits}:</span>
-                <span className="text-sm font-bold text-[#00ff88]">${dashboardStats.totalCredits.toFixed(2)}</span>
+                <span className="text-xs text-[#ffffff]">{t.advDashboardCredits}:</span>
+                <span className="text-sm font-bold text-[#ffffff]">${dashboardStats.totalCredits.toFixed(2)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-[#80ff80]">{t.advDashboardFees}:</span>
+                <span className="text-xs text-[#ffffff]">{t.advDashboardFees}:</span>
                 <span className="text-sm font-bold text-yellow-500">${dashboardStats.totalFees.toFixed(2)}</span>
               </div>
             </div>
@@ -317,10 +317,10 @@ export function AdvancedBankingDashboard() {
         </div>
 
         {/* Ledger Accounts - 15 Divisas Ordenadas */}
-        <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#00ff88]/20 rounded-xl p-6">
+        <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#ffffff]/20 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-6">
-            <Database className="w-6 h-6 text-[#00ff88]" />
-            <h2 className="text-2xl font-bold text-[#e0ffe0]">{t.advDashboardLedgerAccounts}</h2>
+            <Database className="w-6 h-6 text-[#ffffff]" />
+            <h2 className="text-2xl font-bold text-[#ffffff]">{t.advDashboardLedgerAccounts}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
@@ -331,28 +331,28 @@ export function AdvancedBankingDashboard() {
                   key={account.currency}
                   className={`${
                     isMainCurrency
-                      ? 'bg-gradient-to-br from-[#00ff88]/20 to-[#00cc6a]/20 border-[#00ff88]/50'
-                      : 'bg-[#00ff88]/5 border-[#00ff88]/20'
-                  } border rounded-lg p-3 hover:bg-[#00ff88]/15 transition-all`}
+                      ? 'bg-gradient-to-br from-[#ffffff]/20 to-[#e0e0e0]/20 border-[#ffffff]/50'
+                      : 'bg-[#ffffff]/5 border-[#ffffff]/20'
+                  } border rounded-lg p-3 hover:bg-[#ffffff]/15 transition-all`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`text-xl font-black ${isMainCurrency ? 'text-[#00ff88]' : 'text-[#e0ffe0]'}`}>
+                    <span className={`text-xl font-black ${isMainCurrency ? 'text-[#ffffff]' : 'text-[#ffffff]'}`}>
                       {account.currency}
                     </span>
                     {isMainCurrency && (
-                      <span className="text-xs bg-[#00ff88] text-black px-2 py-0.5 rounded-full font-bold">★</span>
+                      <span className="text-xs bg-[#ffffff] text-black px-2 py-0.5 rounded-full font-bold">★</span>
                     )}
                   </div>
 
                   <div className="space-y-1">
-                    <div className="text-lg font-bold text-[#e0ffe0]">
+                    <div className="text-lg font-bold text-[#ffffff]">
                       {balanceVisible ? formatCurrency(account.balance, account.currency) : '••••••'}
                     </div>
-                    <div className="text-xs text-[#80ff80]">
+                    <div className="text-xs text-[#ffffff]">
                       {account.transactionCount} tx
                     </div>
                     <div className={`text-xs font-semibold ${
-                      account.status === 'active' ? 'text-[#00ff88]' :
+                      account.status === 'active' ? 'text-[#ffffff]' :
                       account.status === 'frozen' ? 'text-yellow-500' :
                       'text-red-400'
                     }`}>
@@ -366,49 +366,49 @@ export function AdvancedBankingDashboard() {
         </div>
 
         {/* Currency Distribution */}
-        <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#00ff88]/20 rounded-xl p-6">
+        <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#ffffff]/20 rounded-xl p-6">
           <div className="flex items-center gap-3 mb-6">
-            <PieChart className="w-6 h-6 text-[#00ff88]" />
-            <h2 className="text-2xl font-bold text-[#e0ffe0]">{t.advDashboardCurrencyDistribution}</h2>
+            <PieChart className="w-6 h-6 text-[#ffffff]" />
+            <h2 className="text-2xl font-bold text-[#ffffff]">{t.advDashboardCurrencyDistribution}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {currencyStats.map(stats => (
               <div
                 key={stats.currency}
-                className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-lg p-4 hover:bg-[#00ff88]/10 transition-all"
+                className="bg-[#ffffff]/5 border border-[#ffffff]/20 rounded-lg p-4 hover:bg-[#ffffff]/10 transition-all"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-black text-[#e0ffe0]">{stats.currency}</span>
-                  <span className="text-sm font-bold text-[#00ff88]">{stats.percentageOfTotal.toFixed(1)}%</span>
+                  <span className="text-2xl font-black text-[#ffffff]">{stats.currency}</span>
+                  <span className="text-sm font-bold text-[#ffffff]">{stats.percentageOfTotal.toFixed(1)}%</span>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#80ff80]">Balance:</span>
-                    <span className="text-sm font-bold text-[#e0ffe0]">
+                    <span className="text-xs text-[#ffffff]">Balance:</span>
+                    <span className="text-sm font-bold text-[#ffffff]">
                       {formatCurrency(stats.balance, stats.currency)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#80ff80]">Transacciones:</span>
-                    <span className="text-sm font-bold text-[#e0ffe0]">{stats.transactionCount}</span>
+                    <span className="text-xs text-[#ffffff]">Transacciones:</span>
+                    <span className="text-sm font-bold text-[#ffffff]">{stats.transactionCount}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#80ff80]">Mayor:</span>
-                    <span className="text-sm font-bold text-[#e0ffe0]">
+                    <span className="text-xs text-[#ffffff]">Mayor:</span>
+                    <span className="text-sm font-bold text-[#ffffff]">
                       {formatCurrency(stats.largestTransaction, stats.currency)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-xs text-red-400">↓ {stats.debitCount}</span>
-                    <span className="text-xs text-[#00ff88]">↑ {stats.creditCount}</span>
+                    <span className="text-xs text-[#ffffff]">↑ {stats.creditCount}</span>
                   </div>
                 </div>
 
-                <div className="mt-3 h-2 bg-[#00ff88]/20 rounded-full overflow-hidden">
+                <div className="mt-3 h-2 bg-[#ffffff]/20 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-[#00ff88] to-[#00cc6a]"
+                    className="h-full bg-gradient-to-r from-[#ffffff] to-[#e0e0e0]"
                     style={{ width: `${stats.percentageOfTotal}%` }}
                   />
                 </div>
@@ -418,11 +418,11 @@ export function AdvancedBankingDashboard() {
         </div>
 
         {/* Transaction History */}
-        <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#00ff88]/20 rounded-xl p-6">
+        <div className="bg-gradient-to-br from-[#0a0a0a] to-[#0d0d0d] border border-[#ffffff]/20 rounded-xl p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <FileText className="w-6 h-6 text-[#00ff88]" />
-              <h2 className="text-2xl font-bold text-[#e0ffe0]">{t.advDashboardTransactionHistory}</h2>
+              <FileText className="w-6 h-6 text-[#ffffff]" />
+              <h2 className="text-2xl font-bold text-[#ffffff]">{t.advDashboardTransactionHistory}</h2>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
@@ -430,7 +430,7 @@ export function AdvancedBankingDashboard() {
               <select
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="bg-[#0d0d0d] border border-[#00ff88]/30 text-[#e0ffe0] px-3 py-2 rounded-lg text-sm focus:border-[#00ff88] focus:outline-none"
+                className="bg-[#0d0d0d] border border-[#ffffff]/30 text-[#ffffff] px-3 py-2 rounded-lg text-sm focus:border-[#ffffff] focus:outline-none"
               >
                 <option value="all">{t.advDashboardAllPeriods}</option>
                 <option value="24h">{t.advDashboardLast24h}</option>
@@ -442,7 +442,7 @@ export function AdvancedBankingDashboard() {
               <select
                 value={selectedCurrency}
                 onChange={(e) => setSelectedCurrency(e.target.value)}
-                className="bg-[#0d0d0d] border border-[#00ff88]/30 text-[#e0ffe0] px-3 py-2 rounded-lg text-sm focus:border-[#00ff88] focus:outline-none"
+                className="bg-[#0d0d0d] border border-[#ffffff]/30 text-[#ffffff] px-3 py-2 rounded-lg text-sm focus:border-[#ffffff] focus:outline-none"
               >
                 <option value="all">{t.advDashboardAllCurrencies}</option>
                 {currencyStats.map(stats => (
@@ -454,16 +454,16 @@ export function AdvancedBankingDashboard() {
 
           {filteredTransactions.length === 0 ? (
             <div className="text-center py-12">
-              <AlertCircle className="w-16 h-16 text-[#80ff80] mx-auto mb-4 opacity-50" />
-              <p className="text-[#80ff80] text-lg">{t.advDashboardNoTransactions}</p>
-              <p className="text-[#4d7c4d] text-sm mt-2">{t.advDashboardNoTransactionsMessage}</p>
+              <AlertCircle className="w-16 h-16 text-[#ffffff] mx-auto mb-4 opacity-50" />
+              <p className="text-[#ffffff] text-lg">{t.advDashboardNoTransactions}</p>
+              <p className="text-[#ffffff] text-sm mt-2">{t.advDashboardNoTransactionsMessage}</p>
             </div>
           ) : (
             <div className="space-y-2 max-h-[500px] overflow-y-auto">
               {filteredTransactions.map(tx => (
                 <div
                   key={tx.id}
-                  className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-lg p-4 hover:bg-[#00ff88]/10 transition-all"
+                  className="bg-[#ffffff]/5 border border-[#ffffff]/20 rounded-lg p-4 hover:bg-[#ffffff]/10 transition-all"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1">
@@ -471,29 +471,29 @@ export function AdvancedBankingDashboard() {
                         {tx.transactionType === 'debit' ? (
                           <ArrowDownRight className="w-8 h-8 text-red-400" />
                         ) : (
-                          <ArrowUpRight className="w-8 h-8 text-[#00ff88]" />
+                          <ArrowUpRight className="w-8 h-8 text-[#ffffff]" />
                         )}
                       </div>
 
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-sm font-bold ${tx.transactionType === 'debit' ? 'text-red-400' : 'text-[#00ff88]'}`}>
+                          <span className={`text-sm font-bold ${tx.transactionType === 'debit' ? 'text-red-400' : 'text-[#ffffff]'}`}>
                             {tx.transactionType === 'debit' ? 'DÉBITO' : 'CRÉDITO'}
                           </span>
-                          <span className="text-xs text-[#80ff80]">•</span>
-                          <span className="text-xs font-bold text-[#e0ffe0]">{tx.currency}</span>
+                          <span className="text-xs text-[#ffffff]">•</span>
+                          <span className="text-xs font-bold text-[#ffffff]">{tx.currency}</span>
                         </div>
 
-                        <p className="text-[#e0ffe0] font-semibold text-lg mb-1">
+                        <p className="text-[#ffffff] font-semibold text-lg mb-1">
                           {formatCurrency(tx.amount, tx.currency)}
                         </p>
 
                         {tx.description && (
-                          <p className="text-[#80ff80] text-sm mb-2">{tx.description}</p>
+                          <p className="text-[#ffffff] text-sm mb-2">{tx.description}</p>
                         )}
 
                         {tx.recipientName && (
-                          <div className="text-xs text-[#80ff80]">
+                          <div className="text-xs text-[#ffffff]">
                             <span className="opacity-70">Para: </span>
                             <span className="font-semibold">{tx.recipientName}</span>
                           </div>
@@ -512,7 +512,7 @@ export function AdvancedBankingDashboard() {
                           {tx.status}
                         </span>
                       </div>
-                      <p className="text-xs text-[#4d7c4d]">
+                      <p className="text-xs text-[#ffffff]">
                         {new Date(tx.createdAt).toLocaleString('es-ES', {
                           day: '2-digit',
                           month: 'short',

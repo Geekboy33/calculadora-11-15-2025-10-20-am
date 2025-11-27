@@ -214,7 +214,7 @@ export function TransferInterface() {
 
   const getStatusColor = (status: string): string => {
     switch (status) {
-      case 'completed': return 'text-green-400';
+      case 'completed': return 'text-white';
       case 'pending': return 'text-yellow-400';
       case 'failed': return 'text-red-400';
       case 'cancelled': return 'text-gray-400';
@@ -235,7 +235,7 @@ export function TransferInterface() {
   if (loadingAccounts) {
     return (
       <div className="min-h-screen bg-black p-6 flex items-center justify-center">
-        <div className="text-[#00ff88] text-xl">Cargando cuentas disponibles...</div>
+        <div className="text-[#ffffff] text-xl">Cargando cuentas disponibles...</div>
       </div>
     );
   }
@@ -244,13 +244,13 @@ export function TransferInterface() {
     return (
       <div className="min-h-screen bg-black p-6">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] rounded-xl border border-[#00ff88]/20 p-8 text-center">
+          <div className="bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] rounded-xl border border-[#ffffff]/20 p-8 text-center">
             <AlertCircle className="w-16 h-16 text-[#ffa500] mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-[#e0ffe0] mb-4">No hay cuentas disponibles</h2>
-            <p className="text-[#80ff80] mb-6">
+            <h2 className="text-2xl font-bold text-[#ffffff] mb-4">No hay cuentas disponibles</h2>
+            <p className="text-[#ffffff] mb-6">
               Para realizar transferencias, primero debes procesar un archivo Digital Commercial Bank Ltd completo en el Analizador de Archivos Grandes.
             </p>
-            <p className="text-[#4d7c4d] text-sm">
+            <p className="text-[#ffffff] text-sm">
               El archivo debe estar procesado al 100% para que los balances estén disponibles para transferencias.
             </p>
           </div>
@@ -262,39 +262,39 @@ export function TransferInterface() {
   return (
     <div className="min-h-screen bg-black p-6">
       <div className="max-w-6xl mx-auto pb-24">
-        <div className="bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] rounded-xl shadow-[0_0_30px_rgba(0,255,136,0.2)] p-8 mb-6 border border-[#00ff88]/20">
+        <div className="bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] rounded-xl shadow-[0_0_30px_rgba(255, 255, 255,0.2)] p-8 mb-6 border border-[#ffffff]/20">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-bold text-[#e0ffe0] mb-2 flex items-center gap-3">
-                <Send className="w-10 h-10 text-[#00ff88]" />
+              <h1 className="text-4xl font-bold text-[#ffffff] mb-2 flex items-center gap-3">
+                <Send className="w-10 h-10 text-[#ffffff]" />
                 <span className="text-cyber">Transferencias Desde Digital Commercial Bank Ltd</span>
               </h1>
-              <p className="text-[#80ff80] text-lg">
+              <p className="text-[#ffffff] text-lg">
                 Transfiere fondos desde tus archivos Digital Commercial Bank Ltd procesados
               </p>
             </div>
-            <TrendingDown className="w-16 h-16 text-[#00ff88] opacity-20" />
+            <TrendingDown className="w-16 h-16 text-[#ffffff] opacity-20" />
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-            <h2 className="text-2xl font-bold text-[#e0ffe0] mb-6 flex items-center gap-2">
-              <DollarSign className="w-6 h-6 text-[#00ff88]" />
+            <h2 className="text-2xl font-bold text-[#ffffff] mb-6 flex items-center gap-2">
+              <DollarSign className="w-6 h-6 text-[#ffffff]" />
               Nueva Transferencia
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-[#80ff80] mb-2">
+                  <label className="block text-sm font-semibold text-[#ffffff] mb-2">
                     <Wallet className="w-4 h-4 inline mr-1" />
                     Archivo Digital Commercial Bank Ltd Origen
                   </label>
                   <select
                     value={selectedAccount?.fileHash || ''}
                     onChange={(e) => handleAccountChange(e.target.value)}
-                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#e0ffe0] px-4 py-2 rounded-lg focus:outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88]"
+                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#ffffff] px-4 py-2 rounded-lg focus:outline-none focus:border-[#ffffff] focus:ring-1 focus:ring-[#ffffff]"
                     required
                   >
                     {accounts.map(account => (
@@ -306,13 +306,13 @@ export function TransferInterface() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-[#80ff80] mb-2">
+                  <label className="block text-sm font-semibold text-[#ffffff] mb-2">
                     Moneda
                   </label>
                   <select
                     value={selectedCurrency}
                     onChange={(e) => handleCurrencyChange(e.target.value)}
-                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#e0ffe0] px-4 py-2 rounded-lg focus:outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88]"
+                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#ffffff] px-4 py-2 rounded-lg focus:outline-none focus:border-[#ffffff] focus:ring-1 focus:ring-[#ffffff]"
                     required
                   >
                     {selectedAccount?.balances.map(balance => (
@@ -325,10 +325,10 @@ export function TransferInterface() {
               </div>
 
               {selectedAccount && selectedCurrency && (
-                <div className="bg-[#0a0a0a] border border-[#00ff88]/30 rounded-lg p-4">
+                <div className="bg-[#0a0a0a] border border-[#ffffff]/30 rounded-lg p-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-[#80ff80]">Balance Actual Disponible:</span>
-                    <span className="text-2xl font-bold text-[#00ff88]">
+                    <span className="text-[#ffffff]">Balance Actual Disponible:</span>
+                    <span className="text-2xl font-bold text-[#ffffff]">
                       {formatCurrency(currentBalance, selectedCurrency)}
                     </span>
                   </div>
@@ -336,35 +336,35 @@ export function TransferInterface() {
               )}
 
               <div>
-                <label className="block text-sm font-semibold text-[#80ff80] mb-2">
+                <label className="block text-sm font-semibold text-[#ffffff] mb-2">
                   Dirección del Destinatario
                 </label>
                 <input
                   type="text"
                   value={recipientAddress}
                   onChange={(e) => setRecipientAddress(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#e0ffe0] px-4 py-2 rounded-lg focus:outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88] font-mono"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#ffffff] px-4 py-2 rounded-lg focus:outline-none focus:border-[#ffffff] focus:ring-1 focus:ring-[#ffffff] font-mono"
                   placeholder="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#80ff80] mb-2">
+                <label className="block text-sm font-semibold text-[#ffffff] mb-2">
                   Nombre del Destinatario (Opcional)
                 </label>
                 <input
                   type="text"
                   value={recipientName}
                   onChange={(e) => setRecipientName(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#e0ffe0] px-4 py-2 rounded-lg focus:outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88]"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#ffffff] px-4 py-2 rounded-lg focus:outline-none focus:border-[#ffffff] focus:ring-1 focus:ring-[#ffffff]"
                   placeholder="John Doe"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-[#80ff80] mb-2">
+                  <label className="block text-sm font-semibold text-[#ffffff] mb-2">
                     Monto
                   </label>
                   <input
@@ -372,14 +372,14 @@ export function TransferInterface() {
                     step="0.01"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#e0ffe0] px-4 py-2 rounded-lg focus:outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88]"
+                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#ffffff] px-4 py-2 rounded-lg focus:outline-none focus:border-[#ffffff] focus:ring-1 focus:ring-[#ffffff]"
                     placeholder="0.00"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-[#80ff80] mb-2">
+                  <label className="block text-sm font-semibold text-[#ffffff] mb-2">
                     Comisión
                   </label>
                   <input
@@ -387,7 +387,7 @@ export function TransferInterface() {
                     step="0.01"
                     value={fee}
                     onChange={(e) => setFee(e.target.value)}
-                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#e0ffe0] px-4 py-2 rounded-lg focus:outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88]"
+                    className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#ffffff] px-4 py-2 rounded-lg focus:outline-none focus:border-[#ffffff] focus:ring-1 focus:ring-[#ffffff]"
                     placeholder="0.00"
                   />
                 </div>
@@ -423,13 +423,13 @@ export function TransferInterface() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#80ff80] mb-2">
+                <label className="block text-sm font-semibold text-[#ffffff] mb-2">
                   Descripción (Opcional)
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#e0ffe0] px-4 py-2 rounded-lg focus:outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88]"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] text-[#ffffff] px-4 py-2 rounded-lg focus:outline-none focus:border-[#ffffff] focus:ring-1 focus:ring-[#ffffff]"
                   rows={3}
                   placeholder="Descripción de la transferencia..."
                 />
@@ -443,26 +443,26 @@ export function TransferInterface() {
               )}
 
               {amount && !validationError && (
-                <div className="bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-lg p-4">
-                  <h3 className="text-[#00ff88] font-semibold mb-2">Resumen de Transferencia</h3>
+                <div className="bg-[#ffffff]/10 border border-[#ffffff]/30 rounded-lg p-4">
+                  <h3 className="text-[#ffffff] font-semibold mb-2">Resumen de Transferencia</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-[#80ff80]">Monto:</span>
-                      <span className="text-[#e0ffe0] font-semibold">{parseFloat(amount).toFixed(2)} {selectedCurrency}</span>
+                      <span className="text-[#ffffff]">Monto:</span>
+                      <span className="text-[#ffffff] font-semibold">{parseFloat(amount).toFixed(2)} {selectedCurrency}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#80ff80]">Comisión:</span>
-                      <span className="text-[#e0ffe0] font-semibold">{parseFloat(fee).toFixed(2)} {selectedCurrency}</span>
+                      <span className="text-[#ffffff]">Comisión:</span>
+                      <span className="text-[#ffffff] font-semibold">{parseFloat(fee).toFixed(2)} {selectedCurrency}</span>
                     </div>
-                    <div className="border-t border-[#00ff88]/20 pt-2 flex justify-between">
-                      <span className="text-[#00ff88] font-bold">Total a Debitar:</span>
-                      <span className="text-[#00ff88] font-bold text-lg">
+                    <div className="border-t border-[#ffffff]/20 pt-2 flex justify-between">
+                      <span className="text-[#ffffff] font-bold">Total a Debitar:</span>
+                      <span className="text-[#ffffff] font-bold text-lg">
                         {(parseFloat(amount) + parseFloat(fee)).toFixed(2)} {selectedCurrency}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#80ff80]">Nuevo Balance:</span>
-                      <span className="text-[#e0ffe0] font-semibold">
+                      <span className="text-[#ffffff]">Nuevo Balance:</span>
+                      <span className="text-[#ffffff] font-semibold">
                         {(currentBalance - parseFloat(amount) - parseFloat(fee)).toFixed(2)} {selectedCurrency}
                       </span>
                     </div>
@@ -473,7 +473,7 @@ export function TransferInterface() {
               <button
                 type="submit"
                 disabled={loading || !!validationError || !amount}
-                className="w-full bg-gradient-to-r from-[#00ff88] to-[#00cc6a] hover:from-[#00cc6a] hover:to-[#00aa55] text-black px-6 py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(0,255,136,0.3)] hover:shadow-[0_0_30px_rgba(0,255,136,0.5)]"
+                className="w-full bg-gradient-to-r from-[#ffffff] to-[#e0e0e0] hover:from-[#e0e0e0] hover:to-[#e0e0e0] text-black px-6 py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255, 255, 255,0.3)] hover:shadow-[0_0_30px_rgba(255, 255, 255,0.5)]"
               >
                 <Send className="w-5 h-5" />
                 {loading ? 'Procesando Transferencia...' : 'Ejecutar Transferencia'}
@@ -481,20 +481,20 @@ export function TransferInterface() {
             </form>
 
             {result && (
-              <div className={`mt-6 ${result.success ? 'bg-[#00ff88]/10 border-[#00ff88]/50' : 'bg-[#ff6b6b]/10 border-[#ff6b6b]/50'} border rounded-lg p-4`}>
+              <div className={`mt-6 ${result.success ? 'bg-[#ffffff]/10 border-[#ffffff]/50' : 'bg-[#ff6b6b]/10 border-[#ff6b6b]/50'} border rounded-lg p-4`}>
                 <div className="flex items-start gap-3">
                   {result.success ? (
-                    <CheckCircle className="w-6 h-6 text-[#00ff88] flex-shrink-0" />
+                    <CheckCircle className="w-6 h-6 text-[#ffffff] flex-shrink-0" />
                   ) : (
                     <AlertCircle className="w-6 h-6 text-[#ff6b6b] flex-shrink-0" />
                   )}
                   <div className="flex-1">
-                    <p className={`${result.success ? 'text-[#00ff88]' : 'text-[#ff6b6b]'} font-semibold mb-2`}>
+                    <p className={`${result.success ? 'text-[#ffffff]' : 'text-[#ff6b6b]'} font-semibold mb-2`}>
                       {result.success ? 'Transferencia Exitosa' : 'Error en Transferencia'}
                     </p>
-                    <p className="text-[#e0ffe0] text-sm whitespace-pre-line">{result.message}</p>
+                    <p className="text-[#ffffff] text-sm whitespace-pre-line">{result.message}</p>
                     {result.transactionId && (
-                      <p className="text-[#4d7c4d] text-xs mt-2 font-mono">
+                      <p className="text-[#ffffff] text-xs mt-2 font-mono">
                         ID: {result.transactionId}
                       </p>
                     )}
@@ -506,13 +506,13 @@ export function TransferInterface() {
 
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-              <h3 className="text-xl font-bold text-[#e0ffe0] mb-4 flex items-center gap-2">
-                <History className="w-5 h-5 text-[#00ff88]" />
+              <h3 className="text-xl font-bold text-[#ffffff] mb-4 flex items-center gap-2">
+                <History className="w-5 h-5 text-[#ffffff]" />
                 Historial Reciente
               </h3>
 
               {transactionHistory.length === 0 ? (
-                <p className="text-[#4d7c4d] text-sm text-center py-8">
+                <p className="text-[#ffffff] text-sm text-center py-8">
                   No hay transacciones registradas
                 </p>
               ) : (
@@ -526,33 +526,33 @@ export function TransferInterface() {
                         <span className={`text-sm font-semibold ${getStatusColor(tx.status)}`}>
                           {getStatusLabel(tx.status)}
                         </span>
-                        <span className="text-xs text-[#4d7c4d]">
+                        <span className="text-xs text-[#ffffff]">
                           {new Date(tx.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       <div className="space-y-1">
                         <div className="flex justify-between">
-                          <span className="text-xs text-[#80ff80]">Monto:</span>
-                          <span className="text-sm text-[#e0ffe0] font-semibold">
+                          <span className="text-xs text-[#ffffff]">Monto:</span>
+                          <span className="text-sm text-[#ffffff] font-semibold">
                             -{tx.amount.toFixed(2)} {tx.currency}
                           </span>
                         </div>
                         {tx.fee > 0 && (
                           <div className="flex justify-between">
-                            <span className="text-xs text-[#80ff80]">Comisión:</span>
-                            <span className="text-xs text-[#4d7c4d]">
+                            <span className="text-xs text-[#ffffff]">Comisión:</span>
+                            <span className="text-xs text-[#ffffff]">
                               -{tx.fee.toFixed(2)} {tx.currency}
                             </span>
                           </div>
                         )}
                         <div className="flex justify-between">
-                          <span className="text-xs text-[#80ff80]">Balance After:</span>
-                          <span className="text-xs text-[#e0ffe0]">
+                          <span className="text-xs text-[#ffffff]">Balance After:</span>
+                          <span className="text-xs text-[#ffffff]">
                             {tx.balanceAfter.toFixed(2)} {tx.currency}
                           </span>
                         </div>
                         {tx.recipientAddress && (
-                          <div className="text-xs text-[#4d7c4d] truncate font-mono mt-2">
+                          <div className="text-xs text-[#ffffff] truncate font-mono mt-2">
                             → {tx.recipientAddress}
                           </div>
                         )}

@@ -1256,18 +1256,18 @@ export function APIVUSDModule() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#00ff88] flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-[#ffffff] flex items-center gap-3">
               <Shield className="w-8 h-8" />
               {t.title}
             </h1>
-            <p className="text-[#80ff80] mt-2">{t.subtitle}</p>
+            <p className="text-[#ffffff] mt-2">{t.subtitle}</p>
           </div>
           <div className="flex gap-3">
             <LedgerStatusIndicator />
             <button
               onClick={loadData}
               disabled={loading}
-              className="px-4 py-2 bg-[#00ff88]/20 border border-[#00ff88] text-[#00ff88] rounded-lg hover:bg-[#00ff88]/30 disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 bg-[#ffffff]/20 border border-[#ffffff] text-[#ffffff] rounded-lg hover:bg-[#ffffff]/30 disabled:opacity-50 flex items-center gap-2"
             >
               <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
               {t.refreshData}
@@ -1292,8 +1292,8 @@ export function APIVUSDModule() {
             onClick={() => setSelectedView(view)}
             className={`px-6 py-3 font-medium transition-colors ${
               selectedView === view
-                ? 'text-[#00ff88] border-b-2 border-[#00ff88]'
-                : 'text-[#4d7c4d] hover:text-[#80ff80]'
+                ? 'text-[#ffffff] border-b-2 border-[#ffffff]'
+                : 'text-[#ffffff] hover:text-[#ffffff]'
             }`}
           >
             {t[view]}
@@ -1307,12 +1307,12 @@ export function APIVUSDModule() {
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Circulating Cap */}
-            <div className="bg-[#0d0d0d] border border-[#00ff88] rounded-lg p-6">
+            <div className="bg-[#0d0d0d] border border-[#ffffff] rounded-lg p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[#80ff80] text-sm">{t.circulatingCap}</span>
-                <Lock className="w-5 h-5 text-[#00ff88]" />
+                <span className="text-[#ffffff] text-sm">{t.circulatingCap}</span>
+                <Lock className="w-5 h-5 text-[#ffffff]" />
               </div>
-              <div className="text-3xl font-bold text-[#00ff88]">
+              <div className="text-3xl font-bold text-[#ffffff]">
                 ${circulatingCap.toLocaleString()}
               </div>
             </div>
@@ -1354,13 +1354,13 @@ export function APIVUSDModule() {
           {/* Utilization Bar */}
           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[#80ff80] font-medium">Cap Utilization</span>
-              <span className="text-[#00ff88] font-bold">{utilizationPercent.toFixed(2)}%</span>
+              <span className="text-[#ffffff] font-medium">Cap Utilization</span>
+              <span className="text-[#ffffff] font-bold">{utilizationPercent.toFixed(2)}%</span>
             </div>
             <div className="h-4 bg-[#1a1a1a] rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all duration-500 ${
-                  utilizationPercent > 90 ? 'bg-red-500' : utilizationPercent > 70 ? 'bg-yellow-500' : 'bg-[#00ff88]'
+                  utilizationPercent > 90 ? 'bg-red-500' : utilizationPercent > 70 ? 'bg-yellow-500' : 'bg-[#ffffff]'
                 }`}
                 style={{ width: `${Math.min(utilizationPercent, 100)}%` }}
               />
@@ -1371,12 +1371,12 @@ export function APIVUSDModule() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               onClick={() => setShowTransferModal(true)}
-              className="bg-[#0d0d0d] border border-[#00ff88] rounded-lg p-6 hover:bg-[#00ff88]/10 transition-colors flex items-center gap-4"
+              className="bg-[#0d0d0d] border border-[#ffffff] rounded-lg p-6 hover:bg-[#ffffff]/10 transition-colors flex items-center gap-4"
             >
-              <Send className="w-8 h-8 text-[#00ff88]" />
+              <Send className="w-8 h-8 text-[#ffffff]" />
               <div className="text-left">
-                <div className="font-bold text-[#00ff88]">{t.createTransfer}</div>
-                <div className="text-sm text-[#4d7c4d]">With cap enforcement</div>
+                <div className="font-bold text-[#ffffff]">{t.createTransfer}</div>
+                <div className="text-sm text-[#ffffff]">With cap enforcement</div>
               </div>
             </button>
 
@@ -1410,12 +1410,12 @@ export function APIVUSDModule() {
       {selectedView === 'pledges' && (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg">
           <div className="p-6 border-b border-[#1a1a1a] flex items-center justify-between">
-            <h2 className="text-xl font-bold text-[#00ff88]">{t.pledges}</h2>
+            <h2 className="text-xl font-bold text-[#ffffff]">{t.pledges}</h2>
             <div className="flex items-center gap-3">
               {lastPledgeData && (
                 <button
                   onClick={handleGenerateBlackScreen}
-                  className="px-4 py-2 bg-green-600/20 border border-green-500 text-green-400 rounded-lg hover:bg-green-600/30 flex items-center gap-2"
+                  className="px-4 py-2 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 flex items-center gap-2"
                 >
                   <FileText className="w-4 h-4" />
                   Generate Black Screen
@@ -1423,7 +1423,7 @@ export function APIVUSDModule() {
               )}
               <button
                 onClick={() => setShowPledgeModal(true)}
-                className="px-4 py-2 bg-[#00ff88]/20 border border-[#00ff88] text-[#00ff88] rounded-lg hover:bg-[#00ff88]/30 flex items-center gap-2"
+                className="px-4 py-2 bg-[#ffffff]/20 border border-[#ffffff] text-[#ffffff] rounded-lg hover:bg-[#ffffff]/30 flex items-center gap-2"
               >
                 <Lock className="w-4 h-4" />
                 {t.createPledge}
@@ -1432,44 +1432,44 @@ export function APIVUSDModule() {
           </div>
           <div className="p-6">
             {activePledges.length === 0 ? (
-              <div className="text-center py-12 text-[#4d7c4d]">{t.noData}</div>
+              <div className="text-center py-12 text-[#ffffff]">{t.noData}</div>
             ) : (
               <div className="space-y-3">
                 {activePledges.map((pledge) => (
                   <div
                     key={pledge.pledge_id}
-                    className="bg-[#0a0a0a] border border-[#00ff88]/30 rounded-lg p-4 hover:border-[#00ff88] transition-colors"
+                    className="bg-[#0a0a0a] border border-[#ffffff]/30 rounded-lg p-4 hover:border-[#ffffff] transition-colors"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <span className="px-2 py-1 bg-[#00ff88]/20 text-[#00ff88] text-xs rounded">
+                          <span className="px-2 py-1 bg-[#ffffff]/20 text-[#ffffff] text-xs rounded">
                             {pledge.status}
                           </span>
-                          <span className="text-[#80ff80] font-mono text-sm">
+                          <span className="text-[#ffffff] font-mono text-sm">
                             {pledge.pledge_id}
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <span className="text-[#4d7c4d]">{t.amount}: </span>
-                            <span className="text-[#00ff88] font-bold">
+                            <span className="text-[#ffffff]">{t.amount}: </span>
+                            <span className="text-[#ffffff] font-bold">
                               ${pledge.amount.toLocaleString()} {pledge.currency}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[#4d7c4d]">Available: </span>
-                            <span className="text-[#00ff88]">
+                            <span className="text-[#ffffff]">Available: </span>
+                            <span className="text-[#ffffff]">
                               ${pledge.available.toLocaleString()}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[#4d7c4d]">{t.beneficiary}: </span>
+                            <span className="text-[#ffffff]">{t.beneficiary}: </span>
                             <span className="text-white">{pledge.beneficiary}</span>
                           </div>
                           {pledge.custody_account_id && (
                             <div>
-                              <span className="text-[#4d7c4d]">Custody Account: </span>
+                              <span className="text-[#ffffff]">Custody Account: </span>
                               <span className="text-cyan-400 font-mono text-xs">
                                 {custodyAccounts.find(a => a.id === pledge.custody_account_id)?.accountName || pledge.custody_account_id.substring(0, 12) + '...'}
                               </span>
@@ -1477,7 +1477,7 @@ export function APIVUSDModule() {
                           )}
                           {pledge.updated_at && (
                             <div className="col-span-2">
-                              <span className="text-[#4d7c4d]">📅 Creado: </span>
+                              <span className="text-[#ffffff]">📅 Creado: </span>
                               <span className="text-blue-400 font-mono text-xs">
                                 {new Date(pledge.updated_at).toLocaleString('es-ES', {
                                   year: 'numeric',
@@ -1492,7 +1492,7 @@ export function APIVUSDModule() {
                           )}
                           {pledge.expires_at && (
                             <div className="col-span-2">
-                              <span className="text-[#4d7c4d]">{t.expiresAt}: </span>
+                              <span className="text-[#ffffff]">{t.expiresAt}: </span>
                               <span className="text-yellow-400">
                                 {new Date(pledge.expires_at).toLocaleDateString()}
                               </span>
@@ -1596,10 +1596,10 @@ export function APIVUSDModule() {
       {selectedView === 'transfers' && (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg">
           <div className="p-6 border-b border-[#1a1a1a] flex items-center justify-between">
-            <h2 className="text-xl font-bold text-[#00ff88]">{t.transfers}</h2>
+            <h2 className="text-xl font-bold text-[#ffffff]">{t.transfers}</h2>
             <button
               onClick={() => setShowTransferModal(true)}
-              className="px-4 py-2 bg-[#00ff88]/20 border border-[#00ff88] text-[#00ff88] rounded-lg hover:bg-[#00ff88]/30 flex items-center gap-2"
+              className="px-4 py-2 bg-[#ffffff]/20 border border-[#ffffff] text-[#ffffff] rounded-lg hover:bg-[#ffffff]/30 flex items-center gap-2"
             >
               <Send className="w-4 h-4" />
               {t.createTransfer}
@@ -1607,7 +1607,7 @@ export function APIVUSDModule() {
           </div>
           <div className="p-6">
             {recentTransfers.length === 0 ? (
-              <div className="text-center py-12 text-[#4d7c4d]">{t.noData}</div>
+              <div className="text-center py-12 text-[#ffffff]">{t.noData}</div>
             ) : (
               <div className="space-y-3">
                 {recentTransfers.map((transfer) => (
@@ -1619,30 +1619,30 @@ export function APIVUSDModule() {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <ArrowUpRight className="w-4 h-4 text-blue-400" />
-                          <span className="text-[#80ff80] font-mono text-sm">
+                          <span className="text-[#ffffff] font-mono text-sm">
                             {transfer.external_ref}
                           </span>
                         </div>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                           <div>
-                            <span className="text-[#4d7c4d]">{t.amount}: </span>
+                            <span className="text-[#ffffff]">{t.amount}: </span>
                             <span className="text-blue-400 font-bold">
                               ${transfer.amount.toLocaleString()} {transfer.currency}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[#4d7c4d]">{t.toAccount}: </span>
+                            <span className="text-[#ffffff]">{t.toAccount}: </span>
                             <span className="text-white">{transfer.to_account}</span>
                           </div>
                           <div>
-                            <span className="text-[#4d7c4d]">Date: </span>
-                            <span className="text-[#80ff80]">
+                            <span className="text-[#ffffff]">Date: </span>
+                            <span className="text-[#ffffff]">
                               {new Date(transfer.created_at).toLocaleString()}
                             </span>
                           </div>
                         </div>
                       </div>
-                      <CheckCircle className="w-5 h-5 text-[#00ff88]" />
+                      <CheckCircle className="w-5 h-5 text-[#ffffff]" />
                     </div>
                   </div>
                 ))}
@@ -1656,11 +1656,11 @@ export function APIVUSDModule() {
       {selectedView === 'por' && (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg">
           <div className="p-6 border-b border-[#1a1a1a] flex items-center justify-between">
-            <h2 className="text-xl font-bold text-[#00ff88]">{t.por}</h2>
+            <h2 className="text-xl font-bold text-[#ffffff]">{t.por}</h2>
             <button
               onClick={handlePublishPor}
               disabled={loading}
-              className="px-4 py-2 bg-[#00ff88]/20 border border-[#00ff88] text-[#00ff88] rounded-lg hover:bg-[#00ff88]/30 flex items-center gap-2 disabled:opacity-50"
+              className="px-4 py-2 bg-[#ffffff]/20 border border-[#ffffff] text-[#ffffff] rounded-lg hover:bg-[#ffffff]/30 flex items-center gap-2 disabled:opacity-50"
             >
               <Database className="w-4 h-4" />
               {t.publishPor}
@@ -1750,8 +1750,8 @@ export function APIVUSDModule() {
                         </div>
                       </div>
                       <div className="bg-black/30 rounded-lg p-3">
-                        <div className="text-xs text-green-300/60 mb-1">M2</div>
-                        <div className="text-lg font-bold text-green-300">
+                        <div className="text-xs text-white/60 mb-1">M2</div>
+                        <div className="text-lg font-bold text-white">
                           {porItem.pledgesM2} <span className="text-sm">({porItem.totalM2.toLocaleString()})</span>
                         </div>
                       </div>
@@ -1773,7 +1773,7 @@ export function APIVUSDModule() {
                         <textarea
                           value={porItem.report}
                           readOnly
-                          className="w-full h-96 bg-black/50 border border-cyan-500/30 rounded-lg p-4 text-green-400 font-mono text-xs overflow-y-auto resize-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                          className="w-full h-96 bg-black/50 border border-cyan-500/30 rounded-lg p-4 text-white font-mono text-xs overflow-y-auto resize-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                           style={{ fontFamily: 'Consolas, Monaco, monospace' }}
                         />
                         <div className="text-xs text-cyan-300/60 mt-2">
@@ -1791,13 +1791,13 @@ export function APIVUSDModule() {
             {/* Mensaje cuando no hay reportes */}
             {generatedPorReports.length === 0 && porPublications.length === 0 ? (
               <div className="text-center py-12">
-                <Database className="w-16 h-16 text-[#4d7c4d] mx-auto mb-4" />
-                <div className="text-[#4d7c4d] mb-2">
+                <Database className="w-16 h-16 text-[#ffffff] mx-auto mb-4" />
+                <div className="text-[#ffffff] mb-2">
                   {language === 'es' 
                     ? 'No hay Proof of Reserve generados'
                     : 'No Proof of Reserve generated'}
                 </div>
-                <div className="text-[#4d7c4d] text-sm">
+                <div className="text-[#ffffff] text-sm">
                   {language === 'es'
                     ? 'Click en "Publicar PoR" para generar el reporte'
                     : 'Click on "Publish PoR" to generate the report'}
@@ -1818,30 +1818,30 @@ export function APIVUSDModule() {
                           {idx === 0 ? t.lastPor : `PoR #${por.id}`}
                         </span>
                       </div>
-                      <Clock className="w-4 h-4 text-[#4d7c4d]" />
+                      <Clock className="w-4 h-4 text-[#ffffff]" />
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-[#4d7c4d]">Circ Cap: </span>
-                        <span className="text-[#00ff88] font-bold">
+                        <span className="text-[#ffffff]">Circ Cap: </span>
+                        <span className="text-[#ffffff] font-bold">
                           ${por.circ_cap.toLocaleString()}
                         </span>
                       </div>
                       <div>
-                        <span className="text-[#4d7c4d]">Pledged: </span>
+                        <span className="text-[#ffffff]">Pledged: </span>
                         <span className="text-purple-400 font-bold">
                           ${por.pledged_usd.toLocaleString()}
                         </span>
                       </div>
                       <div>
-                        <span className="text-[#4d7c4d]">{t.asOf}: </span>
-                        <span className="text-[#80ff80]">
+                        <span className="text-[#ffffff]">{t.asOf}: </span>
+                        <span className="text-[#ffffff]">
                           {new Date(por.por_asof).toLocaleString()}
                         </span>
                       </div>
                       {por.tx_id && (
                         <div>
-                          <span className="text-[#4d7c4d]">{t.txId}: </span>
+                          <span className="text-[#ffffff]">{t.txId}: </span>
                           <span className="text-blue-400 font-mono text-xs">
                             {por.tx_id.substring(0, 16)}...
                           </span>
@@ -1859,11 +1859,11 @@ export function APIVUSDModule() {
       {/* Transfer Modal */}
       {showTransferModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0d0d0d] border border-[#00ff88] rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-[#00ff88] mb-4">{t.createTransfer}</h3>
+          <div className="bg-[#0d0d0d] border border-[#ffffff] rounded-lg max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-[#ffffff] mb-4">{t.createTransfer}</h3>
             <form onSubmit={handleCreateTransfer} className="space-y-4">
               <div>
-                <label className="block text-[#80ff80] text-sm mb-2">{t.externalRef}</label>
+                <label className="block text-[#ffffff] text-sm mb-2">{t.externalRef}</label>
                 <input
                   type="text"
                   value={transferForm.external_ref}
@@ -1873,7 +1873,7 @@ export function APIVUSDModule() {
                 />
               </div>
               <div>
-                <label className="block text-[#80ff80] text-sm mb-2">{t.amount} (USD)</label>
+                <label className="block text-[#ffffff] text-sm mb-2">{t.amount} (USD)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -1884,7 +1884,7 @@ export function APIVUSDModule() {
                 />
               </div>
               <div>
-                <label className="block text-[#80ff80] text-sm mb-2">{t.toAccount}</label>
+                <label className="block text-[#ffffff] text-sm mb-2">{t.toAccount}</label>
                 <input
                   type="text"
                   value={transferForm.to_account}
@@ -1904,7 +1904,7 @@ export function APIVUSDModule() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-2 bg-[#00ff88] text-black rounded-lg hover:bg-[#00cc6a] disabled:opacity-50 font-bold"
+                  className="flex-1 px-4 py-2 bg-[#ffffff] text-black rounded-lg hover:bg-[#e0e0e0] disabled:opacity-50 font-bold"
                 >
                   {loading ? t.loading : t.submit}
                 </button>
@@ -2004,9 +2004,9 @@ export function APIVUSDModule() {
                                   {pledgedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                                 </div>
                               </div>
-                              <div className="bg-green-900/30 rounded p-2">
-                                <div className="text-xs text-green-300/80 mb-1">Restante</div>
-                                <div className="text-sm font-bold text-green-300">
+                              <div className="bg-white/10/30 rounded p-2">
+                                <div className="text-xs text-white/80 mb-1">Restante</div>
+                                <div className="text-sm font-bold text-white">
                                   {remainingBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                                 </div>
                               </div>

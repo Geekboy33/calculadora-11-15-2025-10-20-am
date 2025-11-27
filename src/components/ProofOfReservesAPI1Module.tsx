@@ -811,7 +811,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
             className={`px-6 py-3 font-medium transition-colors capitalize ${
               selectedView === view
                 ? 'text-cyan-400 border-b-2 border-cyan-400'
-                : 'text-[#4d7c4d] hover:text-cyan-300'
+                : 'text-[#ffffff] hover:text-cyan-300'
             }`}
           >
             {view}
@@ -844,12 +844,12 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               </div>
             </div>
 
-            <div className="bg-[#0d0d0d] border border-green-500 rounded-lg p-6">
+            <div className="bg-[#0d0d0d] border border-white/30 rounded-lg p-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-green-300/60 text-sm">{isSpanish ? 'Pledges Totales' : 'Total Pledges'}</span>
-                <Lock className="w-5 h-5 text-green-400" />
+                <span className="text-white/60 text-sm">{isSpanish ? 'Pledges Totales' : 'Total Pledges'}</span>
+                <Lock className="w-5 h-5 text-white" />
               </div>
-              <div className="text-3xl font-bold text-green-400">
+              <div className="text-3xl font-bold text-white">
                 ${parseFloat(reserveSummary.totalUsdPledges).toLocaleString()}
               </div>
             </div>
@@ -903,8 +903,8 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                 </div>
               </div>
               <div className="bg-black/30 rounded p-3">
-                <div className="text-green-300/60 mb-1">GET Active Pledges:</div>
-                <div className="text-green-400 break-all">
+                <div className="text-white/60 mb-1">GET Active Pledges:</div>
+                <div className="text-white break-all">
                   {isProduction 
                     ? `${window.location.origin}/.netlify/functions/proof-of-reserves`
                     : `${API_BASE}/api/v1/pledges?status=ACTIVE&porId=${POR_ID}`}
@@ -942,7 +942,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               </div>
               <div className="bg-black/30 rounded p-3">
                 <div className="text-blue-300/60 mb-1">{isSpanish ? 'Webhooks HMAC:' : 'HMAC Webhooks:'}</div>
-                <div className="text-green-400 font-bold">✅ {isSpanish ? 'Habilitados' : 'Enabled'}</div>
+                <div className="text-white font-bold">✅ {isSpanish ? 'Habilitados' : 'Enabled'}</div>
               </div>
               <div className="bg-black/30 rounded p-3">
                 <div className="text-blue-300/60 mb-1">{isSpanish ? 'Protocolo:' : 'Protocol:'}</div>
@@ -950,7 +950,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               </div>
               <div className="bg-black/30 rounded p-3">
                 <div className="text-blue-300/60 mb-1">{isSpanish ? 'Idempotencia:' : 'Idempotency:'}</div>
-                <div className="text-green-400">✅ {isSpanish ? 'Soportada' : 'Supported'}</div>
+                <div className="text-white">✅ {isSpanish ? 'Soportada' : 'Supported'}</div>
               </div>
             </div>
           </div>
@@ -963,12 +963,12 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
       {selectedView === 'pledges' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-green-300">
+            <h2 className="text-2xl font-bold text-white">
               {isSpanish ? 'Pledges Activos (Lockbox)' : 'Active Pledges (Lockbox)'}
             </h2>
             <button
               onClick={() => setShowCreatePledgeModal(true)}
-              className="px-6 py-3 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 flex items-center gap-2 font-bold"
+              className="px-6 py-3 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 flex items-center gap-2 font-bold"
             >
               <Lock className="w-5 h-5" />
               {isSpanish ? 'Crear Pledge' : 'Create Pledge'}
@@ -977,11 +977,11 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
 
           {pledges.length === 0 ? (
             <div className="text-center py-12">
-              <Lock className="w-16 h-16 text-green-400/30 mx-auto mb-4" />
-              <div className="text-green-300/60 mb-2">
+              <Lock className="w-16 h-16 text-white/30 mx-auto mb-4" />
+              <div className="text-white/60 mb-2">
                 {isSpanish ? 'No hay pledges activos' : 'No active pledges'}
               </div>
-              <div className="text-green-300/40 text-sm">
+              <div className="text-white/40 text-sm">
                 {isSpanish 
                   ? 'Los pledges permiten al Anchor calcular CIRC_CAP'
                   : 'Pledges allow Anchor to calculate CIRC_CAP'}
@@ -992,17 +992,17 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               {pledges.map((pledge) => (
                 <div
                   key={pledge.pledgeId}
-                  className="bg-[#0d0d0d] border border-green-500/30 rounded-lg p-6"
+                  className="bg-[#0d0d0d] border border-white/30/30 rounded-lg p-6"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="px-3 py-1 bg-green-500/20 text-green-300 text-xs rounded font-bold">
+                        <span className="px-3 py-1 bg-white/20/20 text-white text-xs rounded font-bold">
                           {pledge.status}
                         </span>
                         <span className="text-white font-mono text-sm">{pledge.pledgeId}</span>
                       </div>
-                      <div className="text-sm text-green-300/60">
+                      <div className="text-sm text-white/60">
                         {isSpanish ? 'Beneficiario:' : 'Beneficiary:'} {pledge.beneficiary}
                       </div>
                       {pledge.linkedVUSDPledge && (
@@ -1031,8 +1031,8 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                     <div>
-                      <div className="text-green-300/60 mb-1">{isSpanish ? 'Monto USD:' : 'USD Amount:'}</div>
-                      <div className="text-2xl font-bold text-green-300">
+                      <div className="text-white/60 mb-1">{isSpanish ? 'Monto USD:' : 'USD Amount:'}</div>
+                      <div className="text-2xl font-bold text-white">
                         ${parseFloat(pledge.amountUsd).toLocaleString()}
                       </div>
                     </div>
@@ -1136,7 +1136,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                     <div>
                       <div className="flex items-center gap-3 mb-2">
                         <span className={`px-3 py-1 text-xs rounded font-bold ${
-                          payout.status === 'COMPLETED' ? 'bg-green-500/20 text-green-300' :
+                          payout.status === 'COMPLETED' ? 'bg-white/20/20 text-white' :
                           payout.status === 'PROCESSING' ? 'bg-yellow-500/20 text-yellow-300' :
                           payout.status === 'FAILED' ? 'bg-red-500/20 text-red-400' :
                           'bg-blue-500/20 text-blue-300'
@@ -1171,8 +1171,8 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                     </div>
                     {payout.completedAt && (
                       <div>
-                        <div className="text-green-300/60 mb-1">{isSpanish ? 'Completado:' : 'Completed:'}</div>
-                        <div className="text-green-300 text-sm">
+                        <div className="text-white/60 mb-1">{isSpanish ? 'Completado:' : 'Completed:'}</div>
+                        <div className="text-white text-sm">
                           {new Date(payout.completedAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
                         </div>
                       </div>
@@ -1196,7 +1196,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               <button
                 onClick={downloadReconciliationCSV}
                 disabled={loading}
-                className="px-4 py-2 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 flex items-center gap-2 disabled:opacity-50"
+                className="px-4 py-2 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 flex items-center gap-2 disabled:opacity-50"
               >
                 <Download className="w-4 h-4" />
                 CSV
@@ -1232,9 +1232,9 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                     <div className="text-purple-300/60 mb-1">{isSpanish ? 'Fecha:' : 'Date:'}</div>
                     <div className="text-purple-300 font-bold">{reconciliationData.date}</div>
                   </div>
-                  <div className="bg-green-900/20 rounded p-3">
-                    <div className="text-green-300/60 mb-1">{isSpanish ? 'Pledges:' : 'Pledges:'}</div>
-                    <div className="text-green-300 font-bold">{reconciliationData.summary.totalPledges}</div>
+                  <div className="bg-white/10/20 rounded p-3">
+                    <div className="text-white/60 mb-1">{isSpanish ? 'Pledges:' : 'Pledges:'}</div>
+                    <div className="text-white font-bold">{reconciliationData.summary.totalPledges}</div>
                   </div>
                   <div className="bg-blue-900/20 rounded p-3">
                     <div className="text-blue-300/60 mb-1">{isSpanish ? 'Payouts:' : 'Payouts:'}</div>
@@ -1305,8 +1305,8 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
       {/* Create Pledge Modal - Integrado con API VUSD */}
       {showCreatePledgeModal && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0d0d0d] border-2 border-green-500 rounded-xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-2xl font-bold text-green-300 mb-6 flex items-center gap-3">
+          <div className="bg-[#0d0d0d] border-2 border-white/30 rounded-xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
               <Lock className="w-7 h-7" />
               {isSpanish ? 'Crear Pledge para Anchor VUSD' : 'Create Pledge for Anchor VUSD'}
             </h3>
@@ -1391,7 +1391,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               </div>
 
               <div>
-                <label className="block text-green-300 text-sm mb-2 font-semibold">
+                <label className="block text-white text-sm mb-2 font-semibold">
                   {isSpanish ? '3. Monto USD:' : '3. USD Amount:'}
                 </label>
                 <input
@@ -1399,7 +1399,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                   step="0.01"
                   value={pledgeForm.amountUsd}
                   onChange={(e) => setPledgeForm({ ...pledgeForm, amountUsd: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-[#0a0a0a] border border-green-500/30 rounded-lg px-4 py-3 text-white font-mono text-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                  className="w-full bg-[#0a0a0a] border border-white/30/30 rounded-lg px-4 py-3 text-white font-mono text-xl focus:border-white/30 focus:ring-2 focus:ring-white/30/20"
                   placeholder="0.00"
                   disabled={!!pledgeForm.selectedVUSDPledge}
                 />
@@ -1411,20 +1411,20 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               </div>
 
               <div>
-                <label className="block text-green-300 text-sm mb-2 font-semibold">
+                <label className="block text-white text-sm mb-2 font-semibold">
                   {isSpanish ? '4. Beneficiario:' : '4. Beneficiary:'}
                 </label>
                 <input
                   type="text"
                   value={pledgeForm.beneficiary}
                   onChange={(e) => setPledgeForm({ ...pledgeForm, beneficiary: e.target.value })}
-                  className="w-full bg-[#0a0a0a] border border-green-500/30 rounded-lg px-4 py-3 text-white"
+                  className="w-full bg-[#0a0a0a] border border-white/30/30 rounded-lg px-4 py-3 text-white"
                   disabled={!!pledgeForm.selectedVUSDPledge}
                 />
               </div>
 
               <div>
-                <label className="block text-green-300 text-sm mb-2 font-semibold">
+                <label className="block text-white text-sm mb-2 font-semibold">
                   {isSpanish ? '5. Plazo (días):' : '5. Term (days):'}
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -1435,8 +1435,8 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                       onClick={() => setPledgeForm({ ...pledgeForm, termDays: days })}
                       className={`px-4 py-2 rounded-lg font-bold transition-all ${
                         pledgeForm.termDays === days
-                          ? 'bg-green-500 text-black'
-                          : 'bg-green-500/20 border border-green-500/30 text-green-300 hover:bg-green-500/30'
+                          ? 'bg-white/20 text-black'
+                          : 'bg-white/20/20 border border-white/30/30 text-white hover:bg-white/20/30'
                       }`}
                     >
                       {days}d
@@ -1465,20 +1465,20 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               </div>
 
               <div>
-                <label className="block text-green-300 text-sm mb-2 font-semibold">
+                <label className="block text-white text-sm mb-2 font-semibold">
                   {isSpanish ? '6. Notas (opcional):' : '6. Notes (optional):'}
                 </label>
                 <textarea
                   value={pledgeForm.notes}
                   onChange={(e) => setPledgeForm({ ...pledgeForm, notes: e.target.value })}
-                  className="w-full bg-[#0a0a0a] border border-green-500/30 rounded-lg px-4 py-3 text-white"
+                  className="w-full bg-[#0a0a0a] border border-white/30/30 rounded-lg px-4 py-3 text-white"
                   rows={3}
                   placeholder={isSpanish ? 'Información adicional...' : 'Additional information...'}
                 />
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6 pt-6 border-t border-green-500/20">
+            <div className="flex gap-3 mt-6 pt-6 border-t border-white/30/20">
               <button
                 onClick={() => {
                   setShowCreatePledgeModal(false);
@@ -1492,13 +1492,13 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                     selectedPorReport: ''
                   });
                 }}
-                className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525] font-semibold"
+                className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] rounded-lg hover:bg-[#252525] font-semibold"
               >
                 {isSpanish ? 'Cancelar' : 'Cancel'}
               </button>
               <button
                 onClick={handleCreatePledge}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-black rounded-lg hover:shadow-[0_0_20px_rgba(34,197,94,0.6)] font-bold flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-white/20 to-emerald-500 text-black rounded-lg hover:shadow-[0_0_20px_rgba(34,197,94,0.6)] font-bold flex items-center justify-center gap-2"
               >
                 <Lock className="w-5 h-5" />
                 {isSpanish ? 'Crear Pledge para Anchor' : 'Create Pledge for Anchor'}
@@ -1622,7 +1622,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                     accountType: 'institutional'
                   });
                 }}
-                className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525] font-semibold"
+                className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] rounded-lg hover:bg-[#252525] font-semibold"
               >
                 {isSpanish ? 'Cancelar' : 'Cancel'}
               </button>

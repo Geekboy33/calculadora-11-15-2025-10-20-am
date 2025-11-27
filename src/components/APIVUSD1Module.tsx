@@ -430,13 +430,13 @@ export default function APIVUSD1Module() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <Database className="w-8 h-8 text-[#00ff88]" />
-          <h1 className="text-3xl font-bold text-[#00ff88]">API VUSD1</h1>
-          <span className="px-3 py-1 bg-[#00ff88]/20 text-[#00ff88] text-sm rounded-full border border-[#00ff88]">
+          <Database className="w-8 h-8 text-[#ffffff]" />
+          <h1 className="text-3xl font-bold text-[#ffffff]">API VUSD1</h1>
+          <span className="px-3 py-1 bg-[#ffffff]/20 text-[#ffffff] text-sm rounded-full border border-[#ffffff]">
             Production Ready
           </span>
         </div>
-        <p className="text-[#4d7c4d]">
+        <p className="text-[#ffffff]">
           Pledges, Payouts, Attestations & HMAC Webhooks System
         </p>
       </div>
@@ -455,18 +455,18 @@ export default function APIVUSD1Module() {
       {/* Quick Stats */}
       {reserveSummary && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-[#0d0d0d] border border-[#00ff88]/30 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-[#4d7c4d] text-sm mb-1">
+          <div className="bg-[#0d0d0d] border border-[#ffffff]/30 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-[#ffffff] text-sm mb-1">
               <Shield className="w-4 h-4" />
               Circulating Cap
             </div>
-            <div className="text-2xl font-bold text-[#00ff88]">
+            <div className="text-2xl font-bold text-[#ffffff]">
               ${reserveSummary.circulating_cap.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
             </div>
           </div>
 
           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4">
-            <div className="flex items-center gap-2 text-[#4d7c4d] text-sm mb-1">
+            <div className="flex items-center gap-2 text-[#ffffff] text-sm mb-1">
               <Lock className="w-4 h-4" />
               Pledged USD
             </div>
@@ -476,7 +476,7 @@ export default function APIVUSD1Module() {
           </div>
 
           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4">
-            <div className="flex items-center gap-2 text-[#4d7c4d] text-sm mb-1">
+            <div className="flex items-center gap-2 text-[#ffffff] text-sm mb-1">
               <Activity className="w-4 h-4" />
               Active Pledges
             </div>
@@ -486,7 +486,7 @@ export default function APIVUSD1Module() {
           </div>
 
           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-4">
-            <div className="flex items-center gap-2 text-[#4d7c4d] text-sm mb-1">
+            <div className="flex items-center gap-2 text-[#ffffff] text-sm mb-1">
               <Zap className="w-4 h-4" />
               Total Reserves
             </div>
@@ -501,12 +501,12 @@ export default function APIVUSD1Module() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <button
           onClick={() => setShowPledgeModal(true)}
-          className="bg-[#0d0d0d] border border-[#00ff88] rounded-lg p-6 hover:bg-[#00ff88]/10 transition-colors flex items-center gap-4"
+          className="bg-[#0d0d0d] border border-[#ffffff] rounded-lg p-6 hover:bg-[#ffffff]/10 transition-colors flex items-center gap-4"
         >
-          <Lock className="w-8 h-8 text-[#00ff88]" />
+          <Lock className="w-8 h-8 text-[#ffffff]" />
           <div className="text-left">
-            <div className="font-bold text-[#00ff88]">Create Pledge</div>
-            <div className="text-sm text-[#4d7c4d]">Lock USD for VUSD cap</div>
+            <div className="font-bold text-[#ffffff]">Create Pledge</div>
+            <div className="text-sm text-[#ffffff]">Lock USD for VUSD cap</div>
           </div>
         </button>
 
@@ -542,8 +542,8 @@ export default function APIVUSD1Module() {
             onClick={() => setSelectedView(view as any)}
             className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${
               selectedView === view
-                ? 'bg-[#00ff88] text-black'
-                : 'text-[#4d7c4d] hover:text-[#00ff88]'
+                ? 'bg-[#ffffff] text-black'
+                : 'text-[#ffffff] hover:text-[#ffffff]'
             }`}
           >
             {view === 'api-keys' && <Key className="w-4 h-4" />}
@@ -557,18 +557,18 @@ export default function APIVUSD1Module() {
         {selectedView === 'overview' && reserveSummary && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-[#00ff88] mb-4">Reserve Summary</h2>
+              <h2 className="text-xl font-bold text-[#ffffff] mb-4">Reserve Summary</h2>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-[#4d7c4d]">As of Date:</span>
+                  <span className="text-[#ffffff]">As of Date:</span>
                   <span className="text-white ml-2 font-mono">{reserveSummary.as_of_date}</span>
                 </div>
                 <div>
-                  <span className="text-[#4d7c4d]">Active Payouts:</span>
+                  <span className="text-[#ffffff]">Active Payouts:</span>
                   <span className="text-white ml-2 font-bold">{reserveSummary.active_payouts}</span>
                 </div>
                 <div>
-                  <span className="text-[#4d7c4d]">Unpledged USD:</span>
+                  <span className="text-[#ffffff]">Unpledged USD:</span>
                   <span className="text-white ml-2 font-mono">${reserveSummary.unpledged_usd.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</span>
                 </div>
               </div>
@@ -580,19 +580,19 @@ export default function APIVUSD1Module() {
                 <div className="bg-[#0a0a0a] border border-purple-500/30 rounded-lg p-4">
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">Attestation ID</div>
+                      <div className="text-[#ffffff] mb-1">Attestation ID</div>
                       <div className="text-purple-400 font-mono">{attestation.attestation_id}</div>
                     </div>
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">Document Hash</div>
+                      <div className="text-[#ffffff] mb-1">Document Hash</div>
                       <div className="text-white font-mono text-xs">{attestation.document_hash.substring(0, 32)}...</div>
                     </div>
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">Signing Key</div>
+                      <div className="text-[#ffffff] mb-1">Signing Key</div>
                       <div className="text-white font-mono">{attestation.signing_key_id}</div>
                     </div>
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">Created</div>
+                      <div className="text-[#ffffff] mb-1">Created</div>
                       <div className="text-white">{new Date(attestation.created_at).toLocaleString()}</div>
                     </div>
                   </div>
@@ -605,44 +605,44 @@ export default function APIVUSD1Module() {
         {selectedView === 'pledges' && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-[#00ff88]">Active Pledges</h2>
+              <h2 className="text-xl font-bold text-[#ffffff]">Active Pledges</h2>
               <button
                 onClick={loadData}
-                className="px-4 py-2 bg-[#00ff88]/20 text-[#00ff88] rounded-lg hover:bg-[#00ff88]/30 flex items-center gap-2"
+                className="px-4 py-2 bg-[#ffffff]/20 text-[#ffffff] rounded-lg hover:bg-[#ffffff]/30 flex items-center gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
                 Refresh
               </button>
             </div>
             {pledges.length === 0 ? (
-              <div className="text-center py-12 text-[#4d7c4d]">No active pledges</div>
+              <div className="text-center py-12 text-[#ffffff]">No active pledges</div>
             ) : (
               <div className="space-y-3">
                 {pledges.map((pledge) => (
                   <div
                     key={pledge.id}
-                    className="bg-[#0a0a0a] border border-[#00ff88]/30 rounded-lg p-4"
+                    className="bg-[#0a0a0a] border border-[#ffffff]/30 rounded-lg p-4"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-1 bg-[#00ff88]/20 text-[#00ff88] text-xs rounded">
+                        <span className="px-2 py-1 bg-[#ffffff]/20 text-[#ffffff] text-xs rounded">
                           {pledge.status}
                         </span>
                         <span className="text-white font-mono">{pledge.pledge_id}</span>
                       </div>
-                      <Lock className="w-5 h-5 text-[#00ff88]" />
+                      <Lock className="w-5 h-5 text-[#ffffff]" />
                     </div>
                     <div className="grid grid-cols-3 gap-4 text-sm mb-3">
                       <div>
-                        <div className="text-[#4d7c4d]">Amount</div>
-                        <div className="text-[#00ff88] font-bold">${pledge.amount.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} {pledge.currency}</div>
+                        <div className="text-[#ffffff]">Amount</div>
+                        <div className="text-[#ffffff] font-bold">${pledge.amount.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} {pledge.currency}</div>
                       </div>
                       <div>
-                        <div className="text-[#4d7c4d]">Available</div>
+                        <div className="text-[#ffffff]">Available</div>
                         <div className="text-white font-bold">${pledge.available.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</div>
                       </div>
                       <div>
-                        <div className="text-[#4d7c4d]">Beneficiary</div>
+                        <div className="text-[#ffffff]">Beneficiary</div>
                         <div className="text-white truncate">{pledge.beneficiary}</div>
                       </div>
                     </div>
@@ -711,7 +711,7 @@ export default function APIVUSD1Module() {
         {selectedView === 'payouts' && (
           <div>
             <h2 className="text-xl font-bold text-blue-400 mb-4">Recent Payouts</h2>
-            <div className="text-center py-12 text-[#4d7c4d]">
+            <div className="text-center py-12 text-[#ffffff]">
               Payout tracking coming soon...
             </div>
           </div>
@@ -725,13 +725,13 @@ export default function APIVUSD1Module() {
       {/* Create Pledge Modal */}
       {showPledgeModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0d0d0d] border border-[#00ff88] rounded-lg max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold text-[#00ff88] mb-4">Create New Pledge</h2>
+          <div className="bg-[#0d0d0d] border border-[#ffffff] rounded-lg max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold text-[#ffffff] mb-4">Create New Pledge</h2>
             <form onSubmit={handleCreatePledge} className="space-y-4">
 
               {/* Custody Account Selector */}
-              <div className="bg-[#0a0a0a] border-2 border-[#00ff88]/40 rounded-lg p-4">
-                <label className="block text-[#00ff88] text-sm font-semibold mb-2 flex items-center gap-2">
+              <div className="bg-[#0a0a0a] border-2 border-[#ffffff]/40 rounded-lg p-4">
+                <label className="block text-[#ffffff] text-sm font-semibold mb-2 flex items-center gap-2">
                   <Database className="w-4 h-4" />
                   Select Custody Account *
                 </label>
@@ -739,7 +739,7 @@ export default function APIVUSD1Module() {
                   <div className="bg-[#1a1a1a] border border-yellow-500/30 rounded p-3 text-center">
                     <AlertCircle className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
                     <p className="text-yellow-400 text-sm font-semibold">No Custody Accounts Available</p>
-                    <p className="text-[#4d7c4d] text-xs mt-1">
+                    <p className="text-[#ffffff] text-xs mt-1">
                       Create custody accounts first in the Custody Accounts module
                     </p>
                   </div>
@@ -773,7 +773,7 @@ export default function APIVUSD1Module() {
                         }
                       }}
                       size={Math.min(custodyAccounts.length + 1, 8)}
-                      className="w-full bg-[#0d0d0d] border-2 border-[#00ff88]/30 focus:border-[#00ff88] text-[#e0ffe0] px-4 py-2 rounded-lg outline-none transition-all text-sm overflow-y-auto"
+                      className="w-full bg-[#0d0d0d] border-2 border-[#ffffff]/30 focus:border-[#ffffff] text-[#ffffff] px-4 py-2 rounded-lg outline-none transition-all text-sm overflow-y-auto"
                       style={{ maxHeight: '300px' }}
                       required
                     >
@@ -790,10 +790,10 @@ export default function APIVUSD1Module() {
                         );
                       })}
                     </select>
-                    <div className="text-xs text-[#80ff80] mt-2">
+                    <div className="text-xs text-[#ffffff] mt-2">
                       {custodyAccounts.length > 5 && '⬆️⬇️ Usa scroll para ver más cuentas'}
                       {selectedCustodyAccount && (
-                        <div className="flex items-center gap-1 text-green-400 font-semibold mt-1">
+                        <div className="flex items-center gap-1 text-white font-semibold mt-1">
                           <CheckCircle className="w-3 h-3" />
                           Cuenta seleccionada - Formulario auto-completado
                         </div>
@@ -813,8 +813,8 @@ export default function APIVUSD1Module() {
                 const remainingBalance = totalBalance - alreadyPledged;
                 
                 return (
-                  <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-4">
-                    <label className="text-sm text-green-400 mb-3 block font-semibold flex items-center gap-2">
+                  <div className="bg-gradient-to-r from-white/10/20 to-emerald-900/20 border border-white/30/30 rounded-lg p-4">
+                    <label className="text-sm text-white mb-3 block font-semibold flex items-center gap-2">
                       <Activity className="w-4 h-4" />
                       ⚡ Quick Pledge - % of Remaining Balance
                     </label>
@@ -833,7 +833,7 @@ export default function APIVUSD1Module() {
                               });
                               console.log(`[APIVUSD1] ✅ ${percentage}% of remaining = ${account.currency} ${calculatedAmount.toLocaleString()}`);
                             }}
-                            className="px-3 py-3 bg-gradient-to-br from-green-600 to-emerald-600 text-white rounded-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all text-sm font-bold hover:scale-105"
+                            className="px-3 py-3 bg-gradient-to-br from-white/10 to-emerald-600 text-white rounded-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all text-sm font-bold hover:scale-105"
                           >
                             <div className="text-lg mb-1">{percentage}%</div>
                             <div className="text-xs opacity-90">
@@ -844,7 +844,7 @@ export default function APIVUSD1Module() {
                       })}
                     </div>
                     <div className="mt-3 text-xs text-center space-y-1">
-                      <div className="text-green-300">
+                      <div className="text-white">
                         💰 Remaining Balance: {account.currency} {remainingBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </div>
                       {alreadyPledged > 0 && (
@@ -858,7 +858,7 @@ export default function APIVUSD1Module() {
               })()}
 
               <div>
-                <label className="block text-[#00ff88] text-sm font-semibold mb-2 flex items-center gap-2">
+                <label className="block text-[#ffffff] text-sm font-semibold mb-2 flex items-center gap-2">
                   <DollarSign className="w-4 h-4" />
                   Amount {selectedCustodyAccount && '(editable)'}
                 </label>
@@ -867,10 +867,10 @@ export default function APIVUSD1Module() {
                   step="0.01"
                   value={pledgeForm.amount}
                   onChange={(e) => setPledgeForm({ ...pledgeForm, amount: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-[#0a0a0a] border border-[#00ff88]/30 focus:border-[#00ff88] rounded-lg px-4 py-3 text-white transition-all"
+                  className="w-full bg-[#0a0a0a] border border-[#ffffff]/30 focus:border-[#ffffff] rounded-lg px-4 py-3 text-white transition-all"
                   required
                 />
-                <div className="text-xs text-[#80ff80] mt-1">
+                <div className="text-xs text-[#ffffff] mt-1">
                   {selectedCustodyAccount 
                     ? '✏️ Edit manually or use % buttons above'
                     : '💡 Select a custody account first to use quick %'
@@ -879,7 +879,7 @@ export default function APIVUSD1Module() {
               </div>
 
               <div>
-                <label className="block text-[#4d7c4d] text-sm mb-2">Currency</label>
+                <label className="block text-[#ffffff] text-sm mb-2">Currency</label>
                 <select
                   value={pledgeForm.currency}
                   onChange={(e) => setPledgeForm({ ...pledgeForm, currency: e.target.value })}
@@ -891,24 +891,24 @@ export default function APIVUSD1Module() {
                   <option value="GBP">GBP</option>
                 </select>
                 {!selectedCustodyAccount && (
-                  <p className="text-[#4d7c4d] text-xs mt-1">Select a custody account first</p>
+                  <p className="text-[#ffffff] text-xs mt-1">Select a custody account first</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-[#00ff88] text-sm font-semibold mb-2">Beneficiary</label>
+                <label className="block text-[#ffffff] text-sm font-semibold mb-2">Beneficiary</label>
                 <input
                   type="text"
                   value={pledgeForm.beneficiary}
                   onChange={(e) => setPledgeForm({ ...pledgeForm, beneficiary: e.target.value })}
-                  className="w-full bg-[#0a0a0a] border border-[#00ff88]/30 focus:border-[#00ff88] rounded px-4 py-2 text-white"
+                  className="w-full bg-[#0a0a0a] border border-[#ffffff]/30 focus:border-[#ffffff] rounded px-4 py-2 text-white"
                   required
                 />
-                <p className="text-green-400 text-xs mt-1">Default: VUSD</p>
+                <p className="text-white text-xs mt-1">Default: VUSD</p>
               </div>
 
               <div>
-                <label className="block text-[#4d7c4d] text-sm mb-2">External Reference (Optional)</label>
+                <label className="block text-[#ffffff] text-sm mb-2">External Reference (Optional)</label>
                 <input
                   type="text"
                   value={pledgeForm.external_ref}
@@ -918,7 +918,7 @@ export default function APIVUSD1Module() {
                 />
               </div>
 
-              <div className="flex gap-3 pt-6 border-t border-[#00ff88]/20 mt-6">
+              <div className="flex gap-3 pt-6 border-t border-[#ffffff]/20 mt-6">
                 <button
                   type="button"
                   onClick={() => {
@@ -926,14 +926,14 @@ export default function APIVUSD1Module() {
                     setSelectedCustodyAccount('');
                     setPledgeForm({ amount: 0, currency: 'USD', beneficiary: 'VUSD', external_ref: '', expires_at: '' });
                   }}
-                  className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#00ff88]/30 hover:border-[#00ff88] text-[#00ff88] rounded-lg font-bold transition-all"
+                  className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#ffffff]/30 hover:border-[#ffffff] text-[#ffffff] rounded-lg font-bold transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !selectedCustodyAccount}
-                  className="flex-1 px-6 py-4 bg-gradient-to-r from-[#00ff88] to-[#00cc6a] hover:from-[#00cc6a] hover:to-[#00aa55] text-black rounded-lg font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-[0_0_20px_rgba(0,255,136,0.5)] flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-[#ffffff] to-[#e0e0e0] hover:from-[#e0e0e0] hover:to-[#e0e0e0] text-black rounded-lg font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-[0_0_20px_rgba(255, 255, 255,0.5)] flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
@@ -965,7 +965,7 @@ export default function APIVUSD1Module() {
             <h2 className="text-xl font-bold text-blue-400 mb-4">Create Payout</h2>
             <form onSubmit={handleCreatePayout} className="space-y-4">
               <div>
-                <label className="block text-[#4d7c4d] text-sm mb-2">Select Pledge</label>
+                <label className="block text-[#ffffff] text-sm mb-2">Select Pledge</label>
                 <select
                   value={payoutForm.pledge_id}
                   onChange={(e) => setPayoutForm({ ...payoutForm, pledge_id: e.target.value })}
@@ -982,7 +982,7 @@ export default function APIVUSD1Module() {
               </div>
 
               <div>
-                <label className="block text-[#4d7c4d] text-sm mb-2">Amount</label>
+                <label className="block text-[#ffffff] text-sm mb-2">Amount</label>
                 <input
                   type="number"
                   step="0.01"
@@ -994,7 +994,7 @@ export default function APIVUSD1Module() {
               </div>
 
               <div>
-                <label className="block text-[#4d7c4d] text-sm mb-2">Destination Account</label>
+                <label className="block text-[#ffffff] text-sm mb-2">Destination Account</label>
                 <input
                   type="text"
                   value={payoutForm.destination_account}

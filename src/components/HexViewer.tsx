@@ -110,7 +110,7 @@ export function HexViewer({ data, highlights = [], matches = [], onSelectOffset 
         <div className="flex items-center gap-2 text-sm text-slate-400">
           <span>Size: {data.length} bytes</span>
           {searchResults.length > 0 && (
-            <span className="text-green-400">| {searchResults.length} matches</span>
+            <span className="text-white">| {searchResults.length} matches</span>
           )}
         </div>
 
@@ -199,12 +199,12 @@ export function HexViewer({ data, highlights = [], matches = [], onSelectOffset 
                 className="flex items-center justify-between text-xs p-2 bg-slate-700 rounded cursor-pointer hover:bg-slate-600 transition-colors"
               >
                 <span className="text-slate-400">0x{match.offset.toString(16).padStart(8, '0')}</span>
-                <span className="font-semibold text-green-400">{match.currency}</span>
+                <span className="font-semibold text-white">{match.currency}</span>
                 <span className="text-slate-300">
                   {match.amount ? `${match.amount.toString()} units` : 'N/A'}
                 </span>
                 <span className={`text-xs px-2 py-0.5 rounded ${
-                  match.confidence === 'high' ? 'bg-green-900 text-green-300' :
+                  match.confidence === 'high' ? 'bg-white/10 text-white' :
                   match.confidence === 'medium' ? 'bg-yellow-900 text-yellow-300' :
                   'bg-red-900 text-red-300'
                 }`}>

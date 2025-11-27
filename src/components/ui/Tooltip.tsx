@@ -91,7 +91,7 @@ export function Tooltip({ content, children, position = 'top', delay = 200 }: To
           left: '50%',
           transform: 'translateX(-50%)',
           borderWidth: '4px 4px 0 4px',
-          borderColor: '#00ff88 transparent transparent transparent',
+          borderColor: '#ffffff transparent transparent transparent',
         };
       case 'bottom':
         return {
@@ -100,7 +100,7 @@ export function Tooltip({ content, children, position = 'top', delay = 200 }: To
           left: '50%',
           transform: 'translateX(-50%)',
           borderWidth: '0 4px 4px 4px',
-          borderColor: 'transparent transparent #00ff88 transparent',
+          borderColor: 'transparent transparent #ffffff transparent',
         };
       case 'left':
         return {
@@ -109,7 +109,7 @@ export function Tooltip({ content, children, position = 'top', delay = 200 }: To
           top: '50%',
           transform: 'translateY(-50%)',
           borderWidth: '4px 0 4px 4px',
-          borderColor: 'transparent transparent transparent #00ff88',
+          borderColor: 'transparent transparent transparent #ffffff',
         };
       case 'right':
         return {
@@ -118,7 +118,7 @@ export function Tooltip({ content, children, position = 'top', delay = 200 }: To
           top: '50%',
           transform: 'translateY(-50%)',
           borderWidth: '4px 4px 4px 0',
-          borderColor: 'transparent #00ff88 transparent transparent',
+          borderColor: 'transparent #ffffff transparent transparent',
         };
     }
   };
@@ -138,9 +138,9 @@ export function Tooltip({ content, children, position = 'top', delay = 200 }: To
         <div
           style={getPositionStyles()}
           className={`
-            px-3 py-1.5 bg-[#0d0d0d] border border-[#00ff88] rounded-lg
-            text-xs text-[#00ff88] font-medium whitespace-nowrap
-            shadow-[0_0_20px_rgba(0,255,136,0.4)]
+            px-3 py-1.5 bg-[#0d0d0d] border border-[#ffffff] rounded-lg
+            text-xs text-[#ffffff] font-medium whitespace-nowrap
+            shadow-[0_0_20px_rgba(255, 255, 255,0.4)]
             animate-fade-in
           `}
         >

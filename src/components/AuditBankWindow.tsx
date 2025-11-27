@@ -1612,7 +1612,7 @@ Versión: 5.0
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 p-4 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-full shadow-[0_0_30px_rgba(0,255,136,0.8)] hover:shadow-[0_0_50px_rgba(0,255,136,1)] transition-all hover:scale-110"
+          className="fixed bottom-8 right-8 z-50 p-4 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-full shadow-[0_0_30px_rgba(255, 255, 255,0.8)] hover:shadow-[0_0_50px_rgba(255, 255, 255,1)] transition-all hover:scale-110"
           title="Ir al inicio"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1624,19 +1624,19 @@ Versión: 5.0
       {/* Header */}
       <div className="flex items-center justify-between sticky top-0 bg-[#000000] z-10 py-4 -mt-4 mb-4 border-b border-[#1a1a1a]">
         <div>
-          <h1 className="text-3xl font-bold text-[#00ff88] flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-[#ffffff] flex items-center gap-3">
             <FileSearch className="w-8 h-8" />
             {t.auditTitle}
           </h1>
-          <p className="text-[#4d7c4d] mt-2">{t.auditSubtitle}</p>
+          <p className="text-[#ffffff] mt-2">{t.auditSubtitle}</p>
           {systemBalances.length > 0 && (
-            <p className="text-xs text-[#80ff80] mt-1">✓ {systemBalances.length} divisas en el sistema</p>
+            <p className="text-xs text-[#ffffff] mt-1">✓ {systemBalances.length} divisas en el sistema</p>
           )}
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="px-4 py-2 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] transition-all flex items-center gap-2"
+            className="px-4 py-2 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(255, 255, 255,0.6)] transition-all flex items-center gap-2"
           >
             <File className="w-4 h-4" />
             {t.auditLoadFile}
@@ -1645,15 +1645,15 @@ Versión: 5.0
             <>
               <button 
                 onClick={() => setShowFullData(!showFullData)} 
-                className={`px-4 py-2 ${showFullData ? 'bg-cyan-500/30 border-cyan-400' : 'bg-[#1a1a1a] border-[#2a2a2a]'} border text-[#00ff88] rounded-lg hover:border-[#00ff88]/50 flex items-center gap-2 transition-all`}
+                className={`px-4 py-2 ${showFullData ? 'bg-cyan-500/30 border-cyan-400' : 'bg-[#1a1a1a] border-[#2a2a2a]'} border text-[#ffffff] rounded-lg hover:border-[#ffffff]/50 flex items-center gap-2 transition-all`}
                 title={showFullData ? 'Ocultar datos completos' : 'Mostrar datos completos'}
               >
                 {showFullData ? `👁️ ${t.auditCompleteView}` : `🔒 ${t.auditMaskedView}`}
               </button>
-              <button onClick={handleExportJson} className="px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:border-[#00ff88]/30 flex items-center gap-2">
+              <button onClick={handleExportJson} className="px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] rounded-lg hover:border-[#ffffff]/30 flex items-center gap-2">
                 <Download className="w-4 h-4" /> JSON
               </button>
-              <button onClick={handleExportCsv} className="px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:border-[#00ff88]/30 flex items-center gap-2">
+              <button onClick={handleExportCsv} className="px-4 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] rounded-lg hover:border-[#ffffff]/30 flex items-center gap-2">
                 <Download className="w-4 h-4" /> CSV
               </button>
               <button 
@@ -1672,14 +1672,14 @@ Versión: 5.0
 
       {/* Banner de Vista Completa */}
       {showFullData && (results || extractedData) && (
-        <div className="bg-gradient-to-r from-green-500/20 to-cyan-500/20 border-2 border-green-500/50 rounded-xl p-4 shadow-[0_0_30px_rgba(0,255,136,0.3)]">
+        <div className="bg-gradient-to-r from-white/20/20 to-cyan-500/20 border-2 border-white/30/50 rounded-xl p-4 shadow-[0_0_30px_rgba(255, 255, 255,0.3)]">
           <div className="flex items-center gap-3">
             <div className="text-3xl">👁️</div>
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-green-400">
+              <h3 className="text-lg font-bold text-white">
                 Vista Completa Activada - Todos los Datos Visibles
               </h3>
-              <p className="text-sm text-green-300/80 mt-1">
+              <p className="text-sm text-white/80 mt-1">
                 Mostrando cuentas bancarias, IBANs y toda la información SIN ENMASCARAR. 
                 Puedes ver TODOS los números completos para verificación.
               </p>
@@ -1696,15 +1696,15 @@ Versión: 5.0
 
       {/* Panel de Control */}
       <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-        <h2 className="text-xl font-semibold text-[#00ff88] mb-4">{t.auditDataSources}</h2>
+        <h2 className="text-xl font-semibold text-[#ffffff] mb-4">{t.auditDataSources}</h2>
         
         {/* 🔥 INDICADOR DE INTEGRACIÓN ACTIVA 🔥 */}
-        <div className="mb-4 bg-gradient-to-r from-cyan-500/10 to-green-500/10 border border-cyan-500/30 rounded-lg p-4">
+        <div className="mb-4 bg-gradient-to-r from-cyan-500/10 to-white/20/10 border border-cyan-500/30 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
             <h3 className="text-sm font-semibold text-cyan-400">🔗 {t.auditAnalyzerIntegration}</h3>
           </div>
-          <p className="text-xs text-[#4d7c4d] mb-2">
+          <p className="text-xs text-[#ffffff] mb-2">
             {t.auditAnalyzerDescription}
           </p>
           <div className="flex items-center gap-2 text-xs text-cyan-300">
@@ -1715,12 +1715,12 @@ Versión: 5.0
         
         {systemBalances.length > 0 ? (
           <div className="mb-4 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-[#00ff88] mb-2">
+            <h3 className="text-sm font-semibold text-[#ffffff] mb-2">
               📊 {t.auditSystemBalances} ({systemBalances.length} divisas)
             </h3>
             <div className="flex flex-wrap gap-1 mb-3">
               {systemBalances.map(b => (
-                <span key={b.currency} className="px-2 py-1 bg-[#1a1a1a] border border-[#00ff88]/30 rounded text-xs text-[#00ff88] font-mono">
+                <span key={b.currency} className="px-2 py-1 bg-[#1a1a1a] border border-[#ffffff]/30 rounded text-xs text-[#ffffff] font-mono">
                   {b.currency}: {b.totalAmount.toLocaleString?.() ?? "0"}
                 </span>
               ))}
@@ -1728,14 +1728,14 @@ Versión: 5.0
             <button
               onClick={handleAnalyzeSystem}
               disabled={isScanning}
-              className="w-full px-4 py-2 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] disabled:opacity-50"
+              className="w-full px-4 py-2 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(255, 255, 255,0.6)] disabled:opacity-50"
             >
               <Play className="w-4 h-4 inline mr-2" />
               {isScanning ? `${t.auditProcessing}` : t.auditAnalyzeBalances}
             </button>
           </div>
         ) : (
-          <div className="text-center py-4 text-[#4d7c4d] text-sm">
+          <div className="text-center py-4 text-[#ffffff] text-sm">
             No hay balances. Ve al "Analizador de Archivos Grandes" para procesar un archivo Digital Commercial Bank Ltd.
           </div>
         )}
@@ -1743,11 +1743,11 @@ Versión: 5.0
         {isScanning && (
           <div className="mt-4">
             <div className="flex justify-between text-sm mb-2">
-              <span className="text-[#4d7c4d]">Procesando...</span>
-              <span className="text-[#00ff88] font-mono">{Math.round(progress)}%</span>
+              <span className="text-[#ffffff]">Procesando...</span>
+              <span className="text-[#ffffff] font-mono">{Math.round(progress)}%</span>
             </div>
             <div className="w-full h-2 bg-[#0a0a0a] rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-[#00ff88] to-[#00cc6a] transition-all" style={{ width: `${progress}%` }} />
+              <div className="h-full bg-gradient-to-r from-[#ffffff] to-[#e0e0e0] transition-all" style={{ width: `${progress}%` }} />
             </div>
           </div>
         )}
@@ -1756,14 +1756,14 @@ Versión: 5.0
       {/* Datos Extraídos - MEJORADO CON VISUALIZACIÓN COMPLETA */}
       {extractedData && (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-[#00ff88] mb-6 flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-[#ffffff] mb-6 flex items-center gap-2">
             <Building2 className="w-5 h-5" />
             📋 Información Completa Extraída del Digital Commercial Bank Ltd
           </h2>
 
           {/* Índice de navegación rápida */}
-          <div className="mb-6 bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] border border-[#00ff88]/20 rounded-lg p-4">
-            <div className="text-xs font-semibold text-[#00ff88] mb-2">📑 Índice de Navegación Rápida:</div>
+          <div className="mb-6 bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] border border-[#ffffff]/20 rounded-lg p-4">
+            <div className="text-xs font-semibold text-[#ffffff] mb-2">📑 Índice de Navegación Rápida:</div>
             <div className="flex flex-wrap gap-2">
               <button onClick={() => document.getElementById('section-accounts')?.scrollIntoView({ behavior: 'smooth' })} 
                 className="px-3 py-1 bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs rounded hover:bg-blue-500/30 transition-colors">
@@ -1774,7 +1774,7 @@ Versión: 5.0
                 🌍 IBANs ({extractedData.ibanCodes.length})
               </button>
               <button onClick={() => document.getElementById('section-swift')?.scrollIntoView({ behavior: 'smooth' })} 
-                className="px-3 py-1 bg-green-500/20 border border-green-500/40 text-green-300 text-xs rounded hover:bg-green-500/30 transition-colors">
+                className="px-3 py-1 bg-white/20/20 border border-white/30/40 text-white text-xs rounded hover:bg-white/20/30 transition-colors">
                 📡 SWIFT ({extractedData.swiftCodes.length})
               </button>
               <button onClick={() => document.getElementById('section-banks')?.scrollIntoView({ behavior: 'smooth' })} 
@@ -1810,10 +1810,10 @@ Versión: 5.0
               <div className="text-3xl font-bold text-purple-400">{extractedData.ibanCodes.length}</div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/40 rounded-lg p-4">
-              <TrendingUp className="w-5 h-5 text-green-400 mb-2" />
-              <div className="text-sm text-green-300">SWIFT/BIC</div>
-              <div className="text-3xl font-bold text-green-400">{extractedData.swiftCodes.length}</div>
+            <div className="bg-gradient-to-br from-white/20/20 to-white/10/10 border border-white/30/40 rounded-lg p-4">
+              <TrendingUp className="w-5 h-5 text-white mb-2" />
+              <div className="text-sm text-white">SWIFT/BIC</div>
+              <div className="text-3xl font-bold text-white">{extractedData.swiftCodes.length}</div>
             </div>
 
             <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border border-yellow-500/40 rounded-lg p-4">
@@ -1842,20 +1842,20 @@ Versión: 5.0
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                 {extractedData.accountNumbers.map((acc, i) => (
                   <div key={i} className="bg-[#000] border border-blue-500/20 rounded p-3 hover:border-blue-400/50 transition-colors">
-                    <div className="text-xs text-[#4d7c4d] mb-1">Cuenta #{i + 1}</div>
+                    <div className="text-xs text-[#ffffff] mb-1">Cuenta #{i + 1}</div>
                     <div className={`${showFullData ? 'text-sm' : 'text-xs'} text-blue-300 font-mono font-bold break-all`}>
                       {showFullData ? acc : (acc.length >= 10 ? `******${acc.slice(-4)}` : acc)}
                     </div>
-                    <div className="text-xs text-[#4d7c4d] mt-1">{acc.length} dígitos</div>
+                    <div className="text-xs text-[#ffffff] mt-1">{acc.length} dígitos</div>
                     {showFullData && (
-                      <div className="mt-1 text-xs text-green-400">
+                      <div className="mt-1 text-xs text-white">
                         ✓ Datos completos visibles
                       </div>
                     )}
                   </div>
               ))}
             </div>
-              <div className="mt-2 text-xs text-[#4d7c4d] text-center">
+              <div className="mt-2 text-xs text-[#ffffff] text-center">
                 {extractedData.accountNumbers.length} cuentas detectadas • Scroll para ver todas
           </div>
             </div>
@@ -1874,22 +1874,22 @@ Versión: 5.0
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                 {extractedData.ibanCodes.map((iban, i) => (
                   <div key={i} className="bg-[#000] border border-purple-500/20 rounded p-3 hover:border-purple-400/50 transition-colors">
-                    <div className="text-xs text-[#4d7c4d] mb-1">IBAN #{i + 1}</div>
+                    <div className="text-xs text-[#ffffff] mb-1">IBAN #{i + 1}</div>
                     <div className={`${showFullData ? 'text-sm' : 'text-xs'} text-purple-300 font-mono font-bold break-all`}>
                       {showFullData ? iban : `${iban.slice(0, 4)}****${iban.slice(-4)}`}
                     </div>
-                    <div className="text-xs text-[#4d7c4d] mt-1">
+                    <div className="text-xs text-[#ffffff] mt-1">
                       País: {iban.slice(0, 2)} | {iban.length} caracteres
                     </div>
                     {showFullData && (
-                      <div className="mt-1 text-xs text-green-400">
+                      <div className="mt-1 text-xs text-white">
                         ✓ IBAN completo visible
                       </div>
                     )}
                   </div>
                 ))}
               </div>
-              <div className="mt-2 text-xs text-[#4d7c4d] text-center">
+              <div className="mt-2 text-xs text-[#ffffff] text-center">
                 {extractedData.ibanCodes.length} códigos IBAN detectados • Scroll para ver todos
               </div>
             </div>
@@ -1897,23 +1897,23 @@ Versión: 5.0
 
           {/* LISTA COMPLETA DE SWIFT CODES */}
           {extractedData.swiftCodes.length > 0 && (
-            <div id="section-swift" className="mb-4 bg-[#0a0a0a] border border-green-500/30 rounded-lg p-4 scroll-mt-20">
-              <h3 className="text-lg font-bold text-green-400 mb-3 flex items-center gap-2">
+            <div id="section-swift" className="mb-4 bg-[#0a0a0a] border border-white/30/30 rounded-lg p-4 scroll-mt-20">
+              <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
                 <TrendingUp className="w-5 h-5" />
                 📡 Códigos SWIFT/BIC ({extractedData.swiftCodes.length})
-                <span className="ml-auto text-xs text-green-300 bg-green-500/20 px-2 py-1 rounded">
+                <span className="ml-auto text-xs text-white bg-white/20/20 px-2 py-1 rounded">
                   Scroll para ver todos →
                 </span>
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                 {extractedData.swiftCodes.map((swift, i) => (
-                  <div key={i} className="bg-[#000] border border-green-500/20 rounded p-2 text-center hover:border-green-400/50 transition-colors">
-                    <div className="text-lg text-green-300 font-mono font-bold">{swift}</div>
-                    <div className="text-xs text-[#4d7c4d]">País: {swift.slice(4, 6)} | #{i + 1}</div>
+                  <div key={i} className="bg-[#000] border border-white/30/20 rounded p-2 text-center hover:border-white/30/50 transition-colors">
+                    <div className="text-lg text-white font-mono font-bold">{swift}</div>
+                    <div className="text-xs text-[#ffffff]">País: {swift.slice(4, 6)} | #{i + 1}</div>
                   </div>
                 ))}
               </div>
-              <div className="mt-2 text-xs text-[#4d7c4d] text-center">
+              <div className="mt-2 text-xs text-[#ffffff] text-center">
                 {extractedData.swiftCodes.length} códigos SWIFT detectados • Scroll para ver todos
               </div>
             </div>
@@ -1933,11 +1933,11 @@ Versión: 5.0
                 {extractedData.bankNames.map((bank, i) => (
                   <div key={i} className="bg-[#000] border border-yellow-500/20 rounded p-2 hover:border-yellow-400/50 transition-colors">
                     <div className="text-sm text-yellow-300 font-semibold">• {bank}</div>
-                    <div className="text-xs text-[#4d7c4d]">Institución #{i + 1}</div>
+                    <div className="text-xs text-[#ffffff]">Institución #{i + 1}</div>
                   </div>
                 ))}
               </div>
-              <div className="mt-2 text-xs text-[#4d7c4d] text-center">
+              <div className="mt-2 text-xs text-[#ffffff] text-center">
                 {extractedData.bankNames.length} instituciones identificadas • Scroll para ver todas
               </div>
             </div>
@@ -1957,11 +1957,11 @@ Versión: 5.0
                 {extractedData.amounts.map((amt, i) => (
                   <div key={i} className="bg-[#000] border border-cyan-500/20 rounded p-2 hover:border-cyan-400/50 transition-colors">
                     <div className="text-lg text-cyan-300 font-mono font-bold">{amt.currency} {amt.value.toLocaleString?.() ?? "0"}</div>
-                    <div className="text-xs text-[#4d7c4d]">Offset: {amt.offset} | Monto #{i + 1}</div>
+                    <div className="text-xs text-[#ffffff]">Offset: {amt.offset} | Monto #{i + 1}</div>
                   </div>
                 ))}
               </div>
-              <div className="mt-2 text-xs text-[#4d7c4d] text-center">
+              <div className="mt-2 text-xs text-[#ffffff] text-center">
                 {extractedData.amounts.length} montos detectados • Scroll para ver todos
               </div>
             </div>
@@ -1969,16 +1969,16 @@ Versión: 5.0
 
           {/* Metadatos */}
           <div className="mt-6 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-[#00ff88] mb-3">📊 Metadatos</h3>
+            <h3 className="text-sm font-semibold text-[#ffffff] mb-3">📊 Metadatos</h3>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-4 text-sm">
-              <div><div className="text-[#4d7c4d]">Tamaño</div><div className="text-[#80ff80] font-mono">{(extractedData.metadata.fileSize / 1024).toFixed(2)} KB</div></div>
-              <div><div className="text-[#4d7c4d]">Bloques</div><div className="text-[#80ff80] font-mono">{extractedData.metadata.blocksDetected}</div></div>
-              <div><div className="text-[#4d7c4d]">Cuentas</div><div className="text-[#80ff80] font-mono">{extractedData.metadata.totalAccounts}</div></div>
-              <div><div className="text-[#4d7c4d]">Bancos</div><div className="text-[#80ff80] font-mono">{extractedData.metadata.totalBanks}</div></div>
-              <div><div className="text-[#4d7c4d]">Divisas</div><div className="text-[#80ff80] font-mono">{extractedData.metadata.totalCurrencies}</div></div>
+              <div><div className="text-[#ffffff]">Tamaño</div><div className="text-[#ffffff] font-mono">{(extractedData.metadata.fileSize / 1024).toFixed(2)} KB</div></div>
+              <div><div className="text-[#ffffff]">Bloques</div><div className="text-[#ffffff] font-mono">{extractedData.metadata.blocksDetected}</div></div>
+              <div><div className="text-[#ffffff]">Cuentas</div><div className="text-[#ffffff] font-mono">{extractedData.metadata.totalAccounts}</div></div>
+              <div><div className="text-[#ffffff]">Bancos</div><div className="text-[#ffffff] font-mono">{extractedData.metadata.totalBanks}</div></div>
+              <div><div className="text-[#ffffff]">Divisas</div><div className="text-[#ffffff] font-mono">{extractedData.metadata.totalCurrencies}</div></div>
               <div>
-                <div className="text-[#4d7c4d]">Entropía</div>
-                <div className={`font-mono ${extractedData.metadata.hasEncryption ? 'text-red-400' : 'text-green-400'}`}>
+                <div className="text-[#ffffff]">Entropía</div>
+                <div className={`font-mono ${extractedData.metadata.hasEncryption ? 'text-red-400' : 'text-white'}`}>
                   {extractedData.metadata.entropyLevel.toFixed(2)}
                 </div>
               </div>
@@ -1987,18 +1987,18 @@ Versión: 5.0
 
           {/* Datos RAW */}
           <div className="mt-4 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-[#00ff88] mb-3">🔬 Análisis Forense</h3>
+            <h3 className="text-sm font-semibold text-[#ffffff] mb-3">🔬 Análisis Forense</h3>
             <div className="space-y-3">
               <div>
-                <div className="text-xs text-[#4d7c4d] mb-1">Firma Binaria (16 bytes):</div>
+                <div className="text-xs text-[#ffffff] mb-1">Firma Binaria (16 bytes):</div>
                 <div className="bg-[#000] border border-[#1a1a1a] rounded p-2">
                   <code className="text-xs text-cyan-400 font-mono">{extractedData.rawData.binarySignature}</code>
                 </div>
               </div>
               <div>
-                <div className="text-xs text-[#4d7c4d] mb-1">Muestra de Texto (500 caracteres):</div>
+                <div className="text-xs text-[#ffffff] mb-1">Muestra de Texto (500 caracteres):</div>
                 <div className="bg-[#000] border border-[#1a1a1a] rounded p-2 max-h-32 overflow-y-auto">
-                  <code className="text-xs text-green-400 font-mono whitespace-pre-wrap">{extractedData.rawData.textSample}</code>
+                  <code className="text-xs text-white font-mono whitespace-pre-wrap">{extractedData.rawData.textSample}</code>
                 </div>
               </div>
             </div>
@@ -2006,11 +2006,11 @@ Versión: 5.0
 
           {/* === INGENIERÍA INVERSA AVANZADA === */}
           {extractedData.reverseEngineering && (
-            <div id="section-reverse" className="mt-4 bg-gradient-to-br from-[#0d0d0d] to-[#1a0a0a] border-2 border-[#00ff88]/30 rounded-xl p-6 shadow-[0_0_20px_rgba(0,255,136,0.2)] scroll-mt-20">
-              <h3 className="text-xl font-bold text-[#00ff88] mb-4 flex items-center gap-2">
+            <div id="section-reverse" className="mt-4 bg-gradient-to-br from-[#0d0d0d] to-[#1a0a0a] border-2 border-[#ffffff]/30 rounded-xl p-6 shadow-[0_0_20px_rgba(255, 255, 255,0.2)] scroll-mt-20">
+              <h3 className="text-xl font-bold text-[#ffffff] mb-4 flex items-center gap-2">
                 🧬 Ingeniería Inversa - Análisis Profundo
                 <span className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${
-                  extractedData.reverseEngineering.confidence >= 80 ? 'bg-green-500/20 text-green-400' :
+                  extractedData.reverseEngineering.confidence >= 80 ? 'bg-white/20/20 text-white' :
                   extractedData.reverseEngineering.confidence >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
                   'bg-red-500/20 text-red-400'
                 }`}>
@@ -2020,7 +2020,7 @@ Versión: 5.0
 
               {/* Firmas del Archivo */}
               {extractedData.reverseEngineering.fileSignatures && extractedData.reverseEngineering.fileSignatures.length > 0 && (
-                <div className="mb-4 bg-[#0a0a0a] border border-[#00ff88]/20 rounded-lg p-4">
+                <div className="mb-4 bg-[#0a0a0a] border border-[#ffffff]/20 rounded-lg p-4">
                   <div className="text-sm font-semibold text-cyan-400 mb-2">🔐 Firmas Detectadas:</div>
                   <div className="flex flex-wrap gap-2">
                     {extractedData.reverseEngineering.fileSignatures.map((sig: string, i: number) => (
@@ -2029,7 +2029,7 @@ Versión: 5.0
                       </span>
                     ))}
                   </div>
-                  <div className="mt-2 text-xs text-[#4d7c4d]">
+                  <div className="mt-2 text-xs text-[#ffffff]">
                     Header Bytes: {extractedData.reverseEngineering.headerBytes?.slice(0, 8).map((b: number) => 
                       '0x' + b.toString(16).padStart(2, '0').toUpperCase()
                     ).join(' ')}
@@ -2039,7 +2039,7 @@ Versión: 5.0
 
               {/* Campos Estructurados Decompilados */}
               {extractedData.reverseEngineering.structuredFieldsCount > 0 && (
-                <div className="mb-4 bg-[#0a0a0a] border border-[#00ff88]/20 rounded-lg p-4">
+                <div className="mb-4 bg-[#0a0a0a] border border-[#ffffff]/20 rounded-lg p-4">
                   <div className="text-sm font-semibold text-purple-400 mb-2">
                     📊 Campos Binarios Decompilados: {extractedData.reverseEngineering.structuredFieldsCount}
                   </div>
@@ -2047,13 +2047,13 @@ Versión: 5.0
                     {extractedData.reverseEngineering.structuredFieldsSample?.map((field: any, i: number) => (
                       <div key={i} className="bg-[#000] border border-[#1a1a1a] rounded p-2">
                         <div className="flex justify-between text-xs">
-                          <span className="text-[#4d7c4d]">Offset: {field.offset}</span>
+                          <span className="text-[#ffffff]">Offset: {field.offset}</span>
                           <span className="text-purple-400 font-mono">{field.type}</span>
                         </div>
-                        <div className="text-sm text-[#00ff88] font-mono font-bold mt-1">
+                        <div className="text-sm text-[#ffffff] font-mono font-bold mt-1">
                           {typeof field.value === 'number' ? field.value.toLocaleString?.() ?? "0" : field.value}
                         </div>
-                        <div className="text-xs text-[#4d7c4d] mt-1">{field.interpretation}</div>
+                        <div className="text-xs text-[#ffffff] mt-1">{field.interpretation}</div>
                       </div>
                     ))}
                   </div>
@@ -2063,12 +2063,12 @@ Versión: 5.0
               {/* Patrones Hexadecimales */}
               {(extractedData.reverseEngineering.hexPatterns?.sha256Count > 0 || 
                 extractedData.reverseEngineering.hexPatterns?.md5Count > 0) && (
-                <div className="mb-4 bg-[#0a0a0a] border border-[#00ff88]/20 rounded-lg p-4">
+                <div className="mb-4 bg-[#0a0a0a] border border-[#ffffff]/20 rounded-lg p-4">
                   <div className="text-sm font-semibold text-orange-400 mb-2">🔑 Hashes y Claves Detectadas:</div>
                   <div className="space-y-2">
                     {extractedData.reverseEngineering.hexPatterns.sha256Count > 0 && (
                       <div>
-                        <div className="text-xs text-[#4d7c4d] mb-1">
+                        <div className="text-xs text-[#ffffff] mb-1">
                           SHA-256 ({extractedData.reverseEngineering.hexPatterns.sha256Count}):
                         </div>
                         {extractedData.reverseEngineering.hexPatterns.sha256Samples?.map((hash: string, i: number) => (
@@ -2080,7 +2080,7 @@ Versión: 5.0
                     )}
                     {extractedData.reverseEngineering.hexPatterns.md5Count > 0 && (
                       <div>
-                        <div className="text-xs text-[#4d7c4d] mb-1">
+                        <div className="text-xs text-[#ffffff] mb-1">
                           MD5 ({extractedData.reverseEngineering.hexPatterns.md5Count}):
                         </div>
                         {extractedData.reverseEngineering.hexPatterns.md5Samples?.map((hash: string, i: number) => (
@@ -2098,7 +2098,7 @@ Versión: 5.0
               {(extractedData.reverseEngineering.dataStructures?.jsonLikeCount > 0 || 
                 extractedData.reverseEngineering.dataStructures?.xmlTagsCount > 0 ||
                 extractedData.reverseEngineering.dataStructures?.keyValuePairsCount > 0) && (
-                <div className="bg-[#0a0a0a] border border-[#00ff88]/20 rounded-lg p-4">
+                <div className="bg-[#0a0a0a] border border-[#ffffff]/20 rounded-lg p-4">
                   <div className="text-sm font-semibold text-blue-400 mb-2">🧩 Estructuras de Datos Detectadas:</div>
                   <div className="grid grid-cols-3 gap-4 mb-3">
                     {extractedData.reverseEngineering.dataStructures.jsonLikeCount > 0 && (
@@ -2106,15 +2106,15 @@ Versión: 5.0
                         <div className="text-2xl font-bold text-blue-400">
                           {extractedData.reverseEngineering.dataStructures.jsonLikeCount}
                         </div>
-                        <div className="text-xs text-[#4d7c4d]">JSON-like</div>
+                        <div className="text-xs text-[#ffffff]">JSON-like</div>
                       </div>
                     )}
                     {extractedData.reverseEngineering.dataStructures.xmlTagsCount > 0 && (
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-400">
+                        <div className="text-2xl font-bold text-white">
                           {extractedData.reverseEngineering.dataStructures.xmlTagsCount}
                         </div>
-                        <div className="text-xs text-[#4d7c4d]">XML Tags</div>
+                        <div className="text-xs text-[#ffffff]">XML Tags</div>
                       </div>
                     )}
                     {extractedData.reverseEngineering.dataStructures.keyValuePairsCount > 0 && (
@@ -2122,14 +2122,14 @@ Versión: 5.0
                         <div className="text-2xl font-bold text-purple-400">
                           {extractedData.reverseEngineering.dataStructures.keyValuePairsCount}
                         </div>
-                        <div className="text-xs text-[#4d7c4d]">Key-Value Pairs</div>
+                        <div className="text-xs text-[#ffffff]">Key-Value Pairs</div>
                       </div>
                     )}
                   </div>
                   <div className="max-h-[400px] overflow-y-auto space-y-1 pr-2 custom-scrollbar">
                     {extractedData.reverseEngineering.dataStructures.kvSamples?.map((kv: string, i: number) => (
                       <div key={i} className="bg-[#000] border border-[#1a1a1a] rounded p-1">
-                        <code className="text-xs text-[#80ff80] font-mono">{kv}</code>
+                        <code className="text-xs text-[#ffffff] font-mono">{kv}</code>
                       </div>
                     ))}
                   </div>
@@ -2142,7 +2142,7 @@ Versión: 5.0
 
       {/* Banner de procesamiento automático */}
       {results && autoProcessed && (
-        <div className="bg-gradient-to-r from-cyan-500/20 to-green-500/20 border-2 border-cyan-500/50 rounded-xl p-4 shadow-[0_0_30px_rgba(0,255,255,0.3)]">
+        <div className="bg-gradient-to-r from-cyan-500/20 to-white/20/20 border-2 border-cyan-500/50 rounded-xl p-4 shadow-[0_0_30px_rgba(0,255,255,0.3)]">
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
             <div>
@@ -2153,7 +2153,7 @@ Versión: 5.0
                 Los datos fueron extraídos, desencriptados y clasificados automáticamente. Sincronización en tiempo real activa.
               </p>
             </div>
-            <CheckCircle className="w-8 h-8 text-green-400 ml-auto" />
+            <CheckCircle className="w-8 h-8 text-white ml-auto" />
           </div>
         </div>
       )}
@@ -2163,7 +2163,7 @@ Versión: 5.0
         <>
           {/* Clasificación M0-M4 */}
           <div id="section-m0m4" className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6 scroll-mt-20">
-            <h2 className="text-xl font-semibold text-[#00ff88] mb-6 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-[#ffffff] mb-6 flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
               {t.auditMonetaryClassification}
             </h2>
@@ -2179,7 +2179,7 @@ Versión: 5.0
                 const colors = {
                   M0: { bg: 'bg-purple-500/20 border-purple-500/40', text: 'text-purple-400' },
                   M1: { bg: 'bg-blue-500/20 border-blue-500/40', text: 'text-blue-400' },
-                  M2: { bg: 'bg-green-500/20 border-green-500/40', text: 'text-green-400' },
+                  M2: { bg: 'bg-white/20/20 border-white/30/40', text: 'text-white' },
                   M3: { bg: 'bg-yellow-500/20 border-yellow-500/40', text: 'text-yellow-400' },
                   M4: { bg: 'bg-red-500/20 border-red-500/40', text: 'text-red-400' },
                 };
@@ -2197,11 +2197,11 @@ Versión: 5.0
                     <div className={`text-sm font-bold mb-1 ${colors[classification].text}`}>
                       {classification}
                     </div>
-                    <div className="text-xs text-[#4d7c4d] mb-2">{descriptions[classification]}</div>
+                    <div className="text-xs text-[#ffffff] mb-2">{descriptions[classification]}</div>
                     <div className={`text-lg font-mono font-bold ${colors[classification].text}`}>
                       ${totalUsdForClass.toLocaleString?.() ?? "0"}
                     </div>
-                    <div className="text-xs text-[#4d7c4d] mt-1">
+                    <div className="text-xs text-[#ffffff] mt-1">
                       {results.agregados.filter(a => a[classification] > 0).length} divisas
                     </div>
                   </div>
@@ -2212,7 +2212,7 @@ Versión: 5.0
 
           {/* Totales por Divisa */}
           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-            <h2 className="text-xl font-semibold text-[#00ff88] mb-6 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-[#ffffff] mb-6 flex items-center gap-2">
               <DollarSign className="w-5 h-5" />
               Totales por Divisa
             </h2>
@@ -2220,14 +2220,14 @@ Versión: 5.0
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-[#1a1a1a]">
-                    <th className="text-left py-3 px-4 text-[#4d7c4d]">Divisa</th>
+                    <th className="text-left py-3 px-4 text-[#ffffff]">Divisa</th>
                     <th className="text-right py-3 px-4 text-cyan-400">Total</th>
                     <th className="text-right py-3 px-4 text-purple-400">M0</th>
                     <th className="text-right py-3 px-4 text-blue-400">M1</th>
-                    <th className="text-right py-3 px-4 text-green-400">M2</th>
+                    <th className="text-right py-3 px-4 text-white">M2</th>
                     <th className="text-right py-3 px-4 text-yellow-400">M3</th>
                     <th className="text-right py-3 px-4 text-red-400">M4</th>
-                    <th className="text-right py-3 px-4 text-[#00ff88]">USD Equiv.</th>
+                    <th className="text-right py-3 px-4 text-[#ffffff]">USD Equiv.</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2236,38 +2236,38 @@ Versión: 5.0
                     const activeClass = a.M0 > 0 ? 'M0' : a.M1 > 0 ? 'M1' : a.M2 > 0 ? 'M2' : a.M3 > 0 ? 'M3' : a.M4 > 0 ? 'M4' : '';
                     return (
                       <tr key={a.currency} className="border-b border-[#1a1a1a] hover:bg-[#141414]">
-                        <td className="py-3 px-4 text-[#80ff80] font-bold">{a.currency}</td>
+                        <td className="py-3 px-4 text-[#ffffff] font-bold">{a.currency}</td>
                         <td className="py-3 px-4 text-right font-mono text-cyan-400 font-bold">
                           {total.toLocaleString?.() ?? "0"}
                         </td>
-                        <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M0' ? 'text-purple-400 font-bold' : 'text-[#4d7c4d]'}`}>
+                        <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M0' ? 'text-purple-400 font-bold' : 'text-[#ffffff]'}`}>
                           {a.M0 > 0 ? a.M0.toLocaleString?.() ?? "0" : '-'}
                         </td>
-                        <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M1' ? 'text-blue-400 font-bold' : 'text-[#4d7c4d]'}`}>
+                        <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M1' ? 'text-blue-400 font-bold' : 'text-[#ffffff]'}`}>
                           {a.M1 > 0 ? a.M1.toLocaleString?.() ?? "0" : '-'}
                         </td>
-                        <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M2' ? 'text-green-400 font-bold' : 'text-[#4d7c4d]'}`}>
+                        <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M2' ? 'text-white font-bold' : 'text-[#ffffff]'}`}>
                           {a.M2 > 0 ? a.M2.toLocaleString?.() ?? "0" : '-'}
                         </td>
-                        <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M3' ? 'text-yellow-400 font-bold' : 'text-[#4d7c4d]'}`}>
+                        <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M3' ? 'text-yellow-400 font-bold' : 'text-[#ffffff]'}`}>
                           {a.M3 > 0 ? a.M3.toLocaleString?.() ?? "0" : '-'}
                         </td>
-                        <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M4' ? 'text-red-400 font-bold' : 'text-[#4d7c4d]'}`}>
+                        <td className={`py-3 px-4 text-right font-mono text-sm ${activeClass === 'M4' ? 'text-red-400 font-bold' : 'text-[#ffffff]'}`}>
                           {a.M4 > 0 ? a.M4.toLocaleString?.() ?? "0" : '-'}
                         </td>
-                        <td className="py-3 px-4 text-right text-[#00ff88] font-mono font-bold">${a.equiv_usd.toLocaleString?.() ?? "0"}</td>
+                        <td className="py-3 px-4 text-right text-[#ffffff] font-mono font-bold">${a.equiv_usd.toLocaleString?.() ?? "0"}</td>
                       </tr>
                     );
                   })}
-                  <tr className="bg-[#141414] font-bold border-t-2 border-[#00ff88]/30">
-                    <td className="py-3 px-4 text-[#00ff88] text-lg">TOTAL USD</td>
+                  <tr className="bg-[#141414] font-bold border-t-2 border-[#ffffff]/30">
+                    <td className="py-3 px-4 text-[#ffffff] text-lg">TOTAL USD</td>
                     <td className="py-3 px-4 text-right text-cyan-400 font-mono text-lg">-</td>
                     <td className="py-3 px-4 text-right text-purple-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M0 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
                     <td className="py-3 px-4 text-right text-blue-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M1 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
-                    <td className="py-3 px-4 text-right text-green-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M2 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
+                    <td className="py-3 px-4 text-right text-white font-mono">${results.agregados.reduce((sum, a) => sum + a.M2 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
                     <td className="py-3 px-4 text-right text-yellow-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M3 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
                     <td className="py-3 px-4 text-right text-red-400 font-mono">${results.agregados.reduce((sum, a) => sum + a.M4 * (EXCHANGE_RATES[a.currency] || 1), 0).toLocaleString?.() ?? "0"}</td>
-                    <td className="py-3 px-4 text-right text-[#00ff88] font-mono text-lg">${totalUsd.toLocaleString?.() ?? "0"}</td>
+                    <td className="py-3 px-4 text-right text-[#ffffff] font-mono text-lg">${totalUsd.toLocaleString?.() ?? "0"}</td>
                   </tr>
                 </tbody>
               </table>
@@ -2276,10 +2276,10 @@ Versión: 5.0
 
           {/* Hallazgos */}
           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-            <h2 className="text-xl font-semibold text-[#00ff88] mb-6 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-[#ffffff] mb-6 flex items-center justify-between">
               <span>{t.auditDetailedFindings} ({results.hallazgos.length})</span>
               {showFullData && (
-                <span className="text-xs text-green-400 bg-green-500/20 px-3 py-1 rounded">
+                <span className="text-xs text-white bg-white/20/20 px-3 py-1 rounded">
                   👁️ Vista Completa Activa - Todos los datos visibles
                 </span>
               )}
@@ -2289,16 +2289,16 @@ Versión: 5.0
                 const classColors = {
                   M0: { bg: 'bg-purple-500/20 border-purple-500/40', text: 'text-purple-400' },
                   M1: { bg: 'bg-blue-500/20 border-blue-500/40', text: 'text-blue-400' },
-                  M2: { bg: 'bg-green-500/20 border-green-500/40', text: 'text-green-400' },
+                  M2: { bg: 'bg-white/20/20 border-white/30/40', text: 'text-white' },
                   M3: { bg: 'bg-yellow-500/20 border-yellow-500/40', text: 'text-yellow-400' },
                   M4: { bg: 'bg-red-500/20 border-red-500/40', text: 'text-red-400' },
                 };
                 const color = classColors[h.classification];
 
                 return (
-                  <div key={h.id_registro} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4 hover:border-[#00ff88]/30 transition-colors">
+                  <div key={h.id_registro} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4 hover:border-[#ffffff]/30 transition-colors">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-[#00ff88] font-bold text-lg">{h.money.currency} {h.money.amount.toLocaleString?.() ?? "0"}</span>
+                      <span className="text-[#ffffff] font-bold text-lg">{h.money.currency} {h.money.amount.toLocaleString?.() ?? "0"}</span>
                       <span className={`px-3 py-1 rounded-full text-xs font-bold border ${color.bg} ${color.text}`}>
                         {h.classification}
                       </span>
@@ -2306,51 +2306,51 @@ Versión: 5.0
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-3">
                       {/* Banco */}
                       <div className="bg-[#000] border border-yellow-500/20 rounded p-2">
-                        <span className="text-[#4d7c4d] text-xs">🏛️ Banco:</span> 
+                        <span className="text-[#ffffff] text-xs">🏛️ Banco:</span> 
                         <div className="text-yellow-300 font-semibold mt-1">{h.banco_detectado}</div>
                     </div>
                       
                       {/* Cuenta */}
                       <div className="bg-[#000] border border-blue-500/20 rounded p-2">
-                        <span className="text-[#4d7c4d] text-xs">💳 Cuenta:</span> 
+                        <span className="text-[#ffffff] text-xs">💳 Cuenta:</span> 
                         <div className={`text-blue-300 font-mono mt-1 ${showFullData ? 'text-sm font-bold' : 'text-xs'} break-all`}>
                           {showFullData ? (h.numero_cuenta_full || h.numero_cuenta_mask) : h.numero_cuenta_mask}
                         </div>
                         {showFullData && h.numero_cuenta_full && (
-                          <div className="text-xs text-green-400 mt-1">✓ Completa</div>
+                          <div className="text-xs text-white mt-1">✓ Completa</div>
                         )}
                       </div>
                       
                       {/* IBAN si existe */}
                       {h.iban_full && (
                         <div className="bg-[#000] border border-purple-500/20 rounded p-2">
-                          <span className="text-[#4d7c4d] text-xs">🌍 IBAN:</span>
+                          <span className="text-[#ffffff] text-xs">🌍 IBAN:</span>
                           <div className={`text-purple-300 font-mono mt-1 ${showFullData ? 'text-sm font-bold' : 'text-xs'} break-all`}>
                             {showFullData ? h.iban_full : `${h.iban_full.slice(0,4)}****${h.iban_full.slice(-4)}`}
                           </div>
                           {showFullData && (
-                            <div className="text-xs text-green-400 mt-1">✓ Completo</div>
+                            <div className="text-xs text-white mt-1">✓ Completo</div>
                           )}
                         </div>
                       )}
                       
                       {/* SWIFT si existe */}
                       {h.swift_code && (
-                        <div className="bg-[#000] border border-green-500/20 rounded p-2">
-                          <span className="text-[#4d7c4d] text-xs">📡 SWIFT/BIC:</span>
-                          <div className="text-green-300 font-mono font-bold mt-1">{h.swift_code}</div>
-                          <div className="text-xs text-[#4d7c4d] mt-1">País: {h.swift_code.slice(4, 6)}</div>
+                        <div className="bg-[#000] border border-white/30/20 rounded p-2">
+                          <span className="text-[#ffffff] text-xs">📡 SWIFT/BIC:</span>
+                          <div className="text-white font-mono font-bold mt-1">{h.swift_code}</div>
+                          <div className="text-xs text-[#ffffff] mt-1">País: {h.swift_code.slice(4, 6)}</div>
                         </div>
                       )}
                       
                       {/* Confianza */}
                       <div className="bg-[#000] border border-cyan-500/20 rounded p-2">
-                        <span className="text-[#4d7c4d] text-xs">✓ Confianza:</span> 
+                        <span className="text-[#ffffff] text-xs">✓ Confianza:</span> 
                         <div className="mt-1">
-                          <span className={`font-bold text-lg ${h.score_confianza >= 95 ? 'text-green-400' : h.score_confianza >= 90 ? 'text-yellow-400' : 'text-orange-400'}`}>
+                          <span className={`font-bold text-lg ${h.score_confianza >= 95 ? 'text-white' : h.score_confianza >= 90 ? 'text-yellow-400' : 'text-orange-400'}`}>
                             {h.score_confianza}%
                           </span>
-                          <div className="text-xs text-[#4d7c4d] mt-1">
+                          <div className="text-xs text-[#ffffff] mt-1">
                             {h.score_confianza >= 95 ? 'Alta' : h.score_confianza >= 90 ? 'Media-Alta' : 'Media'}
                           </div>
                         </div>
@@ -2358,15 +2358,15 @@ Versión: 5.0
                       
                       {/* USD Equivalente */}
                       <div className="bg-[#000] border border-cyan-500/20 rounded p-2">
-                        <span className="text-[#4d7c4d] text-xs">💵 USD Equivalente:</span> 
+                        <span className="text-[#ffffff] text-xs">💵 USD Equivalente:</span> 
                         <div className="text-cyan-300 font-bold text-lg mt-1">
                           ${(h.money.amount * (EXCHANGE_RATES[h.money.currency] || 1)).toLocaleString?.() ?? "0"}
                         </div>
                       </div>
                     </div>
                     <div className="mt-3 bg-[#000] border border-[#1a1a1a] rounded p-3">
-                      <div className="text-xs text-[#4d7c4d] mb-2 font-semibold">📋 Evidencia Completa:</div>
-                      <div className={`${showFullData ? 'text-xs' : 'text-xs'} text-[#80ff80] whitespace-pre-wrap break-all`}>
+                      <div className="text-xs text-[#ffffff] mb-2 font-semibold">📋 Evidencia Completa:</div>
+                      <div className={`${showFullData ? 'text-xs' : 'text-xs'} text-[#ffffff] whitespace-pre-wrap break-all`}>
                         {h.evidencia_fragmento}
                       </div>
                     </div>
@@ -2374,7 +2374,7 @@ Versión: 5.0
                 );
               })}
             </div>
-            <div className="mt-4 text-center text-sm text-[#4d7c4d]">
+            <div className="mt-4 text-center text-sm text-[#ffffff]">
               Total: {results.hallazgos.length} {t.auditFindings.toLowerCase()} • {t.auditScrollToSeeAll}
             </div>
           </div>
@@ -2383,9 +2383,9 @@ Versión: 5.0
 
       {!results && !extractedData && (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-12 text-center">
-          <FileSearch className="w-16 h-16 text-[#4d7c4d] mx-auto mb-4" />
-          <h3 className="text-xl text-[#4d7c4d] mb-2">No hay datos de auditoría</h3>
-          <p className="text-[#4d7c4d] text-sm">Carga un archivo Digital Commercial Bank Ltd para comenzar</p>
+          <FileSearch className="w-16 h-16 text-[#ffffff] mx-auto mb-4" />
+          <h3 className="text-xl text-[#ffffff] mb-2">No hay datos de auditoría</h3>
+          <p className="text-[#ffffff] text-sm">Carga un archivo Digital Commercial Bank Ltd para comenzar</p>
         </div>
       )}
 

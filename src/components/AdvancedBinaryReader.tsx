@@ -302,7 +302,7 @@ export function AdvancedBinaryReader() {
               <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#1a1a1a]">
                 <p className="text-xs text-slate-400 mb-1">Estado Digital Commercial Bank Ltd</p>
                 <p className={`text-lg font-bold ${
-                  analysis.DTC1BAnalysis.isValidDTC1B ? 'text-green-400' : 'text-red-400'
+                  analysis.DTC1BAnalysis.isValidDTC1B ? 'text-white' : 'text-red-400'
                 }`}>
                   {analysis.DTC1BAnalysis.isValidDTC1B ? '✅ Válido' : '❌ No Detectado'}
                 </p>
@@ -310,7 +310,7 @@ export function AdvancedBinaryReader() {
 
               <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#1a1a1a]">
                 <p className="text-xs text-slate-400 mb-1">Transacciones</p>
-                <p className="text-2xl font-bold text-green-400">
+                <p className="text-2xl font-bold text-white">
                   {analysis.DTC1BAnalysis.totalTransactions}
                 </p>
               </div>
@@ -325,7 +325,7 @@ export function AdvancedBinaryReader() {
               <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#1a1a1a]">
                 <p className="text-xs text-slate-400 mb-1">Encriptación</p>
                 <p className={`text-lg font-bold ${
-                  analysis.encryptionAnalysis.isEncrypted ? 'text-red-400' : 'text-green-400'
+                  analysis.encryptionAnalysis.isEncrypted ? 'text-red-400' : 'text-white'
                 }`}>
                   {analysis.encryptionAnalysis.isEncrypted ? '🔒 Sí' : '🔓 No'}
                 </p>
@@ -335,7 +335,7 @@ export function AdvancedBinaryReader() {
             {analysis.DTC1BAnalysis.transactions.length > 0 && (
               <div className="bg-[#0d0d0d] rounded-xl border border-[#1a1a1a] p-6">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-green-400" />
+                  <FileText className="w-5 h-5 text-white" />
                   Transacciones Digital Commercial Bank Ltd ({analysis.DTC1BAnalysis.totalTransactions})
                 </h3>
                 <div className="space-y-4">
@@ -349,7 +349,7 @@ export function AdvancedBinaryReader() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-2xl font-bold text-green-400">
+                          <p className="text-2xl font-bold text-white">
                             {formatCurrency(tx.amount, tx.currency)}
                           </p>
                         </div>
@@ -362,7 +362,7 @@ export function AdvancedBinaryReader() {
 
             <div className="bg-[#0d0d0d] rounded-xl border border-[#1a1a1a] p-6">
               <h3 className="text-xl font-bold text-white mb-4">Vista Hexadecimal</h3>
-              <div className="bg-slate-950 p-4 rounded-lg font-mono text-xs text-green-400 overflow-x-auto max-h-96 overflow-y-auto">
+              <div className="bg-slate-950 p-4 rounded-lg font-mono text-xs text-white overflow-x-auto max-h-96 overflow-y-auto">
                 {analysis.hexDump.map((line, i) => (
                   <div key={i} className="mb-1">{line}</div>
                 ))}

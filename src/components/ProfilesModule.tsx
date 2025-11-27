@@ -323,7 +323,7 @@ export function ProfilesModule() {
     <div className="min-h-screen bg-gradient-to-b from-[#030712] via-[#050b1c] to-[#000] text-white p-6">
       <div className="flex flex-col gap-2 mb-8">
         <div className="flex items-center gap-3">
-          <Layers className="w-6 h-6 text-[#00ff88]" />
+          <Layers className="w-6 h-6 text-[#ffffff]" />
           <h1 className="text-2xl font-bold tracking-tight">
             {isSpanish ? 'Perfiles Redundantes del CoreBanking' : 'CoreBanking Redundant Profiles'}
           </h1>
@@ -350,7 +350,7 @@ export function ProfilesModule() {
                   value={form.name}
                   onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
                   placeholder={isSpanish ? 'Ej: Tesorería Principal' : 'Ex: Treasury Master'}
-                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
+                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff]/40"
                   required
                 />
               </div>
@@ -363,14 +363,14 @@ export function ProfilesModule() {
                   value={form.description}
                   onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder={isSpanish ? 'Notas internas' : 'Internal notes'}
-                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
+                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff]/40"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={creating}
-                className="flex items-center gap-2 bg-[#00ff88]/20 border border-[#00ff88]/40 text-[#00ff88] font-semibold px-5 py-3 rounded-xl hover:bg-[#00ff88]/30 transition disabled:opacity-60"
+                className="flex items-center gap-2 bg-[#ffffff]/20 border border-[#ffffff]/40 text-[#ffffff] font-semibold px-5 py-3 rounded-xl hover:bg-[#ffffff]/30 transition disabled:opacity-60"
               >
                 <Save className="w-4 h-4" />
                 {creating
@@ -416,7 +416,7 @@ export function ProfilesModule() {
                   <button
                     onClick={handleExportProfile}
                     disabled={!selectedProfile}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-400/30 text-green-300 text-xs font-semibold hover:bg-green-500/20 transition disabled:opacity-40"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/20/10 border border-white/30/30 text-white text-xs font-semibold hover:bg-white/20/20 transition disabled:opacity-40"
                   >
                     <Download className="w-3 h-3" />
                     {isSpanish ? 'Exportar' : 'Export'}
@@ -448,7 +448,7 @@ export function ProfilesModule() {
                     onClick={() => setSelectedProfileId(profile.id)}
                     className={`rounded-2xl border p-5 transition shadow-lg cursor-pointer ${
                       profile.id === selectedProfileId
-                        ? 'border-[#00ff88]/70 bg-[#00ff88]/5'
+                        ? 'border-[#ffffff]/70 bg-[#ffffff]/5'
                         : 'border-white/10 bg-black/40 hover:border-white/30'
                     }`}
                   >
@@ -457,7 +457,7 @@ export function ProfilesModule() {
                         <div className="flex items-center gap-2">
                           <h3 className="text-xl font-semibold">{profile.name}</h3>
                           {profile.id === activeProfileId && (
-                            <span className="text-xs px-3 py-1 rounded-full bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/40">
+                            <span className="text-xs px-3 py-1 rounded-full bg-[#ffffff]/20 text-[#ffffff] border border-[#ffffff]/40">
                               {isSpanish ? 'Activo' : 'Active'}
                             </span>
                           )}
@@ -545,7 +545,7 @@ export function ProfilesModule() {
                             Ledger1 · {profile.stats.ledger.fileName || '—'}
                           </p>
                           <div className="text-lg font-semibold flex items-center gap-2">
-                            <Gauge className="w-4 h-4 text-[#00ff88]" />
+                            <Gauge className="w-4 h-4 text-[#ffffff]" />
                             {profile.stats.ledger.progress?.toFixed(2) || '0.00'}%
                           </div>
                           <p className="text-xs text-white/40">
@@ -555,7 +555,7 @@ export function ProfilesModule() {
                         <div className="min-w-[160px]">
                           <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-[#00ff88] to-[#00b3ff]"
+                              className="h-full bg-gradient-to-r from-[#ffffff] to-[#00b3ff]"
                               style={{ width: `${Math.min(profile.stats.ledger.progress || 0, 100)}%` }}
                             />
                           </div>
@@ -576,7 +576,7 @@ export function ProfilesModule() {
         <aside className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl space-y-6">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <ShieldCheck className="w-5 h-5 text-[#00ff88]" />
+              <ShieldCheck className="w-5 h-5 text-[#ffffff]" />
               <h3 className="text-lg font-semibold">
                 {isSpanish ? 'Perfil seleccionado' : 'Selected profile'}
               </h3>
@@ -617,7 +617,7 @@ export function ProfilesModule() {
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={() => handleActivateProfile(selectedProfile.id)}
-                    className="w-full flex items-center justify-center gap-2 bg-[#00ff88]/20 border border-[#00ff88]/60 text-[#00ff88] rounded-xl py-3 font-semibold hover:bg-[#00ff88]/30 transition"
+                    className="w-full flex items-center justify-center gap-2 bg-[#ffffff]/20 border border-[#ffffff]/60 text-[#ffffff] rounded-xl py-3 font-semibold hover:bg-[#ffffff]/30 transition"
                   >
                     <PlayCircle className="w-4 h-4" />
                     {isSpanish ? 'Aplicar este perfil' : 'Apply this profile'}
@@ -656,7 +656,7 @@ export function ProfilesModule() {
                   )}
                   <button
                     onClick={handleExportProfile}
-                    className="w-full flex items-center justify-center gap-2 bg-green-500/10 border border-green-400/30 rounded-xl py-3 font-semibold text-green-200 hover:border-green-400/60 transition"
+                    className="w-full flex items-center justify-center gap-2 bg-white/20/10 border border-white/30/30 rounded-xl py-3 font-semibold text-white hover:border-white/30/60 transition"
                   >
                     <Download className="w-4 h-4" />
                     {isSpanish ? 'Exportar como archivo' : 'Export as file'}
@@ -708,7 +708,7 @@ export function ProfilesModule() {
                   onClick={handleConfigureAutoSnapshots}
                   className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
                     autoConfig.enabled
-                      ? 'bg-[#00ff88]/20 border border-[#00ff88]/40 text-[#00ff88]'
+                      ? 'bg-[#ffffff]/20 border border-[#ffffff]/40 text-[#ffffff]'
                       : 'bg-white/5 border border-white/20 text-white/60'
                   }`}
                 >
@@ -734,10 +734,10 @@ export function ProfilesModule() {
       {/* Modal de Preview */}
       {showPreview && previewProfile && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={handleClosePreview}>
-          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-[#00ff88]/30 rounded-3xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-[#ffffff]/30 rounded-3xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <GitCompare className="w-6 h-6 text-[#00ff88]" />
+                <GitCompare className="w-6 h-6 text-[#ffffff]" />
                 <h2 className="text-2xl font-bold">
                   {isSpanish ? 'Vista previa de perfil' : 'Profile preview'}
                 </h2>
@@ -817,7 +817,7 @@ export function ProfilesModule() {
                     {previewProfile.stats.checksum && (
                       <div className="flex justify-between items-center">
                         <span className="text-white/60">Checksum:</span>
-                        <span className="text-green-400 font-mono text-xs">✓ {previewProfile.stats.checksum.substring(0, 12)}...</span>
+                        <span className="text-white font-mono text-xs">✓ {previewProfile.stats.checksum.substring(0, 12)}...</span>
                       </div>
                     )}
                     {previewProfile.stats.compressionRatio && (
@@ -843,7 +843,7 @@ export function ProfilesModule() {
                     </div>
                     <div>
                       <span className="text-white/60">{isSpanish ? 'Progreso:' : 'Progress:'}</span>
-                      <p className="text-[#00ff88] font-semibold mt-1">{previewProfile.stats.ledger.progress?.toFixed(2)}%</p>
+                      <p className="text-[#ffffff] font-semibold mt-1">{previewProfile.stats.ledger.progress?.toFixed(2)}%</p>
                     </div>
                     <div>
                       <span className="text-white/60">{isSpanish ? 'Estado:' : 'Status:'}</span>
@@ -863,7 +863,7 @@ export function ProfilesModule() {
                     handleClosePreview();
                     handleActivateProfile(previewProfile.id);
                   }}
-                  className="flex-1 flex items-center justify-center gap-2 bg-[#00ff88]/20 border border-[#00ff88]/60 text-[#00ff88] rounded-xl py-3 font-semibold hover:bg-[#00ff88]/30 transition"
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#ffffff]/20 border border-[#ffffff]/60 text-[#ffffff] rounded-xl py-3 font-semibold hover:bg-[#ffffff]/30 transition"
                 >
                   <PlayCircle className="w-5 h-5" />
                   {isSpanish ? 'Activar ahora' : 'Activate now'}
@@ -910,7 +910,7 @@ export function ProfilesModule() {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between items-center">
                     <span className="text-white/60">{isSpanish ? 'Keys agregadas:' : 'Keys added:'}</span>
-                    <span className="text-green-400 font-semibold">+{diffData.added.length}</span>
+                    <span className="text-white font-semibold">+{diffData.added.length}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-white/60">{isSpanish ? 'Keys eliminadas:' : 'Keys removed:'}</span>
@@ -952,7 +952,7 @@ export function ProfilesModule() {
                       <span className={`font-semibold ${
                         diffData.summary.bytesAfter > diffData.summary.bytesBefore
                           ? 'text-orange-400'
-                          : 'text-green-400'
+                          : 'text-white'
                       }`}>
                         {diffData.summary.bytesAfter > diffData.summary.bytesBefore ? '+' : ''}
                         {((diffData.summary.bytesAfter - diffData.summary.bytesBefore) / 1024).toFixed(2)} KB
@@ -964,14 +964,14 @@ export function ProfilesModule() {
             </div>
 
             {diffData.added.length > 0 && (
-              <div className="mt-6 bg-green-500/10 border border-green-500/30 rounded-2xl p-5">
-                <h4 className="text-sm font-semibold text-green-300 mb-3">
+              <div className="mt-6 bg-white/20/10 border border-white/30/30 rounded-2xl p-5">
+                <h4 className="text-sm font-semibold text-white mb-3">
                   {isSpanish ? 'Keys agregadas' : 'Added keys'} ({diffData.added.length})
                 </h4>
                 <div className="max-h-40 overflow-y-auto">
-                  <div className="space-y-1 text-xs font-mono text-green-200">
+                  <div className="space-y-1 text-xs font-mono text-white">
                     {diffData.added.map(key => (
-                      <div key={key} className="bg-green-500/10 px-2 py-1 rounded">+ {key}</div>
+                      <div key={key} className="bg-white/20/10 px-2 py-1 rounded">+ {key}</div>
                     ))}
                   </div>
                 </div>

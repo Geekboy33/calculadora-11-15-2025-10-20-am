@@ -716,7 +716,7 @@ export default function APIGlobalModule() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETED': return 'text-green-400 bg-green-500/20';
+      case 'COMPLETED': return 'text-white bg-white/20/20';
       case 'PROCESSING': return 'text-blue-400 bg-blue-500/20';
       case 'PENDING': return 'text-yellow-400 bg-yellow-500/20';
       case 'FAILED': return 'text-red-400 bg-red-500/20';
@@ -970,15 +970,15 @@ export default function APIGlobalModule() {
           <div className="space-y-6">
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-green-900/50 to-black border border-green-500/30 rounded-lg p-6">
+              <div className="bg-gradient-to-br from-white/10/50 to-black border border-white/30/30 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <TrendingUp className="w-8 h-8 text-green-400" />
-                  <span className="text-2xl font-bold text-green-400">
+                  <TrendingUp className="w-8 h-8 text-white" />
+                  <span className="text-2xl font-bold text-white">
                     {stats.completed_transfers}
                   </span>
                 </div>
                 <div className="text-sm text-gray-400">Completed Transfers</div>
-                <div className="text-xs text-green-400 mt-1">
+                <div className="text-xs text-white mt-1">
                   ${stats.total_sent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
@@ -1016,20 +1016,20 @@ export default function APIGlobalModule() {
 
             {/* API Connection Status */}
             <div className={`bg-gradient-to-br border rounded-lg p-6 ${
-              apiStatus === 'connected' ? 'from-green-900/50 to-black border-green-500/30' :
+              apiStatus === 'connected' ? 'from-white/10/50 to-black border-white/30/30' :
               apiStatus === 'error' ? 'from-red-900/50 to-black border-red-500/30' :
               'from-yellow-900/50 to-black border-yellow-500/30'
             }`}>
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <Zap className={`w-5 h-5 ${
-                  apiStatus === 'connected' ? 'text-green-400' :
+                  apiStatus === 'connected' ? 'text-white' :
                   apiStatus === 'error' ? 'text-red-400' : 'text-yellow-400'
                 }`} />
                 MindCloud API Status
               </h3>
               <div className="flex items-center gap-4">
                 <div className={`px-4 py-2 rounded-lg font-bold ${
-                  apiStatus === 'connected' ? 'bg-green-500/20 text-green-400' :
+                  apiStatus === 'connected' ? 'bg-white/20/20 text-white' :
                   apiStatus === 'error' ? 'bg-red-500/20 text-red-400' :
                   'bg-yellow-500/20 text-yellow-400'
                 }`}>
@@ -1077,7 +1077,7 @@ export default function APIGlobalModule() {
                 </div>
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Account Number</div>
-                  <div className="text-green-400 font-mono text-lg font-bold">23890111</div>
+                  <div className="text-white font-mono text-lg font-bold">23890111</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Institution</div>
@@ -1162,7 +1162,7 @@ export default function APIGlobalModule() {
                       return (
                         <div className="text-sm">
                           <div className="text-blue-400 font-semibold mb-1">Available Balance</div>
-                          <div className={`text-lg font-bold mb-2 ${hasBalance ? 'text-green-400' : 'text-yellow-400'}`}>
+                          <div className={`text-lg font-bold mb-2 ${hasBalance ? 'text-white' : 'text-yellow-400'}`}>
                             {account.currency} {account.availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </div>
                           <div className="text-xs text-gray-400 mb-2">
@@ -1328,7 +1328,7 @@ export default function APIGlobalModule() {
 
               {success && (
                 <>
-                  <div className="mt-4 p-4 bg-green-900/20 border border-green-500/30 rounded-lg text-green-400">
+                  <div className="mt-4 p-4 bg-white/10/20 border border-white/30/30 rounded-lg text-white">
                     <CheckCircle className="w-5 h-5 inline mr-2" />
                     {success}
                   </div>
@@ -1336,7 +1336,7 @@ export default function APIGlobalModule() {
                     <button
                       type="button"
                       onClick={handleGenerateBlackScreen}
-                      className="mt-4 w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg"
+                      className="mt-4 w-full bg-gradient-to-r from-white/10 to-white/10 hover:from-white/10 hover:to-white/10 text-white px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg"
                     >
                       <FileText className="w-5 h-5" />
                       Generate Bank Black Screen
@@ -1362,7 +1362,7 @@ export default function APIGlobalModule() {
                 <button
                   onClick={exportTransfersToTXT}
                   disabled={transfers.length === 0}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition-colors"
                   title="Download transfers as TXT file"
                 >
                   <Download className="w-4 h-4" />
@@ -1416,7 +1416,7 @@ export default function APIGlobalModule() {
                       </div>
                       <div>
                         <div className="text-gray-400 text-xs mb-1">Amount</div>
-                        <div className="text-green-400 font-bold text-lg">
+                        <div className="text-white font-bold text-lg">
                           {transfer.receiving_currency} {transfer.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>

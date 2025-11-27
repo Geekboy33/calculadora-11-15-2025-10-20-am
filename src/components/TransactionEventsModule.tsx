@@ -245,7 +245,7 @@ export function TransactionEventsModule() {
   };
 
   const getTypeColor = (type: TransactionType): string => {
-    if (type.includes('CREATED')) return 'text-green-400 bg-green-500/20';
+    if (type.includes('CREATED')) return 'text-white bg-white/20/20';
     if (type.includes('DELETED')) return 'text-red-400 bg-red-500/20';
     if (type.includes('EDITED') || type.includes('INCREASE')) return 'text-blue-400 bg-blue-500/20';
     if (type.includes('DECREASE')) return 'text-orange-400 bg-orange-500/20';
@@ -255,7 +255,7 @@ export function TransactionEventsModule() {
 
   const getStatusColor = (status: string): string => {
     switch (status) {
-      case 'COMPLETED': return 'bg-green-500/20 text-green-300';
+      case 'COMPLETED': return 'bg-white/20/20 text-white';
       case 'PENDING': return 'bg-yellow-500/20 text-yellow-300';
       case 'FAILED': return 'bg-red-500/20 text-red-300';
       case 'CANCELLED': return 'bg-gray-500/20 text-gray-300';
@@ -289,7 +289,7 @@ export function TransactionEventsModule() {
             </button>
             <button
               onClick={downloadCSV}
-              className="px-4 py-2 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 flex items-center gap-2"
+              className="px-4 py-2 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               CSV
@@ -322,12 +322,12 @@ export function TransactionEventsModule() {
           <div className="text-3xl font-bold text-cyan-400">{stats.totalEvents.toLocaleString()}</div>
         </div>
 
-        <div className="bg-[#0d0d0d] border border-green-500 rounded-lg p-6">
+        <div className="bg-[#0d0d0d] border border-white/30 rounded-lg p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-green-300/60 text-sm">{isSpanish ? 'Hoy' : 'Today'}</span>
-            <Calendar className="w-5 h-5 text-green-400" />
+            <span className="text-white/60 text-sm">{isSpanish ? 'Hoy' : 'Today'}</span>
+            <Calendar className="w-5 h-5 text-white" />
           </div>
-          <div className="text-3xl font-bold text-green-400">{stats.todayEvents.toLocaleString()}</div>
+          <div className="text-3xl font-bold text-white">{stats.todayEvents.toLocaleString()}</div>
         </div>
 
         <div className="bg-[#0d0d0d] border border-purple-500 rounded-lg p-6">
@@ -502,7 +502,7 @@ export function TransactionEventsModule() {
                           {translateModule(event.module)}
                         </span>
                         {event.amount && event.amount > 0 && (
-                          <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded text-xs font-bold flex items-center gap-1">
+                          <span className="px-3 py-1 bg-white/20/20 text-white rounded text-xs font-bold flex items-center gap-1">
                             <DollarSign className="w-3 h-3" />
                             {event.currency} {event.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </span>

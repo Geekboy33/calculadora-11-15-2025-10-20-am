@@ -227,21 +227,21 @@ export function AccountDashboard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'text-[#00ff88]';
+      case 'completed': return 'text-[#ffffff]';
       case 'pending': return 'text-[#39ff14]';
       case 'failed': return 'text-red-400';
-      case 'reversed': return 'text-[#4d7c4d]';
-      default: return 'text-[#80ff80]';
+      case 'reversed': return 'text-[#ffffff]';
+      default: return 'text-[#ffffff]';
     }
   };
 
   const getStatusBadge = (status: string) => {
     const colors = {
-      active: 'bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/30',
+      active: 'bg-[#ffffff]/20 text-[#ffffff] border border-[#ffffff]/30',
       frozen: 'bg-[#39ff14]/20 text-[#39ff14] border border-[#39ff14]/30',
       closed: 'bg-red-900/30 text-red-400 border border-red-500/30'
     };
-    return colors[status as keyof typeof colors] || 'bg-[#0d0d0d] text-[#4d7c4d] border border-[#1a1a1a]';
+    return colors[status as keyof typeof colors] || 'bg-[#0d0d0d] text-[#ffffff] border border-[#1a1a1a]';
   };
 
   if (showFileLoader || accounts.length === 0) {
@@ -249,12 +249,12 @@ export function AccountDashboard() {
       <div className="flex flex-col h-full bg-black p-6">
         <div className="max-w-3xl mx-auto w-full space-y-6">
           {accounts.length === 0 && (
-            <div className="p-6 bg-[#0d0d0d] border border-[#00ff88]/30 rounded-lg glass-panel">
+            <div className="p-6 bg-[#0d0d0d] border border-[#ffffff]/30 rounded-lg glass-panel">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-[#00ff88] flex-shrink-0 mt-0.5 pulse-green" />
+                <AlertCircle className="w-5 h-5 text-[#ffffff] flex-shrink-0 mt-0.5 pulse-green" />
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-[#00ffaa] mb-1">{t.dashboardWelcomeTitle}</h3>
-                  <p className="text-sm text-[#80ff80]">
+                  <h3 className="text-lg font-semibold text-[#ffffff] mb-1">{t.dashboardWelcomeTitle}</h3>
+                  <p className="text-sm text-[#ffffff]">
                     {t.dashboardWelcomeMessage}
                   </p>
                 </div>
@@ -273,7 +273,7 @@ export function AccountDashboard() {
             <button
               onClick={generateSampleFile}
               disabled={uploading}
-              className="flex items-center gap-2 px-4 py-2 bg-[#0d0d0d] hover:bg-[#141414] disabled:bg-[#0a0a0a] text-[#00ff88] border border-[#1a1a1a] hover:border-[#00ff88] rounded-lg transition-all hover:shadow-[0_0_15px_rgba(0,255,136,0.3)]"
+              className="flex items-center gap-2 px-4 py-2 bg-[#0d0d0d] hover:bg-[#141414] disabled:bg-[#0a0a0a] text-[#ffffff] border border-[#1a1a1a] hover:border-[#ffffff] rounded-lg transition-all hover:shadow-[0_0_15px_rgba(255, 255, 255,0.3)]"
             >
               <FileUp className="w-4 h-4" />
               {t.dashboardOrGenerateSample}
@@ -284,7 +284,7 @@ export function AccountDashboard() {
             <div className="flex justify-center">
               <button
                 onClick={() => setShowFileLoader(false)}
-                className="px-6 py-2 bg-gradient-to-r from-[#00ff88] to-[#00cc6a] hover:from-[#00ffaa] hover:to-[#00ff88] text-black font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(0,255,136,0.4)] hover:shadow-[0_0_30px_rgba(0,255,136,0.6)]"
+                className="px-6 py-2 bg-gradient-to-r from-[#ffffff] to-[#e0e0e0] hover:from-[#ffffff] hover:to-[#ffffff] text-black font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(255, 255, 255,0.4)] hover:shadow-[0_0_30px_rgba(255, 255, 255,0.6)]"
               >
                 {t.dashboardViewDashboard}
               </button>
@@ -309,24 +309,24 @@ export function AccountDashboard() {
   return (
     <div className="flex flex-col h-full bg-black">
       {/* Currency Selector */}
-      <div className="bg-gradient-to-r from-[#0d0d0d] to-[#0a0a0a] border-b border-[#00ff88]/30 p-4">
+      <div className="bg-gradient-to-r from-[#0d0d0d] to-[#0a0a0a] border-b border-[#ffffff]/30 p-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
-            <ArrowRightLeft className="w-5 h-5 text-[#00ff88]" />
-            <span className="text-[#80ff80] text-sm font-semibold">{t.advDashboardTotalBalance} en:</span>
+            <ArrowRightLeft className="w-5 h-5 text-[#ffffff]" />
+            <span className="text-[#ffffff] text-sm font-semibold">{t.advDashboardTotalBalance} en:</span>
           </div>
           <select
             value={selectedCurrency}
             onChange={(e) => setSelectedCurrency(e.target.value)}
-            className="px-4 py-2 bg-[#0a0a0a] border border-[#00ff88]/30 hover:border-[#00ff88] rounded-lg text-[#e0ffe0] font-mono font-bold text-sm focus:outline-none focus:border-[#00ff88] transition-all cursor-pointer shadow-[0_0_10px_rgba(0,255,136,0.2)]"
+            className="px-4 py-2 bg-[#0a0a0a] border border-[#ffffff]/30 hover:border-[#ffffff] rounded-lg text-[#ffffff] font-mono font-bold text-sm focus:outline-none focus:border-[#ffffff] transition-all cursor-pointer shadow-[0_0_10px_rgba(255, 255, 255,0.2)]"
           >
             {SUPPORTED_CURRENCIES.map(curr => (
               <option key={curr} value={curr}>{curr}</option>
             ))}
           </select>
           <div className="text-right">
-            <div className="text-xs text-[#4d7c4d] mb-1">{t.advDashboardConvertedBalance}</div>
-            <div className="text-2xl font-black text-[#00ff88] font-mono">
+            <div className="text-xs text-[#ffffff] mb-1">{t.advDashboardConvertedBalance}</div>
+            <div className="text-2xl font-black text-[#ffffff] font-mono">
               {formatCurrency(getTotalLedgerBalance(), selectedCurrency)}
             </div>
           </div>
@@ -343,15 +343,15 @@ export function AccountDashboard() {
             'CHF': t.currencyCHF
           };
           return (
-            <div key={currency} className="bg-[#0d0d0d] rounded-lg p-6 border border-[#1a1a1a] glass-panel hover:border-[#00ff88]/50 transition-all group">
+            <div key={currency} className="bg-[#0d0d0d] rounded-lg p-6 border border-[#1a1a1a] glass-panel hover:border-[#ffffff]/50 transition-all group">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[#80ff80] text-sm font-medium">{currencyLabels[currency]}</span>
-                <Wallet className="w-5 h-5 text-[#00ff88] group-hover:text-[#00ffaa] transition-colors" />
+                <span className="text-[#ffffff] text-sm font-medium">{currencyLabels[currency]}</span>
+                <Wallet className="w-5 h-5 text-[#ffffff] group-hover:text-[#ffffff] transition-colors" />
               </div>
-              <div className="text-2xl font-bold text-[#e0ffe0]">
+              <div className="text-2xl font-bold text-[#ffffff]">
                 {formatAmount(total, currency)}
               </div>
-              <div className="text-xs text-[#4d7c4d] mt-1">
+              <div className="text-xs text-[#ffffff] mt-1">
                 {accounts.filter(a => a.currencyISO === currency).length} {t.dashboardAccountsCount}
               </div>
             </div>
@@ -362,13 +362,13 @@ export function AccountDashboard() {
       {/* Ledger Accounts Section */}
       {ledgerAccounts.length > 0 && (
         <div className="px-6 pb-4">
-          <div className="bg-gradient-to-r from-[#0d0d0d] to-[#0a0a0a] border border-[#00ff88]/30 rounded-xl p-6 glass-panel shadow-[0_0_20px_rgba(0,255,136,0.2)]">
+          <div className="bg-gradient-to-r from-[#0d0d0d] to-[#0a0a0a] border border-[#ffffff]/30 rounded-xl p-6 glass-panel shadow-[0_0_20px_rgba(255, 255, 255,0.2)]">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Database className="w-6 h-6 text-[#00ff88] pulse-green" />
+                <Database className="w-6 h-6 text-[#ffffff] pulse-green" />
                 <div>
-                  <h3 className="text-lg font-bold text-[#e0ffe0]">{t.advDashboardLedgerAccounts}</h3>
-                  <p className="text-sm text-[#80ff80]">
+                  <h3 className="text-lg font-bold text-[#ffffff]">{t.advDashboardLedgerAccounts}</h3>
+                  <p className="text-sm text-[#ffffff]">
                     {ledgerAccounts.length} {t.dashboardCurrenciesDetected} | Vista en {selectedCurrency}
                   </p>
                 </div>
@@ -376,10 +376,10 @@ export function AccountDashboard() {
               <button
                 onClick={loadLedgerAccounts}
                 disabled={loadingLedger}
-                className="flex items-center gap-2 px-3 py-2 bg-[#0d0d0d] hover:bg-[#141414] border border-[#1a1a1a] hover:border-[#00ff88] rounded-lg transition-all"
+                className="flex items-center gap-2 px-3 py-2 bg-[#0d0d0d] hover:bg-[#141414] border border-[#1a1a1a] hover:border-[#ffffff] rounded-lg transition-all"
               >
-                <RefreshCw className={`w-4 h-4 text-[#00ff88] ${loadingLedger ? 'animate-spin' : ''}`} />
-                <span className="text-[#00ff88] text-sm">{t.refresh}</span>
+                <RefreshCw className={`w-4 h-4 text-[#ffffff] ${loadingLedger ? 'animate-spin' : ''}`} />
+                <span className="text-[#ffffff] text-sm">{t.refresh}</span>
               </button>
             </div>
 
@@ -394,12 +394,12 @@ export function AccountDashboard() {
                     key={account.id}
                     className={`rounded-lg p-4 border-2 transition-all hover:scale-105 cursor-pointer ${
                       isMainCurrency
-                        ? 'bg-gradient-to-br from-[#00ff88]/20 to-[#00cc6a]/20 border-[#00ff88]/50 shadow-[0_0_10px_rgba(0,255,136,0.2)]'
-                        : 'bg-[#0d0d0d]/50 border-[#1a1a1a] hover:border-[#00ff88]/30'
+                        ? 'bg-gradient-to-br from-[#ffffff]/20 to-[#e0e0e0]/20 border-[#ffffff]/50 shadow-[0_0_10px_rgba(255, 255, 255,0.2)]'
+                        : 'bg-[#0d0d0d]/50 border-[#1a1a1a] hover:border-[#ffffff]/30'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-mono font-bold text-[#e0ffe0] bg-[#0a0a0a] px-2 py-1 rounded border border-[#1a1a1a]">
+                      <span className="text-xs font-mono font-bold text-[#ffffff] bg-[#0a0a0a] px-2 py-1 rounded border border-[#1a1a1a]">
                         {account.currency}
                       </span>
                       {isMainCurrency && (
@@ -407,20 +407,20 @@ export function AccountDashboard() {
                       )}
                     </div>
                     <div className="mb-2">
-                      <div className="text-sm font-bold text-[#e0ffe0]">
+                      <div className="text-sm font-bold text-[#ffffff]">
                         {formatCurrency(account.balance, account.currency)}
                       </div>
                       {account.currency !== selectedCurrency && (
-                        <div className="text-xs text-[#80ff80] mt-1">
+                        <div className="text-xs text-[#ffffff] mt-1">
                           ≈ {formatCurrency(convertedBalance, selectedCurrency)}
                         </div>
                       )}
                     </div>
-                    <div className="text-xs text-[#4d7c4d]">
+                    <div className="text-xs text-[#ffffff]">
                       {account.transactionCount} txns
                     </div>
                     {account.currency !== selectedCurrency && (
-                      <div className="text-xs text-[#4d7c4d] mt-1">
+                      <div className="text-xs text-[#ffffff] mt-1">
                         Rate: {rate.toFixed(4)}
                       </div>
                     )}
@@ -429,8 +429,8 @@ export function AccountDashboard() {
               })}
             </div>
 
-            <div className="mt-4 text-xs text-[#80ff80] flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-[#00ff88]" />
+            <div className="mt-4 text-xs text-[#ffffff] flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-[#ffffff]" />
               <span>{t.dashboardBalancesSaved} • Última actualización: {exchangeRatesManager.getLastUpdate()?.toLocaleString() || 'N/A'}</span>
             </div>
           </div>
@@ -440,29 +440,29 @@ export function AccountDashboard() {
       {/* Analyzed Balances from Large File Analyzer */}
       {analyzedBalances.length > 0 && (
         <div className="px-6 pb-4">
-          <div className="bg-gradient-to-r from-[#0d0d0d] to-[#0a0a0a] border border-[#00ff88]/30 rounded-xl p-6 glass-panel shadow-[0_0_20px_rgba(0,255,136,0.2)]">
+          <div className="bg-gradient-to-r from-[#0d0d0d] to-[#0a0a0a] border border-[#ffffff]/30 rounded-xl p-6 glass-panel shadow-[0_0_20px_rgba(255, 255, 255,0.2)]">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Database className="w-6 h-6 text-[#00ff88] pulse-green" />
+                <Database className="w-6 h-6 text-[#ffffff] pulse-green" />
                 <div>
-                  <h3 className="text-lg font-bold text-[#e0ffe0]">{t.dashboardBalancesTitle}</h3>
-                  <p className="text-sm text-[#80ff80]">
+                  <h3 className="text-lg font-bold text-[#ffffff]">{t.dashboardBalancesTitle}</h3>
+                  <p className="text-sm text-[#ffffff]">
                     {analyzedBalances.length} {t.dashboardCurrenciesDetected} | {analyzedBalances.reduce((sum, b) => sum + b.transactionCount, 0).toLocaleString()} {t.dashboardBalancesSubtitle}
                   </p>
                 </div>
               </div>
-              <CheckCircle className="w-8 h-8 text-[#00ff88] pulse-green" />
+              <CheckCircle className="w-8 h-8 text-[#ffffff] pulse-green" />
             </div>
 
             {/* Selector de ordenamiento para balances */}
             <div className="mb-4 flex items-center gap-2">
-              <label className="text-xs text-[#80ff80] font-medium whitespace-nowrap">
+              <label className="text-xs text-[#ffffff] font-medium whitespace-nowrap">
                 Ordenar balances:
               </label>
               <select
                 value={balanceSortOrder}
                 onChange={(e) => setBalanceSortOrder(e.target.value as 'amount-high' | 'amount-low' | 'currency' | 'transactions')}
-                className="flex-1 px-3 py-2 bg-[#0a0a0a] border border-[#00ff88]/30 hover:border-[#00ff88]/50 rounded text-[#e0ffe0] text-sm focus:outline-none focus:border-[#00ff88] transition-all cursor-pointer"
+                className="flex-1 px-3 py-2 bg-[#0a0a0a] border border-[#ffffff]/30 hover:border-[#ffffff]/50 rounded text-[#ffffff] text-sm focus:outline-none focus:border-[#ffffff] transition-all cursor-pointer"
                 title="Ordenar balances"
                 aria-label="Ordenar balances por criterio"
               >
@@ -481,22 +481,22 @@ export function AccountDashboard() {
                     key={balance.currency}
                     className={`rounded-lg p-4 border-2 transition-all ${
                       isMainCurrency
-                        ? 'bg-gradient-to-br from-[#00ff88]/20 to-[#00cc6a]/20 border-[#00ff88]/50 shadow-[0_0_10px_rgba(0,255,136,0.2)]'
+                        ? 'bg-gradient-to-br from-[#ffffff]/20 to-[#e0e0e0]/20 border-[#ffffff]/50 shadow-[0_0_10px_rgba(255, 255, 255,0.2)]'
                         : 'bg-[#0d0d0d]/50 border-[#1a1a1a]'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-mono font-bold text-[#e0ffe0] bg-[#0a0a0a] px-2 py-1 rounded border border-[#1a1a1a]">
+                      <span className="text-xs font-mono font-bold text-[#ffffff] bg-[#0a0a0a] px-2 py-1 rounded border border-[#1a1a1a]">
                         {balance.currency}
                       </span>
                       {index < 4 && (
                         <span className="text-xs text-[#39ff14]">★</span>
                       )}
                     </div>
-                    <div className="text-lg font-bold text-[#e0ffe0] mb-1">
+                    <div className="text-lg font-bold text-[#ffffff] mb-1">
                       {formatCurrency(balance.totalAmount, balance.currency)}
                     </div>
-                    <div className="text-xs text-[#4d7c4d]">
+                    <div className="text-xs text-[#ffffff]">
                       {balance.transactionCount} txns
                     </div>
                   </div>
@@ -504,8 +504,8 @@ export function AccountDashboard() {
               })}
             </div>
 
-            <div className="mt-4 text-xs text-[#80ff80] flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-[#00ff88]" />
+            <div className="mt-4 text-xs text-[#ffffff] flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-[#ffffff]" />
               <span>{t.dashboardBalancesSaved}</span>
             </div>
           </div>
@@ -516,35 +516,35 @@ export function AccountDashboard() {
         <div className="bg-[#0d0d0d] rounded-lg border border-[#1a1a1a] flex flex-col overflow-hidden glass-panel">
           <div className="p-4 border-b border-[#1a1a1a] space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-[#e0ffe0]">{t.dashboardAccounts.charAt(0).toUpperCase() + t.dashboardAccounts.slice(1)}</h2>
+              <h2 className="text-lg font-semibold text-[#ffffff]">{t.dashboardAccounts.charAt(0).toUpperCase() + t.dashboardAccounts.slice(1)}</h2>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowFileLoader(true)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#00ff88] to-[#00cc6a] hover:from-[#00ffaa] hover:to-[#00ff88] text-black text-sm rounded transition-all shadow-[0_0_10px_rgba(0,255,136,0.3)] font-semibold"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#ffffff] to-[#e0e0e0] hover:from-[#ffffff] hover:to-[#ffffff] text-black text-sm rounded transition-all shadow-[0_0_10px_rgba(255, 255, 255,0.3)] font-semibold"
                 >
                   <FolderOpen className="w-3 h-3" />
                   {t.dashboardLoadFiles}
                 </button>
                 <button
                   onClick={loadAccounts}
-                  className="p-2 hover:bg-[#141414] rounded transition-colors border border-[#1a1a1a] hover:border-[#00ff88]"
+                  className="p-2 hover:bg-[#141414] rounded transition-colors border border-[#1a1a1a] hover:border-[#ffffff]"
                   title={t.refresh}
                   aria-label={t.refresh}
                 >
-                  <RefreshCw className="w-4 h-4 text-[#4d7c4d] hover:text-[#00ff88]" />
+                  <RefreshCw className="w-4 h-4 text-[#ffffff] hover:text-[#ffffff]" />
                 </button>
               </div>
             </div>
             
             {/* Selector de ordenamiento */}
             <div className="flex items-center gap-2">
-              <label className="text-xs text-[#80ff80] font-medium whitespace-nowrap">
+              <label className="text-xs text-[#ffffff] font-medium whitespace-nowrap">
                 Ordenar por:
               </label>
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value as SortOrder)}
-                className="flex-1 px-3 py-2 bg-[#0a0a0a] border border-[#1a1a1a] hover:border-[#00ff88]/50 rounded text-[#e0ffe0] text-sm focus:outline-none focus:border-[#00ff88] transition-all cursor-pointer"
+                className="flex-1 px-3 py-2 bg-[#0a0a0a] border border-[#1a1a1a] hover:border-[#ffffff]/50 rounded text-[#ffffff] text-sm focus:outline-none focus:border-[#ffffff] transition-all cursor-pointer"
                 title="Ordenar cuentas"
                 aria-label="Ordenar cuentas por criterio"
               >
@@ -565,20 +565,20 @@ export function AccountDashboard() {
                 onClick={() => setSelectedAccount(account)}
                 className={`p-4 rounded-lg cursor-pointer transition-all ${
                   selectedAccount?.id === account.id
-                    ? 'bg-gradient-to-r from-[#00ff88]/20 to-[#00cc6a]/20 border-2 border-[#00ff88] shadow-[0_0_15px_rgba(0,255,136,0.3)]'
-                    : 'bg-[#0a0a0a] hover:bg-[#111111] border-2 border-[#1a1a1a] hover:border-[#00ff88]/30'
+                    ? 'bg-gradient-to-r from-[#ffffff]/20 to-[#e0e0e0]/20 border-2 border-[#ffffff] shadow-[0_0_15px_rgba(255, 255, 255,0.3)]'
+                    : 'bg-[#0a0a0a] hover:bg-[#111111] border-2 border-[#1a1a1a] hover:border-[#ffffff]/30'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-sm text-[#80ff80]">{account.accountRef}</span>
+                  <span className="font-mono text-sm text-[#ffffff]">{account.accountRef}</span>
                   <span className={`text-xs px-2 py-1 rounded ${getStatusBadge(account.status)}`}>
                     {account.status}
                   </span>
                 </div>
-                <div className="text-xl font-bold text-[#e0ffe0]">
+                <div className="text-xl font-bold text-[#ffffff]">
                   {formatAmount(account.balanceMinorUnits, account.currencyISO)}
                 </div>
-                <div className="text-xs text-[#4d7c4d] mt-1">
+                <div className="text-xs text-[#ffffff] mt-1">
                   {account.currencyISO} • Created {account.createdAt.toLocaleDateString()}
                 </div>
               </div>
@@ -588,7 +588,7 @@ export function AccountDashboard() {
 
         <div className="col-span-2 bg-[#0d0d0d] rounded-lg border border-[#1a1a1a] flex flex-col overflow-hidden glass-panel">
           <div className="p-4 border-b border-[#1a1a1a]">
-            <h2 className="text-lg font-semibold text-[#e0ffe0]">
+            <h2 className="text-lg font-semibold text-[#ffffff]">
               {selectedAccount ? `${t.dashboardTransactions.charAt(0).toUpperCase() + t.dashboardTransactions.slice(1)} - ${selectedAccount.accountRef}` : t.select + ' ' + t.dashboardAccounts.charAt(0).toUpperCase() + t.dashboardAccounts.slice(1)}
             </h2>
           </div>
@@ -596,7 +596,7 @@ export function AccountDashboard() {
           {selectedAccount ? (
             <div className="flex-1 overflow-auto">
               {transfers.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-[#4d7c4d]">
+                <div className="flex items-center justify-center h-full text-[#ffffff]">
                   {t.dashboardNoTransfers}
                 </div>
               ) : (
@@ -614,20 +614,20 @@ export function AccountDashboard() {
                               {isOutgoing ? (
                                 <TrendingDown className="w-4 h-4 text-red-400" />
                               ) : (
-                                <TrendingUp className="w-4 h-4 text-[#00ff88]" />
+                                <TrendingUp className="w-4 h-4 text-[#ffffff]" />
                               )}
-                              <span className="font-medium text-[#e0ffe0]">
+                              <span className="font-medium text-[#ffffff]">
                                 {isOutgoing ? 'Sent to' : 'Received from'} {otherAccount?.accountRef || otherAccountId}
                               </span>
                             </div>
-                            <div className="text-xs text-[#4d7c4d] space-y-1">
+                            <div className="text-xs text-[#ffffff] space-y-1">
                               <div>Ref: {transfer.reference}</div>
                               <div>{transfer.createdAt.toLocaleString()}</div>
                             </div>
                           </div>
 
                           <div className="text-right">
-                            <div className={`text-lg font-bold ${isOutgoing ? 'text-red-400' : 'text-[#00ff88]'}`}>
+                            <div className={`text-lg font-bold ${isOutgoing ? 'text-red-400' : 'text-[#ffffff]'}`}>
                               {isOutgoing ? '−' : '+'} {formatAmount(transfer.amountMinorUnits, transfer.currencyISO)}
                             </div>
                             <div className={`text-xs mt-1 ${getStatusColor(transfer.status)}`}>
@@ -642,7 +642,7 @@ export function AccountDashboard() {
               )}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-[#4d7c4d]">
+            <div className="flex items-center justify-center h-full text-[#ffffff]">
               Select an account to view transactions
             </div>
           )}
@@ -654,40 +654,40 @@ export function AccountDashboard() {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
             <Database className="w-6 h-6 text-[#39ff14] pulse-green" />
-            <h3 className="text-lg font-bold text-[#e0ffe0]">Herramientas Avanzadas de Análisis Digital Commercial Bank Ltd</h3>
+            <h3 className="text-lg font-bold text-[#ffffff]">Herramientas Avanzadas de Análisis Digital Commercial Bank Ltd</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="bg-[#0a0a0a]/50 rounded-lg p-4 border border-[#1a1a1a] glass-panel hover:border-[#00ff88]/30 transition-all">
+            <div className="bg-[#0a0a0a]/50 rounded-lg p-4 border border-[#1a1a1a] glass-panel hover:border-[#ffffff]/30 transition-all">
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-[#00ff88]/20 rounded-lg">
-                  <Eye className="w-5 h-5 text-[#00ff88]" />
+                <div className="p-2 bg-[#ffffff]/20 rounded-lg">
+                  <Eye className="w-5 h-5 text-[#ffffff]" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-[#e0ffe0]">Analizador Profesional</h4>
-                  <p className="text-xs text-[#80ff80]">Ingeniería inversa completa</p>
+                  <h4 className="font-semibold text-[#ffffff]">Analizador Profesional</h4>
+                  <p className="text-xs text-[#ffffff]">Ingeniería inversa completa</p>
                 </div>
               </div>
-              <p className="text-sm text-[#80ff80] mb-3">
+              <p className="text-sm text-[#ffffff] mb-3">
                 Análisis avanzado de archivos Digital Commercial Bank Ltd con detección automática de estructuras,
                 extracción de transacciones y análisis forense profesional.
               </p>
-              <div className="text-xs text-[#4d7c4d]">
+              <div className="text-xs text-[#ffffff]">
                 • Estructura de bloques • Códigos de moneda • Análisis de seguridad
               </div>
             </div>
 
-            <div className="bg-[#0a0a0a]/50 rounded-lg p-4 border border-[#1a1a1a] glass-panel hover:border-[#00ff88]/30 transition-all">
+            <div className="bg-[#0a0a0a]/50 rounded-lg p-4 border border-[#1a1a1a] glass-panel hover:border-[#ffffff]/30 transition-all">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-purple-500/20 rounded-lg">
                   <Shield className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-[#e0ffe0]">Análisis Forense</h4>
-                  <p className="text-xs text-[#80ff80]">Investigación avanzada</p>
+                  <h4 className="font-semibold text-[#ffffff]">Análisis Forense</h4>
+                  <p className="text-xs text-[#ffffff]">Investigación avanzada</p>
                 </div>
               </div>
-              <p className="text-sm text-[#80ff80] mb-3">
+              <p className="text-sm text-[#ffffff] mb-3">
                 Herramientas profesionales para análisis forense de archivos binarios,
                 detección de manipulaciones y evaluación de integridad.
               </p>
@@ -696,17 +696,17 @@ export function AccountDashboard() {
               </div>
             </div>
 
-            <div className="bg-[#0a0a0a]/50 rounded-lg p-4 border border-[#1a1a1a] glass-panel hover:border-[#00ff88]/30 transition-all">
+            <div className="bg-[#0a0a0a]/50 rounded-lg p-4 border border-[#1a1a1a] glass-panel hover:border-[#ffffff]/30 transition-all">
               <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-red-500/20 rounded-lg">
                   <Key className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-[#e0ffe0]">Criptoanálisis</h4>
-                  <p className="text-xs text-[#80ff80]">Análisis de encriptación</p>
+                  <h4 className="font-semibold text-[#ffffff]">Criptoanálisis</h4>
+                  <p className="text-xs text-[#ffffff]">Análisis de encriptación</p>
                 </div>
               </div>
-              <p className="text-sm text-[#80ff80] mb-3">
+              <p className="text-sm text-[#ffffff] mb-3">
                 Detección automática de algoritmos de encriptación, análisis de
                 complejidad y herramientas de recuperación de datos.
               </p>
@@ -747,8 +747,8 @@ export function AccountDashboard() {
               <div className="text-right ml-4">
                 <div className="text-xs text-slate-500 mb-1">Estado del Sistema</div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-semibold text-green-400">Operativo</span>
+                  <div className="w-2 h-2 bg-white/20 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-semibold text-white">Operativo</span>
                 </div>
               </div>
             </div>

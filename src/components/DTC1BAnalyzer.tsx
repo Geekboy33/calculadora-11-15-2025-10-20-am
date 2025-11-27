@@ -687,7 +687,7 @@ export function DTC1BAnalyzer() {
                   <p>• Extracción de transacciones bancarias</p>
                   <p>• Análisis forense y de encriptación</p>
                   <p>• Soporte para archivos encriptados</p>
-                  <p className="mt-2 text-green-400">🚀 Análisis multi-capa con IA integrada</p>
+                  <p className="mt-2 text-white">🚀 Análisis multi-capa con IA integrada</p>
                 </div>
               </div>
             </label>
@@ -699,7 +699,7 @@ export function DTC1BAnalyzer() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    analysis.DTC1BAnalysis.isValidDTC1B ? 'bg-green-500/20 text-green-300' :
+                    analysis.DTC1BAnalysis.isValidDTC1B ? 'bg-white/20/20 text-white' :
                     analysis.encryptionAnalysis.isEncrypted ? 'bg-red-500/20 text-red-300' :
                     'bg-blue-500/20 text-blue-300'
                   }`}>
@@ -721,7 +721,7 @@ export function DTC1BAnalyzer() {
                   </button>
                   <button
                     onClick={exportToCSV}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     CSV
@@ -785,7 +785,7 @@ export function DTC1BAnalyzer() {
                   <div className="p-4 bg-slate-900 rounded-lg">
                     <p className="text-xs text-slate-400 mb-1">Estado Digital Commercial Bank Ltd</p>
                     <p className={`text-lg font-bold ${
-                      analysis.DTC1BAnalysis.isValidDTC1B ? 'text-green-400' : 'text-red-400'
+                      analysis.DTC1BAnalysis.isValidDTC1B ? 'text-white' : 'text-red-400'
                     }`}>
                       {analysis.DTC1BAnalysis.isValidDTC1B ? '✅ Válido' : '❌ No Detectado'}
                     </p>
@@ -798,13 +798,13 @@ export function DTC1BAnalyzer() {
 
                   <div className="p-4 bg-slate-900 rounded-lg">
                     <p className="text-xs text-slate-400 mb-1">Transacciones</p>
-                    <p className="text-2xl font-bold text-green-400">{analysis.DTC1BAnalysis.totalTransactions}</p>
+                    <p className="text-2xl font-bold text-white">{analysis.DTC1BAnalysis.totalTransactions}</p>
                   </div>
 
                   <div className="p-4 bg-slate-900 rounded-lg">
                     <p className="text-xs text-slate-400 mb-1">Encriptación</p>
                     <p className={`text-lg font-bold ${
-                      analysis.encryptionAnalysis.isEncrypted ? 'text-red-400' : 'text-green-400'
+                      analysis.encryptionAnalysis.isEncrypted ? 'text-red-400' : 'text-white'
                     }`}>
                       {analysis.encryptionAnalysis.isEncrypted ? '🔒 Encriptado' : '🔓 Plano'}
                     </p>
@@ -816,7 +816,7 @@ export function DTC1BAnalyzer() {
             {selectedSection === 'transactions' && (
               <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-green-400" />
+                  <FileText className="w-5 h-5 text-white" />
                   Transacciones Digital Commercial Bank Ltd ({analysis.DTC1BAnalysis.totalTransactions})
                 </h3>
 
@@ -835,7 +835,7 @@ export function DTC1BAnalyzer() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-2xl font-bold text-green-400">
+                            <p className="text-2xl font-bold text-white">
                               {formatCurrency(transaction.amount, transaction.currency)}
                             </p>
                             <p className="text-xs text-slate-400">{transaction.amount.toString()} centavos</p>
@@ -855,7 +855,7 @@ export function DTC1BAnalyzer() {
 
                         <div className="mt-3">
                           <p className="text-xs text-slate-400 mb-1">Datos hexadecimales del bloque:</p>
-                          <div className="bg-slate-950 p-2 rounded font-mono text-xs text-green-400 overflow-x-auto">
+                          <div className="bg-slate-950 p-2 rounded font-mono text-xs text-white overflow-x-auto">
                             {Array.from(transaction.rawData.slice(0, 32)).map(b => b.toString(16).padStart(2, '0')).join(' ')}
                           </div>
                         </div>
@@ -893,7 +893,7 @@ export function DTC1BAnalyzer() {
                           <span className="text-slate-400">Nivel de Entropía</span>
                           <span className={`font-bold text-lg ${
                             analysis.forensicAnalysis.entropy > 7.5 ? 'text-red-400' :
-                            analysis.forensicAnalysis.entropy > 6.5 ? 'text-yellow-400' : 'text-green-400'
+                            analysis.forensicAnalysis.entropy > 6.5 ? 'text-yellow-400' : 'text-white'
                           }`}>
                             {analysis.forensicAnalysis.entropy.toFixed(3)}
                           </span>
@@ -902,7 +902,7 @@ export function DTC1BAnalyzer() {
                           <div
                             className={`h-full ${
                               analysis.forensicAnalysis.entropy > 7.5 ? 'bg-red-500' :
-                              analysis.forensicAnalysis.entropy > 6.5 ? 'bg-yellow-500' : 'bg-green-500'
+                              analysis.forensicAnalysis.entropy > 6.5 ? 'bg-yellow-500' : 'bg-white/20'
                             }`}
                             style={{ width: `${Math.min(100, (analysis.forensicAnalysis.entropy / 8) * 100)}%` }}
                           />
@@ -919,7 +919,7 @@ export function DTC1BAnalyzer() {
                           <span className={`font-bold ${
                             analysis.forensicAnalysis.riskLevel === 'critical' ? 'text-red-400' :
                             analysis.forensicAnalysis.riskLevel === 'high' ? 'text-orange-400' :
-                            analysis.forensicAnalysis.riskLevel === 'medium' ? 'text-yellow-400' : 'text-green-400'
+                            analysis.forensicAnalysis.riskLevel === 'medium' ? 'text-yellow-400' : 'text-white'
                           }`}>
                             {analysis.forensicAnalysis.riskLevel === 'critical' ? 'CRÍTICO' :
                              analysis.forensicAnalysis.riskLevel === 'high' ? 'ALTO' :
@@ -947,9 +947,9 @@ export function DTC1BAnalyzer() {
                           </div>
                         ))
                       ) : (
-                        <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg text-center">
-                          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-400" />
-                          <p className="text-green-300 text-sm">No se detectaron patrones sospechosos</p>
+                        <div className="p-4 bg-white/10/20 border border-white/30/30 rounded-lg text-center">
+                          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-white" />
+                          <p className="text-white text-sm">No se detectaron patrones sospechosos</p>
                         </div>
                       )}
                     </div>
@@ -972,17 +972,17 @@ export function DTC1BAnalyzer() {
                       <div className={`p-4 rounded-lg border-2 ${
                         analysis.encryptionAnalysis.isEncrypted
                           ? 'bg-red-900/20 border-red-500'
-                          : 'bg-green-900/20 border-green-500'
+                          : 'bg-white/10/20 border-white/30'
                       }`}>
                         <div className="flex items-center gap-3 mb-2">
                           {analysis.encryptionAnalysis.isEncrypted ? (
                             <Lock className="w-6 h-6 text-red-400" />
                           ) : (
-                            <Unlock className="w-6 h-6 text-green-400" />
+                            <Unlock className="w-6 h-6 text-white" />
                           )}
                           <div>
                             <p className={`text-lg font-bold ${
-                              analysis.encryptionAnalysis.isEncrypted ? 'text-red-400' : 'text-green-400'
+                              analysis.encryptionAnalysis.isEncrypted ? 'text-red-400' : 'text-white'
                             }`}>
                               {analysis.encryptionAnalysis.isEncrypted ? '🔒 Encriptado' : '🔓 Sin Encriptar'}
                             </p>
@@ -1003,7 +1003,7 @@ export function DTC1BAnalyzer() {
                             </div>
                             <div className="flex justify-between">
                               <span className="text-slate-400">Confianza:</span>
-                              <span className="text-green-400">{analysis.encryptionAnalysis.confidence}%</span>
+                              <span className="text-white">{analysis.encryptionAnalysis.confidence}%</span>
                             </div>
                           </div>
                         </div>
@@ -1040,10 +1040,10 @@ export function DTC1BAnalyzer() {
                           </div>
                         </>
                       ) : (
-                        <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg text-center">
-                          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-400" />
-                          <p className="text-green-300 text-sm">El archivo no está encriptado</p>
-                          <p className="text-xs text-green-200 mt-1">Los datos están disponibles directamente</p>
+                        <div className="p-4 bg-white/10/20 border border-white/30/30 rounded-lg text-center">
+                          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-white" />
+                          <p className="text-white text-sm">El archivo no está encriptado</p>
+                          <p className="text-xs text-white mt-1">Los datos están disponibles directamente</p>
                         </div>
                       )}
                     </div>
@@ -1059,7 +1059,7 @@ export function DTC1BAnalyzer() {
                   Vista Hexadecimal
                 </h3>
 
-                <div className="bg-slate-950 p-4 rounded-lg font-mono text-xs text-green-400 overflow-x-auto max-h-96 overflow-y-auto">
+                <div className="bg-slate-950 p-4 rounded-lg font-mono text-xs text-white overflow-x-auto max-h-96 overflow-y-auto">
                   {analysis.hexDump.map((line, i) => (
                     <div key={i} className="mb-1">{line}</div>
                   ))}

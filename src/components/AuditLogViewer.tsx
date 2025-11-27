@@ -97,7 +97,7 @@ export function AuditLogViewer() {
     const colors: Record<string, string> = {
       transfer: 'text-blue-400',
       api_keys: 'text-purple-400',
-      account: 'text-green-400',
+      account: 'text-white',
       file: 'text-yellow-400',
       auth: 'text-red-400'
     };
@@ -106,7 +106,7 @@ export function AuditLogViewer() {
 
   const getActionBadge = (action: string) => {
     const colors: Record<string, string> = {
-      create: 'bg-green-900 text-green-300',
+      create: 'bg-white/10 text-white',
       update: 'bg-blue-900 text-blue-300',
       delete: 'bg-red-900 text-red-300',
       read: 'bg-slate-700 text-slate-300'
@@ -266,7 +266,7 @@ export function AuditLogViewer() {
 
               <div>
                 <label className="block text-slate-400 mb-1">HMAC Signature</label>
-                <div className="bg-black p-2 rounded font-mono text-xs text-green-400 break-all">
+                <div className="bg-black p-2 rounded font-mono text-xs text-white break-all">
                   {selectedLog.hmacSignature}
                 </div>
               </div>
@@ -283,19 +283,19 @@ export function AuditLogViewer() {
             {signatureValid !== null && (
               <div className={`mt-4 p-3 rounded-lg ${
                 signatureValid
-                  ? 'bg-green-900/20 border border-green-700'
+                  ? 'bg-white/10/20 border border-white/30'
                   : 'bg-red-900/20 border border-red-700'
               }`}>
                 <div className="text-sm font-semibold">
                   {signatureValid ? (
-                    <span className="text-green-300">✓ Signature Valid</span>
+                    <span className="text-white">✓ Signature Valid</span>
                   ) : (
                     <span className="text-red-300">✗ Signature Invalid</span>
                   )}
                 </div>
                 <div className="text-xs mt-1">
                   {signatureValid ? (
-                    <span className="text-green-400">Log integrity verified</span>
+                    <span className="text-white">Log integrity verified</span>
                   ) : (
                     <span className="text-red-400">Log may have been tampered with</span>
                   )}

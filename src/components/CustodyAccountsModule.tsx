@@ -35,7 +35,7 @@ const BLOCKCHAINS = [
   { name: 'Arbitrum', symbol: 'ARB', color: 'text-cyan-400' },
   { name: 'Optimism', symbol: 'OP', color: 'text-red-400' },
   { name: 'Avalanche', symbol: 'AVAX', color: 'text-red-300' },
-  { name: 'Solana', symbol: 'SOL', color: 'text-green-400' },
+  { name: 'Solana', symbol: 'SOL', color: 'text-white' },
   { name: 'Stellar', symbol: 'XLM', color: 'text-indigo-400' },
 ];
 
@@ -641,7 +641,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
         {showScrollTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 z-50 p-4 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-full shadow-[0_0_30px_rgba(0,255,136,0.8)] hover:shadow-[0_0_50px_rgba(0,255,136,1)] transition-all hover:scale-110 animate-bounce"
+            className="fixed bottom-8 right-8 z-50 p-4 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-full shadow-[0_0_30px_rgba(255, 255, 255,0.8)] hover:shadow-[0_0_50px_rgba(255, 255, 255,1)] transition-all hover:scale-110 animate-bounce"
             title={language === 'es' ? 'Ir al inicio' : 'Go to top'}
           >
             <ArrowUp className="w-6 h-6" />
@@ -651,11 +651,11 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#00ff88] flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-[#ffffff] flex items-center gap-3">
             <Shield className="w-8 h-8" />
             {language === 'es' ? 'Cuentas Custodio - Tokenización Blockchain' : 'Custody Accounts - Blockchain Tokenization'}
           </h1>
-          <p className="text-[#4d7c4d] mt-2">
+          <p className="text-[#ffffff] mt-2">
             {language === 'es' 
               ? 'Sistema de reservas y verificación de fondos para stablecoins' 
               : 'Reserve system and fund verification for stablecoins'}
@@ -663,7 +663,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-6 py-3 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] transition-all flex items-center gap-2"
+          className="px-6 py-3 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(255, 255, 255,0.6)] transition-all flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
           {language === 'es' ? 'Crear Cuenta Custodio' : 'Create Custody Account'}
@@ -674,32 +674,32 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
-            <Wallet className="w-5 h-5 text-[#00ff88]" />
-            <span className="text-[#4d7c4d] text-sm">{language === 'es' ? 'Cuentas Totales' : 'Total Accounts'}</span>
+            <Wallet className="w-5 h-5 text-[#ffffff]" />
+            <span className="text-[#ffffff] text-sm">{language === 'es' ? 'Cuentas Totales' : 'Total Accounts'}</span>
           </div>
-          <p className="text-3xl font-bold text-[#00ff88]">{stats.totalAccounts}</p>
+          <p className="text-3xl font-bold text-[#ffffff]">{stats.totalAccounts}</p>
         </div>
 
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
             <Lock className="w-5 h-5 text-yellow-400" />
-            <span className="text-[#4d7c4d] text-sm">{language === 'es' ? 'Fondos Reservados' : 'Reserved Funds'}</span>
+            <span className="text-[#ffffff] text-sm">{language === 'es' ? 'Fondos Reservados' : 'Reserved Funds'}</span>
           </div>
           <p className="text-3xl font-bold text-yellow-400">${stats.totalReserved.toLocaleString()}</p>
         </div>
 
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
-            <Unlock className="w-5 h-5 text-green-400" />
-            <span className="text-[#4d7c4d] text-sm">{language === 'es' ? 'Fondos Disponibles' : 'Available Funds'}</span>
+            <Unlock className="w-5 h-5 text-white" />
+            <span className="text-[#ffffff] text-sm">{language === 'es' ? 'Fondos Disponibles' : 'Available Funds'}</span>
           </div>
-          <p className="text-3xl font-bold text-green-400">${stats.totalAvailable.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-white">${stats.totalAvailable.toLocaleString()}</p>
         </div>
 
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle className="w-5 h-5 text-cyan-400" />
-            <span className="text-[#4d7c4d] text-sm">{language === 'es' ? 'Reservas Confirmadas' : 'Confirmed Reservations'}</span>
+            <span className="text-[#ffffff] text-sm">{language === 'es' ? 'Reservas Confirmadas' : 'Confirmed Reservations'}</span>
           </div>
           <p className="text-3xl font-bold text-cyan-400">{stats.confirmedReservations}</p>
         </div>
@@ -708,14 +708,14 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
       {/* Balances del Sistema Disponibles */}
       {systemBalances.length > 0 && (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-[#00ff88] mb-4">
+          <h2 className="text-xl font-semibold text-[#ffffff] mb-4">
             {language === 'es' ? 'Fondos Disponibles del Sistema Digital Commercial Bank Ltd' : 'Digital Commercial Bank Ltd System Available Funds'}
           </h2>
           <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
             {systemBalances.map(bal => (
-              <div key={bal.currency} className="bg-[#0a0a0a] border border-[#00ff88]/20 rounded-lg p-3 text-center">
-                <div className="text-sm text-[#4d7c4d]">{bal.currency}</div>
-                <div className="text-lg font-bold text-[#00ff88] font-mono">
+              <div key={bal.currency} className="bg-[#0a0a0a] border border-[#ffffff]/20 rounded-lg p-3 text-center">
+                <div className="text-sm text-[#ffffff]">{bal.currency}</div>
+                <div className="text-lg font-bold text-[#ffffff] font-mono">
                   {bal.totalAmount.toLocaleString()}
                 </div>
               </div>
@@ -731,7 +731,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
           {custodyAccounts.map(account => (
             <div 
               key={account.id} 
-              className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6 hover:border-[#00ff88]/30 transition-all cursor-pointer"
+              className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6 hover:border-[#ffffff]/30 transition-all cursor-pointer"
               onClick={() => {
                 setSelectedAccount(account);
                 setShowDetailsModal(true);
@@ -746,16 +746,16 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     ) : (
                       <div className="text-2xl">🏦</div>
                     )}
-                    <h3 className="text-xl font-bold text-[#00ff88]">{account.accountName}</h3>
+                    <h3 className="text-xl font-bold text-[#ffffff]">{account.accountName}</h3>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                       (account.accountType || 'blockchain') === 'blockchain' 
                         ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400' 
-                        : 'bg-green-500/20 border border-green-500/40 text-green-400'
+                        : 'bg-white/20/20 border border-white/30/40 text-white'
                     }`}>
                       {(account.accountType || 'blockchain') === 'blockchain' ? 'BLOCKCHAIN CUSTODY' : 'BANKING ACCOUNT'}
                     </span>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      account.apiStatus === 'active' ? 'bg-green-500/20 text-green-400' :
+                      account.apiStatus === 'active' ? 'bg-white/20/20 text-white' :
                       account.apiStatus === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
                       'bg-red-500/20 text-red-400'
                     }`}>
@@ -763,9 +763,9 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
-                    <p className="text-[#4d7c4d]">ID: {account.id}</p>
+                    <p className="text-[#ffffff]">ID: {account.id}</p>
                     {account.accountNumber && (
-                      <p className="text-[#00ff88] font-mono font-bold">
+                      <p className="text-[#ffffff] font-mono font-bold">
                         {language === 'es' ? 'Nº Cuenta:' : 'Account #:'} {account.accountNumber}
                       </p>
                     )}
@@ -778,7 +778,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                       const verificationUrl = `${window.location.origin}/${account.accountType}/verify/${account.id}`;
                       window.open(verificationUrl, '_blank');
                     }}
-                    className="px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] transition-all text-sm font-bold"
+                    className="px-4 py-2 bg-gradient-to-r from-white/10 to-blue-600 text-white rounded-lg hover:shadow-[0_0_20px_rgba(255, 255, 255,0.6)] transition-all text-sm font-bold"
                   >
                     <Shield className="w-4 h-4 inline mr-1" />
                     {language === 'es' ? 'Ver Verificación' : 'View Verification'}
@@ -789,7 +789,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                       setSelectedAccount(account);
                       setShowBlackScreen(true);
                     }}
-                    className="px-4 py-2 bg-black border border-[#00ff88] text-[#00ff88] rounded-lg hover:shadow-[0_0_15px_rgba(0,255,136,0.6)] transition-all text-sm font-bold"
+                    className="px-4 py-2 bg-black border border-[#ffffff] text-[#ffffff] rounded-lg hover:shadow-[0_0_15px_rgba(255, 255, 255,0.6)] transition-all text-sm font-bold"
                   >
                     <CheckCircle className="w-4 h-4 inline mr-1" />
                     Black Screen
@@ -800,7 +800,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                       setSelectedAccount(account);
                       setShowReserveModal(true);
                     }}
-                    className="px-4 py-2 bg-[#1a1a1a] border border-[#00ff88]/30 text-[#00ff88] rounded-lg hover:bg-[#252525] transition-all text-sm"
+                    className="px-4 py-2 bg-[#1a1a1a] border border-[#ffffff]/30 text-[#ffffff] rounded-lg hover:bg-[#252525] transition-all text-sm"
                   >
                     <Lock className="w-4 h-4 inline mr-1" />
                     {language === 'es' ? 'Reservar' : 'Reserve'}
@@ -822,7 +822,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
                   <div className="flex items-center justify-between mb-1">
-                    <div className="text-xs text-[#4d7c4d]">
+                    <div className="text-xs text-[#ffffff]">
                       {language === 'es' ? 'Total' : 'Total'}
                     </div>
                     <button
@@ -831,29 +831,29 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         setSelectedAccount(account);
                         setShowEditBalanceModal(true);
                       }}
-                      className="p-1 bg-[#00ff88]/10 border border-[#00ff88]/30 text-[#00ff88] rounded hover:bg-[#00ff88]/20 transition-all"
+                      className="p-1 bg-[#ffffff]/10 border border-[#ffffff]/30 text-[#ffffff] rounded hover:bg-[#ffffff]/20 transition-all"
                       title={isSpanish ? 'Ajustar balance' : 'Adjust balance'}
                     >
                       <TrendingUp className="w-3 h-3" />
                     </button>
                   </div>
-                  <div className="text-2xl font-bold text-[#00ff88] font-mono">
+                  <div className="text-2xl font-bold text-[#ffffff] font-mono">
                     {account.currency} {account.totalBalance.toLocaleString()}
                   </div>
                 </div>
                 <div className="bg-[#0a0a0a] border border-yellow-900/30 rounded-lg p-4">
-                  <div className="text-xs text-[#4d7c4d] mb-1">
+                  <div className="text-xs text-[#ffffff] mb-1">
                     {language === 'es' ? 'Reservado' : 'Reserved'}
                   </div>
                   <div className="text-2xl font-bold text-yellow-400 font-mono">
                     {account.currency} {account.reservedBalance.toLocaleString()}
                   </div>
                 </div>
-                <div className="bg-[#0a0a0a] border border-green-900/30 rounded-lg p-4">
-                  <div className="text-xs text-[#4d7c4d] mb-1">
+                <div className="bg-[#0a0a0a] border border-white/30/30 rounded-lg p-4">
+                  <div className="text-xs text-[#ffffff] mb-1">
                     {language === 'es' ? 'Disponible' : 'Available'}
                   </div>
-                  <div className="text-2xl font-bold text-green-400 font-mono">
+                  <div className="text-2xl font-bold text-white font-mono">
                     {account.currency} {account.availableBalance.toLocaleString()}
                   </div>
                 </div>
@@ -868,12 +868,12 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   {/* VUSD Balance Toggle */}
                   <div className="flex items-center justify-between bg-black/30 rounded-lg p-3 border border-purple-500/20">
                     <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-green-400" />
+                      <Shield className="w-4 h-4 text-white" />
                       <div>
                         <div className="text-sm font-semibold text-white">API VUSD</div>
                         <div className="text-xs text-gray-400">
                           {account.vusdBalanceEnabled ? (
-                            <span className="text-green-400">✓ {language === 'es' ? 'Activo' : 'Active'}</span>
+                            <span className="text-white">✓ {language === 'es' ? 'Activo' : 'Active'}</span>
                           ) : (
                             <span className="text-gray-500">{language === 'es' ? 'Desactivado' : 'Disabled'}</span>
                           )}
@@ -894,7 +894,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         }
                       }}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        account.vusdBalanceEnabled ? 'bg-green-600' : 'bg-gray-600'
+                        account.vusdBalanceEnabled ? 'bg-white/20' : 'bg-gray-600'
                       }`}
                     >
                       <span
@@ -955,58 +955,58 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Número de Cuenta:' : 'Account Number:'}</div>
+                      <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Número de Cuenta:' : 'Account Number:'}</div>
                       <div className="text-cyan-400 font-mono font-bold">{account.accountNumber}</div>
                     </div>
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">Blockchain:</div>
-                      <div className="text-[#80ff80] flex items-center gap-2">
+                      <div className="text-[#ffffff] mb-1">Blockchain:</div>
+                      <div className="text-[#ffffff] flex items-center gap-2">
                         {account.blockchainLink}
                         <ExternalLink className="w-3 h-3" />
                       </div>
                     </div>
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">Token Symbol:</div>
-                      <div className="text-[#80ff80] font-mono font-bold">{account.tokenSymbol}</div>
+                      <div className="text-[#ffffff] mb-1">Token Symbol:</div>
+                      <div className="text-[#ffffff] font-mono font-bold">{account.tokenSymbol}</div>
                     </div>
                     <div className="col-span-1">
-                      <div className="text-[#4d7c4d] mb-1">Tipo:</div>
+                      <div className="text-[#ffffff] mb-1">Tipo:</div>
                       <div className="text-cyan-400 font-bold">BLOCKCHAIN CUSTODY</div>
                     </div>
                     <div className="col-span-2">
-                      <div className="text-[#4d7c4d] mb-1">Dirección del Contrato:</div>
+                      <div className="text-[#ffffff] mb-1">Dirección del Contrato:</div>
                       <div className="flex items-center gap-2">
-                        <code className="text-[#80ff80] font-mono text-xs bg-[#000] border border-[#1a1a1a] rounded px-2 py-1 flex-1">
+                        <code className="text-[#ffffff] font-mono text-xs bg-[#000] border border-[#1a1a1a] rounded px-2 py-1 flex-1">
                           {account.contractAddress}
                         </code>
                         <button
                           onClick={() => copyToClipboard(account.contractAddress || '')}
-                          className="p-1 bg-[#1a1a1a] border border-[#00ff88]/30 rounded hover:bg-[#252525]"
+                          className="p-1 bg-[#1a1a1a] border border-[#ffffff]/30 rounded hover:bg-[#252525]"
                           title="Copiar"
                         >
-                          <Copy className="w-4 h-4 text-[#00ff88]" />
+                          <Copy className="w-4 h-4 text-[#ffffff]" />
                         </button>
                       </div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-4 mb-4">
-                  <h4 className="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+                <div className="bg-gradient-to-r from-white/10/20 to-emerald-900/20 border border-white/30/30 rounded-lg p-4 mb-4">
+                  <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                     🏦 {language === 'es' ? 'Información Bancaria' : 'Banking Information'}
                   </h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Número de Cuenta:' : 'Account Number:'}</div>
-                      <div className="text-green-400 font-mono font-bold">{account.accountNumber}</div>
+                      <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Número de Cuenta:' : 'Account Number:'}</div>
+                      <div className="text-white font-mono font-bold">{account.accountNumber}</div>
                     </div>
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Banco:' : 'Bank:'}</div>
-                      <div className="text-[#80ff80]">{account.bankName}</div>
+                      <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Banco:' : 'Bank:'}</div>
+                      <div className="text-[#ffffff]">{account.bankName}</div>
                     </div>
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Tipo:' : 'Type:'}</div>
-                      <div className="text-green-400 font-bold">BANKING ACCOUNT</div>
+                      <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Tipo:' : 'Type:'}</div>
+                      <div className="text-white font-bold">BANKING ACCOUNT</div>
                     </div>
                   </div>
                 </div>
@@ -1014,12 +1014,12 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
               {/* API Endpoint (común para ambos tipos) */}
               <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4 mb-4">
-                <h4 className="text-sm font-semibold text-[#00ff88] mb-3">
+                <h4 className="text-sm font-semibold text-[#ffffff] mb-3">
                   {language === 'es' ? 'API de Verificación' : 'Verification API'}
                 </h4>
                 <div className="space-y-3">
                   <div>
-                    <div className="text-[#4d7c4d] mb-1 text-xs">Endpoint:</div>
+                    <div className="text-[#ffffff] mb-1 text-xs">Endpoint:</div>
                     <div className="flex items-center gap-2">
                       <code className="text-cyan-400 font-mono text-xs bg-[#000] border border-cyan-500/20 rounded px-2 py-1 flex-1">
                         {account.apiEndpoint}
@@ -1037,7 +1037,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
                   {account.apiKey && (
                     <div>
-                      <div className="text-[#4d7c4d] mb-1 text-xs">API Key:</div>
+                      <div className="text-[#ffffff] mb-1 text-xs">API Key:</div>
                       <div className="flex items-center gap-2">
                         <code className="text-orange-400 font-mono text-xs bg-[#000] border border-orange-500/20 rounded px-2 py-1 flex-1">
                           {account.apiKey}
@@ -1056,28 +1056,28 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               </div>
 
               {/* Cumplimiento y Seguridad ISO/FATF */}
-              <div className="bg-gradient-to-r from-green-900/20 to-cyan-900/20 border border-green-500/30 rounded-lg p-4 mb-4">
-                <h4 className="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+              <div className="bg-gradient-to-r from-white/10/20 to-cyan-900/20 border border-white/30/30 rounded-lg p-4 mb-4">
+                <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                   🥇 {language === 'es' ? 'Cumplimiento de Estándares Internacionales' : 'International Standards Compliance'}
                 </h4>
                 <div className="grid grid-cols-3 gap-3 mb-3">
                   <div className="bg-[#0a0a0a] border border-cyan-500/20 rounded p-2 text-center">
-                    <div className="text-xs text-[#4d7c4d] mb-1">ISO 27001</div>
-                    <div className={`font-bold text-sm ${account.iso27001Compliant !== false ? 'text-green-400' : 'text-yellow-400'}`}>
+                    <div className="text-xs text-[#ffffff] mb-1">ISO 27001</div>
+                    <div className={`font-bold text-sm ${account.iso27001Compliant !== false ? 'text-white' : 'text-yellow-400'}`}>
                       {account.iso27001Compliant !== false ? '✓ COMPLIANT' : '⚡ PENDING'}
                     </div>
                     <div className="text-xs text-cyan-300 mt-1">{language === 'es' ? 'Seguridad' : 'Security'}</div>
                   </div>
                   <div className="bg-[#0a0a0a] border border-blue-500/20 rounded p-2 text-center">
-                    <div className="text-xs text-[#4d7c4d] mb-1">ISO 20022</div>
-                    <div className={`font-bold text-sm ${account.iso20022Compatible !== false ? 'text-green-400' : 'text-yellow-400'}`}>
+                    <div className="text-xs text-[#ffffff] mb-1">ISO 20022</div>
+                    <div className={`font-bold text-sm ${account.iso20022Compatible !== false ? 'text-white' : 'text-yellow-400'}`}>
                       {account.iso20022Compatible !== false ? '✓ COMPATIBLE' : '⚡ PENDING'}
                     </div>
                     <div className="text-xs text-blue-300 mt-1">{language === 'es' ? 'Interop.' : 'Interop.'}</div>
                   </div>
                   <div className="bg-[#0a0a0a] border border-yellow-500/20 rounded p-2 text-center">
-                    <div className="text-xs text-[#4d7c4d] mb-1">FATF AML/CFT</div>
-                    <div className={`font-bold text-sm ${account.fatfAmlVerified !== false ? 'text-green-400' : 'text-yellow-400'}`}>
+                    <div className="text-xs text-[#ffffff] mb-1">FATF AML/CFT</div>
+                    <div className={`font-bold text-sm ${account.fatfAmlVerified !== false ? 'text-white' : 'text-yellow-400'}`}>
                       {account.fatfAmlVerified !== false ? '✓ VERIFIED' : '⚡ PENDING'}
                     </div>
                     <div className="text-xs text-yellow-300 mt-1">{language === 'es' ? 'Anti-Lavado' : 'Anti-Money Laundering'}</div>
@@ -1085,15 +1085,15 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
                 <div className="grid grid-cols-3 gap-3 text-xs">
                   <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded p-2">
-                    <div className="text-[#4d7c4d] mb-1">KYC Status:</div>
-                    <div className={`font-semibold ${account.kycVerified !== false ? 'text-green-400' : 'text-red-400'}`}>
+                    <div className="text-[#ffffff] mb-1">KYC Status:</div>
+                    <div className={`font-semibold ${account.kycVerified !== false ? 'text-white' : 'text-red-400'}`}>
                       {account.kycVerified !== false ? '✓ VERIFIED' : '✗ NOT VERIFIED'}
                     </div>
                   </div>
                   <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded p-2">
-                    <div className="text-[#4d7c4d] mb-1">AML Score:</div>
+                    <div className="text-[#ffffff] mb-1">AML Score:</div>
                     <div className={`font-mono font-bold ${
-                      (account.amlScore || 85) >= 90 ? 'text-green-400' :
+                      (account.amlScore || 85) >= 90 ? 'text-white' :
                       (account.amlScore || 85) >= 75 ? 'text-yellow-400' :
                       'text-red-400'
                     }`}>
@@ -1101,9 +1101,9 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     </div>
                   </div>
                   <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded p-2">
-                    <div className="text-[#4d7c4d] mb-1">Risk Level:</div>
+                    <div className="text-[#ffffff] mb-1">Risk Level:</div>
                     <div className={`font-bold ${
-                      (account.riskLevel || 'medium') === 'low' ? 'text-green-400' :
+                      (account.riskLevel || 'medium') === 'low' ? 'text-white' :
                       (account.riskLevel || 'medium') === 'medium' ? 'text-yellow-400' :
                       'text-red-400'
                     }`}>
@@ -1141,16 +1141,16 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               {/* Reservas - Solo mostrar para cuentas blockchain */}
               {account.accountType === 'blockchain' && account.reservations.length > 0 && (
                 <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-[#00ff88] mb-3">
+                  <h4 className="text-sm font-semibold text-[#ffffff] mb-3">
                     {language === 'es' ? `Reservas Blockchain (${account.reservations.length})` : `Blockchain Reserves (${account.reservations.length})`}
                   </h4>
                   <div className="space-y-2">
                     {account.reservations.map(reservation => (
                       <div key={reservation.id} className="bg-[#000] border border-[#1a1a1a] rounded p-3">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-mono text-[#80ff80]">{reservation.id}</span>
+                          <span className="text-sm font-mono text-[#ffffff]">{reservation.id}</span>
                           <span className={`px-2 py-1 rounded text-xs font-bold ${
-                            reservation.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
+                            reservation.status === 'confirmed' ? 'bg-white/20/20 text-white' :
                             reservation.status === 'reserved' ? 'bg-yellow-500/20 text-yellow-400' :
                             'bg-gray-500/20 text-gray-400'
                           }`}>
@@ -1159,19 +1159,19 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div>
-                            <span className="text-[#4d7c4d]">Monto:</span> 
-                            <span className="text-[#80ff80] ml-1">{account.currency} {reservation.amount.toLocaleString()}</span>
+                            <span className="text-[#ffffff]">Monto:</span> 
+                            <span className="text-[#ffffff] ml-1">{account.currency} {reservation.amount.toLocaleString()}</span>
                           </div>
                           <div>
-                            <span className="text-[#4d7c4d]">Tokens:</span> 
+                            <span className="text-[#ffffff]">Tokens:</span> 
                             <span className="text-cyan-400 ml-1">{reservation.tokenAmount?.toLocaleString() || 0} {account.tokenSymbol}</span>
                           </div>
                           <div>
-                            <span className="text-[#4d7c4d]">Blockchain:</span> 
-                            <span className="text-[#80ff80] ml-1">{reservation.blockchain}</span>
+                            <span className="text-[#ffffff]">Blockchain:</span> 
+                            <span className="text-[#ffffff] ml-1">{reservation.blockchain}</span>
                           </div>
                           <div className="col-span-2">
-                            <span className="text-[#4d7c4d]">Contrato:</span> 
+                            <span className="text-[#ffffff]">Contrato:</span> 
                             <code className="text-purple-400 ml-1 text-xs">{reservation.contractAddress?.substring(0, 20) || 'N/A'}...</code>
                           </div>
                         </div>
@@ -1179,7 +1179,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                           {reservation.status === 'reserved' && (
                             <button
                               onClick={() => custodyStore.confirmReservation(account.id, reservation.id)}
-                              className="px-3 py-1 bg-green-500/20 border border-green-500/40 text-green-400 rounded text-xs hover:bg-green-500/30"
+                              className="px-3 py-1 bg-white/20/20 border border-white/30/40 text-white rounded text-xs hover:bg-white/20/30"
                             >
                               <Check className="w-3 h-3 inline mr-1" />
                               Confirmar
@@ -1205,12 +1205,12 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
         </div>
 
         {/* Botón para Crear Más Cuentas */}
-        <div className="mt-6 bg-gradient-to-r from-[#0d0d0d] to-black border-2 border-[#00ff88]/30 rounded-xl p-6 text-center">
+        <div className="mt-6 bg-gradient-to-r from-[#0d0d0d] to-black border-2 border-[#ffffff]/30 rounded-xl p-6 text-center">
           <div className="mb-4">
-            <h3 className="text-lg font-bold text-[#00ff88] mb-2">
+            <h3 className="text-lg font-bold text-[#ffffff] mb-2">
               {language === 'es' ? '✨ Crear Nueva Cuenta Custodio' : '✨ Create New Custody Account'}
             </h3>
-            <p className="text-sm text-[#4d7c4d]">
+            <p className="text-sm text-[#ffffff]">
               {language === 'es' 
                 ? 'Agrega más cuentas blockchain o bancarias para gestionar fondos adicionales'
                 : 'Add more blockchain or banking accounts to manage additional funds'}
@@ -1218,12 +1218,12 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-8 py-4 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(0,255,136,0.8)] transition-all text-lg flex items-center gap-3 mx-auto"
+            className="px-8 py-4 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(255, 255, 255,0.8)] transition-all text-lg flex items-center gap-3 mx-auto"
           >
             <Plus className="w-6 h-6" />
             {language === 'es' ? 'Crear Otra Cuenta Custodio' : 'Create Another Custody Account'}
           </button>
-          <div className="mt-3 text-xs text-[#4d7c4d]">
+          <div className="mt-3 text-xs text-[#ffffff]">
             {language === 'es' 
               ? `Total de cuentas activas: ${custodyAccounts.length}` 
               : `Total active accounts: ${custodyAccounts.length}`}
@@ -1232,18 +1232,18 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
         </>
       ) : (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-12 text-center">
-          <Shield className="w-16 h-16 text-[#4d7c4d] mx-auto mb-4" />
-          <h3 className="text-xl text-[#4d7c4d] mb-2">
+          <Shield className="w-16 h-16 text-[#ffffff] mx-auto mb-4" />
+          <h3 className="text-xl text-[#ffffff] mb-2">
             {language === 'es' ? 'No hay cuentas custodio creadas' : 'No custody accounts created'}
           </h3>
-          <p className="text-[#4d7c4d] text-sm mb-4">
+          <p className="text-[#ffffff] text-sm mb-4">
             {language === 'es' 
               ? 'Crea una cuenta custodio para reservar fondos y prepararlos para tokenización blockchain'
               : 'Create a custody account to reserve funds and prepare them for blockchain tokenization'}
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-6 py-3 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] transition-all"
+            className="px-6 py-3 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(255, 255, 255,0.6)] transition-all"
           >
             <Plus className="w-5 h-5 inline mr-2" />
             {language === 'es' ? 'Crear Primera Cuenta Custodio' : 'Create First Custody Account'}
@@ -1254,15 +1254,15 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
       {/* Modal de Creación */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0d0d0d] border-2 border-[#00ff88] rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-[#00ff88] mb-6">
+          <div className="bg-[#0d0d0d] border-2 border-[#ffffff] rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-[#ffffff] mb-6">
               {language === 'es' ? 'Crear Cuenta Custodio' : 'Create Custody Account'}
             </h2>
             
             <div className="space-y-4 mb-6">
               {/* Selector de Tipo */}
               <div>
-                <label className="text-sm text-[#4d7c4d] mb-2 block">
+                <label className="text-sm text-[#ffffff] mb-2 block">
                   {language === 'es' ? 'Tipo de Cuenta' : 'Account Type'}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -1271,7 +1271,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       formData.accountType === 'blockchain'
                         ? 'border-cyan-500 bg-cyan-500/20 text-cyan-400'
-                        : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#4d7c4d] hover:border-cyan-500/30'
+                        : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#ffffff] hover:border-cyan-500/30'
                     }`}
                   >
                     <div className="text-2xl mb-2">🌐</div>
@@ -1284,8 +1284,8 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     onClick={() => setFormData({...formData, accountType: 'banking'})}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       formData.accountType === 'banking'
-                        ? 'border-green-500 bg-green-500/20 text-green-400'
-                        : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#4d7c4d] hover:border-green-500/30'
+                        ? 'border-white/30 bg-white/20/20 text-white'
+                        : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#ffffff] hover:border-white/30/30'
                     }`}
                   >
                     <div className="text-2xl mb-2">🏦</div>
@@ -1298,14 +1298,14 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               </div>
 
               {/* Estándares de Cumplimiento */}
-              <div className="bg-gradient-to-r from-green-900/20 to-cyan-900/20 border border-green-500/30 rounded-lg p-4">
-                <div className="text-sm font-semibold text-green-400 mb-3">
+              <div className="bg-gradient-to-r from-white/10/20 to-cyan-900/20 border border-white/30/30 rounded-lg p-4">
+                <div className="text-sm font-semibold text-white mb-3">
                   {language === 'es' ? '🔐 Seguridad y Cumplimiento Incluidos' : '🔐 Security & Compliance Included'}
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div className="flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3 text-green-400" />
-                    <span className="text-green-300">ISO 27001</span>
+                    <CheckCircle className="w-3 h-3 text-white" />
+                    <span className="text-white">ISO 27001</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <CheckCircle className="w-3 h-3 text-cyan-400" />
@@ -1319,14 +1319,14 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               </div>
 
               <div>
-                <label className="text-sm text-[#4d7c4d] mb-2 block">
+                <label className="text-sm text-[#ffffff] mb-2 block">
                   {language === 'es' ? 'Nombre de la Cuenta' : 'Account Name'}
                 </label>
                 <input
                   type="text"
                   value={formData.accountName}
                   onChange={e => setFormData({...formData, accountName: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#80ff80] focus:outline-none focus:border-[#00ff88]/50"
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-[#ffffff]/50"
                   placeholder={formData.accountType === 'blockchain' 
                     ? (language === 'es' ? 'Ej: USD Stablecoin Reserve' : 'Ex: USD Stablecoin Reserve')
                     : (language === 'es' ? 'Ej: Cuenta Wire Transfer EUR' : 'Ex: EUR Wire Transfer Account')}
@@ -1335,13 +1335,13 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-[#4d7c4d] mb-2 block">
+                  <label className="text-sm text-[#ffffff] mb-2 block">
                     {language === 'es' ? 'Moneda' : 'Currency'}
                   </label>
                   <select
                     value={formData.currency}
                     onChange={e => setFormData({...formData, currency: e.target.value})}
-                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#80ff80] focus:outline-none focus:border-[#00ff88]/50"
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-[#ffffff]/50"
                     aria-label="Seleccionar moneda"
                   >
                     {systemBalances.map(bal => (
@@ -1353,14 +1353,14 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
 
                 <div>
-                  <label className="text-sm text-[#4d7c4d] mb-2 block">
+                  <label className="text-sm text-[#ffffff] mb-2 block">
                     {language === 'es' ? 'Monto a Transferir' : 'Amount to Transfer'}
                   </label>
                   <input
                     type="number"
                     value={formData.amount}
                     onChange={e => setFormData({...formData, amount: parseFloat(e.target.value) || 0})}
-                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#80ff80] font-mono focus:outline-none focus:border-[#00ff88]/50"
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono focus:outline-none focus:border-[#ffffff]/50"
                     placeholder="0.00"
                   />
                 </div>
@@ -1411,13 +1411,13 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
 
                   <div>
-                    <label className="text-sm text-[#4d7c4d] mb-2 block">
+                    <label className="text-sm text-[#ffffff] mb-2 block">
                       {language === 'es' ? 'Red Blockchain *' : 'Blockchain Network *'}
                     </label>
                     <select
                       value={formData.blockchain}
                       onChange={e => setFormData({...formData, blockchain: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#80ff80] focus:outline-none focus:border-cyan-500"
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#ffffff] focus:outline-none focus:border-cyan-500"
                       aria-label="Seleccionar blockchain"
                     >
                       {BLOCKCHAINS.map(chain => (
@@ -1429,14 +1429,14 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
 
                   <div>
-                    <label className="text-sm text-[#4d7c4d] mb-2 block">
+                    <label className="text-sm text-[#ffffff] mb-2 block">
                       {language === 'es' ? 'Símbolo del Token *' : 'Token Symbol *'}
                     </label>
                     <input
                       type="text"
                       value={formData.tokenSymbol}
                       onChange={e => setFormData({...formData, tokenSymbol: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#80ff80] font-mono focus:outline-none focus:border-cyan-500"
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#ffffff] font-mono focus:outline-none focus:border-cyan-500"
                       placeholder={language === 'es' ? `Ej: ${formData.currency}T, USDT, EURT` : `Ex: ${formData.currency}T, USDT, EURT`}
                     />
                     <div className="text-xs text-cyan-300 mt-1">
@@ -1447,14 +1447,14 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
 
                   <div>
-                    <label className="text-sm text-[#4d7c4d] mb-2 block">
+                    <label className="text-sm text-[#ffffff] mb-2 block">
                       {language === 'es' ? 'Dirección del Contrato (Opcional)' : 'Contract Address (Optional)'}
                     </label>
                     <input
                       type="text"
                       value={formData.contractAddress}
                       onChange={e => setFormData({...formData, contractAddress: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#80ff80] font-mono focus:outline-none focus:border-cyan-500"
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#ffffff] font-mono focus:outline-none focus:border-cyan-500"
                       placeholder={language === 'es' ? 'Ej: 0x1234567890abcdef1234567890abcdef12345678' : 'Ex: 0x1234567890abcdef1234567890abcdef12345678'}
                     />
                     <div className="text-xs text-cyan-300 mt-1">
@@ -1468,41 +1468,41 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
               {/* CAMPOS ESPECÍFICOS PARA BANKING */}
               {formData.accountType === 'banking' && (
-                <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border-2 border-green-500/40 rounded-lg p-4 space-y-4">
+                <div className="bg-gradient-to-r from-white/10/20 to-emerald-900/20 border-2 border-white/30/40 rounded-lg p-4 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="text-xl">🏦</div>
-                    <h4 className="text-sm font-bold text-green-400">
+                    <h4 className="text-sm font-bold text-white">
                       {language === 'es' ? 'CONFIGURACIÓN BANCARIA (Auto-generado)' : 'BANKING CONFIGURATION (Auto-generated)'}
                     </h4>
                   </div>
 
                   <div>
-                    <label className="text-sm text-[#4d7c4d] mb-2 block">
+                    <label className="text-sm text-[#ffffff] mb-2 block">
                       {language === 'es' ? 'Nombre del Banco (opcional)' : 'Bank Name (optional)'}
                     </label>
                     <input
                       type="text"
                       value={formData.bankName}
                       onChange={e => setFormData({...formData, bankName: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-green-500/50 rounded-lg text-[#80ff80] focus:outline-none focus:border-green-500"
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/30/50 rounded-lg text-[#ffffff] focus:outline-none focus:border-white/30"
                       placeholder="DAES - Data and Exchange Settlement"
                     />
                   </div>
 
-                  <div className="bg-green-900/20 border border-green-500/30 rounded p-3 space-y-1">
-                    <div className="text-xs text-green-300 font-semibold">
+                  <div className="bg-white/10/20 border border-white/30/30 rounded p-3 space-y-1">
+                    <div className="text-xs text-white font-semibold">
                       ℹ️ {language === 'es' ? 'Se generarán automáticamente:' : 'Will be auto-generated:'}
                     </div>
-                    <div className="text-xs text-green-300/80">
+                    <div className="text-xs text-white/80">
                       • {language === 'es' ? 'Número de Cuenta' : 'Account Number'}: DAES-BK-{formData.currency}-XXXXXXX
                     </div>
-                    <div className="text-xs text-green-300/80">
+                    <div className="text-xs text-white/80">
                       • IBAN: {language === 'es' ? 'Estándar ISO 13616' : 'ISO 13616 Standard'}
                     </div>
-                    <div className="text-xs text-green-300/80">
+                    <div className="text-xs text-white/80">
                       • SWIFT/BIC: DAES{formData.currency.substring(0,2)}XXX
                     </div>
-                    <div className="text-xs text-green-300/80">
+                    <div className="text-xs text-white/80">
                       • Routing Number: 021XXXXXX
                     </div>
                   </div>
@@ -1513,7 +1513,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="px-6 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525]"
+                className="px-6 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] rounded-lg hover:bg-[#252525]"
               >
                 {language === 'es' ? 'Cancelar' : 'Cancel'}
               </button>
@@ -1551,7 +1551,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 className={`px-6 py-2 bg-gradient-to-br text-black font-bold rounded-lg transition-all ${
                   formData.accountType === 'blockchain'
                     ? 'from-cyan-500 to-blue-500 hover:shadow-[0_0_20px_rgba(0,255,255,0.6)]'
-                    : 'from-green-500 to-emerald-500 hover:shadow-[0_0_20px_rgba(0,255,0,0.6)]'
+                    : 'from-white/20 to-emerald-500 hover:shadow-[0_0_20px_rgba(0,255,0,0.6)]'
                 }`}
               >
                 {formData.accountType === 'blockchain' ? (
@@ -1577,12 +1577,12 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
           <div className={`bg-[#0d0d0d] border-2 rounded-xl p-6 max-w-2xl w-full ${
             (selectedAccount.accountType || 'blockchain') === 'blockchain'
               ? 'border-yellow-500'
-              : 'border-green-500'
+              : 'border-white/30'
           }`}>
             <h2 className={`text-2xl font-bold mb-6 ${
               (selectedAccount.accountType || 'blockchain') === 'blockchain'
                 ? 'text-yellow-400'
-                : 'text-green-400'
+                : 'text-white'
             }`}>
               {(selectedAccount.accountType || 'blockchain') === 'blockchain'
                 ? (language === 'es' ? '🌐 Reservar Fondos para Tokenización' : '🌐 Reserve Funds for Tokenization')
@@ -1590,25 +1590,25 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
             </h2>
             
             <div className="bg-[#0a0a0a] border border-yellow-500/20 rounded-lg p-4 mb-6">
-              <div className="text-sm text-[#4d7c4d] mb-1">
+              <div className="text-sm text-[#ffffff] mb-1">
                 {language === 'es' ? 'Cuenta Seleccionada:' : 'Selected Account:'}
               </div>
-              <div className="text-lg font-bold text-[#00ff88]">{selectedAccount.accountName}</div>
-              <div className="text-sm text-green-400 mt-1">
+              <div className="text-lg font-bold text-[#ffffff]">{selectedAccount.accountName}</div>
+              <div className="text-sm text-white mt-1">
                 {language === 'es' ? 'Disponible:' : 'Available:'} {selectedAccount.currency} {selectedAccount.availableBalance.toLocaleString()}
               </div>
             </div>
 
             <div className="space-y-4 mb-6">
               <div>
-                <label className="text-sm text-[#4d7c4d] mb-2 block">
+                <label className="text-sm text-[#ffffff] mb-2 block">
                   {language === 'es' ? 'Monto a Reservar' : 'Amount to Reserve'}
                 </label>
                 <input
                   type="number"
                   value={reserveData.amount}
                   onChange={e => setReserveData({...reserveData, amount: parseFloat(e.target.value) || 0})}
-                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#80ff80] font-mono text-lg focus:outline-none focus:border-yellow-500/50"
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono text-lg focus:outline-none focus:border-yellow-500/50"
                   placeholder="0.00"
                   max={selectedAccount.availableBalance}
                 />
@@ -1651,13 +1651,13 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               {(selectedAccount.accountType || 'blockchain') === 'blockchain' && (
                 <>
                   <div>
-                    <label className="text-sm text-[#4d7c4d] mb-2 block">
+                    <label className="text-sm text-[#ffffff] mb-2 block">
                       {language === 'es' ? 'Blockchain Destino' : 'Destination Blockchain'}
                     </label>
                     <select
                       value={reserveData.blockchain}
                       onChange={e => setReserveData({...reserveData, blockchain: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#80ff80] focus:outline-none focus:border-cyan-500"
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#ffffff] focus:outline-none focus:border-cyan-500"
                       aria-label="Seleccionar blockchain destino"
                     >
                       {BLOCKCHAINS.map(chain => (
@@ -1669,27 +1669,27 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
 
                   <div>
-                    <label className="text-sm text-[#4d7c4d] mb-2 block">
+                    <label className="text-sm text-[#ffffff] mb-2 block">
                       {language === 'es' ? 'Dirección del Contrato Blockchain *' : 'Blockchain Contract Address *'}
                     </label>
                     <input
                       type="text"
                       value={reserveData.contractAddress}
                       onChange={e => setReserveData({...reserveData, contractAddress: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#80ff80] font-mono text-sm focus:outline-none focus:border-cyan-500"
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#ffffff] font-mono text-sm focus:outline-none focus:border-cyan-500"
                       placeholder="0x..."
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm text-[#4d7c4d] mb-2 block">
+                    <label className="text-sm text-[#ffffff] mb-2 block">
                       {language === 'es' ? 'Cantidad de Tokens a Emitir' : 'Token Amount to Mint'}
                     </label>
                     <input
                       type="number"
                       value={reserveData.tokenAmount}
                       onChange={e => setReserveData({...reserveData, tokenAmount: parseFloat(e.target.value) || 0})}
-                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#80ff80] font-mono text-lg focus:outline-none focus:border-cyan-500"
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/50 rounded-lg text-[#ffffff] font-mono text-lg focus:outline-none focus:border-cyan-500"
                       placeholder="1000000"
                     />
                     <div className="text-xs text-cyan-400 mt-1">
@@ -1742,26 +1742,26 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               {(selectedAccount.accountType || 'blockchain') === 'banking' && (
                 <>
                   <div>
-                    <label className="text-sm text-[#4d7c4d] mb-2 block">
+                    <label className="text-sm text-[#ffffff] mb-2 block">
                       {language === 'es' ? 'Referencia de Transferencia (opcional)' : 'Transfer Reference (optional)'}
                     </label>
                     <input
                       type="text"
                       value={reserveData.transferReference}
                       onChange={e => setReserveData({...reserveData, transferReference: e.target.value})}
-                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-green-500/50 rounded-lg text-[#80ff80] focus:outline-none focus:border-green-500"
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/30/50 rounded-lg text-[#ffffff] focus:outline-none focus:border-white/30"
                       placeholder={language === 'es' ? 'Ej: WIRE-2024-001, Pago servicios, etc.' : 'Ex: WIRE-2024-001, Payment for services, etc.'}
                     />
                   </div>
 
-                  <div className="bg-gradient-to-r from-green-900/20 to-cyan-900/20 border border-green-500/40 rounded-lg p-4">
+                  <div className="bg-gradient-to-r from-white/10/20 to-cyan-900/20 border border-white/30/40 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="w-5 h-5 text-green-400" />
-                      <div className="text-sm font-semibold text-green-400">
+                      <CheckCircle className="w-5 h-5 text-white" />
+                      <div className="text-sm font-semibold text-white">
                         {language === 'es' ? 'Aprobación Automática' : 'Automatic Approval'}
                       </div>
                     </div>
-                    <div className="text-xs text-green-300/80 space-y-1">
+                    <div className="text-xs text-white/80 space-y-1">
                       <div>
                         {language === 'es'
                           ? '✓ Las reservas bancarias se aprueban automáticamente'
@@ -1796,10 +1796,10 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
             ) : (
-              <div className="bg-gradient-to-r from-green-900/20 to-cyan-900/20 border border-green-700/50 rounded-lg p-4 mb-6">
+              <div className="bg-gradient-to-r from-white/10/20 to-cyan-900/20 border border-white/30/50 rounded-lg p-4 mb-6">
                 <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-xs text-green-300/80">
+                  <CheckCircle className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
+                  <div className="text-xs text-white/80">
                     <strong>{language === 'es' ? '✓ Aprobación Automática:' : '✓ Auto-Approval:'}</strong> {language === 'es'
                       ? 'Los fondos se aprobarán automáticamente para transferencia API. No requiere confirmación manual.'
                       : 'Funds will be auto-approved for API transfer. No manual confirmation required.'}
@@ -1811,7 +1811,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowReserveModal(false)}
-                className="px-6 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525]"
+                className="px-6 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] rounded-lg hover:bg-[#252525]"
               >
                 {language === 'es' ? 'Cancelar' : 'Cancel'}
               </button>
@@ -1835,7 +1835,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 className={`px-6 py-2 bg-gradient-to-br text-black font-bold rounded-lg ${
                   (selectedAccount.accountType || 'blockchain') === 'blockchain'
                     ? 'from-yellow-500 to-orange-500 hover:shadow-[0_0_20px_rgba(255,193,7,0.6)]'
-                    : 'from-green-500 to-emerald-500 hover:shadow-[0_0_20px_rgba(0,255,0,0.6)]'
+                    : 'from-white/20 to-emerald-500 hover:shadow-[0_0_20px_rgba(0,255,0,0.6)]'
                 }`}
               >
                 <Lock className="w-4 h-4 inline mr-2" />
@@ -1851,15 +1851,15 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
       {/* Modal de Detalles Completos (Clic en Cuenta) */}
       {showDetailsModal && selectedAccount && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-black border-2 border-[#00ff88] rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-[0_0_50px_rgba(0,255,136,0.5)]">
+          <div className="bg-black border-2 border-[#ffffff] rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-[0_0_50px_rgba(255, 255, 255,0.5)]">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6 border-b border-[#00ff88]/30 pb-4">
+            <div className="flex items-center justify-between mb-6 border-b border-[#ffffff]/30 pb-4">
               <div>
-                <h2 className="text-2xl font-bold text-[#00ff88] flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-[#ffffff] flex items-center gap-3">
                   {(selectedAccount.accountType || 'blockchain') === 'blockchain' ? '🌐' : '🏦'}
                   {language === 'es' ? 'Detalles de Cuenta Custodio' : 'Custody Account Details'}
                 </h2>
-                <p className="text-[#4d7c4d] mt-1">{selectedAccount.accountName}</p>
+                <p className="text-[#ffffff] mt-1">{selectedAccount.accountName}</p>
               </div>
               <button
                 onClick={() => setShowDetailsModal(false)}
@@ -1871,21 +1871,21 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
             </div>
 
             {/* Contenido */}
-            <div className="space-y-6 text-[#00ff88]">
+            <div className="space-y-6 text-[#ffffff]">
               
               {/* Tipo y Estado */}
               <div className="flex gap-3">
                 <span className={`px-4 py-2 rounded-lg border-2 font-bold ${
                   (selectedAccount.accountType || 'blockchain') === 'blockchain' 
                     ? 'border-cyan-500 bg-cyan-500/20 text-cyan-400' 
-                    : 'border-green-500 bg-green-500/20 text-green-400'
+                    : 'border-white/30 bg-white/20/20 text-white'
                 }`}>
                   {(selectedAccount.accountType || 'blockchain') === 'blockchain' 
                     ? (language === 'es' ? '🌐 BLOCKCHAIN CUSTODY' : '🌐 BLOCKCHAIN CUSTODY')
                     : (language === 'es' ? '🏦 CUENTA BANCARIA' : '🏦 BANKING ACCOUNT')}
                 </span>
                 <span className={`px-4 py-2 rounded-lg border-2 font-bold ${
-                  selectedAccount.apiStatus === 'active' ? 'border-green-500 bg-green-500/20 text-green-400' :
+                  selectedAccount.apiStatus === 'active' ? 'border-white/30 bg-white/20/20 text-white' :
                   selectedAccount.apiStatus === 'pending' ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400' :
                   'border-red-500 bg-red-500/20 text-red-400'
                 }`}>
@@ -1895,52 +1895,52 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
               {/* Identificación */}
               <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-6">
-                <h3 className="text-lg font-bold text-[#00ff88] mb-4">
+                <h3 className="text-lg font-bold text-[#ffffff] mb-4">
                   {language === 'es' ? '📋 Identificación' : '📋 Identification'}
                 </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'ID:' : 'ID:'}</div>
-                    <div className="text-[#80ff80] font-mono">{selectedAccount.id}</div>
+                    <div className="text-[#ffffff] mb-1">{language === 'es' ? 'ID:' : 'ID:'}</div>
+                    <div className="text-[#ffffff] font-mono">{selectedAccount.id}</div>
                   </div>
                   <div>
-                    <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Número de Cuenta:' : 'Account Number:'}</div>
-                    <div className="text-[#00ff88] font-mono font-bold text-lg">
+                    <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Número de Cuenta:' : 'Account Number:'}</div>
+                    <div className="text-[#ffffff] font-mono font-bold text-lg">
                       {selectedAccount.accountNumber || 'N/A'}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Nombre:' : 'Name:'}</div>
-                    <div className="text-[#80ff80]">{selectedAccount.accountName}</div>
+                    <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Nombre:' : 'Name:'}</div>
+                    <div className="text-[#ffffff]">{selectedAccount.accountName}</div>
                   </div>
                   <div>
-                    <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Moneda:' : 'Currency:'}</div>
-                    <div className="text-[#80ff80] font-bold">{selectedAccount.currency}</div>
+                    <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Moneda:' : 'Currency:'}</div>
+                    <div className="text-[#ffffff] font-bold">{selectedAccount.currency}</div>
                   </div>
                 </div>
               </div>
 
               {/* Balances */}
               <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-6">
-                <h3 className="text-lg font-bold text-[#00ff88] mb-4">
+                <h3 className="text-lg font-bold text-[#ffffff] mb-4">
                   {language === 'es' ? '💰 Balances' : '💰 Balances'}
                 </h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-[#0a0a0a] border border-cyan-500/30 rounded-lg p-4 text-center">
-                    <div className="text-xs text-[#4d7c4d] mb-1">{language === 'es' ? 'Total' : 'Total'}</div>
+                    <div className="text-xs text-[#ffffff] mb-1">{language === 'es' ? 'Total' : 'Total'}</div>
                     <div className="text-2xl font-bold text-cyan-400 font-mono">
                       {selectedAccount.currency} {selectedAccount.totalBalance.toLocaleString()}
                     </div>
                   </div>
                   <div className="bg-[#0a0a0a] border border-yellow-500/30 rounded-lg p-4 text-center">
-                    <div className="text-xs text-[#4d7c4d] mb-1">{language === 'es' ? 'Reservado' : 'Reserved'}</div>
+                    <div className="text-xs text-[#ffffff] mb-1">{language === 'es' ? 'Reservado' : 'Reserved'}</div>
                     <div className="text-2xl font-bold text-yellow-400 font-mono">
                       {selectedAccount.currency} {selectedAccount.reservedBalance.toLocaleString()}
                     </div>
                   </div>
-                  <div className="bg-[#0a0a0a] border border-green-500/30 rounded-lg p-4 text-center">
-                    <div className="text-xs text-[#4d7c4d] mb-1">{language === 'es' ? 'Disponible' : 'Available'}</div>
-                    <div className="text-2xl font-bold text-green-400 font-mono">
+                  <div className="bg-[#0a0a0a] border border-white/30/30 rounded-lg p-4 text-center">
+                    <div className="text-xs text-[#ffffff] mb-1">{language === 'es' ? 'Disponible' : 'Available'}</div>
+                    <div className="text-2xl font-bold text-white font-mono">
                       {selectedAccount.currency} {selectedAccount.availableBalance.toLocaleString()}
                     </div>
                   </div>
@@ -1955,15 +1955,15 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Blockchain:' : 'Blockchain:'}</div>
-                      <div className="text-[#80ff80] font-bold">{selectedAccount.blockchainLink}</div>
+                      <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Blockchain:' : 'Blockchain:'}</div>
+                      <div className="text-[#ffffff] font-bold">{selectedAccount.blockchainLink}</div>
                     </div>
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Token Symbol:' : 'Token Symbol:'}</div>
-                      <div className="text-[#80ff80] font-mono font-bold">{selectedAccount.tokenSymbol}</div>
+                      <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Token Symbol:' : 'Token Symbol:'}</div>
+                      <div className="text-[#ffffff] font-mono font-bold">{selectedAccount.tokenSymbol}</div>
                     </div>
                     <div className="col-span-2">
-                      <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Dirección del Contrato:' : 'Contract Address:'}</div>
+                      <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Dirección del Contrato:' : 'Contract Address:'}</div>
                       <div className="flex items-center gap-2">
                         <code className="text-cyan-400 font-mono text-sm bg-[#000] border border-cyan-500/20 rounded px-3 py-2 flex-1">
                           {selectedAccount.contractAddress}
@@ -1980,23 +1980,23 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
                 </div>
               ) : (
-                <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/40 rounded-lg p-6">
-                  <h3 className="text-lg font-bold text-green-400 mb-4">
+                <div className="bg-gradient-to-r from-white/10/20 to-emerald-900/20 border border-white/30/40 rounded-lg p-6">
+                  <h3 className="text-lg font-bold text-white mb-4">
                     {language === 'es' ? '🏦 Cuenta Bancaria - Configuración API' : '🏦 Banking Account - API Configuration'}
                   </h3>
                   <div className="space-y-4 text-sm">
                     <div>
-                      <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Banco:' : 'Bank:'}</div>
-                      <div className="text-[#80ff80] font-semibold">{selectedAccount.bankName}</div>
+                      <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Banco:' : 'Bank:'}</div>
+                      <div className="text-[#ffffff] font-semibold">{selectedAccount.bankName}</div>
                     </div>
-                    <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                    <div className="bg-white/10/20 border border-white/30/30 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <CheckCircle className="w-5 h-5 text-green-400" />
-                        <div className="text-sm font-semibold text-green-400">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                        <div className="text-sm font-semibold text-white">
                           {language === 'es' ? 'Configuración para Conexión API' : 'API Connection Configuration'}
                         </div>
                       </div>
-                      <div className="text-xs text-green-300/80 space-y-1">
+                      <div className="text-xs text-white/80 space-y-1">
                         <div>
                           {language === 'es' 
                             ? '✓ Cuenta bancaria lista para conectar API de transferencias' 
@@ -2025,12 +2025,12 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
               {/* API de Verificación */}
               <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-6">
-                <h3 className="text-lg font-bold text-[#00ff88] mb-4">
+                <h3 className="text-lg font-bold text-[#ffffff] mb-4">
                   {language === 'es' ? '🔗 API de Verificación' : '🔗 Verification API'}
                 </h3>
                 <div className="space-y-3">
                   <div>
-                    <div className="text-[#4d7c4d] mb-1 text-xs">{language === 'es' ? 'Endpoint:' : 'Endpoint:'}</div>
+                    <div className="text-[#ffffff] mb-1 text-xs">{language === 'es' ? 'Endpoint:' : 'Endpoint:'}</div>
                     <div className="flex items-center gap-2">
                       <code className="text-cyan-400 font-mono text-xs bg-[#000] border border-cyan-500/20 rounded px-3 py-2 flex-1 break-all">
                         {selectedAccount.apiEndpoint}
@@ -2046,7 +2046,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
                   {selectedAccount.apiKey && (
                     <div>
-                      <div className="text-[#4d7c4d] mb-1 text-xs">API Key:</div>
+                      <div className="text-[#ffffff] mb-1 text-xs">API Key:</div>
                       <div className="flex items-center gap-2">
                         <code className="text-orange-400 font-mono text-xs bg-[#000] border border-orange-500/20 rounded px-3 py-2 flex-1">
                           {selectedAccount.apiKey}
@@ -2065,15 +2065,15 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               </div>
 
               {/* Cumplimiento ISO/FATF */}
-              <div className="bg-gradient-to-r from-green-900/20 to-cyan-900/20 border border-green-500/40 rounded-lg p-6">
-                <h3 className="text-lg font-bold text-green-400 mb-4">
+              <div className="bg-gradient-to-r from-white/10/20 to-cyan-900/20 border border-white/30/40 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-white mb-4">
                   {language === 'es' ? '🥇 Cumplimiento de Estándares' : '🥇 Standards Compliance'}
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="bg-[#0a0a0a] border border-cyan-500/30 rounded-lg p-4 text-center">
                     <div className="text-2xl mb-2">🔒</div>
-                    <div className="text-sm text-[#4d7c4d] mb-1">ISO 27001:2022</div>
-                    <div className="font-bold text-green-400">
+                    <div className="text-sm text-[#ffffff] mb-1">ISO 27001:2022</div>
+                    <div className="font-bold text-white">
                       {selectedAccount.iso27001Compliant !== false ? '✓ COMPLIANT' : '⚡ PENDING'}
                     </div>
                     <div className="text-xs text-cyan-300 mt-1">
@@ -2082,8 +2082,8 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
                   <div className="bg-[#0a0a0a] border border-blue-500/30 rounded-lg p-4 text-center">
                     <div className="text-2xl mb-2">🏦</div>
-                    <div className="text-sm text-[#4d7c4d] mb-1">ISO 20022</div>
-                    <div className="font-bold text-green-400">
+                    <div className="text-sm text-[#ffffff] mb-1">ISO 20022</div>
+                    <div className="font-bold text-white">
                       {selectedAccount.iso20022Compatible !== false ? '✓ COMPATIBLE' : '⚡ PENDING'}
                     </div>
                     <div className="text-xs text-blue-300 mt-1">
@@ -2092,8 +2092,8 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
                   <div className="bg-[#0a0a0a] border border-yellow-500/30 rounded-lg p-4 text-center">
                     <div className="text-2xl mb-2">⚖️</div>
-                    <div className="text-sm text-[#4d7c4d] mb-1">FATF AML/CFT</div>
-                    <div className="font-bold text-green-400">
+                    <div className="text-sm text-[#ffffff] mb-1">FATF AML/CFT</div>
+                    <div className="font-bold text-white">
                       {selectedAccount.fatfAmlVerified !== false ? '✓ VERIFIED' : '⚡ PENDING'}
                     </div>
                     <div className="text-xs text-yellow-300 mt-1">
@@ -2103,15 +2103,15 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-3 text-center">
-                    <div className="text-[#4d7c4d] mb-1">KYC</div>
-                    <div className={`font-bold ${selectedAccount.kycVerified !== false ? 'text-green-400' : 'text-red-400'}`}>
+                    <div className="text-[#ffffff] mb-1">KYC</div>
+                    <div className={`font-bold ${selectedAccount.kycVerified !== false ? 'text-white' : 'text-red-400'}`}>
                       {selectedAccount.kycVerified !== false ? '✓ VERIFIED' : '✗ NOT VERIFIED'}
                     </div>
                   </div>
                   <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-3 text-center">
-                    <div className="text-[#4d7c4d] mb-1">AML Score</div>
+                    <div className="text-[#ffffff] mb-1">AML Score</div>
                     <div className={`font-mono font-bold text-lg ${
-                      (selectedAccount.amlScore || 85) >= 90 ? 'text-green-400' :
+                      (selectedAccount.amlScore || 85) >= 90 ? 'text-white' :
                       (selectedAccount.amlScore || 85) >= 75 ? 'text-yellow-400' :
                       'text-red-400'
                     }`}>
@@ -2119,9 +2119,9 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     </div>
                   </div>
                   <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-3 text-center">
-                    <div className="text-[#4d7c4d] mb-1">Risk Level</div>
+                    <div className="text-[#ffffff] mb-1">Risk Level</div>
                     <div className={`font-bold ${
-                      (selectedAccount.riskLevel || 'medium') === 'low' ? 'text-green-400' :
+                      (selectedAccount.riskLevel || 'medium') === 'low' ? 'text-white' :
                       (selectedAccount.riskLevel || 'medium') === 'medium' ? 'text-yellow-400' :
                       'text-red-400'
                     }`}>
@@ -2138,7 +2138,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </h3>
                 <div className="space-y-3">
                   <div>
-                    <div className="text-[#4d7c4d] mb-2 text-xs">
+                    <div className="text-[#ffffff] mb-2 text-xs">
                       {language === 'es' ? 'Hash de Verificación (SHA-256):' : 'Verification Hash (SHA-256):'}
                     </div>
                     <div className="flex items-center gap-2">
@@ -2155,10 +2155,10 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[#4d7c4d] mb-2 text-xs">
+                    <div className="text-[#ffffff] mb-2 text-xs">
                       {language === 'es' ? 'Datos Encriptados (AES-256):' : 'Encrypted Data (AES-256):'}
                     </div>
-                    <code className="text-green-400 font-mono text-xs bg-[#000] border border-green-500/20 rounded px-3 py-2 block break-all">
+                    <code className="text-white font-mono text-xs bg-[#000] border border-white/30/20 rounded px-3 py-2 block break-all">
                       {selectedAccount.encryptedData.substring(0, 100)}...
                     </code>
                   </div>
@@ -2167,21 +2167,21 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
               {/* Timestamps */}
               <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-6">
-                <h3 className="text-lg font-bold text-[#00ff88] mb-4">
+                <h3 className="text-lg font-bold text-[#ffffff] mb-4">
                   {language === 'es' ? '🕐 Fechas y Auditoría' : '🕐 Dates & Audit'}
                 </h3>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
-                    <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Creado:' : 'Created:'}</div>
-                    <div className="text-[#80ff80]">{new Date(selectedAccount.createdAt).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}</div>
+                    <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Creado:' : 'Created:'}</div>
+                    <div className="text-[#ffffff]">{new Date(selectedAccount.createdAt).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}</div>
                   </div>
                   <div>
-                    <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Última Actualización:' : 'Last Updated:'}</div>
-                    <div className="text-[#80ff80]">{new Date(selectedAccount.lastUpdated).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}</div>
+                    <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Última Actualización:' : 'Last Updated:'}</div>
+                    <div className="text-[#ffffff]">{new Date(selectedAccount.lastUpdated).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}</div>
                   </div>
                   <div>
-                    <div className="text-[#4d7c4d] mb-1">{language === 'es' ? 'Última Auditoría:' : 'Last Audit:'}</div>
-                    <div className="text-[#80ff80]">{new Date(selectedAccount.lastAudit || selectedAccount.lastUpdated).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}</div>
+                    <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Última Auditoría:' : 'Last Audit:'}</div>
+                    <div className="text-[#ffffff]">{new Date(selectedAccount.lastAudit || selectedAccount.lastUpdated).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}</div>
                   </div>
                 </div>
               </div>
@@ -2189,16 +2189,16 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               {/* Reservas - Solo mostrar para cuentas blockchain */}
               {selectedAccount.accountType === 'blockchain' && selectedAccount.reservations && selectedAccount.reservations.length > 0 && (
                 <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg p-6">
-                  <h3 className="text-lg font-bold text-[#00ff88] mb-4">
+                  <h3 className="text-lg font-bold text-[#ffffff] mb-4">
                     {language === 'es' ? `📜 Reservas Blockchain (${selectedAccount.reservations.length})` : `📜 Blockchain Reserves (${selectedAccount.reservations.length})`}
                   </h3>
                   <div className="space-y-3">
                     {selectedAccount.reservations.map(r => (
                       <div key={r.id} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-mono text-[#80ff80]">{r.id}</span>
+                          <span className="text-sm font-mono text-[#ffffff]">{r.id}</span>
                           <span className={`px-2 py-1 rounded text-xs font-bold ${
-                            r.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
+                            r.status === 'confirmed' ? 'bg-white/20/20 text-white' :
                             r.status === 'reserved' ? 'bg-yellow-500/20 text-yellow-400' :
                             r.status === 'completed' ? 'bg-blue-500/20 text-blue-400' :
                             'bg-gray-500/20 text-gray-400'
@@ -2208,24 +2208,24 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div>
-                            <span className="text-[#4d7c4d]">{language === 'es' ? 'Monto:' : 'Amount:'}</span>
-                            <span className="text-[#80ff80] ml-1">{selectedAccount.currency} {r.amount.toLocaleString()}</span>
+                            <span className="text-[#ffffff]">{language === 'es' ? 'Monto:' : 'Amount:'}</span>
+                            <span className="text-[#ffffff] ml-1">{selectedAccount.currency} {r.amount.toLocaleString()}</span>
                           </div>
                           {r.tokenAmount && (
                             <div>
-                              <span className="text-[#4d7c4d]">{language === 'es' ? 'Tokens:' : 'Tokens:'}</span>
+                              <span className="text-[#ffffff]">{language === 'es' ? 'Tokens:' : 'Tokens:'}</span>
                               <span className="text-cyan-400 ml-1">{r.tokenAmount.toLocaleString()} {selectedAccount.tokenSymbol}</span>
                             </div>
                           )}
                           {r.blockchain && (
                             <div>
-                              <span className="text-[#4d7c4d]">Blockchain:</span>
-                              <span className="text-[#80ff80] ml-1">{r.blockchain}</span>
+                              <span className="text-[#ffffff]">Blockchain:</span>
+                              <span className="text-[#ffffff] ml-1">{r.blockchain}</span>
                             </div>
                           )}
                           {r.contractAddress && (
                             <div className="col-span-2">
-                              <span className="text-[#4d7c4d]">{language === 'es' ? 'Contrato:' : 'Contract:'}</span>
+                              <span className="text-[#ffffff]">{language === 'es' ? 'Contrato:' : 'Contract:'}</span>
                               <span className="text-cyan-400 ml-1 font-mono text-[10px]">{r.contractAddress.substring(0, 10)}...</span>
                             </div>
                           )}
@@ -2237,20 +2237,20 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               )}
 
               {/* Botones de Acción */}
-              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[#00ff88]/30">
+              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[#ffffff]/30">
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
                     setShowBlackScreen(true);
                   }}
-                  className="px-6 py-3 bg-black border-2 border-[#00ff88] text-[#00ff88] font-bold rounded-lg hover:shadow-[0_0_25px_rgba(0,255,136,0.8)] transition-all"
+                  className="px-6 py-3 bg-black border-2 border-[#ffffff] text-[#ffffff] font-bold rounded-lg hover:shadow-[0_0_25px_rgba(255, 255, 255,0.8)] transition-all"
                 >
                   <CheckCircle className="w-5 h-5 inline mr-2" />
                   {language === 'es' ? '🖤 Generar Black Screen' : '🖤 Generate Black Screen'}
                 </button>
                 <button
                   onClick={() => exportAccountStatement(selectedAccount)}
-                  className="px-6 py-3 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] transition-all"
+                  className="px-6 py-3 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(255, 255, 255,0.6)] transition-all"
                 >
                   <Download className="w-5 h-5 inline mr-2" />
                   {language === 'es' ? '📄 Estado de Cuenta' : '📄 Account Statement'}
@@ -2260,14 +2260,14 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     setShowDetailsModal(false);
                     setShowReserveModal(true);
                   }}
-                  className="px-6 py-2 bg-[#1a1a1a] border border-[#00ff88]/30 text-[#00ff88] rounded-lg hover:bg-[#252525]"
+                  className="px-6 py-2 bg-[#1a1a1a] border border-[#ffffff]/30 text-[#ffffff] rounded-lg hover:bg-[#252525]"
                 >
                   <Lock className="w-4 h-4 inline mr-2" />
                   {language === 'es' ? 'Reservar Fondos' : 'Reserve Funds'}
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="px-6 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525]"
+                  className="px-6 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] rounded-lg hover:bg-[#252525]"
                 >
                   {language === 'es' ? 'Cerrar' : 'Close'}
                 </button>
@@ -2288,8 +2288,8 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
       {/* Modal de Ajuste de Balance */}
       {showEditBalanceModal && selectedAccount && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0d0d0d] border-2 border-[#00ff88] rounded-xl max-w-lg w-full p-6">
-            <h2 className="text-2xl font-bold text-[#00ff88] mb-6 flex items-center gap-3">
+          <div className="bg-[#0d0d0d] border-2 border-[#ffffff] rounded-xl max-w-lg w-full p-6">
+            <h2 className="text-2xl font-bold text-[#ffffff] mb-6 flex items-center gap-3">
               <TrendingUp className="w-7 h-7" />
               {isSpanish ? 'Ajustar Balance de Cuenta' : 'Adjust Account Balance'}
             </h2>
@@ -2313,8 +2313,8 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
                 </div>
                 <div className="bg-black/30 rounded p-2">
-                  <div className="text-green-300/60 mb-1">{isSpanish ? 'Disponible' : 'Available'}</div>
-                  <div className="text-green-300 font-mono font-bold">
+                  <div className="text-white/60 mb-1">{isSpanish ? 'Disponible' : 'Available'}</div>
+                  <div className="text-white font-mono font-bold">
                     {selectedAccount.currency} {selectedAccount.availableBalance.toLocaleString()}
                   </div>
                 </div>
@@ -2323,7 +2323,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
             {/* Selector de Operación */}
             <div className="mb-6">
-              <label className="block text-[#00ff88] text-sm mb-3 font-semibold">
+              <label className="block text-[#ffffff] text-sm mb-3 font-semibold">
                 {isSpanish ? 'Selecciona operación:' : 'Select operation:'}
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -2332,8 +2332,8 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   onClick={() => setBalanceOperation('add')}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     balanceOperation === 'add'
-                      ? 'border-green-500 bg-green-500/20 text-green-300'
-                      : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#4d7c4d] hover:border-green-500/30'
+                      ? 'border-white/30 bg-white/20/20 text-white'
+                      : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#ffffff] hover:border-white/30/30'
                   }`}
                 >
                   <div className="text-3xl mb-2">📈</div>
@@ -2348,7 +2348,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     balanceOperation === 'subtract'
                       ? 'border-red-500 bg-red-500/20 text-red-300'
-                      : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#4d7c4d] hover:border-red-500/30'
+                      : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#ffffff] hover:border-red-500/30'
                   }`}
                 >
                   <div className="text-3xl mb-2">📉</div>
@@ -2362,7 +2362,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
             {/* Input de Monto */}
             <div className="mb-6">
-              <label className="block text-[#00ff88] text-sm mb-2 font-semibold">
+              <label className="block text-[#ffffff] text-sm mb-2 font-semibold">
                 {isSpanish ? 'Monto:' : 'Amount:'}
               </label>
               <input
@@ -2370,13 +2370,13 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 step="0.01"
                 value={balanceAmount}
                 onChange={(e) => setBalanceAmount(parseFloat(e.target.value) || 0)}
-                className="w-full bg-[#0a0a0a] border-2 border-[#00ff88]/30 focus:border-[#00ff88] rounded-lg px-4 py-3 text-[#00ff88] font-mono text-xl focus:outline-none transition-all"
+                className="w-full bg-[#0a0a0a] border-2 border-[#ffffff]/30 focus:border-[#ffffff] rounded-lg px-4 py-3 text-[#ffffff] font-mono text-xl focus:outline-none transition-all"
                 placeholder="0.00"
                 autoFocus
               />
-              <div className="text-xs text-[#4d7c4d] mt-2">
+              <div className="text-xs text-[#ffffff] mt-2">
                 {balanceOperation === 'add' ? (
-                  <span className="text-green-400">
+                  <span className="text-white">
                     ➕ {isSpanish ? 'Se agregará:' : 'Will add:'} {selectedAccount.currency} {balanceAmount.toLocaleString()}
                   </span>
                 ) : (
@@ -2391,7 +2391,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
             {balanceAmount > 0 && (
               <div className={`rounded-lg p-4 mb-6 border-2 ${
                 balanceOperation === 'add'
-                  ? 'bg-green-900/20 border-green-500/50'
+                  ? 'bg-white/10/20 border-white/30/50'
                   : (selectedAccount.totalBalance - balanceAmount) >= selectedAccount.reservedBalance
                     ? 'bg-blue-900/20 border-blue-500/50'
                     : 'bg-red-900/20 border-red-500/50'
@@ -2409,7 +2409,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
                   <div>
                     <div className="text-white/60 mb-1">{isSpanish ? 'Cambio' : 'Change'}</div>
-                    <div className={`font-mono font-bold ${balanceOperation === 'add' ? 'text-green-400' : 'text-red-400'}`}>
+                    <div className={`font-mono font-bold ${balanceOperation === 'add' ? 'text-white' : 'text-red-400'}`}>
                       {balanceOperation === 'add' ? '+' : '-'}{balanceAmount.toLocaleString()}
                     </div>
                   </div>
@@ -2417,7 +2417,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     <div className="text-white/60 mb-1">{isSpanish ? 'Nuevo' : 'New'}</div>
                     <div className={`font-mono font-bold ${
                       balanceOperation === 'add' || (selectedAccount.totalBalance - balanceAmount) >= selectedAccount.reservedBalance
-                        ? 'text-[#00ff88]'
+                        ? 'text-[#ffffff]'
                         : 'text-red-400'
                     }`}>
                       {balanceOperation === 'add'
@@ -2445,7 +2445,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   setBalanceAmount(0);
                   setBalanceOperation('add');
                 }}
-                className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525] font-semibold"
+                className="flex-1 px-6 py-3 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] rounded-lg hover:bg-[#252525] font-semibold"
               >
                 {isSpanish ? 'Cancelar' : 'Cancel'}
               </button>
@@ -2481,7 +2481,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 disabled={balanceAmount <= 0 || (balanceOperation === 'subtract' && (selectedAccount.totalBalance - balanceAmount) < selectedAccount.reservedBalance)}
                 className={`flex-1 px-6 py-3 font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                   balanceOperation === 'add'
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-black hover:shadow-[0_0_20px_rgba(34,197,94,0.6)]'
+                    ? 'bg-gradient-to-r from-white/20 to-emerald-500 text-black hover:shadow-[0_0_20px_rgba(34,197,94,0.6)]'
                     : 'bg-gradient-to-r from-red-500 to-orange-500 text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.6)]'
                 }`}
               >

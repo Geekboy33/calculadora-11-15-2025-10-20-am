@@ -148,12 +148,12 @@ select:not([class*="wealth-"]) {
 
 /* Success → Wealth Green */
 .bg-emerald-500,
-.bg-green-500 {
+.bg-white/20 {
   background-color: var(--color-accent-green) !important;
 }
 
 .text-emerald-400,
-.text-green-400 {
+.text-white {
   color: var(--color-accent-green) !important;
 }
 

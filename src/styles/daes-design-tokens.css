@@ -48,7 +48,7 @@
   
   /* 🟡 Accent Colors - Wealth */
   --color-accent-gold: #C8A56A;       /* Oro institucional elegante */
-  --color-accent-green: #59C27A;      /* Verde profit */
+  --color-accent-green: #ffffff;      /* Verde profit */
   --color-accent-red: #E85C5C;        /* Rojo loss */
   --color-accent-blue: #4F8DFF;       /* Azul información */
   
@@ -56,7 +56,7 @@
   --chart-primary: #1A4DB3;           /* Línea principal */
   --chart-secondary: #3464C9;         /* Línea secundaria */
   --chart-tertiary: #C8A56A;          /* Terciaria */
-  --chart-success: #59C27A;           /* Success */
+  --chart-success: #ffffff;           /* Success */
   --chart-warning: #F59E0B;           /* Warning */
   --chart-danger: #E85C5C;            /* Danger */
   --chart-gradient-start: #1A4DB3;    /* Inicio gradiente */
@@ -110,7 +110,7 @@
   
   /* 🟡 Accent Colors Dark - Más Brillantes */
   --color-accent-gold: #F5D576;       /* Oro brillante */
-  --color-accent-green: #6EE7B7;      /* Verde profit brillante */
+  --color-accent-green: #ffffff;      /* Verde profit brillante */
   --color-accent-red: #FCA5A5;        /* Rojo loss suave */
   --color-accent-blue: #60A5FA;       /* Azul info */
   
@@ -118,7 +118,7 @@
   --chart-primary: #4F8DFF;           /* Línea principal dark */
   --chart-secondary: #60A5FA;         /* Secundaria */
   --chart-tertiary: #F5D576;          /* Oro */
-  --chart-success: #6EE7B7;           /* Success */
+  --chart-success: #ffffff;           /* Success */
   --chart-warning: #FBBF24;           /* Warning */
   --chart-danger: #FCA5A5;            /* Danger */
   --chart-gradient-start: #4F8DFF;    /* Inicio gradiente */
@@ -241,7 +241,7 @@
 
 [data-theme="dark"] {
   --status-success-bg: rgba(110, 231, 183, 0.1);
-  --status-success-text: #6EE7B7;
+  --status-success-text: #ffffff;
   --status-success-border: rgba(110, 231, 183, 0.3);
   
   --status-warning-bg: rgba(245, 213, 118, 0.1);

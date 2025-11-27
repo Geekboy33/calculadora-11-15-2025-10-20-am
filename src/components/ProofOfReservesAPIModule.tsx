@@ -596,14 +596,14 @@ ${isSpanish
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg p-4">
+        <div className="bg-gradient-to-r from-white/10/20 to-emerald-900/20 border border-white/30/30 rounded-lg p-4">
           <div className="flex items-center gap-3">
-            <Key className="w-8 h-8 text-green-400" />
+            <Key className="w-8 h-8 text-white" />
             <div>
-              <div className="text-2xl font-bold text-green-300">
+              <div className="text-2xl font-bold text-white">
                 {apiKeys.filter(k => k.status === 'active').length}
               </div>
-              <div className="text-xs text-green-300/60">
+              <div className="text-xs text-white/60">
                 {isSpanish ? 'API Keys Activas' : 'Active API Keys'}
               </div>
             </div>
@@ -678,8 +678,8 @@ ${isSpanish
                           <span className="text-cyan-300 font-bold">${por.circulatingCap.toLocaleString()}</span>
                         </div>
                         <div>
-                          <span className="text-green-300/60">M2: </span>
-                          <span className="text-green-300 font-bold">{por.pledgesM2}</span>
+                          <span className="text-white/60">M2: </span>
+                          <span className="text-white font-bold">{por.pledgesM2}</span>
                         </div>
                         <div>
                           <span className="text-purple-300/60">M3: </span>
@@ -733,14 +733,14 @@ ${isSpanish
       </div>
 
       {/* API Keys Section */}
-      <div className="bg-[#0d0d0d] border border-green-500/30 rounded-lg">
-        <div className="p-6 border-b border-green-500/20 flex items-center justify-between">
+      <div className="bg-[#0d0d0d] border border-white/30/30 rounded-lg">
+        <div className="p-6 border-b border-white/30/20 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-green-300 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <Key className="w-6 h-6" />
               {isSpanish ? 'API Keys Generadas' : 'Generated API Keys'}
             </h2>
-            <p className="text-sm text-green-300/60 mt-1">
+            <p className="text-sm text-white/60 mt-1">
               {isSpanish 
                 ? 'Gestiona las API keys para acceso a Proof of Reserve data'
                 : 'Manage API keys for Proof of Reserve data access'}
@@ -762,7 +762,7 @@ ${isSpanish
               loadPorReports();
               setShowCreateKeyModal(true);
             }}
-            className="px-6 py-3 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 flex items-center gap-2 font-bold"
+            className="px-6 py-3 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 flex items-center gap-2 font-bold"
           >
             <Key className="w-5 h-5" />
             {isSpanish ? 'Generar Nueva API Key' : 'Generate New API Key'}
@@ -771,11 +771,11 @@ ${isSpanish
         <div className="p-6">
           {apiKeys.length === 0 ? (
             <div className="text-center py-12">
-              <Key className="w-16 h-16 text-green-400/30 mx-auto mb-4" />
-              <div className="text-green-300/60 mb-2">
+              <Key className="w-16 h-16 text-white/30 mx-auto mb-4" />
+              <div className="text-white/60 mb-2">
                 {isSpanish ? 'No hay API keys generadas' : 'No API keys generated'}
               </div>
-              <div className="text-green-300/40 text-sm">
+              <div className="text-white/40 text-sm">
                 {isSpanish
                   ? 'Genera una API key para transmitir PoR data'
                   : 'Generate an API key to transmit PoR data'}
@@ -800,22 +800,22 @@ ${isSpanish
                     key={key.id}
                     className={`border-2 rounded-lg p-6 ${
                       key.status === 'active' 
-                        ? 'bg-green-900/10 border-green-500/30' 
+                        ? 'bg-white/10/10 border-white/30/30' 
                         : 'bg-red-900/10 border-red-500/30 opacity-60'
                     }`}
                   >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <Shield className="w-6 h-6 text-green-400" />
+                      <Shield className="w-6 h-6 text-white" />
                       <div>
                         <div className="text-lg font-bold text-white">{key.name}</div>
-                        <div className="text-xs text-green-300/60">
+                        <div className="text-xs text-white/60">
                           {isSpanish ? 'Creada:' : 'Created:'} {new Date(key.createdAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
                         </div>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                         key.status === 'active' 
-                          ? 'bg-green-500/20 text-green-300' 
+                          ? 'bg-white/20/20 text-white' 
                           : 'bg-red-500/20 text-red-300'
                       }`}>
                         {key.status === 'active' 
@@ -844,16 +844,16 @@ ${isSpanish
                   {/* API Key */}
                   <div className="space-y-3">
                     <div className="bg-black/50 rounded-lg p-4">
-                      <div className="text-xs text-green-300/60 mb-2 font-semibold">
+                      <div className="text-xs text-white/60 mb-2 font-semibold">
                         {isSpanish ? '🔑 API KEY:' : '🔑 API KEY:'}
                       </div>
                       <div className="flex items-center gap-2">
-                        <code className="flex-1 text-green-400 font-mono text-sm bg-black/50 p-2 rounded border border-green-500/20">
+                        <code className="flex-1 text-white font-mono text-sm bg-black/50 p-2 rounded border border-white/30/20">
                           {key.apiKey}
                         </code>
                         <button
                           onClick={() => copyToClipboard(key.apiKey, 'API Key')}
-                          className="p-2 bg-green-500/20 border border-green-500 text-green-300 rounded hover:bg-green-500/30"
+                          className="p-2 bg-white/20/20 border border-white/30 text-white rounded hover:bg-white/20/30"
                         >
                           <Copy className="w-4 h-4" />
                         </button>
@@ -910,7 +910,7 @@ ${isSpanish
                             </button>
                             <button
                               onClick={() => simulateApiCall(key, key.apiUrls.baseEndpoint)}
-                              className="px-3 py-2 bg-green-500/20 border border-green-500 text-green-300 rounded hover:bg-green-500/30 text-xs font-bold"
+                              className="px-3 py-2 bg-white/20/20 border border-white/30 text-white rounded hover:bg-white/20/30 text-xs font-bold"
                             >
                               {isSpanish ? 'Probar' : 'Test'}
                             </button>
@@ -937,16 +937,16 @@ ${isSpanish
 
                         {/* Download Endpoint */}
                         <div>
-                          <div className="text-xs text-green-300/60 mb-1">
+                          <div className="text-xs text-white/60 mb-1">
                             {isSpanish ? '⬇️ Download Endpoint (Descargar TXT):' : '⬇️ Download Endpoint (Download TXT):'}
                           </div>
                           <div className="flex items-center gap-2">
-                            <code className="flex-1 text-green-400 font-mono text-xs bg-black/50 p-2 rounded border border-green-500/20 overflow-x-auto">
+                            <code className="flex-1 text-white font-mono text-xs bg-black/50 p-2 rounded border border-white/30/20 overflow-x-auto">
                               GET {key.apiUrls.downloadEndpoint}
                             </code>
                             <button
                               onClick={() => copyToClipboard(key.apiUrls.downloadEndpoint, 'Download Endpoint')}
-                              className="p-2 bg-green-500/20 border border-green-500 text-green-300 rounded hover:bg-green-500/30"
+                              className="p-2 bg-white/20/20 border border-white/30 text-white rounded hover:bg-white/20/30"
                             >
                               <Copy className="w-4 h-4" />
                             </button>
@@ -996,7 +996,7 @@ ${isSpanish
                           {isSpanish ? '🔐 Autenticación Requerida:' : '🔐 Authentication Required:'}
                         </div>
                         <div className="text-xs text-yellow-300/80 space-y-1 font-mono">
-                          <div>Header: <span className="text-green-400">Authorization: Bearer {key.apiKey}</span></div>
+                          <div>Header: <span className="text-white">Authorization: Bearer {key.apiKey}</span></div>
                           <div>Header: <span className="text-orange-400">X-Secret-Key: {key.secretKey.substring(0, 20)}...</span></div>
                         </div>
                       </div>
@@ -1053,10 +1053,10 @@ ${isSpanish
                         {isSpanish ? 'Permisos:' : 'Permissions:'}
                       </div>
                       <div className="flex gap-4 text-xs">
-                        <span className="text-green-300">
+                        <span className="text-white">
                           ✅ {isSpanish ? 'Leer PoR' : 'Read PoR'}
                         </span>
-                        <span className="text-green-300">
+                        <span className="text-white">
                           ✅ {isSpanish ? 'Descargar PoR' : 'Download PoR'}
                         </span>
                       </div>
@@ -1091,7 +1091,7 @@ ${isSpanish
                   key={log.id}
                   className={`border rounded-lg p-4 ${
                     log.status === 'success'
-                      ? 'bg-green-900/10 border-green-500/30'
+                      ? 'bg-white/10/10 border-white/30/30'
                       : 'bg-red-900/10 border-red-500/30'
                   }`}
                 >
@@ -1102,7 +1102,7 @@ ${isSpanish
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-1 rounded text-xs font-bold ${
                         log.status === 'success'
-                          ? 'bg-green-500/20 text-green-300'
+                          ? 'bg-white/20/20 text-white'
                           : 'bg-red-500/20 text-red-300'
                       }`}>
                         {log.method}
@@ -1141,7 +1141,7 @@ ${isSpanish
                           {isSpanish ? 'Copiar JSON' : 'Copy JSON'}
                         </button>
                       </div>
-                      <pre className="text-xs text-green-400 font-mono overflow-x-auto max-h-96 overflow-y-auto bg-black/50 p-3 rounded border border-green-500/20 whitespace-pre-wrap break-words">
+                      <pre className="text-xs text-white font-mono overflow-x-auto max-h-96 overflow-y-auto bg-black/50 p-3 rounded border border-white/30/20 whitespace-pre-wrap break-words">
                         {JSON.stringify(log.payload, null, 2)}
                       </pre>
                       <div className="mt-2 text-xs text-purple-300/60">
@@ -1161,13 +1161,13 @@ ${isSpanish
       {/* Create API Key Modal */}
       {showCreateKeyModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0d0d0d] border-2 border-green-500 rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#0d0d0d] border-2 border-white/30 rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
             <div className="mb-6">
-              <h3 className="text-2xl font-bold text-green-300 flex items-center gap-2">
+              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                 <Key className="w-6 h-6" />
                 {isSpanish ? 'Generar Nueva API Key' : 'Generate New API Key'}
               </h3>
-              <p className="text-green-300/60 text-sm mt-2">
+              <p className="text-white/60 text-sm mt-2">
                 {isSpanish 
                   ? `${porReports.length} Proof of Reserves activos disponibles para vincular`
                   : `${porReports.length} active Proof of Reserves available to link`}
@@ -1177,7 +1177,7 @@ ${isSpanish
             <div className="space-y-6">
               {/* Key Name */}
               <div>
-                <label className="block text-green-300 text-sm mb-2 font-semibold">
+                <label className="block text-white text-sm mb-2 font-semibold">
                   {isSpanish ? 'Nombre de la API Key:' : 'API Key Name:'}
                 </label>
                 <input
@@ -1185,22 +1185,22 @@ ${isSpanish
                   value={keyName}
                   onChange={(e) => setKeyName(e.target.value)}
                   placeholder={isSpanish ? 'Ej: External PoR Access' : 'e.g., External PoR Access'}
-                  className="w-full bg-black/50 border border-green-500/30 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                  className="w-full bg-black/50 border border-white/30/30 rounded-lg px-4 py-3 text-white focus:border-white/30 focus:ring-2 focus:ring-white/30/20"
                 />
               </div>
 
               {/* Select PoR Reports */}
               <div>
-                <label className="block text-green-300 text-sm mb-3 font-semibold">
+                <label className="block text-white text-sm mb-3 font-semibold">
                   {isSpanish 
                     ? 'Selecciona Proof of Reserves a vincular:'
                     : 'Select Proof of Reserves to link:'}
                 </label>
-                <div className="space-y-2 max-h-60 overflow-y-auto bg-black/30 rounded-lg p-3 border border-green-500/20">
+                <div className="space-y-2 max-h-60 overflow-y-auto bg-black/30 rounded-lg p-3 border border-white/30/20">
                   {porReports.map((por, index) => (
                     <label
                       key={por.id}
-                      className="flex items-center gap-3 p-3 bg-black/50 rounded-lg border border-green-500/10 hover:border-green-500/30 cursor-pointer"
+                      className="flex items-center gap-3 p-3 bg-black/50 rounded-lg border border-white/30/10 hover:border-white/30/30 cursor-pointer"
                     >
                       <input
                         type="checkbox"
@@ -1216,7 +1216,7 @@ ${isSpanish
                       />
                       <div className="flex-1">
                         <div className="text-white text-sm">PoR #{porReports.length - index}</div>
-                        <div className="text-xs text-green-300/60">
+                        <div className="text-xs text-white/60">
                           {new Date(por.timestamp).toLocaleString(isSpanish ? 'es-ES' : 'en-US')} • 
                           {por.activePledgesCount} pledges • ${por.circulatingCap.toLocaleString()}
                         </div>
@@ -1224,7 +1224,7 @@ ${isSpanish
                     </label>
                   ))}
                 </div>
-                <div className="text-xs text-green-300/60 mt-2">
+                <div className="text-xs text-white/60 mt-2">
                   {isSpanish 
                     ? `✅ ${selectedPorIds.length} PoR seleccionado(s)`
                     : `✅ ${selectedPorIds.length} PoR selected`}
@@ -1282,7 +1282,7 @@ ${isSpanish
               </div>
 
               {/* Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-green-500/20">
+              <div className="flex gap-3 pt-4 border-t border-white/30/20">
                 <button
                   onClick={() => {
                     setShowCreateKeyModal(false);
@@ -1295,7 +1295,7 @@ ${isSpanish
                 </button>
                 <button
                   onClick={handleCreateApiKey}
-                  className="flex-1 px-6 py-3 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 font-bold flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-3 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 font-bold flex items-center justify-center gap-2"
                 >
                   <Key className="w-5 h-5" />
                   {isSpanish ? 'Generar API Key' : 'Generate API Key'}
@@ -1309,13 +1309,13 @@ ${isSpanish
       {/* Show Secret Modal */}
       {showSecretModal && newKeyData && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-[#0d0d0d] border-2 border-green-500 rounded-lg max-w-5xl w-full p-8 my-8 max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#0d0d0d] border-2 border-white/30 rounded-lg max-w-5xl w-full p-8 my-8 max-h-[90vh] overflow-y-auto">
             <div className="text-center mb-6">
-              <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-green-300 mb-2">
+              <CheckCircle className="w-16 h-16 text-white mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-white mb-2">
                 {isSpanish ? '✅ API Key Generada Exitosamente' : '✅ API Key Generated Successfully'}
               </h3>
-              <p className="text-green-300/60">
+              <p className="text-white/60">
                 {isSpanish 
                   ? '⚠️ Guarda estas credenciales de forma segura. No podrás verlas nuevamente.'
                   : '⚠️ Save these credentials securely. You won\'t be able to see them again.'}
@@ -1324,15 +1324,15 @@ ${isSpanish
 
             <div className="space-y-4">
               {/* API Key */}
-              <div className="bg-black/50 rounded-lg p-4 border border-green-500/30">
-                <div className="text-sm text-green-300 mb-2 font-semibold">🔑 API KEY:</div>
+              <div className="bg-black/50 rounded-lg p-4 border border-white/30/30">
+                <div className="text-sm text-white mb-2 font-semibold">🔑 API KEY:</div>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 text-green-400 font-mono text-sm bg-black/50 p-3 rounded border border-green-500/20 break-all">
+                  <code className="flex-1 text-white font-mono text-sm bg-black/50 p-3 rounded border border-white/30/20 break-all">
                     {newKeyData.apiKey}
                   </code>
                   <button
                     onClick={() => copyToClipboard(newKeyData.apiKey, 'API Key')}
-                    className="p-3 bg-green-500/20 border border-green-500 text-green-300 rounded hover:bg-green-500/30"
+                    className="p-3 bg-white/20/20 border border-white/30 text-white rounded hover:bg-white/20/30"
                   >
                     <Copy className="w-5 h-5" />
                   </button>
@@ -1374,9 +1374,9 @@ ${isSpanish
                       GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}/data
                     </div>
                   </div>
-                  <div className="p-2 bg-black/50 rounded border border-green-500/10">
-                    <div className="text-green-300/60 mb-1">⬇️ Download:</div>
-                    <div className="text-green-400 break-all">
+                  <div className="p-2 bg-black/50 rounded border border-white/30/10">
+                    <div className="text-white/60 mb-1">⬇️ Download:</div>
+                    <div className="text-white break-all">
                       GET https://api.luxliqdaes.cloud/api/v1/proof-of-reserves/{newKeyData.apiKey}/download
                     </div>
                   </div>
@@ -1550,7 +1550,7 @@ print(data)
                     setShowSecretModal(false);
                     setNewKeyData(null);
                   }}
-                  className="flex-1 px-6 py-4 bg-green-500/20 border border-green-500 text-green-300 rounded-lg hover:bg-green-500/30 font-bold text-lg"
+                  className="flex-1 px-6 py-4 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 font-bold text-lg"
                 >
                   {isSpanish ? 'Cerrar' : 'Close'}
                 </button>

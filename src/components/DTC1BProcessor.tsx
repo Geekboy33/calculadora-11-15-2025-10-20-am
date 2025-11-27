@@ -124,7 +124,7 @@ export function DTC1BProcessor() {
   const highlights = parsedBlocks.map(block => ({
     start: block.offsetStart,
     end: block.offsetEnd,
-    color: 'bg-green-600 text-white',
+    color: 'bg-white/20 text-white',
     label: `${block.currency} - ${DTC1BParser.formatAmount(block.amountMinorUnits, block.currency)}`
   }));
 
@@ -219,7 +219,7 @@ export function DTC1BProcessor() {
               <button
                 onClick={handleEncrypt}
                 disabled={!fileData || loading}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-colors"
               >
                 <Lock className="w-4 h-4" />
                 Encrypt (AES-256-GCM)
@@ -267,7 +267,7 @@ export function DTC1BProcessor() {
                     value={keyString}
                     readOnly
                     rows={2}
-                    className="w-full bg-[#0d0d0d] text-green-400 px-3 py-2 rounded border border-slate-600 font-mono text-xs"
+                    className="w-full bg-[#0d0d0d] text-white px-3 py-2 rounded border border-slate-600 font-mono text-xs"
                   />
                 </div>
                 <div>
@@ -277,7 +277,7 @@ export function DTC1BProcessor() {
                   <input
                     value={nonce ? btoa(String.fromCharCode(...nonce)) : ''}
                     readOnly
-                    className="w-full bg-[#0d0d0d] text-green-400 px-3 py-2 rounded border border-slate-600 font-mono text-xs"
+                    className="w-full bg-[#0d0d0d] text-white px-3 py-2 rounded border border-slate-600 font-mono text-xs"
                   />
                 </div>
               </div>

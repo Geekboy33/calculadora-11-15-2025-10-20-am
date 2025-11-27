@@ -46,7 +46,7 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-green-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-white/30 mx-auto mb-4"></div>
           <p className="text-gray-400">Verifying account...</p>
         </div>
       </div>
@@ -72,40 +72,40 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-green-700 rounded-full mb-4 shadow-[0_0_30px_rgba(0,255,136,0.5)]">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-white/20 to-white/10 rounded-full mb-4 shadow-[0_0_30px_rgba(255, 255, 255,0.5)]">
             <Shield className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white/10 to-blue-500 bg-clip-text text-transparent">
             DAES Custody Verification
           </h1>
           <p className="text-gray-400">Data and Exchange Settlement - Official Verification</p>
-          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/50 rounded-full">
-            <CheckCircle className="w-5 h-5 text-green-400" />
-            <span className="text-green-400 font-semibold">Verified Account</span>
+          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white/20/20 border border-white/30/50 rounded-full">
+            <CheckCircle className="w-5 h-5 text-white" />
+            <span className="text-white font-semibold">Verified Account</span>
           </div>
         </div>
 
         {/* Main Info Card */}
-        <div className="bg-gradient-to-br from-gray-900/50 to-black border border-green-500/30 rounded-lg p-8 shadow-[0_0_50px_rgba(0,255,136,0.1)]">
+        <div className="bg-gradient-to-br from-gray-900/50 to-black border border-white/30/30 rounded-lg p-8 shadow-[0_0_50px_rgba(255, 255, 255,0.1)]">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-3xl font-bold text-green-400 mb-2">{account.accountName}</h2>
+              <h2 className="text-3xl font-bold text-white mb-2">{account.accountName}</h2>
               <p className="text-gray-400 text-sm">{accountTypeDisplay}</p>
             </div>
             <div className="text-right">
               <div className="text-sm text-gray-400 mb-1">Account Number</div>
-              <div className="text-xl font-mono font-bold text-green-400">{account.accountNumber}</div>
+              <div className="text-xl font-mono font-bold text-white">{account.accountNumber}</div>
             </div>
           </div>
 
           {/* Balance Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-black/50 border border-green-500/30 rounded-lg p-6">
+            <div className="bg-black/50 border border-white/30/30 rounded-lg p-6">
               <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-5 h-5 text-green-400" />
+                <TrendingUp className="w-5 h-5 text-white" />
                 <span className="text-sm text-gray-400">Total Balance</span>
               </div>
-              <div className="text-3xl font-bold text-green-400 font-mono">
+              <div className="text-3xl font-bold text-white font-mono">
                 {account.currency} {account.totalBalance.toLocaleString()}
               </div>
             </div>
@@ -134,7 +134,7 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
           {/* Account Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
-              <h3 className="text-lg font-semibold text-green-400 mb-3 flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                 <Key className="w-5 h-5" />
                 Account Information
               </h3>
@@ -187,7 +187,7 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-green-400 mb-3 flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                 <Hash className="w-5 h-5" />
                 Security & Verification
               </h3>
@@ -201,12 +201,12 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
                 <div>
                   <div className="text-sm text-gray-400">API Status</div>
                   <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ${
-                    account.apiStatus === 'active' ? 'bg-green-500/20 text-green-400' :
+                    account.apiStatus === 'active' ? 'bg-white/20/20 text-white' :
                     account.apiStatus === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
                     'bg-gray-500/20 text-gray-400'
                   }`}>
                     <div className={`w-2 h-2 rounded-full ${
-                      account.apiStatus === 'active' ? 'bg-green-400' :
+                      account.apiStatus === 'active' ? 'bg-white/20' :
                       account.apiStatus === 'pending' ? 'bg-yellow-400' :
                       'bg-gray-400'
                     }`}></div>
@@ -219,7 +219,7 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
                     <div className="flex-1 bg-gray-700 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full ${
-                          account.amlScore >= 90 ? 'bg-green-500' :
+                          account.amlScore >= 90 ? 'bg-white/20' :
                           account.amlScore >= 75 ? 'bg-yellow-500' :
                           'bg-red-500'
                         }`}
@@ -232,7 +232,7 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
                 <div>
                   <div className="text-sm text-gray-400">Risk Level</div>
                   <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                    account.riskLevel === 'low' ? 'bg-green-500/20 text-green-400' :
+                    account.riskLevel === 'low' ? 'bg-white/20/20 text-white' :
                     account.riskLevel === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
                     'bg-red-500/20 text-red-400'
                   }`}>
@@ -278,11 +278,11 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className={`bg-black/50 border rounded-lg p-4 ${
-              account.iso27001Compliant ? 'border-green-500/50' : 'border-gray-700'
+              account.iso27001Compliant ? 'border-white/30/50' : 'border-gray-700'
             }`}>
               <div className="flex items-center gap-2 mb-2">
                 {account.iso27001Compliant ? (
-                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <CheckCircle className="w-5 h-5 text-white" />
                 ) : (
                   <AlertCircle className="w-5 h-5 text-gray-500" />
                 )}
@@ -292,11 +292,11 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
             </div>
 
             <div className={`bg-black/50 border rounded-lg p-4 ${
-              account.iso20022Compatible ? 'border-green-500/50' : 'border-gray-700'
+              account.iso20022Compatible ? 'border-white/30/50' : 'border-gray-700'
             }`}>
               <div className="flex items-center gap-2 mb-2">
                 {account.iso20022Compatible ? (
-                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <CheckCircle className="w-5 h-5 text-white" />
                 ) : (
                   <AlertCircle className="w-5 h-5 text-gray-500" />
                 )}
@@ -306,11 +306,11 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
             </div>
 
             <div className={`bg-black/50 border rounded-lg p-4 ${
-              account.fatfAmlVerified ? 'border-green-500/50' : 'border-gray-700'
+              account.fatfAmlVerified ? 'border-white/30/50' : 'border-gray-700'
             }`}>
               <div className="flex items-center gap-2 mb-2">
                 {account.fatfAmlVerified ? (
-                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <CheckCircle className="w-5 h-5 text-white" />
                 ) : (
                   <AlertCircle className="w-5 h-5 text-gray-500" />
                 )}
@@ -320,11 +320,11 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
             </div>
 
             <div className={`bg-black/50 border rounded-lg p-4 ${
-              account.kycVerified ? 'border-green-500/50' : 'border-gray-700'
+              account.kycVerified ? 'border-white/30/50' : 'border-gray-700'
             }`}>
               <div className="flex items-center gap-2 mb-2">
                 {account.kycVerified ? (
-                  <CheckCircle className="w-5 h-5 text-green-400" />
+                  <CheckCircle className="w-5 h-5 text-white" />
                 ) : (
                   <AlertCircle className="w-5 h-5 text-gray-500" />
                 )}
@@ -351,19 +351,19 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
             <h3 className="text-2xl font-bold text-purple-400 mb-6">API Integrations</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {account.vusdBalanceEnabled && (
-                <div className="bg-black/50 border border-green-500/30 rounded-lg p-4">
+                <div className="bg-black/50 border border-white/30/30 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-green-400" />
+                      <Shield className="w-5 h-5 text-white" />
                       <span className="font-semibold text-white">API VUSD</span>
                     </div>
-                    <div className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-semibold">
+                    <div className="px-3 py-1 bg-white/20/20 text-white rounded-full text-xs font-semibold">
                       ACTIVE
                     </div>
                   </div>
                   {account.vusdBalanceId && (
                     <div className="text-xs text-gray-400">
-                      Balance ID: <span className="font-mono text-green-400">{account.vusdBalanceId}</span>
+                      Balance ID: <span className="font-mono text-white">{account.vusdBalanceId}</span>
                     </div>
                   )}
                 </div>

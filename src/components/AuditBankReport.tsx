@@ -541,18 +541,18 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex items-center justify-center p-4">
-      <div className="bg-black w-full max-w-7xl max-h-[90vh] overflow-hidden border-2 border-[#00ff88] shadow-[0_0_50px_rgba(0,255,136,0.5)] rounded-lg flex flex-col">
+      <div className="bg-black w-full max-w-7xl max-h-[90vh] overflow-hidden border-2 border-[#ffffff] shadow-[0_0_50px_rgba(255, 255, 255,0.5)] rounded-lg flex flex-col">
         
         {/* Header */}
-        <div className="bg-black border-b-2 border-[#00ff88] p-6 flex justify-between items-center print:hidden">
+        <div className="bg-black border-b-2 border-[#ffffff] p-6 flex justify-between items-center print:hidden">
           <div>
-            <h2 className="text-2xl font-bold text-[#00ff88]">{txt.title}</h2>
-            <p className="text-sm text-[#4d7c4d] mt-1">{txt.subtitle}</p>
+            <h2 className="text-2xl font-bold text-[#ffffff]">{txt.title}</h2>
+            <p className="text-sm text-[#ffffff] mt-1">{txt.subtitle}</p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={handleDownloadTxt}
-              className="px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 text-[#00ff88] rounded hover:bg-[#00ff88]/20 transition-all"
+              className="px-4 py-2 bg-[#ffffff]/10 border border-[#ffffff]/30 text-[#ffffff] rounded hover:bg-[#ffffff]/20 transition-all"
             >
               <Download className="w-4 h-4 inline mr-2" />
               {language === 'es' ? 'Descargar TXT' : 'Download TXT'}
@@ -582,7 +582,7 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                       handleDownloadAuthenticity();
                       setShowCurrencySelector(false);
                     }}
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-cyan-500/10 transition-all border-b border-cyan-500/10 text-[#00ff88] font-semibold"
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-cyan-500/10 transition-all border-b border-cyan-500/10 text-[#ffffff] font-semibold"
                   >
                     <Shield className="w-3 h-3 inline mr-2" />
                     {language === 'es' ? '🌍 TODAS LAS DIVISAS (Global)' : '🌍 ALL CURRENCIES (Global)'}
@@ -608,7 +608,7 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         <span className="text-cyan-300">
                           {currency} - {getCurrencyName(currency, language)}
                         </span>
-                        <span className="text-xs text-[#4d7c4d]">
+                        <span className="text-xs text-[#ffffff]">
                           {totalAmount.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                         </span>
                       </button>
@@ -619,14 +619,14 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
             </div>
             <button
               onClick={handlePrint}
-              className="px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 text-[#00ff88] rounded hover:bg-[#00ff88]/20 transition-all"
+              className="px-4 py-2 bg-[#ffffff]/10 border border-[#ffffff]/30 text-[#ffffff] rounded hover:bg-[#ffffff]/20 transition-all"
             >
               <Printer className="w-4 h-4 inline mr-2" />
               {language === 'es' ? 'Imprimir' : 'Print'}
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-[#00ff88]/10 border border-[#00ff88]/30 text-[#00ff88] rounded hover:bg-[#00ff88]/20 transition-all"
+              className="px-4 py-2 bg-[#ffffff]/10 border border-[#ffffff]/30 text-[#ffffff] rounded hover:bg-[#ffffff]/20 transition-all"
             >
               <X className="w-4 h-4 inline mr-2" />
               {language === 'es' ? 'Cerrar' : 'Close'}
@@ -635,10 +635,10 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
         </div>
 
         {/* Content */}
-        <div ref={reportRef} className="flex-1 overflow-y-auto p-8 space-y-6 text-[#00ff88] bg-black">
+        <div ref={reportRef} className="flex-1 overflow-y-auto p-8 space-y-6 text-[#ffffff] bg-black">
           
           {/* Confidencial */}
-          <div className="text-center border-t border-b border-[#00ff88]/30 py-4">
+          <div className="text-center border-t border-b border-[#ffffff]/30 py-4">
             <div className="text-lg font-bold">{txt.confidential}</div>
           </div>
 
@@ -666,24 +666,24 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
           {/* Resumen */}
           <div>
-            <div className="text-xl font-bold mb-4 border-b border-[#00ff88]/30 pb-2">{txt.summary}</div>
+            <div className="text-xl font-bold mb-4 border-b border-[#ffffff]/30 pb-2">{txt.summary}</div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex justify-between">
-                <span className="text-[#4d7c4d]">{txt.date}:</span>
+                <span className="text-[#ffffff]">{txt.date}:</span>
                 <span>{new Date().toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#4d7c4d]">{txt.status}:</span>
-                <span className={isComplete ? 'text-green-400' : 'text-yellow-400'}>
+                <span className="text-[#ffffff]">{txt.status}:</span>
+                <span className={isComplete ? 'text-white' : 'text-yellow-400'}>
                   {isComplete ? `✓ ${txt.complete} 100%` : `⚡ ${progress.toFixed(1)}%`}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#4d7c4d]">{txt.findings}:</span>
+                <span className="text-[#ffffff]">{txt.findings}:</span>
                 <span className="font-bold">{results?.resumen?.total_hallazgos || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#4d7c4d]">{txt.institutions}:</span>
+                <span className="text-[#ffffff]">{txt.institutions}:</span>
                 <span className="font-bold">{extractedData?.bankNames?.length || 0}</span>
               </div>
             </div>
@@ -692,13 +692,13 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
           {/* Bancos */}
           {extractedData?.bankNames && extractedData.bankNames.length > 0 && (
             <div>
-              <div className="text-xl font-bold mb-4 border-b border-[#00ff88]/30 pb-2">
+              <div className="text-xl font-bold mb-4 border-b border-[#ffffff]/30 pb-2">
                 {txt.institutions} ({extractedData.bankNames.length})
               </div>
               <div className="grid grid-cols-2 gap-2">
                 {extractedData.bankNames.map((bank: string, i: number) => (
                   <div key={i} className="flex items-center gap-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded p-2">
-                    <span className="text-[#4d7c4d]">{(i + 1).toString().padStart(2, '0')}.</span>
+                    <span className="text-[#ffffff]">{(i + 1).toString().padStart(2, '0')}.</span>
                     <span className="text-sm">{bank}</span>
                   </div>
                 ))}
@@ -708,7 +708,7 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
           {/* Clasificación M0-M4 */}
           <div>
-            <div className="text-xl font-bold mb-4 border-b border-[#00ff88]/30 pb-2">
+            <div className="text-xl font-bold mb-4 border-b border-[#ffffff]/30 pb-2">
               {txt.classification} {!isComplete && `(${txt.projected})`}
             </div>
             
@@ -718,10 +718,10 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 <div className="flex justify-between items-center mb-2">
                   <div>
                     <div className="text-lg font-bold text-purple-400">{txt.m0Title}</div>
-                    <div className="text-xs text-[#4d7c4d]">{txt.m0Desc}</div>
+                    <div className="text-xs text-[#ffffff]">{txt.m0Desc}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-[#4d7c4d]">{calculatePercentage(totals.current.M0)}%</div>
+                    <div className="text-sm text-[#ffffff]">{calculatePercentage(totals.current.M0)}%</div>
                   </div>
                 </div>
                 <div className="flex justify-between text-2xl font-bold text-purple-400">
@@ -741,10 +741,10 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 <div className="flex justify-between items-center mb-2">
                   <div>
                     <div className="text-lg font-bold text-blue-400">{txt.m1Title}</div>
-                    <div className="text-xs text-[#4d7c4d]">{txt.m1Desc}</div>
+                    <div className="text-xs text-[#ffffff]">{txt.m1Desc}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-[#4d7c4d]">{calculatePercentage(totals.current.M1)}%</div>
+                    <div className="text-sm text-[#ffffff]">{calculatePercentage(totals.current.M1)}%</div>
                   </div>
                 </div>
                 <div className="flex justify-between text-2xl font-bold text-blue-400">
@@ -760,22 +760,22 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               </div>
 
               {/* M2 */}
-              <div className="bg-[#0d0d0d] border border-green-500/40 rounded-lg p-4">
+              <div className="bg-[#0d0d0d] border border-white/30/40 rounded-lg p-4">
                 <div className="flex justify-between items-center mb-2">
                   <div>
-                    <div className="text-lg font-bold text-green-400">{txt.m2Title}</div>
-                    <div className="text-xs text-[#4d7c4d]">{txt.m2Desc}</div>
+                    <div className="text-lg font-bold text-white">{txt.m2Title}</div>
+                    <div className="text-xs text-[#ffffff]">{txt.m2Desc}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-[#4d7c4d]">{calculatePercentage(totals.current.M2)}%</div>
+                    <div className="text-sm text-[#ffffff]">{calculatePercentage(totals.current.M2)}%</div>
                   </div>
                 </div>
-                <div className="flex justify-between text-2xl font-bold text-green-400">
+                <div className="flex justify-between text-2xl font-bold text-white">
                   <span>{isComplete ? txt.actual + ':' : `${txt.actual} (${progress.toFixed(1)}%):`}</span>
                   <span>${totals.current.M2.toLocaleString()}</span>
                 </div>
                 {!isComplete && (
-                  <div className="flex justify-between text-lg text-green-300 mt-1">
+                  <div className="flex justify-between text-lg text-white mt-1">
                     <span>{txt.projected}:</span>
                     <span>${totals.projected.M2.toLocaleString()}</span>
                   </div>
@@ -787,10 +787,10 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 <div className="flex justify-between items-center mb-2">
                   <div>
                     <div className="text-lg font-bold text-yellow-400">{txt.m3Title}</div>
-                    <div className="text-xs text-[#4d7c4d]">{txt.m3Desc}</div>
+                    <div className="text-xs text-[#ffffff]">{txt.m3Desc}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-[#4d7c4d]">{calculatePercentage(totals.current.M3)}%</div>
+                    <div className="text-sm text-[#ffffff]">{calculatePercentage(totals.current.M3)}%</div>
                   </div>
                 </div>
                 <div className="flex justify-between text-2xl font-bold text-yellow-400">
@@ -810,10 +810,10 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 <div className="flex justify-between items-center mb-2">
                   <div>
                     <div className="text-lg font-bold text-red-400">{txt.m4Title}</div>
-                    <div className="text-xs text-[#4d7c4d]">{txt.m4Desc}</div>
+                    <div className="text-xs text-[#ffffff]">{txt.m4Desc}</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-[#4d7c4d]">{calculatePercentage(totals.current.M4)}%</div>
+                    <div className="text-sm text-[#ffffff]">{calculatePercentage(totals.current.M4)}%</div>
                   </div>
                 </div>
                 <div className="flex justify-between text-2xl font-bold text-red-400">
@@ -831,25 +831,25 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
           </div>
 
           {/* Total Dinámico */}
-          <div className="bg-gradient-to-r from-[#00ff88]/10 to-[#00cc6a]/10 border-2 border-[#00ff88] rounded-lg p-6">
+          <div className="bg-gradient-to-r from-[#ffffff]/10 to-[#e0e0e0]/10 border-2 border-[#ffffff] rounded-lg p-6">
             <div className="text-center">
-              <div className="text-sm text-[#4d7c4d] mb-2">{txt.totalVerified}</div>
-              <div className="text-sm text-[#4d7c4d] mb-3">
+              <div className="text-sm text-[#ffffff] mb-2">{txt.totalVerified}</div>
+              <div className="text-sm text-[#ffffff] mb-3">
                 {!isComplete && (
                   <span className="text-yellow-400">
                     {language === 'es' ? `⚡ ${actualProgress.toFixed(1)}% Procesado - Valor Actual` : `⚡ ${actualProgress.toFixed(1)}% Processed - Current Value`}
                   </span>
                 )}
               </div>
-              <div className="text-4xl font-bold text-[#00ff88] mb-2">
+              <div className="text-4xl font-bold text-[#ffffff] mb-2">
                 ${grandTotalCurrent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
               </div>
               {!isComplete && (
                 <>
-                  <div className="text-xs text-[#4d7c4d] mb-2">
+                  <div className="text-xs text-[#ffffff] mb-2">
                     {language === 'es' ? `📊 Basado en ${actualProgress.toFixed(1)}% de los datos procesados` : `📊 Based on ${actualProgress.toFixed(1)}% of data processed`}
                   </div>
-                  <div className="border-t border-[#00ff88]/30 pt-3 mt-3">
+                  <div className="border-t border-[#ffffff]/30 pt-3 mt-3">
                     <div className="text-sm text-yellow-400 mb-1">{txt.projected}:</div>
                     <div className="text-3xl font-bold text-yellow-400">
                       ${grandTotalProjected.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
@@ -865,7 +865,7 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
           {/* Balances por Divisa */}
           <div>
-            <div className="text-xl font-bold mb-4 border-b border-[#00ff88]/30 pb-2">
+            <div className="text-xl font-bold mb-4 border-b border-[#ffffff]/30 pb-2">
               {txt.balancesByCurrency} ({language === 'es' ? 'Ordenados por Monto' : 'Sorted by Amount'})
             </div>
             <div className="space-y-3">
@@ -883,10 +883,10 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     <div className="flex justify-between items-center mb-2">
                       <div>
                         <span className="text-xl font-bold">{index + 1}. {a.currency}</span>
-                        <span className="text-sm text-[#4d7c4d] ml-3">{getCurrencyName(a.currency, language)}</span>
+                        <span className="text-sm text-[#ffffff] ml-3">{getCurrencyName(a.currency, language)}</span>
                       </div>
                       <div className="text-right">
-                        <div className="text-xl font-bold text-[#00ff88]">{a.currency} {totalCurrent.toLocaleString()}</div>
+                        <div className="text-xl font-bold text-[#ffffff]">{a.currency} {totalCurrent.toLocaleString()}</div>
                         <div className="text-sm text-cyan-400">USD ${totalUsdCurrent.toLocaleString()}</div>
                         {!isComplete && (
                           <>
@@ -913,9 +913,9 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         </div>
                       )}
                       {a.M2 > 0 && (
-                        <div className="bg-green-900/20 border border-green-500/40 rounded p-1 text-center">
-                          <div className="text-green-400 font-bold">M2</div>
-                          <div className="text-green-300 font-mono text-xs">{a.M2.toLocaleString()}</div>
+                        <div className="bg-white/10/20 border border-white/30/40 rounded p-1 text-center">
+                          <div className="text-white font-bold">M2</div>
+                          <div className="text-white font-mono text-xs">{a.M2.toLocaleString()}</div>
                         </div>
                       )}
                       {a.M3 > 0 && (
@@ -939,12 +939,12 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
 
           {/* Distribución */}
           <div>
-            <div className="text-xl font-bold mb-4 border-b border-[#00ff88]/30 pb-2">{txt.distribution}</div>
+            <div className="text-xl font-bold mb-4 border-b border-[#ffffff]/30 pb-2">{txt.distribution}</div>
             <div className="space-y-2">
               {[
                 { label: 'M0', value: totals.current.M0, color: 'bg-purple-500', textColor: 'text-purple-400' },
                 { label: 'M1', value: totals.current.M1, color: 'bg-blue-500', textColor: 'text-blue-400' },
-                { label: 'M2', value: totals.current.M2, color: 'bg-green-500', textColor: 'text-green-400' },
+                { label: 'M2', value: totals.current.M2, color: 'bg-white/20', textColor: 'text-white' },
                 { label: 'M3', value: totals.current.M3, color: 'bg-yellow-500', textColor: 'text-yellow-400' },
                 { label: 'M4', value: totals.current.M4, color: 'bg-red-500', textColor: 'text-red-400' },
               ].map(({ label, value, color, textColor }) => {
@@ -956,7 +956,7 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                       <div className={`h-full ${color} transition-all`} style={{ width: `${percentage}%` }} />
                     </div>
                     <div className={`text-sm font-mono w-16 text-right ${textColor}`}>{percentage}%</div>
-                    <div className="text-sm font-mono w-32 text-right text-[#80ff80]">${value.toLocaleString()}</div>
+                    <div className="text-sm font-mono w-32 text-right text-[#ffffff]">${value.toLocaleString()}</div>
                   </div>
                 );
               })}
@@ -964,7 +964,7 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
           </div>
 
           {/* Estándares de Cumplimiento */}
-          <div className="bg-gradient-to-r from-cyan-900/20 to-green-900/20 border border-cyan-500/40 rounded-lg p-6">
+          <div className="bg-gradient-to-r from-cyan-900/20 to-white/10/20 border border-cyan-500/40 rounded-lg p-6">
             <div className="text-xl font-bold mb-4 text-cyan-400 border-b border-cyan-500/30 pb-2">{txt.standards}</div>
             <div className="space-y-4">
               {/* ISO 27001 */}
@@ -973,7 +973,7 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   <div className="text-2xl">🔒</div>
                   <div className="flex-1">
                     <div className="text-lg font-bold text-cyan-400">{txt.iso27001}</div>
-                    <div className="text-sm text-[#4d7c4d] mt-1">
+                    <div className="text-sm text-[#ffffff] mt-1">
                       {language === 'es' 
                         ? 'Gestión de seguridad de la información y protección de datos bancarios sensibles' 
                         : 'Information security management and protection of sensitive banking data'}
@@ -992,12 +992,12 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               </div>
 
               {/* ISO 20022 */}
-              <div className="bg-[#0d0d0d] border border-green-500/30 rounded-lg p-4">
+              <div className="bg-[#0d0d0d] border border-white/30/30 rounded-lg p-4">
                 <div className="flex items-start gap-3">
                   <div className="text-2xl">🏦</div>
                   <div className="flex-1">
-                    <div className="text-lg font-bold text-green-400">{txt.iso20022}</div>
-                    <div className="text-sm text-[#4d7c4d] mt-1">
+                    <div className="text-lg font-bold text-white">{txt.iso20022}</div>
+                    <div className="text-sm text-[#ffffff] mt-1">
                       {language === 'es'
                         ? 'Mensajería financiera estándar para interoperabilidad con bancos centrales y sistemas de pago'
                         : 'Standard financial messaging for interoperability with central banks and payment systems'}
@@ -1021,7 +1021,7 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   <div className="text-2xl">⚖️</div>
                   <div className="flex-1">
                     <div className="text-lg font-bold text-orange-400">{txt.fatf}</div>
-                    <div className="text-sm text-[#4d7c4d] mt-1">
+                    <div className="text-sm text-[#ffffff] mt-1">
                       {language === 'es'
                         ? 'Prevención de lavado de dinero y financiamiento del terrorismo según FATF/GAFI'
                         : 'Prevention of money laundering and terrorism financing according to FATF standards'}
@@ -1042,25 +1042,25 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
           </div>
 
           {/* Certificación */}
-          <div className="border-t-2 border-b-2 border-[#00ff88]/30 py-6">
+          <div className="border-t-2 border-b-2 border-[#ffffff]/30 py-6">
             <div className="text-center">
               <div className="text-lg font-bold mb-3">{txt.certification}</div>
-              <div className="text-sm text-[#4d7c4d] max-w-3xl mx-auto mb-4">
+              <div className="text-sm text-[#ffffff] max-w-3xl mx-auto mb-4">
                 {txt.certText}
               </div>
-              <div className="text-sm text-[#4d7c4d] mb-2">
+              <div className="text-sm text-[#ffffff] mb-2">
                 {language === 'es' 
                   ? 'Conforme con estándares: SWIFT MT799/MT999, FEDWIRE, DTC, ISO 20022' 
                   : 'Compliant with standards: SWIFT MT799/MT999, FEDWIRE, DTC, ISO 20022'}
               </div>
-              <div className="mt-4 text-lg font-bold text-[#00ff88]">
+              <div className="mt-4 text-lg font-bold text-[#ffffff]">
                 {isComplete ? `✓ ${txt.verified}` : `⚡ ${txt.inProcess} (${progress.toFixed(1)}%)`}
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="text-center text-sm text-[#4d7c4d] border-t border-[#00ff88]/30 pt-4">
+          <div className="text-center text-sm text-[#ffffff] border-t border-[#ffffff]/30 pt-4">
             <div>{txt.generatedBy}: DAES ULTIMATE - Bank Audit System</div>
             <div className="mt-1">© {new Date().getFullYear()} DAES CoreBanking System</div>
             <div className="mt-2 text-xs">

@@ -118,10 +118,10 @@ export function ProofOfReservesManager() {
 
           <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
             <div className="flex items-center gap-3 mb-2">
-              <Lock className="w-5 h-5 text-green-400" />
+              <Lock className="w-5 h-5 text-white" />
               <span className="text-gray-400 text-sm">Active Pledges</span>
             </div>
-            <div className="text-3xl font-bold text-green-400">
+            <div className="text-3xl font-bold text-white">
               {activePledges.length}
             </div>
           </div>
@@ -178,7 +178,7 @@ export function ProofOfReservesManager() {
                         <h3 className="text-lg font-semibold">{key.name}</h3>
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
                           key.status === 'active'
-                            ? 'bg-green-900/30 text-green-400 border border-green-500/30'
+                            ? 'bg-white/10/30 text-white border border-white/30/30'
                             : 'bg-red-900/30 text-red-400 border border-red-500/30'
                         }`}>
                           {key.status}
@@ -197,7 +197,7 @@ export function ProofOfReservesManager() {
                             title="Copy API key"
                           >
                             {copiedKey === key.key ? (
-                              <CheckCircle className="w-4 h-4 text-green-400" />
+                              <CheckCircle className="w-4 h-4 text-white" />
                             ) : (
                               <Copy className="w-4 h-4 text-gray-400" />
                             )}
@@ -222,10 +222,10 @@ export function ProofOfReservesManager() {
                       </button>
                       <button
                         onClick={() => handleDownloadTXT(key)}
-                        className="p-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-lg transition-colors"
+                        className="p-2 bg-white/20/20 hover:bg-white/20/30 border border-white/30/30 rounded-lg transition-colors"
                         title="Download TXT"
                       >
-                        <Download className="w-4 h-4 text-green-400" />
+                        <Download className="w-4 h-4 text-white" />
                       </button>
                       <button
                         onClick={() => handleRevoke(key.id)}
@@ -268,7 +268,7 @@ export function ProofOfReservesManager() {
                       </div>
                       <div className="bg-gray-800 p-4 rounded-lg">
                         <div className="text-gray-400 text-sm mb-1">USD</div>
-                        <div className="text-2xl font-bold text-green-400">
+                        <div className="text-2xl font-bold text-white">
                           ${previewData.totals.total_pledged_usd.toLocaleString()}
                         </div>
                       </div>
@@ -306,9 +306,9 @@ export function ProofOfReservesManager() {
                             <div>
                               <div className="text-xs text-gray-400 mb-2">PLEDGE INFO</div>
                               <div className="space-y-1 text-sm">
-                                <div><span className="text-gray-400">Amount:</span> <span className="text-green-400 font-bold text-lg">{pledge.currency} {pledge.amount.toLocaleString()}</span></div>
+                                <div><span className="text-gray-400">Amount:</span> <span className="text-white font-bold text-lg">{pledge.currency} {pledge.amount.toLocaleString()}</span></div>
                                 <div><span className="text-gray-400">Beneficiary:</span> {pledge.beneficiary}</div>
-                                <div><span className="text-gray-400">Status:</span> <span className="text-green-400">{pledge.status}</span></div>
+                                <div><span className="text-gray-400">Status:</span> <span className="text-white">{pledge.status}</span></div>
                               </div>
                             </div>
                             {pledge.blockchain_network && (

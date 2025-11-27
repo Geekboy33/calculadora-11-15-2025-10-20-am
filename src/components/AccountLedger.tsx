@@ -46,11 +46,11 @@ export function AccountLedger() {
   };
 
   const getCurrencyColor = (currency: string, index: number) => {
-    if (currency === 'USD') return 'from-[#00ff88] to-[#00cc6a] border-[#00ff88]';
-    if (currency === 'EUR') return 'from-[#00ffaa] to-[#00ff88] border-[#00ffaa]';
-    if (currency === 'GBP') return 'from-[#00ff88]/90 to-[#00cc6a]/90 border-[#00ff88]/90';
-    if (currency === 'CHF') return 'from-[#39ff14] to-[#00ff88] border-[#39ff14]';
-    if (index < 8) return 'from-[#00cc6a] to-[#00aa55] border-[#00cc6a]';
+    if (currency === 'USD') return 'from-[#ffffff] to-[#e0e0e0] border-[#ffffff]';
+    if (currency === 'EUR') return 'from-[#ffffff] to-[#ffffff] border-[#ffffff]';
+    if (currency === 'GBP') return 'from-[#ffffff]/90 to-[#e0e0e0]/90 border-[#ffffff]/90';
+    if (currency === 'CHF') return 'from-[#39ff14] to-[#ffffff] border-[#39ff14]';
+    if (index < 8) return 'from-[#e0e0e0] to-[#e0e0e0] border-[#e0e0e0]';
     return 'from-[#0d0d0d] to-[#0a0a0a] border-[#1a1a1a]';
   };
 
@@ -63,14 +63,14 @@ export function AccountLedger() {
   return (
     <div className="flex flex-col h-full bg-black overflow-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#0d0d0d] to-[#0a0a0a] border-b border-[#00ff88]/30 p-8 sticky top-0 z-10 shadow-[0_4px_20px_rgba(0,255,136,0.2)]">
+      <div className="bg-gradient-to-r from-[#0d0d0d] to-[#0a0a0a] border-b border-[#ffffff]/30 p-8 sticky top-0 z-10 shadow-[0_4px_20px_rgba(255, 255, 255,0.2)]">
         <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-[#e0ffe0] mb-2 flex items-center gap-3">
-                <Database className="w-10 h-10 text-[#00ff88] pulse-green" />
+              <h1 className="text-3xl font-bold text-[#ffffff] mb-2 flex items-center gap-3">
+                <Database className="w-10 h-10 text-[#ffffff] pulse-green" />
                 {t.ledgerTitle}
               </h1>
-              <p className="text-[#80ff80]">
+              <p className="text-[#ffffff]">
                 {t.ledgerSubtitle}
               </p>
             </div>
@@ -78,14 +78,14 @@ export function AccountLedger() {
             {/* Indicador de Estado del Ledger */}
             <LedgerStatusIndicator />
             {isLiveUpdating && (
-              <div className="flex items-center gap-2 bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88] px-4 py-2 rounded-lg animate-pulse shadow-[0_0_15px_rgba(0,255,136,0.4)]">
+              <div className="flex items-center gap-2 bg-[#ffffff]/20 text-[#ffffff] border border-[#ffffff] px-4 py-2 rounded-lg animate-pulse shadow-[0_0_15px_rgba(255, 255, 255,0.4)]">
                 <Activity className="w-5 h-5 animate-spin" />
                 <span className="font-semibold">{t.ledgerUpdating}</span>
               </div>
             )}
             <button
               onClick={refreshBalances}
-              className="bg-[#0d0d0d] hover:bg-[#141414] border border-[#1a1a1a] hover:border-[#00ff88] text-[#00ff88] px-4 py-2 rounded-lg flex items-center gap-2 transition-all hover:shadow-[0_0_15px_rgba(0,255,136,0.3)]"
+              className="bg-[#0d0d0d] hover:bg-[#141414] border border-[#1a1a1a] hover:border-[#ffffff] text-[#ffffff] px-4 py-2 rounded-lg flex items-center gap-2 transition-all hover:shadow-[0_0_15px_rgba(255, 255, 255,0.3)]"
             >
               <RefreshCw className="w-5 h-5" />
               {t.refresh}
@@ -97,46 +97,46 @@ export function AccountLedger() {
       {/* Summary Stats */}
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-[#00ff88]/30 to-[#00cc6a]/30 border border-[#00ff88] rounded-xl p-6 shadow-[0_0_20px_rgba(0,255,136,0.3)] glass-panel">
+          <div className="bg-gradient-to-br from-[#ffffff]/30 to-[#e0e0e0]/30 border border-[#ffffff] rounded-xl p-6 shadow-[0_0_20px_rgba(255, 255, 255,0.3)] glass-panel">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[#00ff88] text-sm font-semibold">{t.ledgerTotalAccounts}</span>
-              <Database className="w-6 h-6 text-[#00ff88]/70" />
+              <span className="text-[#ffffff] text-sm font-semibold">{t.ledgerTotalAccounts}</span>
+              <Database className="w-6 h-6 text-[#ffffff]/70" />
             </div>
-            <div className="text-4xl font-black text-[#e0ffe0]">{balances.length}</div>
-            <div className="text-[#80ff80] text-xs mt-1">{t.ledgerOfCurrencies}</div>
+            <div className="text-4xl font-black text-[#ffffff]">{balances.length}</div>
+            <div className="text-[#ffffff] text-xs mt-1">{t.ledgerOfCurrencies}</div>
           </div>
 
-          <div className="bg-gradient-to-br from-[#00ffaa]/30 to-[#00ff88]/30 border border-[#00ffaa] rounded-xl p-6 shadow-[0_0_20px_rgba(0,255,170,0.3)] glass-panel">
+          <div className="bg-gradient-to-br from-[#ffffff]/30 to-[#ffffff]/30 border border-[#ffffff] rounded-xl p-6 shadow-[0_0_20px_rgba(255, 255, 255,0.3)] glass-panel">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[#00ff88] text-sm font-semibold">{t.ledgerTotalTransactions}</span>
-              <TrendingUp className="w-6 h-6 text-[#00ff88]/70" />
+              <span className="text-[#ffffff] text-sm font-semibold">{t.ledgerTotalTransactions}</span>
+              <TrendingUp className="w-6 h-6 text-[#ffffff]/70" />
             </div>
-            <div className="text-4xl font-black text-[#e0ffe0]">{getTotalTransactions().toLocaleString()}</div>
-            <div className="text-[#80ff80] text-xs mt-1">{t.ledgerProcessed}</div>
+            <div className="text-4xl font-black text-[#ffffff]">{getTotalTransactions().toLocaleString()}</div>
+            <div className="text-[#ffffff] text-xs mt-1">{t.ledgerProcessed}</div>
           </div>
 
-          <div className="bg-gradient-to-br from-[#39ff14]/30 to-[#00ff88]/30 border border-[#39ff14] rounded-xl p-6 shadow-[0_0_20px_rgba(57,255,20,0.3)] glass-panel">
+          <div className="bg-gradient-to-br from-[#39ff14]/30 to-[#ffffff]/30 border border-[#39ff14] rounded-xl p-6 shadow-[0_0_20px_rgba(255, 255, 255,0.3)] glass-panel">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[#00ff88] text-sm font-semibold">{t.ledgerLastUpdate}</span>
-              <CheckCircle className="w-6 h-6 text-[#00ff88]/70" />
+              <span className="text-[#ffffff] text-sm font-semibold">{t.ledgerLastUpdate}</span>
+              <CheckCircle className="w-6 h-6 text-[#ffffff]/70" />
             </div>
-            <div className="text-lg font-bold text-[#e0ffe0]">
+            <div className="text-lg font-bold text-[#ffffff]">
               {lastUpdate ? lastUpdate.toLocaleTimeString() : 'N/A'}
             </div>
-            <div className="text-[#80ff80] text-xs mt-1">
+            <div className="text-[#ffffff] text-xs mt-1">
               {lastUpdate ? lastUpdate.toLocaleDateString() : t.ledgerNoData}
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-[#00cc6a]/30 to-[#00aa55]/30 border border-[#00cc6a] rounded-xl p-6 shadow-[0_0_20px_rgba(0,204,106,0.3)] glass-panel">
+          <div className="bg-gradient-to-br from-[#e0e0e0]/30 to-[#e0e0e0]/30 border border-[#e0e0e0] rounded-xl p-6 shadow-[0_0_20px_rgba(0,204,106,0.3)] glass-panel">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[#00ff88] text-sm font-semibold">{t.ledgerStatus}</span>
-              <Activity className="w-6 h-6 text-[#00ff88]/70" />
+              <span className="text-[#ffffff] text-sm font-semibold">{t.ledgerStatus}</span>
+              <Activity className="w-6 h-6 text-[#ffffff]/70" />
             </div>
-            <div className="text-lg font-bold text-[#e0ffe0]">
+            <div className="text-lg font-bold text-[#ffffff]">
               {balances.length > 0 ? t.ledgerOperational : t.ledgerNoData}
             </div>
-            <div className="text-[#80ff80] text-xs mt-1">
+            <div className="text-[#ffffff] text-xs mt-1">
               {isLiveUpdating ? t.ledgerUpdating : t.ledgerWaiting}
             </div>
           </div>
@@ -161,7 +161,7 @@ export function AccountLedger() {
                         <DollarSign className="w-5 h-5 text-white" style={{filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'}} />
                         <h3 className="text-xl font-bold text-white" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.9), -1px -1px 2px rgba(0,0,0,0.9), 1px -1px 2px rgba(0,0,0,0.9), -1px 1px 2px rgba(0,0,0,0.9)'}}>{balance.currency}</h3>
                         {isMainCurrency && (
-                          <span className="bg-black text-[#00ff88] border border-[#00ff88] px-2 py-0.5 rounded-full text-xs font-bold shadow-[0_0_10px_rgba(0,255,136,0.5)]">
+                          <span className="bg-black text-[#ffffff] border border-[#ffffff] px-2 py-0.5 rounded-full text-xs font-bold shadow-[0_0_10px_rgba(255, 255, 255,0.5)]">
                             ★ {index === 0 ? t.ledgerPrincipal : index === 1 ? t.ledgerSecondary : index === 2 ? t.ledgerTertiary : t.ledgerFourth}
                           </span>
                         )}
@@ -237,7 +237,7 @@ export function AccountLedger() {
         <div className="sticky bottom-0 bg-gradient-to-r from-slate-800 to-slate-900 border-t border-slate-700 p-4">
             <div className="flex items-center justify-between max-w-7xl mx-auto">
               <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${isLiveUpdating ? 'bg-green-400 animate-pulse' : 'bg-blue-400'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${isLiveUpdating ? 'bg-white/20 animate-pulse' : 'bg-blue-400'}`}></div>
                 <span className="text-slate-300 text-sm font-semibold">
                   {isLiveUpdating ? t.ledgerUpdating : t.ledgerConnected}
                 </span>

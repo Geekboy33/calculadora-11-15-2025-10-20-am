@@ -297,11 +297,11 @@ export function APIDAESModule() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#00ff88] flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-[#ffffff] flex items-center gap-3">
             <Key className="w-8 h-8" />
             {language === 'es' ? 'API DAES - Transferencias Bancarias' : 'DAES API - Banking Transfers'}
           </h1>
-          <p className="text-[#4d7c4d] mt-2">
+          <p className="text-[#ffffff] mt-2">
             {language === 'es' 
               ? 'Sistema de gestión de APIs bancarias con privilegios de transferencia' 
               : 'Banking API management system with transfer privileges'}
@@ -314,33 +314,33 @@ export function APIDAESModule() {
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
             <Key className="w-5 h-5 text-cyan-400" />
-            <span className="text-[#4d7c4d] text-sm">{language === 'es' ? 'APIs Activas' : 'Active APIs'}</span>
+            <span className="text-[#ffffff] text-sm">{language === 'es' ? 'APIs Activas' : 'Active APIs'}</span>
           </div>
           <p className="text-3xl font-bold text-cyan-400">{custodyAccounts.length}</p>
         </div>
 
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
-            <Send className="w-5 h-5 text-green-400" />
-            <span className="text-[#4d7c4d] text-sm">{language === 'es' ? 'Pueden Enviar' : 'Can Send'}</span>
+            <Send className="w-5 h-5 text-white" />
+            <span className="text-[#ffffff] text-sm">{language === 'es' ? 'Pueden Enviar' : 'Can Send'}</span>
           </div>
-          <p className="text-3xl font-bold text-green-400">{custodyAccounts.length}</p>
+          <p className="text-3xl font-bold text-white">{custodyAccounts.length}</p>
         </div>
 
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
             <Download className="w-5 h-5 text-blue-400" />
-            <span className="text-[#4d7c4d] text-sm">{language === 'es' ? 'Pueden Recibir' : 'Can Receive'}</span>
+            <span className="text-[#ffffff] text-sm">{language === 'es' ? 'Pueden Recibir' : 'Can Receive'}</span>
           </div>
           <p className="text-3xl font-bold text-blue-400">{custodyAccounts.length}</p>
         </div>
 
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
           <div className="flex items-center gap-3 mb-2">
-            <CheckCircle className="w-5 h-5 text-[#00ff88]" />
-            <span className="text-[#4d7c4d] text-sm">{language === 'es' ? 'Total Activas' : 'Total Active'}</span>
+            <CheckCircle className="w-5 h-5 text-[#ffffff]" />
+            <span className="text-[#ffffff] text-sm">{language === 'es' ? 'Total Activas' : 'Total Active'}</span>
           </div>
-          <p className="text-3xl font-bold text-[#00ff88]">
+          <p className="text-3xl font-bold text-[#ffffff]">
             {custodyAccounts.filter(a => a.apiStatus === 'active').length}
           </p>
         </div>
@@ -349,28 +349,28 @@ export function APIDAESModule() {
       {/* Lista de APIs */}
       {custodyAccounts.length > 0 ? (
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-[#00ff88] mb-4">
+          <h2 className="text-xl font-bold text-[#ffffff] mb-4">
             {language === 'es' ? 'APIs Bancarias Disponibles' : 'Available Banking APIs'}
           </h2>
           {custodyAccounts.map(account => (
-            <div key={account.id} className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6 hover:border-[#00ff88]/30 transition-all">
+            <div key={account.id} className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6 hover:border-[#ffffff]/30 transition-all">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <div className="text-2xl">🏦</div>
-                    <h3 className="text-xl font-bold text-[#00ff88]">{account.accountName}</h3>
+                    <h3 className="text-xl font-bold text-[#ffffff]">{account.accountName}</h3>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      account.apiStatus === 'active' ? 'bg-green-500/20 text-green-400' :
+                      account.apiStatus === 'active' ? 'bg-white/20/20 text-white' :
                       'bg-yellow-500/20 text-yellow-400'
                     }`}>
                       {account.apiStatus?.toUpperCase() || 'PENDING'}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
-                    <p className="text-[#4d7c4d]">
-                      {language === 'es' ? 'Cuenta:' : 'Account:'} <span className="text-[#00ff88] font-mono">{account.accountNumber}</span>
+                    <p className="text-[#ffffff]">
+                      {language === 'es' ? 'Cuenta:' : 'Account:'} <span className="text-[#ffffff] font-mono">{account.accountNumber}</span>
                     </p>
-                    <p className="text-[#4d7c4d]">
+                    <p className="text-[#ffffff]">
                       API ID: <span className="text-cyan-400 font-mono">{account.apiId || 'N/A'}</span>
                     </p>
                   </div>
@@ -388,7 +388,7 @@ export function APIDAESModule() {
                       setSelectedAPI(account);
                       setShowTransferModal(true);
                     }}
-                    className="px-6 py-3 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] transition-all"
+                    className="px-6 py-3 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(255, 255, 255,0.6)] transition-all"
                   >
                     <Send className="w-5 h-5 inline mr-2" />
                     {language === 'es' ? 'Nueva Transferencia' : 'New Transfer'}
@@ -399,15 +399,15 @@ export function APIDAESModule() {
               {/* Info API */}
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-3">
-                  <div className="text-xs text-[#4d7c4d] mb-1">{language === 'es' ? 'Disponible' : 'Available'}</div>
-                  <div className="text-lg font-bold text-green-400 font-mono">
+                  <div className="text-xs text-[#ffffff] mb-1">{language === 'es' ? 'Disponible' : 'Available'}</div>
+                  <div className="text-lg font-bold text-white font-mono">
                     {account.currency} {account.availableBalance.toLocaleString()}
                   </div>
                 </div>
                 <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-3">
-                  <div className="text-xs text-[#4d7c4d] mb-1">{language === 'es' ? 'Privilegios' : 'Privileges'}</div>
+                  <div className="text-xs text-[#ffffff] mb-1">{language === 'es' ? 'Privilegios' : 'Privileges'}</div>
                   <div className="flex gap-2">
-                    <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
+                    <span className="px-2 py-1 bg-white/20/20 text-white text-xs rounded">
                       <Send className="w-3 h-3 inline" /> {language === 'es' ? 'ENVIAR' : 'SEND'}
                     </span>
                     <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">
@@ -416,7 +416,7 @@ export function APIDAESModule() {
                   </div>
                 </div>
                 <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-3">
-                  <div className="text-xs text-[#4d7c4d] mb-1">Endpoint</div>
+                  <div className="text-xs text-[#ffffff] mb-1">Endpoint</div>
                   <div className="text-xs text-cyan-400 font-mono truncate">{account.apiEndpoint || 'N/A'}</div>
                 </div>
               </div>
@@ -425,11 +425,11 @@ export function APIDAESModule() {
         </div>
       ) : (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-12 text-center">
-          <Key className="w-16 h-16 text-[#4d7c4d] mx-auto mb-4" />
-          <h3 className="text-xl text-[#4d7c4d] mb-2">
+          <Key className="w-16 h-16 text-[#ffffff] mx-auto mb-4" />
+          <h3 className="text-xl text-[#ffffff] mb-2">
             {language === 'es' ? 'No hay APIs bancarias configuradas' : 'No banking APIs configured'}
           </h3>
-          <p className="text-[#4d7c4d] text-sm mb-4">
+          <p className="text-[#ffffff] text-sm mb-4">
             {language === 'es' 
               ? 'Crea cuentas bancarias en "Cuentas Custodio" para gestionar APIs de transferencia'
               : 'Create banking accounts in "Custody Accounts" to manage transfer APIs'}
@@ -440,9 +440,9 @@ export function APIDAESModule() {
       {/* Modal de Transferencia API */}
       {showTransferModal && selectedAPI && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-black border-2 border-[#00ff88] rounded-xl p-6 max-w-3xl w-full shadow-[0_0_50px_rgba(0,255,136,0.5)]">
-            <div className="flex items-center justify-between mb-6 border-b border-[#00ff88]/30 pb-4">
-              <h2 className="text-2xl font-bold text-[#00ff88]">
+          <div className="bg-black border-2 border-[#ffffff] rounded-xl p-6 max-w-3xl w-full shadow-[0_0_50px_rgba(255, 255, 255,0.5)]">
+            <div className="flex items-center justify-between mb-6 border-b border-[#ffffff]/30 pb-4">
+              <h2 className="text-2xl font-bold text-[#ffffff]">
                 🌐 {language === 'es' ? 'Nueva Transferencia API' : 'New API Transfer'}
               </h2>
               <button
@@ -455,26 +455,26 @@ export function APIDAESModule() {
             </div>
 
             {/* Info Cuenta */}
-            <div className="bg-[#0d0d0d] border border-[#00ff88]/30 rounded-lg p-4 mb-6">
+            <div className="bg-[#0d0d0d] border border-[#ffffff]/30 rounded-lg p-4 mb-6">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-[#4d7c4d]">{language === 'es' ? 'De:' : 'From:'}</span>
-                  <div className="text-[#00ff88] font-bold">{selectedAPI.accountName}</div>
+                  <span className="text-[#ffffff]">{language === 'es' ? 'De:' : 'From:'}</span>
+                  <div className="text-[#ffffff] font-bold">{selectedAPI.accountName}</div>
                 </div>
                 <div>
-                  <span className="text-[#4d7c4d]">API ID:</span>
+                  <span className="text-[#ffffff]">API ID:</span>
                   <div className="text-cyan-400 font-mono">{selectedAPI.apiId}</div>
                 </div>
                 <div>
-                  <span className="text-[#4d7c4d]">{language === 'es' ? 'Disponible:' : 'Available:'}</span>
-                  <div className="text-green-400 font-mono font-bold">
+                  <span className="text-[#ffffff]">{language === 'es' ? 'Disponible:' : 'Available:'}</span>
+                  <div className="text-white font-mono font-bold">
                     {selectedAPI.currency} {selectedAPI.availableBalance.toLocaleString()}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[#4d7c4d]">{language === 'es' ? 'Privilegios:' : 'Privileges:'}</span>
+                  <span className="text-[#ffffff]">{language === 'es' ? 'Privilegios:' : 'Privileges:'}</span>
                   <div className="flex gap-1">
-                    <span className="text-green-400 text-xs">✓ SEND</span>
+                    <span className="text-white text-xs">✓ SEND</span>
                     <span className="text-blue-400 text-xs">✓ RECEIVE</span>
                   </div>
                 </div>
@@ -484,67 +484,67 @@ export function APIDAESModule() {
             {/* Formulario */}
             <div className="space-y-4 mb-6">
               <div>
-                <label className="text-sm text-[#00ff88] mb-2 block font-bold">
+                <label className="text-sm text-[#ffffff] mb-2 block font-bold">
                   💰 {language === 'es' ? 'Monto a Transferir *' : 'Amount to Transfer *'}
                 </label>
                 <input
                   type="number"
                   value={transferData.amount}
                   onChange={e => setTransferData({...transferData, amount: parseFloat(e.target.value) || 0})}
-                  className="w-full px-4 py-3 bg-[#0a0a0a] border-2 border-[#00ff88]/50 rounded-lg text-[#00ff88] font-mono text-xl focus:outline-none focus:border-[#00ff88]"
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border-2 border-[#ffffff]/50 rounded-lg text-[#ffffff] font-mono text-xl focus:outline-none focus:border-[#ffffff]"
                   placeholder="0.00"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-[#00ff88] mb-2 block font-bold">
+                <label className="text-sm text-[#ffffff] mb-2 block font-bold">
                   👤 {language === 'es' ? 'Beneficiario *' : 'Beneficiary *'}
                 </label>
                 <input
                   type="text"
                   value={transferData.beneficiaryName}
                   onChange={e => setTransferData({...transferData, beneficiaryName: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#80ff80] focus:outline-none focus:border-[#00ff88]/50"
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-[#ffffff]/50"
                   placeholder={language === 'es' ? 'Nombre completo' : 'Full name'}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-[#00ff88] mb-2 block font-bold">
+                  <label className="text-sm text-[#ffffff] mb-2 block font-bold">
                     🏦 {language === 'es' ? 'Banco Destino *' : 'Destination Bank *'}
                   </label>
                   <input
                     type="text"
                     value={transferData.destinationBank}
                     onChange={e => setTransferData({...transferData, destinationBank: e.target.value})}
-                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#80ff80] focus:outline-none focus:border-[#00ff88]/50"
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-[#ffffff]/50"
                     placeholder="Deutsche Bank"
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-[#00ff88] mb-2 block font-bold">
+                  <label className="text-sm text-[#ffffff] mb-2 block font-bold">
                     💳 {language === 'es' ? 'Cuenta/IBAN *' : 'Account/IBAN *'}
                   </label>
                   <input
                     type="text"
                     value={transferData.destinationIBAN}
                     onChange={e => setTransferData({...transferData, destinationIBAN: e.target.value})}
-                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#80ff80] font-mono focus:outline-none focus:border-[#00ff88]/50"
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono focus:outline-none focus:border-[#ffffff]/50"
                     placeholder="DE89370400440532013000"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm text-[#00ff88] mb-2 block font-bold">
+                <label className="text-sm text-[#ffffff] mb-2 block font-bold">
                   📝 {language === 'es' ? 'Referencia' : 'Reference'}
                 </label>
                 <input
                   type="text"
                   value={transferData.reference}
                   onChange={e => setTransferData({...transferData, reference: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#80ff80] focus:outline-none focus:border-[#00ff88]/50"
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-[#ffffff]/50"
                   placeholder={language === 'es' ? 'Concepto de pago' : 'Payment concept'}
                 />
               </div>
@@ -554,7 +554,7 @@ export function APIDAESModule() {
                 <div className="text-sm font-semibold text-purple-400 mb-3">
                   🔐 {language === 'es' ? 'Credenciales API del Destino (Opcional)' : 'Destination API Credentials (Optional)'}
                 </div>
-                <p className="text-xs text-[#4d7c4d] mb-3">
+                <p className="text-xs text-[#ffffff] mb-3">
                   {language === 'es'
                     ? 'Si el destino requiere autenticación API, ingresa sus credenciales aquí'
                     : 'If destination requires API authentication, enter credentials here'}
@@ -601,19 +601,19 @@ export function APIDAESModule() {
               </div>
 
               {/* Vista Previa */}
-              <div className="bg-gradient-to-r from-cyan-900/20 to-green-900/20 border border-cyan-500/40 rounded-lg p-6">
+              <div className="bg-gradient-to-r from-cyan-900/20 to-white/10/20 border border-cyan-500/40 rounded-lg p-6">
                 <div className="text-sm font-bold text-cyan-400 mb-3">
                   {language === 'es' ? '📊 Resumen de Transferencia' : '📊 Transfer Summary'}
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[#4d7c4d]">{language === 'es' ? 'Monto:' : 'Amount:'}</span>
-                    <span className="text-[#00ff88] font-mono font-bold">
+                    <span className="text-[#ffffff]">{language === 'es' ? 'Monto:' : 'Amount:'}</span>
+                    <span className="text-[#ffffff] font-mono font-bold">
                       {selectedAPI.currency} {transferData.amount.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#4d7c4d]">{language === 'es' ? 'Comisión:' : 'Fee:'}</span>
+                    <span className="text-[#ffffff]">{language === 'es' ? 'Comisión:' : 'Fee:'}</span>
                     <span className="text-yellow-400 font-mono">
                       {selectedAPI.currency} {(transferData.amount * (transferData.urgent ? 0.005 : 0.001)).toLocaleString()}
                     </span>
@@ -632,13 +632,13 @@ export function APIDAESModule() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowTransferModal(false)}
-                className="px-6 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525]"
+                className="px-6 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] rounded-lg hover:bg-[#252525]"
               >
                 {language === 'es' ? 'Cancelar' : 'Cancel'}
               </button>
               <button
                 onClick={handleExecuteTransfer}
-                className="px-6 py-3 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-lg hover:shadow-[0_0_25px_rgba(0,255,136,0.8)]"
+                className="px-6 py-3 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_25px_rgba(255, 255, 255,0.8)]"
               >
                 <Send className="w-5 h-5 inline mr-2" />
                 {language === 'es' ? '🚀 Ejecutar Transferencia' : '🚀 Execute Transfer'}
@@ -668,8 +668,8 @@ export function APIDAESModule() {
             {/* Info Cuenta */}
             <div className="bg-[#0d0d0d] border border-cyan-500/30 rounded-lg p-4 mb-6">
               <div className="text-sm">
-                <span className="text-[#4d7c4d]">{language === 'es' ? 'Cuenta:' : 'Account:'}</span>
-                <div className="text-[#00ff88] font-bold text-lg mt-1">{selectedAPI.accountName}</div>
+                <span className="text-[#ffffff]">{language === 'es' ? 'Cuenta:' : 'Account:'}</span>
+                <div className="text-[#ffffff] font-bold text-lg mt-1">{selectedAPI.accountName}</div>
               </div>
             </div>
 
@@ -717,12 +717,12 @@ export function APIDAESModule() {
                 <div className="text-sm font-semibold text-purple-400 mb-3 flex items-center gap-2">
                   🔌 {language === 'es' ? 'Conectar API Externa' : 'Connect External API'}
                   {selectedAPI?.externalConnected && (
-                    <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
+                    <span className="px-2 py-1 bg-white/20/20 text-white text-xs rounded">
                       ✓ {language === 'es' ? 'CONECTADA' : 'CONNECTED'}
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-[#4d7c4d] mb-3">
+                <p className="text-xs text-[#ffffff] mb-3">
                   {language === 'es'
                     ? 'Conecta con APIs bancarias reales (Stripe, Wise, Plaid, etc.) para ejecutar transferencias'
                     : 'Connect with real banking APIs (Stripe, Wise, Plaid, etc.) to execute transfers'}
@@ -801,7 +801,7 @@ export function APIDAESModule() {
                 <div className="text-sm font-semibold text-cyan-400 mb-3">
                   {language === 'es' ? '🔄 Regenerar API Interna DAES' : '🔄 Regenerate DAES Internal API'}
                 </div>
-                <p className="text-xs text-[#4d7c4d] mb-3">
+                <p className="text-xs text-[#ffffff] mb-3">
                   {language === 'es'
                     ? 'Genera automáticamente un nuevo API ID, Endpoint y API Key de DAES'
                     : 'Automatically generates new DAES API ID, Endpoint and API Key'}
@@ -820,7 +820,7 @@ export function APIDAESModule() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowAPIConfigModal(false)}
-                className="px-6 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#4d7c4d] rounded-lg hover:bg-[#252525]"
+                className="px-6 py-2 bg-[#1a1a1a] border border-[#2a2a2a] text-[#ffffff] rounded-lg hover:bg-[#252525]"
               >
                 {language === 'es' ? 'Cancelar' : 'Cancel'}
               </button>

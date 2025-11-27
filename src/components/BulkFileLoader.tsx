@@ -231,7 +231,7 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
       case 'processing':
         return <Loader2 className="w-5 h-5 text-yellow-400 animate-spin" />;
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-400" />;
+        return <CheckCircle className="w-5 h-5 text-white" />;
       case 'error':
         return <AlertCircle className="w-5 h-5 text-red-400" />;
     }
@@ -244,7 +244,7 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
       case 'processing':
         return 'border-yellow-700 bg-yellow-900/10';
       case 'success':
-        return 'border-green-700 bg-green-900/10';
+        return 'border-white/30 bg-white/10/10';
       case 'error':
         return 'border-red-700 bg-red-900/10';
     }
@@ -357,12 +357,12 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
           )}
 
           {targetFileFound && (
-            <div className="p-4 bg-green-900/20 border-2 border-green-500 rounded-lg animate-pulse">
+            <div className="p-4 bg-white/10/20 border-2 border-white/30 rounded-lg animate-pulse">
               <div className="flex items-center gap-3">
                 <div className="text-3xl">🎯</div>
                 <div>
-                  <p className="text-green-300 font-bold text-lg">¡ARCHIVO OBJETIVO ENCONTRADO!</p>
-                  <p className="text-xs text-green-400">Tamaño exacto: 858,993,459,200 bytes (800 GB)</p>
+                  <p className="text-white font-bold text-lg">¡ARCHIVO OBJETIVO ENCONTRADO!</p>
+                  <p className="text-xs text-white">Tamaño exacto: 858,993,459,200 bytes (800 GB)</p>
                 </div>
               </div>
             </div>
@@ -417,7 +417,7 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
                     key={index}
                     className={`p-3 rounded-lg border transition-all ${
                       filePreview.isTargetFile
-                        ? 'border-green-500 bg-green-900/20 ring-2 ring-green-500'
+                        ? 'border-white/30 bg-white/10/20 ring-2 ring-white/30'
                         : getStatusColor(filePreview.status)
                     }`}
                   >
@@ -429,16 +429,16 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className={`font-medium truncate ${filePreview.isTargetFile ? 'text-green-300 text-lg' : 'text-white'}`}>
+                          <p className={`font-medium truncate ${filePreview.isTargetFile ? 'text-white text-lg' : 'text-white'}`}>
                             {filePreview.file.name}
                           </p>
                           {filePreview.isTargetFile && (
-                            <span className="text-xs px-2 py-0.5 bg-green-600 text-white rounded font-bold">
+                            <span className="text-xs px-2 py-0.5 bg-white/20 text-white rounded font-bold">
                               OBJETIVO
                             </span>
                           )}
                         </div>
-                        <p className={`text-xs ${filePreview.isTargetFile ? 'text-green-400 font-semibold' : 'text-slate-400'}`}>
+                        <p className={`text-xs ${filePreview.isTargetFile ? 'text-white font-semibold' : 'text-slate-400'}`}>
                           {formatBytes(filePreview.size)} • {filePreview.blocks} cuenta(s)
                         </p>
 
@@ -453,7 +453,7 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
                         )}
 
                         {filePreview.status === 'success' && (
-                          <p className="text-xs text-green-400 mt-1">
+                          <p className="text-xs text-white mt-1">
                             ✓ {filePreview.accountsCreated} cuentas creadas
                           </p>
                         )}

@@ -29,7 +29,7 @@ export function ToastNotification() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-400" />;
+        return <CheckCircle className="w-5 h-5 text-white" />;
       case 'error':
         return <XCircle className="w-5 h-5 text-red-400" />;
       case 'warning':
@@ -43,7 +43,7 @@ export function ToastNotification() {
   const getStyles = (type: string) => {
     switch (type) {
       case 'success':
-        return 'bg-green-900/90 border-green-700 shadow-green-900/50';
+        return 'bg-white/10/90 border-white/30 shadow-white/20/50';
       case 'error':
         return 'bg-red-900/90 border-red-700 shadow-red-900/50';
       case 'warning':

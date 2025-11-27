@@ -171,12 +171,12 @@ export function XcpB2BInterface() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETED': return 'text-green-400';
+      case 'COMPLETED': return 'text-white';
       case 'PENDING': return 'text-yellow-400';
-      case 'PROCESSING': return 'text-[#00ff88]';
+      case 'PROCESSING': return 'text-[#ffffff]';
       case 'REJECTED': return 'text-red-400';
       case 'FAILED': return 'text-red-500';
-      default: return 'text-[#80ff80]';
+      default: return 'text-[#ffffff]';
     }
   };
 
@@ -194,55 +194,55 @@ export function XcpB2BInterface() {
   return (
     <div className="flex flex-col h-full bg-black overflow-auto">
       {/* Header con tema homogéneo */}
-      <div className="bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] border-b border-[#00ff88]/20 p-4 sm:p-6 lg:p-8 shadow-[0_0_30px_rgba(0,255,136,0.2)]">
+      <div className="bg-gradient-to-r from-[#0a0a0a] to-[#0d0d0d] border-b border-[#ffffff]/20 p-4 sm:p-6 lg:p-8 shadow-[0_0_30px_rgba(255, 255, 255,0.2)]">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#e0ffe0] mb-2 flex items-center gap-2 sm:gap-3">
-              <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-[#00ff88]" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#ffffff] mb-2 flex items-center gap-2 sm:gap-3">
+              <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-[#ffffff]" />
               <span className="text-cyber">XCP B2B API</span>
             </h1>
-            <p className="text-[#80ff80] text-sm sm:text-base">
+            <p className="text-[#ffffff] text-sm sm:text-base">
               Remesas Internacionales • mTLS • HMAC-SHA256
             </p>
           </div>
-          <Shield className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 text-[#00ff88] opacity-20 hidden sm:block" />
+          <Shield className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 text-[#ffffff] opacity-20 hidden sm:block" />
         </div>
       </div>
 
       <div className="p-3 sm:p-4 lg:p-6 max-w-6xl mx-auto w-full space-y-4 sm:space-y-6">
         {/* Security Features Banner */}
-        <div className="bg-[#0d0d0d] border border-[#00ff88]/20 rounded-xl p-4 sm:p-6 shadow-[0_0_20px_rgba(0,255,136,0.1)]">
-          <h3 className="text-base sm:text-lg font-bold text-[#e0ffe0] mb-4 flex items-center gap-2">
-            <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-[#00ff88]" />
+        <div className="bg-[#0d0d0d] border border-[#ffffff]/20 rounded-xl p-4 sm:p-6 shadow-[0_0_20px_rgba(255, 255, 255,0.1)]">
+          <h3 className="text-base sm:text-lg font-bold text-[#ffffff] mb-4 flex items-center gap-2">
+            <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-[#ffffff]" />
             <span className="text-cyber">Características de Seguridad</span>
           </h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-            <div className="flex items-center gap-2 sm:gap-3 bg-[#00ff88]/5 border border-[#00ff88]/10 rounded-lg p-2 sm:p-3">
-              <Key className="w-6 h-6 sm:w-8 sm:h-8 text-[#00ff88] flex-shrink-0" />
+            <div className="flex items-center gap-2 sm:gap-3 bg-[#ffffff]/5 border border-[#ffffff]/10 rounded-lg p-2 sm:p-3">
+              <Key className="w-6 h-6 sm:w-8 sm:h-8 text-[#ffffff] flex-shrink-0" />
               <div>
-                <div className="text-xs sm:text-sm font-semibold text-[#e0ffe0]">mTLS</div>
-                <div className="text-xs text-[#80ff80]">TLS ≥ 1.2</div>
+                <div className="text-xs sm:text-sm font-semibold text-[#ffffff]">mTLS</div>
+                <div className="text-xs text-[#ffffff]">TLS ≥ 1.2</div>
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 bg-[#00ff88]/5 border border-[#00ff88]/10 rounded-lg p-2 sm:p-3">
-              <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-[#00ff88] flex-shrink-0" />
+            <div className="flex items-center gap-2 sm:gap-3 bg-[#ffffff]/5 border border-[#ffffff]/10 rounded-lg p-2 sm:p-3">
+              <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-[#ffffff] flex-shrink-0" />
               <div>
-                <div className="text-xs sm:text-sm font-semibold text-[#e0ffe0]">HMAC</div>
-                <div className="text-xs text-[#80ff80]">SHA-256</div>
+                <div className="text-xs sm:text-sm font-semibold text-[#ffffff]">HMAC</div>
+                <div className="text-xs text-[#ffffff]">SHA-256</div>
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 bg-[#00ff88]/5 border border-[#00ff88]/10 rounded-lg p-2 sm:p-3">
+            <div className="flex items-center gap-2 sm:gap-3 bg-[#ffffff]/5 border border-[#ffffff]/10 rounded-lg p-2 sm:p-3">
               <Zap className="w-6 h-6 sm:w-8 sm:h-8 text-[#ffa500] flex-shrink-0" />
               <div>
-                <div className="text-xs sm:text-sm font-semibold text-[#e0ffe0]">JWT</div>
-                <div className="text-xs text-[#80ff80]">Bearer Auth</div>
+                <div className="text-xs sm:text-sm font-semibold text-[#ffffff]">JWT</div>
+                <div className="text-xs text-[#ffffff]">Bearer Auth</div>
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 bg-[#00ff88]/5 border border-[#00ff88]/10 rounded-lg p-2 sm:p-3">
-              <Activity className="w-6 h-6 sm:w-8 sm:h-8 text-[#00cc6a] flex-shrink-0" />
+            <div className="flex items-center gap-2 sm:gap-3 bg-[#ffffff]/5 border border-[#ffffff]/10 rounded-lg p-2 sm:p-3">
+              <Activity className="w-6 h-6 sm:w-8 sm:h-8 text-[#e0e0e0] flex-shrink-0" />
               <div>
-                <div className="text-xs sm:text-sm font-semibold text-[#e0ffe0]">Anti-Replay</div>
-                <div className="text-xs text-[#80ff80]">±5 min</div>
+                <div className="text-xs sm:text-sm font-semibold text-[#ffffff]">Anti-Replay</div>
+                <div className="text-xs text-[#ffffff]">±5 min</div>
               </div>
             </div>
           </div>
@@ -261,7 +261,7 @@ export function XcpB2BInterface() {
               disabled={isLoadingToken || hasToken}
               className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
                 hasToken
-                  ? 'bg-green-600 text-white cursor-not-allowed'
+                  ? 'bg-white/20 text-white cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`}
             >
@@ -284,7 +284,7 @@ export function XcpB2BInterface() {
             </button>
 
             {hasToken && (
-              <div className="flex items-center gap-2 text-sm text-green-400">
+              <div className="flex items-center gap-2 text-sm text-white">
                 <CheckCircle className="w-4 h-4" />
                 Token válido por 60 minutos
               </div>
@@ -303,16 +303,16 @@ export function XcpB2BInterface() {
 
         {/* Available Balances */}
         {availableBalances.length > 0 && (
-          <div className="bg-[#0d0d0d] rounded-xl p-6 border border-green-700/30">
+          <div className="bg-[#0d0d0d] rounded-xl p-6 border border-white/30/30">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Database className="w-6 h-6 text-green-400" />
+                <Database className="w-6 h-6 text-white" />
                 <div>
                   <h3 className="text-xl font-bold text-white">Balances Disponibles</h3>
-                  <p className="text-sm text-[#80ff80]">Fondos cargados desde el analizador Digital Commercial Bank Ltd</p>
+                  <p className="text-sm text-[#ffffff]">Fondos cargados desde el analizador Digital Commercial Bank Ltd</p>
                 </div>
               </div>
-              <CheckCircle className="w-6 h-6 text-green-400" />
+              <CheckCircle className="w-6 h-6 text-white" />
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -326,7 +326,7 @@ export function XcpB2BInterface() {
                       isSelected
                         ? 'bg-blue-600/30 border-blue-500 ring-2 ring-blue-400'
                         : isMain
-                        ? 'bg-green-900/20 border-green-600/50 hover:border-green-500'
+                        ? 'bg-white/10/20 border-white/30/50 hover:border-white/30'
                         : 'bg-slate-700/50 border-slate-600 hover:border-slate-500'
                     }`}
                     onClick={() => handleInputChange('currency', balance.currency)}
@@ -335,12 +335,12 @@ export function XcpB2BInterface() {
                       <span className="text-xs font-mono font-bold text-white">
                         {balance.currency}
                       </span>
-                      {isSelected && <CheckCircle className="w-3 h-3 text-[#00ff88]" />}
+                      {isSelected && <CheckCircle className="w-3 h-3 text-[#ffffff]" />}
                     </div>
                     <div className="text-sm font-bold text-white">
                       {formatBalanceCurrency(balance.totalAmount, balance.currency)}
                     </div>
-                    <div className="text-xs text-[#80ff80] mt-1">
+                    <div className="text-xs text-[#ffffff] mt-1">
                       {balance.transactionCount} txns
                     </div>
                   </div>
@@ -373,7 +373,7 @@ export function XcpB2BInterface() {
         {/* Remittance Form */}
         <div className="bg-[#0d0d0d] rounded-xl p-6 border border-[#1a1a1a]">
           <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <Send className="w-6 h-6 text-green-400" />
+            <Send className="w-6 h-6 text-white" />
             {availableBalances.length > 0 ? '3' : '2'}. Crear Remesa Internacional
           </h3>
 
@@ -518,7 +518,7 @@ export function XcpB2BInterface() {
             <button
               type="submit"
               disabled={!hasToken || isSubmitting}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:from-slate-600 disabled:to-slate-700 text-white px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-white/10 to-emerald-600 hover:from-white/20 hover:to-emerald-500 disabled:from-slate-600 disabled:to-slate-700 text-white px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
@@ -539,14 +539,14 @@ export function XcpB2BInterface() {
         {remittanceStatus && (
           <div className="bg-[#0d0d0d] rounded-xl p-6 border border-[#1a1a1a]">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <FileText className="w-6 h-6 text-[#00ff88]" />
+              <FileText className="w-6 h-6 text-[#ffffff]" />
               {availableBalances.length > 0 ? '4' : '3'}. Estado de la Remesa
             </h3>
 
             <div className="bg-slate-700/50 rounded-lg p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-[#80ff80]">ID de Transacción</div>
+                  <div className="text-sm text-[#ffffff]">ID de Transacción</div>
                   <div className="text-lg font-mono font-bold text-white">{remittanceStatus.transactionId}</div>
                 </div>
                 <div className={`flex items-center gap-2 ${getStatusColor(remittanceStatus.status)}`}>
@@ -557,43 +557,43 @@ export function XcpB2BInterface() {
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
-                  <div className="text-sm text-[#80ff80]">Monto</div>
+                  <div className="text-sm text-[#ffffff]">Monto</div>
                   <div className="text-xl font-bold text-white">
                     {remittanceStatus.amount.value.toFixed(2)} {remittanceStatus.amount.currency}
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-sm text-[#80ff80]">Referencia</div>
+                  <div className="text-sm text-[#ffffff]">Referencia</div>
                   <div className="text-lg font-mono text-white">{remittanceStatus.reference || 'N/A'}</div>
                 </div>
 
                 {remittanceStatus.mt103Reference && (
                   <div>
-                    <div className="text-sm text-[#80ff80]">Referencia MT103</div>
-                    <div className="text-lg font-mono text-green-400">{remittanceStatus.mt103Reference}</div>
+                    <div className="text-sm text-[#ffffff]">Referencia MT103</div>
+                    <div className="text-lg font-mono text-white">{remittanceStatus.mt103Reference}</div>
                   </div>
                 )}
 
                 <div>
-                  <div className="text-sm text-[#80ff80]">Creado</div>
+                  <div className="text-sm text-[#ffffff]">Creado</div>
                   <div className="text-sm text-white">{new Date(remittanceStatus.createdAt).toLocaleString()}</div>
                 </div>
 
                 {remittanceStatus.completedAt && (
                   <div>
-                    <div className="text-sm text-[#80ff80]">Completado</div>
+                    <div className="text-sm text-[#ffffff]">Completado</div>
                     <div className="text-sm text-white">{new Date(remittanceStatus.completedAt).toLocaleString()}</div>
                   </div>
                 )}
               </div>
 
               {remittanceStatus.status === 'COMPLETED' && (
-                <div className="mt-4 bg-green-900/20 border border-green-500 rounded-lg p-4 flex items-center gap-3">
-                  <CheckCircle className="w-6 h-6 text-green-400" />
+                <div className="mt-4 bg-white/10/20 border border-white/30 rounded-lg p-4 flex items-center gap-3">
+                  <CheckCircle className="w-6 h-6 text-white" />
                   <div>
-                    <div className="text-green-300 font-semibold">Transferencia Completada</div>
-                    <div className="text-green-400 text-sm">Los fondos han sido transferidos exitosamente</div>
+                    <div className="text-white font-semibold">Transferencia Completada</div>
+                    <div className="text-white text-sm">Los fondos han sido transferidos exitosamente</div>
                   </div>
                 </div>
               )}
@@ -604,14 +604,14 @@ export function XcpB2BInterface() {
         {/* API Documentation Link */}
         <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-xl p-6">
           <div className="flex items-start gap-4">
-            <FileText className="w-12 h-12 text-[#00ff88] flex-shrink-0" />
+            <FileText className="w-12 h-12 text-[#ffffff] flex-shrink-0" />
             <div className="flex-1">
               <h3 className="text-lg font-bold text-white mb-2">Documentación Completa</h3>
               <p className="text-slate-300 text-sm mb-4">
                 Para integración completa del módulo XCP B2B, consulta la documentación en{' '}
-                <code className="bg-[#0d0d0d] px-2 py-1 rounded text-[#00ff88]">src/xcp-b2b/README.md</code>
+                <code className="bg-[#0d0d0d] px-2 py-1 rounded text-[#ffffff]">src/xcp-b2b/README.md</code>
               </p>
-              <div className="text-xs text-[#80ff80] space-y-1">
+              <div className="text-xs text-[#ffffff] space-y-1">
                 <div>• Implementación mTLS con certificados cliente</div>
                 <div>• Firma HMAC-SHA256 de todas las solicitudes</div>
                 <div>• Manejo automático de reintentos con backoff exponencial</div>

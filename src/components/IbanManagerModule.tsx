@@ -503,7 +503,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'bg-green-500/20 text-green-300 border-green-500/40';
+      case 'ACTIVE': return 'bg-white/20/20 text-white border-white/30/40';
       case 'PENDING': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40';
       case 'BLOCKED': return 'bg-red-500/20 text-red-300 border-red-500/40';
       case 'CLOSED': return 'bg-gray-500/20 text-gray-300 border-gray-500/40';
@@ -538,7 +538,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
       <div className="flex flex-col gap-2 mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <CreditCard className="w-8 h-8 text-[#00ff88]" />
+            <CreditCard className="w-8 h-8 text-[#ffffff]" />
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
                 {isSpanish ? 'Gestor de IBANs' : 'IBAN Manager'}
@@ -558,7 +558,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
             </button>
             <button
               onClick={() => setShowAllocateModal(true)}
-              className="flex items-center gap-2 px-6 py-2 bg-[#00ff88]/20 border border-[#00ff88]/40 text-[#00ff88] rounded-xl font-semibold hover:bg-[#00ff88]/30 transition"
+              className="flex items-center gap-2 px-6 py-2 bg-[#ffffff]/20 border border-[#ffffff]/40 text-[#ffffff] rounded-xl font-semibold hover:bg-[#ffffff]/30 transition"
             >
               <Plus className="w-5 h-5" />
               {isSpanish ? 'Emitir IBAN' : 'Issue IBAN'}
@@ -578,10 +578,10 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
         </div>
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-2">
-            <CheckCircle className="w-5 h-5 text-green-300" />
+            <CheckCircle className="w-5 h-5 text-white" />
             <span className="text-sm text-white/60">{isSpanish ? 'Activos' : 'Active'}</span>
           </div>
-          <p className="text-3xl font-bold text-green-300">{stats.active}</p>
+          <p className="text-3xl font-bold text-white">{stats.active}</p>
         </div>
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-2">
@@ -619,7 +619,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
             {ibans.map(iban => (
               <div
                 key={iban.id}
-                className="bg-black/40 border border-white/10 rounded-xl p-5 hover:border-[#00ff88]/30 transition"
+                className="bg-black/40 border border-white/10 rounded-xl p-5 hover:border-[#ffffff]/30 transition"
               >
                 <div className="flex flex-wrap gap-4 justify-between items-start">
                   <div className="flex-1">
@@ -640,7 +640,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       </div>
                       <div>
                         <span className="text-white/50">{isSpanish ? 'Moneda:' : 'Currency:'}</span>
-                        <span className="text-[#00ff88] font-semibold ml-2">{iban.currency}</span>
+                        <span className="text-[#ffffff] font-semibold ml-2">{iban.currency}</span>
                       </div>
                       <div>
                         <span className="text-white/50">{isSpanish ? 'Banco:' : 'Bank:'}</span>
@@ -663,7 +663,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                           setStatusForm({ ...statusForm, newStatus: 'ACTIVE' });
                           setShowStatusModal(true);
                         }}
-                        className="px-4 py-2 rounded-xl bg-green-500/10 border border-green-400/30 text-green-300 text-sm font-semibold hover:bg-green-500/20 transition flex items-center gap-2"
+                        className="px-4 py-2 rounded-xl bg-white/20/10 border border-white/30/30 text-white text-sm font-semibold hover:bg-white/20/20 transition flex items-center gap-2"
                       >
                         <Unlock className="w-4 h-4" />
                         {isSpanish ? 'Activar' : 'Activate'}
@@ -714,9 +714,9 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
       {/* Modal Emitir IBAN */}
       {showAllocateModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowAllocateModal(false)}>
-          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-[#00ff88]/30 rounded-3xl p-6 max-w-2xl w-full" onClick={e => e.stopPropagation()}>
+          <div className="bg-gradient-to-br from-[#0a0f1c] to-[#000] border border-[#ffffff]/30 rounded-3xl p-6 max-w-2xl w-full" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-6">
-              <Plus className="w-6 h-6 text-[#00ff88]" />
+              <Plus className="w-6 h-6 text-[#ffffff]" />
               <h2 className="text-2xl font-bold">
                 {isSpanish ? 'Emitir nuevo IBAN' : 'Issue new IBAN'}
               </h2>
@@ -742,7 +742,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                         : 'USD'
                     });
                   }}
-                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#00ff88]/40"
+                  className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff]/40"
                   required
                 >
                   <option value="">{isSpanish ? '-- Seleccionar cuenta --' : '-- Select account --'}</option>
@@ -764,7 +764,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       </div>
                       <div>
                         <span className="text-white/50">{isSpanish ? 'Moneda:' : 'Currency:'}</span>
-                        <p className="text-[#00ff88]">{selectedCustodyAccount.currency}</p>
+                        <p className="text-[#ffffff]">{selectedCustodyAccount.currency}</p>
                       </div>
                       <div>
                         <span className="text-white/50">{isSpanish ? 'Balance:' : 'Balance:'}</span>
@@ -791,7 +791,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       onClick={() => setAllocateForm({ ...allocateForm, countryCode: country })}
                       className={`px-4 py-3 rounded-xl font-semibold transition ${
                         allocateForm.countryCode === country
-                          ? 'bg-[#00ff88]/20 border-2 border-[#00ff88]/60 text-[#00ff88]'
+                          ? 'bg-[#ffffff]/20 border-2 border-[#ffffff]/60 text-[#ffffff]'
                           : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
                       }`}
                     >
@@ -880,7 +880,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                 <button
                   onClick={handleAllocateIban}
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 bg-[#00ff88]/20 border border-[#00ff88]/60 text-[#00ff88] rounded-xl py-3 font-semibold hover:bg-[#00ff88]/30 transition disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#ffffff]/20 border border-[#ffffff]/60 text-[#ffffff] rounded-xl py-3 font-semibold hover:bg-[#ffffff]/30 transition disabled:opacity-50"
                 >
                   <Plus className="w-5 h-5" />
                   {loading ? (isSpanish ? 'Emitiendo...' : 'Issuing...') : (isSpanish ? 'Emitir IBAN' : 'Issue IBAN')}
@@ -929,7 +929,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       className={`px-4 py-3 rounded-xl font-semibold transition ${
                         statusForm.newStatus === status
                           ? status === 'ACTIVE'
-                            ? 'bg-green-500/20 border-2 border-green-400/60 text-green-300'
+                            ? 'bg-white/20/20 border-2 border-white/30/60 text-white'
                             : status === 'BLOCKED'
                             ? 'bg-orange-500/20 border-2 border-orange-400/60 text-orange-300'
                             : 'bg-gray-500/20 border-2 border-gray-400/60 text-gray-300'
@@ -1017,7 +1017,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                     <div className="flex items-center gap-2 text-sm mt-2">
                       <span className="px-2 py-1 rounded bg-white/10 text-white/70">{log.previousStatus}</span>
                       <span className="text-white/40">→</span>
-                      <span className="px-2 py-1 rounded bg-[#00ff88]/20 text-[#00ff88]">{log.newStatus}</span>
+                      <span className="px-2 py-1 rounded bg-[#ffffff]/20 text-[#ffffff]">{log.newStatus}</span>
                     </div>
                   )}
                 </div>

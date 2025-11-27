@@ -289,9 +289,9 @@ export function APIDAESPledgeModule() {
     return (
       <div className="min-h-screen bg-black text-white p-6">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-gradient-to-br from-green-900/20 to-blue-900/20 border border-green-500/30 rounded-lg p-8">
+          <div className="bg-gradient-to-br from-white/10/20 to-blue-900/20 border border-white/30/30 rounded-lg p-8">
             <div className="flex items-center gap-3 mb-6">
-              <Shield className="w-8 h-8 text-green-400" />
+              <Shield className="w-8 h-8 text-white" />
               <h1 className="text-2xl font-bold">
                 {language === 'es' ? 'API DAES Pledge/Escrow' : 'DAES Pledge/Escrow API'}
               </h1>
@@ -304,7 +304,7 @@ export function APIDAESPledgeModule() {
                   type="text"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full bg-black/50 border border-green-500/30 rounded px-4 py-2 text-white"
+                  className="w-full bg-black/50 border border-white/30/30 rounded px-4 py-2 text-white"
                   placeholder="your-api-key"
                 />
               </div>
@@ -315,7 +315,7 @@ export function APIDAESPledgeModule() {
                   type="password"
                   value={apiSecret}
                   onChange={(e) => setApiSecret(e.target.value)}
-                  className="w-full bg-black/50 border border-green-500/30 rounded px-4 py-2 text-white"
+                  className="w-full bg-black/50 border border-white/30/30 rounded px-4 py-2 text-white"
                   placeholder="your-api-secret"
                 />
               </div>
@@ -326,7 +326,7 @@ export function APIDAESPledgeModule() {
                   type="text"
                   value={baseUrl}
                   onChange={(e) => setBaseUrl(e.target.value)}
-                  className="w-full bg-black/50 border border-green-500/30 rounded px-4 py-2 text-white"
+                  className="w-full bg-black/50 border border-white/30/30 rounded px-4 py-2 text-white"
                   placeholder="https://api.daes.world"
                 />
               </div>
@@ -339,7 +339,7 @@ export function APIDAESPledgeModule() {
 
               <button
                 onClick={handleConfigure}
-                className="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded font-semibold transition-colors"
+                className="w-full bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded font-semibold transition-colors"
               >
                 {language === 'es' ? 'Configurar API' : 'Configure API'}
               </button>
@@ -356,7 +356,7 @@ export function APIDAESPledgeModule() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-green-400" />
+            <Shield className="w-8 h-8 text-white" />
             <h1 className="text-2xl font-bold">
               {language === 'es' ? 'DAES Pledge/Escrow API' : 'DAES Pledge/Escrow API'}
             </h1>
@@ -364,7 +364,7 @@ export function APIDAESPledgeModule() {
           <button
             onClick={loadData}
             disabled={loading}
-            className="flex items-center gap-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 px-4 py-2 rounded transition-colors"
+            className="flex items-center gap-2 bg-white/20/20 hover:bg-white/20/30 border border-white/30/30 px-4 py-2 rounded transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             {language === 'es' ? 'Actualizar' : 'Refresh'}
@@ -383,10 +383,10 @@ export function APIDAESPledgeModule() {
         )}
 
         {success && (
-          <div className="bg-green-500/10 border border-green-500 rounded-lg p-4 mb-6 flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
-            <span className="text-green-400">{success}</span>
-            <button onClick={() => setSuccess(null)} className="ml-auto text-green-400 hover:text-green-300">
+          <div className="bg-white/20/10 border border-white/30 rounded-lg p-4 mb-6 flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-white flex-shrink-0" />
+            <span className="text-white">{success}</span>
+            <button onClick={() => setSuccess(null)} className="ml-auto text-white hover:text-white">
               <XCircle className="w-5 h-5" />
             </button>
           </div>
@@ -407,8 +407,8 @@ export function APIDAESPledgeModule() {
               onClick={() => setSelectedView(tab.id as ViewType)}
               className={`flex items-center gap-2 px-4 py-2 rounded transition-colors whitespace-nowrap ${
                 selectedView === tab.id
-                  ? 'bg-green-600 text-white'
-                  : 'bg-green-600/20 text-green-400 hover:bg-green-600/30'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-white/20/20 text-white hover:bg-white/20/30'
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -422,12 +422,12 @@ export function APIDAESPledgeModule() {
           <div className="space-y-6">
             {/* Reserve Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-green-900/20 to-blue-900/20 border border-green-500/30 rounded-lg p-6">
+              <div className="bg-gradient-to-br from-white/10/20 to-blue-900/20 border border-white/30/30 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-gray-400 text-sm">{language === 'es' ? 'Total Reservas' : 'Total Reserves'}</span>
-                  <Database className="w-5 h-5 text-green-400" />
+                  <Database className="w-5 h-5 text-white" />
                 </div>
-                <div className="text-2xl font-bold text-green-400">${parseFloat(reserveSummary.total_usd).toLocaleString()}</div>
+                <div className="text-2xl font-bold text-white">${parseFloat(reserveSummary.total_usd).toLocaleString()}</div>
               </div>
 
               <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg p-6">
@@ -459,9 +459,9 @@ export function APIDAESPledgeModule() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => setShowPledgeModal(true)}
-                className="bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-lg p-6 text-left transition-colors"
+                className="bg-white/20/20 hover:bg-white/20/30 border border-white/30/30 rounded-lg p-6 text-left transition-colors"
               >
-                <Lock className="w-8 h-8 text-green-400 mb-3" />
+                <Lock className="w-8 h-8 text-white mb-3" />
                 <h3 className="text-lg font-semibold mb-1">{language === 'es' ? 'Crear Pledge' : 'Create Pledge'}</h3>
                 <p className="text-sm text-gray-400">{language === 'es' ? 'Comprometer fondos para VUSD' : 'Commit funds for VUSD'}</p>
               </button>
@@ -488,7 +488,7 @@ export function APIDAESPledgeModule() {
             {/* Recent Activity */}
             <div className="bg-gradient-to-br from-gray-900/50 to-black border border-gray-700 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Activity className="w-5 h-5 text-green-400" />
+                <Activity className="w-5 h-5 text-white" />
                 {language === 'es' ? 'Actividad Reciente' : 'Recent Activity'}
               </h3>
               <div className="space-y-3">
@@ -502,7 +502,7 @@ export function APIDAESPledgeModule() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold text-green-400">${parseFloat(pledge.amount).toLocaleString()} {pledge.currency}</div>
+                      <div className="font-semibold text-white">${parseFloat(pledge.amount).toLocaleString()} {pledge.currency}</div>
                       <div className="text-xs text-gray-400">{pledge.status}</div>
                     </div>
                   </div>
@@ -519,7 +519,7 @@ export function APIDAESPledgeModule() {
               <h2 className="text-xl font-bold">{language === 'es' ? 'Gestión de Pledges' : 'Pledge Management'}</h2>
               <button
                 onClick={() => setShowPledgeModal(true)}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition-colors"
+                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded transition-colors"
               >
                 <Lock className="w-4 h-4" />
                 {language === 'es' ? 'Nuevo Pledge' : 'New Pledge'}
@@ -535,7 +535,7 @@ export function APIDAESPledgeModule() {
                       <div className="text-sm text-gray-400">{pledge.purpose}</div>
                     </div>
                     <div className={`px-3 py-1 rounded text-sm font-semibold ${
-                      pledge.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' :
+                      pledge.status === 'ACTIVE' ? 'bg-white/20/20 text-white' :
                       pledge.status === 'RELEASED' ? 'bg-gray-500/20 text-gray-400' :
                       'bg-yellow-500/20 text-yellow-400'
                     }`}>
@@ -546,7 +546,7 @@ export function APIDAESPledgeModule() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div>
                       <div className="text-xs text-gray-400 mb-1">{language === 'es' ? 'Monto Total' : 'Total Amount'}</div>
-                      <div className="font-semibold text-green-400">${parseFloat(pledge.amount).toLocaleString()} {pledge.currency}</div>
+                      <div className="font-semibold text-white">${parseFloat(pledge.amount).toLocaleString()} {pledge.currency}</div>
                     </div>
                     <div>
                       <div className="text-xs text-gray-400 mb-1">{language === 'es' ? 'Disponible' : 'Available'}</div>
@@ -619,7 +619,7 @@ export function APIDAESPledgeModule() {
                       <div className="text-sm text-gray-400">{payout.external_ref}</div>
                     </div>
                     <div className={`px-3 py-1 rounded text-sm font-semibold ${
-                      payout.state === 'COMPLETED' ? 'bg-green-500/20 text-green-400' :
+                      payout.state === 'COMPLETED' ? 'bg-white/20/20 text-white' :
                       payout.state === 'FAILED' ? 'bg-red-500/20 text-red-400' :
                       payout.state === 'PROCESSING' ? 'bg-blue-500/20 text-blue-400' :
                       'bg-yellow-500/20 text-yellow-400'
@@ -661,7 +661,7 @@ export function APIDAESPledgeModule() {
 
             <div className="bg-gradient-to-br from-gray-900/50 to-black border border-gray-700 rounded-lg p-6">
               <div className="flex items-center gap-3 mb-6">
-                <Shield className="w-8 h-8 text-green-400" />
+                <Shield className="w-8 h-8 text-white" />
                 <div>
                   <h3 className="text-lg font-bold">{language === 'es' ? 'Última Attestación' : 'Latest Attestation'}</h3>
                   <p className="text-sm text-gray-400">{new Date(latestAttestation.timestamp).toLocaleString()}</p>
@@ -671,7 +671,7 @@ export function APIDAESPledgeModule() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <div className="text-sm text-gray-400 mb-2">{language === 'es' ? 'Total Reservas' : 'Total Reserves'}</div>
-                  <div className="text-2xl font-bold text-green-400">${parseFloat(latestAttestation.reserves_total).toLocaleString()}</div>
+                  <div className="text-2xl font-bold text-white">${parseFloat(latestAttestation.reserves_total).toLocaleString()}</div>
                 </div>
                 <div>
                   <div className="text-sm text-gray-400 mb-2">{language === 'es' ? 'Total Pledges' : 'Total Pledges'}</div>
@@ -704,7 +704,7 @@ export function APIDAESPledgeModule() {
                   href={latestAttestation.csv_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 px-4 py-2 rounded transition-colors"
+                  className="flex items-center gap-2 bg-white/20/20 hover:bg-white/20/30 border border-white/30/30 px-4 py-2 rounded transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   {language === 'es' ? 'Descargar CSV' : 'Download CSV'}
@@ -729,12 +729,12 @@ export function APIDAESPledgeModule() {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className={`px-3 py-1 rounded text-xs font-semibold ${
-                        event.delivered ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+                        event.delivered ? 'bg-white/20/20 text-white' : 'bg-yellow-500/20 text-yellow-400'
                       }`}>
                         {event.delivered ? 'Delivered' : `Retry ${event.retry_count}`}
                       </div>
                       {event.delivered ? (
-                        <CheckCircle className="w-5 h-5 text-green-400" />
+                        <CheckCircle className="w-5 h-5 text-white" />
                       ) : (
                         <Clock className="w-5 h-5 text-yellow-400" />
                       )}
@@ -785,7 +785,7 @@ export function APIDAESPledgeModule() {
 
               <button
                 onClick={handleConfigure}
-                className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded transition-colors"
+                className="bg-white/20 hover:bg-white/30 px-6 py-2 rounded transition-colors"
               >
                 {language === 'es' ? 'Guardar Cambios' : 'Save Changes'}
               </button>
@@ -796,7 +796,7 @@ export function APIDAESPledgeModule() {
         {/* Create Pledge Modal */}
         {showPledgeModal && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-            <div className="bg-gradient-to-br from-gray-900 to-black border border-green-500/30 rounded-lg p-6 max-w-md w-full">
+            <div className="bg-gradient-to-br from-gray-900 to-black border border-white/30/30 rounded-lg p-6 max-w-md w-full">
               <h3 className="text-xl font-bold mb-4">{language === 'es' ? 'Crear Nuevo Pledge' : 'Create New Pledge'}</h3>
 
               <form onSubmit={handleCreatePledge} className="space-y-4">
@@ -862,7 +862,7 @@ export function APIDAESPledgeModule() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition-colors disabled:opacity-50"
+                    className="flex-1 bg-white/20 hover:bg-white/30 px-4 py-2 rounded transition-colors disabled:opacity-50"
                   >
                     {loading ? (language === 'es' ? 'Creando...' : 'Creating...') : (language === 'es' ? 'Crear' : 'Create')}
                   </button>
@@ -993,8 +993,8 @@ export function APIDAESPledgeModule() {
                       onClick={() => setAdjustForm({ ...adjustForm, type: 'IN' })}
                       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded transition-colors ${
                         adjustForm.type === 'IN'
-                          ? 'bg-green-600 text-white'
-                          : 'bg-green-600/20 text-green-400 hover:bg-green-600/30'
+                          ? 'bg-white/20 text-white'
+                          : 'bg-white/20/20 text-white hover:bg-white/20/30'
                       }`}
                     >
                       <ArrowUpRight className="w-4 h-4" />

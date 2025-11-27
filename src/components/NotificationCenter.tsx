@@ -38,7 +38,7 @@ export function NotificationCenter() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className="w-5 h-5 text-white" />;
       case 'error':
         return <XCircle className="w-5 h-5 text-red-500" />;
       case 'warning':
@@ -52,7 +52,7 @@ export function NotificationCenter() {
   const getBackgroundColor = (type: string) => {
     switch (type) {
       case 'success':
-        return 'bg-green-900/20 border-green-700/50';
+        return 'bg-white/10/20 border-white/30/50';
       case 'error':
         return 'bg-red-900/20 border-red-700/50';
       case 'warning':
@@ -70,7 +70,7 @@ export function NotificationCenter() {
         className="relative p-2 hover:bg-[#1a1a1a] rounded-lg transition-colors"
         title="Notificaciones"
       >
-        <Bell className="w-5 h-5 text-[#00ff88]" />
+        <Bell className="w-5 h-5 text-[#ffffff]" />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -88,10 +88,10 @@ export function NotificationCenter() {
           <div className="absolute right-0 mt-2 w-96 max-h-[600px] bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg shadow-2xl z-50 flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-[#1a1a1a]">
               <div className="flex items-center gap-2">
-                <Bell className="w-5 h-5 text-[#00ff88]" />
-                <h3 className="text-lg font-bold text-[#e0ffe0]">Notificaciones</h3>
+                <Bell className="w-5 h-5 text-[#ffffff]" />
+                <h3 className="text-lg font-bold text-[#ffffff]">Notificaciones</h3>
                 {unreadCount > 0 && (
-                  <span className="bg-[#00ff88] text-black text-xs font-bold px-2 py-0.5 rounded-full">
+                  <span className="bg-[#ffffff] text-black text-xs font-bold px-2 py-0.5 rounded-full">
                     {unreadCount}
                   </span>
                 )}
@@ -101,7 +101,7 @@ export function NotificationCenter() {
                 onClick={() => setIsOpen(false)}
                 className="p-1 hover:bg-[#1a1a1a] rounded transition-colors"
               >
-                <X className="w-5 h-5 text-[#4d7c4d]" />
+                <X className="w-5 h-5 text-[#ffffff]" />
               </button>
             </div>
 
@@ -109,7 +109,7 @@ export function NotificationCenter() {
               <div className="flex items-center gap-2 p-3 border-b border-[#1a1a1a] bg-[#0d0d0d]">
                 <button
                   onClick={handleMarkAllAsRead}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#1a1a1a] hover:bg-[#252525] text-[#00ff88] rounded transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs bg-[#1a1a1a] hover:bg-[#252525] text-[#ffffff] rounded transition-colors"
                   disabled={unreadCount === 0}
                 >
                   <CheckCheck className="w-4 h-4" />
@@ -130,8 +130,8 @@ export function NotificationCenter() {
               {notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <Bell className="w-12 h-12 text-[#1a1a1a] mb-3" />
-                  <p className="text-[#4d7c4d] font-medium">No hay notificaciones</p>
-                  <p className="text-[#4d7c4d] text-sm mt-1">
+                  <p className="text-[#ffffff] font-medium">No hay notificaciones</p>
+                  <p className="text-[#ffffff] text-sm mt-1">
                     Las notificaciones aparecerán aquí
                   </p>
                 </div>
@@ -152,10 +152,10 @@ export function NotificationCenter() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-semibold text-[#e0ffe0] truncate">
+                              <h4 className="text-sm font-semibold text-[#ffffff] truncate">
                                 {notification.title}
                               </h4>
-                              <p className="text-xs text-[#80ff80] mt-1 line-clamp-2">
+                              <p className="text-xs text-[#ffffff] mt-1 line-clamp-2">
                                 {notification.message}
                               </p>
                             </div>
@@ -164,19 +164,19 @@ export function NotificationCenter() {
                               onClick={() => handleDelete(notification.id)}
                               className="flex-shrink-0 p-1 hover:bg-[#1a1a1a] rounded transition-colors"
                             >
-                              <X className="w-4 h-4 text-[#4d7c4d]" />
+                              <X className="w-4 h-4 text-[#ffffff]" />
                             </button>
                           </div>
 
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-[#4d7c4d]">
+                            <span className="text-xs text-[#ffffff]">
                               {formatNotificationTime(notification.timestamp)}
                             </span>
 
                             {!notification.read && (
                               <button
                                 onClick={() => handleMarkAsRead(notification.id)}
-                                className="flex items-center gap-1 px-2 py-1 text-xs bg-[#00ff88]/10 hover:bg-[#00ff88]/20 text-[#00ff88] rounded transition-colors"
+                                className="flex items-center gap-1 px-2 py-1 text-xs bg-[#ffffff]/10 hover:bg-[#ffffff]/20 text-[#ffffff] rounded transition-colors"
                               >
                                 <Check className="w-3 h-3" />
                                 Marcar leída

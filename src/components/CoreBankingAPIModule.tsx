@@ -158,13 +158,13 @@ export function CoreBankingAPIModule() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#00ff88] flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-[#ffffff] flex items-center gap-3">
             <ArrowRightLeft className="w-8 h-8" />
             CoreBanking API - DeVmindPay
           </h1>
-          <p className="text-[#4d7c4d] mt-2">Integración bancaria REST + Webhook para transferencias Digital Commercial Bank Ltd</p>
+          <p className="text-[#ffffff] mt-2">Integración bancaria REST + Webhook para transferencias Digital Commercial Bank Ltd</p>
           {isConfigured && (
-            <p className="text-xs text-green-400 mt-1">✓ API Configurada y lista</p>
+            <p className="text-xs text-white mt-1">✓ API Configurada y lista</p>
           )}
         </div>
       </div>
@@ -178,73 +178,73 @@ export function CoreBankingAPIModule() {
       )}
       
       {success && (
-        <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-4 flex items-center gap-3">
-          <CheckCircle className="w-5 h-5 text-green-400" />
-          <span className="text-green-300">{success}</span>
+        <div className="bg-white/10/30 border border-white/30/50 rounded-lg p-4 flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-white" />
+          <span className="text-white">{success}</span>
         </div>
       )}
 
       {/* Panel de Configuración */}
       {!isConfigured && (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-[#00ff88] mb-6 flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-[#ffffff] mb-6 flex items-center gap-2">
             <Settings className="w-5 h-5" />
             Configuración de Credenciales API
           </h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-[#4d7c4d] mb-2">🌐 Base URL</label>
+              <label className="block text-sm text-[#ffffff] mb-2">🌐 Base URL</label>
               <input
                 type="text"
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
-                className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#00ff88] font-mono focus:border-[#00ff88]/50 focus:outline-none"
+                className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#ffffff] font-mono focus:border-[#ffffff]/50 focus:outline-none"
                 placeholder="https://banktransfer.devmindgroup.com/a.com"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-[#4d7c4d] mb-2">🔑 API Key</label>
+                <label className="block text-sm text-[#ffffff] mb-2">🔑 API Key</label>
                 <input
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#00ff88] font-mono focus:border-[#00ff88]/50 focus:outline-none"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#ffffff] font-mono focus:border-[#ffffff]/50 focus:outline-none"
                   placeholder="DEVMIND_API_KEY"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-[#4d7c4d] mb-2">🔑 API Auth Key</label>
+                <label className="block text-sm text-[#ffffff] mb-2">🔑 API Auth Key</label>
                 <input
                   type="password"
                   value={apiAuthKey}
                   onChange={(e) => setApiAuthKey(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#00ff88] font-mono focus:border-[#00ff88]/50 focus:outline-none"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#ffffff] font-mono focus:border-[#ffffff]/50 focus:outline-none"
                   placeholder="DEVMIND_API_AUTH_KEY"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-[#4d7c4d] mb-2">🔐 Bearer Token</label>
+                <label className="block text-sm text-[#ffffff] mb-2">🔐 Bearer Token</label>
                 <input
                   type="password"
                   value={bearerToken}
                   onChange={(e) => setBearerToken(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#00ff88] font-mono focus:border-[#00ff88]/50 focus:outline-none"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#ffffff] font-mono focus:border-[#ffffff]/50 focus:outline-none"
                   placeholder="DEVMIND_BEARER_TOKEN"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-[#4d7c4d] mb-2">🛡️ Webhook Secret</label>
+                <label className="block text-sm text-[#ffffff] mb-2">🛡️ Webhook Secret</label>
                 <input
                   type="password"
                   value={webhookSecret}
                   onChange={(e) => setWebhookSecret(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#00ff88] font-mono focus:border-[#00ff88]/50 focus:outline-none"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#ffffff] font-mono focus:border-[#ffffff]/50 focus:outline-none"
                   placeholder="WEBHOOK_SECRET"
                 />
               </div>
@@ -252,7 +252,7 @@ export function CoreBankingAPIModule() {
 
             <button
               onClick={handleConfigure}
-              className="w-full px-6 py-3 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] transition-all"
+              className="w-full px-6 py-3 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(255, 255, 255,0.6)] transition-all"
             >
               <Key className="w-5 h-5 inline mr-2" />
               Configurar Credenciales
@@ -266,7 +266,7 @@ export function CoreBankingAPIModule() {
         <>
           {/* Formulario de Envío */}
           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-            <h2 className="text-xl font-semibold text-[#00ff88] mb-6 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-[#ffffff] mb-6 flex items-center gap-2">
               <Send className="w-5 h-5" />
               Crear Transferencia Bancaria
             </h2>
@@ -294,22 +294,22 @@ export function CoreBankingAPIModule() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-[#4d7c4d] mb-2">💵 Monto</label>
+                <label className="block text-sm text-[#ffffff] mb-2">💵 Monto</label>
                 <input
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#00ff88] font-mono focus:border-[#00ff88]/50 focus:outline-none"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#ffffff] font-mono focus:border-[#ffffff]/50 focus:outline-none"
                   placeholder="5001654208000.00"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-[#4d7c4d] mb-2">💱 Divisa</label>
+                <label className="block text-sm text-[#ffffff] mb-2">💱 Divisa</label>
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#00ff88] focus:border-[#00ff88]/50 focus:outline-none"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#ffffff] focus:border-[#ffffff]/50 focus:outline-none"
                 >
                   <option value="USD">USD - Dólares</option>
                   <option value="EUR">EUR - Euros</option>
@@ -324,23 +324,23 @@ export function CoreBankingAPIModule() {
               </div>
 
               <div>
-                <label className="block text-sm text-[#4d7c4d] mb-2">🏦 Banco Origen</label>
+                <label className="block text-sm text-[#ffffff] mb-2">🏦 Banco Origen</label>
                 <input
                   type="text"
                   value={fromBank}
                   onChange={(e) => setFromBank(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#00ff88] focus:border-[#00ff88]/50 focus:outline-none"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#ffffff] focus:border-[#ffffff]/50 focus:outline-none"
                   placeholder="Deutsche Bank AG"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-[#4d7c4d] mb-2">🏛️ Banco Destino</label>
+                <label className="block text-sm text-[#ffffff] mb-2">🏛️ Banco Destino</label>
                 <input
                   type="text"
                   value={toBank}
                   onChange={(e) => setToBank(e.target.value)}
-                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#00ff88] focus:border-[#00ff88]/50 focus:outline-none"
+                  className="w-full bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg px-4 py-2 text-[#ffffff] focus:border-[#ffffff]/50 focus:outline-none"
                   placeholder="HSBC UK Bank"
                 />
               </div>
@@ -349,7 +349,7 @@ export function CoreBankingAPIModule() {
             <button
               onClick={handleSendTransaction}
               disabled={isSending}
-              className="w-full mt-4 px-6 py-3 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              className="w-full mt-4 px-6 py-3 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_20px_rgba(255, 255, 255,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               {isSending ? (
                 <>
@@ -368,7 +368,7 @@ export function CoreBankingAPIModule() {
           {/* Lista de Transacciones */}
           {transactions.length > 0 && (
             <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-[#00ff88] mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-[#ffffff] mb-6 flex items-center gap-2">
                 <DollarSign className="w-5 h-5" />
                 Transacciones Enviadas ({transactions.length})
               </h2>
@@ -378,7 +378,7 @@ export function CoreBankingAPIModule() {
                   const statusColors = {
                     pending: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/40' },
                     accepted: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/40' },
-                    settled: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/40' },
+                    settled: { bg: 'bg-white/20/20', text: 'text-white', border: 'border-white/30/40' },
                     failed: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/40' },
                     rejected: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/40' },
                   };
@@ -387,7 +387,7 @@ export function CoreBankingAPIModule() {
                   return (
                     <div key={tx.transaction_id} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[#00ff88] font-bold font-mono text-sm">{tx.transaction_id}</span>
+                        <span className="text-[#ffffff] font-bold font-mono text-sm">{tx.transaction_id}</span>
                         <span className={`px-3 py-1 rounded-full text-xs font-bold border ${color.bg} ${color.border} ${color.text}`}>
                           {tx.status.toUpperCase()}
                         </span>
@@ -395,20 +395,20 @@ export function CoreBankingAPIModule() {
 
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
-                          <span className="text-[#4d7c4d]">Monto:</span>
+                          <span className="text-[#ffffff]">Monto:</span>
                           <div className="text-cyan-300 font-bold font-mono">{tx.currency} {parseFloat(tx.amount).toLocaleString()}</div>
                         </div>
                         <div>
-                          <span className="text-[#4d7c4d]">Fecha:</span>
-                          <div className="text-[#80ff80]">{new Date(tx.timestamp).toLocaleString('es-ES')}</div>
+                          <span className="text-[#ffffff]">Fecha:</span>
+                          <div className="text-[#ffffff]">{new Date(tx.timestamp).toLocaleString('es-ES')}</div>
                         </div>
                         <div>
-                          <span className="text-[#4d7c4d]">De:</span>
-                          <div className="text-[#80ff80]">{tx.from_bank}</div>
+                          <span className="text-[#ffffff]">De:</span>
+                          <div className="text-[#ffffff]">{tx.from_bank}</div>
                         </div>
                         <div>
-                          <span className="text-[#4d7c4d]">Para:</span>
-                          <div className="text-[#80ff80]">{tx.to_bank}</div>
+                          <span className="text-[#ffffff]">Para:</span>
+                          <div className="text-[#ffffff]">{tx.to_bank}</div>
                         </div>
                       </div>
 
@@ -423,7 +423,7 @@ export function CoreBankingAPIModule() {
                           </button>
                           <button
                             onClick={() => simulateWebhook(tx.transaction_id, 'settled')}
-                            className="flex-1 px-3 py-1 bg-green-500/20 border border-green-500/40 text-green-300 text-xs rounded hover:bg-green-500/30"
+                            className="flex-1 px-3 py-1 bg-white/20/20 border border-white/30/40 text-white text-xs rounded hover:bg-white/20/30"
                           >
                             ✓ Liquidar
                           </button>
@@ -445,19 +445,19 @@ export function CoreBankingAPIModule() {
           {/* Eventos de Webhook */}
           {webhookEvents.length > 0 && (
             <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-[#00ff88] mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-[#ffffff] mb-6 flex items-center gap-2">
                 <Webhook className="w-5 h-5" />
                 Eventos de Webhook Recibidos ({webhookEvents.length})
               </h2>
 
               <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
                 {webhookEvents.map((evt, i) => (
-                  <div key={i} className="bg-[#0a0a0a] border border-green-500/30 rounded-lg p-3">
+                  <div key={i} className="bg-[#0a0a0a] border border-white/30/30 rounded-lg p-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#4d7c4d]">{new Date(evt.timestamp).toLocaleString('es-ES')}</span>
-                      <Shield className="w-4 h-4 text-green-400" title="Verificado con HMAC" />
+                      <span className="text-xs text-[#ffffff]">{new Date(evt.timestamp).toLocaleString('es-ES')}</span>
+                      <Shield className="w-4 h-4 text-white" title="Verificado con HMAC" />
                     </div>
-                    <div className="text-sm text-green-300 font-mono mt-1">
+                    <div className="text-sm text-white font-mono mt-1">
                       {evt.transaction_id} → {evt.status.toUpperCase()}
                     </div>
                   </div>
@@ -469,7 +469,7 @@ export function CoreBankingAPIModule() {
           {/* Información de Integración */}
           <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-cyan-400 mb-4">🔗 Integración con DAES Digital Commercial Bank Ltd</h3>
-            <div className="space-y-2 text-sm text-[#4d7c4d]">
+            <div className="space-y-2 text-sm text-[#ffffff]">
               <p>✓ Conectado con balanceStore (ve balances disponibles arriba)</p>
               <p>✓ Usa tasas de cambio del sistema</p>
               <p>✓ Logs en consola para depuración</p>
@@ -483,11 +483,11 @@ export function CoreBankingAPIModule() {
       {/* Instrucciones si no está configurado */}
       {!isConfigured && transactions.length === 0 && (
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-12 text-center">
-          <Building2 className="w-16 h-16 text-[#4d7c4d] mx-auto mb-4" />
-          <h3 className="text-xl text-[#4d7c4d] mb-2">CoreBanking API Module</h3>
-          <p className="text-[#4d7c4d] text-sm mb-4">Configura las credenciales para comenzar a usar la API</p>
-          <div className="text-xs text-[#4d7c4d] bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4 text-left max-w-2xl mx-auto">
-            <div className="font-semibold text-[#00ff88] mb-2">📋 Funcionalidades:</div>
+          <Building2 className="w-16 h-16 text-[#ffffff] mx-auto mb-4" />
+          <h3 className="text-xl text-[#ffffff] mb-2">CoreBanking API Module</h3>
+          <p className="text-[#ffffff] text-sm mb-4">Configura las credenciales para comenzar a usar la API</p>
+          <div className="text-xs text-[#ffffff] bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-4 text-left max-w-2xl mx-auto">
+            <div className="font-semibold text-[#ffffff] mb-2">📋 Funcionalidades:</div>
             <ul className="space-y-1">
               <li>• Enviar transferencias bancarias vía API REST</li>
               <li>• Recibir notificaciones por webhook</li>

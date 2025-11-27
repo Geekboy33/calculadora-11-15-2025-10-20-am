@@ -10,20 +10,20 @@
 
 /* Reemplazar verde neón por Slate profesional */
 .bg-\[--00ff88\],
-.bg-\[\#00ff88\],
+.bg-\[\#ffffff\],
 [class*="bg-green-"] {
   background-color: rgb(14 165 233) !important; /* sky-500 */
 }
 
 .text-\[--00ff88\],
-.text-\[\#00ff88\],
-.text-\[\#e0ffe0\],
-[class*="text-green-4"] {
+.text-\[\#ffffff\],
+.text-\[\#ffffff\],
+[class*="text-white"] {
   color: rgb(241 245 249) !important; /* slate-100 */
 }
 
 .border-\[--00ff88\],
-.border-\[\#00ff88\] {
+.border-\[\#ffffff\] {
   border-color: rgb(71 85 105) !important; /* slate-600 */
 }
 

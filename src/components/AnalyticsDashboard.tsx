@@ -54,13 +54,13 @@ export function AnalyticsDashboard() {
 
   const renderKPI = (kpi: KPIData) => {
     const getTrendIcon = () => {
-      if (kpi.trend === 'up') return <TrendingUp className="w-4 h-4 text-green-400" />;
+      if (kpi.trend === 'up') return <TrendingUp className="w-4 h-4 text-white" />;
       if (kpi.trend === 'down') return <TrendingDown className="w-4 h-4 text-red-400" />;
       return <Minus className="w-4 h-4 text-gray-400" />;
     };
 
     const getTrendColor = () => {
-      if (kpi.trend === 'up') return 'text-green-400';
+      if (kpi.trend === 'up') return 'text-white';
       if (kpi.trend === 'down') return 'text-red-400';
       return 'text-gray-400';
     };
@@ -74,17 +74,17 @@ export function AnalyticsDashboard() {
     }
 
     return (
-      <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-6 hover:border-[#00ff88]/30 transition-all">
+      <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-6 hover:border-[#ffffff]/30 transition-all">
         <div className="flex items-start justify-between mb-4">
-          <div className="p-3 bg-[#00ff88]/10 rounded-lg">
-            <Icon className="w-6 h-6 text-[#00ff88]" />
+          <div className="p-3 bg-[#ffffff]/10 rounded-lg">
+            <Icon className="w-6 h-6 text-[#ffffff]" />
           </div>
           {getTrendIcon()}
         </div>
 
         <div className="space-y-1">
-          <div className="text-sm text-[#4d7c4d]">{kpi.label}</div>
-          <div className="text-3xl font-bold text-[#e0ffe0]">{kpi.formatted}</div>
+          <div className="text-sm text-[#ffffff]">{kpi.label}</div>
+          <div className="text-3xl font-bold text-[#ffffff]">{kpi.formatted}</div>
           <div className={`text-sm font-semibold ${getTrendColor()}`}>
             {kpi.changeFormatted} vs semana anterior
           </div>
@@ -97,8 +97,8 @@ export function AnalyticsDashboard() {
     return (
       <div className="h-full flex items-center justify-center bg-black">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00ff88] mb-4"></div>
-          <p className="text-[#00ff88] text-lg font-semibold">Cargando Analytics...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffffff] mb-4"></div>
+          <p className="text-[#ffffff] text-lg font-semibold">Cargando Analytics...</p>
         </div>
       </div>
     );
@@ -112,10 +112,10 @@ export function AnalyticsDashboard() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#e0ffe0] mb-2">
+            <h1 className="text-3xl font-bold text-[#ffffff] mb-2">
               {isSpanish ? 'Dashboard Analytics' : 'Analytics Dashboard'}
             </h1>
-            <p className="text-[#80ff80]">
+            <p className="text-[#ffffff]">
               {isSpanish ? 'Última actualización:' : 'Last update:'} {new Date(analytics.lastUpdated).toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
             </p>
           </div>
@@ -124,7 +124,7 @@ export function AnalyticsDashboard() {
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg text-[#00ff88] hover:border-[#00ff88] transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg text-[#ffffff] hover:border-[#ffffff] transition-all disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               {isSpanish ? 'Actualizar' : 'Refresh'}
@@ -132,7 +132,7 @@ export function AnalyticsDashboard() {
 
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-[#00ff88] text-black rounded-lg hover:bg-[#00cc6a] transition-all font-semibold"
+              className="flex items-center gap-2 px-4 py-2 bg-[#ffffff] text-black rounded-lg hover:bg-[#e0e0e0] transition-all font-semibold"
             >
               <Download className="w-4 h-4" />
               {isSpanish ? 'Exportar' : 'Export'}
@@ -154,7 +154,7 @@ export function AnalyticsDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Volume Over Time */}
           <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-6">
-            <h3 className="text-xl font-bold text-[#e0ffe0] mb-6">Volumen en el Tiempo (30 días)</h3>
+            <h3 className="text-xl font-bold text-[#ffffff] mb-6">Volumen en el Tiempo (30 días)</h3>
             {analytics.charts.volumeOverTime.length > 0 ? (
             <div className="h-64 flex items-end justify-between gap-2">
               {analytics.charts.volumeOverTime.slice(-15).map((point, index) => {
@@ -164,11 +164,11 @@ export function AnalyticsDashboard() {
                 return (
                   <div key={index} className="flex-1 flex flex-col items-center gap-2">
                     <div
-                      className="w-full bg-gradient-to-t from-[#00ff88] to-[#00cc6a] rounded-t transition-all hover:from-[#00cc6a] hover:to-[#00aa55] cursor-pointer"
+                      className="w-full bg-gradient-to-t from-[#ffffff] to-[#e0e0e0] rounded-t transition-all hover:from-[#e0e0e0] hover:to-[#e0e0e0] cursor-pointer"
                       style={{ height: `${height}%` }}
                       title={`${point.label}: ${point.value?.toLocaleString() ?? '0'}`}
                     />
-                    <div className="text-xs text-[#4d7c4d] rotate-45 origin-left whitespace-nowrap">
+                    <div className="text-xs text-[#ffffff] rotate-45 origin-left whitespace-nowrap">
                       {point.label}
                     </div>
                   </div>
@@ -177,21 +177,21 @@ export function AnalyticsDashboard() {
             </div>
             ) : (
               <div className="h-64 flex items-center justify-center">
-                <p className="text-[#4d7c4d]">No hay datos disponibles</p>
+                <p className="text-[#ffffff]">No hay datos disponibles</p>
               </div>
             )}
           </div>
 
           {/* Currency Distribution */}
           <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-6">
-            <h3 className="text-xl font-bold text-[#e0ffe0] mb-6">Distribución por Divisa</h3>
+            <h3 className="text-xl font-bold text-[#ffffff] mb-6">Distribución por Divisa</h3>
             {analytics.charts.currencyDistribution.length > 0 ? (
             <div className="space-y-4">
               {analytics.charts.currencyDistribution.slice(0, 8).map((dist, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-[#e0ffe0] font-semibold">{dist.currency}</span>
-                    <span className="text-[#80ff80]">{dist.percentage.toFixed(1)}%</span>
+                    <span className="text-[#ffffff] font-semibold">{dist.currency}</span>
+                    <span className="text-[#ffffff]">{dist.percentage.toFixed(1)}%</span>
                   </div>
                   <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
                     <div
@@ -207,7 +207,7 @@ export function AnalyticsDashboard() {
             </div>
             ) : (
               <div className="h-64 flex items-center justify-center">
-                <p className="text-[#4d7c4d]">No hay datos disponibles</p>
+                <p className="text-[#ffffff]">No hay datos disponibles</p>
               </div>
             )}
           </div>
@@ -217,7 +217,7 @@ export function AnalyticsDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Transaction Trends */}
           <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-6">
-            <h3 className="text-xl font-bold text-[#e0ffe0] mb-6">Tendencia de Transacciones (7 días)</h3>
+            <h3 className="text-xl font-bold text-[#ffffff] mb-6">Tendencia de Transacciones (7 días)</h3>
             <div className="h-48 flex items-end justify-between gap-3">
               {analytics.charts.transactionTrends.map((point, index) => {
                 const maxValue = Math.max(...analytics.charts.transactionTrends.map(p => p.value ?? 0).filter(v => v > 0), 1);
@@ -225,13 +225,13 @@ export function AnalyticsDashboard() {
 
                 return (
                   <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                    <div className="text-sm font-bold text-[#00ff88]">{point.value ?? 0}</div>
+                    <div className="text-sm font-bold text-[#ffffff]">{point.value ?? 0}</div>
                     <div
                       className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t transition-all hover:from-blue-400 hover:to-blue-300 cursor-pointer"
                       style={{ height: `${height}%` }}
                       title={`${point.label}: ${point.value ?? 0} transacciones`}
                     />
-                    <div className="text-xs text-[#4d7c4d]">{point.label}</div>
+                    <div className="text-xs text-[#ffffff]">{point.label}</div>
                   </div>
                 );
               })}
@@ -240,7 +240,7 @@ export function AnalyticsDashboard() {
 
           {/* Top Currencies */}
           <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-6">
-            <h3 className="text-xl font-bold text-[#e0ffe0] mb-6">Top 5 Divisas por Volumen</h3>
+            <h3 className="text-xl font-bold text-[#ffffff] mb-6">Top 5 Divisas por Volumen</h3>
             <div className="space-y-4">
               {analytics.charts.topCurrencies.map((item, index) => {
                 const maxValue = analytics.charts.topCurrencies[0]?.value ?? 1;
@@ -248,20 +248,20 @@ export function AnalyticsDashboard() {
 
                 return (
                   <div key={index} className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#00ff88]/10 border border-[#00ff88]/30">
-                      <span className="text-lg font-bold text-[#00ff88]">#{index + 1}</span>
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#ffffff]/10 border border-[#ffffff]/30">
+                      <span className="text-lg font-bold text-[#ffffff]">#{index + 1}</span>
                     </div>
 
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-[#e0ffe0] font-bold">{item.currency}</span>
-                        <span className="text-[#80ff80]">
+                        <span className="text-[#ffffff] font-bold">{item.currency}</span>
+                        <span className="text-[#ffffff]">
                           ${item.value?.toLocaleString() ?? '0'}
                         </span>
                       </div>
                       <div className="h-2 bg-[#1a1a1a] rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-[#00ff88] to-[#00cc6a] rounded-full transition-all"
+                          className="h-full bg-gradient-to-r from-[#ffffff] to-[#e0e0e0] rounded-full transition-all"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
@@ -275,25 +275,25 @@ export function AnalyticsDashboard() {
 
         {/* Comparisons */}
         <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-6">
-          <h3 className="text-xl font-bold text-[#e0ffe0] mb-6">Comparaciones de Periodo</h3>
+          <h3 className="text-xl font-bold text-[#ffffff] mb-6">Comparaciones de Periodo</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center p-4 bg-[#0d0d0d] rounded-lg">
-              <div className="text-[#4d7c4d] text-sm mb-2">vs Semana Anterior</div>
-              <div className={`text-3xl font-bold ${analytics.comparisons.vsLastWeek >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="text-[#ffffff] text-sm mb-2">vs Semana Anterior</div>
+              <div className={`text-3xl font-bold ${analytics.comparisons.vsLastWeek >= 0 ? 'text-white' : 'text-red-400'}`}>
                 {analytics.comparisons.vsLastWeek >= 0 ? '+' : ''}{analytics.comparisons.vsLastWeek.toFixed(1)}%
               </div>
             </div>
 
             <div className="text-center p-4 bg-[#0d0d0d] rounded-lg">
-              <div className="text-[#4d7c4d] text-sm mb-2">vs Mes Anterior</div>
-              <div className={`text-3xl font-bold ${analytics.comparisons.vsLastMonth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="text-[#ffffff] text-sm mb-2">vs Mes Anterior</div>
+              <div className={`text-3xl font-bold ${analytics.comparisons.vsLastMonth >= 0 ? 'text-white' : 'text-red-400'}`}>
                 {analytics.comparisons.vsLastMonth >= 0 ? '+' : ''}{analytics.comparisons.vsLastMonth.toFixed(1)}%
               </div>
             </div>
 
             <div className="text-center p-4 bg-[#0d0d0d] rounded-lg">
-              <div className="text-[#4d7c4d] text-sm mb-2">vs Año Anterior</div>
-              <div className={`text-3xl font-bold ${analytics.comparisons.vsLastYear >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="text-[#ffffff] text-sm mb-2">vs Año Anterior</div>
+              <div className={`text-3xl font-bold ${analytics.comparisons.vsLastYear >= 0 ? 'text-white' : 'text-red-400'}`}>
                 {analytics.comparisons.vsLastYear >= 0 ? '+' : ''}{analytics.comparisons.vsLastYear.toFixed(1)}%
               </div>
             </div>

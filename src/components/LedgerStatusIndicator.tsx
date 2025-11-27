@@ -31,7 +31,7 @@ export function LedgerStatusIndicator({ onLoadFile, showFullDetails = false }: L
   const getStatusColor = () => {
     if (!status.isLoaded) return 'text-red-400 border-red-500 bg-red-500/10';
     if (status.isProcessing) return 'text-yellow-400 border-yellow-500 bg-yellow-500/10';
-    if (status.isComplete) return 'text-green-400 border-green-500 bg-green-500/10';
+    if (status.isComplete) return 'text-white border-white/30 bg-white/20/10';
     return 'text-orange-400 border-orange-500 bg-orange-500/10';
   };
 
@@ -119,7 +119,7 @@ export function LedgerStatusIndicator({ onLoadFile, showFullDetails = false }: L
                   </div>
                   <div className="h-2 bg-black/50 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-yellow-500 to-green-500 transition-all duration-300"
+                      className="h-full bg-gradient-to-r from-yellow-500 to-white/20 transition-all duration-300"
                       style={{ width: `${status.progress}%` }}
                     />
                   </div>
@@ -130,10 +130,10 @@ export function LedgerStatusIndicator({ onLoadFile, showFullDetails = false }: L
               {status.balancesCount > 0 && (
                 <div className="bg-black/30 rounded-lg p-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-green-300/60">
+                    <span className="text-xs text-white/60">
                       {isSpanish ? 'Balances Cargados:' : 'Loaded Balances:'}
                     </span>
-                    <span className="text-lg text-green-300 font-bold">
+                    <span className="text-lg text-white font-bold">
                       {status.balancesCount}
                     </span>
                   </div>
@@ -142,8 +142,8 @@ export function LedgerStatusIndicator({ onLoadFile, showFullDetails = false }: L
 
               {/* Estado de Completado */}
               {status.isComplete && (
-                <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-green-300">
+                <div className="bg-white/10/30 border border-white/30/30 rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-white">
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-sm font-semibold">
                       {isSpanish 

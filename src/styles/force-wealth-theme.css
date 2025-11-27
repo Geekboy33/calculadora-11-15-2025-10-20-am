@@ -83,16 +83,16 @@ html {
    ACCENT COLORS - Wealth
    ═══════════════════════════════════════════════════════════════ */
 
-/* Verde Profit - #6EE7B7 */
+/* Verde Profit - #ffffff */
 [class*="text-emerald-400"],
-[class*="text-green-400"],
+[class*="text-white"],
 .text-emerald-400 {
-  color: #6EE7B7 !important;
+  color: #ffffff !important;
 }
 
 [class*="bg-emerald-500"],
 .bg-emerald-500 {
-  background-color: #6EE7B7 !important;
+  background-color: #ffffff !important;
 }
 
 /* Oro - #F5D576 */

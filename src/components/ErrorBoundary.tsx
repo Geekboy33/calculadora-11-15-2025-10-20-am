@@ -112,7 +112,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="flex gap-3">
                 <button
                   onClick={this.handleReset}
-                  className="flex-1 px-6 py-4 bg-gradient-to-r from-[#00ff88] to-[#00cc6a] text-black rounded-lg font-bold flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(0,255,136,0.6)] transition-all"
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-[#ffffff] to-[#e0e0e0] text-black rounded-lg font-bold flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(255, 255, 255,0.6)] transition-all"
                 >
                   <RefreshCw className="w-5 h-5" />
                   Reiniciar Aplicación
@@ -126,7 +126,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </a>
               </div>
 
-              <div className="mt-6 text-center text-[#4d7c4d] text-sm">
+              <div className="mt-6 text-center text-[#ffffff] text-sm">
                 <p>Si el problema persiste, contacta al administrador del sistema.</p>
                 <p className="mt-2 font-mono text-xs">
                   Error ID: {Date.now().toString(36).toUpperCase()}

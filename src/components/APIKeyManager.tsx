@@ -143,12 +143,12 @@ export function APIKeyManager() {
         )}
 
         {newKeyResult && (
-          <div className="p-6 bg-green-900/20 border-b border-green-700">
+          <div className="p-6 bg-white/10/20 border-b border-white/30">
             <div className="flex items-start gap-3 mb-4">
-              <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-green-300 mb-1">API Key Created</h3>
-                <p className="text-sm text-green-400">
+                <h3 className="text-lg font-semibold text-white mb-1">API Key Created</h3>
+                <p className="text-sm text-white">
                   Save these credentials now. The secret will not be shown again.
                 </p>
               </div>
@@ -171,7 +171,7 @@ export function APIKeyManager() {
                     className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
                   >
                     {copiedField === 'public' ? (
-                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <CheckCircle className="w-5 h-5 text-white" />
                     ) : (
                       <Copy className="w-5 h-5 text-slate-400" />
                     )}
@@ -195,7 +195,7 @@ export function APIKeyManager() {
                     className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
                   >
                     {copiedField === 'secret' ? (
-                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <CheckCircle className="w-5 h-5 text-white" />
                     ) : (
                       <Copy className="w-5 h-5 text-slate-400" />
                     )}
@@ -235,7 +235,7 @@ export function APIKeyManager() {
                         <span className="font-mono text-sm text-white">{apiKey.publicKey}</span>
                         <span className={`text-xs px-2 py-0.5 rounded ${
                           apiKey.active
-                            ? 'bg-green-900 text-green-300'
+                            ? 'bg-white/10 text-white'
                             : 'bg-red-900 text-red-300'
                         }`}>
                           {apiKey.active ? 'Active' : 'Revoked'}
@@ -255,7 +255,7 @@ export function APIKeyManager() {
                         className="p-2 hover:bg-slate-600 rounded transition-colors"
                       >
                         {copiedField === `key-${apiKey.id}` ? (
-                          <CheckCircle className="w-4 h-4 text-green-400" />
+                          <CheckCircle className="w-4 h-4 text-white" />
                         ) : (
                           <Copy className="w-4 h-4 text-slate-400" />
                         )}

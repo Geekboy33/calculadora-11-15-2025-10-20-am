@@ -815,7 +815,7 @@ export function APIDigitalModule() {
       case 'APPROVED':
       case 'ACSC':
       case 'ACTIVE':
-        return 'bg-green-500/20 text-green-400 border border-green-500/30';
+        return 'bg-white/20/20 text-white border border-white/30/30';
       case 'PENDING':
       case 'ACCP':
       case 'ACTC':
@@ -870,7 +870,7 @@ export function APIDigitalModule() {
         {/* Status Bar */}
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isAuthenticated ? 'bg-green-500' : 'bg-red-500'}`} />
+            <div className={`w-2 h-2 rounded-full ${isAuthenticated ? 'bg-white/20' : 'bg-red-500'}`} />
             <span className="text-gray-400">
               Status: {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
             </span>
@@ -901,13 +901,13 @@ export function APIDigitalModule() {
       )}
 
       {success && (
-        <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-start gap-3">
-          <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+        <div className="mb-6 p-4 bg-white/20/10 border border-white/30/30 rounded-lg flex items-start gap-3">
+          <CheckCircle className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <div className="font-semibold text-green-400">Success</div>
-            <div className="text-green-300 text-sm whitespace-pre-wrap">{success}</div>
+            <div className="font-semibold text-white">Success</div>
+            <div className="text-white text-sm whitespace-pre-wrap">{success}</div>
           </div>
-          <button onClick={() => setSuccess(null)} className="text-green-400 hover:text-green-300">
+          <button onClick={() => setSuccess(null)} className="text-white hover:text-white">
             ✕
           </button>
         </div>
@@ -919,7 +919,7 @@ export function APIDigitalModule() {
           onClick={() => setActiveTab('auth')}
           className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap ${
             activeTab === 'auth'
-              ? 'bg-[#00ff88] text-black font-semibold'
+              ? 'bg-[#ffffff] text-black font-semibold'
               : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
           }`}
         >
@@ -931,7 +931,7 @@ export function APIDigitalModule() {
           disabled={!isAuthenticated}
           className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap ${
             activeTab === 'domestic'
-              ? 'bg-[#00ff88] text-black font-semibold'
+              ? 'bg-[#ffffff] text-black font-semibold'
               : isAuthenticated
               ? 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               : 'bg-gray-900 text-gray-600 cursor-not-allowed'
@@ -945,7 +945,7 @@ export function APIDigitalModule() {
           disabled={!isAuthenticated}
           className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap ${
             activeTab === 'international'
-              ? 'bg-[#00ff88] text-black font-semibold'
+              ? 'bg-[#ffffff] text-black font-semibold'
               : isAuthenticated
               ? 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               : 'bg-gray-900 text-gray-600 cursor-not-allowed'
@@ -959,7 +959,7 @@ export function APIDigitalModule() {
           disabled={!isAuthenticated}
           className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap ${
             activeTab === 'scheduled'
-              ? 'bg-[#00ff88] text-black font-semibold'
+              ? 'bg-[#ffffff] text-black font-semibold'
               : isAuthenticated
               ? 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               : 'bg-gray-900 text-gray-600 cursor-not-allowed'
@@ -973,7 +973,7 @@ export function APIDigitalModule() {
           disabled={!isAuthenticated}
           className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap ${
             activeTab === 'beneficiaries'
-              ? 'bg-[#00ff88] text-black font-semibold'
+              ? 'bg-[#ffffff] text-black font-semibold'
               : isAuthenticated
               ? 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               : 'bg-gray-900 text-gray-600 cursor-not-allowed'
@@ -987,7 +987,7 @@ export function APIDigitalModule() {
           disabled={!isAuthenticated}
           className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap ${
             activeTab === 'fx'
-              ? 'bg-[#00ff88] text-black font-semibold'
+              ? 'bg-[#ffffff] text-black font-semibold'
               : isAuthenticated
               ? 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               : 'bg-gray-900 text-gray-600 cursor-not-allowed'
@@ -1001,7 +1001,7 @@ export function APIDigitalModule() {
           disabled={!isAuthenticated}
           className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors whitespace-nowrap ${
             activeTab === 'server'
-              ? 'bg-[#00ff88] text-black font-semibold'
+              ? 'bg-[#ffffff] text-black font-semibold'
               : isAuthenticated
               ? 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               : 'bg-gray-900 text-gray-600 cursor-not-allowed'
@@ -1033,7 +1033,7 @@ export function APIDigitalModule() {
                       type="email"
                       value={authCredentials.email}
                       onChange={(e) => setAuthCredentials({ ...authCredentials, email: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       placeholder="partner@yourcompany.com"
                     />
                   </div>
@@ -1046,7 +1046,7 @@ export function APIDigitalModule() {
                       type="password"
                       value={authCredentials.password}
                       onChange={(e) => setAuthCredentials({ ...authCredentials, password: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       placeholder="your-secure-password"
                     />
                   </div>
@@ -1054,7 +1054,7 @@ export function APIDigitalModule() {
                   <button
                     onClick={handleLogin}
                     disabled={loading}
-                    className="w-full px-6 py-3 bg-[#00ff88] text-black font-bold rounded-lg hover:bg-[#00cc6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full px-6 py-3 bg-[#ffffff] text-black font-bold rounded-lg hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <>
@@ -1077,8 +1077,8 @@ export function APIDigitalModule() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                    <div className="flex items-center gap-2 text-green-400 mb-2">
+                  <div className="p-4 bg-white/20/10 border border-white/30/30 rounded-lg">
+                    <div className="flex items-center gap-2 text-white mb-2">
                       <CheckCircle className="w-5 h-5" />
                       <strong>Authenticated Successfully</strong>
                     </div>
@@ -1159,7 +1159,7 @@ export function APIDigitalModule() {
                     type="text"
                     value={domesticTransfer.from_account_number}
                     onChange={(e) => setDomesticTransfer({ ...domesticTransfer, from_account_number: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="GB82CRPO00123400012345678"
                   />
                 </div>
@@ -1172,7 +1172,7 @@ export function APIDigitalModule() {
                     type="text"
                     value={domesticTransfer.to_account_number}
                     onChange={(e) => setDomesticTransfer({ ...domesticTransfer, to_account_number: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="GB82CRPO00123400087654321"
                   />
                 </div>
@@ -1185,7 +1185,7 @@ export function APIDigitalModule() {
                     type="number"
                     value={domesticTransfer.amount || ''}
                     onChange={(e) => setDomesticTransfer({ ...domesticTransfer, amount: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="1500.00"
                     step="0.01"
                   />
@@ -1198,7 +1198,7 @@ export function APIDigitalModule() {
                   <select
                     value={domesticTransfer.currency}
                     onChange={(e) => setDomesticTransfer({ ...domesticTransfer, currency: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                   >
                     <option value="USD">USD</option>
                     <option value="EUR">EUR</option>
@@ -1215,7 +1215,7 @@ export function APIDigitalModule() {
                     type="text"
                     value={domesticTransfer.description}
                     onChange={(e) => setDomesticTransfer({ ...domesticTransfer, description: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="Invoice #INV-2024-001"
                   />
                 </div>
@@ -1224,7 +1224,7 @@ export function APIDigitalModule() {
               <button
                 onClick={handleCreateDomesticTransfer}
                 disabled={loading}
-                className="w-full px-6 py-3 bg-[#00ff88] text-black font-bold rounded-lg hover:bg-[#00cc6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-[#ffffff] text-black font-bold rounded-lg hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -1253,11 +1253,11 @@ export function APIDigitalModule() {
                   {domesticTransfers.map((transfer) => (
                     <div
                       key={transfer.id}
-                      className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 hover:border-[#00ff88]/50 transition-colors"
+                      className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 hover:border-[#ffffff]/50 transition-colors"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <div className="font-mono text-sm text-[#00ff88] mb-1">
+                          <div className="font-mono text-sm text-[#ffffff] mb-1">
                             Transfer #{transfer.id}
                           </div>
                           <div className="text-xs text-gray-400">
@@ -1280,7 +1280,7 @@ export function APIDigitalModule() {
                         </div>
                         <div>
                           <div className="text-gray-400 text-xs mb-1">Amount</div>
-                          <div className="text-[#00ff88] font-bold">
+                          <div className="text-[#ffffff] font-bold">
                             {transfer.currency} {transfer.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -1322,7 +1322,7 @@ export function APIDigitalModule() {
                     type="number"
                     value={iso20022Payment.debtorAccountId || ''}
                     onChange={(e) => setISO20022Payment({ ...iso20022Payment, debtorAccountId: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="12345"
                   />
                 </div>
@@ -1335,7 +1335,7 @@ export function APIDigitalModule() {
                     type="date"
                     value={iso20022Payment.requestedExecutionDate}
                     onChange={(e) => setISO20022Payment({ ...iso20022Payment, requestedExecutionDate: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                   />
                 </div>
 
@@ -1346,7 +1346,7 @@ export function APIDigitalModule() {
                   <select
                     value={iso20022Payment.chargeBearer}
                     onChange={(e) => setISO20022Payment({ ...iso20022Payment, chargeBearer: e.target.value as any })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                   >
                     <option value="SHAR">SHAR - Shared</option>
                     <option value="DEBT">DEBT - Debtor pays all</option>
@@ -1369,7 +1369,7 @@ export function APIDigitalModule() {
                       type="text"
                       value={newCreditTransfer.creditorName}
                       onChange={(e) => setNewCreditTransfer({ ...newCreditTransfer, creditorName: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       placeholder="Acme Corporation SARL"
                     />
                   </div>
@@ -1382,7 +1382,7 @@ export function APIDigitalModule() {
                       type="text"
                       value={newCreditTransfer.creditorIban}
                       onChange={(e) => setNewCreditTransfer({ ...newCreditTransfer, creditorIban: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       placeholder="FR7630006000011234567890189"
                     />
                   </div>
@@ -1395,7 +1395,7 @@ export function APIDigitalModule() {
                       type="text"
                       value={newCreditTransfer.creditorBic}
                       onChange={(e) => setNewCreditTransfer({ ...newCreditTransfer, creditorBic: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       placeholder="BNPAFRPP"
                     />
                   </div>
@@ -1408,7 +1408,7 @@ export function APIDigitalModule() {
                       type="text"
                       value={newCreditTransfer.creditorBankName}
                       onChange={(e) => setNewCreditTransfer({ ...newCreditTransfer, creditorBankName: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       placeholder="BNP Paribas"
                     />
                   </div>
@@ -1421,7 +1421,7 @@ export function APIDigitalModule() {
                       type="number"
                       value={newCreditTransfer.amount || ''}
                       onChange={(e) => setNewCreditTransfer({ ...newCreditTransfer, amount: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       placeholder="5000.00"
                       step="0.01"
                     />
@@ -1434,7 +1434,7 @@ export function APIDigitalModule() {
                     <select
                       value={newCreditTransfer.currency}
                       onChange={(e) => setNewCreditTransfer({ ...newCreditTransfer, currency: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     >
                       <option value="EUR">EUR</option>
                       <option value="USD">USD</option>
@@ -1452,7 +1452,7 @@ export function APIDigitalModule() {
                       type="text"
                       value={newCreditTransfer.creditorCountry}
                       onChange={(e) => setNewCreditTransfer({ ...newCreditTransfer, creditorCountry: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       placeholder="FR"
                       maxLength={2}
                     />
@@ -1465,7 +1465,7 @@ export function APIDigitalModule() {
                     <select
                       value={newCreditTransfer.purposeCode}
                       onChange={(e) => setNewCreditTransfer({ ...newCreditTransfer, purposeCode: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     >
                       <option value="SUPP">SUPP - Supplier Payment</option>
                       <option value="SALA">SALA - Salary</option>
@@ -1483,7 +1483,7 @@ export function APIDigitalModule() {
                       type="text"
                       value={newCreditTransfer.creditorAddress}
                       onChange={(e) => setNewCreditTransfer({ ...newCreditTransfer, creditorAddress: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       placeholder="15 Avenue des Champs-Élysées, 75008 Paris, France"
                     />
                   </div>
@@ -1496,7 +1496,7 @@ export function APIDigitalModule() {
                       type="text"
                       value={newCreditTransfer.remittanceInfo}
                       onChange={(e) => setNewCreditTransfer({ ...newCreditTransfer, remittanceInfo: e.target.value })}
-                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                      className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       placeholder="Invoice #INV-FR-2024-042"
                     />
                   </div>
@@ -1526,7 +1526,7 @@ export function APIDigitalModule() {
                         <div className="flex-1">
                           <div className="text-white font-semibold">{ct.creditorName}</div>
                           <div className="text-xs text-gray-400 font-mono">{ct.creditorIban}</div>
-                          <div className="text-[#00ff88] text-sm mt-1">
+                          <div className="text-[#ffffff] text-sm mt-1">
                             {ct.currency} {ct.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -1552,7 +1552,7 @@ export function APIDigitalModule() {
               <button
                 onClick={handleCreateISO20022Payment}
                 disabled={loading || iso20022Payment.creditTransfers.length === 0}
-                className="w-full px-6 py-3 bg-[#00ff88] text-black font-bold rounded-lg hover:bg-[#00cc6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-[#ffffff] text-black font-bold rounded-lg hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -1581,11 +1581,11 @@ export function APIDigitalModule() {
                   {internationalPayments.map((payment) => (
                     <div
                       key={payment.paymentInstruction.id}
-                      className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 hover:border-[#00ff88]/50 transition-colors"
+                      className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 hover:border-[#ffffff]/50 transition-colors"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <div className="font-mono text-sm text-[#00ff88] mb-1">
+                          <div className="font-mono text-sm text-[#ffffff] mb-1">
                             {payment.paymentInstruction.messageId}
                           </div>
                           <div className="text-xs text-gray-400">
@@ -1600,7 +1600,7 @@ export function APIDigitalModule() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3">
                         <div>
                           <div className="text-gray-400 text-xs mb-1">Total Amount</div>
-                          <div className="text-[#00ff88] font-bold">
+                          <div className="text-[#ffffff] font-bold">
                             {payment.paymentInstruction.currency} {payment.paymentInstruction.totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -1631,7 +1631,7 @@ export function APIDigitalModule() {
                                 </span>
                               </div>
                               <div className="text-gray-400 font-mono mt-1">{ct.creditorIban}</div>
-                              <div className="text-[#00ff88] mt-1">
+                              <div className="text-[#ffffff] mt-1">
                                 {ct.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                               </div>
                             </div>
@@ -1664,7 +1664,7 @@ export function APIDigitalModule() {
                     type="number"
                     value={scheduledPayment.from_account_id || ''}
                     onChange={(e) => setScheduledPayment({ ...scheduledPayment, from_account_id: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="12345"
                   />
                 </div>
@@ -1677,7 +1677,7 @@ export function APIDigitalModule() {
                     type="number"
                     value={scheduledPayment.to_beneficiary_id || ''}
                     onChange={(e) => setScheduledPayment({ ...scheduledPayment, to_beneficiary_id: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="678"
                   />
                 </div>
@@ -1690,7 +1690,7 @@ export function APIDigitalModule() {
                     type="number"
                     value={scheduledPayment.amount || ''}
                     onChange={(e) => setScheduledPayment({ ...scheduledPayment, amount: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="2500.00"
                     step="0.01"
                   />
@@ -1703,7 +1703,7 @@ export function APIDigitalModule() {
                   <select
                     value={scheduledPayment.currency}
                     onChange={(e) => setScheduledPayment({ ...scheduledPayment, currency: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                   >
                     <option value="USD">USD</option>
                     <option value="EUR">EUR</option>
@@ -1718,7 +1718,7 @@ export function APIDigitalModule() {
                   <select
                     value={scheduledPayment.frequency}
                     onChange={(e) => setScheduledPayment({ ...scheduledPayment, frequency: e.target.value as any })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                   >
                     <option value="ONCE">ONCE - Single Payment</option>
                     <option value="DAILY">DAILY - Every Day</option>
@@ -1737,7 +1737,7 @@ export function APIDigitalModule() {
                     type="date"
                     value={scheduledPayment.start_date}
                     onChange={(e) => setScheduledPayment({ ...scheduledPayment, start_date: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                   />
                 </div>
 
@@ -1749,7 +1749,7 @@ export function APIDigitalModule() {
                     type="date"
                     value={scheduledPayment.end_date || ''}
                     onChange={(e) => setScheduledPayment({ ...scheduledPayment, end_date: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                   />
                 </div>
 
@@ -1761,7 +1761,7 @@ export function APIDigitalModule() {
                     type="text"
                     value={scheduledPayment.description}
                     onChange={(e) => setScheduledPayment({ ...scheduledPayment, description: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="Monthly supplier payment"
                   />
                 </div>
@@ -1770,7 +1770,7 @@ export function APIDigitalModule() {
               <button
                 onClick={handleCreateScheduledPayment}
                 disabled={loading}
-                className="w-full px-6 py-3 bg-[#00ff88] text-black font-bold rounded-lg hover:bg-[#00cc6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-[#ffffff] text-black font-bold rounded-lg hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -1814,7 +1814,7 @@ export function APIDigitalModule() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
                           <div className="text-gray-400 text-xs mb-1">Amount</div>
-                          <div className="text-[#00ff88] font-bold">
+                          <div className="text-[#ffffff] font-bold">
                             {payment.currency} {payment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                           </div>
                         </div>
@@ -1857,7 +1857,7 @@ export function APIDigitalModule() {
                     onClick={() => setNewBeneficiary({ ...newBeneficiary, beneficiary_type: 'DOMESTIC' })}
                     className={`flex-1 px-4 py-2 rounded border ${
                       newBeneficiary.beneficiary_type === 'DOMESTIC'
-                        ? 'bg-[#00ff88] text-black border-[#00ff88] font-semibold'
+                        ? 'bg-[#ffffff] text-black border-[#ffffff] font-semibold'
                         : 'bg-gray-800 text-gray-400 border-gray-700'
                     }`}
                   >
@@ -1867,7 +1867,7 @@ export function APIDigitalModule() {
                     onClick={() => setNewBeneficiary({ ...newBeneficiary, beneficiary_type: 'INTERNATIONAL' })}
                     className={`flex-1 px-4 py-2 rounded border ${
                       newBeneficiary.beneficiary_type === 'INTERNATIONAL'
-                        ? 'bg-[#00ff88] text-black border-[#00ff88] font-semibold'
+                        ? 'bg-[#ffffff] text-black border-[#ffffff] font-semibold'
                         : 'bg-gray-800 text-gray-400 border-gray-700'
                     }`}
                   >
@@ -1885,7 +1885,7 @@ export function APIDigitalModule() {
                     type="text"
                     value={newBeneficiary.name}
                     onChange={(e) => setNewBeneficiary({ ...newBeneficiary, name: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="John Smith"
                   />
                 </div>
@@ -1898,7 +1898,7 @@ export function APIDigitalModule() {
                     type="text"
                     value={newBeneficiary.bank_name}
                     onChange={(e) => setNewBeneficiary({ ...newBeneficiary, bank_name: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="Chase Bank"
                   />
                 </div>
@@ -1913,7 +1913,7 @@ export function APIDigitalModule() {
                         type="text"
                         value={newBeneficiary.account_number || ''}
                         onChange={(e) => setNewBeneficiary({ ...newBeneficiary, account_number: e.target.value })}
-                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                         placeholder="123456789"
                       />
                     </div>
@@ -1926,7 +1926,7 @@ export function APIDigitalModule() {
                         type="text"
                         value={newBeneficiary.routing_number || ''}
                         onChange={(e) => setNewBeneficiary({ ...newBeneficiary, routing_number: e.target.value })}
-                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                         placeholder="026073150"
                       />
                     </div>
@@ -1943,7 +1943,7 @@ export function APIDigitalModule() {
                         type="text"
                         value={newBeneficiary.iban || ''}
                         onChange={(e) => setNewBeneficiary({ ...newBeneficiary, iban: e.target.value })}
-                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                         placeholder="FR7612345678901234567890123"
                       />
                     </div>
@@ -1956,7 +1956,7 @@ export function APIDigitalModule() {
                         type="text"
                         value={newBeneficiary.swift_code || ''}
                         onChange={(e) => setNewBeneficiary({ ...newBeneficiary, swift_code: e.target.value })}
-                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                         placeholder="BNPAFRPP"
                       />
                     </div>
@@ -1968,7 +1968,7 @@ export function APIDigitalModule() {
                       <select
                         value={newBeneficiary.currency || 'EUR'}
                         onChange={(e) => setNewBeneficiary({ ...newBeneficiary, currency: e.target.value })}
-                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                       >
                         <option value="EUR">EUR</option>
                         <option value="USD">USD</option>
@@ -1985,7 +1985,7 @@ export function APIDigitalModule() {
                         type="text"
                         value={newBeneficiary.address || ''}
                         onChange={(e) => setNewBeneficiary({ ...newBeneficiary, address: e.target.value })}
-                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                        className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                         placeholder="10 Rue de la Paix, 75002 Paris, France"
                       />
                     </div>
@@ -2000,7 +2000,7 @@ export function APIDigitalModule() {
                     type="text"
                     value={newBeneficiary.country}
                     onChange={(e) => setNewBeneficiary({ ...newBeneficiary, country: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="US"
                     maxLength={2}
                   />
@@ -2010,7 +2010,7 @@ export function APIDigitalModule() {
               <button
                 onClick={handleCreateBeneficiary}
                 disabled={loading}
-                className="w-full px-6 py-3 bg-[#00ff88] text-black font-bold rounded-lg hover:bg-[#00cc6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-[#ffffff] text-black font-bold rounded-lg hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -2114,7 +2114,7 @@ export function APIDigitalModule() {
               <button
                 onClick={handleGetFXRates}
                 disabled={loading}
-                className="w-full px-6 py-3 bg-[#00ff88] text-black font-bold rounded-lg hover:bg-[#00cc6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4"
+                className="w-full px-6 py-3 bg-[#ffffff] text-black font-bold rounded-lg hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4"
               >
                 {loading ? (
                   <>
@@ -2132,7 +2132,7 @@ export function APIDigitalModule() {
               {fxRates && (
                 <div>
                   <div className="mb-4 text-sm text-gray-400">
-                    Base Currency: <span className="text-[#00ff88] font-semibold">{fxRates.base}</span>
+                    Base Currency: <span className="text-[#ffffff] font-semibold">{fxRates.base}</span>
                     <span className="mx-2">|</span>
                     Source: {fxRates.source}
                     <span className="mx-2">|</span>
@@ -2143,7 +2143,7 @@ export function APIDigitalModule() {
                     {Object.entries(fxRates.rates).map(([currency, rate]) => (
                       <div key={currency} className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
                         <div className="text-gray-400 text-xs mb-1">{currency}</div>
-                        <div className="text-[#00ff88] text-xl font-bold">{rate.toFixed(4)}</div>
+                        <div className="text-[#ffffff] text-xl font-bold">{rate.toFixed(4)}</div>
                         <div className="text-xs text-gray-500 mt-1">1 {fxRates.base} = {rate.toFixed(4)} {currency}</div>
                       </div>
                     ))}
@@ -2168,7 +2168,7 @@ export function APIDigitalModule() {
                     type="number"
                     value={fxConversion.amount || ''}
                     onChange={(e) => setFxConversion({ ...fxConversion, amount: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                     placeholder="10000.00"
                     step="0.01"
                   />
@@ -2181,7 +2181,7 @@ export function APIDigitalModule() {
                   <select
                     value={fxConversion.from_currency}
                     onChange={(e) => setFxConversion({ ...fxConversion, from_currency: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                   >
                     <option value="USD">USD</option>
                     <option value="EUR">EUR</option>
@@ -2198,7 +2198,7 @@ export function APIDigitalModule() {
                   <select
                     value={fxConversion.to_currency}
                     onChange={(e) => setFxConversion({ ...fxConversion, to_currency: e.target.value })}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none"
                   >
                     <option value="EUR">EUR</option>
                     <option value="USD">USD</option>
@@ -2224,7 +2224,7 @@ export function APIDigitalModule() {
               <button
                 onClick={handleConvertCurrency}
                 disabled={loading}
-                className="w-full px-6 py-3 bg-[#00ff88] text-black font-bold rounded-lg hover:bg-[#00cc6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-[#ffffff] text-black font-bold rounded-lg hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -2240,9 +2240,9 @@ export function APIDigitalModule() {
               </button>
 
               {fxConversionResult && (
-                <div className="mt-6 p-6 bg-gradient-to-r from-[#00ff88]/10 to-[#00cc6a]/10 border border-[#00ff88]/30 rounded-lg">
+                <div className="mt-6 p-6 bg-gradient-to-r from-[#ffffff]/10 to-[#e0e0e0]/10 border border-[#ffffff]/30 rounded-lg">
                   <div className="text-center mb-4">
-                    <div className="text-4xl font-bold text-[#00ff88] mb-2">
+                    <div className="text-4xl font-bold text-[#ffffff] mb-2">
                       {fxConversionResult.to_currency} {fxConversionResult.to_amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </div>
                     <div className="text-gray-400">
@@ -2309,7 +2309,7 @@ export function APIDigitalModule() {
                   <div className="flex items-center gap-3">
                     {bankingServerStatus === 'disconnected' && <WifiOff className="w-8 h-8 text-red-400" />}
                     {bankingServerStatus === 'connecting' && <RefreshCw className="w-8 h-8 text-yellow-400 animate-spin" />}
-                    {bankingServerStatus === 'connected' && <Wifi className="w-8 h-8 text-green-400" />}
+                    {bankingServerStatus === 'connected' && <Wifi className="w-8 h-8 text-white" />}
                     {bankingServerStatus === 'error' && <AlertCircle className="w-8 h-8 text-red-400" />}
                     <div>
                       <div className="text-xl font-bold text-white">
@@ -2332,7 +2332,7 @@ export function APIDigitalModule() {
                       : bankingServerStatus === 'connecting'
                       ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                       : bankingServerStatus === 'connected'
-                      ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      ? 'bg-white/20/20 text-white border border-white/30/30'
                       : 'bg-red-500/20 text-red-400 border border-red-500/30'
                   }`}>
                     {bankingServerStatus.toUpperCase()}
@@ -2342,7 +2342,7 @@ export function APIDigitalModule() {
                 {lastPingTime !== null && (
                   <div className="flex items-center gap-2 text-sm text-gray-400">
                     <Clock className="w-4 h-4" />
-                    <span>Latency: <span className="text-green-400 font-semibold">{lastPingTime}ms</span></span>
+                    <span>Latency: <span className="text-white font-semibold">{lastPingTime}ms</span></span>
                   </div>
                 )}
               </div>
@@ -2358,7 +2358,7 @@ export function APIDigitalModule() {
                     value={serverHost}
                     onChange={(e) => setServerHost(e.target.value)}
                     disabled={bankingServerStatus === 'connected' || bankingServerStatus === 'connecting'}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="sandbox.creditpopulaire.net"
                   />
                 </div>
@@ -2372,7 +2372,7 @@ export function APIDigitalModule() {
                     value={serverPort}
                     onChange={(e) => setServerPort(e.target.value)}
                     disabled={bankingServerStatus === 'connected' || bankingServerStatus === 'connecting'}
-                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="443"
                   />
                 </div>
@@ -2390,7 +2390,7 @@ export function APIDigitalModule() {
                   value={securitySignature}
                   onChange={(e) => setSecuritySignature(e.target.value)}
                   disabled={bankingServerStatus === 'connected' || bankingServerStatus === 'connecting'}
-                  className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#00ff88] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed font-mono"
+                  className="w-full px-4 py-2 bg-black border border-gray-700 rounded text-white focus:border-[#ffffff] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed font-mono"
                   placeholder="Enter your security digital signature (min 32 characters)"
                   minLength={32}
                 />
@@ -2405,7 +2405,7 @@ export function APIDigitalModule() {
                       </div>
                     )}
                     {securitySignature.length >= 32 && (
-                      <div className="text-green-400 mt-1 flex items-center gap-1">
+                      <div className="text-white mt-1 flex items-center gap-1">
                         <CheckCircle className="w-3 h-3" />
                         Valid signature length
                       </div>
@@ -2420,7 +2420,7 @@ export function APIDigitalModule() {
                   <button
                     onClick={handleConnectToServer}
                     disabled={loading}
-                    className="flex-1 px-6 py-3 bg-[#00ff88] text-black font-bold rounded-lg hover:bg-[#00cc6a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3 bg-[#ffffff] text-black font-bold rounded-lg hover:bg-[#e0e0e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <>
@@ -2472,31 +2472,31 @@ export function APIDigitalModule() {
               </div>
 
               {/* Connection Benefits */}
-              <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                <h3 className="text-sm font-semibold text-green-400 mb-2">Connection Benefits</h3>
+              <div className="mt-4 p-4 bg-white/20/10 border border-white/30/30 rounded-lg">
+                <h3 className="text-sm font-semibold text-white mb-2">Connection Benefits</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-400">
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="w-4 h-4 text-white flex-shrink-0 mt-0.5" />
                     <span>Real-time payment processing</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="w-4 h-4 text-white flex-shrink-0 mt-0.5" />
                     <span>Live FX rate updates</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="w-4 h-4 text-white flex-shrink-0 mt-0.5" />
                     <span>Instant transfer validation</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="w-4 h-4 text-white flex-shrink-0 mt-0.5" />
                     <span>Secure SWIFT messaging</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="w-4 h-4 text-white flex-shrink-0 mt-0.5" />
                     <span>Account balance synchronization</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="w-4 h-4 text-white flex-shrink-0 mt-0.5" />
                     <span>Beneficiary management</span>
                   </div>
                 </div>

@@ -1132,7 +1132,7 @@ export function EnhancedBinaryViewer() {
               <div className="flex gap-3 justify-center">
                 <button
                   onClick={generateSampleFile}
-                  className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                  className="flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium transition-colors"
                 >
                   <FilePlus className="w-5 h-5" />
                   Cargar Ejemplo
@@ -1343,7 +1343,7 @@ export function EnhancedBinaryViewer() {
                       onClick={() => setAnalysisMode('pattern')}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         analysisMode === 'pattern'
-                          ? 'bg-green-600 text-white'
+                          ? 'bg-white/20 text-white'
                           : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                       }`}
                     >
@@ -1435,7 +1435,7 @@ export function EnhancedBinaryViewer() {
                       <div>
                         <h4 className="text-lg font-semibold text-white mb-3">Firma del Archivo</h4>
                         <div className="bg-slate-700/50 rounded-lg p-4">
-                          <p className="font-mono text-green-400">{forensicAnalysis.fileSignature}</p>
+                          <p className="font-mono text-white">{forensicAnalysis.fileSignature}</p>
                         </div>
 
                         <h4 className="text-lg font-semibold text-white mb-3 mt-6">Distribución de Entropía</h4>
@@ -1510,7 +1510,7 @@ export function EnhancedBinaryViewer() {
                             <div key={i} className="bg-slate-700/50 rounded-lg p-3">
                               <div className="flex justify-between items-center mb-2">
                                 <span className="text-white font-medium">{algo.name}</span>
-                                <span className="text-green-400 text-sm">{algo.confidence}% confianza</span>
+                                <span className="text-white text-sm">{algo.confidence}% confianza</span>
                               </div>
                               <div className="text-slate-400 text-sm">
                                 {algo.details.map((detail, j) => (
@@ -1528,7 +1528,7 @@ export function EnhancedBinaryViewer() {
                           <div className="mb-4">
                             <p className="text-slate-400 text-sm mb-1">Complejidad</p>
                             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              cryptanalysis.bruteForceEstimates.complexity === 'very weak' ? 'bg-green-600' :
+                              cryptanalysis.bruteForceEstimates.complexity === 'very weak' ? 'bg-white/20' :
                               cryptanalysis.bruteForceEstimates.complexity === 'weak' ? 'bg-yellow-600' :
                               cryptanalysis.bruteForceEstimates.complexity === 'medium' ? 'bg-orange-600' :
                               cryptanalysis.bruteForceEstimates.complexity === 'strong' ? 'bg-red-600' :
@@ -1577,11 +1577,11 @@ export function EnhancedBinaryViewer() {
                         <h4 className="text-lg font-semibold text-white mb-3">Resultados de Fuerza Bruta</h4>
                         <div className="space-y-2 max-h-48 overflow-y-auto">
                           {bruteForceResults.map((result, i) => (
-                            <div key={i} className={`p-3 rounded-lg ${result.success ? 'bg-green-500/10 border border-green-500' : 'bg-slate-700/30'}`}>
+                            <div key={i} className={`p-3 rounded-lg ${result.success ? 'bg-white/20/10 border border-white/30' : 'bg-slate-700/30'}`}>
                               <div className="flex justify-between items-center">
                                 <span className="font-mono text-white">{result.password}</span>
                                 <div className="flex items-center gap-2">
-                                  <span className={`px-2 py-1 rounded text-xs ${result.success ? 'bg-green-600' : 'bg-red-600'}`}>
+                                  <span className={`px-2 py-1 rounded text-xs ${result.success ? 'bg-white/20' : 'bg-red-600'}`}>
                                     {result.success ? 'ÉXITO' : 'FALLIDO'}
                                   </span>
                                   <span className="text-slate-400 text-sm">{result.time}ms</span>
@@ -1599,7 +1599,7 @@ export function EnhancedBinaryViewer() {
                 {analysisMode === 'pattern' && analysis && (
                   <div className="bg-[#0d0d0d] rounded-xl border border-[#1a1a1a] p-6">
                     <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                      <Layers className="w-5 h-5 text-green-400" />
+                      <Layers className="w-5 h-5 text-white" />
                       Análisis de Patrones
                     </h3>
 
@@ -1609,7 +1609,7 @@ export function EnhancedBinaryViewer() {
                           <div key={i} className="bg-slate-700/50 rounded-lg p-4">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-white font-medium">Patrón {i + 1}</span>
-                              <span className="text-green-400 text-sm">{pattern.count} ocurrencias</span>
+                              <span className="text-white text-sm">{pattern.count} ocurrencias</span>
                             </div>
                             <div className="font-mono text-slate-300 mb-2">
                               [{pattern.pattern.map(b => `0x${b.toString(16).padStart(2, '0')}`).join(', ')}]
@@ -1644,7 +1644,7 @@ export function EnhancedBinaryViewer() {
                         <div className="space-y-3">
                           <div className="bg-slate-700/50 rounded-lg p-4">
                             <p className="text-sm text-slate-400 mb-1">Firma del Archivo</p>
-                            <p className="font-mono text-green-400">{DTC1BAnalysis.fileSignature}</p>
+                            <p className="font-mono text-white">{DTC1BAnalysis.fileSignature}</p>
                           </div>
 
                           <div className="bg-slate-700/50 rounded-lg p-4">
@@ -1699,7 +1699,7 @@ export function EnhancedBinaryViewer() {
                             <p className="text-sm text-slate-400 mb-2">Códigos Bancarios</p>
                             <div className="space-y-1">
                               {DTC1BAnalysis.extracted_data.bank_codes.slice(0, 3).map((code: string, i: number) => (
-                                <div key={i} className="font-mono text-green-400 text-sm">{code}</div>
+                                <div key={i} className="font-mono text-white text-sm">{code}</div>
                               ))}
                             </div>
                           </div>
@@ -1732,7 +1732,7 @@ export function EnhancedBinaryViewer() {
                             <p className="text-sm text-slate-400 mb-2">Palabras Clave Financieras</p>
                             <div className="flex flex-wrap gap-1">
                               {Object.entries(DTC1BAnalysis.potential_data.financial_keywords).slice(0, 8).map(([keyword, count]: [string, number]) => (
-                                <span key={keyword} className="px-2 py-1 bg-green-500/20 text-green-300 rounded text-xs">
+                                <span key={keyword} className="px-2 py-1 bg-white/20/20 text-white rounded text-xs">
                                   {keyword} ({count})
                                 </span>
                               ))}
@@ -1770,7 +1770,7 @@ export function EnhancedBinaryViewer() {
                         <h4 className="text-lg font-semibold text-white mb-3">📦 Bloques de Transacciones</h4>
                         <div className="space-y-2 max-h-48 overflow-y-auto">
                           {DTC1BAnalysis.currencyMatches.map((currency: any, i: number) => (
-                            <div key={i} className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                            <div key={i} className="bg-white/20/10 border border-white/30/30 rounded-lg p-3">
                               <div className="flex items-center justify-between mb-2">
                                 <div>
                                   <span className="text-white font-medium">{currency.name}</span>
@@ -1779,7 +1779,7 @@ export function EnhancedBinaryViewer() {
                                   </p>
                                 </div>
                               </div>
-                              <div className="text-green-400 font-mono text-sm">
+                              <div className="text-white font-mono text-sm">
                                 {currency.positions.map((pos: number) => `0x${pos.toString(16)}`).join(', ')}
                               </div>
                             </div>
