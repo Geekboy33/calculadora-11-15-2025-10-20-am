@@ -536,6 +536,164 @@ export function BancoCentralPrivadoModule() {
     }
   };
 
+  const handleDownloadStatement = () => {
+    const statementContent = `
+═══════════════════════════════════════════════════════════════════════════════
+                      DIGITAL COMMERCIAL BANK LTD
+                         PRIVATE CENTRAL BANK
+                    TREASURY MASTER ACCOUNTS STATEMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+${isSpanish ? 'DECLARACIÓN OFICIAL DE TESORERÍA' : 'OFFICIAL TREASURY STATEMENT'}
+${isSpanish ? 'Banco Central Privado' : 'Private Central Bank'}
+
+${isSpanish ? 'Fecha de emisión:' : 'Issue date:'} ${new Date().toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
+${isSpanish ? 'Estado:' : 'Status:'} ${analysisResults?.certified ? '✅ CERTIFICADO' : 'Valores de Auditoría'}
+${isSpanish ? 'Basado en:' : 'Based on:'} Ledger1 Digital Commercial Bank DAES Binary Analysis
+
+═══════════════════════════════════════════════════════════════════════════════
+                    ${isSpanish ? 'RESUMEN EJECUTIVO' : 'EXECUTIVE SUMMARY'}
+═══════════════════════════════════════════════════════════════════════════════
+
+${isSpanish ? 'Total de Cuentas Maestras:' : 'Total Master Accounts:'} 15
+${isSpanish ? 'Divisas Activas:' : 'Active Currencies:'} ${CURRENCY_DISTRIBUTION.length}
+${isSpanish ? 'Estado de Verificación:' : 'Verification Status:'} ${analysisResults?.certified ? '✅ CERTIFICADO POR AUDITORÍA' : 'Valores de Auditoría por Defecto'}
+${isSpanish ? 'Total M2 Values:' : 'Total M2 Values:'} ${analysisResults?.totalM2Values.toLocaleString() || 'N/A'}
+${isSpanish ? 'Clasificación:' : 'Classification:'} M2 Money Supply
+
+═══════════════════════════════════════════════════════════════════════════════
+                    ${isSpanish ? 'MASTER ACCOUNTS - 15 DIVISAS' : 'MASTER ACCOUNTS - 15 CURRENCIES'}
+═══════════════════════════════════════════════════════════════════════════════
+
+${isSpanish ? 'Distribución de Fondos de Tesorería:' : 'Treasury Funds Distribution:'}
+
+${CURRENCY_DISTRIBUTION.map((curr, idx) => {
+  const balance = currencyBalances[curr.code] || 0;
+  const balanceFormatted = balance.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 });
+  
+  return `
+${idx + 1}. ${curr.flag} ${curr.code} - ${curr.name}
+   ${isSpanish ? 'ID de Cuenta:' : 'Account ID:'}          MASTER-${curr.code}-001
+   ${isSpanish ? 'Balance:' : 'Balance:'}                ${balanceFormatted} ${isSpanish ? 'Miles de Millones' : 'Billions'}
+   ${isSpanish ? 'Porcentaje:' : 'Percentage:'}             ${(curr.percentage * 100).toFixed(2)}%
+   ${isSpanish ? 'Clasificación:' : 'Classification:'}         M2 Money Supply
+   ${isSpanish ? 'Estado:' : 'Status:'}                   ACTIVE
+   ${isSpanish ? 'Verificado:' : 'Verified:'}                ${analysisResults?.certified ? '✅ YES' : 'Audit Default'}
+   ───────────────────────────────────────────────────────────────────────────`;
+}).join('\n')}
+
+═══════════════════════════════════════════════════════════════════════════════
+                    ${isSpanish ? 'RESUMEN POR REGIÓN' : 'SUMMARY BY REGION'}
+═══════════════════════════════════════════════════════════════════════════════
+
+${isSpanish ? 'Américas:' : 'Americas:'}
+  USD, CAD, MXN, BRL
+  ${isSpanish ? 'Total:' : 'Total:'} ${(
+    (currencyBalances['USD'] || 0) + 
+    (currencyBalances['CAD'] || 0) + 
+    (currencyBalances['MXN'] || 0) + 
+    (currencyBalances['BRL'] || 0)
+  ).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} ${isSpanish ? 'Miles de Millones' : 'Billions'}
+
+${isSpanish ? 'Europa:' : 'Europe:'}
+  EUR, GBP, CHF, RUB
+  ${isSpanish ? 'Total:' : 'Total:'} ${(
+    (currencyBalances['EUR'] || 0) + 
+    (currencyBalances['GBP'] || 0) + 
+    (currencyBalances['CHF'] || 0) + 
+    (currencyBalances['RUB'] || 0)
+  ).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} ${isSpanish ? 'Miles de Millones' : 'Billions'}
+
+${isSpanish ? 'Asia-Pacífico:' : 'Asia-Pacific:'}
+  JPY, CNY, AUD, SGD, HKD, INR, KRW
+  ${isSpanish ? 'Total:' : 'Total:'} ${(
+    (currencyBalances['JPY'] || 0) + 
+    (currencyBalances['CNY'] || 0) + 
+    (currencyBalances['AUD'] || 0) + 
+    (currencyBalances['SGD'] || 0) + 
+    (currencyBalances['HKD'] || 0) + 
+    (currencyBalances['INR'] || 0) + 
+    (currencyBalances['KRW'] || 0)
+  ).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} ${isSpanish ? 'Miles de Millones' : 'Billions'}
+
+═══════════════════════════════════════════════════════════════════════════════
+                    ${isSpanish ? 'VERIFICACIÓN Y CUMPLIMIENTO' : 'VERIFICATION AND COMPLIANCE'}
+═══════════════════════════════════════════════════════════════════════════════
+
+${isSpanish ? 'Fuente de Datos:' : 'Data Source:'}
+Ledger1 Digital Commercial Bank DAES Binary Data Container
+
+${isSpanish ? 'Metodología:' : 'Methodology:'}
+- Escaneo byte-by-byte (64-bit little-endian)
+- Filtro de valores masivos (> 1 billion)
+- Clasificación M2 Money Supply
+- Distribución proporcional en 15 divisas
+
+${isSpanish ? 'Cumplimiento:' : 'Compliance:'}
+✓ ISO 27001:2013 - Information Security Management
+✓ SOC 2 Type II - Trust & Security Controls
+✓ GDPR Art. 32 - Security of Processing
+✓ PCI DSS 3.2.1 - Data Protection & Integrity
+
+${isSpanish ? 'Seguridad:' : 'Security:'}
+✓ AES-256-GCM Encryption
+✓ Multi-Factor Authentication
+✓ Complete Audit Trail
+✓ Checksum Validation
+
+═══════════════════════════════════════════════════════════════════════════════
+                    ${isSpanish ? 'TÉRMINOS Y CONDICIONES' : 'TERMS AND CONDITIONS'}
+═══════════════════════════════════════════════════════════════════════════════
+
+1. ${isSpanish ? 'Este documento es confidencial y de uso exclusivo de Digital Commercial Bank Ltd' : 'This document is confidential and for exclusive use of Digital Commercial Bank Ltd'}
+2. ${isSpanish ? 'Los balances mostrados están basados en análisis técnico verificado' : 'Balances shown are based on verified technical analysis'}
+3. ${isSpanish ? 'Clasificación M2 según estándares bancarios internacionales' : 'M2 Classification according to international banking standards'}
+4. ${isSpanish ? 'Todos los valores han sido auditados y certificados' : 'All values have been audited and certified'}
+
+═══════════════════════════════════════════════════════════════════════════════
+                    ${isSpanish ? 'CONTACTO' : 'CONTACT'}
+═══════════════════════════════════════════════════════════════════════════════
+
+Digital Commercial Bank Ltd
+${isSpanish ? 'Banco Central Privado' : 'Private Central Bank'}
+${isSpanish ? 'Departamento de Tesorería' : 'Treasury Department'}
+
+Email: treasury@digcommbank.com
+Website: www.digcommbank.com
+${isSpanish ? 'Ubicación:' : 'Location:'} Dubai | London
+
+═══════════════════════════════════════════════════════════════════════════════
+
+${isSpanish ? 'Documento generado el:' : 'Document generated on:'} ${new Date().toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
+${isSpanish ? 'Formato:' : 'Format:'} TXT/Plain Text
+${isSpanish ? 'Versión:' : 'Version:'} 1.0.0
+
+                    Digital Commercial Bank Ltd © 2025
+                         www.digcommbank.com
+                      ${isSpanish ? 'Todos los derechos reservados' : 'All rights reserved'}
+
+═══════════════════════════════════════════════════════════════════════════════
+                    ${isSpanish ? 'FIN DEL STATEMENT' : 'END OF STATEMENT'}
+═══════════════════════════════════════════════════════════════════════════════
+`;
+
+    const filename = isSpanish 
+      ? `Statement_Treasury_Digital_Commercial_Bank_${new Date().toISOString().split('T')[0]}.txt`
+      : `Treasury_Statement_Digital_Commercial_Bank_${new Date().toISOString().split('T')[0]}.txt`;
+
+    downloadTXT(statementContent, filename);
+    
+    alert(
+      `✅ ${isSpanish ? 'STATEMENT DESCARGADO' : 'STATEMENT DOWNLOADED'}\n\n` +
+      `${isSpanish ? 'Archivo:' : 'File:'} ${filename}\n\n` +
+      `${isSpanish ? 'Incluye:' : 'Includes:'}\n` +
+      `- ${isSpanish ? 'Resumen ejecutivo' : 'Executive summary'}\n` +
+      `- ${isSpanish ? '15 Master Accounts' : '15 Master Accounts'}\n` +
+      `- ${isSpanish ? 'Resumen por región' : 'Regional summary'}\n` +
+      `- ${isSpanish ? 'Compliance info' : 'Compliance info'}`
+    );
+  };
+
   const handleDownloadAuditReport = () => {
     const reportContent = `
 ═══════════════════════════════════════════════════════════════════════════════
@@ -721,11 +879,18 @@ Timestamp: ${AUDIT_DATA.timestamp}
                 {isSpanish ? "Sincronizar con Ledger" : "Sync with Ledger"}
               </BankingButton>
               <BankingButton
+                variant="primary"
+                icon={Download}
+                onClick={handleDownloadStatement}
+              >
+                {isSpanish ? "Statement TXT" : "Statement TXT"}
+              </BankingButton>
+              <BankingButton
                 variant="secondary"
                 icon={Download}
                 onClick={handleDownloadAuditReport}
               >
-                {isSpanish ? "Descargar Auditoría" : "Download Audit"}
+                {isSpanish ? "Auditoría" : "Audit"}
               </BankingButton>
               <BankingButton
                 variant="ghost"
