@@ -79,6 +79,18 @@ export function BancoCentralPrivadoModule() {
     const saved = localStorage.getItem('banco_central_currency_balances');
     return saved ? JSON.parse(saved) : initialBalances;
   });
+
+  // ✅ Estados individuales para USD y EUR (para compatibilidad con código existente)
+  const usdBalance = currencyBalances['USD'] || 0;
+  const eurBalance = currencyBalances['EUR'] || 0;
+  
+  const setUsdBalance = (value: number) => {
+    setCurrencyBalances(prev => ({...prev, USD: value}));
+  };
+  
+  const setEurBalance = (value: number) => {
+    setCurrencyBalances(prev => ({...prev, EUR: value}));
+  };
   const [analysisResultsSaved, setAnalysisResultsSaved] = useState(() => {
     const saved = localStorage.getItem('banco_central_analysis_results');
     return saved ? JSON.parse(saved) : null;
@@ -126,29 +138,19 @@ export function BancoCentralPrivadoModule() {
     };
   }, []);
 
-  // Master Accounts (usando balances actualizados si hay análisis)
-  const masterAccounts = [
-    {
-      id: 'MASTER-USD-001',
-      name: 'Master Account USD - Treasury',
-      currency: 'USD',
-      balance: usdBalance,
-      percentage: USD_PERCENTAGE * 100,
-      classification: 'M2 Money Supply',
-      status: 'ACTIVE',
-      auditVerified: analysisResults?.certified || true
-    },
-    {
-      id: 'MASTER-EUR-001',
-      name: 'Master Account EUR - Treasury',
-      currency: 'EUR',
-      balance: eurBalance,
-      percentage: EUR_PERCENTAGE * 100,
-      classification: 'M2 Money Supply',
-      status: 'ACTIVE',
-      auditVerified: analysisResults?.certified || true
-    }
-  ];
+  // Master Accounts para las 15 divisas
+  const masterAccounts = CURRENCY_DISTRIBUTION.map(curr => ({
+    id: `MASTER-${curr.code}-001`,
+    name: `Master Account ${curr.code} - Treasury`,
+    currency: curr.code,
+    balance: currencyBalances[curr.code] || 0,
+    percentage: curr.percentage * 100,
+    classification: 'M2 Money Supply',
+    status: 'ACTIVE',
+    auditVerified: analysisResults?.certified || true,
+    flag: curr.flag,
+    fullName: curr.name
+  }));
 
   const selectedMasterAccount = masterAccounts.find(a => a.currency === selectedAccount)!;
 
@@ -176,8 +178,9 @@ export function BancoCentralPrivadoModule() {
       let m2Total = 0;
 
       if (isSameFile && offset > 0) {
-        // ✅ CRÍTICO: Restaurar el balance EXACTO que corresponde al offset guardado
-        m2Total = usdBalance / USD_PERCENTAGE; // Recalcular desde el balance guardado
+        // ✅ CRÍTICO: Restaurar el balance EXACTO desde el balance de USD
+        const usdPercentage = CURRENCY_DISTRIBUTION.find(c => c.code === 'USD')!.percentage;
+        m2Total = currencyBalances['USD'] / usdPercentage;
         m2Count = analysisResults ? analysisResults.totalM2Values : 0;
         
         const savedProgress = (offset / totalSize) * 100;
@@ -230,27 +233,26 @@ export function BancoCentralPrivadoModule() {
         offset += CHUNK_SIZE;
         const progressPercent = Math.min((offset / totalSize) * 100, 100);
         
-        // ✅ ACTUALIZAR ESTADO (Progreso y Balance SINCRONIZADOS)
-        const usdCurrent = m2Total * USD_PERCENTAGE;
-        const eurCurrent = m2Total * EUR_PERCENTAGE;
+        // ✅ ACTUALIZAR TODAS LAS 15 DIVISAS simultáneamente
+        const updatedBalances: {[key: string]: number} = {};
+        CURRENCY_DISTRIBUTION.forEach(curr => {
+          updatedBalances[curr.code] = m2Total * curr.percentage;
+        });
         
         setProgress(progressPercent);
         setCurrentScannedAmount(m2Total);
-        setUsdBalance(usdCurrent);
-        setEurBalance(eurCurrent);
+        setCurrencyBalances(updatedBalances);
         setLastProcessedOffset(offset);
         
-        // ✅ GUARDAR EN CADA CHUNK (para máxima persistencia)
+        // ✅ GUARDAR EN CADA CHUNK
         localStorage.setItem('banco_central_last_offset', offset.toString());
-        localStorage.setItem('banco_central_usd_balance', usdCurrent.toString());
-        localStorage.setItem('banco_central_eur_balance', eurCurrent.toString());
+        localStorage.setItem('banco_central_currency_balances', JSON.stringify(updatedBalances));
         
-        // Guardar también m2Count y m2Total actuales
         const tempResults = {
           totalM2Values: m2Count,
           totalM2Amount: m2Total,
           filesProcessed: 1,
-          certified: false // Aún no completado
+          certified: false
         };
         localStorage.setItem('banco_central_analysis_results', JSON.stringify(tempResults));
         
@@ -285,26 +287,36 @@ export function BancoCentralPrivadoModule() {
         // ✅ GUARDAR ESTADO FINAL
         localStorage.setItem('banco_central_last_offset', totalSize.toString());
         localStorage.setItem('banco_central_analysis_results', JSON.stringify(finalResults));
-        localStorage.setItem('banco_central_usd_balance', (m2Total * USD_PERCENTAGE).toString());
-        localStorage.setItem('banco_central_eur_balance', (m2Total * EUR_PERCENTAGE).toString());
+        
+        // Guardar las 15 divisas
+        const finalBalances: {[key: string]: number} = {};
+        CURRENCY_DISTRIBUTION.forEach(curr => {
+          finalBalances[curr.code] = m2Total * curr.percentage;
+        });
+        localStorage.setItem('banco_central_currency_balances', JSON.stringify(finalBalances));
 
         console.log('[Banco Central] ✅ COMPLETADO AL 100%');
         console.log(`  Progreso: 100% (${totalSize} bytes)`);
         console.log(`  M2 Values: ${m2Count}`);
         console.log(`  Total: ${m2Total.toFixed(0)} Billions`);
-        console.log(`  USD (60%): ${(m2Total * USD_PERCENTAGE).toFixed(0)} Billions`);
-        console.log(`  EUR (40%): ${(m2Total * EUR_PERCENTAGE).toFixed(0)} Billions`);
-        console.log(`  ✅ PROGRESO Y BALANCE 100% SINCRONIZADOS Y GUARDADOS`);
+        console.log(`  15 DIVISAS DISTRIBUIDAS:`);
+        CURRENCY_DISTRIBUTION.forEach(curr => {
+          console.log(`    ${curr.flag} ${curr.code} (${(curr.percentage * 100).toFixed(1)}%): ${(m2Total * curr.percentage).toFixed(0)} Billions`);
+        });
+        console.log(`  ✅ PROGRESO Y 15 BALANCES SINCRONIZADOS Y GUARDADOS`);
 
         alert(
           `✅ ${isSpanish ? 'ANÁLISIS COMPLETADO AL 100%' : 'ANALYSIS 100% COMPLETED'}\n\n` +
           `${isSpanish ? 'Progreso:' : 'Progress:'} 100%\n` +
           `M2 Values: ${m2Count.toLocaleString()}\n` +
           `${isSpanish ? 'Total:' : 'Total:'} ${m2Total.toLocaleString()} ${isSpanish ? 'Miles de Millones' : 'Billions'}\n\n` +
-          `Master USD: ${(m2Total * USD_PERCENTAGE).toLocaleString()}\n` +
-          `Master EUR: ${(m2Total * EUR_PERCENTAGE).toLocaleString()}\n\n` +
+          `${isSpanish ? '15 DIVISAS DISTRIBUIDAS:' : '15 CURRENCIES DISTRIBUTED:'}\n` +
+          `USD (35%): ${(m2Total * CURRENCY_DISTRIBUTION[0].percentage).toLocaleString()}\n` +
+          `EUR (20%): ${(m2Total * CURRENCY_DISTRIBUTION[1].percentage).toLocaleString()}\n` +
+          `GBP (12%): ${(m2Total * CURRENCY_DISTRIBUTION[2].percentage).toLocaleString()}\n` +
+          `${isSpanish ? '...y 12 más' : '...and 12 more'}\n\n` +
           `✅ ${isSpanish ? 'Guardado y certificado' : 'Saved and certified'}\n` +
-          `✅ ${isSpanish ? 'Progreso = Balance (sincronizados)' : 'Progress = Balance (synchronized)'}`
+          `✅ ${isSpanish ? 'Progreso = 15 Balances (sincronizados)' : 'Progress = 15 Balances (synchronized)'}`
         );
       } else {
         console.log('[Banco Central] ⏸️ Procesamiento detenido por usuario');
@@ -332,15 +344,13 @@ export function BancoCentralPrivadoModule() {
       processingRef.current = false;
 
       // Limpiar TODO de localStorage
-      localStorage.removeItem('banco_central_usd_balance');
-      localStorage.removeItem('banco_central_eur_balance');
+      localStorage.removeItem('banco_central_currency_balances');
       localStorage.removeItem('banco_central_analysis_results');
       localStorage.removeItem('banco_central_last_offset');
       localStorage.removeItem('banco_central_current_file');
 
-      // Restaurar valores por defecto
-      setUsdBalance(usdMasterBalance);
-      setEurBalance(eurMasterBalance);
+      // Restaurar valores por defecto para las 15 divisas
+      setCurrencyBalances(initialBalances);
       setAnalysisResults(null);
       setProgress(0);
       setCurrentScannedAmount(0);
@@ -400,30 +410,25 @@ ${isSpanish ? 'Estadísticas Agregadas:' : 'Aggregate Statistics:'}
 • ${isSpanish ? 'Cuatrillones Finales:' : 'Final Quadrillions:'} 745,381.00
 
 ═══════════════════════════════════════════════════════════════════════════════
-                         ${isSpanish ? 'CUENTAS MAESTRAS DE TESORERÍA' : 'TREASURY MASTER ACCOUNTS'}
+                         ${isSpanish ? 'CUENTAS MAESTRAS DE TESORERÍA (15 DIVISAS)' : 'TREASURY MASTER ACCOUNTS (15 CURRENCIES)'}
 ═══════════════════════════════════════════════════════════════════════════════
 
 ${isSpanish ? 'Distribución de Fondos Basada en Análisis de Auditoría' : 'Funds Distribution Based on Audit Analysis'}
 
-MASTER ACCOUNT 1 - USD (${USD_PERCENTAGE * 100}%)
+${CURRENCY_DISTRIBUTION.map((curr, idx) => {
+  const balance = currencyBalances[curr.code] || 0;
+  return `
+MASTER ACCOUNT ${idx + 1} - ${curr.code} (${(curr.percentage * 100).toFixed(1)}%)
 ───────────────────────────────────────────────────────────────────────────────
-${isSpanish ? 'ID de Cuenta:' : 'Account ID:'}            MASTER-USD-001
-${isSpanish ? 'Nombre:' : 'Name:'}                   Master Account USD - Treasury
-${isSpanish ? 'Moneda:' : 'Currency:'}                 USD
-${isSpanish ? 'Balance:' : 'Balance:'}                 ${fmt.currency(usdMasterBalance, 'USD')}
+${isSpanish ? 'ID de Cuenta:' : 'Account ID:'}            MASTER-${curr.code}-001
+${isSpanish ? 'Nombre:' : 'Name:'}                   Master Account ${curr.code} - Treasury
+${isSpanish ? 'Moneda:' : 'Currency:'}                 ${curr.code} ${curr.flag}
+${isSpanish ? 'Balance:' : 'Balance:'}                 ${fmt.currency(balance, curr.code)}
 ${isSpanish ? 'Clasificación:' : 'Classification:'}          M2 Money Supply
 ${isSpanish ? 'Estado:' : 'Status:'}                  ACTIVE
 ${isSpanish ? 'Verificado por Auditoría:' : 'Audit Verified:'}    ✅ YES
-
-MASTER ACCOUNT 2 - EUR (${EUR_PERCENTAGE * 100}%)
-───────────────────────────────────────────────────────────────────────────────
-${isSpanish ? 'ID de Cuenta:' : 'Account ID:'}            MASTER-EUR-001
-${isSpanish ? 'Nombre:' : 'Name:'}                   Master Account EUR - Treasury
-${isSpanish ? 'Moneda:' : 'Currency:'}                 EUR
-${isSpanish ? 'Balance:' : 'Balance:'}                 ${fmt.currency(eurMasterBalance, 'EUR')}
-${isSpanish ? 'Clasificación:' : 'Classification:'}          M2 Money Supply
-${isSpanish ? 'Estado:' : 'Status:'}                  ACTIVE
-${isSpanish ? 'Verificado por Auditoría:' : 'Audit Verified:'}    ✅ YES
+`;
+}).join('\n')}
 
 ═══════════════════════════════════════════════════════════════════════════════
                     ${isSpanish ? 'VERIFICACIÓN DE ORIGEN' : 'SOURCE VERIFICATION'}
@@ -637,47 +642,32 @@ Timestamp: ${AUDIT_DATA.timestamp}
           </div>
         </BankingCard>
 
-        {/* Master Accounts Selector */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button
-            onClick={() => setSelectedAccount('USD')}
-            className={`p-6 rounded-2xl border-2 transition-all ${
-              selectedAccount === 'USD'
-                ? 'bg-gradient-to-br from-sky-500/20 to-blue-600/20 border-sky-500 shadow-lg shadow-sky-500/25'
-                : 'bg-slate-900/50 border-slate-700 hover:border-slate-600'
-            }`}
-          >
-            <div className="flex items-center gap-4 mb-3">
-              <div className={`p-3 rounded-xl ${selectedAccount === 'USD' ? 'bg-sky-500/20' : 'bg-slate-800'}`}>
-                <DollarSign className={`w-6 h-6 ${selectedAccount === 'USD' ? 'text-sky-400' : 'text-slate-500'}`} />
-              </div>
-              <div className="text-left flex-1">
-                <p className="text-slate-100 font-bold text-lg">MASTER USD</p>
-                <p className="text-slate-400 text-sm">{USD_PERCENTAGE * 100}% {isSpanish ? "del Total" : "of Total"}</p>
-              </div>
-              {selectedAccount === 'USD' && <CheckCircle className="w-6 h-6 text-sky-400" />}
-            </div>
-          </button>
+        {/* Selector de 15 Master Accounts */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          {CURRENCY_DISTRIBUTION.map((curr, idx) => {
+            const colors = ['sky', 'emerald', 'amber', 'purple', 'pink', 'blue', 'teal', 'cyan', 'indigo', 'violet', 'fuchsia', 'rose', 'orange', 'lime', 'yellow'];
+            const color = colors[idx % colors.length];
+            const isSelected = selectedAccount === curr.code;
 
-          <button
-            onClick={() => setSelectedAccount('EUR')}
-            className={`p-6 rounded-2xl border-2 transition-all ${
-              selectedAccount === 'EUR'
-                ? 'bg-gradient-to-br from-emerald-500/20 to-teal-600/20 border-emerald-500 shadow-lg shadow-emerald-500/25'
-                : 'bg-slate-900/50 border-slate-700 hover:border-slate-600'
-            }`}
-          >
-            <div className="flex items-center gap-4 mb-3">
-              <div className={`p-3 rounded-xl ${selectedAccount === 'EUR' ? 'bg-emerald-500/20' : 'bg-slate-800'}`}>
-                <DollarSign className={`w-6 h-6 ${selectedAccount === 'EUR' ? 'text-emerald-400' : 'text-slate-500'}`} />
-              </div>
-              <div className="text-left flex-1">
-                <p className="text-slate-100 font-bold text-lg">MASTER EUR</p>
-                <p className="text-slate-400 text-sm">{EUR_PERCENTAGE * 100}% {isSpanish ? "del Total" : "of Total"}</p>
-              </div>
-              {selectedAccount === 'EUR' && <CheckCircle className="w-6 h-6 text-emerald-400" />}
-            </div>
-          </button>
+            return (
+              <button
+                key={curr.code}
+                onClick={() => setSelectedAccount(curr.code)}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  isSelected
+                    ? `bg-${color}-500/20 border-${color}-500 shadow-lg`
+                    : 'bg-slate-900/50 border-slate-700 hover:border-slate-600'
+                }`}
+              >
+                <div className="text-center">
+                  <span className="text-3xl mb-2 block">{curr.flag}</span>
+                  <p className="text-slate-100 font-bold">{curr.code}</p>
+                  <p className="text-slate-500 text-xs">{(curr.percentage * 100).toFixed(1)}%</p>
+                  {isSelected && <CheckCircle className={`w-5 h-5 text-${color}-400 mx-auto mt-2`} />}
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {/* Master Account Display */}
@@ -775,67 +765,41 @@ Timestamp: ${AUDIT_DATA.timestamp}
                     </div>
                   </div>
 
-                  {/* VERIFICACIÓN DUAL: USD y EUR en paralelo */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Master USD en tiempo real */}
-                    <div className="bg-slate-900/80 border border-slate-700 rounded-xl p-5">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-sky-500/10 rounded-lg">
-                          <DollarSign className="w-5 h-5 text-sky-400" />
-                        </div>
-                        <div>
-                          <p className="text-slate-100 font-bold">MASTER USD (60%)</p>
-                          <p className="text-slate-500 text-xs">MASTER-USD-001</p>
-                        </div>
-                      </div>
-                      <div className="text-center py-4">
-                        <p className="text-slate-400 text-xs mb-2">
-                          {isSpanish ? "Balance Actual:" : "Current Balance:"}
-                        </p>
-                        <p className="text-sky-400 font-black text-2xl">
-                          {(currentScannedAmount * USD_PERCENTAGE).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
-                        </p>
-                        <p className="text-slate-500 text-xs mt-1">
-                          {isSpanish ? "Miles de Millones" : "Billions"}
-                        </p>
-                      </div>
-                      <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full transition-all duration-500"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                    </div>
+                  {/* VERIFICACIÓN DE 15 DIVISAS SIMULTÁNEAMENTE */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 max-h-[600px] overflow-y-auto pr-2">
+                    {CURRENCY_DISTRIBUTION.map((curr, idx) => {
+                      const colors = [
+                        'sky', 'emerald', 'amber', 'purple', 'pink',
+                        'blue', 'teal', 'cyan', 'indigo', 'violet',
+                        'fuchsia', 'rose', 'orange', 'lime', 'yellow'
+                      ];
+                      const color = colors[idx % colors.length];
+                      const currentBalance = currentScannedAmount * curr.percentage;
 
-                    {/* Master EUR en tiempo real */}
-                    <div className="bg-slate-900/80 border border-slate-700 rounded-xl p-5">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-emerald-500/10 rounded-lg">
-                          <DollarSign className="w-5 h-5 text-emerald-400" />
+                      return (
+                        <div key={curr.code} className="bg-slate-900/80 border border-slate-700 rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xl">{curr.flag}</span>
+                            <div>
+                              <p className="text-slate-100 font-bold text-sm">{curr.code}</p>
+                              <p className="text-slate-500 text-xs">{curr.percentage * 100}%</p>
+                            </div>
+                          </div>
+                          <div className="text-center py-2">
+                            <p className={`font-bold text-lg text-${color}-400`}>
+                              {currentBalance.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
+                            </p>
+                            <p className="text-slate-600 text-xs">{isSpanish ? "M.Millones" : "Billions"}</p>
+                          </div>
+                          <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div
+                              className={`h-full bg-${color}-500 rounded-full transition-all duration-500`}
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-slate-100 font-bold">MASTER EUR (40%)</p>
-                          <p className="text-slate-500 text-xs">MASTER-EUR-001</p>
-                        </div>
-                      </div>
-                      <div className="text-center py-4">
-                        <p className="text-slate-400 text-xs mb-2">
-                          {isSpanish ? "Balance Actual:" : "Current Balance:"}
-                        </p>
-                        <p className="text-emerald-400 font-black text-2xl">
-                          {(currentScannedAmount * EUR_PERCENTAGE).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
-                        </p>
-                        <p className="text-slate-500 text-xs mt-1">
-                          {isSpanish ? "Miles de Millones" : "Billions"}
-                        </p>
-                      </div>
-                      <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full transition-all duration-500"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
 
                   {/* Info adicional */}
