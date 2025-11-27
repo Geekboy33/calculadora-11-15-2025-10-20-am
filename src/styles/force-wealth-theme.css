@@ -1,0 +1,88 @@
+/**
+ * FORCE WEALTH THEME
+ * Fuerza la aplicación del tema Wealth Dark con !important
+ */
+
+/* FORZAR BACKGROUND PRINCIPAL */
+body,
+#root,
+.min-h-screen {
+  background-color: #050812 !important;
+}
+
+/* FORZAR COLORES DE TEXTO */
+h1, h2, h3, h4, h5, h6,
+p, span, div {
+  color: #F9FAFB;
+}
+
+/* FORZAR CARDS */
+[class*="Card"],
+[class*="card"] {
+  background-color: #0E1525 !important;
+  border-color: #1F2937 !important;
+}
+
+/* FORZAR BOTONES PRIMARIOS */
+button[class*="primary"],
+button[class*="Primary"] {
+  background: linear-gradient(135deg, #4F8DFF, #3A6BD9) !important;
+  color: #FFFFFF !important;
+}
+
+/* APLICAR A TODOS LOS MÓDULOS */
+[class*="min-h-screen"] {
+  background-color: #050812 !important;
+}
+
+[class*="bg-black"] {
+  background-color: #050812 !important;
+}
+
+[class*="bg-slate-950"] {
+  background-color: #050812 !important;
+}
+
+[class*="bg-slate-900"] {
+  background-color: #0E1525 !important;
+}
+
+[class*="bg-slate-800"] {
+  background-color: #141A2A !important;
+}
+
+[class*="text-slate-100"],
+[class*="text-white"] {
+  color: #F9FAFB !important;
+}
+
+[class*="text-slate-300"] {
+  color: #D1D5DB !important;
+}
+
+[class*="text-slate-400"],
+[class*="text-slate-500"] {
+  color: #6B7280 !important;
+}
+
+[class*="border-slate-700"] {
+  border-color: #1F2937 !important;
+}
+
+[class*="text-sky-400"],
+[class*="text-sky-500"] {
+  color: #4F8DFF !important;
+}
+
+[class*="bg-sky-500"] {
+  background-color: #4F8DFF !important;
+}
+
+[class*="text-emerald-400"] {
+  color: #6EE7B7 !important;
+}
+
+[class*="text-amber-400"] {
+  color: #F5D576 !important;
+}
+

@@ -1,12 +1,15 @@
-/* Import DAES Wealth Design System */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import DAES Wealth Design System DESPUÉS de Tailwind para sobrescribir */
 @import './styles/daes-design-tokens.css';
 @import './styles/daes-wealth-global.css';
 @import './styles/design-system.css';
 @import './styles/banking-theme.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* FORZAR tema Wealth Dark con máxima prioridad */
+@import './styles/force-wealth-theme.css';
 
 /* 🎨 Paleta de Colores Futurista - Negro + Verde Neón Tipo Pantalla Iluminada */
 :root {
