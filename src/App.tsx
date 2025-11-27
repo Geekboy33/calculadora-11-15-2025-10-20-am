@@ -25,7 +25,6 @@ const EnhancedBinaryViewer = lazy(() => import('./components/EnhancedBinaryViewe
 const LargeFileDTC1BAnalyzer = lazy(() => import('./components/LargeFileDTC1BAnalyzer').then(m => ({ default: m.LargeFileDTC1BAnalyzer })));
 const XcpB2BInterface = lazy(() => import('./components/XcpB2BInterface').then(m => ({ default: m.XcpB2BInterface })));
 const AccountLedger = lazy(() => import('./components/AccountLedger').then(m => ({ default: m.AccountLedger })));
-const AccountLedger1 = lazy(() => import('./components/AccountLedger1').then(m => ({ default: m.AccountLedger1 })));
 const BankBlackScreen = lazy(() => import('./components/BankBlackScreen').then(m => ({ default: m.BankBlackScreen })));
 const AuditBankWindow = lazy(() => import('./components/AuditBankWindow').then(m => ({ default: m.AuditBankWindow })));
 const CoreBankingAPIModule = lazy(() => import('./components/CoreBankingAPIModule').then(m => ({ default: m.CoreBankingAPIModule })));
@@ -43,7 +42,7 @@ const ProfilesModule = lazy(() => import('./components/ProfilesModule').then(m =
 const BankSettlementModule = lazy(() => import('./components/BankSettlementModule').then(m => ({ default: m.BankSettlementModule })));
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 
-type Tab = 'central-dashboard' | 'banco-central-privado' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager';
+type Tab = 'central-dashboard' | 'banco-central-privado' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -116,7 +115,6 @@ function App() {
     { id: 'dashboard' as Tab, name: t.navDashboard, icon: LayoutDashboard },
     { id: 'analytics' as Tab, name: 'Analytics', icon: TrendingUp },
     { id: 'ledger' as Tab, name: t.navLedger, icon: BookOpen },
-    { id: 'ledger1' as Tab, name: isSpanish ? '📊 Account Ledger 1' : '📊 Account Ledger 1', icon: Database },
     { id: 'blackscreen' as Tab, name: t.navBlackScreen, icon: FileCheck },
     { id: 'custody' as Tab, name: t.navCustody, icon: Lock },
     { id: 'profiles' as Tab, name: isSpanish ? 'Perfiles' : 'Profiles', icon: User },
@@ -243,7 +241,6 @@ function App() {
           {activeTab === 'dashboard' && <AdvancedBankingDashboard />}
           {activeTab === 'analytics' && <AnalyticsDashboard />}
           {activeTab === 'ledger' && <AccountLedger />}
-          {activeTab === 'ledger1' && <AccountLedger1 />}
           {activeTab === 'blackscreen' && <BankBlackScreen />}
           {activeTab === 'custody' && <CustodyAccountsModule />}
           {activeTab === 'profiles' && <ProfilesModule />}

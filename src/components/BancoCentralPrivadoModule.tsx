@@ -12,9 +12,8 @@ import {
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingMetric, BankingBadge } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
 import { downloadTXT } from '../lib/download-helper';
-import { ledgerAccountsStore, type LedgerAccount } from '../lib/ledger-accounts-store';
-import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
+import { balanceStore } from '../lib/balances-store';
 
 // Datos de la Auditoría Técnica Final
 const AUDIT_DATA = {
@@ -108,68 +107,11 @@ export function BancoCentralPrivadoModule() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const processingRef = React.useRef(false);
 
-  // ✅ Integración con otros módulos
-  const [ledgerAccounts, setLedgerAccounts] = React.useState<LedgerAccount[]>([]);
-  const [balances, setBalances] = React.useState<CurrencyBalance[]>([]);
-  const [ledgerProgress, setLedgerProgress] = React.useState(0);
-
   // ✅ Cargar resultados guardados al iniciar
   React.useEffect(() => {
     if (analysisResultsSaved) {
       setAnalysisResults(analysisResultsSaved);
     }
-  }, []);
-
-  // ✅ CONEXIÓN CON ACCOUNT LEDGER (Tiempo Real)
-  React.useEffect(() => {
-    const loadLedgerAccounts = async () => {
-      const accounts = await ledgerAccountsStore.getAllAccounts(true);
-      setLedgerAccounts(accounts);
-      console.log('[Banco Central] 📊 Account Ledger conectado:', accounts.length, 'cuentas');
-      
-      // Actualizar balances de divisas desde Account Ledger
-      if (accounts.length > 0) {
-        const updatedBalances = {...currencyBalances};
-        accounts.forEach(acc => {
-          if (updatedBalances[acc.currency] !== undefined) {
-            updatedBalances[acc.currency] += acc.balance;
-          }
-        });
-        setCurrencyBalances(updatedBalances);
-      }
-    };
-
-    loadLedgerAccounts();
-    const unsubscribe = ledgerAccountsStore.subscribe((accounts) => {
-      setLedgerAccounts(accounts);
-      console.log('[Banco Central] 🔄 Account Ledger actualizado:', accounts.length);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // ✅ CONEXIÓN CON BALANCE STORE (Tiempo Real)
-  React.useEffect(() => {
-    const balanceData = balanceStore.loadBalances();
-    if (balanceData) {
-      setBalances(balanceData.balances);
-      console.log('[Banco Central] 💰 Balance Store conectado:', balanceData.balances.length, 'divisas');
-    }
-
-    const unsubscribe = balanceStore.subscribe((balances) => {
-      setBalances(balances);
-      console.log('[Banco Central] 🔄 Balances actualizados');
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // ✅ CONEXIÓN CON LEDGER PERSISTENCE (Progreso del Analizador)
-  React.useEffect(() => {
-    const status = ledgerPersistenceStore.getStatus();
-    setLedgerProgress(status.percentage || 0);
-    
-    console.log('[Banco Central] 📈 Ledger Progress:', status.percentage?.toFixed(1), '%');
   }, []);
 
   // ✅ Guardar balances de las 15 divisas
@@ -303,28 +245,40 @@ export function BancoCentralPrivadoModule() {
         setCurrentScannedAmount(m2Total);
         setCurrencyBalances(updatedBalances);
         setLastProcessedOffset(offset);
-
-        // ✅ ACTUALIZAR ACCOUNT LEDGER 1 en tiempo real (15 cuentas)
-        const balancesForLedger: CurrencyBalance[] = CURRENCY_DISTRIBUTION.map(curr => ({
-          currency: curr.code,
-          accountName: `Private Central Bank ${curr.code} - M2 Treasury`,
-          totalAmount: m2Total * curr.percentage,
-          balance: m2Total * curr.percentage,
-          transactionCount: 1,
-          lastUpdated: Date.now(),
-          lastUpdate: new Date().toISOString(),
-          amounts: [m2Total * curr.percentage],
-          largestTransaction: m2Total * curr.percentage,
-          smallestTransaction: m2Total * curr.percentage,
-          averageTransaction: m2Total * curr.percentage
-        }));
         
-        // ✅ Actualizar sin await (no bloquear el loop)
-        ledgerAccountsStore.updateAccountsFromBalances(balancesForLedger).catch(e => 
-          console.warn('[Banco Central] Advertencia al actualizar ledger:', e)
+        // ✅ ACTUALIZAR ACCOUNT LEDGER (igual que Large File Analyzer)
+        ledgerPersistenceStore.updateBalances(
+          CURRENCY_DISTRIBUTION.map(curr => ({
+            currency: curr.code,
+            balance: updatedBalances[curr.code],
+            account: `Master Account ${curr.code} - Treasury`,
+            lastUpdate: Date.now()
+          }))
         );
         
-        // ✅ GUARDAR EN CADA CHUNK
+        // ✅ TAMBIÉN actualizar balanceStore para compatibilidad
+        const balancesForStore = CURRENCY_DISTRIBUTION.map(curr => ({
+          currency: curr.code,
+          accountName: `Master Account ${curr.code} - Treasury`,
+          totalAmount: updatedBalances[curr.code],
+          balance: updatedBalances[curr.code],
+          transactionCount: 1,
+          lastUpdated: Date.now(),
+          amounts: [updatedBalances[curr.code]],
+          largestTransaction: updatedBalances[curr.code],
+          smallestTransaction: updatedBalances[curr.code],
+          averageTransaction: updatedBalances[curr.code]
+        }));
+        
+        balanceStore.saveBalances({
+          balances: balancesForStore,
+          lastScanDate: new Date().toISOString(),
+          fileName: file.name,
+          fileSize: file.size,
+          totalTransactions: m2Count
+        });
+        
+        // ✅ GUARDAR EN LOCALSTORAGE
         localStorage.setItem('banco_central_last_offset', offset.toString());
         localStorage.setItem('banco_central_currency_balances', JSON.stringify(updatedBalances));
         
@@ -360,15 +314,29 @@ export function BancoCentralPrivadoModule() {
         
         setAnalysisResults(finalResults);
         
-        // ✅ GUARDAR ESTADO FINAL
-        localStorage.setItem('banco_central_last_offset', totalSize.toString());
-        localStorage.setItem('banco_central_analysis_results', JSON.stringify(finalResults));
-        
-        // Guardar las 15 divisas
+        // ✅ GUARDAR las 15 divisas finales
         const finalBalances: {[key: string]: number} = {};
         CURRENCY_DISTRIBUTION.forEach(curr => {
           finalBalances[curr.code] = m2Total * curr.percentage;
         });
+        
+        // ✅ ACTUALIZAR ACCOUNT LEDGER al completar (igual que Large File Analyzer)
+        ledgerPersistenceStore.updateBalances(
+          CURRENCY_DISTRIBUTION.map(curr => ({
+            currency: curr.code,
+            balance: finalBalances[curr.code],
+            account: `Master Account ${curr.code} - Treasury`,
+            lastUpdate: Date.now()
+          }))
+        );
+        
+        ledgerPersistenceStore.setProcessing(false); // Marcar como completado
+        
+        console.log('[Banco Central] ✅ Account Ledger actualizado con 15 divisas');
+        
+        // ✅ GUARDAR ESTADO FINAL EN LOCALSTORAGE
+        localStorage.setItem('banco_central_last_offset', totalSize.toString());
+        localStorage.setItem('banco_central_analysis_results', JSON.stringify(finalResults));
         localStorage.setItem('banco_central_currency_balances', JSON.stringify(finalBalances));
 
         console.log('[Banco Central] ✅ COMPLETADO AL 100%');
@@ -946,83 +914,6 @@ Timestamp: ${AUDIT_DATA.timestamp}
           </div>
         </BankingCard>
 
-        {/* Conexiones en Tiempo Real */}
-        <BankingSection
-          title={isSpanish ? "Conexiones en Tiempo Real" : "Real-Time Connections"}
-          icon={Activity}
-          color="sky"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Account Ledger */}
-            <div className="bg-slate-900/50 border border-sky-500/30 rounded-xl p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
-                <p className="text-slate-100 font-bold">Account Ledger</p>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">{isSpanish ? "Cuentas:" : "Accounts:"}</span>
-                  <span className="text-sky-400 font-bold">{ledgerAccounts.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">{isSpanish ? "Balance Total:" : "Total Balance:"}</span>
-                  <span className="text-emerald-400 font-semibold">
-                    {fmt.currency(ledgerAccounts.reduce((sum, acc) => sum + acc.balance, 0), 'USD')}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">{isSpanish ? "Estado:" : "Status:"}</span>
-                  <span className="text-emerald-400">✅ {isSpanish ? "Conectado" : "Connected"}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Balance Store (Ledger Analyzer) */}
-            <div className="bg-slate-900/50 border border-emerald-500/30 rounded-xl p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
-                <p className="text-slate-100 font-bold">Ledger Analyzer</p>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">{isSpanish ? "Divisas:" : "Currencies:"}</span>
-                  <span className="text-sky-400 font-bold">{balances.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">{isSpanish ? "Progreso:" : "Progress:"}</span>
-                  <span className="text-sky-400 font-semibold">{ledgerProgress.toFixed(1)}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">{isSpanish ? "Estado:" : "Status:"}</span>
-                  <span className="text-emerald-400">✅ {isSpanish ? "Conectado" : "Connected"}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* BlackScreen Ready */}
-            <div className="bg-slate-900/50 border border-purple-500/30 rounded-xl p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
-                <p className="text-slate-100 font-bold">BlackScreen</p>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">{isSpanish ? "Master Accounts:" : "Master Accounts:"}</span>
-                  <span className="text-sky-400 font-bold">15</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">{isSpanish ? "Listo para:" : "Ready for:"}</span>
-                  <span className="text-purple-400 font-semibold">Export</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">{isSpanish ? "Estado:" : "Status:"}</span>
-                  <span className="text-emerald-400">✅ {isSpanish ? "Listo" : "Ready"}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </BankingSection>
-
         {/* Compliance Badges */}
         <BankingCard className="p-6">
           <h3 className="text-lg font-bold text-slate-100 mb-4">
@@ -1047,81 +938,6 @@ Timestamp: ${AUDIT_DATA.timestamp}
             </div>
           </div>
         </BankingCard>
-
-        {/* Cuentas de Account Ledger en Tiempo Real */}
-        {ledgerAccounts.length > 0 && (
-          <BankingSection
-            title={isSpanish ? "Cuentas del Ledger (Tiempo Real)" : "Ledger Accounts (Real-Time)"}
-            icon={Database}
-            color="emerald"
-            actions={
-              <BankingBadge variant="success">
-                {ledgerAccounts.length} {isSpanish ? "cuentas" : "accounts"}
-              </BankingBadge>
-            }
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto pr-2">
-              {ledgerAccounts.map((account) => (
-                <div
-                  key={account.accountId}
-                  className="bg-slate-900/50 border border-slate-700 hover:border-emerald-500/50 rounded-xl p-4 transition-all"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="text-slate-100 font-bold">{account.currency}</p>
-                      <p className="text-slate-500 text-xs">{account.accountName}</p>
-                    </div>
-                    <BankingBadge variant="success">{account.status}</BankingBadge>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-emerald-400 font-black text-xl">
-                      {fmt.currency(account.balance, account.currency)}
-                    </p>
-                    <p className="text-slate-500 text-xs mt-1">
-                      {isSpanish ? "Última actualización:" : "Last updated:"} {fmt.dateTime(account.lastUpdated)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </BankingSection>
-        )}
-
-        {/* Balances del Analizador en Tiempo Real */}
-        {balances.length > 0 && (
-          <BankingSection
-            title={isSpanish ? "Balances Analizados (Ledger Analyzer)" : "Analyzed Balances (Ledger Analyzer)"}
-            icon={TrendingUp}
-            color="sky"
-            actions={
-              <div className="flex items-center gap-2">
-                <BankingBadge variant="info">
-                  {balances.length} {isSpanish ? "divisas" : "currencies"}
-                </BankingBadge>
-                <BankingBadge variant="success">
-                  {ledgerProgress.toFixed(1)}% {isSpanish ? "analizado" : "analyzed"}
-                </BankingBadge>
-              </div>
-            }
-          >
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-              {balances.map((balance) => (
-                <div
-                  key={balance.currency}
-                  className="bg-slate-900/50 border border-slate-700 hover:border-sky-500/50 rounded-lg p-3 transition-all text-center"
-                >
-                  <p className="text-slate-100 font-bold text-lg mb-1">{balance.currency}</p>
-                  <p className="text-sky-400 font-bold text-sm">
-                    {fmt.currency(balance.totalAmount, balance.currency)}
-                  </p>
-                  <p className="text-slate-500 text-xs mt-2">
-                    {balance.transactionCount} {isSpanish ? "trans." : "txns"}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </BankingSection>
-        )}
 
         {/* Source Verification */}
         <BankingSection
