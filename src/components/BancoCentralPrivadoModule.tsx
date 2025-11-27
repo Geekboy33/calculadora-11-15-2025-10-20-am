@@ -132,16 +132,41 @@ export function BancoCentralPrivadoModule() {
     }
   }, [lastProcessedOffset]);
 
-  // ✅ NO detener el procesamiento al desmontar (igual que Large File Analyzer)
+  // ✅ AUTO-SINCRONIZACIÓN con Account Ledger cada 5 segundos
   React.useEffect(() => {
+    const syncInterval = setInterval(() => {
+      // Si NO está analizando activamente, sincronizar con Account Ledger
+      if (!analyzing) {
+        const ledgerBalances = ledgerPersistenceStore.getBalances();
+        const ledgerStatus = ledgerPersistenceStore.getStatus();
+
+        if (ledgerBalances.length > 0) {
+          const syncedBalances: {[key: string]: number} = {};
+          
+          ledgerBalances.forEach(b => {
+            syncedBalances[b.currency] = b.balance;
+          });
+
+          // Actualizar balances con los de Account Ledger
+          setCurrencyBalances(prev => ({
+            ...prev,
+            ...syncedBalances
+          }));
+
+          // Actualizar progreso si Account Ledger está procesando
+          if (ledgerStatus?.isProcessing && ledgerStatus.percentage > 0) {
+            setProgress(ledgerStatus.percentage);
+            console.log(`[Banco Central] 🔄 Auto-sincronizado: ${ledgerStatus.percentage.toFixed(1)}% - ${ledgerBalances.length} divisas`);
+          }
+        }
+      }
+    }, 5000); // Cada 5 segundos
+
     return () => {
-      // El procesamiento continúa en background
-      // NO llamar ledgerPersistenceStore.setProcessing(false)
-      // NO llamar processingRef.current = false
+      clearInterval(syncInterval);
       console.log('[Banco Central] 💾 Componente desmontado, procesamiento continúa en background');
-      console.log('[Banco Central] 🔄 Account Ledger seguirá actualizándose automáticamente');
     };
-  }, []);
+  }, [analyzing]);
 
   // Master Accounts para las 15 divisas
   const masterAccounts = CURRENCY_DISTRIBUTION.map(curr => ({
@@ -429,6 +454,58 @@ export function BancoCentralPrivadoModule() {
     }
   };
 
+  // ✅ Sincronizar con Account Ledger (si está procesando)
+  const handleSyncWithLedger = () => {
+    console.log('[Banco Central] 🔄 Sincronizando con Account Ledger...');
+
+    // Obtener balances actuales de ledgerPersistenceStore
+    const ledgerBalances = ledgerPersistenceStore.getBalances();
+    const ledgerStatus = ledgerPersistenceStore.getStatus();
+
+    if (ledgerBalances.length > 0) {
+      console.log('[Banco Central] 📊 Balances encontrados en Account Ledger:', ledgerBalances.length);
+
+      // Actualizar balances de Private Central Bank con los de Account Ledger
+      const syncedBalances: {[key: string]: number} = {};
+      let totalBalance = 0;
+
+      ledgerBalances.forEach(b => {
+        syncedBalances[b.currency] = b.balance;
+        totalBalance += b.balance;
+      });
+
+      // Si faltan divisas, usar distribución proporcional
+      CURRENCY_DISTRIBUTION.forEach(curr => {
+        if (!syncedBalances[curr.code]) {
+          syncedBalances[curr.code] = totalBalance * curr.percentage;
+        }
+      });
+
+      setCurrencyBalances(syncedBalances);
+
+      // Calcular progreso estimado
+      const estimatedProgress = ledgerStatus?.percentage || 0;
+      setProgress(estimatedProgress);
+
+      alert(
+        `✅ ${isSpanish ? 'SINCRONIZADO CON ACCOUNT LEDGER' : 'SYNCED WITH ACCOUNT LEDGER'}\n\n` +
+        `${isSpanish ? 'Divisas actualizadas:' : 'Currencies updated:'} ${ledgerBalances.length}\n` +
+        `${isSpanish ? 'Progreso de Account Ledger:' : 'Account Ledger progress:'} ${estimatedProgress.toFixed(1)}%\n\n` +
+        `${isSpanish ? 'Balances sincronizados desde Account Ledger' : 'Balances synced from Account Ledger'}`
+      );
+
+      console.log('[Banco Central] ✅ Sincronización completada');
+      ledgerBalances.forEach(b => {
+        console.log(`  ${b.currency}: ${b.balance.toFixed(0)}`);
+      });
+    } else {
+      alert(
+        `ℹ️ ${isSpanish ? 'Account Ledger vacío' : 'Account Ledger empty'}\n\n` +
+        `${isSpanish ? 'Carga un archivo en Large File Analyzer o aquí para ver balances' : 'Load a file in Large File Analyzer or here to see balances'}`
+      );
+    }
+  };
+
   const handleClearAnalysis = () => {
     const confirmed = confirm(
       `⚠️ ${isSpanish ? 'LIMPIAR ANÁLISIS Y PROGRESO' : 'CLEAR ANALYSIS AND PROGRESS'}\n\n` +
@@ -634,6 +711,14 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   ? (isSpanish ? 'Analizando...' : 'Analyzing...')
                   : (isSpanish ? 'Cargar Ledger1' : 'Load Ledger1')
                 }
+              </BankingButton>
+              <BankingButton
+                variant="secondary"
+                icon={RefreshCw}
+                onClick={handleSyncWithLedger}
+                className="border border-emerald-500/30 hover:border-emerald-500 text-emerald-400"
+              >
+                {isSpanish ? "Sincronizar con Ledger" : "Sync with Ledger"}
               </BankingButton>
               <BankingButton
                 variant="secondary"
