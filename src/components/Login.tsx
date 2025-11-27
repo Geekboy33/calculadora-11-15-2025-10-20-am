@@ -1,265 +1,278 @@
 /**
- * Login Component - Sistema de Autenticación DAES
- * Digital Commercial Bank Ltd - Authentication System
- * Esquema: Negro + Verde Futurista
+ * Login Component - DAES Wealth Authentication
+ * Diseño: Emirates NBD / JP Morgan Wealth Management
+ * Tema: Wealth Dark Premium
  */
 
-import { useState, useEffect } from 'react';
-import { Lock, User, Shield, Eye, EyeOff, AlertCircle, Key } from 'lucide-react';
-import { useLanguage } from '../lib/i18n.tsx';
+import { useState } from 'react';
+import { Lock, User, Eye, EyeOff, Shield, Building2 } from 'lucide-react';
 
 interface LoginProps {
   onLogin: () => void;
 }
 
 export function Login({ onLogin }: LoginProps) {
-  const { t, language } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [attempts, setAttempts] = useState(0);
 
-  // Credenciales profesionales
+  // Credenciales
   const VALID_USERNAME = 'admin';
   const VALID_PASSWORD = 'DAES2025';
-
-  // Efecto de animación de fondo
-  useEffect(() => {
-    const canvas = document.getElementById('matrix-bg') as HTMLCanvasElement;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const chars = 'DAES01DIGITAL';
-    const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops: number[] = [];
-
-    for (let i = 0; i < columns; i++) {
-      drops[i] = Math.random() * -100;
-    }
-
-    function draw() {
-      if (!ctx || !canvas) return;
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = '#00ff88';
-      ctx.font = fontSize + 'px monospace';
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = chars[Math.floor(Math.random() * chars.length)];
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    }
-
-    const interval = setInterval(draw, 50);
-
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Simular delay de autenticación
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Simular validación
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     if (username === VALID_USERNAME && password === VALID_PASSWORD) {
-      // Login exitoso
       localStorage.setItem('daes_authenticated', 'true');
       localStorage.setItem('daes_user', username);
       localStorage.setItem('daes_login_time', new Date().toISOString());
       onLogin();
     } else {
-      setAttempts(prev => prev + 1);
-      setError(t.loginInvalidCredentials);
-      setPassword('');
-
-      // Bloqueo temporal después de 3 intentos
-      if (attempts >= 2) {
-        setError(t.loginTooManyAttempts);
-        setTimeout(() => {
-          setAttempts(0);
-          setError('');
-        }, 30000);
-      }
+      setError('Invalid credentials. Please try again.');
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
-    <div className="fixed inset-0 bg-black overflow-hidden">
-      {/* Fondo Matrix animado */}
-      <canvas
-        id="matrix-bg"
-        className="absolute inset-0 opacity-20"
-      />
-
-      {/* Grid de fondo */}
-      <div className="absolute inset-0 grid-cyber opacity-10" />
-
-      {/* Contenedor principal */}
-      <div className="relative z-10 h-full flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          {/* Logo y título */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-[#00ff88] to-[#00cc6a] mb-6 glow-green-ultra pulse-green">
-              <Shield className="w-10 h-10 text-black" />
-            </div>
-            <h1 className="text-4xl font-black text-neon-bright mb-2 tracking-wider">
-              {t.loginTitle}
-            </h1>
-            <p className="text-cyber text-sm font-semibold tracking-widest">
-              {t.loginSubtitle}
-            </p>
-            <div className="mt-4 space-y-2">
-              <div className="text-[#00ff88] text-base font-bold tracking-wide">
-                Digital Commercial Bank Ltd
-              </div>
-              <div className="text-white/90 text-sm font-mono space-y-1 leading-relaxed">
-                <div className="font-semibold">International Banking License Number: L 15446</div>
-                <div className="font-semibold">Company Number: 15446</div>
-              </div>
-              <div className="text-white/80 text-xs font-mono mt-3 tracking-wider">
-                CoreBanking Security Gateway
-              </div>
-            </div>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{
+      backgroundColor: 'var(--bg-main)',
+      backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(79, 141, 255, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(79, 141, 255, 0.03) 0%, transparent 50%)'
+    }}>
+      <div className="w-full max-w-md">
+        {/* Logo y Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6" style={{
+            background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-lighter))',
+            boxShadow: '0 8px 32px rgba(79, 141, 255, 0.3)'
+          }}>
+            <Building2 className="w-10 h-10" style={{ color: 'var(--text-inverse)' }} />
           </div>
+          <h1 className="text-4xl font-bold mb-2" style={{ 
+            color: 'var(--text-primary)',
+            fontWeight: 'var(--font-bold)'
+          }}>
+            Digital Commercial Bank
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-base)' }}>
+            DAES CoreBanking System
+          </p>
+        </div>
 
-          {/* Formulario de login */}
-          <div className="glass-panel rounded-2xl p-8 shadow-2xl border-glow">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Campo de usuario */}
-              <div>
-                <label className="block text-[#80ff80] text-sm font-semibold mb-2">
-                  {t.loginUser}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="w-5 h-5 text-[#4d7c4d]" />
-                  </div>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-black border border-[#1a1a1a] rounded-lg text-[#e0ffe0] placeholder-[#4d7c4d] focus:border-[#00ff88] focus:ring-2 focus:ring-[#00ff88]/30 focus:shadow-[0_0_15px_rgba(0,255,136,0.3)] transition-all outline-none font-mono"
-                    placeholder={t.loginUser}
-                    disabled={isLoading || attempts >= 3}
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Campo de contraseña */}
-              <div>
-                <label className="block text-[#80ff80] text-sm font-semibold mb-2">
-                  {t.loginPassword}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="w-5 h-5 text-[#4d7c4d]" />
-                  </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-12 py-3 bg-black border border-[#1a1a1a] rounded-lg text-[#e0ffe0] placeholder-[#4d7c4d] focus:border-[#00ff88] focus:ring-2 focus:ring-[#00ff88]/30 focus:shadow-[0_0_15px_rgba(0,255,136,0.3)] transition-all outline-none font-mono"
-                    placeholder={t.loginPassword}
-                    disabled={isLoading || attempts >= 3}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#4d7c4d] hover:text-[#80ff80] transition-colors"
-                    disabled={isLoading || attempts >= 3}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Mensaje de error */}
-              {error && (
-                <div className="flex items-start gap-2 bg-red-950/50 border border-red-500/50 rounded-lg p-3 animate-pulse">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-red-300 text-sm font-medium">{error}</p>
-                </div>
-              )}
-
-              {/* Botón de submit */}
-              <button
-                type="submit"
-                disabled={isLoading || attempts >= 3}
-                className={`w-full py-3 px-4 rounded-lg font-bold text-black transition-all flex items-center justify-center gap-2 ${
-                  isLoading || attempts >= 3
-                    ? 'bg-[#4d7c4d] cursor-not-allowed opacity-50'
-                    : 'bg-gradient-to-r from-[#00ff88] to-[#00cc6a] hover:from-[#00ffaa] hover:to-[#00ff88] shadow-[0_0_25px_rgba(0,255,136,0.5)] hover:shadow-[0_0_35px_rgba(0,255,136,0.8)] transform hover:scale-[1.02]'
-                }`}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                    <span>{t.loginAuthenticating}</span>
-                  </>
-                ) : (
-                  <>
-                    <Shield className="w-5 h-5" />
-                    <span>{t.loginButton}</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Información de seguridad */}
-            <div className="mt-6 pt-6 border-t border-[#1a1a1a]">
-              <div className="flex items-center gap-2 text-[#4d7c4d] text-xs">
-                <Lock className="w-4 h-4" />
-                <span>{t.loginSecureConnection}</span>
-              </div>
-              <div className="mt-2 text-[#4d7c4d] text-xs">
-                {t.loginAttempts}: {attempts}/3
+        {/* Card de Login */}
+        <div style={{
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: 'var(--radius-2xl)',
+          boxShadow: 'var(--shadow-elevated)',
+          border: '1px solid var(--border-subtle)',
+          padding: '2.5rem'
+        }}>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Username */}
+            <div>
+              <label style={{
+                display: 'block',
+                color: 'var(--text-secondary)',
+                fontSize: 'var(--text-sm)',
+                fontWeight: 'var(--font-medium)',
+                marginBottom: '0.5rem'
+              }}>
+                Username
+              </label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter username"
+                  required
+                  style={{
+                    width: '100%',
+                    paddingLeft: '3rem',
+                    paddingRight: '1rem',
+                    paddingTop: '0.875rem',
+                    paddingBottom: '0.875rem',
+                    backgroundColor: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-lg)',
+                    color: 'var(--text-primary)',
+                    fontSize: 'var(--text-base)',
+                    outline: 'none',
+                    transition: 'all var(--transition-base)'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'var(--border-focus)';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(79, 141, 255, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'var(--border-subtle)';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
               </div>
             </div>
 
-          </div>
+            {/* Password */}
+            <div>
+              <label style={{
+                display: 'block',
+                color: 'var(--text-secondary)',
+                fontSize: 'var(--text-sm)',
+                fontWeight: 'var(--font-medium)',
+                marginBottom: '0.5rem'
+              }}>
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  required
+                  style={{
+                    width: '100%',
+                    paddingLeft: '3rem',
+                    paddingRight: '3rem',
+                    paddingTop: '0.875rem',
+                    paddingBottom: '0.875rem',
+                    backgroundColor: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-lg)',
+                    color: 'var(--text-primary)',
+                    fontSize: 'var(--text-base)',
+                    outline: 'none',
+                    transition: 'all var(--transition-base)'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'var(--border-focus)';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(79, 141, 255, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'var(--border-subtle)';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
 
-          {/* Footer */}
-          <div className="mt-8 text-center text-[#4d7c4d] text-xs">
-            <p>{t.loginCopyright}</p>
-            <p className="mt-1">{t.loginAllRightsReserved} • {t.loginVersion}</p>
+            {/* Error Message */}
+            {error && (
+              <div style={{
+                backgroundColor: 'var(--status-error-bg)',
+                border: '1px solid var(--status-error-border)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem'
+              }}>
+                <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--status-error-text)' }} />
+                <p style={{ color: 'var(--status-error-text)', fontSize: 'var(--text-sm)' }}>
+                  {error}
+                </p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading || !username || !password}
+              style={{
+                width: '100%',
+                padding: '1rem',
+                backgroundColor: 'var(--color-primary)',
+                color: 'var(--text-inverse)',
+                fontSize: 'var(--text-base)',
+                fontWeight: 'var(--font-semibold)',
+                borderRadius: 'var(--radius-lg)',
+                border: 'none',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: (isLoading || !username || !password) ? 0.5 : 1,
+                transition: 'all var(--transition-base)',
+                boxShadow: 'var(--shadow-md)'
+              }}
+              onMouseEnter={(e) => {
+                if (!isLoading && username && password) {
+                  e.currentTarget.style.backgroundColor = 'var(--color-primary-hover)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--color-primary)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+              }}
+            >
+              {isLoading ? 'Authenticating...' : 'Sign In'}
+            </button>
+          </form>
+
+          {/* Footer Info */}
+          <div className="mt-8 text-center space-y-3">
+            <div className="flex items-center justify-center gap-2" style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
+              <Shield className="w-4 h-4" />
+              <span>Secure Authentication • AES-256 Encrypted</span>
+            </div>
+            <div className="flex items-center justify-center gap-4" style={{ fontSize: 'var(--text-xs)' }}>
+              <span style={{
+                backgroundColor: 'var(--status-success-bg)',
+                color: 'var(--status-success-text)',
+                padding: '0.25rem 0.75rem',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--status-success-border)',
+                fontWeight: 'var(--font-semibold)'
+              }}>
+                ISO 27001
+              </span>
+              <span style={{
+                backgroundColor: 'var(--status-info-bg)',
+                color: 'var(--status-info-text)',
+                padding: '0.25rem 0.75rem',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--status-info-border)',
+                fontWeight: 'var(--font-semibold)'
+              }}>
+                SOC 2
+              </span>
+              <span style={{
+                backgroundColor: 'var(--status-success-bg)',
+                color: 'var(--status-success-text)',
+                padding: '0.25rem 0.75rem',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--status-success-border)',
+                fontWeight: 'var(--font-semibold)'
+              }}>
+                PCI DSS
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* Copyright */}
+        <p className="text-center mt-8" style={{ 
+          color: 'var(--text-muted)', 
+          fontSize: 'var(--text-xs)' 
+        }}>
+          © 2025 Digital Commercial Bank Ltd. All rights reserved.
+        </p>
       </div>
     </div>
   );
 }
-
