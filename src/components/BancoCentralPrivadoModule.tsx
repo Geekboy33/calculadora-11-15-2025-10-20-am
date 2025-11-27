@@ -305,19 +305,22 @@ export function BancoCentralPrivadoModule() {
         setLastProcessedOffset(offset);
 
         // ✅ ACTUALIZAR ACCOUNT LEDGER 1 en tiempo real (15 cuentas)
-        CURRENCY_DISTRIBUTION.forEach(curr => {
-          const accountBalance = m2Total * curr.percentage;
-          
-          ledgerAccountsStore.updateOrCreateAccount({
-            accountId: `PCB-${curr.code}-001`,
-            accountName: `Private Central Bank ${curr.code} - M2 Treasury`,
-            currency: curr.code,
-            balance: accountBalance,
-            accountType: 'TREASURY',
-            status: 'ACTIVE',
-            lastUpdated: new Date().toISOString()
-          });
-        });
+        const balancesForLedger: CurrencyBalance[] = CURRENCY_DISTRIBUTION.map(curr => ({
+          currency: curr.code,
+          accountName: `Private Central Bank ${curr.code} - M2 Treasury`,
+          totalAmount: m2Total * curr.percentage,
+          balance: m2Total * curr.percentage,
+          transactionCount: 1,
+          lastUpdated: Date.now(),
+          lastUpdate: new Date().toISOString(),
+          amounts: [m2Total * curr.percentage],
+          largestTransaction: m2Total * curr.percentage,
+          smallestTransaction: m2Total * curr.percentage,
+          averageTransaction: m2Total * curr.percentage
+        }));
+        
+        // Actualizar ledgerAccountsStore con las 15 cuentas
+        await ledgerAccountsStore.updateAccountsFromBalances(balancesForLedger);
         
         // ✅ GUARDAR EN CADA CHUNK
         localStorage.setItem('banco_central_last_offset', offset.toString());
