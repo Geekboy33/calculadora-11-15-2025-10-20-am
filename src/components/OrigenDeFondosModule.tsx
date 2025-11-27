@@ -54,6 +54,7 @@ export function OrigenDeFondosModule() {
   });
   const [selectedBank, setSelectedBank] = useState<string>('ALL');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const processingRef = React.useRef(false);
 
   // ✅ Guardar cuentas cuando cambien
   React.useEffect(() => {
@@ -63,28 +64,42 @@ export function OrigenDeFondosModule() {
     }
   }, [accounts]);
 
+  // ✅ NO detener procesamiento al desmontar (igual que Private Central Bank)
+  React.useEffect(() => {
+    return () => {
+      // El procesamiento continúa en background
+      console.log('[Origen Fondos] 💾 Componente desmontado, procesamiento continúa en background');
+    };
+  }, []);
+
   const handleAnalyzeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    processingRef.current = true;
     setAnalyzing(true);
     setProgress(0);
-    setAccounts([]);
 
     try {
       console.log('[Origen Fondos] 📂 Analizando:', file.name);
       console.log('[Origen Fondos] 📊 Tamaño:', (file.size / (1024 * 1024)).toFixed(2), 'MB');
 
       const totalSize = file.size;
-      const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB chunks (igual que Private Central Bank)
+      const CHUNK_SIZE = 10 * 1024 * 1024;
       let offset = 0;
-      const foundAccounts: BankAccount[] = [];
+      const foundAccounts: BankAccount[] = [...accounts]; // Mantener cuentas existentes
       let accountIdCounter = 1;
 
       // ✅ TÉCNICA MEJORADA: Detección avanzada y creación en tiempo real
-      const accountsMap = new Map<string, BankAccount>(); // Evitar duplicados
+      const accountsMap = new Map<string, BankAccount>();
+      
+      // Añadir cuentas existentes al Map
+      foundAccounts.forEach(acc => {
+        accountsMap.set(`${acc.bankName}-${acc.accountNumber}`, acc);
+      });
 
-      while (offset < totalSize) {
+      // ✅ PROCESAMIENTO EN BACKGROUND (continúa aunque cambies de módulo)
+      while (offset < totalSize && processingRef.current) {
         const chunk = file.slice(offset, Math.min(offset + CHUNK_SIZE, totalSize));
         const buffer = await chunk.arrayBuffer();
         const bytes = new Uint8Array(buffer);
@@ -163,28 +178,35 @@ export function OrigenDeFondosModule() {
         await new Promise(r => setTimeout(r, 0));
       }
 
-      setProgress(100);
-      
-      // ✅ Guardar en localStorage (persistencia)
-      localStorage.setItem('origen_fondos_accounts', JSON.stringify(foundAccounts));
-      
-      console.log('[Origen Fondos] ✅ Completado:', foundAccounts.length, 'cuentas');
+      if (processingRef.current) {
+        setProgress(100);
+        
+        // ✅ Guardar en localStorage
+        localStorage.setItem('origen_fondos_accounts', JSON.stringify(foundAccounts));
+        
+        console.log('[Origen Fondos] ✅ COMPLETADO AL 100%');
+        console.log(`  Total cuentas: ${foundAccounts.length}`);
+        console.log(`  Bancos: ${new Set(foundAccounts.map(a => a.bankName)).size}`);
 
-      alert(
-        `✅ ${isSpanish ? 'ANÁLISIS COMPLETADO' : 'ANALYSIS COMPLETED'}\n\n` +
-        `${isSpanish ? 'Cuentas encontradas:' : 'Accounts found:'} ${foundAccounts.length}\n` +
-        `${isSpanish ? 'Bancos detectados:' : 'Banks detected:'} ${new Set(foundAccounts.map(a => a.bankName)).size}\n\n` +
-        `${isSpanish ? 'Datos extraídos:' : 'Extracted data:'}\n` +
-        `- ${isSpanish ? 'Números de cuenta' : 'Account numbers'}\n` +
-        `- ${isSpanish ? 'Balances' : 'Balances'}\n` +
-        `- IBAN, SWIFT`
-      );
+        alert(
+          `✅ ${isSpanish ? 'ANÁLISIS COMPLETADO' : 'ANALYSIS COMPLETED'}\n\n` +
+          `${isSpanish ? 'Cuentas:' : 'Accounts:'} ${foundAccounts.length}\n` +
+          `${isSpanish ? 'Bancos:' : 'Banks:'} ${new Set(foundAccounts.map(a => a.bankName)).size}\n\n` +
+          `${isSpanish ? 'Datos extraídos:' : 'Extracted data:'}\n` +
+          `- ${isSpanish ? 'Números de cuenta' : 'Account numbers'}\n` +
+          `- ${isSpanish ? 'Balances reales' : 'Real balances'}\n` +
+          `- IBAN, SWIFT`
+        );
+      } else {
+        console.log('[Origen Fondos] ⏸️ Procesamiento detenido por usuario');
+      }
 
     } catch (error) {
       console.error('[Origen Fondos] Error:', error);
       alert(`❌ Error: ${error instanceof Error ? error.message : 'Unknown'}`);
     } finally {
       setAnalyzing(false);
+      processingRef.current = false;
     }
   };
 
@@ -242,12 +264,16 @@ ${idx + 1}. ${acc.bankName}
     );
     
     if (confirmed) {
+      // ✅ Detener procesamiento si está activo
+      processingRef.current = false;
+      
       localStorage.removeItem('origen_fondos_accounts');
       setAccounts([]);
       setProgress(0);
       setSelectedBank('ALL');
+      
       alert(`✅ ${isSpanish ? 'Todo limpiado' : 'All cleared'}`);
-      console.log('[Origen Fondos] 🗑️ Todas las cuentas eliminadas');
+      console.log('[Origen Fondos] 🗑️ Todas las cuentas eliminadas y procesamiento detenido');
     }
   };
 
