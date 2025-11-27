@@ -23,6 +23,7 @@ const AuditLogViewer = lazy(() => import('./components/AuditLogViewer').then(m =
 const AdvancedBinaryReader = lazy(() => import('./components/AdvancedBinaryReader').then(m => ({ default: m.AdvancedBinaryReader })));
 const EnhancedBinaryViewer = lazy(() => import('./components/EnhancedBinaryViewer').then(m => ({ default: m.EnhancedBinaryViewer })));
 const LargeFileDTC1BAnalyzer = lazy(() => import('./components/LargeFileDTC1BAnalyzer').then(m => ({ default: m.LargeFileDTC1BAnalyzer })));
+const LargeFileAnalyzer2 = lazy(() => import('./components/LargeFileAnalyzer2').then(m => ({ default: m.LargeFileAnalyzer2 })));
 const XcpB2BInterface = lazy(() => import('./components/XcpB2BInterface').then(m => ({ default: m.XcpB2BInterface })));
 const AccountLedger = lazy(() => import('./components/AccountLedger').then(m => ({ default: m.AccountLedger })));
 const BankBlackScreen = lazy(() => import('./components/BankBlackScreen').then(m => ({ default: m.BankBlackScreen })));
@@ -42,7 +43,7 @@ const ProfilesModule = lazy(() => import('./components/ProfilesModule').then(m =
 const BankSettlementModule = lazy(() => import('./components/BankSettlementModule').then(m => ({ default: m.BankSettlementModule })));
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 
-type Tab = 'central-dashboard' | 'banco-central-privado' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager';
+type Tab = 'central-dashboard' | 'banco-central-privado' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'large-file-analyzer-2' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -136,6 +137,7 @@ function App() {
     { id: 'binary-reader' as Tab, name: t.navBinaryReader, icon: Binary },
     { id: 'hex-viewer' as Tab, name: t.navAnalyzerPro, icon: Eye },
     { id: 'large-file-analyzer' as Tab, name: t.navLargeFileAnalyzer, icon: Database },
+    { id: 'large-file-analyzer-2' as Tab, name: isSpanish ? 'Large File Analyzer 2' : 'Large File Analyzer 2', icon: TrendingUp },
     { id: 'transfer' as Tab, name: t.navTransfers, icon: Send },
     { id: 'api-keys' as Tab, name: t.navApiKeys, icon: Key },
     { id: 'audit' as Tab, name: t.navAuditLogs, icon: Shield }
@@ -262,6 +264,7 @@ function App() {
           {activeTab === 'binary-reader' && <AdvancedBinaryReader />}
           {activeTab === 'hex-viewer' && <EnhancedBinaryViewer />}
           {activeTab === 'large-file-analyzer' && <LargeFileDTC1BAnalyzer />}
+          {activeTab === 'large-file-analyzer-2' && <LargeFileAnalyzer2 />}
           {activeTab === 'transfer' && <TransferInterface />}
           {activeTab === 'api-keys' && <APIKeyManager />}
           {activeTab === 'audit' && <AuditLogViewer />}
