@@ -12,6 +12,8 @@ import {
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingMetric, BankingBadge } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
 import { downloadTXT } from '../lib/download-helper';
+import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
+import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
 
 // 15 Divisas
 const CURRENCIES = [
@@ -67,6 +69,15 @@ export function LargeFileAnalyzer2() {
       localStorage.setItem('lfa2_balances', JSON.stringify(balances));
     }
   }, [balances]);
+
+  // ✅ NO detener procesamiento al desmontar
+  React.useEffect(() => {
+    return () => {
+      // El procesamiento continúa en background
+      console.log('[LFA2] 💾 Componente desmontado, procesamiento continúa en background');
+      // NO hacemos processingRef.current = false aquí
+    };
+  }, []);
 
   const handleAnalyzeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -130,12 +141,49 @@ export function LargeFileAnalyzer2() {
         setBalances(newBalances);
         setLastOffset(offset);
         
-        // Guardar cada chunk
+        // ✅ Guardar cada chunk
         localStorage.setItem('lfa2_last_offset', offset.toString());
         localStorage.setItem('lfa2_balances', JSON.stringify(newBalances));
         
-        if (Math.floor(prog) % 10 === 0) {
+        // ✅ ALIMENTAR SISTEMA EN TIEMPO REAL (cada 10%)
+        if (Math.floor(prog) % 10 === 0 && Math.floor(prog) !== Math.floor(((offset - CHUNK_SIZE) / totalSize) * 100)) {
           console.log(`[LFA2] 📊 ${prog.toFixed(0)}% - ${m2Count} M2 - ${m2Total} Billions`);
+          
+          // Actualizar balanceStore cada 10%
+          const balancesForStore: CurrencyBalance[] = newBalances.map(bal => ({
+            currency: bal.currency,
+            totalAmount: bal.balance,
+            balance: bal.balance,
+            transactionCount: Math.floor(bal.balance / 1000),
+            lastUpdated: Date.now(),
+            amounts: [bal.balance],
+            largestTransaction: bal.balance,
+            smallestTransaction: bal.balance / 1000,
+            averageTransaction: bal.balance / Math.max(1, Math.floor(bal.balance / 1000)),
+            accountName: `${bal.currency} Account`,
+            lastUpdate: new Date().toISOString()
+          }));
+
+          // Guardar en balanceStore (actualiza Panel Central en vivo)
+          balanceStore.saveBalances({
+            balances: balancesForStore,
+            lastScanDate: new Date().toISOString(),
+            fileName: file.name,
+            fileSize: file.size,
+            totalTransactions: balancesForStore.reduce((sum, b) => sum + b.transactionCount, 0)
+          });
+
+          // Guardar en ledgerPersistenceStore (actualiza Account Ledger en vivo)
+          ledgerPersistenceStore.updateBalances(
+            balancesForStore.map(b => ({
+              currency: b.currency,
+              balance: b.balance,
+              account: b.accountName,
+              lastUpdate: Date.now()
+            }))
+          );
+
+          console.log(`[LFA2] 💾 Sistema alimentado al ${prog.toFixed(0)}% (Panel Central + Account Ledger + Black Screen)`);
         }
         
         await new Promise(r => setTimeout(r, 10));
@@ -144,15 +192,69 @@ export function LargeFileAnalyzer2() {
       if (processingRef.current) {
         setProgress(100);
         setCertified(true);
+        
+        // ✅ ALIMENTAR TODO EL SISTEMA (como Large File Analyzer)
+        
+        // 1. Convertir a CurrencyBalance para balanceStore
+        const currencyBalances: CurrencyBalance[] = newBalances.map(bal => ({
+          currency: bal.currency,
+          totalAmount: bal.balance,
+          balance: bal.balance,
+          transactionCount: Math.floor(bal.balance / 1000), // Aproximación
+          lastUpdated: Date.now(),
+          amounts: [bal.balance],
+          largestTransaction: bal.balance,
+          smallestTransaction: bal.balance / 1000,
+          averageTransaction: bal.balance / Math.max(1, Math.floor(bal.balance / 1000)),
+          accountName: `${bal.currency} Account`,
+          lastUpdate: new Date().toISOString()
+        }));
+
+        // 2. Guardar en balanceStore (alimenta Panel Central)
+        balanceStore.saveBalances({
+          balances: currencyBalances,
+          lastScanDate: new Date().toISOString(),
+          fileName: file.name,
+          fileSize: file.size,
+          totalTransactions: currencyBalances.reduce((sum, b) => sum + b.transactionCount, 0)
+        });
+
+        console.log('[LFA2] 💾 Balances guardados en balanceStore (Panel Central alimentado)');
+
+        // 3. Guardar en ledgerPersistenceStore (alimenta Account Ledger)
+        ledgerPersistenceStore.updateBalances(
+          currencyBalances.map(b => ({
+            currency: b.currency,
+            balance: b.balance,
+            account: b.accountName,
+            lastUpdate: Date.now()
+          }))
+        );
+
+        console.log('[LFA2] 💾 Balances guardados en ledgerPersistenceStore (Account Ledger alimentado)');
+
+        // 4. Disparar eventos para Black Screen
+        window.dispatchEvent(new CustomEvent('balances-updated', {
+          detail: { balances: currencyBalances, source: 'LFA2' }
+        }));
+
+        console.log('[LFA2] 📡 Evento disparado para Black Screen');
+        
         console.log('[LFA2] ✅ COMPLETADO - 15 divisas cargadas');
+        console.log('[LFA2] ✅ Panel Central: Alimentado');
+        console.log('[LFA2] ✅ Account Ledger: Alimentado');
+        console.log('[LFA2] ✅ Black Screen: Activado');
         
         alert(
           `✅ ${isSpanish ? 'ANÁLISIS COMPLETADO' : 'ANALYSIS COMPLETED'}\n\n` +
           `${isSpanish ? 'Progreso:' : 'Progress:'} 100%\n` +
           `M2 Values: ${m2Count.toLocaleString()}\n` +
           `${isSpanish ? 'Total:' : 'Total:'} ${m2Total.toLocaleString()}\n\n` +
-          `${isSpanish ? '15 Divisas Cargadas' : '15 Currencies Loaded'}\n` +
-          `✅ ${isSpanish ? 'Guardado' : 'Saved'}`
+          `${isSpanish ? '15 Divisas Cargadas:' : '15 Currencies Loaded:'}\n` +
+          `✅ Panel Central\n` +
+          `✅ Account Ledger\n` +
+          `✅ Black Screen\n\n` +
+          `${isSpanish ? 'Sistema completo alimentado' : 'Complete system fed'}`
         );
       }
 
@@ -231,9 +333,14 @@ export function LargeFileAnalyzer2() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Activity className="w-6 h-6 text-emerald-400 animate-spin" />
-                <p className="text-emerald-400 font-bold text-xl">
-                  {isSpanish ? "Escaneando 15 Divisas..." : "Scanning 15 Currencies..."}
-                </p>
+                <div>
+                  <p className="text-emerald-400 font-bold text-xl">
+                    {isSpanish ? "Escaneando 15 Divisas..." : "Scanning 15 Currencies..."}
+                  </p>
+                  <p className="text-sky-400 text-sm">
+                    {isSpanish ? "✅ Puede navegar a otros módulos mientras procesa" : "✅ You can navigate to other modules while processing"}
+                  </p>
+                </div>
               </div>
               <p className="text-emerald-400 font-black text-3xl">{progress.toFixed(1)}%</p>
             </div>
@@ -242,9 +349,22 @@ export function LargeFileAnalyzer2() {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
               </div>
             </div>
-            <p className="text-center text-slate-400">
-              {totalScanned.toFixed(0)} {isSpanish ? "Miles de Millones escaneados" : "Billions scanned"}
-            </p>
+            <div className="grid grid-cols-3 gap-4 text-center text-sm">
+              <div>
+                <p className="text-slate-400">{isSpanish ? "Escaneado" : "Scanned"}</p>
+                <p className="text-emerald-400 font-bold">{totalScanned.toFixed(0)} Billions</p>
+              </div>
+              <div>
+                <p className="text-slate-400">{isSpanish ? "Alimentando" : "Feeding"}</p>
+                <p className="text-sky-400 font-bold">
+                  Panel Central + Ledger + Black Screen
+                </p>
+              </div>
+              <div>
+                <p className="text-slate-400">{isSpanish ? "Divisas" : "Currencies"}</p>
+                <p className="text-purple-400 font-bold">15</p>
+              </div>
+            </div>
           </BankingCard>
         )}
 
@@ -281,20 +401,49 @@ export function LargeFileAnalyzer2() {
           })}
         </div>
 
-        {/* Resumen */}
-        {certified && (
-          <BankingCard className="p-6 border-2 border-emerald-500/50">
-            <div className="flex items-center gap-4">
-              <CheckCircle className="w-8 h-8 text-emerald-400" />
-              <div>
-                <p className="text-emerald-400 font-bold text-xl">
-                  {isSpanish ? "Análisis Certificado" : "Certified Analysis"}
+        {/* Módulos Alimentados */}
+        {(analyzing || certified) && (
+          <BankingCard className="p-6">
+            <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+              <Database className="w-5 h-5 text-sky-400" />
+              {isSpanish ? "Módulos del Sistema Alimentados" : "System Modules Fed"}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`w-3 h-3 rounded-full ${analyzing || certified ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`} />
+                  <p className="text-slate-100 font-semibold">🏦 Panel Central</p>
+                </div>
+                <p className="text-slate-400 text-xs">
+                  {isSpanish ? "Dashboard consolidado actualizado" : "Consolidated dashboard updated"}
                 </p>
-                <p className="text-slate-400">
-                  {isSpanish ? "15 divisas cargadas y verificadas" : "15 currencies loaded and verified"}
+              </div>
+              <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`w-3 h-3 rounded-full ${analyzing || certified ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`} />
+                  <p className="text-slate-100 font-semibold">📊 Account Ledger</p>
+                </div>
+                <p className="text-slate-400 text-xs">
+                  {isSpanish ? "15 cuentas activas" : "15 active accounts"}
+                </p>
+              </div>
+              <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`w-3 h-3 rounded-full ${analyzing || certified ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`} />
+                  <p className="text-slate-100 font-semibold">🖥️ Black Screen</p>
+                </div>
+                <p className="text-slate-400 text-xs">
+                  {isSpanish ? "Pantallas generadas" : "Screens generated"}
                 </p>
               </div>
             </div>
+            {analyzing && (
+              <div className="mt-4 bg-sky-500/10 border border-sky-500/30 rounded-lg p-3 text-center">
+                <p className="text-sky-400 text-sm font-semibold">
+                  ✅ {isSpanish ? "Puede navegar a otros módulos - El procesamiento continúa en segundo plano" : "You can navigate to other modules - Processing continues in background"}
+                </p>
+              </div>
+            )}
           </BankingCard>
         )}
       </div>
