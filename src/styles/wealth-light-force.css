@@ -1,0 +1,100 @@
+/**
+ * WEALTH LIGHT MODE - Estilo Emirates NBD (de las imágenes)
+ * Fondo azul claro suave, cards blancos, diseño minimalista
+ */
+
+/* BACKGROUNDS - Azul Claro Suave (como en las imágenes) */
+body,
+html,
+#root {
+  background: linear-gradient(180deg, #EEF4FF 0%, #F5F7FA 100%) !important;
+  color: #0E1525 !important;
+}
+
+div[class*="min-h-screen"],
+main {
+  background: linear-gradient(180deg, #EEF4FF 0%, #F5F7FA 100%) !important;
+}
+
+/* CARDS - Blanco puro con shadows suaves */
+div[class*="Card"],
+div[class*="card"],
+div[class*="panel"],
+[class*="bg-slate-900"],
+[class*="bg-slate-800"] {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(0, 59, 124, 0.08) !important;
+  border: 1px solid #E2E6EE !important;
+}
+
+/* TEXTOS - Oscuros para legibilidad */
+h1, h2, h3, h4, h5, h6,
+[class*="text-slate-100"],
+[class*="text-slate-50"],
+[class*="text-white"] {
+  color: #0E1525 !important;
+}
+
+p, span, div, label,
+[class*="text-slate-300"] {
+  color: #4A4F55 !important;
+}
+
+[class*="text-slate-400"],
+[class*="text-slate-500"] {
+  color: #C7CCD6 !important;
+}
+
+/* AZUL CORPORATIVO - Primary */
+[class*="text-sky-400"],
+[class*="text-blue-400"],
+[class*="bg-sky-500"],
+[class*="bg-blue-500"] {
+  color: #003B7C !important;
+}
+
+button[class*="primary"] {
+  background: linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(26, 77, 179, 0.25) !important;
+}
+
+button[class*="primary"]:hover {
+  background: linear-gradient(135deg, #003B7C 0%, #002A5C 100%) !important;
+  box-shadow: 0 6px 16px rgba(26, 77, 179, 0.35) !important;
+}
+
+/* INPUTS - Blanco con border sutil */
+input,
+select,
+textarea {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E2E6EE !important;
+  color: #0E1525 !important;
+}
+
+input:focus {
+  border-color: #1A4DB3 !important;
+  box-shadow: 0 0 0 3px rgba(26, 77, 179, 0.1) !important;
+}
+
+/* BADGES - Colores suaves */
+[class*="badge"] {
+  background-color: #EEF4FF !important;
+  color: #003B7C !important;
+  border: 1px solid #DDE8FF !important;
+}
+
+/* BORDERS - Sutiles */
+[class*="border-slate-700"],
+[class*="border-slate-600"] {
+  border-color: #E2E6EE !important;
+}
+
+/* NAV/HEADER - Azul corporativo */
+nav,
+header {
+  background: linear-gradient(135deg, #003B7C 0%, #1A4DB3 100%) !important;
+  color: #FFFFFF !important;
+}
+

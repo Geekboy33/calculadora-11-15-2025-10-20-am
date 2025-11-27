@@ -1,21 +1,13 @@
-/* PRIMERO: Forzar aplicación Wealth Dark ANTES de Tailwind */
-@import './styles/daes-force-apply.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Import DAES Wealth Design System DESPUÉS de Tailwind para sobrescribir */
+/* Import DAES Wealth Design System */
 @import './styles/daes-design-tokens.css';
 @import './styles/daes-wealth-global.css';
-@import './styles/design-system.css';
-@import './styles/banking-theme.css';
 
-/* FORZAR tema Wealth Dark con máxima prioridad */
-@import './styles/force-wealth-theme.css';
-
-/* ÚLTIMO: Re-forzar aplicación después de TODO */
-@import './styles/daes-force-apply.css';
+/* FORZAR Wealth LIGHT como en Emirates NBD (de las imágenes) */
+@import './styles/wealth-light-force.css';
 
 /* 🎨 Paleta de Colores Futurista - Negro + Verde Neón Tipo Pantalla Iluminada */
 :root {

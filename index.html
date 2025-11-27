@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -31,16 +31,16 @@
     <meta name="author" content="DAES - Data and Exchange Settlement" />
     <meta name="application-name" content="DAES CoreBanking System" />
     <style>
-      /* FORZAR Wealth Dark INMEDIATAMENTE sin esperar CSS externos */
+      /* FORZAR Wealth LIGHT (como Emirates NBD en las imágenes) */
       body, html {
-        background-color: #050812 !important;
-        color: #F9FAFB !important;
+        background: linear-gradient(180deg, #EEF4FF 0%, #F5F7FA 100%) !important;
+        color: #0E1525 !important;
         font-family: 'Inter', -apple-system, sans-serif !important;
         margin: 0;
         padding: 0;
       }
       #root {
-        background-color: #050812 !important;
+        background: linear-gradient(180deg, #EEF4FF 0%, #F5F7FA 100%) !important;
         min-height: 100vh;
       }
       * {
@@ -48,7 +48,7 @@
       }
     </style>
   </head>
-  <body style="background-color: #050812 !important; color: #F9FAFB !important;">
+  <body style="background: linear-gradient(180deg, #EEF4FF 0%, #F5F7FA 100%) !important; color: #0E1525 !important;">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

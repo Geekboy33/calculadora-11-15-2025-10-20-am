@@ -1,7 +1,7 @@
 /**
- * Login Component - DAES Wealth Authentication
- * Diseño: Emirates NBD / JP Morgan Wealth Management
- * Tema: Wealth Dark Premium
+ * Login Component - DAES Wealth Light
+ * Diseño: Emirates NBD Wealth (de las imágenes proporcionadas)
+ * Tema: Light Mode - Azul claro suave
  */
 
 import { useState } from 'react';
@@ -18,7 +18,6 @@ export function Login({ onLogin }: LoginProps) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Credenciales
   const VALID_USERNAME = 'admin';
   const VALID_PASSWORD = 'DAES2025';
 
@@ -27,7 +26,6 @@ export function Login({ onLogin }: LoginProps) {
     setError('');
     setIsLoading(true);
 
-    // Simular validación
     await new Promise(resolve => setTimeout(resolve, 800));
 
     if (username === VALID_USERNAME && password === VALID_PASSWORD) {
@@ -42,52 +40,75 @@ export function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{
-      backgroundColor: 'var(--bg-main)',
-      backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(79, 141, 255, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(79, 141, 255, 0.03) 0%, transparent 50%)'
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '2rem',
+      background: 'linear-gradient(180deg, #EEF4FF 0%, #F5F7FA 100%)',
+      fontFamily: 'Inter, sans-serif'
     }}>
-      <div className="w-full max-w-md">
-        {/* Logo y Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6" style={{
-            background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-lighter))',
-            boxShadow: '0 8px 32px rgba(79, 141, 255, 0.3)'
+      <div style={{ width: '100%', maxWidth: '420px' }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '80px',
+            height: '80px',
+            borderRadius: '20px',
+            background: 'linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%)',
+            boxShadow: '0 8px 24px rgba(26, 77, 179, 0.25)',
+            marginBottom: '1.5rem'
           }}>
-            <Building2 className="w-10 h-10" style={{ color: 'var(--text-inverse)' }} />
+            <Building2 style={{ width: '40px', height: '40px', color: '#FFFFFF' }} />
           </div>
-          <h1 className="text-4xl font-bold mb-2" style={{ 
-            color: 'var(--text-primary)',
-            fontWeight: 'var(--font-bold)'
+          <h1 style={{
+            fontSize: '2rem',
+            fontWeight: 700,
+            color: '#0E1525',
+            marginBottom: '0.5rem',
+            letterSpacing: '-0.025em'
           }}>
             Digital Commercial Bank
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-base)' }}>
+          <p style={{ color: '#4A4F55', fontSize: '1rem' }}>
             DAES CoreBanking System
           </p>
         </div>
 
-        {/* Card de Login */}
+        {/* Card */}
         <div style={{
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: 'var(--radius-2xl)',
-          boxShadow: 'var(--shadow-elevated)',
-          border: '1px solid var(--border-subtle)',
+          backgroundColor: '#FFFFFF',
+          borderRadius: '24px',
+          boxShadow: '0 2px 8px rgba(0, 59, 124, 0.08)',
+          border: '1px solid #E2E6EE',
           padding: '2.5rem'
         }}>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Username */}
             <div>
               <label style={{
                 display: 'block',
-                color: 'var(--text-secondary)',
-                fontSize: 'var(--text-sm)',
-                fontWeight: 'var(--font-medium)',
+                color: '#4A4F55',
+                fontSize: '0.875rem',
+                fontWeight: 600,
                 marginBottom: '0.5rem'
               }}>
                 Username
               </label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+              <div style={{ position: 'relative' }}>
+                <User style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '20px',
+                  height: '20px',
+                  color: '#C7CCD6'
+                }} />
                 <input
                   type="text"
                   value={username}
@@ -100,20 +121,20 @@ export function Login({ onLogin }: LoginProps) {
                     paddingRight: '1rem',
                     paddingTop: '0.875rem',
                     paddingBottom: '0.875rem',
-                    backgroundColor: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-lg)',
-                    color: 'var(--text-primary)',
-                    fontSize: 'var(--text-base)',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #E2E6EE',
+                    borderRadius: '12px',
+                    color: '#0E1525',
+                    fontSize: '1rem',
                     outline: 'none',
-                    transition: 'all var(--transition-base)'
+                    transition: 'all 0.2s'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = 'var(--border-focus)';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(79, 141, 255, 0.1)';
+                    e.target.style.borderColor = '#1A4DB3';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(26, 77, 179, 0.1)';
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = 'var(--border-subtle)';
+                    e.target.style.borderColor = '#E2E6EE';
                     e.target.style.boxShadow = 'none';
                   }}
                 />
@@ -124,15 +145,23 @@ export function Login({ onLogin }: LoginProps) {
             <div>
               <label style={{
                 display: 'block',
-                color: 'var(--text-secondary)',
-                fontSize: 'var(--text-sm)',
-                fontWeight: 'var(--font-medium)',
+                color: '#4A4F55',
+                fontSize: '0.875rem',
+                fontWeight: 600,
                 marginBottom: '0.5rem'
               }}>
                 Password
               </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+              <div style={{ position: 'relative' }}>
+                <Lock style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '20px',
+                  height: '20px',
+                  color: '#C7CCD6'
+                }} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -145,131 +174,126 @@ export function Login({ onLogin }: LoginProps) {
                     paddingRight: '3rem',
                     paddingTop: '0.875rem',
                     paddingBottom: '0.875rem',
-                    backgroundColor: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-lg)',
-                    color: 'var(--text-primary)',
-                    fontSize: 'var(--text-base)',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #E2E6EE',
+                    borderRadius: '12px',
+                    color: '#0E1525',
+                    fontSize: '1rem',
                     outline: 'none',
-                    transition: 'all var(--transition-base)'
+                    transition: 'all 0.2s'
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = 'var(--border-focus)';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(79, 141, 255, 0.1)';
+                    e.target.style.borderColor = '#1A4DB3';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(26, 77, 179, 0.1)';
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = 'var(--border-subtle)';
+                    e.target.style.borderColor = '#E2E6EE';
                     e.target.style.boxShadow = 'none';
                   }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2"
-                  style={{ color: 'var(--text-muted)' }}
+                  style={{
+                    position: 'absolute',
+                    right: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#C7CCD6'
+                  }}
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff style={{ width: '20px', height: '20px' }} /> : <Eye style={{ width: '20px', height: '20px' }} />}
                 </button>
               </div>
             </div>
 
-            {/* Error Message */}
+            {/* Error */}
             {error && (
               <div style={{
-                backgroundColor: 'var(--status-error-bg)',
-                border: '1px solid var(--status-error-border)',
-                borderRadius: 'var(--radius-lg)',
+                backgroundColor: '#FEF2F2',
+                border: '1px solid #FECACA',
+                borderRadius: '12px',
                 padding: '1rem',
                 display: 'flex',
-                alignItems: 'center',
                 gap: '0.75rem'
               }}>
-                <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--status-error-text)' }} />
-                <p style={{ color: 'var(--status-error-text)', fontSize: 'var(--text-sm)' }}>
-                  {error}
-                </p>
+                <p style={{ color: '#DC2626', fontSize: '0.875rem' }}>{error}</p>
               </div>
             )}
 
-            {/* Submit Button */}
+            {/* Button */}
             <button
               type="submit"
               disabled={isLoading || !username || !password}
               style={{
                 width: '100%',
                 padding: '1rem',
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--text-inverse)',
-                fontSize: 'var(--text-base)',
-                fontWeight: 'var(--font-semibold)',
-                borderRadius: 'var(--radius-lg)',
+                background: 'linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%)',
+                color: '#FFFFFF',
+                fontSize: '1rem',
+                fontWeight: 600,
+                borderRadius: '12px',
                 border: 'none',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
                 opacity: (isLoading || !username || !password) ? 0.5 : 1,
-                transition: 'all var(--transition-base)',
-                boxShadow: 'var(--shadow-md)'
+                transition: 'all 0.2s',
+                boxShadow: '0 4px 12px rgba(26, 77, 179, 0.25)'
               }}
               onMouseEnter={(e) => {
                 if (!isLoading && username && password) {
-                  e.currentTarget.style.backgroundColor = 'var(--color-primary-hover)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #003B7C 0%, #002A5C 100%)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(26, 77, 179, 0.35)';
                 }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--color-primary)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(26, 77, 179, 0.25)';
               }}
             >
               {isLoading ? 'Authenticating...' : 'Sign In'}
             </button>
           </form>
 
-          {/* Footer Info */}
-          <div className="mt-8 text-center space-y-3">
-            <div className="flex items-center justify-center gap-2" style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
-              <Shield className="w-4 h-4" />
-              <span>Secure Authentication • AES-256 Encrypted</span>
+          {/* Compliance */}
+          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#C7CCD6', fontSize: '0.75rem' }}>
+              <Shield style={{ width: '16px', height: '16px' }} />
+              <span>Secure Authentication • AES-256</span>
             </div>
-            <div className="flex items-center justify-center gap-4" style={{ fontSize: 'var(--text-xs)' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', fontSize: '0.75rem' }}>
               <span style={{
-                backgroundColor: 'var(--status-success-bg)',
-                color: 'var(--status-success-text)',
+                backgroundColor: '#F0FDF4',
+                color: '#16A34A',
                 padding: '0.25rem 0.75rem',
-                borderRadius: 'var(--radius-full)',
-                border: '1px solid var(--status-success-border)',
-                fontWeight: 'var(--font-semibold)'
-              }}>
-                ISO 27001
-              </span>
+                borderRadius: '9999px',
+                border: '1px solid #BBF7D0',
+                fontWeight: 600
+              }}>ISO 27001</span>
               <span style={{
-                backgroundColor: 'var(--status-info-bg)',
-                color: 'var(--status-info-text)',
+                backgroundColor: '#EEF4FF',
+                color: '#1A4DB3',
                 padding: '0.25rem 0.75rem',
-                borderRadius: 'var(--radius-full)',
-                border: '1px solid var(--status-info-border)',
-                fontWeight: 'var(--font-semibold)'
-              }}>
-                SOC 2
-              </span>
+                borderRadius: '9999px',
+                border: '1px solid #BFDBFE',
+                fontWeight: 600
+              }}>SOC 2</span>
               <span style={{
-                backgroundColor: 'var(--status-success-bg)',
-                color: 'var(--status-success-text)',
+                backgroundColor: '#F0FDF4',
+                color: '#16A34A',
                 padding: '0.25rem 0.75rem',
-                borderRadius: 'var(--radius-full)',
-                border: '1px solid var(--status-success-border)',
-                fontWeight: 'var(--font-semibold)'
-              }}>
-                PCI DSS
-              </span>
+                borderRadius: '9999px',
+                border: '1px solid #BBF7D0',
+                fontWeight: 600
+              }}>PCI DSS</span>
             </div>
           </div>
         </div>
 
-        {/* Copyright */}
-        <p className="text-center mt-8" style={{ 
-          color: 'var(--text-muted)', 
-          fontSize: 'var(--text-xs)' 
-        }}>
+        {/* Footer */}
+        <p style={{ textAlign: 'center', marginTop: '2rem', color: '#C7CCD6', fontSize: '0.75rem' }}>
           © 2025 Digital Commercial Bank Ltd. All rights reserved.
         </p>
       </div>
