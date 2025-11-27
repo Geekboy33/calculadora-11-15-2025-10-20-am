@@ -1,5 +1,6 @@
 /* Import DAES Wealth Design System */
 @import './styles/daes-design-tokens.css';
+@import './styles/daes-wealth-global.css';
 @import './styles/design-system.css';
 @import './styles/banking-theme.css';
 

@@ -1,0 +1,225 @@
+/**
+ * DAES Wealth Global Styles
+ * Aplicación automática del Design System a toda la plataforma
+ * Nivel: Emirates NBD / JP Morgan Wealth Management
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   APLICACIÓN GLOBAL DE WEALTH DESIGN
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Body - Aplicar tema Wealth Dark por defecto */
+body {
+  font-family: var(--font-family-base);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Set Dark theme por defecto */
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background-color: #050812;
+}
+
+/* Headings - Typography System */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-tight);
+}
+
+h1 { font-size: var(--text-4xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl); }
+
+/* Links */
+a {
+  color: var(--color-primary);
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Buttons - Reemplazo automático */
+button:not([class*="wealth-"]):not([class*="banking-"]) {
+  font-family: var(--font-family-base);
+  font-weight: var(--font-semibold);
+  transition: all var(--transition-base);
+}
+
+/* Cards - Aplicar estilo Wealth */
+[class*="card"]:not([class*="wealth-"]):not([class*="banking-"]),
+[class*="Card"]:not([class*="wealth-"]):not([class*="banking-"]) {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+/* Inputs - Wealth Style */
+input:not([type="checkbox"]):not([type="radio"]):not([class*="wealth-"]) {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  font-family: var(--font-family-base);
+  transition: all var(--transition-base);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(79, 141, 255, 0.1);
+}
+
+/* Select */
+select:not([class*="wealth-"]) {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  transition: all var(--transition-base);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   REEMPLAZO DE COLORES ANTIGUOS → WEALTH COLORS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Reemplazar Slate por Wealth Dark */
+.bg-slate-950,
+.bg-slate-900,
+.bg-black {
+  background-color: var(--bg-main) !important;
+}
+
+.bg-slate-800,
+.bg-slate-900\/50 {
+  background-color: var(--bg-card) !important;
+}
+
+.bg-slate-800\/50,
+.bg-slate-700 {
+  background-color: var(--bg-elevated) !important;
+}
+
+/* Text colors → Wealth */
+.text-slate-100,
+.text-slate-50,
+.text-white {
+  color: var(--text-primary) !important;
+}
+
+.text-slate-300,
+.text-slate-200 {
+  color: var(--text-secondary) !important;
+}
+
+.text-slate-400,
+.text-slate-500 {
+  color: var(--text-muted) !important;
+}
+
+/* Borders → Wealth */
+.border-slate-700,
+.border-slate-600 {
+  border-color: var(--border-subtle) !important;
+}
+
+/* Primary colors → Wealth Primary */
+.bg-sky-500,
+.bg-blue-500 {
+  background-color: var(--color-primary) !important;
+}
+
+.text-sky-400,
+.text-sky-500,
+.text-blue-400 {
+  color: var(--color-primary) !important;
+}
+
+/* Success → Wealth Green */
+.bg-emerald-500,
+.bg-green-500 {
+  background-color: var(--color-accent-green) !important;
+}
+
+.text-emerald-400,
+.text-green-400 {
+  color: var(--color-accent-green) !important;
+}
+
+/* Warning → Wealth Gold */
+.text-amber-400,
+.text-yellow-400 {
+  color: var(--color-accent-gold) !important;
+}
+
+/* Danger → Wealth Red */
+.text-red-400,
+.text-red-500 {
+  color: var(--color-accent-red) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITY CLASSES WEALTH
+   ═══════════════════════════════════════════════════════════════ */
+
+.wealth-card {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-base);
+}
+
+.wealth-card:hover {
+  box-shadow: var(--shadow-elevated);
+}
+
+.wealth-bg-main {
+  background-color: var(--bg-main);
+}
+
+.wealth-text-primary {
+  color: var(--text-primary);
+}
+
+.wealth-border {
+  border: 1px solid var(--border-subtle);
+}
+
+.wealth-shadow {
+  box-shadow: var(--shadow-card);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLLBAR WEALTH STYLE
+   ═══════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
