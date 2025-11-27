@@ -1,4 +1,5 @@
-/* Import Professional Design System */
+/* Import DAES Wealth Design System */
+@import './styles/daes-design-tokens.css';
 @import './styles/design-system.css';
 @import './styles/banking-theme.css';
 
