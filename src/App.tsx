@@ -6,7 +6,8 @@ import {
   SourceOfFundsIcon, 
   TheKingdomBankIcon, 
   DAESPartnerAPIIcon,
-  ModuleIconWidget 
+  ModuleIconWidget,
+  getModuleIcon
 } from './components/ui/ModuleIcons';
 import { LanguageSelector } from './components/LanguageSelector';
 import { Login } from './components/Login';
@@ -232,13 +233,7 @@ function App() {
             {featuredModules.map(module => (
               <ModuleIconWidget
                 key={`${module.id}-${activeTab}`}
-                icon={
-                  module.id === 'central-dashboard' ? <CentralPanelIcon size={28} active={activeTab === module.id} /> :
-                  module.id === 'banco-central-privado' ? <PrivateCentralBankIcon size={28} active={activeTab === module.id} /> :
-                  module.id === 'origen-fondos' ? <SourceOfFundsIcon size={28} active={activeTab === module.id} /> :
-                  module.id === 'the-kingdom-bank' ? <TheKingdomBankIcon size={28} active={activeTab === module.id} /> :
-                  <DAESPartnerAPIIcon size={28} active={activeTab === module.id} />
-                }
+                icon={getModuleIcon(module.id, 28, activeTab === module.id)}
                 label={module.name}
                 active={activeTab === module.id}
                 onClick={() => setActiveTab(module.id)}
@@ -250,8 +245,8 @@ function App() {
         <nav className="px-6 bg-[#0a0a0a] border-t border-[#1a1a1a] hidden lg:block">
           <div className="flex gap-1 overflow-x-auto">
             {tabs.map(tab => {
-              const Icon = tab.icon;
               const isActive = activeTab === tab.id;
+              const CustomIcon = getModuleIcon(tab.id, 18, isActive);
 
               return (
                 <button
@@ -263,7 +258,9 @@ function App() {
                       : 'text-[#4d7c4d] hover:text-[#80ff80]'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <span className="flex items-center justify-center">
+                    {CustomIcon}
+                  </span>
                   {tab.name}
                   {isActive && (
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00ff88] shadow-[0_0_10px_rgba(0,255,136,0.8)]" />
