@@ -319,8 +319,10 @@ export function BancoCentralPrivadoModule() {
           averageTransaction: m2Total * curr.percentage
         }));
         
-        // Actualizar ledgerAccountsStore con las 15 cuentas
-        await ledgerAccountsStore.updateAccountsFromBalances(balancesForLedger);
+        // ✅ Actualizar sin await (no bloquear el loop)
+        ledgerAccountsStore.updateAccountsFromBalances(balancesForLedger).catch(e => 
+          console.warn('[Banco Central] Advertencia al actualizar ledger:', e)
+        );
         
         // ✅ GUARDAR EN CADA CHUNK
         localStorage.setItem('banco_central_last_offset', offset.toString());
