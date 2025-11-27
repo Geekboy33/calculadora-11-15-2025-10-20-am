@@ -1,6 +1,6 @@
 /**
- * Module Icons - Iconos personalizados para módulos DAES
- * Diseño propio estilo Emirates NBD Wealth
+ * Module Icons - Iconos Futuristas Minimalistas
+ * Diseño: Líneas finas, formas simples, estilo futurista
  */
 
 import React from 'react';
@@ -12,294 +12,175 @@ interface ModuleIconProps {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CENTRAL PANEL ICON
+// CENTRAL PANEL ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function CentralPanelIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      style={{
-        filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none',
-        transition: 'all 0.3s ease'
-      }}
-    >
-      {/* Building base */}
-      <rect x="4" y="8" width="16" height="12" rx="2" 
-        fill={active ? '#4F8DFF' : '#1A4DB3'} 
-        stroke={active ? '#6BA3FF' : '#003B7C'} 
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="5" y="6" width="14" height="14" rx="1" 
+        fill="none" 
+        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
         strokeWidth="1.5"
       />
-      {/* Windows grid */}
-      <rect x="6" y="10" width="3" height="3" rx="0.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <rect x="11" y="10" width="3" height="3" rx="0.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <rect x="16" y="10" width="3" height="3" rx="0.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <rect x="6" y="15" width="3" height="3" rx="0.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <rect x="11" y="15" width="3" height="3" rx="0.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <rect x="16" y="15" width="3" height="3" rx="0.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      {/* Top accent */}
-      <path d="M8 4 L12 2 L16 4" 
-        stroke={active ? '#6BA3FF' : '#1A4DB3'} 
-        strokeWidth="2" 
-        fill="none" 
-        strokeLinecap="round"
-      />
+      <line x1="9" y1="10" x2="15" y2="10" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="9" y1="13" x2="15" y2="13" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="9" y1="16" x2="13" y2="16" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <circle cx="12" cy="4" r="1.5" fill={active ? '#4F8DFF' : '#1A4DB3'} />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PRIVATE CENTRAL BANK ICON
+// PRIVATE CENTRAL BANK ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function PrivateCentralBankIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      style={{
-        filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none',
-        transition: 'all 0.3s ease'
-      }}
-    >
-      {/* Shield base */}
-      <path
-        d="M12 2 L20 5 L20 11 C20 16 15 20 12 22 C9 20 4 16 4 11 L4 5 Z"
-        fill={active ? '#4F8DFF' : '#1A4DB3'}
-        stroke={active ? '#6BA3FF' : '#003B7C'}
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M12 2 L20 5 L20 11 C20 16 15 20 12 22 C9 20 4 16 4 11 L4 5 Z"
+        fill="none"
+        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
         strokeWidth="1.5"
       />
-      {/* Shield pattern */}
-      <circle cx="12" cy="10" r="2" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <path d="M12 6 L12 14 M8 10 L16 10" 
-        stroke={active ? '#FFFFFF' : '#EEF4FF'} 
-        strokeWidth="1.5" 
-        strokeLinecap="round"
-      />
+      <circle cx="12" cy="10" r="2" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="12" y1="6" x2="12" y2="14" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SOURCE OF FUNDS ICON
+// SOURCE OF FUNDS ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function SourceOfFundsIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      style={{
-        filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none',
-        transition: 'all 0.3s ease'
-      }}
-    >
-      {/* Magnifying glass */}
-      <circle cx="10" cy="10" r="6" 
-        fill="none" 
-        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
-        strokeWidth="2"
-      />
-      <path d="M15 15 L20 20" 
-        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
-        strokeWidth="2" 
-        strokeLinecap="round"
-      />
-      {/* Money symbol inside */}
-      <path d="M10 6 L10 14 M7 10 L13 10" 
-        stroke={active ? '#6EE7B7' : '#59C27A'} 
-        strokeWidth="1.5" 
-        strokeLinecap="round"
-      />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <circle cx="10" cy="10" r="6" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="15" y1="15" x2="20" y2="20" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="10" y1="6" x2="10" y2="14" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="7" y1="10" x2="13" y2="10" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// THE KINGDOM BANK ICON
+// THE KINGDOM BANK ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function TheKingdomBankIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      style={{
-        filter: active ? 'drop-shadow(0 0 8px rgba(245, 213, 118, 0.6))' : 'none',
-        transition: 'all 0.3s ease'
-      }}
-    >
-      {/* Crown base */}
-      <path
-        d="M5 16 L5 20 L19 20 L19 16 L12 8 Z"
-        fill={active ? '#F5D576' : '#C8A56A'}
-        stroke={active ? '#FBBF24' : '#A67C52'}
-        strokeWidth="1.5"
-      />
-      {/* Crown peaks */}
-      <path d="M12 8 L8 12 L10 12 L12 8 L14 12 L16 12 Z" 
-        fill={active ? '#FBBF24' : '#A67C52'}
-      />
-      {/* Gems */}
-      <circle cx="8" cy="12" r="1.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <circle cx="12" cy="10" r="1.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <circle cx="16" cy="12" r="1.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M5 16 L5 20 L19 20 L19 16 L12 8 Z" fill="none" stroke={active ? '#F5D576' : '#C8A56A'} strokeWidth="1.5" />
+      <path d="M12 8 L8 12 L10 12 L12 8 L14 12 L16 12 Z" fill="none" stroke={active ? '#F5D576' : '#C8A56A'} strokeWidth="1.5" />
+      <circle cx="8" cy="12" r="1" fill={active ? '#F5D576' : '#C8A56A'} />
+      <circle cx="12" cy="10" r="1" fill={active ? '#F5D576' : '#C8A56A'} />
+      <circle cx="16" cy="12" r="1" fill={active ? '#F5D576' : '#C8A56A'} />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// DAES PARTNER API ICON
+// DAES PARTNER API ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function DAESPartnerAPIIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      style={{
-        filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none',
-        transition: 'all 0.3s ease'
-      }}
-    >
-      {/* Globe */}
-      <circle cx="12" cy="12" r="8" 
-        fill="none" 
-        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
-        strokeWidth="2"
-      />
-      {/* Latitude lines */}
-      <path d="M4 12 L20 12" 
-        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
-        strokeWidth="1.5"
-      />
-      <ellipse cx="12" cy="8" rx="6" ry="2" 
-        fill="none" 
-        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
-        strokeWidth="1.5"
-      />
-      <ellipse cx="12" cy="16" rx="6" ry="2" 
-        fill="none" 
-        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
-        strokeWidth="1.5"
-      />
-      {/* Connection nodes */}
-      <circle cx="8" cy="10" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
-      <circle cx="16" cy="10" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
-      <circle cx="8" cy="14" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
-      <circle cx="16" cy="14" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
-      <circle cx="12" cy="12" r="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// DASHBOARD ICON
-// ═══════════════════════════════════════════════════════════════
-
-export function DashboardIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="3" y="3" width="8" height="8" rx="1.5" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <rect x="13" y="3" width="8" height="8" rx="1.5" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <rect x="3" y="13" width="8" height="8" rx="1.5" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <rect x="13" y="13" width="8" height="8" rx="1.5" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ANALYTICS ICON
-// ═══════════════════════════════════════════════════════════════
-
-export function AnalyticsIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <path d="M3 18 L8 12 L12 16 L21 6" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="2" strokeLinecap="round" fill="none" />
-      <circle cx="3" cy="18" r="2" fill={active ? '#6EE7B7' : '#59C27A'} />
-      <circle cx="8" cy="12" r="2" fill={active ? '#6EE7B7' : '#59C27A'} />
-      <circle cx="12" cy="16" r="2" fill={active ? '#6EE7B7' : '#59C27A'} />
-      <circle cx="21" cy="6" r="2" fill={active ? '#6EE7B7' : '#59C27A'} />
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// LEDGER ICON
-// ═══════════════════════════════════════════════════════════════
-
-export function LedgerIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="4" width="16" height="18" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} stroke={active ? '#6BA3FF' : '#003B7C'} strokeWidth="1.5" />
-      <line x1="8" y1="8" x2="16" y2="8" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="1.5" />
-      <line x1="8" y1="12" x2="16" y2="12" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="1.5" />
-      <line x1="8" y1="16" x2="14" y2="16" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// BLACKSCREEN ICON
-// ═══════════════════════════════════════════════════════════════
-
-export function BlackScreenIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(0, 0, 0, 0.8))' : 'none' }}>
-      <rect x="3" y="3" width="18" height="18" rx="2" fill="#000000" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
-      <rect x="6" y="6" width="12" height="12" rx="1" fill={active ? '#4F8DFF' : '#1A4DB3'} opacity="0.3" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <circle cx="12" cy="12" r="8" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="4" y1="12" x2="20" y2="12" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <ellipse cx="12" cy="8" rx="6" ry="1.5" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <ellipse cx="12" cy="16" rx="6" ry="1.5" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
       <circle cx="12" cy="12" r="2" fill={active ? '#6EE7B7' : '#59C27A'} />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CUSTODY ICON
+// DASHBOARD ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
-export function CustodyIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+export function DashboardIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="6" y="4" width="12" height="16" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} stroke={active ? '#6BA3FF' : '#003B7C'} strokeWidth="1.5" />
-      <circle cx="12" cy="10" r="2" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <path d="M8 16 L16 16" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="1.5" strokeLinecap="round" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="3" y="3" width="8" height="8" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <rect x="13" y="3" width="8" height="8" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <rect x="3" y="13" width="8" height="8" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <rect x="13" y="13" width="8" height="8" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PROFILES ICON
+// ANALYTICS ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function AnalyticsIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M3 18 L8 12 L12 16 L21 6" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      <circle cx="3" cy="18" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
+      <circle cx="8" cy="12" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
+      <circle cx="12" cy="16" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
+      <circle cx="21" cy="6" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LEDGER ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function LedgerIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="4" width="16" height="18" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="8" y1="8" x2="16" y2="8" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="8" y1="12" x2="16" y2="12" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="8" y1="16" x2="14" y2="16" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BLACKSCREEN ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function BlackScreenIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="3" y="3" width="18" height="18" rx="1" fill="#000000" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <rect x="6" y="6" width="12" height="12" rx="0.5" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" opacity="0.5" />
+      <circle cx="12" cy="12" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CUSTODY ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function CustodyIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="6" y="4" width="12" height="16" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <circle cx="12" cy="10" r="1.5" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="8" y1="16" x2="16" y2="16" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PROFILES ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function ProfilesIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <circle cx="12" cy="8" r="4" fill={active ? '#4F8DFF' : '#1A4DB3'} />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <circle cx="12" cy="8" r="3" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
       <path d="M6 20 C6 16 8.5 14 12 14 C15.5 14 18 16 18 20" 
         stroke={active ? '#4F8DFF' : '#1A4DB3'} 
-        strokeWidth="2" 
+        strokeWidth="1.5" 
         fill="none" 
         strokeLinecap="round"
       />
@@ -308,142 +189,141 @@ export function ProfilesIcon({ size = 24, className = '', active = false }: Modu
 }
 
 // ═══════════════════════════════════════════════════════════════
-// API DAES ICON
+// API DAES ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function APIDAESIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="6" width="16" height="12" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} stroke={active ? '#6BA3FF' : '#003B7C'} strokeWidth="1.5" />
-      <path d="M8 10 L12 14 L16 10" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="2" strokeLinecap="round" fill="none" />
-      <circle cx="12" cy="4" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="6" width="16" height="12" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <path d="M8 10 L12 14 L16 10" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      <circle cx="12" cy="4" r="1" fill={active ? '#6EE7B7' : '#59C27A'} />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// API GLOBAL ICON
+// API GLOBAL ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function APIGlobalIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <circle cx="12" cy="12" r="8" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="2" />
-      <path d="M4 12 L20 12 M12 4 L12 20" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
-      <circle cx="12" cy="12" r="2" fill={active ? '#6EE7B7' : '#59C27A'} />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <circle cx="12" cy="12" r="8" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="4" y1="12" x2="20" y2="12" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <ellipse cx="12" cy="8" rx="6" ry="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <ellipse cx="12" cy="16" rx="6" ry="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <circle cx="12" cy="12" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// API DIGITAL ICON
+// API DIGITAL ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function APIDigitalIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="4" width="16" height="16" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <rect x="7" y="7" width="10" height="10" rx="1" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <circle cx="12" cy="12" r="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="4" width="16" height="16" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <rect x="7" y="7" width="10" height="10" rx="0.5" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <circle cx="12" cy="12" r="1.5" fill={active ? '#4F8DFF' : '#1A4DB3'} />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// API VUSD ICON
+// API VUSD ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function APIVUSDIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="6" width="16" height="12" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <path d="M8 10 L12 14 L16 10" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="2" strokeLinecap="round" fill="none" />
-      <path d="M12 4 L12 6" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="2" strokeLinecap="round" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="6" width="16" height="12" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <path d="M8 10 L12 14 L16 10" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      <line x1="12" y1="4" x2="12" y2="6" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PROOF OF RESERVES ICON
+// PROOF OF RESERVES ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function ProofOfReservesIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M12 2 L20 5 L20 11 C20 16 15 20 12 22 C9 20 4 16 4 11 L4 5 Z"
-        fill={active ? '#4F8DFF' : '#1A4DB3'} stroke={active ? '#6BA3FF' : '#003B7C'} strokeWidth="1.5" />
-      <path d="M9 12 L11 14 L15 10" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="2" strokeLinecap="round" fill="none" />
+        fill="none"
+        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
+        strokeWidth="1.5"
+      />
+      <path d="M9 12 L11 14 L15 10" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// TRANSACTIONS EVENTS ICON
+// TRANSACTIONS EVENTS ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function TransactionsEventsIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="4" width="16" height="16" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <circle cx="8" cy="10" r="1.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <circle cx="12" cy="10" r="1.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <circle cx="16" cy="10" r="1.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <path d="M6 14 L18 14" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="1.5" />
-      <path d="M6 17 L14 17" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="1.5" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="4" width="16" height="16" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <circle cx="8" cy="10" r="1" fill={active ? '#4F8DFF' : '#1A4DB3'} />
+      <circle cx="12" cy="10" r="1" fill={active ? '#4F8DFF' : '#1A4DB3'} />
+      <circle cx="16" cy="10" r="1" fill={active ? '#4F8DFF' : '#1A4DB3'} />
+      <line x1="6" y1="14" x2="18" y2="14" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="6" y1="17" x2="14" y2="17" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// BANK SETTLEMENT ICON
+// BANK SETTLEMENT ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function BankSettlementIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="6" width="16" height="12" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <path d="M8 10 L12 14 L16 10" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="2" strokeLinecap="round" fill="none" />
-      <path d="M8 14 L12 18 L16 14" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="2" strokeLinecap="round" fill="none" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="6" width="16" height="12" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <path d="M8 10 L12 14 L16 10" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      <path d="M8 14 L12 18 L16 14" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// IBAN MANAGER ICON
+// IBAN MANAGER ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function IBANManagerIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="6" width="16" height="12" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} stroke={active ? '#6BA3FF' : '#003B7C'} strokeWidth="1.5" />
-      <rect x="6" y="9" width="12" height="2" rx="0.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <rect x="6" y="13" width="8" height="2" rx="0.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <rect x="6" y="17" width="10" height="2" rx="0.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="6" width="16" height="12" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="6" y1="9" x2="18" y2="9" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="6" y1="13" x2="14" y2="13" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="6" y1="17" x2="16" y2="17" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// CORE BANKING API ICON
+// CORE BANKING API ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function CoreBankingAPIIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M12 2 L20 5 L20 11 C20 16 15 20 12 22 C9 20 4 16 4 11 L4 5 Z"
-        fill={active ? '#4F8DFF' : '#1A4DB3'} stroke={active ? '#6BA3FF' : '#003B7C'} strokeWidth="1.5" />
+        fill="none"
+        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
+        strokeWidth="1.5"
+      />
       <path d="M8 12 L12 16 L16 12 M12 8 L12 16" 
-        stroke={active ? '#FFFFFF' : '#EEF4FF'} 
-        strokeWidth="2" 
+        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
+        strokeWidth="1.5" 
         strokeLinecap="round" 
         fill="none"
       />
@@ -452,142 +332,131 @@ export function CoreBankingAPIIcon({ size = 24, className = '', active = false }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AUDIT BANK ICON
+// AUDIT BANK ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function AuditBankIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="4" width="16" height="16" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <path d="M8 8 L16 8 M8 12 L16 12 M8 16 L12 16" 
-        stroke={active ? '#FFFFFF' : '#EEF4FF'} 
-        strokeWidth="1.5" 
-        strokeLinecap="round"
-      />
-      <circle cx="18" cy="6" r="2" fill={active ? '#6EE7B7' : '#59C27A'} />
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PROCESSOR ICON
-// ═══════════════════════════════════════════════════════════════
-
-export function ProcessorIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="4" width="16" height="16" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <rect x="7" y="7" width="10" height="10" rx="1" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <circle cx="10" cy="10" r="1" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <circle cx="14" cy="10" r="1" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <circle cx="10" cy="14" r="1" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <circle cx="14" cy="14" r="1" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TRANSFER ICON
-// ═══════════════════════════════════════════════════════════════
-
-export function TransferIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <path d="M7 16 L1 12 L7 8 M1 12 L23 12" 
-        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
-        strokeWidth="2" 
-        strokeLinecap="round"
-      />
-      <path d="M17 8 L23 12 L17 16" 
-        stroke={active ? '#6EE7B7' : '#59C27A'} 
-        strokeWidth="2" 
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// API KEYS ICON
-// ═══════════════════════════════════════════════════════════════
-
-export function APIKeysIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="8" y="6" width="8" height="12" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <circle cx="12" cy="10" r="1.5" fill={active ? '#FFFFFF' : '#EEF4FF'} />
-      <path d="M12 12 L12 16" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M4 12 L8 12 M16 12 L20 12" 
-        stroke={active ? '#6EE7B7' : '#59C27A'} 
-        strokeWidth="2" 
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// BINARY READER ICON
-// ═══════════════════════════════════════════════════════════════
-
-export function BinaryReaderIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="4" width="16" height="16" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <text x="12" y="14" fontSize="8" fill={active ? '#FFFFFF' : '#EEF4FF'} textAnchor="middle" fontFamily="monospace">01</text>
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// HEX VIEWER ICON
-// ═══════════════════════════════════════════════════════════════
-
-export function HexViewerIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="4" width="16" height="16" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <text x="12" y="14" fontSize="7" fill={active ? '#FFFFFF' : '#EEF4FF'} textAnchor="middle" fontFamily="monospace">0xFF</text>
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// LARGE FILE ANALYZER ICON
-// ═══════════════════════════════════════════════════════════════
-
-export function LargeFileAnalyzerIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="5" y="4" width="14" height="16" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <path d="M8 8 L16 8 M8 12 L16 12 M8 16 L12 16" 
-        stroke={active ? '#FFFFFF' : '#EEF4FF'} 
-        strokeWidth="1.5" 
-        strokeLinecap="round"
-      />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="4" width="16" height="16" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="8" y1="8" x2="16" y2="8" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="8" y1="12" x2="16" y2="12" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="8" y1="16" x2="12" y2="16" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
       <circle cx="18" cy="6" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
     </svg>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// XCP B2B ICON
+// PROCESSOR ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function ProcessorIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="4" width="16" height="16" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <rect x="7" y="7" width="10" height="10" rx="0.5" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <circle cx="10" cy="10" r="0.8" fill={active ? '#4F8DFF' : '#1A4DB3'} />
+      <circle cx="14" cy="10" r="0.8" fill={active ? '#4F8DFF' : '#1A4DB3'} />
+      <circle cx="10" cy="14" r="0.8" fill={active ? '#4F8DFF' : '#1A4DB3'} />
+      <circle cx="14" cy="14" r="0.8" fill={active ? '#4F8DFF' : '#1A4DB3'} />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TRANSFER ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function TransferIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M7 16 L1 12 L7 8 M1 12 L23 12" 
+        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
+        strokeWidth="1.5" 
+        strokeLinecap="round"
+      />
+      <path d="M17 8 L23 12 L17 16" 
+        stroke={active ? '#6EE7B7' : '#59C27A'} 
+        strokeWidth="1.5" 
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// API KEYS ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function APIKeysIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="8" y="6" width="8" height="12" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <circle cx="12" cy="10" r="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="12" y1="12" x2="12" y2="16" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" strokeLinecap="round" />
+      <line x1="4" y1="12" x2="8" y2="12" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="16" y1="12" x2="20" y2="12" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BINARY READER ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function BinaryReaderIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="4" width="16" height="16" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="8" y1="8" x2="16" y2="8" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="8" y1="12" x2="16" y2="12" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="8" y1="16" x2="12" y2="16" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HEX VIEWER ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function HexViewerIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="4" width="16" height="16" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="8" y1="8" x2="16" y2="8" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="8" y1="12" x2="16" y2="12" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="8" y1="16" x2="14" y2="16" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LARGE FILE ANALYZER ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function LargeFileAnalyzerIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="5" y="4" width="14" height="16" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <line x1="8" y1="8" x2="16" y2="8" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="8" y1="12" x2="16" y2="12" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <line x1="8" y1="16" x2="12" y2="16" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <circle cx="18" cy="6" r="1.5" fill={active ? '#6EE7B7' : '#59C27A'} />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// XCP B2B ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function XcpB2BIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}
-      style={{ filter: active ? 'drop-shadow(0 0 8px rgba(79, 141, 255, 0.6))' : 'none' }}>
-      <rect x="4" y="6" width="16" height="12" rx="2" fill={active ? '#4F8DFF' : '#1A4DB3'} />
-      <path d="M8 10 L12 14 L16 10" stroke={active ? '#FFFFFF' : '#EEF4FF'} strokeWidth="2" strokeLinecap="round" fill="none" />
-      <path d="M8 14 L12 18 L16 14" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="2" strokeLinecap="round" fill="none" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="6" width="16" height="12" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <path d="M8 10 L12 14 L16 10" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      <path d="M8 14 L12 18 L16 14" stroke={active ? '#6EE7B7' : '#59C27A'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
@@ -665,7 +534,7 @@ export function getModuleIcon(tabId: string, size: number = 20, active: boolean 
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MODULE ICON WRAPPER (Widget con diseño premium)
+// MODULE ICON WRAPPER (Widget Futurista Minimalista)
 // ═══════════════════════════════════════════════════════════════
 
 interface ModuleIconWidgetProps {
@@ -684,48 +553,48 @@ export function ModuleIconWidget({ icon, label, active = false, onClick }: Modul
         px-4 py-3 rounded-xl
         transition-all duration-300
         ${active 
-          ? 'bg-gradient-to-br from-sky-500/20 to-blue-600/20 border-2 border-sky-500/50 shadow-lg shadow-sky-500/20' 
-          : 'bg-slate-900/50 border border-slate-700 hover:border-slate-600 hover:bg-slate-800/50'
+          ? 'bg-gradient-to-br from-sky-500/10 to-blue-600/10 border border-sky-500/30 shadow-lg shadow-sky-500/10' 
+          : 'bg-slate-900/30 border border-slate-700/50 hover:border-slate-600 hover:bg-slate-800/30'
         }
         group
       `}
       style={{
         minWidth: '100px',
-        minHeight: '90px'
+        minHeight: '90px',
+        backdropFilter: 'blur(10px)'
       }}
     >
-      {/* Icon container with glow effect */}
+      {/* Icon container - Minimalista */}
       <div className={`
-        relative p-3 rounded-lg
+        relative p-2 rounded-lg
         transition-all duration-300
         ${active 
-          ? 'bg-gradient-to-br from-sky-500/30 to-blue-600/30' 
-          : 'bg-slate-800/50 group-hover:bg-slate-700/50'
+          ? 'bg-sky-500/5' 
+          : 'bg-transparent group-hover:bg-slate-800/30'
         }
       `}>
-        <div className={active ? 'scale-110' : 'group-hover:scale-105 transition-transform'}>
+        <div className={active ? 'scale-105' : 'group-hover:scale-105 transition-transform'}>
           {icon}
         </div>
-        {/* Active indicator */}
+        {/* Active indicator - Minimalista */}
         {active && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-950 shadow-lg" />
+          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full border border-slate-950" />
         )}
       </div>
       
-      {/* Label */}
+      {/* Label - Minimalista */}
       <span className={`
-        text-xs font-semibold text-center
+        text-xs font-medium text-center
         transition-colors duration-300
         ${active ? 'text-sky-400' : 'text-slate-400 group-hover:text-slate-300'}
       `}>
         {label}
       </span>
       
-      {/* Hover glow effect */}
+      {/* Hover glow effect - Sutil */}
       {!active && (
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-sky-500/0 to-blue-600/0 group-hover:from-sky-500/5 group-hover:to-blue-600/5 transition-all duration-300 pointer-events-none" />
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-sky-500/0 to-blue-600/0 group-hover:from-sky-500/3 group-hover:to-blue-600/3 transition-all duration-300 pointer-events-none" />
       )}
     </button>
   );
 }
-
