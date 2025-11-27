@@ -184,15 +184,15 @@ function App() {
                 title="Abrir menú de navegación"
                 aria-label="Abrir menú de navegación"
               >
-                <Menu className="w-6 h-6 text-[#00ff88]" />
+                <Menu className="w-6 h-6 text-white" />
               </button>
-              <div className="p-2 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] rounded-lg glow-green">
+              <div className="p-2 bg-gradient-to-br from-white to-[#e0e0e0] rounded-lg glow-green">
                 <Wallet className="w-6 h-6 text-black" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-[#e0ffe0]">{t.headerTitle}</h1>
                 <p className="text-sm text-neon font-bold">{t.headerSubtitle}</p>
-                <p className="text-xs text-[#4d7c4d]">AES-256-GCM • Digital Commercial Bank Ltd • HMAC-SHA256</p>
+                <p className="text-xs text-white">AES-256-GCM • Digital Commercial Bank Ltd • HMAC-SHA256</p>
               </div>
             </div>
 
@@ -200,17 +200,17 @@ function App() {
             <NotificationCenter />
             <LanguageSelector />
             <div className="text-right">
-              <div className="text-xs text-[#4d7c4d]">{t.productionEnvironment}</div>
+              <div className="text-xs text-white">{t.productionEnvironment}</div>
               <div className="text-sm font-semibold text-neon pulse-green">{t.allSystemsOperational}</div>
               <div className="text-xs text-cyber mt-1 blink-matrix">{t.dtcAnalysisReady}</div>
-              <div className="flex items-center gap-1 text-xs text-[#80ff80] mt-1 font-mono">
+              <div className="flex items-center gap-1 text-xs text-white mt-1 font-mono">
                 <User className="w-3 h-3" />
                 <span>{user}</span>
               </div>
             </div>
             <button
               onClick={logout}
-              className="flex items-center gap-2 px-4 py-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg text-[#4d7c4d] hover:text-[#00ff88] hover:border-[#00ff88] hover:shadow-[0_0_15px_rgba(0,255,136,0.3)] transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg text-white hover:text-white hover:border-white hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all"
               title={t.logoutTitle}
             >
               <LogOut className="w-4 h-4" />
@@ -254,8 +254,8 @@ function App() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2.5 px-4 py-3 font-medium transition-all relative min-w-fit ${
                     isActive
-                      ? 'text-[#00ffaa] text-shadow-[0_0_10px_rgba(0,255,136,0.8)]'
-                      : 'text-[#4d7c4d] hover:text-[#80ff80]'
+                      ? 'text-white text-shadow-[0_0_10px_rgba(255,255,255,0.8)]'
+                      : 'text-white hover:text-white'
                   }`}
                 >
                   <span className="flex items-center justify-center w-5 h-5 flex-shrink-0">
@@ -263,7 +263,7 @@ function App() {
                   </span>
                   <span className="whitespace-nowrap">{tab.name}</span>
                   {isActive && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00ff88] shadow-[0_0_10px_rgba(0,255,136,0.8)]" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
                   )}
                 </button>
               );
@@ -276,8 +276,8 @@ function App() {
         <Suspense fallback={
           <div className="h-full flex items-center justify-center bg-black">
             <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00ff88] mb-4"></div>
-              <p className="text-[#00ff88] text-lg font-semibold">Cargando módulo...</p>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mb-4"></div>
+              <p className="text-white text-lg font-semibold">Cargando módulo...</p>
             </div>
           </div>
         }>
@@ -317,15 +317,15 @@ function App() {
       </main>
 
       <footer className="bg-black border-t border-[#1a1a1a] px-6 py-3 shadow-[0_-2px_20px_rgba(0,255,136,0.1)]">
-        <div className="flex items-center justify-between text-xs text-[#4d7c4d]">
+        <div className="flex items-center justify-between text-xs text-white">
           <div className="flex items-center gap-6">
-            <span className="hover:text-[#80ff80] transition-colors">{t.footerVersion}</span>
-            <span className="hover:text-[#80ff80] transition-colors">{t.footerIsoCompliant}</span>
-            <span className="hover:text-[#80ff80] transition-colors">{t.footerPciReady}</span>
+            <span className="hover:text-white transition-colors">{t.footerVersion}</span>
+            <span className="hover:text-white transition-colors">{t.footerIsoCompliant}</span>
+            <span className="hover:text-white transition-colors">{t.footerPciReady}</span>
           </div>
           <div className="flex items-center gap-6">
-            <span className="hover:text-[#80ff80] transition-colors">{t.footerMultiCurrency}</span>
-            <span className="hover:text-[#80ff80] transition-colors">{t.footerEncryption}</span>
+            <span className="hover:text-white transition-colors">{t.footerMultiCurrency}</span>
+            <span className="hover:text-white transition-colors">{t.footerEncryption}</span>
             <span className="text-cyber font-bold pulse-green">{t.footerForensicAnalysis}</span>
           </div>
         </div>

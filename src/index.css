@@ -19,27 +19,27 @@
 /* FORZAR Wealth LIGHT como en Emirates NBD (de las imágenes) */
 @import './styles/wealth-light-force.css';
 
-/* 🎨 Paleta de Colores Futurista - Negro + Verde Neón Tipo Pantalla Iluminada */
+/* 🎨 Paleta de Colores Futurista - Negro + Blanco Tipo Pantalla Iluminada */
 :root {
-  --neon-green: #00ff88;
-  --neon-green-dim: #00cc6a;
-  --neon-green-bright: #00ffaa;
-  --matrix-green: #0f0;
-  --cyber-green: #39ff14;
+  --neon-green: #ffffff;
+  --neon-green-dim: #e0e0e0;
+  --neon-green-bright: #ffffff;
+  --matrix-green: #ffffff;
+  --cyber-green: #ffffff;
   --dark-bg: #000000;
   --dark-bg-light: #0a0a0a;
   --dark-panel: #0d0d0d;
   --dark-panel-hover: #141414;
   --dark-border: #1a1a1a;
-  --text-primary: #e0ffe0;
-  --text-secondary: #80ff80;
-  --text-dim: #4d7c4d;
-  --glow-green: 0 0 10px rgba(0, 255, 136, 0.5);
-  --glow-green-strong: 0 0 20px rgba(0, 255, 136, 0.8);
-  --glow-green-ultra: 0 0 30px rgba(0, 255, 136, 1);
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-dim: #ffffff;
+  --glow-green: 0 0 10px rgba(255, 255, 255, 0.5);
+  --glow-green-strong: 0 0 20px rgba(255, 255, 255, 0.8);
+  --glow-green-ultra: 0 0 30px rgba(255, 255, 255, 1);
 }
 
-/* Scrollbar personalizado con efecto neón verde */
+/* Scrollbar personalizado con efecto neón blanco */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--neon-green) rgba(0, 0, 0, 0.9);
@@ -59,7 +59,7 @@
   background: linear-gradient(180deg, var(--neon-green) 0%, var(--neon-green-dim) 100%);
   border-radius: 5px;
   box-shadow: var(--glow-green);
-  border: 1px solid rgba(0, 255, 136, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 *::-webkit-scrollbar-thumb:hover {
@@ -95,11 +95,11 @@ body {
 @keyframes pulse-green {
   0%, 100% {
     opacity: 1;
-    box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
   }
   50% {
     opacity: 0.9;
-    box-shadow: 0 0 25px rgba(0, 255, 136, 0.9);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
   }
 }
 
@@ -117,28 +117,28 @@ body {
   animation: blink-matrix 1.5s ease-in-out infinite;
 }
 
-/* Texto con efecto neón verde */
+/* Texto con efecto neón blanco */
 .text-neon {
   color: var(--neon-green);
-  text-shadow: 0 0 10px rgba(0, 255, 136, 0.8),
-               0 0 20px rgba(0, 255, 136, 0.6),
-               0 0 30px rgba(0, 255, 136, 0.4);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
+               0 0 20px rgba(255, 255, 255, 0.6),
+               0 0 30px rgba(255, 255, 255, 0.4);
   font-weight: 600;
   letter-spacing: 0.05em;
 }
 
 .text-neon-bright {
   color: var(--neon-green-bright);
-  text-shadow: 0 0 15px rgba(0, 255, 170, 1),
-               0 0 30px rgba(0, 255, 170, 0.8),
-               0 0 45px rgba(0, 255, 170, 0.6);
+  text-shadow: 0 0 15px rgba(255, 255, 255, 1),
+               0 0 30px rgba(255, 255, 255, 0.8),
+               0 0 45px rgba(255, 255, 255, 0.6);
   font-weight: 700;
   letter-spacing: 0.08em;
 }
 
 .text-cyber {
   color: var(--cyber-green);
-  text-shadow: 0 0 8px rgba(57, 255, 20, 0.8);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
   font-weight: 600;
 }
 
