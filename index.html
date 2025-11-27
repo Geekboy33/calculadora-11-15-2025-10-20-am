@@ -30,8 +30,25 @@
     <meta name="keywords" content="DAES, CoreBanking, Data and Exchange Settlement, Banking System, Financial Platform" />
     <meta name="author" content="DAES - Data and Exchange Settlement" />
     <meta name="application-name" content="DAES CoreBanking System" />
+    <style>
+      /* FORZAR Wealth Dark INMEDIATAMENTE sin esperar CSS externos */
+      body, html {
+        background-color: #050812 !important;
+        color: #F9FAFB !important;
+        font-family: 'Inter', -apple-system, sans-serif !important;
+        margin: 0;
+        padding: 0;
+      }
+      #root {
+        background-color: #050812 !important;
+        min-height: 100vh;
+      }
+      * {
+        box-sizing: border-box;
+      }
+    </style>
   </head>
-  <body>
+  <body style="background-color: #050812 !important; color: #F9FAFB !important;">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
