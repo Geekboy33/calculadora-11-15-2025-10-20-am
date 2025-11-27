@@ -1,88 +1,151 @@
 /**
- * FORCE WEALTH THEME
- * Fuerza la aplicación del tema Wealth Dark con !important
+ * FORCE WEALTH THEME - Paleta EXACTA Emirates NBD
+ * Fuerza aplicación con !important
  */
 
-/* FORZAR BACKGROUND PRINCIPAL */
+/* ═══════════════════════════════════════════════════════════════
+   BACKGROUNDS - Wealth Dark (Azul Oscuro Premium)
+   ═══════════════════════════════════════════════════════════════ */
+
 body,
 #root,
-.min-h-screen {
+html {
   background-color: #050812 !important;
-}
-
-/* FORZAR COLORES DE TEXTO */
-h1, h2, h3, h4, h5, h6,
-p, span, div {
-  color: #F9FAFB;
-}
-
-/* FORZAR CARDS */
-[class*="Card"],
-[class*="card"] {
-  background-color: #0E1525 !important;
-  border-color: #1F2937 !important;
-}
-
-/* FORZAR BOTONES PRIMARIOS */
-button[class*="primary"],
-button[class*="Primary"] {
-  background: linear-gradient(135deg, #4F8DFF, #3A6BD9) !important;
-  color: #FFFFFF !important;
-}
-
-/* APLICAR A TODOS LOS MÓDULOS */
-[class*="min-h-screen"] {
-  background-color: #050812 !important;
-}
-
-[class*="bg-black"] {
-  background-color: #050812 !important;
-}
-
-[class*="bg-slate-950"] {
-  background-color: #050812 !important;
-}
-
-[class*="bg-slate-900"] {
-  background-color: #0E1525 !important;
-}
-
-[class*="bg-slate-800"] {
-  background-color: #141A2A !important;
-}
-
-[class*="text-slate-100"],
-[class*="text-white"] {
   color: #F9FAFB !important;
 }
 
-[class*="text-slate-300"] {
+.min-h-screen,
+[class*="bg-black"],
+[class*="bg-slate-950"],
+.bg-slate-950 {
+  background-color: #050812 !important;
+}
+
+[class*="bg-slate-900"],
+.bg-slate-900 {
+  background-color: #0E1525 !important;
+}
+
+[class*="bg-slate-800"],
+.bg-slate-800 {
+  background-color: #141A2A !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEXT COLORS - Wealth Dark
+   ═══════════════════════════════════════════════════════════════ */
+
+[class*="text-slate-100"],
+[class*="text-slate-50"],
+[class*="text-white"],
+.text-slate-100,
+.text-white {
+  color: #F9FAFB !important;
+}
+
+[class*="text-slate-300"],
+[class*="text-slate-200"],
+.text-slate-300 {
   color: #D1D5DB !important;
 }
 
 [class*="text-slate-400"],
-[class*="text-slate-500"] {
+[class*="text-slate-500"],
+.text-slate-400,
+.text-slate-500 {
   color: #6B7280 !important;
 }
 
-[class*="border-slate-700"] {
-  border-color: #1F2937 !important;
-}
+/* ═══════════════════════════════════════════════════════════════
+   PRIMARY COLOR - Azul Premium #4F8DFF
+   ═══════════════════════════════════════════════════════════════ */
 
 [class*="text-sky-400"],
-[class*="text-sky-500"] {
+[class*="text-sky-500"],
+[class*="text-blue-400"],
+.text-sky-400,
+.text-blue-400 {
   color: #4F8DFF !important;
 }
 
-[class*="bg-sky-500"] {
+[class*="bg-sky-500"],
+[class*="bg-blue-500"],
+.bg-sky-500 {
   background-color: #4F8DFF !important;
 }
 
-[class*="text-emerald-400"] {
+[class*="border-sky-500"],
+.border-sky-500 {
+  border-color: #4F8DFF !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCENT COLORS - Wealth
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Verde Profit - #6EE7B7 */
+[class*="text-emerald-400"],
+[class*="text-green-400"],
+.text-emerald-400 {
   color: #6EE7B7 !important;
 }
 
-[class*="text-amber-400"] {
+[class*="bg-emerald-500"],
+.bg-emerald-500 {
+  background-color: #6EE7B7 !important;
+}
+
+/* Oro - #F5D576 */
+[class*="text-amber-400"],
+[class*="text-yellow-400"],
+.text-amber-400 {
   color: #F5D576 !important;
 }
 
+/* Rojo Loss - #FCA5A5 */
+[class*="text-red-400"],
+.text-red-400 {
+  color: #FCA5A5 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BORDERS - Wealth Dark
+   ═══════════════════════════════════════════════════════════════ */
+
+[class*="border-slate-700"],
+[class*="border-slate-600"],
+.border-slate-700 {
+  border-color: #1F2937 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GRADIENTES WEALTH
+   ═══════════════════════════════════════════════════════════════ */
+
+[class*="from-sky-500"][class*="to-blue-600"],
+[class*="gradient-to-r"][class*="sky"] {
+  background: linear-gradient(135deg, #4F8DFF 0%, #3A6BD9 100%) !important;
+}
+
+[class*="from-slate-900"][class*="to-slate-800"] {
+  background: linear-gradient(135deg, #0E1525 0%, #141A2A 100%) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   APLICACIÓN GLOBAL
+   ═══════════════════════════════════════════════════════════════ */
+
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+button {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  font-family: 'Inter', sans-serif;
+}
