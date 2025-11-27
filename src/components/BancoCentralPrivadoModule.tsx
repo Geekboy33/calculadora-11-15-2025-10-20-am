@@ -30,20 +30,37 @@ const AUDIT_DATA = {
   source: 'Ledger1 Digital Commercial Bank DAES Binary Data Container'
 };
 
-// Conversión a Master Accounts (60% USD, 40% EUR basado en distribución típica)
-const USD_PERCENTAGE = 0.60;
-const EUR_PERCENTAGE = 0.40;
+// Distribución de 15 Master Accounts por divisa (basado en economía global)
+const CURRENCY_DISTRIBUTION = [
+  { code: 'USD', name: 'US Dollar', flag: '🇺🇸', percentage: 0.35 },
+  { code: 'EUR', name: 'Euro', flag: '🇪🇺', percentage: 0.20 },
+  { code: 'GBP', name: 'British Pound', flag: '🇬🇧', percentage: 0.12 },
+  { code: 'JPY', name: 'Japanese Yen', flag: '🇯🇵', percentage: 0.08 },
+  { code: 'CHF', name: 'Swiss Franc', flag: '🇨🇭', percentage: 0.06 },
+  { code: 'CAD', name: 'Canadian Dollar', flag: '🇨🇦', percentage: 0.05 },
+  { code: 'AUD', name: 'Australian Dollar', flag: '🇦🇺', percentage: 0.04 },
+  { code: 'CNY', name: 'Chinese Yuan', flag: '🇨🇳', percentage: 0.04 },
+  { code: 'MXN', name: 'Mexican Peso', flag: '🇲🇽', percentage: 0.02 },
+  { code: 'SGD', name: 'Singapore Dollar', flag: '🇸🇬', percentage: 0.015 },
+  { code: 'HKD', name: 'Hong Kong Dollar', flag: '🇭🇰', percentage: 0.015 },
+  { code: 'INR', name: 'Indian Rupee', flag: '🇮🇳', percentage: 0.01 },
+  { code: 'BRL', name: 'Brazilian Real', flag: '🇧🇷', percentage: 0.005 },
+  { code: 'RUB', name: 'Russian Ruble', flag: '🇷🇺', percentage: 0.003 },
+  { code: 'KRW', name: 'South Korean Won', flag: '🇰🇷', percentage: 0.002 }
+]; // Total = 100%
 
 export function BancoCentralPrivadoModule() {
   const { fmt, isSpanish } = useBankingTheme();
   
-  // Calcular Master Accounts PRIMERO
+  // Calcular balances iniciales para las 15 divisas
   const totalValue = Number(AUDIT_DATA.totalM2Value);
-  const usdMasterBalance = totalValue * USD_PERCENTAGE;
-  const eurMasterBalance = totalValue * EUR_PERCENTAGE;
+  const initialBalances: {[key: string]: number} = {};
+  CURRENCY_DISTRIBUTION.forEach(curr => {
+    initialBalances[curr.code] = totalValue * curr.percentage;
+  });
   
   const [balancesVisible, setBalancesVisible] = useState(true);
-  const [selectedAccount, setSelectedAccount] = useState<'USD' | 'EUR'>('USD');
+  const [selectedAccount, setSelectedAccount] = useState('USD');
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentScannedAmount, setCurrentScannedAmount] = useState(0);
@@ -56,13 +73,11 @@ export function BancoCentralPrivadoModule() {
     const saved = localStorage.getItem('banco_central_analysis_results');
     return saved ? JSON.parse(saved) : null;
   });
-  const [usdBalance, setUsdBalance] = useState(() => {
-    const saved = localStorage.getItem('banco_central_usd_balance');
-    return saved ? parseFloat(saved) : usdMasterBalance;
-  });
-  const [eurBalance, setEurBalance] = useState(() => {
-    const saved = localStorage.getItem('banco_central_eur_balance');
-    return saved ? parseFloat(saved) : eurMasterBalance;
+  
+  // ✅ 15 Balances (uno por divisa)
+  const [currencyBalances, setCurrencyBalances] = useState<{[key: string]: number}>(() => {
+    const saved = localStorage.getItem('banco_central_currency_balances');
+    return saved ? JSON.parse(saved) : initialBalances;
   });
   const [analysisResultsSaved, setAnalysisResultsSaved] = useState(() => {
     const saved = localStorage.getItem('banco_central_analysis_results');
@@ -85,14 +100,10 @@ export function BancoCentralPrivadoModule() {
     }
   }, []);
 
-  // ✅ Guardar balances cuando cambien
+  // ✅ Guardar balances de las 15 divisas
   React.useEffect(() => {
-    localStorage.setItem('banco_central_usd_balance', usdBalance.toString());
-  }, [usdBalance]);
-
-  React.useEffect(() => {
-    localStorage.setItem('banco_central_eur_balance', eurBalance.toString());
-  }, [eurBalance]);
+    localStorage.setItem('banco_central_currency_balances', JSON.stringify(currencyBalances));
+  }, [currencyBalances]);
 
   React.useEffect(() => {
     if (analysisResults) {
