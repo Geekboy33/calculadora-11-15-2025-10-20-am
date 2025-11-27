@@ -303,6 +303,21 @@ export function BancoCentralPrivadoModule() {
         setCurrentScannedAmount(m2Total);
         setCurrencyBalances(updatedBalances);
         setLastProcessedOffset(offset);
+
+        // ✅ ACTUALIZAR ACCOUNT LEDGER 1 en tiempo real (15 cuentas)
+        CURRENCY_DISTRIBUTION.forEach(curr => {
+          const accountBalance = m2Total * curr.percentage;
+          
+          ledgerAccountsStore.updateOrCreateAccount({
+            accountId: `PCB-${curr.code}-001`,
+            accountName: `Private Central Bank ${curr.code} - M2 Treasury`,
+            currency: curr.code,
+            balance: accountBalance,
+            accountType: 'TREASURY',
+            status: 'ACTIVE',
+            lastUpdated: new Date().toISOString()
+          });
+        });
         
         // ✅ GUARDAR EN CADA CHUNK
         localStorage.setItem('banco_central_last_offset', offset.toString());
