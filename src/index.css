@@ -1,3 +1,6 @@
+/* PRIMERO: Forzar aplicación Wealth Dark ANTES de Tailwind */
+@import './styles/daes-force-apply.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,6 +13,9 @@
 
 /* FORZAR tema Wealth Dark con máxima prioridad */
 @import './styles/force-wealth-theme.css';
+
+/* ÚLTIMO: Re-forzar aplicación después de TODO */
+@import './styles/daes-force-apply.css';
 
 /* 🎨 Paleta de Colores Futurista - Negro + Verde Neón Tipo Pantalla Iluminada */
 :root {
