@@ -112,12 +112,15 @@ export function LargeFileAnalyzer2() {
         setBalances(CURRENCIES.map(c => ({ currency: c.code, balance: 0, percentage: c.percentage })));
       }
 
-      // ✅ STREAMING por chunks
-      while (offset < totalSize && processingRef.current) {
-        const chunk = file.slice(offset, Math.min(offset + CHUNK_SIZE, totalSize));
+      // ✅ PROCESAMIENTO ASÍNCRONO NO BLOQUEANTE
+      const processChunk = async (chunkOffset: number) => {
+        if (!processingRef.current) return false;
+
+        const chunk = file.slice(chunkOffset, Math.min(chunkOffset + CHUNK_SIZE, totalSize));
         const buffer = await chunk.arrayBuffer();
         const bytes = new Uint8Array(buffer);
         
+        // Procesar chunk
         for (let i = 0; i < bytes.length - 7; i += 8) {
           const v = bytes[i] + (bytes[i+1] << 8) + (bytes[i+2] << 16) + (bytes[i+3] << 24);
           if (v > 100000000) {
@@ -126,30 +129,39 @@ export function LargeFileAnalyzer2() {
           }
         }
         
+        return true;
+      };
+
+      // Loop asíncrono con yields frecuentes
+      while (offset < totalSize && processingRef.current) {
+        // Procesar chunk
+        await processChunk(offset);
+        
         offset += CHUNK_SIZE;
         const prog = Math.min((offset / totalSize) * 100, 100);
         
-        // ✅ Distribuir en 15 divisas
+        // Distribuir en 15 divisas
         const newBalances = CURRENCIES.map(c => ({
           currency: c.code,
           balance: m2Total * c.percentage,
           percentage: c.percentage
         }));
         
-        setProgress(prog);
-        setTotalScanned(m2Total);
-        setBalances(newBalances);
-        setLastOffset(offset);
+        // ✅ Actualizar UI usando requestAnimationFrame (más suave)
+        requestAnimationFrame(() => {
+          setProgress(prog);
+          setTotalScanned(m2Total);
+          setBalances(newBalances);
+          setLastOffset(offset);
+        });
         
-        // ✅ Guardar cada chunk
         localStorage.setItem('lfa2_last_offset', offset.toString());
         localStorage.setItem('lfa2_balances', JSON.stringify(newBalances));
         
-        // ✅ ALIMENTAR SISTEMA EN TIEMPO REAL (cada 10%)
+        // ✅ ALIMENTAR SISTEMA cada 10%
         if (Math.floor(prog) % 10 === 0 && Math.floor(prog) !== Math.floor(((offset - CHUNK_SIZE) / totalSize) * 100)) {
-          console.log(`[LFA2] 📊 ${prog.toFixed(0)}% - ${m2Count} M2 - ${m2Total} Billions`);
+          console.log(`[LFA2] 📊 ${prog.toFixed(0)}%`);
           
-          // Actualizar balanceStore cada 10%
           const balancesForStore: CurrencyBalance[] = newBalances.map(bal => ({
             currency: bal.currency,
             totalAmount: bal.balance,
@@ -164,29 +176,31 @@ export function LargeFileAnalyzer2() {
             lastUpdate: new Date().toISOString()
           }));
 
-          // Guardar en balanceStore (actualiza Panel Central en vivo)
-          balanceStore.saveBalances({
-            balances: balancesForStore,
-            lastScanDate: new Date().toISOString(),
-            fileName: file.name,
-            fileSize: file.size,
-            totalTransactions: balancesForStore.reduce((sum, b) => sum + b.transactionCount, 0)
-          });
+          // ✅ Usar setTimeout para no bloquear
+          setTimeout(() => {
+            balanceStore.saveBalances({
+              balances: balancesForStore,
+              lastScanDate: new Date().toISOString(),
+              fileName: file.name,
+              fileSize: file.size,
+              totalTransactions: balancesForStore.reduce((sum, b) => sum + b.transactionCount, 0)
+            });
 
-          // Guardar en ledgerPersistenceStore (actualiza Account Ledger en vivo)
-          ledgerPersistenceStore.updateBalances(
-            balancesForStore.map(b => ({
-              currency: b.currency,
-              balance: b.balance,
-              account: b.accountName,
-              lastUpdate: Date.now()
-            }))
-          );
+            ledgerPersistenceStore.updateBalances(
+              balancesForStore.map(b => ({
+                currency: b.currency,
+                balance: b.balance,
+                account: b.accountName,
+                lastUpdate: Date.now()
+              }))
+            );
 
-          console.log(`[LFA2] 💾 Sistema alimentado al ${prog.toFixed(0)}% (Panel Central + Account Ledger + Black Screen)`);
+            console.log(`[LFA2] 💾 Sistema alimentado al ${prog.toFixed(0)}%`);
+          }, 0);
         }
         
-        await new Promise(r => setTimeout(r, 10));
+        // ✅ YIELD frecuente para permitir navegación
+        await new Promise(r => setTimeout(r, 50)); // 50ms para dar tiempo a la UI
       }
 
       if (processingRef.current) {
