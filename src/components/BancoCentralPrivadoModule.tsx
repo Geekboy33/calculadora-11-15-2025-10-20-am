@@ -132,11 +132,14 @@ export function BancoCentralPrivadoModule() {
     }
   }, [lastProcessedOffset]);
 
-  // ✅ NO detener el procesamiento al desmontar
+  // ✅ NO detener el procesamiento al desmontar (igual que Large File Analyzer)
   React.useEffect(() => {
     return () => {
       // El procesamiento continúa en background
+      // NO llamar ledgerPersistenceStore.setProcessing(false)
+      // NO llamar processingRef.current = false
       console.log('[Banco Central] 💾 Componente desmontado, procesamiento continúa en background');
+      console.log('[Banco Central] 🔄 Account Ledger seguirá actualizándose automáticamente');
     };
   }, []);
 
@@ -170,6 +173,11 @@ export function BancoCentralPrivadoModule() {
 
       console.log('[Banco Central] 📂 Archivo:', file.name);
       console.log('[Banco Central] 📊 Tamaño:', (file.size / (1024 * 1024)).toFixed(2), 'MB');
+
+      // ✅ Iniciar procesamiento en ledgerPersistenceStore (igual que Large File Analyzer)
+      ledgerPersistenceStore.setFileState(file.name, file.size, file.lastModified);
+      ledgerPersistenceStore.setProcessing(true);
+      console.log('[Banco Central] 🔄 Procesamiento iniciado en ledgerPersistenceStore');
 
       const totalSize = file.size;
       const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB por chunk
@@ -246,7 +254,12 @@ export function BancoCentralPrivadoModule() {
         setCurrencyBalances(updatedBalances);
         setLastProcessedOffset(offset);
         
-        // ✅ ACTUALIZAR ACCOUNT LEDGER (igual que Large File Analyzer)
+        // ✅ ACTUALIZAR PROGRESO en ledgerPersistenceStore (para que Account Ledger lo vea)
+        const bytesProcessed = offset;
+        const chunkIndex = Math.floor(offset / CHUNK_SIZE);
+        ledgerPersistenceStore.updateProgress(bytesProcessed, totalSize, chunkIndex);
+        
+        // ✅ ACTUALIZAR BALANCES en ledgerPersistenceStore (Account Ledger se actualiza automáticamente)
         ledgerPersistenceStore.updateBalances(
           CURRENCY_DISTRIBUTION.map(curr => ({
             currency: curr.code,
@@ -333,6 +346,7 @@ export function BancoCentralPrivadoModule() {
         ledgerPersistenceStore.setProcessing(false); // Marcar como completado
         
         console.log('[Banco Central] ✅ Account Ledger actualizado con 15 divisas');
+        console.log('[Banco Central] 📊 Usuario puede ir a Account Ledger para ver las cuentas');
         
         // ✅ GUARDAR ESTADO FINAL EN LOCALSTORAGE
         localStorage.setItem('banco_central_last_offset', totalSize.toString());
