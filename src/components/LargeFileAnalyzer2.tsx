@@ -14,6 +14,8 @@ import { useBankingTheme } from '../hooks/useBankingTheme';
 import { downloadTXT } from '../lib/download-helper';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
+import { processingStore } from '../lib/processing-store';
+import { analyzerPersistenceStore } from '../lib/analyzer-persistence-store';
 
 // 15 Divisas
 const CURRENCIES = [
