@@ -258,16 +258,12 @@ export function BancoCentralPrivadoModule() {
         
         // Log cada 10%
         if (Math.floor(progressPercent) % 10 === 0 && Math.floor(progressPercent) !== Math.floor(((offset - CHUNK_SIZE) / totalSize) * 100)) {
-          console.log(`[Banco Central] 📊 ${progressPercent.toFixed(1)}%`);
-          console.log(`  Offset: ${(offset / (1024 * 1024 * 1024)).toFixed(2)} GB`);
-          console.log(`  M2 Values: ${m2Count}`);
-          console.log(`  Total: ${m2Total.toFixed(0)} Billions`);
-          console.log(`  USD: ${usdCurrent.toFixed(0)}`);
-          console.log(`  EUR: ${eurCurrent.toFixed(0)}`);
-          console.log(`  ✅ Progreso y balance guardados y SINCRONIZADOS`);
+          console.log(`[Banco Central] 📊 ${progressPercent.toFixed(1)}% - Procesando...`);
+          console.log(`  M2 Values: ${m2Count} | Total: ${m2Total.toFixed(0)} Billions`);
+          console.log(`  ✅ 15 divisas sincronizadas y guardadas`);
         }
         
-        await new Promise(r => setTimeout(r, 10));
+        await new Promise(r => setTimeout(r, 0)); // Yield mínimo
       }
 
       if (processingRef.current) {
