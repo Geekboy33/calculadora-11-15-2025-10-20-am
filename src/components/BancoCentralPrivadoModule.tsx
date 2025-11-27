@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { 
   Building2, Shield, Lock, TrendingUp, Database, Activity,
-  CheckCircle, DollarSign, Eye, EyeOff, Download, RefreshCw, Upload
+  CheckCircle, DollarSign, Eye, EyeOff, Download, RefreshCw, Upload, RotateCcw
 } from 'lucide-react';
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingMetric, BankingBadge } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
@@ -332,6 +332,45 @@ export function BancoCentralPrivadoModule() {
     }
   };
 
+  const handleReset = () => {
+    const confirmed = confirm(
+      `🔄 ${isSpanish ? 'REINICIAR DESDE 0' : 'RESET FROM 0'}\n\n` +
+      `${isSpanish ? '¿Reiniciar COMPLETAMENTE el análisis?' : 'COMPLETELY restart the analysis?'}\n\n` +
+      `${isSpanish ? 'Esto eliminará:' : 'This will delete:'}\n` +
+      `- ${isSpanish ? 'Progreso guardado' : 'Saved progress'}\n` +
+      `- ${isSpanish ? 'Balances de las 15 divisas' : 'Balances of 15 currencies'}\n` +
+      `- ${isSpanish ? 'Certificación' : 'Certification'}\n\n` +
+      `${isSpanish ? 'El próximo archivo empezará desde 0%' : 'Next file will start from 0%'}`
+    );
+
+    if (confirmed) {
+      // ✅ Detener procesamiento
+      processingRef.current = false;
+
+      // ✅ Limpiar TODO
+      localStorage.removeItem('banco_central_currency_balances');
+      localStorage.removeItem('banco_central_analysis_results');
+      localStorage.removeItem('banco_central_last_offset');
+      localStorage.removeItem('banco_central_current_file');
+
+      // ✅ Resetear a valores iniciales (auditoría)
+      setCurrencyBalances(initialBalances);
+      setAnalysisResults(null);
+      setProgress(0);
+      setCurrentScannedAmount(0);
+      setLastProcessedOffset(0);
+      setCurrentFileName('');
+
+      alert(
+        `✅ ${isSpanish ? 'RESETEO COMPLETO' : 'COMPLETE RESET'}\n\n` +
+        `${isSpanish ? '- Progreso: 0%' : '- Progress: 0%'}\n` +
+        `${isSpanish ? '- 15 divisas restauradas a valores de auditoría' : '- 15 currencies restored to audit values'}\n` +
+        `${isSpanish ? '- Listo para cargar nuevo archivo' : '- Ready to load new file'}`
+      );
+      console.log('[Banco Central] 🔄 RESET COMPLETO: Todo limpiado, valores de auditoría restaurados');
+    }
+  };
+
   const handleClearAnalysis = () => {
     const confirmed = confirm(
       `⚠️ ${isSpanish ? 'LIMPIAR ANÁLISIS Y PROGRESO' : 'CLEAR ANALYSIS AND PROGRESS'}\n\n` +
@@ -545,16 +584,14 @@ Timestamp: ${AUDIT_DATA.timestamp}
               >
                 {isSpanish ? "Descargar Auditoría" : "Download Audit"}
               </BankingButton>
-              {analysisResults?.certified && (
-                <BankingButton
-                  variant="ghost"
-                  icon={RefreshCw}
-                  onClick={handleClearAnalysis}
-                  className="border border-amber-500/30 hover:border-amber-500 text-amber-400"
-                >
-                  {isSpanish ? "Limpiar y Recargar" : "Clear & Reload"}
-                </BankingButton>
-              )}
+              <BankingButton
+                variant="ghost"
+                icon={RotateCcw}
+                onClick={handleReset}
+                className="border-2 border-red-500/30 hover:border-red-500 text-red-400 hover:bg-red-500/10"
+              >
+                {isSpanish ? "Reset desde 0" : "Reset from 0"}
+              </BankingButton>
               <button
                 onClick={() => setBalancesVisible(!balancesVisible)}
                 className="p-3 bg-slate-800 border border-slate-600 hover:border-slate-500 text-slate-300 rounded-xl transition-all"
