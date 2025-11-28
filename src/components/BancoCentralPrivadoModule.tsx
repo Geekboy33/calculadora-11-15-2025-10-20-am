@@ -1016,8 +1016,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
         </div>
 
         {/* Master Account Display */}
-        <BankingCard className="overflow-hidden">
-          <div className={`p-card-lg border-b border-[var(--border-subtle)] ${
+        <BankingCard className="overflow-visible">
+          <div className={`p-card-lg ${
             selectedAccount === 'USD' 
               ? 'bg-gradient-to-r from-white/5 to-white/5'
               : 'bg-gradient-to-r from-emerald-500/10 to-teal-600/10'
@@ -1041,24 +1041,24 @@ Timestamp: ${AUDIT_DATA.timestamp}
               </BankingBadge>
             </div>
 
-            <div className="text-center py-8">
+            <div className="text-center py-8 relative z-10">
               <p className="text-white text-sm mb-card uppercase tracking-wide">
                 {isSpanish ? "Balance de Tesorería" : "Treasury Balance"}
               </p>
               {balancesVisible ? (
                 <>
-                  <p className="text-6xl font-black text-white mb-card-sm">
+                  <p className="text-6xl font-black text-white mb-card-sm relative z-10 break-words">
                     {fmt.currency(selectedMasterAccount.balance, selectedMasterAccount.currency)}
                   </p>
-                  <p className="text-white text-lg">
+                  <p className="text-white text-lg relative z-10">
                     ({selectedMasterAccount.balance.toExponential(2)} {selectedMasterAccount.currency})
                   </p>
-                  <p className="text-white text-sm mt-card-sm">
+                  <p className="text-white text-sm mt-card-sm relative z-10">
                     ≈ {(selectedMasterAccount.balance / 1000000000).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} {isSpanish ? 'Miles de Millones' : 'Billions'}
                   </p>
                 </>
               ) : (
-                <p className="text-6xl font-black text-white m-card">
+                <p className="text-6xl font-black text-white m-card relative z-10">
                   {'*'.repeat(20)}
                 </p>
               )}
