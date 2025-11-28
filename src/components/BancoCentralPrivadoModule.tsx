@@ -1017,23 +1017,15 @@ Timestamp: ${AUDIT_DATA.timestamp}
 
         {/* Master Account Display */}
         <BankingCard className="overflow-visible">
-          <div className={`p-card-lg ${
-            selectedAccount === 'USD' 
-              ? 'bg-gradient-to-r from-[var(--bg-card)] to-[var(--bg-elevated)]'
-              : 'bg-gradient-to-r from-[var(--bg-card)] to-[var(--bg-elevated)]'
-          }`}>
+          <div className="p-card-lg bg-white">
             <div className="flex items-center justify-between m-section">
               <div className="flex items-center gap-card">
-                <div className={`p-card-sm rounded-xl ${
-                  selectedAccount === 'USD' ? 'bg-white/10' : 'bg-emerald-500/20'
-                }`}>
-                  <DollarSign className={`w-10 h-10 ${
-                    selectedAccount === 'USD' ? 'text-white' : 'text-white'
-                  }`} />
+                <div className="p-card-sm rounded-xl bg-white/10">
+                  <DollarSign className="w-10 h-10 text-black" />
                 </div>
                 <div>
-                  <h3 className="text-heading text-white">{selectedMasterAccount.name}</h3>
-                  <p className="text-white">ID: {selectedMasterAccount.id}</p>
+                  <h3 className="text-heading text-black">{selectedMasterAccount.name}</h3>
+                  <p className="text-black">ID: {selectedMasterAccount.id}</p>
                 </div>
               </div>
               <BankingBadge variant="success">
@@ -1041,24 +1033,24 @@ Timestamp: ${AUDIT_DATA.timestamp}
               </BankingBadge>
             </div>
 
-            <div className="text-center py-8 relative z-20">
-              <p className="text-white text-sm mb-card uppercase tracking-wide font-semibold" style={{ color: '#FFFFFF' }}>
+            <div className="text-center py-8 relative z-20 bg-white">
+              <p className="text-black text-sm mb-card uppercase tracking-wide font-semibold">
                 {isSpanish ? "Balance de Tesorería" : "Treasury Balance"}
               </p>
               {balancesVisible ? (
                 <>
-                  <p className="text-6xl font-black text-white mb-card-sm relative z-20 break-words leading-tight" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
+                  <p className="text-6xl font-black text-black mb-card-sm relative z-20 break-words leading-tight">
                     {fmt.currency(selectedMasterAccount.balance, selectedMasterAccount.currency)}
                   </p>
-                  <p className="text-white text-lg relative z-20 font-semibold" style={{ color: '#FFFFFF', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+                  <p className="text-black text-lg relative z-20 font-semibold">
                     ({selectedMasterAccount.balance.toExponential(2)} {selectedMasterAccount.currency})
                   </p>
-                  <p className="text-white text-sm mt-card-sm relative z-20" style={{ color: '#FFFFFF', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+                  <p className="text-black text-sm mt-card-sm relative z-20">
                     ≈ {(selectedMasterAccount.balance / 1000000000).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} {isSpanish ? 'Miles de Millones' : 'Billions'}
                   </p>
                 </>
               ) : (
-                <p className="text-6xl font-black text-white m-card relative z-20">
+                <p className="text-6xl font-black text-black m-card relative z-20">
                   {'*'.repeat(20)}
                 </p>
               )}
@@ -1070,8 +1062,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   </span>
                 </div>
                 <div className="flex items-center gap-card-sm">
-                  <Database className="w-4 h-4 text-white" />
-                  <span className="text-white">{selectedMasterAccount.classification}</span>
+                  <Database className="w-4 h-4 text-black" />
+                  <span className="text-black">{selectedMasterAccount.classification}</span>
                 </div>
               </div>
             </div>
