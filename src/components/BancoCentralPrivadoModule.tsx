@@ -1163,15 +1163,15 @@ Timestamp: ${AUDIT_DATA.timestamp}
           <div className="p-card">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-card">
               <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-xl p-card-sm">
-                <p className="text-black text-sm mb-card-sm">{isSpanish ? "Porcentaje del Total" : "Percentage of Total"}</p>
-                <p className="text-heading text-black">{selectedMasterAccount.percentage}%</p>
+                <p className="text-white text-sm mb-card-sm">{isSpanish ? "Porcentaje del Total" : "Percentage of Total"}</p>
+                <p className="text-heading text-white">{selectedMasterAccount.percentage}%</p>
               </div>
               <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-xl p-card-sm">
-                <p className="text-black text-sm mb-card-sm">{isSpanish ? "Clasificación" : "Classification"}</p>
-                <p className="text-heading-sm text-black">{selectedMasterAccount.classification}</p>
+                <p className="text-white text-sm mb-card-sm">{isSpanish ? "Clasificación" : "Classification"}</p>
+                <p className="text-heading-sm text-white">{selectedMasterAccount.classification}</p>
               </div>
               <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-xl p-card-sm">
-                <p className="text-black text-sm mb-card-sm">{isSpanish ? "Estado de Verificación" : "Verification Status"}</p>
+                <p className="text-white text-sm mb-card-sm">{isSpanish ? "Estado de Verificación" : "Verification Status"}</p>
                 <p className="text-emerald-400 font-bold text-xl">✅ {isSpanish ? "VERIFICADO" : "VERIFIED"}</p>
               </div>
             </div>
