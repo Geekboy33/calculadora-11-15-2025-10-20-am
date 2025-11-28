@@ -1050,3 +1050,6 @@ function InfoRow({ icon, label, value }: { icon: ReactNode; label: string; value
   );
 }
 
+// Export default for better lazy loading compatibility
+export default ProfilesModule;
+

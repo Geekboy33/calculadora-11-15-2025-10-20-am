@@ -50,7 +50,30 @@ const APIDigitalModule = lazy(() => import('./components/APIDigitalModule').then
 const ProofOfReservesAPIModule = lazy(() => import('./components/ProofOfReservesAPIModule').then(m => ({ default: m.ProofOfReservesAPIModule })));
 const ProofOfReservesAPI1Module = lazy(() => import('./components/ProofOfReservesAPI1Module').then(m => ({ default: m.ProofOfReservesAPI1Module })));
 const TransactionEventsModule = lazy(() => import('./components/TransactionEventsModule').then(m => ({ default: m.TransactionEventsModule })));
-const ProfilesModule = lazy(() => import('./components/ProfilesModule').then(m => ({ default: m.ProfilesModule })));
+const ProfilesModule = lazy(() => 
+  import('./components/ProfilesModule')
+    .then(m => {
+      // Try default export first, then named export
+      const component = m.default || m.ProfilesModule;
+      if (!component) {
+        throw new Error('ProfilesModule export not found');
+      }
+      return { default: component };
+    })
+    .catch(error => {
+      console.error('Error loading ProfilesModule:', error);
+      // Return a fallback component
+      return { 
+        default: () => (
+          <div className="p-6 text-white">
+            <h2 className="text-xl font-bold mb-4">Error loading Profiles Module</h2>
+            <p className="text-white/70">Please refresh the page or contact support.</p>
+            <p className="text-xs text-white/50 mt-2">Error: {error.message}</p>
+          </div>
+        )
+      };
+    })
+);
 const BankSettlementModule = lazy(() => import('./components/BankSettlementModule').then(m => ({ default: m.BankSettlementModule })));
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 
