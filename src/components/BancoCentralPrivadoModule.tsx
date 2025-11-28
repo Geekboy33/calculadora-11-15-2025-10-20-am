@@ -920,13 +920,13 @@ Timestamp: ${AUDIT_DATA.timestamp}
           <BankingCard className="p-card border-2 border-white/20 bg-white/3">
             <div className="flex items-start gap-card">
               <div className="p-card-sm bg-white/10 rounded-xl animate-pulse">
-                <Activity className="w-8 h-8 text-black" />
+                <Activity className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="text-heading text-black mb-card-sm">
+                <h3 className="text-heading text-white mb-card-sm">
                   {isSpanish ? "Análisis Completado" : "Analysis Completed"}
                 </h3>
-                <p className="text-black text-heading-sm mb-card">
+                <p className="text-white text-heading-sm mb-card">
                   {analysisResults.totalM2Values.toLocaleString()} {isSpanish ? "Valores M2 Detectados" : "M2 Values Detected"}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-card text-sm">
