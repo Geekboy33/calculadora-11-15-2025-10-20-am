@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-8);
-  background: var(--bg-main);
+  background: #000000;
   font-family: var(--font-family-base);
 }
 
@@ -68,10 +68,10 @@
 }
 
 .card {
-  background: var(--bg-card);
+  background: #0d0d0d;
   border-radius: var(--radius-3xl);
   box-shadow: var(--shadow-card);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid #1a1a1a;
   padding: var(--space-10);
 }
 
@@ -115,22 +115,22 @@
   padding-right: var(--space-4);
   padding-top: var(--space-3);
   padding-bottom: var(--space-3);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
+  background: #141414;
+  border: 1px solid #1a1a1a;
   border-radius: var(--radius-lg);
-  color: var(--text-primary);
+  color: #FFFFFF;
   font-size: var(--text-base);
   outline: none;
   transition: all var(--transition-base);
 }
 
 .input:focus {
-  border-color: var(--border-focus);
+  border-color: #1A4DB3;
   box-shadow: 0 0 0 3px rgba(26, 77, 179, 0.2);
 }
 
 .input::placeholder {
-  color: var(--text-muted);
+  color: #6B7280;
 }
 
 .passwordInput {
@@ -157,7 +157,7 @@
 }
 
 .errorContainer {
-  background: var(--bg-elevated);
+  background: #1a1a1a;
   border: 1px solid var(--color-accent-red);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
@@ -252,7 +252,7 @@
 }
 
 .badge {
-  background: var(--bg-elevated);
+  background: #141414;
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
   border: 1px solid;
