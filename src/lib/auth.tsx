@@ -4,7 +4,6 @@
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { loginSecurity } from './login-security';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -19,17 +18,39 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const auth = localStorage.getItem('daes_authenticated') === 'true';
-    const token = localStorage.getItem('daes_session_token');
-    
-    // Validar token de sesión si existe
-    if (auth && token) {
-      return loginSecurity.validateSessionToken(token);
+// Función helper para validar token sin importar loginSecurity en la inicialización
+function validateTokenSimple(token: string): boolean {
+  try {
+    // Validar formato (64 caracteres hex)
+    if (!/^[a-f0-9]{64}$/i.test(token)) {
+      return false;
     }
     
+    // Verificar que el token existe en localStorage
+    const storedToken = localStorage.getItem('daes_session_token');
+    return storedToken === token;
+  } catch (error) {
+    console.warn('[AuthProvider] Error validating token:', error);
     return false;
+  }
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      const auth = localStorage.getItem('daes_authenticated') === 'true';
+      const token = localStorage.getItem('daes_session_token');
+      
+      // Validar token de sesión si existe
+      if (auth && token) {
+        return validateTokenSimple(token);
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('[AuthProvider] Error initializing auth state:', error);
+      return false;
+    }
   });
   
   const [user, setUser] = useState<string | null>(() => {
