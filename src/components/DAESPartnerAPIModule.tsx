@@ -1605,7 +1605,7 @@ Partner: ${partner.name}
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
@@ -1707,7 +1707,7 @@ Partner: ${partner.name}
               {verificationResults.checks.map((check: any, idx: number) => (
                 <div
                   key={idx}
-                  className={`bg-slate-900/50 border rounded-xl p-4 ${
+                  className={`bg-[#0d0d0d]/50 border rounded-xl p-4 ${
                     check.status === 'SUCCESS' ? 'border-emerald-500/30' :
                     check.status === 'WARNING' ? 'border-amber-500/30' :
                     'border-red-500/30'
@@ -1731,7 +1731,7 @@ Partner: ${partner.name}
                         {check.message}
                       </p>
                       {check.details.length > 0 && (
-                        <div className="bg-slate-800/50 rounded-lg p-3 mt-2">
+                        <div className="bg-[#141414]/50 rounded-lg p-3 mt-2">
                           <ul className="text-slate-400 text-xs space-y-1">
                             {check.details.slice(0, 5).map((detail: string, i: number) => (
                               <li key={i}>• {detail}</li>
@@ -1781,13 +1781,13 @@ Partner: ${partner.name}
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 p-2 rounded-xl">
+        <div className="flex items-center gap-2 bg-[#0d0d0d] border border-[#1a1a1a] p-2 rounded-xl">
           <button
             onClick={() => setSelectedTab('partners')}
             className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
               selectedTab === 'partners'
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg'
-                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-white to-white text-black shadow-lg'
+                : 'text-slate-400 hover:text-slate-100 hover:bg-[#141414]'
             }`}
           >
             <Users className="w-5 h-5 inline mr-2" />
@@ -1798,7 +1798,7 @@ Partner: ${partner.name}
             className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
               selectedTab === 'clients'
                 ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
-                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+                : 'text-slate-400 hover:text-slate-100 hover:bg-[#141414]'
             }`}
           >
             <Wallet className="w-5 h-5 inline mr-2" />
@@ -1809,7 +1809,7 @@ Partner: ${partner.name}
             className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
               selectedTab === 'accounts'
                 ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
-                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+                : 'text-slate-400 hover:text-slate-100 hover:bg-[#141414]'
             }`}
           >
             <Key className="w-5 h-5 inline mr-2" />
@@ -1820,7 +1820,7 @@ Partner: ${partner.name}
             className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
               selectedTab === 'transfers'
                 ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
-                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+                : 'text-slate-400 hover:text-slate-100 hover:bg-[#141414]'
             }`}
           >
             <ArrowRight className="w-5 h-5 inline mr-2" />
@@ -1869,8 +1869,8 @@ Partner: ${partner.name}
                     }}
                     className={`px-4 py-2 rounded-lg border-2 font-semibold transition-all flex items-center gap-2 ${
                       newPartner.allowedCurrencies.includes(currency.code)
-                        ? 'bg-sky-500/20 border-sky-500 text-sky-400'
-                        : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-500'
+                        ? 'bg-white/10 border-sky-500 text-sky-400'
+                        : 'bg-[#141414] border-[#1a1a1a] text-slate-400 hover:border-[#1a1a1a]'
                     }`}
                     title={currency.name}
                   >
@@ -1894,9 +1894,9 @@ Partner: ${partner.name}
 
         {/* Credenciales Generadas */}
         {createdCredentials && (
-          <BankingCard className="p-6 border-2 border-sky-500/50">
+          <BankingCard className="p-6 border-2 border-white/20">
             <div className="flex items-start gap-4 mb-4">
-              <div className="p-3 bg-sky-500/10 rounded-xl">
+              <div className="p-3 bg-white/5 rounded-xl">
                 <Key className="w-6 h-6 text-sky-400" />
               </div>
               <div className="flex-1">
@@ -1909,11 +1909,11 @@ Partner: ${partner.name}
               </div>
             </div>
 
-            <div className="space-y-4 bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+            <div className="space-y-4 bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
               <div>
                 <label className="text-slate-400 text-sm font-semibold mb-2 block">Client ID:</label>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-slate-800 border border-slate-600 text-sky-400 px-4 py-3 rounded-lg font-mono text-sm">
+                  <code className="flex-1 bg-[#141414] border border-[#1a1a1a] text-sky-400 px-4 py-3 rounded-lg font-mono text-sm">
                     {createdCredentials.clientId}
                   </code>
                   <BankingButton
@@ -1929,12 +1929,12 @@ Partner: ${partner.name}
               <div>
                 <label className="text-slate-400 text-sm font-semibold mb-2 block">Client Secret:</label>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-slate-800 border border-slate-600 text-amber-400 px-4 py-3 rounded-lg font-mono text-sm break-all">
+                  <code className="flex-1 bg-[#141414] border border-[#1a1a1a] text-amber-400 px-4 py-3 rounded-lg font-mono text-sm break-all">
                     {showSecret ? createdCredentials.clientSecret : '•'.repeat(64)}
                   </code>
                   <button
                     onClick={() => setShowSecret(!showSecret)}
-                    className="p-3 bg-slate-800 border border-slate-600 hover:border-slate-500 text-slate-300 rounded-lg transition-all"
+                    className="p-3 bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-slate-300 rounded-lg transition-all"
                   >
                     {showSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -1969,7 +1969,7 @@ Partner: ${partner.name}
                 return (
                   <div
                     key={partner.partnerId}
-                    className="bg-slate-900/50 border border-slate-700 hover:border-sky-500/50 rounded-xl p-5 transition-all group"
+                    className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-white/20 rounded-xl p-5 transition-all group"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
@@ -1991,7 +1991,7 @@ Partner: ${partner.name}
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <p className="text-slate-400 text-sm mb-1">Client ID:</p>
-                          <code className="text-sky-400 text-xs font-mono bg-slate-800 px-2 py-1 rounded">
+                          <code className="text-sky-400 text-xs font-mono bg-[#141414] px-2 py-1 rounded">
                             {partner.clientId}
                           </code>
                         </div>
@@ -2051,9 +2051,9 @@ Partner: ${partner.name}
               </h3>
               
               <div className="space-y-3">
-                <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="bg-sky-500/10 border border-sky-500/30 text-sky-400 px-3 py-1 rounded-md text-xs font-bold">
+                    <span className="bg-white/5 border border-white/15 text-sky-400 px-3 py-1 rounded-md text-xs font-bold">
                       POST
                     </span>
                     <code className="text-slate-100 font-mono text-sm">/partner-api/v1/auth/token</code>
@@ -2063,7 +2063,7 @@ Partner: ${partner.name}
                   </p>
                 </div>
 
-                <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-md text-xs font-bold">
                       POST
@@ -2075,7 +2075,7 @@ Partner: ${partner.name}
                   </p>
                 </div>
 
-                <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1 rounded-md text-xs font-bold">
                       POST
@@ -2087,7 +2087,7 @@ Partner: ${partner.name}
                   </p>
                 </div>
 
-                <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="bg-purple-500/10 border border-purple-500/30 text-purple-400 px-3 py-1 rounded-md text-xs font-bold">
                       POST
@@ -2111,7 +2111,7 @@ Partner: ${partner.name}
                 {availableCurrencies.map(curr => (
                   <div
                     key={curr.code}
-                    className="bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-center hover:border-sky-500/50 transition-all"
+                    className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-3 text-center hover:border-white/20 transition-all"
                   >
                     <div className="text-2xl mb-1">{curr.flag}</div>
                     <p className="text-slate-100 font-bold text-sm">{curr.code}</p>
@@ -2126,7 +2126,7 @@ Partner: ${partner.name}
               <h3 className="text-lg font-bold text-slate-100 mb-4">
                 {isSpanish ? "Ejemplo CashTransfer.v1" : "CashTransfer.v1 Example"}
               </h3>
-              <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 overflow-x-auto">
+              <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-4 overflow-x-auto">
                 <pre className="text-sky-400 font-mono text-xs">
 {`{
   "CashTransfer.v1": {
@@ -2175,7 +2175,7 @@ Partner: ${partner.name}
                       value={newClient.partnerIdForClient}
                       onChange={(e) => setNewClient({...newClient, partnerIdForClient: e.target.value})}
                       aria-label="Select Partner"
-                      className="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
+                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-emerald-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
                     >
                       <option value="">{isSpanish ? "-- Selecciona Partner --" : "-- Select Partner --"}</option>
                       {partners.map(p => (
@@ -2210,7 +2210,7 @@ Partner: ${partner.name}
                       value={newClient.type}
                       onChange={(e) => setNewClient({...newClient, type: e.target.value as any})}
                       aria-label="Client Type"
-                      className="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
+                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-emerald-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
                     >
                       <option value="WALLET">Wallet</option>
                       <option value="FINTECH">Fintech</option>
@@ -2223,7 +2223,7 @@ Partner: ${partner.name}
                     <label className="block text-sm font-semibold text-slate-300 mb-2">
                       {isSpanish ? "Divisas para API" : "API Currencies"} <span className="text-red-400">*</span>
                     </label>
-                    <div className="flex flex-wrap gap-2 bg-slate-900/50 border border-slate-700 rounded-xl p-4 max-h-48 overflow-y-auto">
+                    <div className="flex flex-wrap gap-2 bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4 max-h-48 overflow-y-auto">
                       {availableCurrencies.map(currency => (
                         <button
                           key={currency.code}
@@ -2243,7 +2243,7 @@ Partner: ${partner.name}
                           className={`px-3 py-2 rounded-lg border font-semibold text-sm transition-all ${
                             newClient.allowedCurrencies.includes(currency.code)
                               ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                              : 'bg-slate-800 border-slate-600 text-slate-400 hover:border-slate-500'
+                              : 'bg-[#141414] border-[#1a1a1a] text-slate-400 hover:border-[#1a1a1a]'
                           }`}
                         >
                           {currency.flag} {currency.code}
@@ -2279,7 +2279,7 @@ Partner: ${partner.name}
                   {clients.map((client) => (
                     <div
                       key={client.clientId}
-                      className="bg-slate-900/50 border border-slate-700 hover:border-emerald-500/50 rounded-xl p-5 transition-all group"
+                      className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-emerald-500/50 rounded-xl p-5 transition-all group"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
@@ -2301,7 +2301,7 @@ Partner: ${partner.name}
                                 generateClientCredentialsTXT(client, partnerForClient);
                               }
                             }}
-                            className="p-2 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 hover:border-sky-500 text-sky-400 rounded-lg transition-all"
+                            className="p-2 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-sky-500 text-sky-400 rounded-lg transition-all"
                             title={isSpanish ? "Descargar credenciales TXT" : "Download credentials TXT"}
                           >
                             <Download className="w-5 h-5" />
@@ -2388,10 +2388,10 @@ Partner: ${partner.name}
                 return (
                   <BankingCard key={partner.partnerId} className="overflow-hidden">
                     {/* Header del Partner */}
-                    <div className="p-6 border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
+                    <div className="p-6 border-b border-[#1a1a1a] bg-gradient-to-r from-[#0d0d0d] to-[#141414]">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="p-3 bg-sky-500/10 rounded-xl">
+                          <div className="p-3 bg-white/5 rounded-xl">
                             <Users className="w-6 h-6 text-sky-400" />
                           </div>
                           <div>
@@ -2409,24 +2409,24 @@ Partner: ${partner.name}
                     </div>
 
                     {/* Estadísticas del Partner */}
-                    <div className="p-6 border-b border-slate-700">
+                    <div className="p-6 border-b border-[#1a1a1a]">
                       <h4 className="text-lg font-bold text-slate-100 mb-4">
                         {isSpanish ? 'Estadísticas Generales' : 'General Statistics'}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
                           <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Volumen Total' : 'Total Volume'}</p>
                           <p className="text-2xl font-bold text-emerald-400">{fmt.currency(totalVolume, 'USD')}</p>
                         </div>
-                        <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
                           <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Transferencias' : 'Transfers'}</p>
                           <p className="text-2xl font-bold text-sky-400">{totalTransactionsCount}</p>
                         </div>
-                        <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
                           <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Clientes' : 'Clients'}</p>
                           <p className="text-2xl font-bold text-purple-400">{partnerClients.length}</p>
                         </div>
-                        <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
                           <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Divisas Activas' : 'Active Currencies'}</p>
                           <p className="text-2xl font-bold text-amber-400">{Object.keys(statsByCurrency).length}</p>
                         </div>
@@ -2434,7 +2434,7 @@ Partner: ${partner.name}
                     </div>
 
                     {/* Desglose por Divisa */}
-                    <div className="p-6 border-b border-slate-700">
+                    <div className="p-6 border-b border-[#1a1a1a]">
                       <h4 className="text-lg font-bold text-slate-100 mb-4">
                         {isSpanish ? 'Desglose por Divisa' : 'Breakdown by Currency'}
                       </h4>
@@ -2444,7 +2444,7 @@ Partner: ${partner.name}
                           const percentage = totalVolume > 0 ? (stats.total / totalVolume) * 100 : 0;
                           
                           return (
-                            <div key={currency} className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+                            <div key={currency} className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-3">
                                   <span className="text-2xl">{currInfo?.flag}</span>
@@ -2469,7 +2469,7 @@ Partner: ${partner.name}
                                     <span className="text-slate-300">{fmt.dateTime(stats.lastTransfer)}</span>
                                   </div>
                                 )}
-                                <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden mt-2">
+                                <div className="w-full bg-[#141414] rounded-full h-2 overflow-hidden mt-2">
                                   <div
                                     className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full transition-all duration-500"
                                     style={{ width: `${percentage}%` }}
@@ -2493,7 +2493,7 @@ Partner: ${partner.name}
                           {partnerTransfers.map((transfer, idx) => (
                             <div
                               key={idx}
-                              className="bg-slate-900/50 border border-slate-700 hover:border-purple-500/50 rounded-lg p-4 transition-all"
+                              className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-purple-500/50 rounded-lg p-4 transition-all"
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
@@ -2576,7 +2576,7 @@ Partner: ${partner.name}
                       value={selectedPartner}
                       onChange={(e) => setSelectedPartner(e.target.value)}
                       aria-label="Select Partner"
-                      className="w-full bg-slate-900 border border-slate-700 focus:border-sky-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-sky-500/30 outline-none transition-all"
+                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-sky-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-sky-500/30 outline-none transition-all"
                     >
                       <option value="">{isSpanish ? "-- Selecciona Partner --" : "-- Select Partner --"}</option>
                       {partners.map(partner => (
@@ -2596,7 +2596,7 @@ Partner: ${partner.name}
                       value={selectedCustodyAccount}
                       onChange={(e) => setSelectedCustodyAccount(e.target.value)}
                       aria-label="Select Custody Account"
-                      className="w-full bg-slate-900 border border-slate-700 focus:border-sky-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-sky-500/30 outline-none transition-all"
+                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-sky-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-sky-500/30 outline-none transition-all"
                       disabled={!selectedPartner}
                     >
                       <option value="">{isSpanish ? "-- Selecciona Cuenta --" : "-- Select Account --"}</option>
@@ -2647,7 +2647,7 @@ Partner: ${partner.name}
                         value={transferForm.currency}
                         onChange={(e) => setTransferForm({...transferForm, currency: e.target.value})}
                         aria-label="Select Currency"
-                        className="w-full bg-slate-900 border border-slate-700 focus:border-sky-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-sky-500/30 outline-none transition-all"
+                        className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-sky-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-sky-500/30 outline-none transition-all"
                       >
                         {availableCurrencies.map(curr => (
                           <option key={curr.code} value={curr.code}>
@@ -2697,7 +2697,7 @@ Partner: ${partner.name}
                     placeholder={isSpanish ? "Concepto de la transferencia" : "Transfer description"}
                   />
 
-                  <div className="bg-sky-500/10 border border-sky-500/30 rounded-xl p-4 space-y-2">
+                  <div className="bg-white/5 border border-white/15 rounded-xl p-4 space-y-2">
                     <div className="flex items-center gap-2 text-sky-400 font-semibold">
                       <Shield className="w-4 h-4" />
                       <span>{isSpanish ? "Resumen de la Transferencia" : "Transfer Summary"}</span>
@@ -2751,7 +2751,7 @@ Partner: ${partner.name}
                   {transfers.map((transfer, idx) => (
                     <div
                       key={idx}
-                      className="bg-slate-900/50 border border-slate-700 hover:border-emerald-500/50 rounded-xl p-5 transition-all"
+                      className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-emerald-500/50 rounded-xl p-5 transition-all"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">

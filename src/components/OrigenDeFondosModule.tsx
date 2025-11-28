@@ -338,7 +338,7 @@ ${idx + 1}. ${acc.bankName}
     : accounts.filter(a => a.bankName === selectedBank);
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         
         <BankingHeader
@@ -431,9 +431,9 @@ ${idx + 1}. ${acc.bankName}
               </div>
               <p className="text-sky-400 font-bold text-2xl">{progress.toFixed(1)}%</p>
             </div>
-            <div className="w-full bg-slate-800 rounded-full h-4 overflow-hidden">
+            <div className="w-full bg-[#141414] rounded-full h-4 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full transition-all duration-300"
+                className="h-full bg-gradient-to-r from-white to-white rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -447,8 +447,8 @@ ${idx + 1}. ${acc.bankName}
               onClick={() => setSelectedBank('ALL')}
               className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                 selectedBank === 'ALL'
-                  ? 'bg-sky-500 text-white'
-                  : 'bg-slate-800 border border-slate-600 text-slate-300 hover:border-slate-500'
+                  ? 'bg-white text-black'
+                  : 'bg-[#141414] border border-[#1a1a1a] text-slate-300 hover:border-[#1a1a1a]'
               }`}
             >
               {isSpanish ? 'Todos' : 'All'} ({accounts.length})
@@ -459,8 +459,8 @@ ${idx + 1}. ${acc.bankName}
                 onClick={() => setSelectedBank(bank)}
                 className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                   selectedBank === bank
-                    ? 'bg-sky-500 text-white'
-                    : 'bg-slate-800 border border-slate-600 text-slate-300 hover:border-slate-500'
+                    ? 'bg-white text-black'
+                    : 'bg-[#141414] border border-[#1a1a1a] text-slate-300 hover:border-[#1a1a1a]'
                 }`}
               >
                 {bank} ({accounts.filter(a => a.bankName === bank).length})
@@ -480,7 +480,7 @@ ${idx + 1}. ${acc.bankName}
               {filteredAccounts.map((account, idx) => (
                 <div
                   key={idx}
-                  className="bg-slate-900/50 border border-slate-700 hover:border-sky-500/50 rounded-xl p-5 transition-all"
+                  className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-white/20 rounded-xl p-5 transition-all"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">

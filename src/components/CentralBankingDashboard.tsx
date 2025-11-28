@@ -251,7 +251,7 @@ export function CentralBankingDashboard() {
 
   if (!metrics) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4" />
           <p className="text-slate-300 text-lg font-semibold">
@@ -266,17 +266,17 @@ export function CentralBankingDashboard() {
   const currencyIndex = currencies.indexOf(selectedCurrency);
 
   return (
-    <div className="w-full bg-slate-950 p-4 sm:p-6 lg:p-8">
+    <div className="w-full bg-black p-4 sm:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-6">
         
         {/* Professional Header */}
-        <header className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6">
+        <header className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl p-6">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             {/* Brand & Title */}
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="absolute inset-0 bg-sky-500 blur-xl opacity-30" />
-                <div className="relative bg-gradient-to-br from-sky-500 to-blue-600 p-4 rounded-xl">
+                <div className="absolute inset-0 bg-white/20 blur-xl opacity-30" />
+                <div className="relative bg-gradient-to-br from-white to-white p-4 rounded-xl">
                   <Building2 className="w-8 h-8 text-white" />
                 </div>
               </div>
@@ -296,7 +296,7 @@ export function CentralBankingDashboard() {
               <div className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-lg border',
                 metrics.systemHealth === 'excellent' && 'bg-emerald-500/10 border-emerald-500/30',
-                metrics.systemHealth === 'good' && 'bg-sky-500/10 border-sky-500/30',
+                metrics.systemHealth === 'good' && 'bg-white/5 border-white/15',
                 metrics.systemHealth === 'warning' && 'bg-amber-500/10 border-amber-500/30',
                 metrics.systemHealth === 'critical' && 'bg-red-500/10 border-red-500/30'
               )}>
@@ -321,7 +321,7 @@ export function CentralBankingDashboard() {
               {/* Export Button */}
               <button
                 onClick={handleExportStatement}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold transition-all shadow-lg hover:shadow-sky"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-white to-white hover:from-white hover:to-white text-black font-semibold transition-all shadow-lg hover:shadow-white/20"
               >
                 <Download className="w-4 h-4" />
                 <span className="hidden sm:inline">{isSpanish ? 'Exportar TXT' : 'Export TXT'}</span>
@@ -331,7 +331,7 @@ export function CentralBankingDashboard() {
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 hover:border-slate-500 text-slate-300 hover:text-slate-100 font-medium transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-slate-300 hover:text-slate-100 font-medium transition-all disabled:opacity-50"
               >
                 <RefreshCw className={cn('w-4 h-4', refreshing && 'animate-spin')} />
                 <span className="hidden sm:inline">{isSpanish ? 'Actualizar' : 'Refresh'}</span>
@@ -365,7 +365,7 @@ export function CentralBankingDashboard() {
                   {fmt.currency(Object.values(metrics.totalBalances).reduce((sum, v) => sum + v, 0), 'USD')}
                 </p>
               </div>
-              <div className="p-3 bg-sky-500/10 rounded-xl">
+              <div className="p-3 bg-white/5 rounded-xl">
                 <DollarSign className="w-6 h-6 text-sky-400" />
               </div>
             </div>
@@ -438,8 +438,8 @@ export function CentralBankingDashboard() {
         </div>
 
         {/* Balance Carousel - Professional */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
-          <div className="p-6 border-b border-slate-700">
+        <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
+          <div className="p-6 border-b border-[#1a1a1a]">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-100 flex items-center gap-3">
                 <Coins className="w-6 h-6 text-sky-400" />
@@ -460,21 +460,21 @@ export function CentralBankingDashboard() {
                 onClick={() => navigateCurrency('prev')}
                 disabled={currencies.length <= 1}
                 aria-label={isSpanish ? 'Divisa anterior' : 'Previous currency'}
-                className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-slate-600 hover:border-sky-500 text-slate-300 hover:text-sky-400 font-bold shadow-lg hover:shadow-sky transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center group"
+                className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-[#141414] to-[#0d0d0d] border-2 border-[#1a1a1a] hover:border-sky-500 text-slate-300 hover:text-sky-400 font-bold shadow-lg hover:shadow-sky transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center group"
               >
                 <ChevronLeft className="w-7 h-7 group-hover:scale-110 transition-transform" />
               </button>
 
               {/* Balance Display - Premium */}
               <div className="flex-1">
-                <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-slate-600 rounded-2xl p-10 overflow-hidden">
+                <div className="relative bg-gradient-to-br from-[#0d0d0d] to-[#141414] border-2 border-[#1a1a1a] rounded-2xl p-10 overflow-hidden">
                   {/* Background Glow */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-sky-500/5 via-transparent to-sky-500/5" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-transparent to-white/3" />
                   
                   <div className="relative z-10 text-center">
                     {/* Currency Code */}
                     <div className="flex items-center justify-center gap-3 mb-4">
-                      <div className="flex items-center gap-2 bg-slate-800/80 border border-slate-600 px-6 py-2 rounded-full backdrop-blur-sm">
+                      <div className="flex items-center gap-2 bg-[#141414]/80 border border-[#1a1a1a] px-6 py-2 rounded-full backdrop-blur-sm">
                         <Globe className="w-5 h-5 text-sky-400" />
                         <span className="text-slate-100 text-xl font-bold tracking-wide">
                           {selectedCurrency}
@@ -532,7 +532,7 @@ export function CentralBankingDashboard() {
                 onClick={() => navigateCurrency('next')}
                 disabled={currencies.length <= 1}
                 aria-label={isSpanish ? 'Siguiente divisa' : 'Next currency'}
-                className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-slate-600 hover:border-sky-500 text-slate-300 hover:text-sky-400 font-bold shadow-lg hover:shadow-sky transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center group"
+                className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-[#141414] to-[#0d0d0d] border-2 border-[#1a1a1a] hover:border-sky-500 text-slate-300 hover:text-sky-400 font-bold shadow-lg hover:shadow-sky transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center group"
               >
                 <ChevronRight className="w-7 h-7 group-hover:scale-110 transition-transform" />
               </button>
@@ -546,8 +546,8 @@ export function CentralBankingDashboard() {
           <div className="xl:col-span-2 space-y-6">
             
             {/* Custody Accounts - Professional Table */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
-              <div className="p-6 border-b border-slate-700">
+            <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
+              <div className="p-6 border-b border-[#1a1a1a]">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-slate-100 flex items-center gap-3">
                     <Shield className="w-6 h-6 text-sky-400" />
@@ -555,12 +555,12 @@ export function CentralBankingDashboard() {
                   </h2>
                   <div className="flex items-center gap-3">
                     {/* Filter Buttons */}
-                    <div className="flex items-center gap-1 bg-slate-800 p-1 rounded-lg">
+                    <div className="flex items-center gap-1 bg-[#141414] p-1 rounded-lg">
                       <button
                         onClick={() => setFilterType('all')}
                         className={cn(
                           'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-                          filterType === 'all' ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-slate-200'
+                          filterType === 'all' ? 'bg-white text-black' : 'text-slate-400 hover:text-slate-200'
                         )}
                       >
                         {isSpanish ? 'Todas' : 'All'}
@@ -569,7 +569,7 @@ export function CentralBankingDashboard() {
                         onClick={() => setFilterType('blockchain')}
                         className={cn(
                           'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-                          filterType === 'blockchain' ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-slate-200'
+                          filterType === 'blockchain' ? 'bg-white text-black' : 'text-slate-400 hover:text-slate-200'
                         )}
                       >
                         ⛓️ Blockchain
@@ -578,13 +578,13 @@ export function CentralBankingDashboard() {
                         onClick={() => setFilterType('banking')}
                         className={cn(
                           'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-                          filterType === 'banking' ? 'bg-sky-500 text-white' : 'text-slate-400 hover:text-slate-200'
+                          filterType === 'banking' ? 'bg-white text-black' : 'text-slate-400 hover:text-slate-200'
                         )}
                       >
                         🏦 Banking
                       </button>
                     </div>
-                    <div className="bg-slate-800 px-3 py-2 rounded-lg">
+                    <div className="bg-[#141414] px-3 py-2 rounded-lg">
                       <span className="text-slate-100 font-bold text-lg">{filteredAccounts.length}</span>
                     </div>
                   </div>
@@ -598,7 +598,7 @@ export function CentralBankingDashboard() {
                     {filteredAccounts.map((account) => (
                       <div
                         key={account.id}
-                        className="group bg-slate-900/50 border border-slate-700 hover:border-sky-500/50 rounded-xl p-5 transition-all hover:shadow-sky cursor-pointer"
+                        className="group bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-white/20 rounded-xl p-5 transition-all hover:shadow-sky cursor-pointer"
                       >
                         {/* Header */}
                         <div className="flex items-start justify-between mb-4">
@@ -607,7 +607,7 @@ export function CentralBankingDashboard() {
                               {account.accountName}
                             </p>
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="bg-sky-500/10 border border-sky-500/30 text-sky-400 px-2 py-0.5 rounded-md text-xs font-bold">
+                              <span className="bg-white/5 border border-white/15 text-sky-400 px-2 py-0.5 rounded-md text-xs font-bold">
                                 {account.currency}
                               </span>
                               <span className="text-slate-500 text-xs">
@@ -652,9 +652,9 @@ export function CentralBankingDashboard() {
                                 : 0}%
                             </span>
                           </div>
-                          <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                          <div className="w-full bg-[#141414] rounded-full h-1.5 overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full transition-all duration-500"
+                              className="h-full bg-gradient-to-r from-white to-white rounded-full transition-all duration-500"
                               style={{ 
                                 width: `${account.totalBalance > 0 ? (account.reservedBalance / account.totalBalance) * 100 : 0}%` 
                               }}
@@ -679,8 +679,8 @@ export function CentralBankingDashboard() {
             </div>
 
             {/* Active Pledges - Professional */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
-              <div className="p-6 border-b border-slate-700">
+            <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
+              <div className="p-6 border-b border-[#1a1a1a]">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-slate-100 flex items-center gap-3">
                     <Lock className="w-6 h-6 text-amber-400" />
@@ -699,7 +699,7 @@ export function CentralBankingDashboard() {
                     {pledges.filter(p => p.status === 'ACTIVE').map((pledge) => (
                       <div
                         key={pledge.id}
-                        className="bg-slate-900/50 border border-slate-700 hover:border-amber-500/50 rounded-xl p-5 transition-all hover:shadow-amber group"
+                        className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-amber-500/50 rounded-xl p-5 transition-all hover:shadow-amber group"
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
@@ -711,7 +711,7 @@ export function CentralBankingDashboard() {
                               <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-2 py-1 rounded-md text-xs font-bold">
                                 {pledge.currency}
                               </span>
-                              <span className="bg-sky-500/10 border border-sky-500/30 text-sky-400 px-2 py-1 rounded-md text-xs font-bold">
+                              <span className="bg-white/5 border border-white/15 text-sky-400 px-2 py-1 rounded-md text-xs font-bold">
                                 {pledge.source_module}
                               </span>
                               {pledge.token_symbol && (
@@ -748,9 +748,9 @@ export function CentralBankingDashboard() {
           {/* Right Column - Activity & Status */}
           <div className="space-y-6">
             {/* Ledger Analysis Status */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6">
+            <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl p-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-sky-500/10 rounded-xl">
+                <div className="p-3 bg-white/5 rounded-xl">
                   <Database className="w-6 h-6 text-sky-400" />
                 </div>
                 <div>
@@ -771,9 +771,9 @@ export function CentralBankingDashboard() {
                     {metrics.ledgerProgress.toFixed(1)}%
                   </span>
                 </div>
-                <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+                <div className="w-full bg-[#141414] rounded-full h-3 overflow-hidden border border-[#1a1a1a]">
                   <div
-                    className="h-full bg-gradient-to-r from-sky-500 to-blue-600 rounded-full transition-all duration-500 relative overflow-hidden"
+                    className="h-full bg-gradient-to-r from-white to-white rounded-full transition-all duration-500 relative overflow-hidden"
                     style={{ width: `${metrics.ledgerProgress}%` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
@@ -783,18 +783,18 @@ export function CentralBankingDashboard() {
 
               {/* Stats */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
                   <p className="text-slate-500 text-xs mb-1">{isSpanish ? 'Divisas' : 'Currencies'}</p>
                   <p className="text-2xl font-bold text-slate-100">{metrics.activeCurrencies}</p>
                 </div>
-                <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
                   <p className="text-slate-500 text-xs mb-1">{isSpanish ? 'Operaciones' : 'Operations'}</p>
                   <p className="text-2xl font-bold text-slate-100">{fmt.compact(metrics.totalTransactions)}</p>
                 </div>
               </div>
 
               {metrics.ledgerProgress > 0 && metrics.ledgerProgress < 100 && (
-                <div className="mt-4 bg-sky-500/10 border border-sky-500/30 rounded-lg p-3 flex items-center gap-3">
+                <div className="mt-4 bg-white/5 border border-white/15 rounded-lg p-3 flex items-center gap-3">
                   <Activity className="w-5 h-5 text-sky-400 animate-spin" />
                   <div className="flex-1">
                     <p className="text-sky-400 font-semibold text-sm">
@@ -809,7 +809,7 @@ export function CentralBankingDashboard() {
             </div>
 
             {/* Recent Activity Timeline */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6">
+            <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl p-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-3 bg-purple-500/10 rounded-xl">
                   <Bell className="w-6 h-6 text-purple-400" />
@@ -829,11 +829,11 @@ export function CentralBankingDashboard() {
                   recentActivity.map((activity, idx) => (
                     <div
                       key={activity.id}
-                      className="relative bg-slate-900/50 border border-slate-700 hover:border-slate-600 rounded-lg p-4 transition-all group"
+                      className="relative bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-[#1a1a1a] rounded-lg p-4 transition-all group"
                     >
                       {/* Timeline Line */}
                       {idx < recentActivity.length - 1 && (
-                        <div className="absolute left-[21px] top-[52px] bottom-[-12px] w-px bg-slate-700" />
+                        <div className="absolute left-[21px] top-[52px] bottom-[-12px] w-px bg-[#1a1a1a]" />
                       )}
 
                       <div className="flex items-start gap-3">
@@ -842,7 +842,7 @@ export function CentralBankingDashboard() {
                           'relative z-10 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2',
                           activity.status === 'success' && 'bg-emerald-500/10 border-emerald-500/30',
                           activity.status === 'warning' && 'bg-amber-500/10 border-amber-500/30',
-                          activity.status === 'info' && 'bg-sky-500/10 border-sky-500/30'
+                          activity.status === 'info' && 'bg-white/5 border-white/15'
                         )}>
                           {activity.type === 'account_created' && <Wallet className={cn('w-5 h-5', activity.status === 'success' && 'text-emerald-400')} />}
                           {activity.type === 'pledge_active' && <Lock className={cn('w-5 h-5', activity.status === 'warning' && 'text-amber-400')} />}
@@ -889,7 +889,7 @@ export function CentralBankingDashboard() {
         </div>
 
         {/* Footer - Trust & Compliance */}
-        <footer className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-2xl shadow-xl p-6">
+        <footer className="bg-gradient-to-r from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-xl p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
@@ -898,14 +898,14 @@ export function CentralBankingDashboard() {
                   {isSpanish ? 'Sistema Verificado' : 'Verified System'}
                 </span>
               </div>
-              <div className="hidden sm:block w-px h-4 bg-slate-700" />
+              <div className="hidden sm:block w-px h-4 bg-[#1a1a1a]" />
               <div className="hidden sm:flex items-center gap-2">
                 <Shield className="w-4 h-4 text-sky-400" />
                 <span className="text-slate-400">
                   {isSpanish ? 'Cumplimiento Total' : 'Fully Compliant'}
                 </span>
               </div>
-              <div className="hidden md:block w-px h-4 bg-slate-700" />
+              <div className="hidden md:block w-px h-4 bg-[#1a1a1a]" />
               <div className="hidden md:flex items-center gap-2">
                 <Lock className="w-4 h-4 text-amber-400" />
                 <span className="text-slate-400">

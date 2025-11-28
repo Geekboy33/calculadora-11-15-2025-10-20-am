@@ -836,7 +836,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
@@ -902,7 +902,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
               </BankingButton>
               <button
                 onClick={() => setBalancesVisible(!balancesVisible)}
-                className="p-3 bg-slate-800 border border-slate-600 hover:border-slate-500 text-slate-300 rounded-xl transition-all"
+                className="p-3 bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-slate-300 rounded-xl transition-all"
               >
                 {balancesVisible ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
               </button>
@@ -917,9 +917,9 @@ Timestamp: ${AUDIT_DATA.timestamp}
 
         {/* Analysis Results (si hay archivo analizado) */}
         {analysisResults && (
-          <BankingCard className="p-6 border-2 border-sky-500/50 bg-sky-500/5">
+          <BankingCard className="p-6 border-2 border-white/20 bg-white/3">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-sky-500/20 rounded-xl animate-pulse">
+              <div className="p-3 bg-white/10 rounded-xl animate-pulse">
                 <Activity className="w-8 h-8 text-sky-400" />
               </div>
               <div className="flex-1">
@@ -1001,7 +1001,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
                 className={`p-4 rounded-xl border-2 transition-all ${
                   isSelected
                     ? `bg-${color}-500/20 border-${color}-500 shadow-lg`
-                    : 'bg-slate-900/50 border-slate-700 hover:border-slate-600'
+                    : 'bg-[#0d0d0d]/50 border-[#1a1a1a] hover:border-[#1a1a1a]'
                 }`}
               >
                 <div className="text-center">
@@ -1017,15 +1017,15 @@ Timestamp: ${AUDIT_DATA.timestamp}
 
         {/* Master Account Display */}
         <BankingCard className="overflow-hidden">
-          <div className={`p-8 border-b border-slate-700 ${
+          <div className={`p-8 border-b border-[#1a1a1a] ${
             selectedAccount === 'USD' 
-              ? 'bg-gradient-to-r from-sky-500/10 to-blue-600/10'
+              ? 'bg-gradient-to-r from-white/5 to-white/5'
               : 'bg-gradient-to-r from-emerald-500/10 to-teal-600/10'
           }`}>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
                 <div className={`p-4 rounded-xl ${
-                  selectedAccount === 'USD' ? 'bg-sky-500/20' : 'bg-emerald-500/20'
+                  selectedAccount === 'USD' ? 'bg-white/10' : 'bg-emerald-500/20'
                 }`}>
                   <DollarSign className={`w-10 h-10 ${
                     selectedAccount === 'USD' ? 'text-sky-400' : 'text-emerald-400'
@@ -1079,10 +1079,10 @@ Timestamp: ${AUDIT_DATA.timestamp}
             {/* ✅ PANTALLA DE VERIFICACIÓN Y CARGA EN TIEMPO REAL */}
             {analyzing && (
               <div className="px-8 pb-6">
-                <BankingCard className="p-6 border-2 border-sky-500/50 bg-sky-500/5">
+                <BankingCard className="p-6 border-2 border-white/20 bg-white/3">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="p-3 bg-sky-500/20 rounded-xl">
+                      <div className="p-3 bg-white/10 rounded-xl">
                         <Activity className="w-6 h-6 text-sky-400 animate-spin" />
                       </div>
                       <div>
@@ -1101,9 +1101,9 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   </div>
                   
                   {/* Barra de progreso principal */}
-                  <div className="w-full bg-slate-800 rounded-full h-5 overflow-hidden border border-slate-700 mb-6">
+                  <div className="w-full bg-[#141414] rounded-full h-5 overflow-hidden border border-[#1a1a1a] mb-6">
                     <div
-                      className="h-full bg-gradient-to-r from-sky-500 via-blue-600 to-sky-500 rounded-full transition-all duration-300 relative overflow-hidden"
+                      className="h-full bg-gradient-to-r from-sky-500 via-blue-600 to-white rounded-full transition-all duration-300 relative overflow-hidden"
                       style={{ width: `${progress}%` }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
@@ -1122,7 +1122,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
                       const currentBalance = currentScannedAmount * curr.percentage;
 
                       return (
-                        <div key={curr.code} className="bg-slate-900/80 border border-slate-700 rounded-lg p-3">
+                        <div key={curr.code} className="bg-[#0d0d0d]/80 border border-[#1a1a1a] rounded-lg p-3">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xl">{curr.flag}</span>
                             <div>
@@ -1136,7 +1136,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
                             </p>
                             <p className="text-slate-600 text-xs">{isSpanish ? "M.Millones" : "Billions"}</p>
                           </div>
-                          <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                          <div className="w-full bg-[#141414] rounded-full h-1.5 overflow-hidden">
                             <div
                               className={`h-full bg-${color}-500 rounded-full transition-all duration-500`}
                               style={{ width: `${progress}%` }}
@@ -1162,15 +1162,15 @@ Timestamp: ${AUDIT_DATA.timestamp}
 
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+              <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
                 <p className="text-slate-400 text-sm mb-2">{isSpanish ? "Porcentaje del Total" : "Percentage of Total"}</p>
                 <p className="text-3xl font-bold text-slate-100">{selectedMasterAccount.percentage}%</p>
               </div>
-              <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+              <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
                 <p className="text-slate-400 text-sm mb-2">{isSpanish ? "Clasificación" : "Classification"}</p>
                 <p className="text-xl font-bold text-slate-100">{selectedMasterAccount.classification}</p>
               </div>
-              <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
+              <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
                 <p className="text-slate-400 text-sm mb-2">{isSpanish ? "Estado de Verificación" : "Verification Status"}</p>
                 <p className="text-emerald-400 font-bold text-xl">✅ {isSpanish ? "VERIFICADO" : "VERIFIED"}</p>
               </div>
@@ -1188,7 +1188,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
               <p className="text-emerald-400 font-bold text-sm mb-1">ISO 27001</p>
               <p className="text-emerald-300 text-xs">{AUDIT_DATA.compliance.iso27001}</p>
             </div>
-            <div className="bg-sky-500/10 border border-sky-500/30 rounded-xl p-4 text-center">
+            <div className="bg-white/5 border border-white/15 rounded-xl p-4 text-center">
               <p className="text-sky-400 font-bold text-sm mb-1">SOC 2 Type II</p>
               <p className="text-sky-300 text-xs">{AUDIT_DATA.compliance.soc2TypeII}</p>
             </div>
@@ -1210,7 +1210,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
           color="purple"
         >
           <div className="space-y-4">
-            <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-5">
+            <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-5">
               <p className="text-slate-100 font-bold mb-3">
                 {isSpanish ? "Cadena de Trazabilidad" : "Traceability Chain"}
               </p>

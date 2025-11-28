@@ -411,7 +411,7 @@ export function TheKingdomBankModule() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-6">
+    <div className="min-h-screen bg-black p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         
         <BankingHeader
@@ -445,7 +445,7 @@ export function TheKingdomBankModule() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 bg-slate-900 rounded-xl p-1">
+        <div className="flex gap-2 bg-[#0d0d0d] rounded-xl p-1">
           {[
             { id: 'accounts', label: isSpanish ? 'Cuentas' : 'Accounts', icon: CreditCard },
             { id: 'payments', label: isSpanish ? 'Payments' : 'Payments', icon: Send },
@@ -459,7 +459,7 @@ export function TheKingdomBankModule() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
                 activeTab === tab.id
-                  ? 'bg-sky-500 text-white'
+                  ? 'bg-white text-black'
                   : 'text-slate-400 hover:text-slate-100'
               }`}
             >
@@ -564,7 +564,7 @@ export function TheKingdomBankModule() {
                     : "Webhook URL for notifications:"
                   }
                 </p>
-                <code className="block p-3 bg-slate-900 rounded-lg text-sky-400 text-sm">
+                <code className="block p-3 bg-[#0d0d0d] rounded-lg text-sky-400 text-sm">
                   https://luxliqdaes.cloud/webhooks/tkb/payments
                 </code>
               </div>
@@ -577,7 +577,7 @@ export function TheKingdomBankModule() {
           <BankingSection title={isSpanish ? "Crear Payment Request" : "Create Payment Request"} icon={Send} color="sky">
             <BankingCard className="p-6 space-y-4">
               {/* Selector de Cuenta Custody */}
-              <div className="mb-4 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="mb-4 p-4 bg-[#0d0d0d]/50 rounded-lg border border-[#1a1a1a]">
                 <label className="block text-slate-200 font-semibold mb-2">
                   {isSpanish ? "Seleccionar Cuenta Custody" : "Select Custody Account"}
                 </label>
@@ -590,7 +590,7 @@ export function TheKingdomBankModule() {
                       setPaymentForm({ ...paymentForm, currency: account.currency });
                     }
                   }}
-                  className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-sky-500"
+                  className="w-full px-4 py-2 bg-[#141414] border border-[#1a1a1a] rounded-lg text-white focus:outline-none focus:border-sky-500"
                 >
                   <option value="">{isSpanish ? "-- Seleccionar cuenta --" : "-- Select account --"}</option>
                   {custodyAccounts
@@ -703,7 +703,7 @@ export function TheKingdomBankModule() {
             <BankingSection title={isSpanish ? "Transferencia Interna" : "Internal Transfer"} icon={ArrowRightLeft} color="emerald">
               <BankingCard className="p-6 space-y-4">
                 {/* Selector de Cuenta Origen Custody */}
-                <div className="mb-4 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                <div className="mb-4 p-4 bg-[#0d0d0d]/50 rounded-lg border border-[#1a1a1a]">
                   <label className="block text-slate-200 font-semibold mb-2">
                     {isSpanish ? "Cuenta Origen (Custody)" : "Source Account (Custody)"}
                   </label>
@@ -716,7 +716,7 @@ export function TheKingdomBankModule() {
                         setTransferForm({ ...transferForm, currency: account.currency });
                       }
                     }}
-                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-4 py-2 bg-[#141414] border border-[#1a1a1a] rounded-lg text-white focus:outline-none focus:border-emerald-500"
                   >
                     <option value="">{isSpanish ? "-- Seleccionar cuenta origen --" : "-- Select source account --"}</option>
                     {custodyAccounts
@@ -785,7 +785,7 @@ export function TheKingdomBankModule() {
             <BankingSection title={isSpanish ? "Transferencia Externa" : "External Transfer"} icon={Send} color="purple">
               <BankingCard className="p-6 space-y-4">
                 {/* Selector de Cuenta Origen Custody */}
-                <div className="mb-4 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                <div className="mb-4 p-4 bg-[#0d0d0d]/50 rounded-lg border border-[#1a1a1a]">
                   <label className="block text-slate-200 font-semibold mb-2">
                     {isSpanish ? "Cuenta Origen (Custody)" : "Source Account (Custody)"}
                   </label>
@@ -798,7 +798,7 @@ export function TheKingdomBankModule() {
                         setExternalTransferForm({ ...externalTransferForm, currency: account.currency });
                       }
                     }}
-                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                    className="w-full px-4 py-2 bg-[#141414] border border-[#1a1a1a] rounded-lg text-white focus:outline-none focus:border-purple-500"
                   >
                     <option value="">{isSpanish ? "-- Seleccionar cuenta origen --" : "-- Select source account --"}</option>
                     {custodyAccounts
