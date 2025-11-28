@@ -277,7 +277,7 @@ export function CentralBankingDashboard() {
               <div className="relative">
                 <div className="absolute inset-0 bg-white/20 blur-xl opacity-30" />
                 <div className="relative bg-gradient-to-br from-white to-white p-4 rounded-xl">
-                  <Building2 className="w-8 h-8 text-white" />
+                  <Building2 className="w-8 h-8 text-black" />
                 </div>
               </div>
               <div>
