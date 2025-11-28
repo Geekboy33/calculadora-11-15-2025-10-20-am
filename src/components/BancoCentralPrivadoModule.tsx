@@ -1126,15 +1126,15 @@ Timestamp: ${AUDIT_DATA.timestamp}
                           <div className="flex items-center gap-card-sm mb-card-sm">
                             <span className="text-xl">{curr.flag}</span>
                             <div>
-                              <p className="text-black font-bold text-sm">{curr.code}</p>
-                              <p className="text-black text-xs">{curr.percentage * 100}%</p>
+                              <p className="text-white font-bold text-sm">{curr.code}</p>
+                              <p className="text-white text-xs">{curr.percentage * 100}%</p>
                             </div>
                           </div>
                           <div className="text-center py-card-sm">
-                            <p className={`font-bold text-lg text-${color}-400`}>
+                            <p className="font-bold text-lg text-white">
                               {currentBalance.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
                             </p>
-                            <p className="text-black text-xs">{isSpanish ? "M.Millones" : "Billions"}</p>
+                            <p className="text-white text-xs">{isSpanish ? "M.Millones" : "Billions"}</p>
                           </div>
                           <div className="w-full bg-[var(--bg-elevated)] rounded-full h-1.5 overflow-hidden">
                             <div
