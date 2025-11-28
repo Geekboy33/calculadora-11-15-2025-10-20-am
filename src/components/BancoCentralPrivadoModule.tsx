@@ -1000,15 +1000,15 @@ Timestamp: ${AUDIT_DATA.timestamp}
                 onClick={() => setSelectedAccount(curr.code)}
                 className={`p-card-sm rounded-xl border-2 transition-all ${
                   isSelected
-                    ? `bg-${color}-500/20 border-${color}-500 shadow-lg`
-                    : 'bg-[var(--bg-card)]/50 border-[var(--border-subtle)] hover:border-[var(--border-subtle)]'
+                    ? `bg-${color}-500/20 border-${color}-500 shadow-lg bg-white`
+                    : 'bg-white border-gray-200 hover:border-gray-300'
                 }`}
               >
                 <div className="text-center">
                   <span className="text-3xl mb-card-sm block">{curr.flag}</span>
                   <p className="text-black font-bold">{curr.code}</p>
                   <p className="text-black text-xs">{(curr.percentage * 100).toFixed(1)}%</p>
-                  {isSelected && <CheckCircle className={`w-5 h-5 text-${color}-400 mx-auto mt-card-sm`} />}
+                  {isSelected && <CheckCircle className={`w-5 h-5 text-${color}-600 mx-auto mt-card-sm`} />}
                 </div>
               </button>
             );
