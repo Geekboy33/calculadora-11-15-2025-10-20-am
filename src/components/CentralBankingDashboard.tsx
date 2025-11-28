@@ -366,7 +366,7 @@ export function CentralBankingDashboard() {
         {/* Main Metrics - 4 Cards Premium */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-card">
           {/* Total Assets */}
-          <div className={BankingStyles.metric.container}>
+          <div className={`${BankingStyles.metric.container} stagger-item scroll-reveal`}>
             <div className="flex items-start justify-between m-card">
               <div>
                 <p className={BankingStyles.metric.label}>

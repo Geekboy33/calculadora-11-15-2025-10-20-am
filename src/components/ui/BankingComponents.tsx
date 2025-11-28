@@ -95,11 +95,28 @@ export function BankingButton({ children, onClick, variant = 'primary', icon: Ic
     danger: 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg'
   };
 
+  // Mouse tracking para efecto visual
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const button = e.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    button.style.setProperty('--mouse-x', `${x}%`);
+    button.style.setProperty('--mouse-y', `${y}%`);
+  };
+
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={cn(baseClasses, variantClasses[variant], disabled && 'opacity-50 cursor-not-allowed', className)}
+      onMouseMove={handleMouseMove}
+      className={cn(
+        baseClasses, 
+        variantClasses[variant], 
+        disabled && 'opacity-50 cursor-not-allowed',
+        !disabled && 'ripple-effect btn-interactive',
+        className
+      )}
       aria-disabled={disabled}
       {...props}
     >

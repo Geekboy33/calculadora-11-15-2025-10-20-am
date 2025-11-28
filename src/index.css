@@ -22,6 +22,9 @@
 /* Design System Utilities */
 @import './styles/design-system-utilities.css';
 
+/* Advanced Interactions & Micro-animations */
+@import './styles/advanced-interactions.css';
+
 /* 🎨 Paleta de Colores Futurista - Negro + Blanco Tipo Pantalla Iluminada */
 :root {
   --neon-green: #ffffff;

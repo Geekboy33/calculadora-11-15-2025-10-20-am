@@ -284,12 +284,36 @@ function App() {
             </div>
           </div>
         }>
-          {activeTab === 'central-dashboard' && <CentralBankingDashboard />}
-          {activeTab === 'banco-central-privado' && <BancoCentralPrivadoModule />}
-          {activeTab === 'origen-fondos' && <OrigenDeFondosModule />}
-          {activeTab === 'the-kingdom-bank' && <TheKingdomBankModule />}
-          {activeTab === 'daes-partner-api' && <DAESPartnerAPIModule />}
-          {activeTab === 'dashboard' && <AdvancedBankingDashboard />}
+          {activeTab === 'central-dashboard' && (
+            <PageTransition key="central-dashboard">
+              <CentralBankingDashboard />
+            </PageTransition>
+          )}
+          {activeTab === 'banco-central-privado' && (
+            <PageTransition key="banco-central-privado">
+              <BancoCentralPrivadoModule />
+            </PageTransition>
+          )}
+          {activeTab === 'origen-fondos' && (
+            <PageTransition key="origen-fondos">
+              <OrigenDeFondosModule />
+            </PageTransition>
+          )}
+          {activeTab === 'the-kingdom-bank' && (
+            <PageTransition key="the-kingdom-bank">
+              <TheKingdomBankModule />
+            </PageTransition>
+          )}
+          {activeTab === 'daes-partner-api' && (
+            <PageTransition key="daes-partner-api">
+              <DAESPartnerAPIModule />
+            </PageTransition>
+          )}
+          {activeTab === 'dashboard' && (
+            <PageTransition key="dashboard">
+              <AdvancedBankingDashboard />
+            </PageTransition>
+          )}
           {activeTab === 'analytics' && <AnalyticsDashboard />}
           {activeTab === 'ledger' && <AccountLedger />}
           {activeTab === 'blackscreen' && <BankBlackScreen />}
