@@ -917,32 +917,32 @@ Timestamp: ${AUDIT_DATA.timestamp}
 
         {/* Analysis Results (si hay archivo analizado) */}
         {analysisResults && (
-          <BankingCard className="p-card border-2 border-white/20 bg-white/3">
+          <BankingCard className="p-card border-2 border-gray-200 bg-white">
             <div className="flex items-start gap-card">
-              <div className="p-card-sm bg-white/10 rounded-xl animate-pulse">
+              <div className="p-card-sm bg-gray-100 rounded-xl">
                 <Activity className="w-8 h-8 text-black" />
               </div>
               <div className="flex-1">
-                <h3 className="text-heading text-black mb-card-sm">
+                <h3 className="text-heading text-black mb-card-sm font-bold">
                   {isSpanish ? "Análisis Completado" : "Analysis Completed"}
                 </h3>
-                <p className="text-black text-heading-sm mb-card">
+                <p className="text-black text-heading-sm mb-card font-semibold">
                   {analysisResults.totalM2Values.toLocaleString()} {isSpanish ? "Valores M2 Detectados" : "M2 Values Detected"}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-card text-sm">
                   <div>
-                    <p className="text-black">{isSpanish ? "Total en Miles de Millones" : "Total in Billions"}</p>
+                    <p className="text-black font-medium">{isSpanish ? "Total en Miles de Millones" : "Total in Billions"}</p>
                     <p className="text-black font-bold text-xl">
                       {analysisResults.totalM2Amount.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
                     </p>
                   </div>
                   <div>
-                    <p className="text-black">{isSpanish ? "Archivos Analizados" : "Files Analyzed"}</p>
+                    <p className="text-black font-medium">{isSpanish ? "Archivos Analizados" : "Files Analyzed"}</p>
                     <p className="text-black font-bold text-xl">{analysisResults.filesProcessed}</p>
                   </div>
                   <div>
-                    <p className="text-black">{isSpanish ? "Estado" : "Status"}</p>
-                    <p className="text-emerald-400 font-bold text-xl">
+                    <p className="text-black font-medium">{isSpanish ? "Estado" : "Status"}</p>
+                    <p className="text-emerald-600 font-bold text-xl">
                       ✅ {isSpanish ? "CERTIFICADO" : "CERTIFIED"}
                     </p>
                   </div>
