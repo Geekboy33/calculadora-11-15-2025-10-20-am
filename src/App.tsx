@@ -122,7 +122,7 @@ function App() {
   // Módulos principales con iconos personalizados
   const featuredModules = [
     { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel' },
-    { id: 'banco-central-privado' as Tab, name: isSpanish ? 'Banco Central Privado' : 'Private Central Bank' },
+    { id: 'banco-central-privado' as Tab, name: 'Treasury Reserve' },
     { id: 'origen-fondos' as Tab, name: isSpanish ? 'Origen de Fondos' : 'Source of Funds' },
     { id: 'the-kingdom-bank' as Tab, name: 'The Kingdom Bank' },
     { id: 'daes-partner-api' as Tab, name: isSpanish ? 'APIs Partner DAES' : 'DAES Partner APIs' }
@@ -130,7 +130,7 @@ function App() {
 
   const tabs = [
     { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel', icon: Building2 },
-    { id: 'banco-central-privado' as Tab, name: isSpanish ? 'Banco Central Privado' : 'Private Central Bank', icon: Shield },
+    { id: 'banco-central-privado' as Tab, name: 'Treasury Reserve', icon: Shield },
     { id: 'origen-fondos' as Tab, name: isSpanish ? 'Origen de Fondos' : 'Source of Funds', icon: FileSearch },
     { id: 'the-kingdom-bank' as Tab, name: 'The Kingdom Bank', icon: Key },
     { id: 'daes-partner-api' as Tab, name: isSpanish ? 'APIs Partner DAES' : 'DAES Partner APIs', icon: Globe },

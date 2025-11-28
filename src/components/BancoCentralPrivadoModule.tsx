@@ -1,5 +1,5 @@
 /**
- * Banco Central Privado - Digital Commercial Bank Ltd
+ * Treasury Reserve - Digital Commercial Bank Ltd
  * Master Accounts de Tesorería basadas en Auditoría Técnica
  * Ledger1 Digital Commercial Bank DAES
  */
@@ -465,7 +465,7 @@ export function BancoCentralPrivadoModule() {
     if (ledgerBalances.length > 0) {
       console.log('[Banco Central] 📊 Balances encontrados en Account Ledger:', ledgerBalances.length);
 
-      // Actualizar balances de Private Central Bank con los de Account Ledger
+      // Actualizar balances de Treasury Reserve con los de Account Ledger
       const syncedBalances: {[key: string]: number} = {};
       let totalBalance = 0;
 
@@ -540,12 +540,12 @@ export function BancoCentralPrivadoModule() {
     const statementContent = `
 ═══════════════════════════════════════════════════════════════════════════════
                       DIGITAL COMMERCIAL BANK LTD
-                         PRIVATE CENTRAL BANK
+                         TREASURY RESERVE
                     TREASURY MASTER ACCOUNTS STATEMENT
 ═══════════════════════════════════════════════════════════════════════════════
 
 ${isSpanish ? 'DECLARACIÓN OFICIAL DE TESORERÍA' : 'OFFICIAL TREASURY STATEMENT'}
-${isSpanish ? 'Banco Central Privado' : 'Private Central Bank'}
+Treasury Reserve
 
 ${isSpanish ? 'Fecha de emisión:' : 'Issue date:'} ${new Date().toLocaleString(isSpanish ? 'es-ES' : 'en-US')}
 ${isSpanish ? 'Estado:' : 'Status:'} ${analysisResults?.certified ? '✅ CERTIFICADO' : 'Valores de Auditoría'}
@@ -655,7 +655,7 @@ ${isSpanish ? 'Seguridad:' : 'Security:'}
 ═══════════════════════════════════════════════════════════════════════════════
 
 Digital Commercial Bank Ltd
-${isSpanish ? 'Banco Central Privado' : 'Private Central Bank'}
+Treasury Reserve
 ${isSpanish ? 'Departamento de Tesorería' : 'Treasury Department'}
 
 Email: treasury@digcommbank.com
@@ -698,7 +698,7 @@ ${isSpanish ? 'Versión:' : 'Version:'} 1.0.0
     const reportContent = `
 ═══════════════════════════════════════════════════════════════════════════════
                       DIGITAL COMMERCIAL BANK LTD
-                         BANCO CENTRAL PRIVADO
+                         TREASURY RESERVE
                     REPORTE DE AUDITORÍA TÉCNICA FINAL
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -842,7 +842,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
         {/* Header */}
         <BankingHeader
           icon={Building2}
-          title={isSpanish ? "Banco Central Privado" : "Private Central Bank"}
+          title="Treasury Reserve"
           subtitle={isSpanish 
             ? "Cuentas Maestras de Tesorería - Ledger1 Digital Commercial Bank DAES"
             : "Treasury Master Accounts - Ledger1 Digital Commercial Bank DAES"

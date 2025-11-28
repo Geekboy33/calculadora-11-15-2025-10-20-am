@@ -32,7 +32,7 @@ export function CentralPanelIcon({ size = 24, className = '', active = false }: 
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PRIVATE CENTRAL BANK ICON - Futurista Minimalista
+// TREASURY RESERVE ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
 export function PrivateCentralBankIcon({ size = 24, className = '', active = false }: ModuleIconProps) {

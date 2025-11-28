@@ -1,4 +1,4 @@
-# 🏛️ GUÍA DE USO: BANCO CENTRAL PRIVADO
+# 🏛️ GUÍA DE USO: TREASURY RESERVE
 
 ## ✅ MÓDULO COMPLETO Y FUNCIONAL
 
@@ -13,7 +13,7 @@
 ```
 1. http://localhost:4000
 2. Login: admin / DAES2025
-3. Menú → 🏛️ Banco Central Privado
+3. Menú → 🏛️ Treasury Reserve
 ```
 
 ### PASO 2: Cargar Archivo
