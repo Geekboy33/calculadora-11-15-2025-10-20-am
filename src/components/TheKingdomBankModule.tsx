@@ -574,7 +574,7 @@ export function TheKingdomBankModule() {
 
         {/* Payments Tab */}
         {activeTab === 'payments' && (
-          <BankingSection title={isSpanish ? "Crear Payment Request" : "Create Payment Request"} icon={Send} color="sky">
+          <BankingSection title={isSpanish ? "Crear Payment Request" : "Create Payment Request"} icon={Send} color="white">
             <BankingCard className="p-6 space-y-4">
               {/* Selector de Cuenta Custody */}
               <div className="mb-4 p-4 bg-[#0d0d0d]/50 rounded-lg border border-[#1a1a1a]">
@@ -927,7 +927,7 @@ export function TheKingdomBankModule() {
 
         {/* History Tab */}
         {activeTab === 'history' && (
-          <BankingSection title={isSpanish ? "Historial de Transacciones" : "Transaction History"} icon={History} color="sky">
+          <BankingSection title={isSpanish ? "Historial de Transacciones" : "Transaction History"} icon={History} color="white">
             <BankingCard className="p-12 text-center">
               <History className="w-20 h-20 text-slate-700 mx-auto mb-4" />
               <p className="text-slate-400">

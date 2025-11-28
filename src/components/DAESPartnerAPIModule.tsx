@@ -1613,7 +1613,7 @@ Partner: ${partner.name}
           icon={Globe}
           title="APIs Digital Commercial Bank Ltd"
           subtitle={isSpanish ? 'DAES Partner API - Gestión de Partners y Acceso API' : 'DAES Partner API - Partner & API Access Management'}
-          gradient="sky"
+          gradient="white"
           actions={
             <div className="flex items-center gap-3">
               <BankingButton
@@ -1758,7 +1758,7 @@ Partner: ${partner.name}
             label={isSpanish ? "Partners Activos" : "Active Partners"}
             value={partners.length}
             icon={Users}
-            color="sky"
+            color="white"
           />
           <BankingMetric
             label={isSpanish ? "Clientes" : "Clients"}
@@ -1835,7 +1835,7 @@ Partner: ${partner.name}
             <BankingSection
           title={isSpanish ? "Crear Nuevo Partner" : "Create New Partner"}
           icon={Plus}
-          color="sky"
+          color="white"
         >
           <div className="space-y-4">
             <BankingInput
@@ -2272,7 +2272,7 @@ Partner: ${partner.name}
             <BankingSection
               title={isSpanish ? "Clientes Registrados" : "Registered Clients"}
               icon={Wallet}
-              color="sky"
+              color="white"
             >
               {clients.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -847,7 +847,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
             ? "Cuentas Maestras de Tesorería - Ledger1 Digital Commercial Bank DAES"
             : "Treasury Master Accounts - Ledger1 Digital Commercial Bank DAES"
           }
-          gradient="sky"
+          gradient="white"
           actions={
             <div className="flex items-center gap-3">
               <input
@@ -990,7 +990,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
         {/* Selector de 15 Master Accounts */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {CURRENCY_DISTRIBUTION.map((curr, idx) => {
-            const colors = ['sky', 'emerald', 'amber', 'purple', 'pink', 'blue', 'teal', 'cyan', 'indigo', 'violet', 'fuchsia', 'rose', 'orange', 'lime', 'yellow'];
+            const colors = ['white', 'emerald', 'amber', 'purple', 'pink', 'emerald', 'teal', 'cyan', 'indigo', 'violet', 'fuchsia', 'rose', 'orange', 'lime', 'yellow'];
             const color = colors[idx % colors.length];
             const isSelected = selectedAccount === curr.code;
 
@@ -1114,8 +1114,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 max-h-[600px] overflow-y-auto pr-2">
                     {CURRENCY_DISTRIBUTION.map((curr, idx) => {
                       const colors = [
-                        'sky', 'emerald', 'amber', 'purple', 'pink',
-                        'blue', 'teal', 'cyan', 'indigo', 'violet',
+                        'white', 'emerald', 'amber', 'purple', 'pink',
+                        'emerald', 'teal', 'cyan', 'indigo', 'violet',
                         'fuchsia', 'rose', 'orange', 'lime', 'yellow'
                       ];
                       const color = colors[idx % colors.length];

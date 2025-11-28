@@ -348,7 +348,7 @@ ${idx + 1}. ${acc.bankName}
             ? "Extracción de datos bancarios de Ledger1 - HSBC, JPMorgan, etc."
             : "Bank data extraction from Ledger1 - HSBC, JPMorgan, etc."
           }
-          gradient="sky"
+          gradient="white"
           actions={
             <div className="flex items-center gap-3">
               <input
@@ -397,7 +397,7 @@ ${idx + 1}. ${acc.bankName}
             label={isSpanish ? "Cuentas Detectadas" : "Detected Accounts"}
             value={accounts.length}
             icon={CreditCard}
-            color="sky"
+            color="white"
           />
           <BankingMetric
             label={isSpanish ? "Bancos" : "Banks"}
