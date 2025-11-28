@@ -11,6 +11,7 @@ import {
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingInput } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
 import { TheKingdomBankClient, TKBConfig, TKBAccount, TKBPaymentRequest, TKBTransfer, TKBExternalTransfer, TKBExchange } from '../lib/tkbClient';
+import { custodyStore, type CustodyAccount } from '../lib/custody-store';
 
 export function TheKingdomBankModule() {
   const { fmt, isSpanish } = useBankingTheme();
@@ -27,10 +28,34 @@ export function TheKingdomBankModule() {
   });
 
   const [accounts, setAccounts] = useState<TKBAccount[]>([]);
+  const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'accounts' | 'payments' | 'transfers' | 'exchange' | 'history' | 'settings'>('accounts');
   const [client, setClient] = useState<TheKingdomBankClient | null>(null);
+
+  // Cargar cuentas de Custody Accounts al montar
+  useEffect(() => {
+    const loadCustodyAccounts = () => {
+      const accounts = custodyStore.getAccounts();
+      setCustodyAccounts(accounts);
+      console.log('[TKB] ✅ Custody Accounts cargadas:', accounts.length);
+    };
+    
+    loadCustodyAccounts();
+    
+    // Suscribirse a cambios en Custody Accounts
+    const unsubscribe = custodyStore.subscribe((accounts) => {
+      setCustodyAccounts(accounts);
+    });
+    
+    return () => unsubscribe();
+  }, []);
+
+  // Selected Custody Account for Payments/Transfers
+  const [selectedCustodyAccountId, setSelectedCustodyAccountId] = useState<string>('');
+  const [selectedFromCustodyAccountId, setSelectedFromCustodyAccountId] = useState<string>('');
+  const [selectedToCustodyAccountId, setSelectedToCustodyAccountId] = useState<string>('');
 
   // Payment Request Form
   const [paymentForm, setPaymentForm] = useState<TKBPaymentRequest>({
@@ -120,17 +145,75 @@ export function TheKingdomBankModule() {
       return;
     }
 
+    // Validar cuenta de Custody Accounts seleccionada
+    if (!selectedCustodyAccountId) {
+      setError(isSpanish ? 'Selecciona una cuenta de Custody Accounts' : 'Select a Custody Account');
+      return;
+    }
+
+    const custodyAccount = custodyAccounts.find(a => a.id === selectedCustodyAccountId);
+    if (!custodyAccount) {
+      setError(isSpanish ? 'Cuenta no encontrada' : 'Account not found');
+      return;
+    }
+
+    // Validar balance disponible
+    if (custodyAccount.availableBalance < paymentForm.amount) {
+      setError(
+        isSpanish 
+          ? `Balance insuficiente. Disponible: ${custodyAccount.currency} ${custodyAccount.availableBalance.toLocaleString()}`
+          : `Insufficient balance. Available: ${custodyAccount.currency} ${custodyAccount.availableBalance.toLocaleString()}`
+      );
+      return;
+    }
+
+    // Validar moneda
+    if (custodyAccount.currency !== paymentForm.currency) {
+      setError(
+        isSpanish 
+          ? `La moneda de la cuenta (${custodyAccount.currency}) no coincide con la del pago (${paymentForm.currency})`
+          : `Account currency (${custodyAccount.currency}) doesn't match payment currency (${paymentForm.currency})`
+      );
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
       const response = await client.createPaymentRequest(paymentForm);
+      
+      // Actualizar balance de Custody Account (reservar fondos)
+      const newAvailableBalance = custodyAccount.availableBalance - paymentForm.amount;
+      const newReservedBalance = custodyAccount.reservedBalance + paymentForm.amount;
+      
+      // Actualizar cuenta directamente
+      const allAccounts = custodyStore.getAccounts();
+      const accountIndex = allAccounts.findIndex(a => a.id === custodyAccount.id);
+      if (accountIndex !== -1) {
+        allAccounts[accountIndex].availableBalance = newAvailableBalance;
+        allAccounts[accountIndex].reservedBalance = newReservedBalance;
+        allAccounts[accountIndex].lastUpdated = new Date().toISOString();
+        
+        // Guardar usando localStorage directamente (mismo método que usa el store)
+        const STORAGE_KEY = 'Digital Commercial Bank Ltd_custody_accounts';
+        const data = {
+          accounts: allAccounts,
+          totalReserved: allAccounts.reduce((sum, a) => sum + a.reservedBalance, 0),
+          totalAvailable: allAccounts.reduce((sum, a) => sum + a.availableBalance, 0),
+          lastSync: new Date().toISOString(),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+      
       alert(
         `✅ ${isSpanish ? 'Payment Request Creado' : 'Payment Request Created'}\n\n` +
         `${isSpanish ? 'ID:' : 'ID:'} ${response.id || response.requestId}\n` +
-        `${isSpanish ? 'URL:' : 'URL:'} ${response.checkoutUrl || response.url || 'N/A'}`
+        `${isSpanish ? 'URL:' : 'URL:'} ${response.checkoutUrl || response.url || 'N/A'}\n\n` +
+        `${isSpanish ? 'Balance actualizado:' : 'Balance updated:'} ${custodyAccount.currency} ${newAvailableBalance.toLocaleString()} disponible`
       );
       console.log('[TKB] ✅ Payment creado:', response);
+      console.log('[TKB] ✅ Balance de Custody Account actualizado');
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMsg);
@@ -146,17 +229,75 @@ export function TheKingdomBankModule() {
       return;
     }
 
+    // Validar cuenta origen de Custody Accounts
+    if (!selectedFromCustodyAccountId) {
+      setError(isSpanish ? 'Selecciona una cuenta origen de Custody Accounts' : 'Select a source Custody Account');
+      return;
+    }
+
+    const fromAccount = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
+    if (!fromAccount) {
+      setError(isSpanish ? 'Cuenta origen no encontrada' : 'Source account not found');
+      return;
+    }
+
+    // Validar balance disponible
+    if (fromAccount.availableBalance < transferForm.amount) {
+      setError(
+        isSpanish 
+          ? `Balance insuficiente. Disponible: ${fromAccount.currency} ${fromAccount.availableBalance.toLocaleString()}`
+          : `Insufficient balance. Available: ${fromAccount.currency} ${fromAccount.availableBalance.toLocaleString()}`
+      );
+      return;
+    }
+
+    // Validar moneda
+    if (fromAccount.currency !== transferForm.currency) {
+      setError(
+        isSpanish 
+          ? `La moneda de la cuenta (${fromAccount.currency}) no coincide con la de la transferencia (${transferForm.currency})`
+          : `Account currency (${fromAccount.currency}) doesn't match transfer currency (${transferForm.currency})`
+      );
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
       const response = await client.createInternalTransfer(transferForm);
+      
+      // Actualizar balance de Custody Account origen
+      const newAvailableBalance = fromAccount.availableBalance - transferForm.amount;
+      const newReservedBalance = fromAccount.reservedBalance + transferForm.amount;
+      
+      // Actualizar cuenta directamente
+      const allAccounts = custodyStore.getAccounts();
+      const accountIndex = allAccounts.findIndex(a => a.id === fromAccount.id);
+      if (accountIndex !== -1) {
+        allAccounts[accountIndex].availableBalance = newAvailableBalance;
+        allAccounts[accountIndex].reservedBalance = newReservedBalance;
+        allAccounts[accountIndex].lastUpdated = new Date().toISOString();
+        
+        // Guardar usando localStorage directamente
+        const STORAGE_KEY = 'Digital Commercial Bank Ltd_custody_accounts';
+        const data = {
+          accounts: allAccounts,
+          totalReserved: allAccounts.reduce((sum, a) => sum + a.reservedBalance, 0),
+          totalAvailable: allAccounts.reduce((sum, a) => sum + a.availableBalance, 0),
+          lastSync: new Date().toISOString(),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+      
       alert(
         `✅ ${isSpanish ? 'Transferencia Interna Creada' : 'Internal Transfer Created'}\n\n` +
-        `${isSpanish ? 'ID:' : 'ID:'} ${response.id || response.transactionId}`
+        `${isSpanish ? 'ID:' : 'ID:'} ${response.id || response.transactionId}\n\n` +
+        `${isSpanish ? 'Balance actualizado:' : 'Balance updated:'} ${fromAccount.currency} ${newAvailableBalance.toLocaleString()} disponible`
       );
       console.log('[TKB] ✅ Transfer creada:', response);
-      await handleLoadAccounts(); // Recargar balances
+      console.log('[TKB] ✅ Balance de Custody Account actualizado');
+      await handleLoadAccounts(); // Recargar balances TKB
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       setError(errorMsg);
@@ -172,16 +313,67 @@ export function TheKingdomBankModule() {
       return;
     }
 
+    // Validar cuenta origen de Custody Accounts
+    if (!selectedFromCustodyAccountId) {
+      setError(isSpanish ? 'Selecciona una cuenta origen de Custody Accounts' : 'Select a source Custody Account');
+      return;
+    }
+
+    const fromAccount = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
+    if (!fromAccount) {
+      setError(isSpanish ? 'Cuenta origen no encontrada' : 'Source account not found');
+      return;
+    }
+
+    // Validar balance disponible
+    if (fromAccount.availableBalance < externalTransferForm.amount) {
+      setError(
+        isSpanish 
+          ? `Balance insuficiente. Disponible: ${fromAccount.currency} ${fromAccount.availableBalance.toLocaleString()}`
+          : `Insufficient balance. Available: ${fromAccount.currency} ${fromAccount.availableBalance.toLocaleString()}`
+      );
+      return;
+    }
+
+    // Validar moneda
+    if (fromAccount.currency !== externalTransferForm.currency) {
+      setError(
+        isSpanish 
+          ? `La moneda de la cuenta (${fromAccount.currency}) no coincide con la de la transferencia (${externalTransferForm.currency})`
+          : `Account currency (${fromAccount.currency}) doesn't match transfer currency (${externalTransferForm.currency})`
+      );
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
       const response = await client.createExternalTransfer(externalTransferForm);
+      
+      // Actualizar balance de Custody Account origen
+      const newAvailableBalance = fromAccount.availableBalance - externalTransferForm.amount;
+      const newReservedBalance = fromAccount.reservedBalance + externalTransferForm.amount;
+      
+      fromAccount.availableBalance = newAvailableBalance;
+      fromAccount.reservedBalance = newReservedBalance;
+      fromAccount.lastUpdated = new Date().toISOString();
+      
+      // Guardar cambios
+      const allAccounts = custodyStore.getAccounts();
+      const accountIndex = allAccounts.findIndex(a => a.id === fromAccount.id);
+      if (accountIndex !== -1) {
+        allAccounts[accountIndex] = fromAccount;
+        custodyStore['saveAccounts'](allAccounts);
+      }
+      
       alert(
         `✅ ${isSpanish ? 'Transferencia Externa Creada' : 'External Transfer Created'}\n\n` +
-        `${isSpanish ? 'ID:' : 'ID:'} ${response.id || response.transactionId}`
+        `${isSpanish ? 'ID:' : 'ID:'} ${response.id || response.transactionId}\n\n` +
+        `${isSpanish ? 'Balance actualizado:' : 'Balance updated:'} ${fromAccount.currency} ${newAvailableBalance.toLocaleString()} disponible`
       );
       console.log('[TKB] ✅ External transfer creada:', response);
+      console.log('[TKB] ✅ Balance de Custody Account actualizado');
       await handleLoadAccounts();
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
@@ -384,6 +576,43 @@ export function TheKingdomBankModule() {
         {activeTab === 'payments' && (
           <BankingSection title={isSpanish ? "Crear Payment Request" : "Create Payment Request"} icon={Send} color="sky">
             <BankingCard className="p-6 space-y-4">
+              {/* Selector de Cuenta Custody */}
+              <div className="mb-4 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                <label className="block text-slate-200 font-semibold mb-2">
+                  {isSpanish ? "Seleccionar Cuenta Custody" : "Select Custody Account"}
+                </label>
+                <select
+                  value={selectedCustodyAccountId}
+                  onChange={(e) => {
+                    setSelectedCustodyAccountId(e.target.value);
+                    const account = custodyAccounts.find(a => a.id === e.target.value);
+                    if (account) {
+                      setPaymentForm({ ...paymentForm, currency: account.currency });
+                    }
+                  }}
+                  className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-sky-500"
+                >
+                  <option value="">{isSpanish ? "-- Seleccionar cuenta --" : "-- Select account --"}</option>
+                  {custodyAccounts
+                    .filter(acc => acc.accountType === 'banking')
+                    .map(account => (
+                      <option key={account.id} value={account.id}>
+                        {account.accountName} - {account.currency} {account.availableBalance.toLocaleString()} disponible
+                        {account.accountNumber ? ` (${account.accountNumber})` : ''}
+                      </option>
+                    ))}
+                </select>
+                {selectedCustodyAccountId && (() => {
+                  const account = custodyAccounts.find(a => a.id === selectedCustodyAccountId);
+                  return account ? (
+                    <div className="mt-2 text-sm text-slate-400">
+                      {isSpanish ? "Balance disponible:" : "Available balance:"} {account.currency} {account.availableBalance.toLocaleString()}
+                      {account.iban && <span className="ml-4">IBAN: {account.iban}</span>}
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <BankingInput
                   label={isSpanish ? "Foreign Transaction ID" : "Foreign Transaction ID"}
@@ -473,12 +702,50 @@ export function TheKingdomBankModule() {
             {/* Internal Transfer */}
             <BankingSection title={isSpanish ? "Transferencia Interna" : "Internal Transfer"} icon={ArrowRightLeft} color="emerald">
               <BankingCard className="p-6 space-y-4">
+                {/* Selector de Cuenta Origen Custody */}
+                <div className="mb-4 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                  <label className="block text-slate-200 font-semibold mb-2">
+                    {isSpanish ? "Cuenta Origen (Custody)" : "Source Account (Custody)"}
+                  </label>
+                  <select
+                    value={selectedFromCustodyAccountId}
+                    onChange={(e) => {
+                      setSelectedFromCustodyAccountId(e.target.value);
+                      const account = custodyAccounts.find(a => a.id === e.target.value);
+                      if (account) {
+                        setTransferForm({ ...transferForm, currency: account.currency });
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="">{isSpanish ? "-- Seleccionar cuenta origen --" : "-- Select source account --"}</option>
+                    {custodyAccounts
+                      .filter(acc => acc.accountType === 'banking')
+                      .map(account => (
+                        <option key={account.id} value={account.id}>
+                          {account.accountName} - {account.currency} {account.availableBalance.toLocaleString()} disponible
+                          {account.accountNumber ? ` (${account.accountNumber})` : ''}
+                        </option>
+                      ))}
+                  </select>
+                  {selectedFromCustodyAccountId && (() => {
+                    const account = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
+                    return account ? (
+                      <div className="mt-2 text-sm text-slate-400">
+                        {isSpanish ? "Balance disponible:" : "Available balance:"} {account.currency} {account.availableBalance.toLocaleString()}
+                        {account.iban && <span className="ml-4">IBAN: {account.iban}</span>}
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <BankingInput
-                    label={isSpanish ? "Desde Account ID" : "From Account ID"}
+                    label={isSpanish ? "Desde Account ID (TKB)" : "From Account ID (TKB)"}
                     value={transferForm.fromAccountId.toString()}
                     onChange={(v) => setTransferForm({ ...transferForm, fromAccountId: parseInt(v) || 0 })}
                     type="number"
+                    placeholder={isSpanish ? "Opcional: ID de cuenta TKB" : "Optional: TKB account ID"}
                   />
                   <BankingInput
                     label={isSpanish ? "Hacia Account ID" : "To Account ID"}
@@ -517,12 +784,50 @@ export function TheKingdomBankModule() {
             {/* External Transfer */}
             <BankingSection title={isSpanish ? "Transferencia Externa" : "External Transfer"} icon={Send} color="purple">
               <BankingCard className="p-6 space-y-4">
+                {/* Selector de Cuenta Origen Custody */}
+                <div className="mb-4 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                  <label className="block text-slate-200 font-semibold mb-2">
+                    {isSpanish ? "Cuenta Origen (Custody)" : "Source Account (Custody)"}
+                  </label>
+                  <select
+                    value={selectedFromCustodyAccountId}
+                    onChange={(e) => {
+                      setSelectedFromCustodyAccountId(e.target.value);
+                      const account = custodyAccounts.find(a => a.id === e.target.value);
+                      if (account) {
+                        setExternalTransferForm({ ...externalTransferForm, currency: account.currency });
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                  >
+                    <option value="">{isSpanish ? "-- Seleccionar cuenta origen --" : "-- Select source account --"}</option>
+                    {custodyAccounts
+                      .filter(acc => acc.accountType === 'banking')
+                      .map(account => (
+                        <option key={account.id} value={account.id}>
+                          {account.accountName} - {account.currency} {account.availableBalance.toLocaleString()} disponible
+                          {account.accountNumber ? ` (${account.accountNumber})` : ''}
+                        </option>
+                      ))}
+                  </select>
+                  {selectedFromCustodyAccountId && (() => {
+                    const account = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
+                    return account ? (
+                      <div className="mt-2 text-sm text-slate-400">
+                        {isSpanish ? "Balance disponible:" : "Available balance:"} {account.currency} {account.availableBalance.toLocaleString()}
+                        {account.iban && <span className="ml-4">IBAN: {account.iban}</span>}
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <BankingInput
-                    label={isSpanish ? "Desde Account ID" : "From Account ID"}
+                    label={isSpanish ? "Desde Account ID (TKB)" : "From Account ID (TKB)"}
                     value={externalTransferForm.fromAccountId.toString()}
                     onChange={(v) => setExternalTransferForm({ ...externalTransferForm, fromAccountId: parseInt(v) || 0 })}
                     type="number"
+                    placeholder={isSpanish ? "Opcional: ID de cuenta TKB" : "Optional: TKB account ID"}
                   />
                   <BankingInput
                     label={isSpanish ? "Monto" : "Amount"}
