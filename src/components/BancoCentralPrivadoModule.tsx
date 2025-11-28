@@ -1019,8 +1019,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
         <BankingCard className="overflow-visible">
           <div className={`p-card-lg ${
             selectedAccount === 'USD' 
-              ? 'bg-gradient-to-r from-white/5 to-white/5'
-              : 'bg-gradient-to-r from-emerald-500/10 to-teal-600/10'
+              ? 'bg-gradient-to-r from-[var(--bg-card)] to-[var(--bg-elevated)]'
+              : 'bg-gradient-to-r from-[var(--bg-card)] to-[var(--bg-elevated)]'
           }`}>
             <div className="flex items-center justify-between m-section">
               <div className="flex items-center gap-card">
@@ -1028,12 +1028,12 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   selectedAccount === 'USD' ? 'bg-white/10' : 'bg-emerald-500/20'
                 }`}>
                   <DollarSign className={`w-10 h-10 ${
-                    selectedAccount === 'USD' ? 'text-black' : 'text-black'
+                    selectedAccount === 'USD' ? 'text-white' : 'text-white'
                   }`} />
                 </div>
                 <div>
-                  <h3 className="text-heading text-black">{selectedMasterAccount.name}</h3>
-                  <p className="text-black">ID: {selectedMasterAccount.id}</p>
+                  <h3 className="text-heading text-white">{selectedMasterAccount.name}</h3>
+                  <p className="text-white">ID: {selectedMasterAccount.id}</p>
                 </div>
               </div>
               <BankingBadge variant="success">
@@ -1041,24 +1041,24 @@ Timestamp: ${AUDIT_DATA.timestamp}
               </BankingBadge>
             </div>
 
-            <div className="text-center py-8 relative z-10">
-              <p className="text-white text-sm mb-card uppercase tracking-wide">
+            <div className="text-center py-8 relative z-20">
+              <p className="text-white text-sm mb-card uppercase tracking-wide font-semibold">
                 {isSpanish ? "Balance de Tesorería" : "Treasury Balance"}
               </p>
               {balancesVisible ? (
                 <>
-                  <p className="text-6xl font-black text-white mb-card-sm relative z-10 break-words">
+                  <p className="text-6xl font-black text-white mb-card-sm relative z-20 break-words leading-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
                     {fmt.currency(selectedMasterAccount.balance, selectedMasterAccount.currency)}
                   </p>
-                  <p className="text-white text-lg relative z-10">
+                  <p className="text-white text-lg relative z-20 font-semibold" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
                     ({selectedMasterAccount.balance.toExponential(2)} {selectedMasterAccount.currency})
                   </p>
-                  <p className="text-white text-sm mt-card-sm relative z-10">
+                  <p className="text-white text-sm mt-card-sm relative z-20" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
                     ≈ {(selectedMasterAccount.balance / 1000000000).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} {isSpanish ? 'Miles de Millones' : 'Billions'}
                   </p>
                 </>
               ) : (
-                <p className="text-6xl font-black text-white m-card relative z-10">
+                <p className="text-6xl font-black text-white m-card relative z-20">
                   {'*'.repeat(20)}
                 </p>
               )}
@@ -1070,8 +1070,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   </span>
                 </div>
                 <div className="flex items-center gap-card-sm">
-                  <Database className="w-4 h-4 text-black" />
-                  <span className="text-black">{selectedMasterAccount.classification}</span>
+                  <Database className="w-4 h-4 text-white" />
+                  <span className="text-white">{selectedMasterAccount.classification}</span>
                 </div>
               </div>
             </div>
