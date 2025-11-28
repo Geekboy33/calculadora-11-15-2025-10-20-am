@@ -226,6 +226,41 @@ class LedgerAccountsStore {
     }
   }
 
+  async updateAccount(accountId: string, updates: Partial<{ balance: number; transactionCount: number; averageTransaction: number; largestTransaction: number; smallestTransaction: number; status: 'active' | 'frozen' | 'closed' }>): Promise<boolean> {
+    const userId = await this.ensureUserId();
+    if (!userId || !supabase) return false;
+
+    try {
+      const updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+
+      if (updates.balance !== undefined) updateData.balance = updates.balance;
+      if (updates.transactionCount !== undefined) updateData.transaction_count = updates.transactionCount;
+      if (updates.averageTransaction !== undefined) updateData.average_transaction = updates.averageTransaction;
+      if (updates.largestTransaction !== undefined) updateData.largest_transaction = updates.largestTransaction;
+      if (updates.smallestTransaction !== undefined) updateData.smallest_transaction = updates.smallestTransaction;
+      if (updates.status !== undefined) updateData.status = updates.status;
+
+      const { error } = await supabase
+        .from('ledger_accounts')
+        .update(updateData)
+        .eq('id', accountId)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      await this.getAllAccounts(true);
+      this.notifyListeners();
+
+      console.log('[LedgerAccountsStore] Account updated:', accountId, updates);
+      return true;
+    } catch (error) {
+      console.error('[LedgerAccountsStore] Error updating account:', error);
+      return false;
+    }
+  }
+
   async updateAccountStatus(currency: string, status: 'active' | 'frozen' | 'closed'): Promise<boolean> {
     const userId = await this.ensureUserId();
     if (!userId || !supabase) return false;
