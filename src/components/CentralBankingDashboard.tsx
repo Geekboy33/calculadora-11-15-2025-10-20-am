@@ -344,7 +344,7 @@ export function CentralBankingDashboard() {
                 disabled={refreshing}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-all disabled:opacity-50"
                 aria-label={isSpanish ? 'Actualizar datos del panel' : 'Refresh panel data'}
-                aria-busy={refreshing}
+                aria-busy={refreshing ? 'true' : 'false'}
               >
                 <RefreshCw className={cn('w-4 h-4', refreshing && 'animate-spin')} aria-hidden="true" />
                 <span className="hidden sm:inline">{isSpanish ? 'Actualizar' : 'Refresh'}</span>
