@@ -12,6 +12,8 @@ import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingInput
 import { useBankingTheme } from '../hooks/useBankingTheme';
 import { TheKingdomBankClient, TKBConfig, TKBAccount, TKBPaymentRequest, TKBTransfer, TKBExternalTransfer, TKBExchange } from '../lib/tkbClient';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
+import { ledgerAccountsStore, type LedgerAccount } from '../lib/ledger-accounts-store';
+import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 
 export function TheKingdomBankModule() {
   const { fmt, isSpanish } = useBankingTheme();
@@ -29,6 +31,9 @@ export function TheKingdomBankModule() {
 
   const [accounts, setAccounts] = useState<TKBAccount[]>([]);
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
+  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
+  const [accountLedgerBalances, setAccountLedgerBalances] = useState<CurrencyBalance[]>([]);
+  const [balanceSource, setBalanceSource] = useState<'custody' | 'ledger'>('custody');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'accounts' | 'payments' | 'transfers' | 'exchange' | 'history' | 'settings'>('accounts');
@@ -45,11 +50,53 @@ export function TheKingdomBankModule() {
     loadCustodyAccounts();
     
     // Suscribirse a cambios en Custody Accounts
-    const unsubscribe = custodyStore.subscribe((accounts) => {
+    const unsubscribeCustody = custodyStore.subscribe((accounts) => {
       setCustodyAccounts(accounts);
     });
     
-    return () => unsubscribe();
+    return () => unsubscribeCustody();
+  }, []);
+
+  // Cargar cuentas del Account Ledger al montar
+  useEffect(() => {
+    const loadLedgerAccounts = async () => {
+      try {
+        const accounts = await ledgerAccountsStore.getAllAccounts();
+        setLedgerAccounts(accounts);
+        console.log('[TKB] ✅ Ledger Accounts cargadas:', accounts.length);
+      } catch (err) {
+        console.error('[TKB] ❌ Error cargando Ledger Accounts:', err);
+      }
+    };
+    
+    loadLedgerAccounts();
+    
+    // Suscribirse a cambios en Ledger Accounts
+    const unsubscribeLedger = ledgerAccountsStore.subscribe((accounts) => {
+      setLedgerAccounts(accounts);
+      console.log('[TKB] ✅ Ledger Accounts actualizadas:', accounts.length);
+    });
+    
+    return () => unsubscribeLedger();
+  }, []);
+
+  // Cargar balances del Account Ledger (balanceStore)
+  useEffect(() => {
+    const loadAccountLedgerBalances = () => {
+      const balances = balanceStore.getBalances();
+      setAccountLedgerBalances(balances);
+      console.log('[TKB] ✅ Account Ledger Balances cargados:', balances.length);
+    };
+    
+    loadAccountLedgerBalances();
+    
+    // Suscribirse a cambios en Account Ledger Balances
+    const unsubscribeBalances = balanceStore.subscribe((balances) => {
+      setAccountLedgerBalances(balances);
+      console.log('[TKB] ✅ Account Ledger Balances actualizados:', balances.length);
+    });
+    
+    return () => unsubscribeBalances();
   }, []);
 
   // Selected Custody Account for Payments/Transfers
@@ -145,34 +192,60 @@ export function TheKingdomBankModule() {
       return;
     }
 
-    // Validar cuenta de Custody Accounts seleccionada
+    // Validar cuenta seleccionada según fuente
     if (!selectedCustodyAccountId) {
-      setError(isSpanish ? 'Selecciona una cuenta de Custody Accounts' : 'Select a Custody Account');
+      setError(
+        isSpanish 
+          ? balanceSource === 'custody' 
+            ? 'Selecciona una cuenta de Custody Accounts' 
+            : 'Selecciona un balance del Account Ledger'
+          : balanceSource === 'custody'
+            ? 'Select a Custody Account'
+            : 'Select an Account Ledger balance'
+      );
       return;
     }
 
-    const custodyAccount = custodyAccounts.find(a => a.id === selectedCustodyAccountId);
-    if (!custodyAccount) {
-      setError(isSpanish ? 'Cuenta no encontrada' : 'Account not found');
-      return;
+    let availableBalance = 0;
+    let accountCurrency = '';
+    let accountName = '';
+
+    if (balanceSource === 'custody') {
+      const custodyAccount = custodyAccounts.find(a => a.id === selectedCustodyAccountId);
+      if (!custodyAccount) {
+        setError(isSpanish ? 'Cuenta no encontrada' : 'Account not found');
+        return;
+      }
+      availableBalance = custodyAccount.availableBalance;
+      accountCurrency = custodyAccount.currency;
+      accountName = custodyAccount.accountName;
+    } else {
+      const balance = accountLedgerBalances.find(b => b.currency === selectedCustodyAccountId);
+      if (!balance) {
+        setError(isSpanish ? 'Balance no encontrado' : 'Balance not found');
+        return;
+      }
+      availableBalance = balance.totalAmount;
+      accountCurrency = balance.currency;
+      accountName = balance.accountName;
     }
 
     // Validar balance disponible
-    if (custodyAccount.availableBalance < paymentForm.amount) {
+    if (availableBalance < paymentForm.amount) {
       setError(
         isSpanish 
-          ? `Balance insuficiente. Disponible: ${custodyAccount.currency} ${custodyAccount.availableBalance.toLocaleString()}`
-          : `Insufficient balance. Available: ${custodyAccount.currency} ${custodyAccount.availableBalance.toLocaleString()}`
+          ? `Balance insuficiente. Disponible: ${accountCurrency} ${availableBalance.toLocaleString()}`
+          : `Insufficient balance. Available: ${accountCurrency} ${availableBalance.toLocaleString()}`
       );
       return;
     }
 
     // Validar moneda
-    if (custodyAccount.currency !== paymentForm.currency) {
+    if (accountCurrency !== paymentForm.currency) {
       setError(
         isSpanish 
-          ? `La moneda de la cuenta (${custodyAccount.currency}) no coincide con la del pago (${paymentForm.currency})`
-          : `Account currency (${custodyAccount.currency}) doesn't match payment currency (${paymentForm.currency})`
+          ? `La moneda de la cuenta (${accountCurrency}) no coincide con la del pago (${paymentForm.currency})`
+          : `Account currency (${accountCurrency}) doesn't match payment currency (${paymentForm.currency})`
       );
       return;
     }
@@ -183,34 +256,50 @@ export function TheKingdomBankModule() {
     try {
       const response = await client.createPaymentRequest(paymentForm);
       
-      // Actualizar balance de Custody Account (reservar fondos)
-      const newAvailableBalance = custodyAccount.availableBalance - paymentForm.amount;
-      const newReservedBalance = custodyAccount.reservedBalance + paymentForm.amount;
-      
-      // Actualizar cuenta directamente
-      const allAccounts = custodyStore.getAccounts();
-      const accountIndex = allAccounts.findIndex(a => a.id === custodyAccount.id);
-      if (accountIndex !== -1) {
-        allAccounts[accountIndex].availableBalance = newAvailableBalance;
-        allAccounts[accountIndex].reservedBalance = newReservedBalance;
-        allAccounts[accountIndex].lastUpdated = new Date().toISOString();
-        
-        // Guardar usando localStorage directamente (mismo método que usa el store)
-        const STORAGE_KEY = 'Digital Commercial Bank Ltd_custody_accounts';
-        const data = {
-          accounts: allAccounts,
-          totalReserved: allAccounts.reduce((sum, a) => sum + a.reservedBalance, 0),
-          totalAvailable: allAccounts.reduce((sum, a) => sum + a.availableBalance, 0),
-          lastSync: new Date().toISOString(),
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      // Actualizar balance según fuente
+      if (balanceSource === 'custody') {
+        const custodyAccount = custodyAccounts.find(a => a.id === selectedCustodyAccountId);
+        if (custodyAccount) {
+          const newAvailableBalance = custodyAccount.availableBalance - paymentForm.amount;
+          const newReservedBalance = custodyAccount.reservedBalance + paymentForm.amount;
+          
+          // Actualizar cuenta directamente
+          const allAccounts = custodyStore.getAccounts();
+          const accountIndex = allAccounts.findIndex(a => a.id === custodyAccount.id);
+          if (accountIndex !== -1) {
+            allAccounts[accountIndex].availableBalance = newAvailableBalance;
+            allAccounts[accountIndex].reservedBalance = newReservedBalance;
+            allAccounts[accountIndex].lastUpdated = new Date().toISOString();
+            
+            // Guardar usando localStorage directamente (mismo método que usa el store)
+            const STORAGE_KEY = 'Digital Commercial Bank Ltd_custody_accounts';
+            const data = {
+              accounts: allAccounts,
+              totalReserved: allAccounts.reduce((sum, a) => sum + a.reservedBalance, 0),
+              totalAvailable: allAccounts.reduce((sum, a) => sum + a.availableBalance, 0),
+              lastSync: new Date().toISOString(),
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          }
+        }
+      } else {
+        // Para Account Ledger, actualizar el ledger account
+        const ledgerAccount = ledgerAccounts.find(a => a.currency === selectedCustodyAccountId);
+        if (ledgerAccount) {
+          const newBalance = ledgerAccount.balance - paymentForm.amount;
+          await ledgerAccountsStore.updateAccount(ledgerAccount.id, {
+            balance: newBalance,
+            transactionCount: ledgerAccount.transactionCount + 1,
+          });
+          console.log('[TKB] ✅ Account Ledger balance actualizado');
+        }
       }
       
       alert(
         `✅ ${isSpanish ? 'Payment Request Creado' : 'Payment Request Created'}\n\n` +
         `${isSpanish ? 'ID:' : 'ID:'} ${response.id || response.requestId}\n` +
         `${isSpanish ? 'URL:' : 'URL:'} ${response.checkoutUrl || response.url || 'N/A'}\n\n` +
-        `${isSpanish ? 'Balance actualizado:' : 'Balance updated:'} ${custodyAccount.currency} ${newAvailableBalance.toLocaleString()} disponible`
+        `${isSpanish ? 'Balance actualizado:' : 'Balance updated:'} ${accountCurrency} ${(availableBalance - paymentForm.amount).toLocaleString()} disponible`
       );
       console.log('[TKB] ✅ Payment creado:', response);
       console.log('[TKB] ✅ Balance de Custody Account actualizado');
@@ -229,34 +318,60 @@ export function TheKingdomBankModule() {
       return;
     }
 
-    // Validar cuenta origen de Custody Accounts
+    // Validar cuenta origen según fuente
     if (!selectedFromCustodyAccountId) {
-      setError(isSpanish ? 'Selecciona una cuenta origen de Custody Accounts' : 'Select a source Custody Account');
+      setError(
+        isSpanish 
+          ? balanceSource === 'custody' 
+            ? 'Selecciona una cuenta origen de Custody Accounts' 
+            : 'Selecciona un balance origen del Account Ledger'
+          : balanceSource === 'custody'
+            ? 'Select a source Custody Account'
+            : 'Select a source Account Ledger balance'
+      );
       return;
     }
 
-    const fromAccount = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
-    if (!fromAccount) {
-      setError(isSpanish ? 'Cuenta origen no encontrada' : 'Source account not found');
-      return;
+    let availableBalance = 0;
+    let accountCurrency = '';
+    let accountName = '';
+
+    if (balanceSource === 'custody') {
+      const fromAccount = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
+      if (!fromAccount) {
+        setError(isSpanish ? 'Cuenta origen no encontrada' : 'Source account not found');
+        return;
+      }
+      availableBalance = fromAccount.availableBalance;
+      accountCurrency = fromAccount.currency;
+      accountName = fromAccount.accountName;
+    } else {
+      const balance = accountLedgerBalances.find(b => b.currency === selectedFromCustodyAccountId);
+      if (!balance) {
+        setError(isSpanish ? 'Balance origen no encontrado' : 'Source balance not found');
+        return;
+      }
+      availableBalance = balance.totalAmount;
+      accountCurrency = balance.currency;
+      accountName = balance.accountName;
     }
 
     // Validar balance disponible
-    if (fromAccount.availableBalance < transferForm.amount) {
+    if (availableBalance < transferForm.amount) {
       setError(
         isSpanish 
-          ? `Balance insuficiente. Disponible: ${fromAccount.currency} ${fromAccount.availableBalance.toLocaleString()}`
-          : `Insufficient balance. Available: ${fromAccount.currency} ${fromAccount.availableBalance.toLocaleString()}`
+          ? `Balance insuficiente. Disponible: ${accountCurrency} ${availableBalance.toLocaleString()}`
+          : `Insufficient balance. Available: ${accountCurrency} ${availableBalance.toLocaleString()}`
       );
       return;
     }
 
     // Validar moneda
-    if (fromAccount.currency !== transferForm.currency) {
+    if (accountCurrency !== transferForm.currency) {
       setError(
         isSpanish 
-          ? `La moneda de la cuenta (${fromAccount.currency}) no coincide con la de la transferencia (${transferForm.currency})`
-          : `Account currency (${fromAccount.currency}) doesn't match transfer currency (${transferForm.currency})`
+          ? `La moneda de la cuenta (${accountCurrency}) no coincide con la de la transferencia (${transferForm.currency})`
+          : `Account currency (${accountCurrency}) doesn't match transfer currency (${transferForm.currency})`
       );
       return;
     }
@@ -267,27 +382,43 @@ export function TheKingdomBankModule() {
     try {
       const response = await client.createInternalTransfer(transferForm);
       
-      // Actualizar balance de Custody Account origen
-      const newAvailableBalance = fromAccount.availableBalance - transferForm.amount;
-      const newReservedBalance = fromAccount.reservedBalance + transferForm.amount;
-      
-      // Actualizar cuenta directamente
-      const allAccounts = custodyStore.getAccounts();
-      const accountIndex = allAccounts.findIndex(a => a.id === fromAccount.id);
-      if (accountIndex !== -1) {
-        allAccounts[accountIndex].availableBalance = newAvailableBalance;
-        allAccounts[accountIndex].reservedBalance = newReservedBalance;
-        allAccounts[accountIndex].lastUpdated = new Date().toISOString();
-        
-        // Guardar usando localStorage directamente
-        const STORAGE_KEY = 'Digital Commercial Bank Ltd_custody_accounts';
-        const data = {
-          accounts: allAccounts,
-          totalReserved: allAccounts.reduce((sum, a) => sum + a.reservedBalance, 0),
-          totalAvailable: allAccounts.reduce((sum, a) => sum + a.availableBalance, 0),
-          lastSync: new Date().toISOString(),
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      // Actualizar balance según fuente
+      if (balanceSource === 'custody') {
+        const fromAccount = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
+        if (fromAccount) {
+          const newAvailableBalance = fromAccount.availableBalance - transferForm.amount;
+          const newReservedBalance = fromAccount.reservedBalance + transferForm.amount;
+          
+          // Actualizar cuenta directamente
+          const allAccounts = custodyStore.getAccounts();
+          const accountIndex = allAccounts.findIndex(a => a.id === fromAccount.id);
+          if (accountIndex !== -1) {
+            allAccounts[accountIndex].availableBalance = newAvailableBalance;
+            allAccounts[accountIndex].reservedBalance = newReservedBalance;
+            allAccounts[accountIndex].lastUpdated = new Date().toISOString();
+            
+            // Guardar usando localStorage directamente
+            const STORAGE_KEY = 'Digital Commercial Bank Ltd_custody_accounts';
+            const data = {
+              accounts: allAccounts,
+              totalReserved: allAccounts.reduce((sum, a) => sum + a.reservedBalance, 0),
+              totalAvailable: allAccounts.reduce((sum, a) => sum + a.availableBalance, 0),
+              lastSync: new Date().toISOString(),
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          }
+        }
+      } else {
+        // Para Account Ledger, actualizar el ledger account
+        const ledgerAccount = ledgerAccounts.find(a => a.currency === selectedFromCustodyAccountId);
+        if (ledgerAccount) {
+          const newBalance = ledgerAccount.balance - transferForm.amount;
+          await ledgerAccountsStore.updateAccount(ledgerAccount.id, {
+            balance: newBalance,
+            transactionCount: ledgerAccount.transactionCount + 1,
+          });
+          console.log('[TKB] ✅ Account Ledger balance actualizado');
+        }
       }
       
       alert(
@@ -313,34 +444,60 @@ export function TheKingdomBankModule() {
       return;
     }
 
-    // Validar cuenta origen de Custody Accounts
+    // Validar cuenta origen según fuente
     if (!selectedFromCustodyAccountId) {
-      setError(isSpanish ? 'Selecciona una cuenta origen de Custody Accounts' : 'Select a source Custody Account');
+      setError(
+        isSpanish 
+          ? balanceSource === 'custody' 
+            ? 'Selecciona una cuenta origen de Custody Accounts' 
+            : 'Selecciona un balance origen del Account Ledger'
+          : balanceSource === 'custody'
+            ? 'Select a source Custody Account'
+            : 'Select a source Account Ledger balance'
+      );
       return;
     }
 
-    const fromAccount = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
-    if (!fromAccount) {
-      setError(isSpanish ? 'Cuenta origen no encontrada' : 'Source account not found');
-      return;
+    let availableBalance = 0;
+    let accountCurrency = '';
+    let accountName = '';
+
+    if (balanceSource === 'custody') {
+      const fromAccount = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
+      if (!fromAccount) {
+        setError(isSpanish ? 'Cuenta origen no encontrada' : 'Source account not found');
+        return;
+      }
+      availableBalance = fromAccount.availableBalance;
+      accountCurrency = fromAccount.currency;
+      accountName = fromAccount.accountName;
+    } else {
+      const balance = accountLedgerBalances.find(b => b.currency === selectedFromCustodyAccountId);
+      if (!balance) {
+        setError(isSpanish ? 'Balance origen no encontrado' : 'Source balance not found');
+        return;
+      }
+      availableBalance = balance.totalAmount;
+      accountCurrency = balance.currency;
+      accountName = balance.accountName;
     }
 
     // Validar balance disponible
-    if (fromAccount.availableBalance < externalTransferForm.amount) {
+    if (availableBalance < externalTransferForm.amount) {
       setError(
         isSpanish 
-          ? `Balance insuficiente. Disponible: ${fromAccount.currency} ${fromAccount.availableBalance.toLocaleString()}`
-          : `Insufficient balance. Available: ${fromAccount.currency} ${fromAccount.availableBalance.toLocaleString()}`
+          ? `Balance insuficiente. Disponible: ${accountCurrency} ${availableBalance.toLocaleString()}`
+          : `Insufficient balance. Available: ${accountCurrency} ${availableBalance.toLocaleString()}`
       );
       return;
     }
 
     // Validar moneda
-    if (fromAccount.currency !== externalTransferForm.currency) {
+    if (accountCurrency !== externalTransferForm.currency) {
       setError(
         isSpanish 
-          ? `La moneda de la cuenta (${fromAccount.currency}) no coincide con la de la transferencia (${externalTransferForm.currency})`
-          : `Account currency (${fromAccount.currency}) doesn't match transfer currency (${externalTransferForm.currency})`
+          ? `La moneda de la cuenta (${accountCurrency}) no coincide con la de la transferencia (${externalTransferForm.currency})`
+          : `Account currency (${accountCurrency}) doesn't match transfer currency (${externalTransferForm.currency})`
       );
       return;
     }
@@ -351,20 +508,36 @@ export function TheKingdomBankModule() {
     try {
       const response = await client.createExternalTransfer(externalTransferForm);
       
-      // Actualizar balance de Custody Account origen
-      const newAvailableBalance = fromAccount.availableBalance - externalTransferForm.amount;
-      const newReservedBalance = fromAccount.reservedBalance + externalTransferForm.amount;
-      
-      fromAccount.availableBalance = newAvailableBalance;
-      fromAccount.reservedBalance = newReservedBalance;
-      fromAccount.lastUpdated = new Date().toISOString();
-      
-      // Guardar cambios
-      const allAccounts = custodyStore.getAccounts();
-      const accountIndex = allAccounts.findIndex(a => a.id === fromAccount.id);
-      if (accountIndex !== -1) {
-        allAccounts[accountIndex] = fromAccount;
-        custodyStore['saveAccounts'](allAccounts);
+      // Actualizar balance según fuente
+      if (balanceSource === 'custody') {
+        const fromAccount = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
+        if (fromAccount) {
+          const newAvailableBalance = fromAccount.availableBalance - externalTransferForm.amount;
+          const newReservedBalance = fromAccount.reservedBalance + externalTransferForm.amount;
+          
+          fromAccount.availableBalance = newAvailableBalance;
+          fromAccount.reservedBalance = newReservedBalance;
+          fromAccount.lastUpdated = new Date().toISOString();
+          
+          // Guardar cambios
+          const allAccounts = custodyStore.getAccounts();
+          const accountIndex = allAccounts.findIndex(a => a.id === fromAccount.id);
+          if (accountIndex !== -1) {
+            allAccounts[accountIndex] = fromAccount;
+            custodyStore['saveAccounts'](allAccounts);
+          }
+        }
+      } else {
+        // Para Account Ledger, actualizar el ledger account
+        const ledgerAccount = ledgerAccounts.find(a => a.currency === selectedFromCustodyAccountId);
+        if (ledgerAccount) {
+          const newBalance = ledgerAccount.balance - externalTransferForm.amount;
+          await ledgerAccountsStore.updateAccount(ledgerAccount.id, {
+            balance: newBalance,
+            transactionCount: ledgerAccount.transactionCount + 1,
+          });
+          console.log('[TKB] ✅ Account Ledger balance actualizado');
+        }
       }
       
       alert(
