@@ -917,31 +917,31 @@ Timestamp: ${AUDIT_DATA.timestamp}
 
         {/* Analysis Results (si hay archivo analizado) */}
         {analysisResults && (
-          <BankingCard className="p-card border-2 border-white/20 bg-[var(--bg-card)]/80">
+          <BankingCard className="p-card border-2 border-white/20 bg-white/3">
             <div className="flex items-start gap-card">
               <div className="p-card-sm bg-white/10 rounded-xl animate-pulse">
-                <Activity className="w-8 h-8 text-white" />
+                <Activity className="w-8 h-8 text-black" />
               </div>
               <div className="flex-1">
-                <h3 className="text-heading text-white mb-card-sm">
+                <h3 className="text-heading text-black mb-card-sm">
                   {isSpanish ? "Análisis Completado" : "Analysis Completed"}
                 </h3>
-                <p className="text-white text-heading-sm mb-card">
+                <p className="text-black text-heading-sm mb-card">
                   {analysisResults.totalM2Values.toLocaleString()} {isSpanish ? "Valores M2 Detectados" : "M2 Values Detected"}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-card text-sm">
                   <div>
-                    <p className="text-white">{isSpanish ? "Total en Miles de Millones" : "Total in Billions"}</p>
-                    <p className="text-white font-bold text-xl">
+                    <p className="text-black">{isSpanish ? "Total en Miles de Millones" : "Total in Billions"}</p>
+                    <p className="text-black font-bold text-xl">
                       {analysisResults.totalM2Amount.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
                     </p>
                   </div>
                   <div>
-                    <p className="text-white">{isSpanish ? "Archivos Analizados" : "Files Analyzed"}</p>
-                    <p className="text-white font-bold text-xl">{analysisResults.filesProcessed}</p>
+                    <p className="text-black">{isSpanish ? "Archivos Analizados" : "Files Analyzed"}</p>
+                    <p className="text-black font-bold text-xl">{analysisResults.filesProcessed}</p>
                   </div>
                   <div>
-                    <p className="text-white">{isSpanish ? "Estado" : "Status"}</p>
+                    <p className="text-black">{isSpanish ? "Estado" : "Status"}</p>
                     <p className="text-emerald-400 font-bold text-xl">
                       ✅ {isSpanish ? "CERTIFICADO" : "CERTIFIED"}
                     </p>
@@ -1042,7 +1042,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
             </div>
 
             <div className="text-center py-8">
-              <p className="text-black text-sm mb-card uppercase tracking-wide">
+              <p className="text-white text-sm mb-card uppercase tracking-wide">
                 {isSpanish ? "Balance de Tesorería" : "Treasury Balance"}
               </p>
               {balancesVisible ? (
@@ -1053,12 +1053,12 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   <p className="text-white text-lg">
                     ({selectedMasterAccount.balance.toExponential(2)} {selectedMasterAccount.currency})
                   </p>
-                  <p className="text-black text-sm mt-card-sm">
+                  <p className="text-white text-sm mt-card-sm">
                     ≈ {(selectedMasterAccount.balance / 1000000000).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} {isSpanish ? 'Miles de Millones' : 'Billions'}
                   </p>
                 </>
               ) : (
-                <p className="text-6xl font-black text-black m-card">
+                <p className="text-6xl font-black text-white m-card">
                   {'*'.repeat(20)}
                 </p>
               )}
