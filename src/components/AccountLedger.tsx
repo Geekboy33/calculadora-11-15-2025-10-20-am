@@ -102,7 +102,7 @@ export function AccountLedger() {
               <span className="text-[#ffffff] text-sm font-semibold">{t.ledgerTotalAccounts}</span>
               <Database className="w-6 h-6 text-[#ffffff]/70" />
             </div>
-            <div className="text-4xl font-black text-[#ffffff]">{balances.length}</div>
+            <div className="text-4xl font-black text-black">{balances.length}</div>
             <div className="text-[#ffffff] text-xs mt-1">{t.ledgerOfCurrencies}</div>
           </div>
 
@@ -111,7 +111,7 @@ export function AccountLedger() {
               <span className="text-[#ffffff] text-sm font-semibold">{t.ledgerTotalTransactions}</span>
               <TrendingUp className="w-6 h-6 text-[#ffffff]/70" />
             </div>
-            <div className="text-4xl font-black text-[#ffffff]">{getTotalTransactions().toLocaleString()}</div>
+            <div className="text-4xl font-black text-black">{getTotalTransactions().toLocaleString()}</div>
             <div className="text-[#ffffff] text-xs mt-1">{t.ledgerProcessed}</div>
           </div>
 
@@ -158,29 +158,29 @@ export function AccountLedger() {
                   <div className="flex items-center justify-between mb-4 pb-3 border-b border-black/40">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <DollarSign className="w-5 h-5 text-white" style={{filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'}} />
-                        <h3 className="text-xl font-bold text-white" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.9), -1px -1px 2px rgba(0,0,0,0.9), 1px -1px 2px rgba(0,0,0,0.9), -1px 1px 2px rgba(0,0,0,0.9)'}}>{balance.currency}</h3>
+                        <DollarSign className="w-5 h-5 text-black" />
+                        <h3 className="text-xl font-bold text-black">{balance.currency}</h3>
                         {isMainCurrency && (
                           <span className="bg-black text-[#ffffff] border border-[#ffffff] px-2 py-0.5 rounded-full text-xs font-bold shadow-[0_0_10px_rgba(255, 255, 255,0.5)]">
                             ★ {index === 0 ? t.ledgerPrincipal : index === 1 ? t.ledgerSecondary : index === 2 ? t.ledgerTertiary : t.ledgerFourth}
                           </span>
                         )}
                       </div>
-                      <p className="text-white text-sm font-semibold" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.8)'}}>{getCurrencyName(balance.currency)}</p>
+                      <p className="text-black text-sm font-semibold">{getCurrencyName(balance.currency)}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-white/80 text-xs font-semibold" style={{textShadow: '1px 1px 1px rgba(0,0,0,0.8)'}}>{t.ledgerAccount}</div>
-                      <div className="text-white font-mono text-lg font-bold" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.9)'}}>#{index + 1}</div>
+                      <div className="text-black/80 text-xs font-semibold">{t.ledgerAccount}</div>
+                      <div className="text-black font-mono text-lg font-bold">#{index + 1}</div>
                     </div>
                   </div>
 
                   {/* Balance Amount */}
                   <div className="mb-4 bg-black/30 border border-black/40 rounded-lg p-4 shadow-inner">
-                    <p className="text-white/90 text-xs mb-1 uppercase tracking-wide font-semibold" style={{textShadow: '1px 1px 1px rgba(0,0,0,0.8)'}}>{t.ledgerTotalBalance}</p>
-                    <p className="text-3xl font-black text-white" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.9), -1px -1px 2px rgba(0,0,0,0.9)'}}>
+                    <p className="text-black/90 text-xs mb-1 uppercase tracking-wide font-semibold">{t.ledgerTotalBalance}</p>
+                    <p className="text-3xl font-black text-black">
                       {formatCurrency(balance.totalAmount, balance.currency)}
                     </p>
-                    <p className="text-white/70 text-xs mt-2 font-medium" style={{textShadow: '1px 1px 1px rgba(0,0,0,0.8)'}}>
+                    <p className="text-black/70 text-xs mt-2 font-medium">
                       {t.ledgerUpdatedAt}: {new Date(balance.lastUpdated).toLocaleTimeString()}
                     </p>
                   </div>
@@ -188,26 +188,26 @@ export function AccountLedger() {
                   {/* Statistics Grid */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-black/30 border border-black/30 rounded-lg p-3">
-                      <p className="text-white/80 text-xs mb-1 font-semibold" style={{textShadow: '1px 1px 1px rgba(0,0,0,0.8)'}}>{t.ledgerTransactions}</p>
-                      <p className="text-xl font-bold text-white" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.9)'}}>{balance.transactionCount.toLocaleString()}</p>
+                      <p className="text-black/80 text-xs mb-1 font-semibold">{t.ledgerTransactions}</p>
+                      <p className="text-xl font-bold text-black">{balance.transactionCount.toLocaleString()}</p>
                     </div>
                     <div className="bg-black/30 border border-black/30 rounded-lg p-3">
-                      <p className="text-white/80 text-xs mb-1 font-semibold" style={{textShadow: '1px 1px 1px rgba(0,0,0,0.8)'}}>{t.ledgerAverage}</p>
-                      <p className="text-sm font-bold text-white" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.9)'}}>
+                      <p className="text-black/80 text-xs mb-1 font-semibold">{t.ledgerAverage}</p>
+                      <p className="text-sm font-bold text-black">
                         {formatCurrency(balance.averageTransaction, balance.currency)}
                       </p>
                     </div>
                     <div className="bg-black/30 border border-black/30 rounded-lg p-3">
-                      <p className="text-white/80 text-xs mb-1 font-semibold" style={{textShadow: '1px 1px 1px rgba(0,0,0,0.8)'}}>{t.ledgerHighest}</p>
-                      <p className="text-sm font-bold text-white" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.9)'}}>
+                      <p className="text-black/80 text-xs mb-1 font-semibold">{t.ledgerHighest}</p>
+                      <p className="text-sm font-bold text-black">
                         {balance.largestTransaction > 0 
                           ? formatCurrency(balance.largestTransaction, balance.currency)
                           : '-'}
                       </p>
                     </div>
                     <div className="bg-black/30 border border-black/30 rounded-lg p-3">
-                      <p className="text-white/80 text-xs mb-1 font-semibold" style={{textShadow: '1px 1px 1px rgba(0,0,0,0.8)'}}>{t.ledgerLowest}</p>
-                      <p className="text-sm font-bold text-white" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.9)'}}>
+                      <p className="text-black/80 text-xs mb-1 font-semibold">{t.ledgerLowest}</p>
+                      <p className="text-sm font-bold text-black">
                         {balance.smallestTransaction < Infinity
                           ? formatCurrency(balance.smallestTransaction, balance.currency)
                           : '-'}
