@@ -18,8 +18,8 @@ export function Login({ onLogin }: LoginProps) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const VALID_USERNAME = 'admin';
-  const VALID_PASSWORD = 'DAES2025';
+  const VALID_USERNAME = 'operator';
+  const VALID_PASSWORD = 'Eldiosdelacero34@';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
