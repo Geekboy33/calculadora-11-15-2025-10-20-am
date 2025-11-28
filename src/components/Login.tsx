@@ -4,8 +4,9 @@
  * Tema: Dark Mode - Negro con acentos azules
  */
 
-import { useState } from 'react';
-import { Lock, User, Eye, EyeOff, Shield, Building2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Lock, User, Eye, EyeOff, Shield, Building2, AlertTriangle } from 'lucide-react';
+import { loginSecurity } from '../lib/login-security';
 
 interface LoginProps {
   onLogin: () => void;
@@ -17,24 +18,72 @@ export function Login({ onLogin }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [blockedUntil, setBlockedUntil] = useState<Date | null>(null);
+  const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
 
+  // Credenciales válidas (password hash SHA-256)
   const VALID_USERNAME = 'operator';
-  const VALID_PASSWORD = 'Eldiosdelacero34@';
+  const VALID_PASSWORD_HASH = 'a226ff8eadee0fb1594b2e1665b90593b3f28d971d2cadd844f772c1570a7d63';
+
+  // Verificar bloqueo al cargar
+  useEffect(() => {
+    const checkBlocked = () => {
+      const blockStatus = loginSecurity.isBlocked(username || 'default');
+      if (blockStatus.blocked && blockStatus.blockedUntil) {
+        setBlockedUntil(blockStatus.blockedUntil);
+        const now = Date.now();
+        const blockedTime = blockStatus.blockedUntil.getTime();
+        if (blockedTime > now) {
+          const minutes = Math.ceil((blockedTime - now) / 60000);
+          setError(`Account temporarily blocked. Try again in ${minutes} minute(s).`);
+        }
+      } else {
+        setBlockedUntil(null);
+      }
+    };
+
+    checkBlocked();
+    const interval = setInterval(checkBlocked, 1000);
+    return () => clearInterval(interval);
+  }, [username]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    setRemainingAttempts(null);
 
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      // Usar módulo de seguridad para autenticación
+      const result = await loginSecurity.authenticate(
+        username,
+        password,
+        VALID_USERNAME,
+        VALID_PASSWORD_HASH
+      );
 
-    if (username === VALID_USERNAME && password === VALID_PASSWORD) {
-      localStorage.setItem('daes_authenticated', 'true');
-      localStorage.setItem('daes_user', username);
-      localStorage.setItem('daes_login_time', new Date().toISOString());
-      onLogin();
-    } else {
-      setError('Invalid credentials. Please try again.');
+      if (result.success) {
+        // Login exitoso
+        localStorage.setItem('daes_authenticated', 'true');
+        localStorage.setItem('daes_user', username);
+        localStorage.setItem('daes_login_time', new Date().toISOString());
+        onLogin();
+      } else {
+        // Login fallido
+        setError(result.error || 'Invalid credentials. Please try again.');
+        setIsLoading(false);
+        
+        if (result.blocked && result.blockedUntil) {
+          setBlockedUntil(result.blockedUntil);
+        }
+        
+        if (result.remainingAttempts !== undefined) {
+          setRemainingAttempts(result.remainingAttempts);
+        }
+      }
+    } catch (err) {
+      console.error('[Login] Security error:', err);
+      setError('Security error occurred. Please try again.');
       setIsLoading(false);
     }
   };
@@ -240,42 +289,64 @@ export function Login({ onLogin }: LoginProps) {
                 borderRadius: '12px',
                 padding: '1rem',
                 display: 'flex',
-                gap: '0.75rem'
+                gap: '0.75rem',
+                alignItems: 'flex-start'
               }}>
-                <p style={{ color: '#E85C5C', fontSize: '0.875rem' }}>{error}</p>
+                <AlertTriangle style={{ width: '18px', height: '18px', color: '#E85C5C', flexShrink: 0, marginTop: '2px' }} />
+                <div style={{ flex: 1 }}>
+                  <p style={{ color: '#E85C5C', fontSize: '0.875rem', margin: 0 }}>{error}</p>
+                  {remainingAttempts !== null && remainingAttempts > 0 && (
+                    <p style={{ color: '#D1D5DB', fontSize: '0.75rem', marginTop: '0.5rem', margin: 0 }}>
+                      {remainingAttempts} attempt(s) remaining before account lockout.
+                    </p>
+                  )}
+                  {blockedUntil && (
+                    <p style={{ color: '#D1D5DB', fontSize: '0.75rem', marginTop: '0.5rem', margin: 0 }}>
+                      Blocked until: {blockedUntil.toLocaleTimeString()}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 
             {/* Button */}
             <button
               type="submit"
-              disabled={isLoading || !username || !password}
+              disabled={isLoading || !username || !password || (blockedUntil !== null && blockedUntil.getTime() > Date.now())}
               style={{
                 width: '100%',
                 padding: '1rem',
-                background: 'linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%)',
+                background: (blockedUntil !== null && blockedUntil.getTime() > Date.now())
+                  ? 'linear-gradient(135deg, #4A4F55 0%, #1a1a1a 100%)'
+                  : 'linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%)',
                 color: '#FFFFFF',
                 fontSize: '1rem',
                 fontWeight: 600,
                 borderRadius: '12px',
                 border: 'none',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                opacity: (isLoading || !username || !password) ? 0.5 : 1,
+                cursor: (isLoading || !username || !password || (blockedUntil !== null && blockedUntil.getTime() > Date.now())) ? 'not-allowed' : 'pointer',
+                opacity: (isLoading || !username || !password || (blockedUntil !== null && blockedUntil.getTime() > Date.now())) ? 0.5 : 1,
                 transition: 'all 0.2s',
                 boxShadow: '0 4px 12px rgba(26, 77, 179, 0.25)'
               }}
               onMouseEnter={(e) => {
-                if (!isLoading && username && password) {
+                if (!isLoading && username && password && !(blockedUntil !== null && blockedUntil.getTime() > Date.now())) {
                   e.currentTarget.style.background = 'linear-gradient(135deg, #003B7C 0%, #002A5C 100%)';
                   e.currentTarget.style.boxShadow = '0 6px 16px rgba(26, 77, 179, 0.35)';
                 }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%)';
+                e.currentTarget.style.background = (blockedUntil !== null && blockedUntil.getTime() > Date.now())
+                  ? 'linear-gradient(135deg, #4A4F55 0%, #1a1a1a 100%)'
+                  : 'linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%)';
                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(26, 77, 179, 0.25)';
               }}
             >
-              {isLoading ? 'Authenticating...' : 'Sign In'}
+              {isLoading 
+                ? 'Authenticating...' 
+                : (blockedUntil !== null && blockedUntil.getTime() > Date.now())
+                  ? 'Account Blocked'
+                  : 'Sign In'}
             </button>
           </form>
 

@@ -4,6 +4,7 @@
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { loginSecurity } from './login-security';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -20,7 +21,15 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('daes_authenticated') === 'true';
+    const auth = localStorage.getItem('daes_authenticated') === 'true';
+    const token = localStorage.getItem('daes_session_token');
+    
+    // Validar token de sesión si existe
+    if (auth && token) {
+      return loginSecurity.validateSessionToken(token);
+    }
+    
+    return false;
   });
   
   const [user, setUser] = useState<string | null>(() => {
@@ -36,6 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem('daes_authenticated');
     localStorage.removeItem('daes_user');
     localStorage.removeItem('daes_login_time');
+    localStorage.removeItem('daes_session_token');
     setIsAuthenticated(false);
     setUser(null);
   };
