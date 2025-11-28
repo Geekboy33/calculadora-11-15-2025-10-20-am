@@ -165,7 +165,7 @@ function App() {
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-black">
+    <div className="h-screen flex flex-col bg-[var(--bg-main)]">
       <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
@@ -174,64 +174,64 @@ function App() {
         onTabChange={(tabId) => setActiveTab(tabId as Tab)}
       />
 
-      <header className="bg-black border-b border-[#1a1a1a] shadow-[0_2px_20px_rgba(0,255,136,0.1)]">
-        <div className="px-6 py-4">
+      <header className="bg-[var(--bg-main)] border-b border-[var(--border-subtle)] shadow-[0_2px_20px_rgba(0,255,136,0.1)]">
+        <div className="px-card py-card">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-card">
               {/* Hamburger button for mobile */}
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="lg:hidden p-2 hover:bg-[#1a1a1a] rounded-lg transition-colors"
+                className="lg:hidden p-card-sm hover:bg-[var(--bg-hover)] rounded-lg transition-colors"
                 title="Abrir menú de navegación"
                 aria-label="Abrir menú de navegación"
               >
-                <Menu className="w-6 h-6 text-white" />
+                <Menu className="w-6 h-6 text-[var(--text-primary)]" />
               </button>
-              <div className="p-2 bg-gradient-to-br from-white to-[#e0e0e0] rounded-lg glow-green">
+              <div className="p-card-sm bg-gradient-to-br from-white to-[#e0e0e0] rounded-lg glow-green">
                 <Wallet className="w-6 h-6 text-black" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-[#e0ffe0]">{t.headerTitle}</h1>
-                <p className="text-sm text-neon font-bold">{t.headerSubtitle}</p>
-                <p className="text-xs text-white">AES-256-GCM • Digital Commercial Bank Ltd • HMAC-SHA256</p>
+                <h1 className="text-heading-sm text-[var(--text-primary)]">{t.headerTitle}</h1>
+                <p className="text-body-sm text-[var(--text-primary)] font-semibold">{t.headerSubtitle}</p>
+                <p className="text-muted">AES-256-GCM • Digital Commercial Bank Ltd • HMAC-SHA256</p>
               </div>
             </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-card">
             <NotificationCenter />
             <LanguageSelector />
             <div className="text-right">
-              <div className="text-xs text-white">{t.productionEnvironment}</div>
-              <div className="text-sm font-semibold text-neon pulse-green">{t.allSystemsOperational}</div>
-              <div className="text-xs text-cyber mt-1 blink-matrix">{t.dtcAnalysisReady}</div>
-              <div className="flex items-center gap-1 text-xs text-white mt-1 font-mono">
+              <div className="text-muted">{t.productionEnvironment}</div>
+              <div className="text-body-sm font-semibold text-[var(--text-primary)] pulse-green">{t.allSystemsOperational}</div>
+              <div className="text-muted mt-card-sm blink-matrix">{t.dtcAnalysisReady}</div>
+              <div className="flex items-center gap-card-sm text-muted mt-card-sm font-mono">
                 <User className="w-3 h-3" />
                 <span>{user}</span>
               </div>
             </div>
             <button
               onClick={logout}
-              className="flex items-center gap-2 px-4 py-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg text-white hover:text-white hover:border-white hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all"
+              className="flex items-center gap-card-sm px-card-sm py-card-sm bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] hover:text-[var(--text-primary)] hover:border-white hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all"
               title={t.logoutTitle}
               aria-label={t.logoutTitle}
             >
               <LogOut className="w-4 h-4" aria-hidden="true" />
-              <span className="text-sm font-semibold">{t.logout}</span>
+              <span className="text-body-sm font-semibold">{t.logout}</span>
             </button>
           </div>
           </div>
         </div>
 
         {/* Featured Modules - Widgets Personalizados */}
-        <div className="px-6 py-4 bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-card)] border-b border-[var(--border-subtle)] hidden lg:block">
-          <div className="flex items-center gap-2 mb-3">
+        <div className="px-card py-card bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-card)] border-b border-[var(--border-subtle)] hidden lg:block">
+          <div className="flex items-center gap-card-sm mb-card">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-            <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-3">
+            <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-card-sm">
               {isSpanish ? 'Módulos Principales' : 'Featured Modules'}
             </span>
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
           </div>
-          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex items-center gap-card overflow-x-auto pb-2 scrollbar-hide">
             {featuredModules.map(module => (
               <ModuleIconWidget
                 key={`${module.id}-${activeTab}`}
@@ -244,7 +244,7 @@ function App() {
           </div>
         </div>
 
-        <nav className="px-6 bg-[#0a0a0a] border-t border-[#1a1a1a] hidden lg:block">
+        <nav className="px-card bg-[var(--bg-main)] border-t border-[var(--border-subtle)] hidden lg:block">
           <div className="flex gap-1 overflow-x-auto scrollbar-hide">
             {tabs.map(tab => {
               const isActive = activeTab === tab.id;
@@ -254,10 +254,10 @@ function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2.5 px-4 py-3 font-medium transition-all relative min-w-fit ${
+                  className={`flex items-center gap-card-sm.5 px-card-sm py-card-sm font-medium transition-all relative min-w-fit ${
                     isActive
-                      ? 'text-white text-shadow-[0_0_10px_rgba(255,255,255,0.8)]'
-                      : 'text-white hover:text-white'
+                      ? 'text-[var(--text-primary)] text-shadow-[0_0_10px_rgba(255,255,255,0.8)]'
+                      : 'text-[var(--text-primary)] hover:text-[var(--text-primary)]'
                   }`}
                   aria-label={`${tab.name} ${isActive ? '(current)' : ''}`}
                   aria-current={isActive ? 'page' : undefined}
@@ -278,10 +278,10 @@ function App() {
 
       <main className="flex-1 overflow-y-auto">
         <Suspense fallback={
-          <div className="h-full flex items-center justify-center bg-black">
+          <div className="h-full flex items-center justify-center bg-[var(--bg-main)]">
             <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mb-4"></div>
-              <p className="text-white text-lg font-semibold">Cargando módulo...</p>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mb-card"></div>
+              <p className="text-[var(--text-primary)] text-heading-sm">Cargando módulo...</p>
             </div>
           </div>
         }>
@@ -344,16 +344,16 @@ function App() {
         </Suspense>
       </main>
 
-      <footer className="bg-black border-t border-[#1a1a1a] px-6 py-3 shadow-[0_-2px_20px_rgba(0,255,136,0.1)]">
-        <div className="flex items-center justify-between text-xs text-white">
-          <div className="flex items-center gap-6">
-            <span className="hover:text-white transition-colors">{t.footerVersion}</span>
-            <span className="hover:text-white transition-colors">{t.footerIsoCompliant}</span>
-            <span className="hover:text-white transition-colors">{t.footerPciReady}</span>
+      <footer className="bg-[var(--bg-main)] border-t border-[var(--border-subtle)] px-card py-card-sm shadow-[0_-2px_20px_rgba(0,255,136,0.1)]">
+        <div className="flex items-center justify-between text-xs text-[var(--text-primary)]">
+          <div className="flex items-center gap-section">
+            <span className="hover:text-[var(--text-primary)] transition-colors">{t.footerVersion}</span>
+            <span className="hover:text-[var(--text-primary)] transition-colors">{t.footerIsoCompliant}</span>
+            <span className="hover:text-[var(--text-primary)] transition-colors">{t.footerPciReady}</span>
           </div>
-          <div className="flex items-center gap-6">
-            <span className="hover:text-white transition-colors">{t.footerMultiCurrency}</span>
-            <span className="hover:text-white transition-colors">{t.footerEncryption}</span>
+          <div className="flex items-center gap-section">
+            <span className="hover:text-[var(--text-primary)] transition-colors">{t.footerMultiCurrency}</span>
+            <span className="hover:text-[var(--text-primary)] transition-colors">{t.footerEncryption}</span>
             <span className="text-cyber font-bold pulse-green">{t.footerForensicAnalysis}</span>
           </div>
         </div>

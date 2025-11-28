@@ -411,7 +411,7 @@ export function TheKingdomBankModule() {
   };
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-[var(--bg-main)] p-card">
       <div className="max-w-7xl mx-auto space-y-6">
         
         <BankingHeader
@@ -436,8 +436,8 @@ export function TheKingdomBankModule() {
 
         {/* Error */}
         {error && (
-          <BankingCard className="p-4 bg-red-500/10 border-red-500/30">
-            <div className="flex items-center gap-3">
+          <BankingCard className="p-card-sm bg-red-500/10 border-red-500/30">
+            <div className="flex items-center gap-card">
               <AlertCircle className="w-5 h-5 text-red-400" />
               <p className="text-red-400">{error}</p>
             </div>
@@ -445,7 +445,7 @@ export function TheKingdomBankModule() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 bg-[#0d0d0d] rounded-xl p-1">
+        <div className="flex gap-card-sm bg-[var(--bg-card)] rounded-xl p-1">
           {[
             { id: 'accounts', label: isSpanish ? 'Cuentas' : 'Accounts', icon: CreditCard },
             { id: 'payments', label: isSpanish ? 'Payments' : 'Payments', icon: Send },
@@ -457,7 +457,7 @@ export function TheKingdomBankModule() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+              className={`flex items-center gap-card-sm px-card-sm py-card-sm rounded-lg font-semibold transition-all ${
                 activeTab === tab.id
                   ? 'bg-white text-black'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -473,10 +473,10 @@ export function TheKingdomBankModule() {
         {activeTab === 'accounts' && (
           <BankingSection title={isSpanish ? "Cuentas TKB" : "TKB Accounts"} icon={CreditCard} color="emerald">
             {accounts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-card">
                 {accounts.map(account => (
-                  <BankingCard key={account.id} className="p-6">
-                    <div className="flex items-start justify-between mb-4">
+                  <BankingCard key={account.id} className="p-card">
+                    <div className="flex items-start justify-between mb-card">
                       <div>
                         <h4 className="text-[var(--text-primary)] font-bold text-lg mb-1">
                           {account.currency} Account
@@ -489,7 +489,7 @@ export function TheKingdomBankModule() {
                           <p className="text-[var(--text-secondary)] text-sm">IBAN: {account.iban}</p>
                         )}
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      <span className={`px-card-sm py-1 rounded-full text-xs font-semibold ${
                         account.status === 'ACTIVE' 
                           ? 'bg-emerald-500/20 text-emerald-400'
                           : 'bg-amber-500/20 text-amber-400'
@@ -498,15 +498,15 @@ export function TheKingdomBankModule() {
                       </span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between py-2 border-b border-[var(--border-subtle)]">
+                      <div className="flex justify-between py-card-sm border-b border-[var(--border-subtle)]">
                         <span className="text-[var(--text-secondary)]">{isSpanish ? 'Balance:' : 'Balance:'}</span>
                         <span className="text-emerald-400 font-bold text-xl">
                           {fmt.currency(account.balance, account.currency)}
                         </span>
                       </div>
-                      <div className="flex justify-between py-2">
+                      <div className="flex justify-between py-card-sm">
                         <span className="text-[var(--text-secondary)]">{isSpanish ? 'Disponible:' : 'Available:'}</span>
-                        <span className="text-white font-semibold">
+                        <span className="text-[var(--text-primary)] font-semibold">
                           {fmt.currency(account.availableBalance, account.currency)}
                         </span>
                       </div>
@@ -516,7 +516,7 @@ export function TheKingdomBankModule() {
               </div>
             ) : (
               <BankingCard className="p-12 text-center">
-                <CreditCard className="w-20 h-20 text-slate-700 mx-auto mb-4" />
+                <CreditCard className="w-20 h-20 text-slate-700 mx-auto mb-card" />
                 <p className="text-[var(--text-secondary)]">
                   {isSpanish ? 'No hay cuentas. Carga las cuentas desde TKB.' : 'No accounts. Load accounts from TKB.'}
                 </p>
@@ -528,7 +528,7 @@ export function TheKingdomBankModule() {
         {/* Settings Tab */}
         {activeTab === 'settings' && (
           <BankingSection title={isSpanish ? "Configuración API" : "API Configuration"} icon={Settings} color="purple">
-            <BankingCard className="p-6 space-y-4">
+            <BankingCard className="p-card space-y-4">
               <BankingInput
                 label={isSpanish ? "Base URL" : "Base URL"}
                 value={config.baseUrl}
@@ -558,13 +558,13 @@ export function TheKingdomBankModule() {
                 type="password"
               />
               <div className="pt-4 border-t border-[var(--border-subtle)]">
-                <p className="text-[var(--text-secondary)] text-sm mb-4">
+                <p className="text-[var(--text-secondary)] text-sm mb-card">
                   {isSpanish 
                     ? "Webhook URL para notificaciones:"
                     : "Webhook URL for notifications:"
                   }
                 </p>
-                <code className="block p-3 bg-[#0d0d0d] rounded-lg text-white text-sm">
+                <code className="block p-card-sm bg-[var(--bg-card)] rounded-lg text-[var(--text-primary)] text-sm">
                   https://luxliqdaes.cloud/webhooks/tkb/payments
                 </code>
               </div>
@@ -575,10 +575,10 @@ export function TheKingdomBankModule() {
         {/* Payments Tab */}
         {activeTab === 'payments' && (
           <BankingSection title={isSpanish ? "Crear Payment Request" : "Create Payment Request"} icon={Send} color="white">
-            <BankingCard className="p-6 space-y-4">
+            <BankingCard className="p-card space-y-4">
               {/* Selector de Cuenta Custody */}
-              <div className="mb-4 p-4 bg-[#0d0d0d]/50 rounded-lg border border-[#1a1a1a]">
-                <label className="block text-[var(--text-primary)] font-semibold mb-2">
+              <div className="mb-card p-card-sm bg-[var(--bg-card)]/50 rounded-lg border border-[var(--border-subtle)]">
+                <label className="block text-[var(--text-primary)] font-semibold mb-card-sm">
                   {isSpanish ? "Seleccionar Cuenta Custody" : "Select Custody Account"}
                 </label>
                 <select
@@ -590,7 +590,7 @@ export function TheKingdomBankModule() {
                       setPaymentForm({ ...paymentForm, currency: account.currency });
                     }
                   }}
-                  className="w-full px-4 py-2 bg-[#141414] border border-[#1a1a1a] rounded-lg text-white focus:outline-none focus:border-white/30"
+                  className="w-full px-card-sm py-card-sm bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-white/30"
                 >
                   <option value="">{isSpanish ? "-- Seleccionar cuenta --" : "-- Select account --"}</option>
                   {custodyAccounts
@@ -605,7 +605,7 @@ export function TheKingdomBankModule() {
                 {selectedCustodyAccountId && (() => {
                   const account = custodyAccounts.find(a => a.id === selectedCustodyAccountId);
                   return account ? (
-                    <div className="mt-2 text-sm text-[var(--text-secondary)]">
+                    <div className="mt-card-sm text-sm text-[var(--text-secondary)]">
                       {isSpanish ? "Balance disponible:" : "Available balance:"} {account.currency} {account.availableBalance.toLocaleString()}
                       {account.iban && <span className="ml-4">IBAN: {account.iban}</span>}
                     </div>
@@ -613,7 +613,7 @@ export function TheKingdomBankModule() {
                 })()}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-card">
                 <BankingInput
                   label={isSpanish ? "Foreign Transaction ID" : "Foreign Transaction ID"}
                   value={paymentForm.foreignTransactionId}
@@ -647,8 +647,8 @@ export function TheKingdomBankModule() {
                 />
               </div>
               <div className="pt-4 border-t border-[var(--border-subtle)]">
-                <h5 className="text-[var(--text-primary)] font-semibold mb-4">{isSpanish ? "Cliente" : "Customer"}</h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h5 className="text-[var(--text-primary)] font-semibold mb-card">{isSpanish ? "Cliente" : "Customer"}</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-card">
                   <BankingInput
                     label={isSpanish ? "Nombre" : "First Name"}
                     value={paymentForm.customer?.firstName || ''}
@@ -701,10 +701,10 @@ export function TheKingdomBankModule() {
           <div className="space-y-6">
             {/* Internal Transfer */}
             <BankingSection title={isSpanish ? "Transferencia Interna" : "Internal Transfer"} icon={ArrowRightLeft} color="emerald">
-              <BankingCard className="p-6 space-y-4">
+              <BankingCard className="p-card space-y-4">
                 {/* Selector de Cuenta Origen Custody */}
-                <div className="mb-4 p-4 bg-[#0d0d0d]/50 rounded-lg border border-[#1a1a1a]">
-                  <label className="block text-[var(--text-primary)] font-semibold mb-2">
+                <div className="mb-card p-card-sm bg-[var(--bg-card)]/50 rounded-lg border border-[var(--border-subtle)]">
+                  <label className="block text-[var(--text-primary)] font-semibold mb-card-sm">
                     {isSpanish ? "Cuenta Origen (Custody)" : "Source Account (Custody)"}
                   </label>
                   <select
@@ -716,7 +716,7 @@ export function TheKingdomBankModule() {
                         setTransferForm({ ...transferForm, currency: account.currency });
                       }
                     }}
-                    className="w-full px-4 py-2 bg-[#141414] border border-[#1a1a1a] rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-card-sm py-card-sm bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-emerald-500"
                   >
                     <option value="">{isSpanish ? "-- Seleccionar cuenta origen --" : "-- Select source account --"}</option>
                     {custodyAccounts
@@ -731,7 +731,7 @@ export function TheKingdomBankModule() {
                   {selectedFromCustodyAccountId && (() => {
                     const account = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
                     return account ? (
-                      <div className="mt-2 text-sm text-[var(--text-secondary)]">
+                      <div className="mt-card-sm text-sm text-[var(--text-secondary)]">
                         {isSpanish ? "Balance disponible:" : "Available balance:"} {account.currency} {account.availableBalance.toLocaleString()}
                         {account.iban && <span className="ml-4">IBAN: {account.iban}</span>}
                       </div>
@@ -739,7 +739,7 @@ export function TheKingdomBankModule() {
                   })()}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-card">
                   <BankingInput
                     label={isSpanish ? "Desde Account ID (TKB)" : "From Account ID (TKB)"}
                     value={transferForm.fromAccountId.toString()}
@@ -783,10 +783,10 @@ export function TheKingdomBankModule() {
 
             {/* External Transfer */}
             <BankingSection title={isSpanish ? "Transferencia Externa" : "External Transfer"} icon={Send} color="purple">
-              <BankingCard className="p-6 space-y-4">
+              <BankingCard className="p-card space-y-4">
                 {/* Selector de Cuenta Origen Custody */}
-                <div className="mb-4 p-4 bg-[#0d0d0d]/50 rounded-lg border border-[#1a1a1a]">
-                  <label className="block text-[var(--text-primary)] font-semibold mb-2">
+                <div className="mb-card p-card-sm bg-[var(--bg-card)]/50 rounded-lg border border-[var(--border-subtle)]">
+                  <label className="block text-[var(--text-primary)] font-semibold mb-card-sm">
                     {isSpanish ? "Cuenta Origen (Custody)" : "Source Account (Custody)"}
                   </label>
                   <select
@@ -798,7 +798,7 @@ export function TheKingdomBankModule() {
                         setExternalTransferForm({ ...externalTransferForm, currency: account.currency });
                       }
                     }}
-                    className="w-full px-4 py-2 bg-[#141414] border border-[#1a1a1a] rounded-lg text-white focus:outline-none focus:border-purple-500"
+                    className="w-full px-card-sm py-card-sm bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-purple-500"
                   >
                     <option value="">{isSpanish ? "-- Seleccionar cuenta origen --" : "-- Select source account --"}</option>
                     {custodyAccounts
@@ -813,7 +813,7 @@ export function TheKingdomBankModule() {
                   {selectedFromCustodyAccountId && (() => {
                     const account = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
                     return account ? (
-                      <div className="mt-2 text-sm text-[var(--text-secondary)]">
+                      <div className="mt-card-sm text-sm text-[var(--text-secondary)]">
                         {isSpanish ? "Balance disponible:" : "Available balance:"} {account.currency} {account.availableBalance.toLocaleString()}
                         {account.iban && <span className="ml-4">IBAN: {account.iban}</span>}
                       </div>
@@ -821,7 +821,7 @@ export function TheKingdomBankModule() {
                   })()}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-card">
                   <BankingInput
                     label={isSpanish ? "Desde Account ID (TKB)" : "From Account ID (TKB)"}
                     value={externalTransferForm.fromAccountId.toString()}
@@ -877,8 +877,8 @@ export function TheKingdomBankModule() {
         {/* Exchange Tab */}
         {activeTab === 'exchange' && (
           <BankingSection title={isSpanish ? "Exchange" : "Exchange"} icon={Globe} color="amber">
-            <BankingCard className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BankingCard className="p-card space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-card">
                 <BankingInput
                   label={isSpanish ? "Desde Account ID" : "From Account ID"}
                   value={exchangeForm.fromAccountId.toString()}
@@ -929,7 +929,7 @@ export function TheKingdomBankModule() {
         {activeTab === 'history' && (
           <BankingSection title={isSpanish ? "Historial de Transacciones" : "Transaction History"} icon={History} color="white">
             <BankingCard className="p-12 text-center">
-              <History className="w-20 h-20 text-slate-700 mx-auto mb-4" />
+              <History className="w-20 h-20 text-slate-700 mx-auto mb-card" />
               <p className="text-[var(--text-secondary)]">
                 {isSpanish ? 'Funcionalidad de historial próximamente' : 'History functionality coming soon'}
               </p>

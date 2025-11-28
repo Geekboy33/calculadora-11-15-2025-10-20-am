@@ -1605,7 +1605,7 @@ Partner: ${partner.name}
   };
 
   return (
-    <div className="min-h-screen bg-black p-card">
+    <div className="min-h-screen bg-[var(--bg-main)] p-card">
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
@@ -1615,7 +1615,7 @@ Partner: ${partner.name}
           subtitle={isSpanish ? 'DAES Partner API - Gestión de Partners y Acceso API' : 'DAES Partner API - Partner & API Access Management'}
           gradient="white"
           actions={
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-card">
               <BankingButton
                 variant="secondary"
                 icon={CheckCircle}
@@ -1645,7 +1645,7 @@ Partner: ${partner.name}
             'border-red-500/50'
           }`}>
             <div className="flex items-start gap-card m-section">
-              <div className={`p-3 rounded-xl ${
+              <div className={`p-card-sm rounded-xl ${
                 verificationResults.overall === 'SUCCESS' ? 'bg-emerald-500/10' :
                 verificationResults.overall === 'WARNING' ? 'bg-amber-500/10' :
                 'bg-red-500/10'
@@ -1655,10 +1655,10 @@ Partner: ${partner.name}
                  <AlertCircle className="w-8 h-8 text-red-400" />}
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+                <h3 className="text-heading text-[var(--text-primary)] mb-card-sm">
                   {isSpanish ? 'Resultados de Verificación' : 'Verification Results'}
                 </h3>
-                <p className={`text-lg font-semibold ${
+                <p className={`text-heading-sm ${
                   verificationResults.overall === 'SUCCESS' ? 'text-emerald-400' :
                   verificationResults.overall === 'WARNING' ? 'text-amber-400' :
                   'text-red-400'
@@ -1684,19 +1684,19 @@ Partner: ${partner.name}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-card m-section">
               <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-card-sm text-center">
-                <p className="text-emerald-400 text-3xl font-bold">
+                <p className="text-emerald-400 text-heading">
                   {verificationResults.checks.filter((c: any) => c.status === 'SUCCESS').length}
                 </p>
                 <p className="text-emerald-300 text-sm mt-1">{isSpanish ? 'Exitosas' : 'Successful'}</p>
               </div>
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-card-sm text-center">
-                <p className="text-amber-400 text-3xl font-bold">
+                <p className="text-amber-400 text-heading">
                   {verificationResults.checks.filter((c: any) => c.status === 'WARNING').length}
                 </p>
                 <p className="text-amber-300 text-sm mt-1">{isSpanish ? 'Advertencias' : 'Warnings'}</p>
               </div>
               <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-card-sm text-center">
-                <p className="text-red-400 text-3xl font-bold">
+                <p className="text-red-400 text-heading">
                   {verificationResults.checks.filter((c: any) => c.status === 'ERROR').length}
                 </p>
                 <p className="text-red-300 text-sm mt-1">{isSpanish ? 'Errores' : 'Errors'}</p>
@@ -1707,13 +1707,13 @@ Partner: ${partner.name}
               {verificationResults.checks.map((check: any, idx: number) => (
                 <div
                   key={idx}
-                  className={`bg-[#0d0d0d]/50 border rounded-xl p-card-sm ${
+                  className={`bg-[var(--bg-card)]/50 border rounded-xl p-card-sm ${
                     check.status === 'SUCCESS' ? 'border-emerald-500/30' :
                     check.status === 'WARNING' ? 'border-amber-500/30' :
                     'border-red-500/30'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-card">
                     <div className={`mt-1 ${
                       check.status === 'SUCCESS' ? 'text-emerald-400' :
                       check.status === 'WARNING' ? 'text-amber-400' :
@@ -1723,7 +1723,7 @@ Partner: ${partner.name}
                     </div>
                     <div className="flex-1">
                       <p className="text-[var(--text-primary)] font-semibold mb-1">{check.name}</p>
-                      <p className={`text-sm mb-2 ${
+                      <p className={`text-sm mb-card-sm ${
                         check.status === 'SUCCESS' ? 'text-emerald-300' :
                         check.status === 'WARNING' ? 'text-amber-300' :
                         'text-red-300'
@@ -1731,7 +1731,7 @@ Partner: ${partner.name}
                         {check.message}
                       </p>
                       {check.details.length > 0 && (
-                        <div className="bg-[#141414]/50 rounded-lg p-3 mt-2">
+                        <div className="bg-[var(--bg-elevated)]/50 rounded-lg p-card-sm mt-card-sm">
                           <ul className="text-[var(--text-secondary)] text-xs space-y-1">
                             {check.details.slice(0, 5).map((detail: string, i: number) => (
                               <li key={i}>• {detail}</li>
@@ -1781,13 +1781,13 @@ Partner: ${partner.name}
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 bg-[#0d0d0d] border border-[#1a1a1a] p-2 rounded-xl">
+        <div className="flex items-center gap-card-sm bg-[var(--bg-card)] border border-[var(--border-subtle)] p-card-sm rounded-xl">
           <button
             onClick={() => setSelectedTab('partners')}
-            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`flex-1 px-card py-card-sm rounded-lg font-semibold transition-all ${
               selectedTab === 'partners'
                 ? 'bg-gradient-to-r from-white to-white text-black shadow-lg'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[#141414]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'
             }`}
           >
             <Users className="w-5 h-5 inline mr-2" />
@@ -1795,10 +1795,10 @@ Partner: ${partner.name}
           </button>
           <button
             onClick={() => setSelectedTab('clients')}
-            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`flex-1 px-card py-card-sm rounded-lg font-semibold transition-all ${
               selectedTab === 'clients'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[#141414]'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-[var(--text-primary)] shadow-lg'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'
             }`}
           >
             <Wallet className="w-5 h-5 inline mr-2" />
@@ -1806,10 +1806,10 @@ Partner: ${partner.name}
           </button>
           <button
             onClick={() => setSelectedTab('accounts')}
-            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`flex-1 px-card py-card-sm rounded-lg font-semibold transition-all ${
               selectedTab === 'accounts'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[#141414]'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-[var(--text-primary)] shadow-lg'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'
             }`}
           >
             <Key className="w-5 h-5 inline mr-2" />
@@ -1817,10 +1817,10 @@ Partner: ${partner.name}
           </button>
           <button
             onClick={() => setSelectedTab('transfers')}
-            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`flex-1 px-card py-card-sm rounded-lg font-semibold transition-all ${
               selectedTab === 'transfers'
-                ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[#141414]'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-[var(--text-primary)] shadow-lg'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'
             }`}
           >
             <ArrowRight className="w-5 h-5 inline mr-2" />
@@ -1847,10 +1847,10 @@ Partner: ${partner.name}
             />
             
             <div>
-              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-card-sm">
                 {isSpanish ? "Divisas Permitidas" : "Allowed Currencies"}
               </label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-card-sm">
                 {availableCurrencies.map(currency => (
                   <button
                     key={currency.code}
@@ -1867,10 +1867,10 @@ Partner: ${partner.name}
                         });
                       }
                     }}
-                    className={`px-4 py-2 rounded-lg border-2 font-semibold transition-all flex items-center gap-2 ${
+                    className={`px-card-sm py-card-sm rounded-lg border-2 font-semibold transition-all flex items-center gap-card-sm ${
                       newPartner.allowedCurrencies.includes(currency.code)
-                        ? 'bg-white/10 border-white/30 text-white'
-                        : 'bg-[#141414] border-[#1a1a1a] text-[var(--text-secondary)] hover:border-[#1a1a1a]'
+                        ? 'bg-white/10 border-white/30 text-[var(--text-primary)]'
+                        : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-subtle)]'
                     }`}
                     title={currency.name}
                   >
@@ -1896,11 +1896,11 @@ Partner: ${partner.name}
         {createdCredentials && (
           <BankingCard className="p-card border-2 border-white/20">
             <div className="flex items-start gap-card m-card">
-              <div className="p-3 bg-white/5 rounded-xl">
-                <Key className="w-6 h-6 text-white" />
+              <div className="p-card-sm bg-white/5 rounded-xl">
+                <Key className="w-6 h-6 text-[var(--text-primary)]" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
+                <h3 className="text-heading-sm text-[var(--text-primary)] mb-card-sm">
                   {isSpanish ? "⚠️ Credenciales Generadas (Guárdalas Ahora)" : "⚠️ Generated Credentials (Save Now)"}
                 </h3>
                 <p className="text-amber-400 text-sm font-semibold">
@@ -1909,11 +1909,11 @@ Partner: ${partner.name}
               </div>
             </div>
 
-            <div className="space-y-4 bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+            <div className="space-y-4 bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-xl p-card-sm">
               <div>
-                <label className="text-[var(--text-secondary)] text-sm font-semibold mb-2 block">Client ID:</label>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-[#141414] border border-[#1a1a1a] text-white px-4 py-3 rounded-lg font-mono text-sm">
+                <label className="text-[var(--text-secondary)] text-sm font-semibold mb-card-sm block">Client ID:</label>
+                <div className="flex items-center gap-card-sm">
+                  <code className="flex-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-primary)] px-card-sm py-card-sm rounded-lg font-mono text-sm">
                     {createdCredentials.clientId}
                   </code>
                   <BankingButton
@@ -1927,14 +1927,14 @@ Partner: ${partner.name}
               </div>
 
               <div>
-                <label className="text-[var(--text-secondary)] text-sm font-semibold mb-2 block">Client Secret:</label>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-[#141414] border border-[#1a1a1a] text-amber-400 px-4 py-3 rounded-lg font-mono text-sm break-all">
+                <label className="text-[var(--text-secondary)] text-sm font-semibold mb-card-sm block">Client Secret:</label>
+                <div className="flex items-center gap-card-sm">
+                  <code className="flex-1 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-amber-400 px-card-sm py-card-sm rounded-lg font-mono text-sm break-all">
                     {showSecret ? createdCredentials.clientSecret : '•'.repeat(64)}
                   </code>
                   <button
                     onClick={() => setShowSecret(!showSecret)}
-                    className="p-3 bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-[var(--text-secondary)] rounded-lg transition-all"
+                    className="p-card-sm bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-subtle)] text-[var(--text-secondary)] rounded-lg transition-all"
                   >
                     {showSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -1969,14 +1969,14 @@ Partner: ${partner.name}
                 return (
                   <div
                     key={partner.partnerId}
-                    className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-white/20 rounded-xl p-5 transition-all group"
+                    className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] hover:border-white/20 rounded-xl p-5 transition-all group"
                   >
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-card">
                       <div className="flex-1">
-                        <h4 className="text-[var(--text-primary)] font-bold text-lg mb-2 group-hover:text-white transition-colors">
+                        <h4 className="text-[var(--text-primary)] font-bold text-lg mb-card-sm group-hover:text-[var(--text-primary)] transition-colors">
                           {partner.name}
                         </h4>
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-card-sm">
                           <BankingBadge variant="success">
                             {partner.status}
                           </BankingBadge>
@@ -1988,16 +1988,16 @@ Partner: ${partner.name}
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-card">
                         <div className="text-right">
                           <p className="text-[var(--text-secondary)] text-sm mb-1">Client ID:</p>
-                          <code className="text-white text-xs font-mono bg-[#141414] px-2 py-1 rounded">
+                          <code className="text-[var(--text-primary)] text-xs font-mono bg-[var(--bg-elevated)] px-card-sm py-1 rounded">
                             {partner.clientId}
                           </code>
                         </div>
                         <button
                           onClick={() => handleDeletePartner(partner.partnerId)}
-                          className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500 text-red-400 rounded-lg transition-all"
+                          className="p-card-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500 text-red-400 rounded-lg transition-all"
                           title={isSpanish ? "Eliminar partner y todos sus clientes" : "Delete partner and all clients"}
                         >
                           <AlertCircle className="w-5 h-5" />
@@ -2005,11 +2005,11 @@ Partner: ${partner.name}
                       </div>
                     </div>
 
-                  <div className="flex flex-wrap gap-2 mt-3">
+                  <div className="flex flex-wrap gap-card-sm mt-3">
                     {partner.allowedCurrencies.map(curr => (
                       <span
                         key={curr}
-                        className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-md text-xs font-bold"
+                        className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-card-sm py-1 rounded-md text-xs font-bold"
                       >
                         {curr}
                       </span>
@@ -2029,7 +2029,7 @@ Partner: ${partner.name}
               <p className="text-[var(--text-secondary)] text-lg font-medium">
                 {isSpanish ? "No hay partners registrados" : "No partners registered"}
               </p>
-              <p className="text-[var(--text-muted)] text-sm mt-2">
+              <p className="text-[var(--text-muted)] text-sm mt-card-sm">
                 {isSpanish ? "Crea tu primer partner para comenzar" : "Create your first partner to get started"}
               </p>
             </div>
@@ -2045,15 +2045,15 @@ Partner: ${partner.name}
           <div className="space-y-6">
             {/* Endpoints */}
             <div>
-              <h3 className="text-lg font-bold text-[var(--text-primary)] m-card flex items-center gap-2">
+              <h3 className="text-lg font-bold text-[var(--text-primary)] m-card flex items-center gap-card-sm">
                 <ArrowRight className="w-5 h-5 text-purple-400" />
                 {isSpanish ? "Endpoints Disponibles" : "Available Endpoints"}
               </h3>
               
               <div className="space-y-3">
-                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-card-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="bg-white/5 border border-white/15 text-white px-3 py-1 rounded-md text-xs font-bold">
+                <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-lg p-card-sm">
+                  <div className="flex items-center gap-card mb-card-sm">
+                    <span className="bg-white/5 border border-white/15 text-[var(--text-primary)] px-card-sm py-1 rounded-md text-xs font-bold">
                       POST
                     </span>
                     <code className="text-[var(--text-primary)] font-mono text-sm">/partner-api/v1/auth/token</code>
@@ -2063,9 +2063,9 @@ Partner: ${partner.name}
                   </p>
                 </div>
 
-                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-card-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-md text-xs font-bold">
+                <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-lg p-card-sm">
+                  <div className="flex items-center gap-card mb-card-sm">
+                    <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-card-sm py-1 rounded-md text-xs font-bold">
                       POST
                     </span>
                     <code className="text-[var(--text-primary)] font-mono text-sm">/partner-api/v1/clients</code>
@@ -2075,9 +2075,9 @@ Partner: ${partner.name}
                   </p>
                 </div>
 
-                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-card-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1 rounded-md text-xs font-bold">
+                <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-lg p-card-sm">
+                  <div className="flex items-center gap-card mb-card-sm">
+                    <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-card-sm py-1 rounded-md text-xs font-bold">
                       POST
                     </span>
                     <code className="text-[var(--text-primary)] font-mono text-sm">/partner-api/v1/clients/:clientId/accounts</code>
@@ -2087,9 +2087,9 @@ Partner: ${partner.name}
                   </p>
                 </div>
 
-                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-card-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="bg-purple-500/10 border border-purple-500/30 text-purple-400 px-3 py-1 rounded-md text-xs font-bold">
+                <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-lg p-card-sm">
+                  <div className="flex items-center gap-card mb-card-sm">
+                    <span className="bg-purple-500/10 border border-purple-500/30 text-purple-400 px-card-sm py-1 rounded-md text-xs font-bold">
                       POST
                     </span>
                     <code className="text-[var(--text-primary)] font-mono text-sm">/partner-api/v1/transfers</code>
@@ -2103,15 +2103,15 @@ Partner: ${partner.name}
 
             {/* Divisas Soportadas */}
             <div>
-              <h3 className="text-lg font-bold text-[var(--text-primary)] m-card flex items-center gap-2">
-                <Globe className="w-5 h-5 text-white" />
+              <h3 className="text-lg font-bold text-[var(--text-primary)] m-card flex items-center gap-card-sm">
+                <Globe className="w-5 h-5 text-[var(--text-primary)]" />
                 {isSpanish ? "15 Divisas Soportadas" : "15 Supported Currencies"}
               </h3>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-card">
                 {availableCurrencies.map(curr => (
                   <div
                     key={curr.code}
-                    className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-3 text-center hover:border-white/20 transition-all"
+                    className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-lg p-card-sm text-center hover:border-white/20 transition-all"
                   >
                     <div className="text-2xl mb-1">{curr.flag}</div>
                     <p className="text-[var(--text-primary)] font-bold text-sm">{curr.code}</p>
@@ -2126,8 +2126,8 @@ Partner: ${partner.name}
               <h3 className="text-lg font-bold text-[var(--text-primary)] m-card">
                 {isSpanish ? "Ejemplo CashTransfer.v1" : "CashTransfer.v1 Example"}
               </h3>
-              <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-card-sm overflow-x-auto">
-                <pre className="text-white font-mono text-xs">
+              <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-card-sm overflow-x-auto">
+                <pre className="text-[var(--text-primary)] font-mono text-xs">
 {`{
   "CashTransfer.v1": {
     "SendingName": "Digital Commercial Bank Ltd",
@@ -2168,14 +2168,14 @@ Partner: ${partner.name}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-section">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-card-sm">
                       {isSpanish ? "Partner" : "Partner"} <span className="text-red-400">*</span>
                     </label>
                     <select
                       value={newClient.partnerIdForClient}
                       onChange={(e) => setNewClient({...newClient, partnerIdForClient: e.target.value})}
                       aria-label="Select Partner"
-                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-emerald-500 text-[var(--text-primary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border-subtle)] focus:border-emerald-500 text-[var(--text-primary)] px-card-sm py-card-sm rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
                     >
                       <option value="">{isSpanish ? "-- Selecciona Partner --" : "-- Select Partner --"}</option>
                       {partners.map(p => (
@@ -2203,14 +2203,14 @@ Partner: ${partner.name}
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-card-sm">
                       {isSpanish ? "Tipo de Cliente" : "Client Type"}
                     </label>
                     <select
                       value={newClient.type}
                       onChange={(e) => setNewClient({...newClient, type: e.target.value as any})}
                       aria-label="Client Type"
-                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-emerald-500 text-[var(--text-primary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border-subtle)] focus:border-emerald-500 text-[var(--text-primary)] px-card-sm py-card-sm rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
                     >
                       <option value="WALLET">Wallet</option>
                       <option value="FINTECH">Fintech</option>
@@ -2220,10 +2220,10 @@ Partner: ${partner.name}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-card-sm">
                       {isSpanish ? "Divisas para API" : "API Currencies"} <span className="text-red-400">*</span>
                     </label>
-                    <div className="flex flex-wrap gap-2 bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm max-h-48 overflow-y-auto">
+                    <div className="flex flex-wrap gap-card-sm bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-xl p-card-sm max-h-48 overflow-y-auto">
                       {availableCurrencies.map(currency => (
                         <button
                           key={currency.code}
@@ -2240,17 +2240,17 @@ Partner: ${partner.name}
                               });
                             }
                           }}
-                          className={`px-3 py-2 rounded-lg border font-semibold text-sm transition-all ${
+                          className={`px-card-sm py-card-sm rounded-lg border font-semibold text-sm transition-all ${
                             newClient.allowedCurrencies.includes(currency.code)
                               ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                              : 'bg-[#141414] border-[#1a1a1a] text-[var(--text-secondary)] hover:border-[#1a1a1a]'
+                              : 'bg-[var(--bg-elevated)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-subtle)]'
                           }`}
                         >
                           {currency.flag} {currency.code}
                         </button>
                       ))}
                     </div>
-                    <p className="text-[var(--text-muted)] text-xs mt-2">
+                    <p className="text-[var(--text-muted)] text-xs mt-card-sm">
                       {isSpanish ? "Selecciona las divisas que este cliente podrá usar" : "Select currencies this client will be able to use"}
                     </p>
                   </div>
@@ -2260,7 +2260,7 @@ Partner: ${partner.name}
                     icon={Plus}
                     onClick={handleCreateClient}
                     disabled={!newClient.partnerIdForClient || !newClient.legalName || !newClient.externalClientId || newClient.allowedCurrencies.length === 0}
-                    className="w-full mt-4"
+                    className="w-full mt-card"
                   >
                     {isSpanish ? "Crear Cliente y Descargar Credenciales" : "Create Client & Download Credentials"}
                   </BankingButton>
@@ -2279,21 +2279,21 @@ Partner: ${partner.name}
                   {clients.map((client) => (
                     <div
                       key={client.clientId}
-                      className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-emerald-500/50 rounded-xl p-5 transition-all group"
+                      className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] hover:border-emerald-500/50 rounded-xl p-5 transition-all group"
                     >
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start justify-between mb-card">
                         <div className="flex-1">
                           <h4 className="text-[var(--text-primary)] font-bold text-lg mb-1 group-hover:text-emerald-400 transition-colors">
                             {client.legalName}
                           </h4>
-                          <p className="text-[var(--text-muted)] text-sm mb-2">{client.externalClientId}</p>
-                          <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-[var(--text-muted)] text-sm mb-card-sm">{client.externalClientId}</p>
+                          <div className="flex flex-wrap items-center gap-card-sm">
                             <BankingBadge variant="success">{client.status}</BankingBadge>
                             <BankingBadge variant="info">{client.type}</BankingBadge>
                             <span className="text-[var(--text-muted)] text-xs">{client.country}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-card-sm">
                           <button
                             onClick={() => {
                               const partnerForClient = partners.find(p => p.partnerId === client.partnerId);
@@ -2301,14 +2301,14 @@ Partner: ${partner.name}
                                 generateClientCredentialsTXT(client, partnerForClient);
                               }
                             }}
-                            className="p-2 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-white/30 text-white rounded-lg transition-all"
+                            className="p-card-sm bg-white/5 hover:bg-white/10 border border-white/15 hover:border-white/30 text-[var(--text-primary)] rounded-lg transition-all"
                             title={isSpanish ? "Descargar credenciales TXT" : "Download credentials TXT"}
                           >
                             <Download className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => handleDeleteClient(client.clientId)}
-                            className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500 text-red-400 rounded-lg transition-all"
+                            className="p-card-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500 text-red-400 rounded-lg transition-all"
                             title={isSpanish ? "Eliminar cliente" : "Delete client"}
                           >
                             <AlertCircle className="w-5 h-5" />
@@ -2323,19 +2323,19 @@ Partner: ${partner.name}
                         </div>
                         <div className="text-xs">
                           <span className="text-[var(--text-muted)]">Client ID:</span>
-                          <code className="text-white ml-2 font-mono">{client.clientId}</code>
+                          <code className="text-[var(--text-primary)] ml-2 font-mono">{client.clientId}</code>
                         </div>
-                        <div className="flex flex-wrap gap-1 mt-2">
+                        <div className="flex flex-wrap gap-1 mt-card-sm">
                           {client.allowedCurrencies.map((curr: string) => {
                             const currInfo = availableCurrencies.find(c => c.code === curr);
                             return (
-                              <span key={curr} className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">
+                              <span key={curr} className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-card-sm py-0.5 rounded">
                                 {currInfo?.flag} {curr}
                               </span>
                             );
                           })}
                         </div>
-                        <div className="text-[var(--text-muted)] text-xs mt-2">
+                        <div className="text-[var(--text-muted)] text-xs mt-card-sm">
                           {fmt.dateTime(client.createdAt)}
                         </div>
                       </div>
@@ -2348,7 +2348,7 @@ Partner: ${partner.name}
                   <p className="text-[var(--text-secondary)] text-lg font-medium">
                     {isSpanish ? "No hay clientes registrados" : "No clients registered"}
                   </p>
-                  <p className="text-[var(--text-muted)] text-sm mt-2">
+                  <p className="text-[var(--text-muted)] text-sm mt-card-sm">
                     {isSpanish ? "Crea tu primer cliente para comenzar" : "Create your first client to get started"}
                   </p>
                 </div>
@@ -2388,18 +2388,18 @@ Partner: ${partner.name}
                 return (
                   <BankingCard key={partner.partnerId} className="overflow-hidden">
                     {/* Header del Partner */}
-                    <div className="p-card border-b border-[#1a1a1a] bg-gradient-to-r from-[#0d0d0d] to-[#141414]">
+                    <div className="p-card border-b border-[var(--border-subtle)] bg-gradient-to-r from-[var(--bg-card)] to-[#141414]">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-card">
-                          <div className="p-3 bg-white/5 rounded-xl">
-                            <Users className="w-6 h-6 text-white" />
+                          <div className="p-card-sm bg-white/5 rounded-xl">
+                            <Users className="w-6 h-6 text-[var(--text-primary)]" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-[var(--text-primary)]">{partner.name}</h3>
+                            <h3 className="text-heading-sm text-[var(--text-primary)]">{partner.name}</h3>
                             <p className="text-[var(--text-secondary)] text-sm">Partner ID: {partner.partnerId}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-card">
                           <BankingBadge variant="success">{partner.status}</BankingBadge>
                           <BankingBadge variant="info">
                             {partnerClients.length} {isSpanish ? 'clientes' : 'clients'}
@@ -2409,32 +2409,32 @@ Partner: ${partner.name}
                     </div>
 
                     {/* Estadísticas del Partner */}
-                    <div className="p-card border-b border-[#1a1a1a]">
+                    <div className="p-card border-b border-[var(--border-subtle)]">
                       <h4 className="text-lg font-bold text-[var(--text-primary)] m-card">
                         {isSpanish ? 'Estadísticas Generales' : 'General Statistics'}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-card">
-                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                        <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-xl p-card-sm">
                           <p className="text-[var(--text-secondary)] text-sm mb-1">{isSpanish ? 'Volumen Total' : 'Total Volume'}</p>
-                          <p className="text-2xl font-bold text-emerald-400">{fmt.currency(totalVolume, 'USD')}</p>
+                          <p className="text-heading text-emerald-400">{fmt.currency(totalVolume, 'USD')}</p>
                         </div>
-                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                        <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-xl p-card-sm">
                           <p className="text-[var(--text-secondary)] text-sm mb-1">{isSpanish ? 'Transferencias' : 'Transfers'}</p>
-                          <p className="text-2xl font-bold text-white">{totalTransactionsCount}</p>
+                          <p className="text-heading text-[var(--text-primary)]">{totalTransactionsCount}</p>
                         </div>
-                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                        <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-xl p-card-sm">
                           <p className="text-[var(--text-secondary)] text-sm mb-1">{isSpanish ? 'Clientes' : 'Clients'}</p>
-                          <p className="text-2xl font-bold text-purple-400">{partnerClients.length}</p>
+                          <p className="text-heading text-purple-400">{partnerClients.length}</p>
                         </div>
-                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                        <div className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-xl p-card-sm">
                           <p className="text-[var(--text-secondary)] text-sm mb-1">{isSpanish ? 'Divisas Activas' : 'Active Currencies'}</p>
-                          <p className="text-2xl font-bold text-amber-400">{Object.keys(statsByCurrency).length}</p>
+                          <p className="text-heading text-amber-400">{Object.keys(statsByCurrency).length}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Desglose por Divisa */}
-                    <div className="p-card border-b border-[#1a1a1a]">
+                    <div className="p-card border-b border-[var(--border-subtle)]">
                       <h4 className="text-lg font-bold text-[var(--text-primary)] m-card">
                         {isSpanish ? 'Desglose por Divisa' : 'Breakdown by Currency'}
                       </h4>
@@ -2444,9 +2444,9 @@ Partner: ${partner.name}
                           const percentage = totalVolume > 0 ? (stats.total / totalVolume) * 100 : 0;
                           
                           return (
-                            <div key={currency} className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-3">
+                            <div key={currency} className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] rounded-xl p-card-sm">
+                              <div className="flex items-center justify-between mb-card">
+                                <div className="flex items-center gap-card">
                                   <span className="text-2xl">{currInfo?.flag}</span>
                                   <div>
                                     <p className="text-[var(--text-primary)] font-bold">{currency}</p>
@@ -2461,7 +2461,7 @@ Partner: ${partner.name}
                               <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                   <span className="text-[var(--text-secondary)]">{isSpanish ? 'Porcentaje del total:' : 'Percentage of total:'}</span>
-                                  <span className="text-white font-semibold">{percentage.toFixed(1)}%</span>
+                                  <span className="text-[var(--text-primary)] font-semibold">{percentage.toFixed(1)}%</span>
                                 </div>
                                 {stats.lastTransfer && (
                                   <div className="flex justify-between text-sm">
@@ -2469,7 +2469,7 @@ Partner: ${partner.name}
                                     <span className="text-[var(--text-secondary)]">{fmt.dateTime(stats.lastTransfer)}</span>
                                   </div>
                                 )}
-                                <div className="w-full bg-[#141414] rounded-full h-2 overflow-hidden mt-2">
+                                <div className="w-full bg-[var(--bg-elevated)] rounded-full h-2 overflow-hidden mt-card-sm">
                                   <div
                                     className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full transition-all duration-500"
                                     style={{ width: `${percentage}%` }}
@@ -2484,7 +2484,7 @@ Partner: ${partner.name}
 
                     {/* Lista de Transferencias del Partner */}
                     <div className="p-card">
-                      <h4 className="text-lg font-bold text-[var(--text-primary)] m-card flex items-center gap-2">
+                      <h4 className="text-lg font-bold text-[var(--text-primary)] m-card flex items-center gap-card-sm">
                         <ArrowRight className="w-5 h-5 text-purple-400" />
                         {isSpanish ? 'Historial de Transferencias' : 'Transfer History'}
                       </h4>
@@ -2493,16 +2493,16 @@ Partner: ${partner.name}
                           {partnerTransfers.map((transfer, idx) => (
                             <div
                               key={idx}
-                              className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-purple-500/50 rounded-lg p-card-sm transition-all"
+                              className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] hover:border-purple-500/50 rounded-lg p-card-sm transition-all"
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
+                                  <div className="flex items-center gap-card-sm mb-card-sm">
                                     <span className="text-[var(--text-primary)] font-semibold">{transfer.transferRequestId}</span>
                                     <BankingBadge variant="success">{transfer.state}</BankingBadge>
                                   </div>
                                   <div className="space-y-1 text-sm">
-                                    <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+                                    <div className="flex items-center gap-card-sm text-[var(--text-secondary)]">
                                       <ArrowRight className="w-3 h-3" />
                                       <span>{transfer.fromAccount} → {transfer.toAccount}</span>
                                     </div>
@@ -2542,7 +2542,7 @@ Partner: ${partner.name}
                   <p className="text-[var(--text-secondary)] text-lg font-medium">
                     {isSpanish ? 'No hay partners registrados' : 'No partners registered'}
                   </p>
-                  <p className="text-[var(--text-muted)] text-sm mt-2">
+                  <p className="text-[var(--text-muted)] text-sm mt-card-sm">
                     {isSpanish ? 'Crea tu primer partner para comenzar' : 'Create your first partner to get started'}
                   </p>
                 </div>
@@ -2569,14 +2569,14 @@ Partner: ${partner.name}
 
                   {/* Seleccionar Partner */}
                   <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-card-sm">
                       {isSpanish ? "1. Seleccionar Partner" : "1. Select Partner"}
                     </label>
                     <select
                       value={selectedPartner}
                       onChange={(e) => setSelectedPartner(e.target.value)}
                       aria-label="Select Partner"
-                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-[var(--text-primary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border-subtle)] focus:border-white/30 text-[var(--text-primary)] px-card-sm py-card-sm rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
                     >
                       <option value="">{isSpanish ? "-- Selecciona Partner --" : "-- Select Partner --"}</option>
                       {partners.map(partner => (
@@ -2589,14 +2589,14 @@ Partner: ${partner.name}
 
                   {/* Seleccionar Cuenta Custodio */}
                   <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-card-sm">
                       {isSpanish ? "2. Seleccionar Cuenta Custodio" : "2. Select Custody Account"}
                     </label>
                     <select
                       value={selectedCustodyAccount}
                       onChange={(e) => setSelectedCustodyAccount(e.target.value)}
                       aria-label="Select Custody Account"
-                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-[var(--text-primary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border-subtle)] focus:border-white/30 text-[var(--text-primary)] px-card-sm py-card-sm rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
                       disabled={!selectedPartner}
                     >
                       <option value="">{isSpanish ? "-- Selecciona Cuenta --" : "-- Select Account --"}</option>
@@ -2615,7 +2615,7 @@ Partner: ${partner.name}
                         const account = custodyAccounts.find(a => a.id === selectedCustodyAccount)!;
                         return (
                           <>
-                            <p className="text-emerald-400 text-sm font-semibold mb-2">
+                            <p className="text-emerald-400 text-sm font-semibold mb-card-sm">
                               {isSpanish ? "Balance Disponible:" : "Available Balance:"}
                             </p>
                             <p className="text-3xl font-black text-[var(--text-primary)]">
@@ -2640,14 +2640,14 @@ Partner: ${partner.name}
                   {/* Moneda y Monto */}
                   <div className="grid grid-cols-2 gap-card">
                     <div>
-                      <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                      <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-card-sm">
                         {isSpanish ? "3. Moneda" : "3. Currency"}
                       </label>
                       <select
                         value={transferForm.currency}
                         onChange={(e) => setTransferForm({...transferForm, currency: e.target.value})}
                         aria-label="Select Currency"
-                        className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-[var(--text-primary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
+                        className="w-full bg-[var(--bg-card)] border border-[var(--border-subtle)] focus:border-white/30 text-[var(--text-primary)] px-card-sm py-card-sm rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
                       >
                         {availableCurrencies.map(curr => (
                           <option key={curr.code} value={curr.code}>
@@ -2698,7 +2698,7 @@ Partner: ${partner.name}
                   />
 
                   <div className="bg-white/5 border border-white/15 rounded-xl p-card-sm space-y-2">
-                    <div className="flex items-center gap-2 text-white font-semibold">
+                    <div className="flex items-center gap-card-sm text-[var(--text-primary)] font-semibold">
                       <Shield className="w-4 h-4" />
                       <span>{isSpanish ? "Resumen de la Transferencia" : "Transfer Summary"}</span>
                     </div>
@@ -2751,9 +2751,9 @@ Partner: ${partner.name}
                   {transfers.map((transfer, idx) => (
                     <div
                       key={idx}
-                      className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-emerald-500/50 rounded-xl p-5 transition-all"
+                      className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] hover:border-emerald-500/50 rounded-xl p-5 transition-all"
                     >
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start justify-between mb-card">
                         <div className="flex-1">
                           <p className="text-[var(--text-primary)] font-bold text-base mb-1">
                             {transfer.partnerName}
@@ -2761,7 +2761,7 @@ Partner: ${partner.name}
                           <p className="text-[var(--text-secondary)] text-sm">
                             {transfer.fromAccount} → {transfer.toAccount}
                           </p>
-                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <div className="flex flex-wrap items-center gap-card-sm mt-card-sm">
                             <BankingBadge variant="success">{transfer.state}</BankingBadge>
                             <span className="text-[var(--text-muted)] text-xs">{transfer.transferRequestId}</span>
                           </div>
@@ -2784,7 +2784,7 @@ Partner: ${partner.name}
                   <p className="text-[var(--text-secondary)] text-lg font-medium">
                     {isSpanish ? "No hay transferencias aún" : "No transfers yet"}
                   </p>
-                  <p className="text-[var(--text-muted)] text-sm mt-2">
+                  <p className="text-[var(--text-muted)] text-sm mt-card-sm">
                     {isSpanish ? "Las transferencias aparecerán aquí" : "Transfers will appear here"}
                   </p>
                 </div>
@@ -2796,7 +2796,7 @@ Partner: ${partner.name}
         {/* Footer - API Info */}
         <BankingCard className="p-card">
           <div className="flex flex-wrap items-center justify-between gap-card">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-card">
               <Shield className="w-5 h-5 text-emerald-400" />
               <div>
                 <p className="text-[var(--text-primary)] font-semibold">
@@ -2808,7 +2808,7 @@ Partner: ${partner.name}
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-card">
               <BankingBadge variant="success">ISO 27001</BankingBadge>
               <BankingBadge variant="info">PCI DSS</BankingBadge>
               <BankingBadge variant="success">SOC 2</BankingBadge>

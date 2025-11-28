@@ -80,6 +80,27 @@
   padding: var(--space-8);
 }
 
+/* Padding X/Y específicos */
+.px-card-sm {
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+.px-card {
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+}
+
+.py-card-sm {
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+.py-card {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-6);
+}
+
 /* Padding Sections */
 .p-section {
   padding: var(--space-8);
@@ -119,11 +140,39 @@
   margin-bottom: var(--space-6);
 }
 
+.m-card-sm {
+  margin-bottom: var(--space-4);
+}
+
 .m-element {
   margin-bottom: var(--space-4);
 }
 
+.mb-card-sm {
+  margin-bottom: var(--space-4);
+}
+
+.mb-card {
+  margin-bottom: var(--space-6);
+}
+
+.mb-section {
+  margin-bottom: var(--space-8);
+}
+
+.mt-card-sm {
+  margin-top: var(--space-4);
+}
+
+.mt-card {
+  margin-top: var(--space-6);
+}
+
 /* Gap Utilities */
+.gap-card-sm {
+  gap: var(--space-2);
+}
+
 .gap-card {
   gap: var(--space-4);
 }
@@ -191,6 +240,10 @@
   box-shadow: var(--shadow-md);
   transition: all var(--transition-base);
   cursor: pointer;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-primary:hover {
@@ -219,6 +272,10 @@
   border: 1px solid var(--border-medium);
   transition: all var(--transition-base);
   cursor: pointer;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-secondary:hover {
@@ -235,6 +292,10 @@
   border: none;
   transition: all var(--transition-base);
   cursor: pointer;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-ghost:hover {
@@ -252,6 +313,10 @@
   box-shadow: var(--shadow-md);
   transition: all var(--transition-base);
   cursor: pointer;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-danger:hover {
@@ -265,6 +330,7 @@
 
 .input-banking {
   width: 100%;
+  min-height: 48px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -438,4 +504,3 @@ select:focus-visible {
     transform: rotate(360deg);
   }
 }
-

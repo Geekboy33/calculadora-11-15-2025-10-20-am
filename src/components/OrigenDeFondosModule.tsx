@@ -338,7 +338,7 @@ ${idx + 1}. ${acc.bankName}
     : accounts.filter(a => a.bankName === selectedBank);
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-[var(--bg-main)] p-card">
       <div className="max-w-7xl mx-auto space-y-6">
         
         <BankingHeader
@@ -350,7 +350,7 @@ ${idx + 1}. ${acc.bankName}
           }
           gradient="white"
           actions={
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-card">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -392,7 +392,7 @@ ${idx + 1}. ${acc.bankName}
         />
 
         {/* Métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-card">
           <BankingMetric
             label={isSpanish ? "Cuentas Detectadas" : "Detected Accounts"}
             value={accounts.length}
@@ -421,17 +421,17 @@ ${idx + 1}. ${acc.bankName}
 
         {/* Progreso */}
         {analyzing && (
-          <BankingCard className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <Activity className="w-6 h-6 text-white animate-spin" />
+          <BankingCard className="p-card">
+            <div className="flex items-center justify-between mb-card">
+              <div className="flex items-center gap-card">
+                <Activity className="w-6 h-6 text-[var(--text-primary)] animate-spin" />
                 <p className="text-[var(--text-primary)] font-bold text-lg">
                   {isSpanish ? 'Escaneando archivo...' : 'Scanning file...'}
                 </p>
               </div>
-              <p className="text-white font-bold text-2xl">{progress.toFixed(1)}%</p>
+              <p className="text-[var(--text-primary)] font-bold text-2xl">{progress.toFixed(1)}%</p>
             </div>
-            <div className="w-full bg-[#141414] rounded-full h-4 overflow-hidden">
+            <div className="w-full bg-[var(--bg-elevated)] rounded-full h-4 overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-white to-white rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
@@ -442,13 +442,13 @@ ${idx + 1}. ${acc.bankName}
 
         {/* Filtro por banco */}
         {accounts.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-card-sm">
             <button
               onClick={() => setSelectedBank('ALL')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+              className={`px-card-sm py-card-sm rounded-lg font-semibold transition-all ${
                 selectedBank === 'ALL'
                   ? 'bg-white text-black'
-                  : 'bg-[#141414] border border-[#1a1a1a] text-[var(--text-secondary)] hover:border-[#1a1a1a]'
+                  : 'bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-subtle)]'
               }`}
             >
               {isSpanish ? 'Todos' : 'All'} ({accounts.length})
@@ -457,10 +457,10 @@ ${idx + 1}. ${acc.bankName}
               <button
                 key={bank}
                 onClick={() => setSelectedBank(bank)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                className={`px-card-sm py-card-sm rounded-lg font-semibold transition-all ${
                   selectedBank === bank
                     ? 'bg-white text-black'
-                    : 'bg-[#141414] border border-[#1a1a1a] text-[var(--text-secondary)] hover:border-[#1a1a1a]'
+                    : 'bg-[var(--bg-elevated)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--border-subtle)]'
                 }`}
               >
                 {bank} ({accounts.filter(a => a.bankName === bank).length})
@@ -476,57 +476,57 @@ ${idx + 1}. ${acc.bankName}
             icon={CreditCard}
             color="emerald"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-card">
               {filteredAccounts.map((account, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-white/20 rounded-xl p-5 transition-all"
+                  className="bg-[var(--bg-card)]/50 border border-[var(--border-subtle)] hover:border-white/20 rounded-xl p-5 transition-all"
                 >
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start justify-between mb-card">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Building2 className="w-5 h-5 text-white" />
+                      <div className="flex items-center gap-card-sm mb-card-sm">
+                        <Building2 className="w-5 h-5 text-[var(--text-primary)]" />
                         <h4 className="text-[var(--text-primary)] font-bold text-lg">{account.bankName}</h4>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-card-sm">
                         <BankingBadge variant="success">{account.accountType}</BankingBadge>
                         <BankingBadge variant="info">{account.currency}</BankingBadge>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDeleteAccount(account.accountNumber)}
-                      className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500 text-red-400 rounded-lg transition-all"
+                      className="p-card-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500 text-red-400 rounded-lg transition-all"
                       title={isSpanish ? "Eliminar cuenta" : "Delete account"}
                     >
                       <RotateCcw className="w-5 h-5" />
                     </button>
                   </div>
 
-                  <div className="space-y-2 text-sm mb-4">
-                    <div className="flex justify-between py-2 border-b border-[var(--border-subtle)]">
+                  <div className="space-y-2 text-sm mb-card">
+                    <div className="flex justify-between py-card-sm border-b border-[var(--border-subtle)]">
                       <span className="text-[var(--text-secondary)]">{isSpanish ? 'Número de Cuenta:' : 'Account Number:'}</span>
-                      <code className="text-white font-mono font-bold">{account.accountNumber}</code>
+                      <code className="text-[var(--text-primary)] font-mono font-bold">{account.accountNumber}</code>
                     </div>
                     {account.iban && (
-                      <div className="flex justify-between py-2 border-b border-[var(--border-subtle)]">
+                      <div className="flex justify-between py-card-sm border-b border-[var(--border-subtle)]">
                         <span className="text-[var(--text-secondary)]">IBAN:</span>
                         <code className="text-purple-400 font-mono text-xs">{account.iban}</code>
                       </div>
                     )}
                     {account.swift && (
-                      <div className="flex justify-between py-2 border-b border-[var(--border-subtle)]">
+                      <div className="flex justify-between py-card-sm border-b border-[var(--border-subtle)]">
                         <span className="text-[var(--text-secondary)]">SWIFT:</span>
                         <code className="text-amber-400 font-mono">{account.swift}</code>
                       </div>
                     )}
-                    <div className="flex justify-between py-2">
+                    <div className="flex justify-between py-card-sm">
                       <span className="text-[var(--text-secondary)]">{isSpanish ? 'Extraído:' : 'Extracted:'}</span>
                       <span className="text-[var(--text-secondary)] text-xs">{fmt.dateTime(account.extractedAt)}</span>
                     </div>
                   </div>
 
                   {/* Balance destacado */}
-                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 text-center">
+                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-card-sm text-center">
                     <p className="text-[var(--text-secondary)] text-xs mb-1">{isSpanish ? 'Balance' : 'Balance'}</p>
                     <p className="text-emerald-400 font-black text-2xl">
                       {fmt.currency(account.balance, account.currency)}
@@ -539,8 +539,8 @@ ${idx + 1}. ${acc.bankName}
         ) : !analyzing && (
           <BankingCard className="p-12">
             <div className="text-center">
-              <FileSearch className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-              <p className="text-[var(--text-secondary)] text-lg font-medium mb-2">
+              <FileSearch className="w-20 h-20 text-slate-700 mx-auto mb-card" />
+              <p className="text-[var(--text-secondary)] text-lg font-medium mb-card-sm">
                 {isSpanish ? 'No hay cuentas detectadas' : 'No accounts detected'}
               </p>
               <p className="text-[var(--text-muted)] text-sm">
@@ -551,9 +551,9 @@ ${idx + 1}. ${acc.bankName}
         )}
 
         {/* Footer */}
-        <BankingCard className="p-6">
+        <BankingCard className="p-card">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-card">
               <CheckCircle className="w-5 h-5 text-emerald-400" />
               <div>
                 <p className="text-[var(--text-primary)] font-semibold">
@@ -564,7 +564,7 @@ ${idx + 1}. ${acc.bankName}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-card">
               <BankingBadge variant="success">AML Compliant</BankingBadge>
               <BankingBadge variant="info">KYC Verified</BankingBadge>
             </div>

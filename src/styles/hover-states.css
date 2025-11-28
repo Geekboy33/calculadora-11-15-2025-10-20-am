@@ -1,0 +1,152 @@
+/**
+ * Hover States Estandarizados
+ * Sistema consistente de hover effects para toda la plataforma
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   HOVER LIFT - Elevación al hover
+   ═══════════════════════════════════════════════════════════════ */
+
+.hover-lift {
+  transition: transform var(--transition-base), 
+              box-shadow var(--transition-base),
+              border-color var(--transition-base);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.hover-lift:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HOVER GLOW - Brillo al hover
+   ═══════════════════════════════════════════════════════════════ */
+
+.hover-glow {
+  transition: box-shadow var(--transition-base),
+              border-color var(--transition-base);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HOVER SCALE - Escala al hover
+   ═══════════════════════════════════════════════════════════════ */
+
+.hover-scale {
+  transition: transform var(--transition-base);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.hover-scale:active {
+  transform: scale(0.98);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HOVER BRIGHTEN - Aclarar al hover
+   ═══════════════════════════════════════════════════════════════ */
+
+.hover-brighten {
+  transition: opacity var(--transition-base),
+              filter var(--transition-base);
+}
+
+.hover-brighten:hover {
+  opacity: 1;
+  filter: brightness(1.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HOVER BORDER - Cambio de borde al hover
+   ═══════════════════════════════════════════════════════════════ */
+
+.hover-border {
+  transition: border-color var(--transition-base);
+}
+
+.hover-border:hover {
+  border-color: var(--border-focus);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HOVER TEXT - Cambio de color de texto al hover
+   ═══════════════════════════════════════════════════════════════ */
+
+.hover-text {
+  transition: color var(--transition-base);
+}
+
+.hover-text:hover {
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HOVER BACKGROUND - Cambio de fondo al hover
+   ═══════════════════════════════════════════════════════════════ */
+
+.hover-bg {
+  transition: background-color var(--transition-base);
+}
+
+.hover-bg:hover {
+  background-color: var(--bg-hover);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMBINACIONES - Hover effects combinados
+   ═══════════════════════════════════════════════════════════════ */
+
+.hover-card {
+  transition: all var(--transition-base);
+}
+
+.hover-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-focus);
+}
+
+.hover-button {
+  transition: all var(--transition-base);
+}
+
+.hover-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.hover-button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DISABLED STATES
+   ═══════════════════════════════════════════════════════════════ */
+
+.hover-lift:disabled,
+.hover-glow:disabled,
+.hover-scale:disabled,
+.hover-brighten:disabled,
+.hover-border:disabled,
+.hover-text:disabled,
+.hover-bg:disabled,
+.hover-card:disabled,
+.hover-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  pointer-events: none;
+}
+
