@@ -452,7 +452,7 @@ export function CentralBankingDashboard() {
         <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
           <div className="p-card border-b border-[#1a1a1a]">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-3">
+              <h2 className="text-heading-sm flex items-center gap-3">
                 <Coins className="w-6 h-6 text-white" />
                 {isSpanish ? 'Balances por Divisa' : 'Balance by Currency'}
               </h2>
@@ -560,7 +560,7 @@ export function CentralBankingDashboard() {
             <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
               <div className="p-card border-b border-[#1a1a1a]">
                 <div className="flex items-center justify-between m-card">
-                  <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-3">
+                  <h2 className="text-heading-sm flex items-center gap-3">
                     <Shield className="w-6 h-6 text-white" />
                     {isSpanish ? 'Cuentas Custodio' : 'Custody Accounts'}
                   </h2>
@@ -693,7 +693,7 @@ export function CentralBankingDashboard() {
             <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
               <div className="p-card border-b border-[#1a1a1a]">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-3">
+                  <h2 className="text-heading-sm flex items-center gap-3">
                     <Lock className="w-6 h-6 text-amber-400" />
                     {isSpanish ? 'Reservas Activas (Pledges)' : 'Active Reserves (Pledges)'}
                   </h2>

@@ -212,8 +212,9 @@ function App() {
               onClick={logout}
               className="flex items-center gap-2 px-4 py-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded-lg text-white hover:text-white hover:border-white hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all"
               title={t.logoutTitle}
+              aria-label={t.logoutTitle}
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4" aria-hidden="true" />
               <span className="text-sm font-semibold">{t.logout}</span>
             </button>
           </div>
@@ -221,13 +222,13 @@ function App() {
         </div>
 
         {/* Featured Modules - Widgets Personalizados */}
-        <div className="px-6 py-4 bg-gradient-to-b from-slate-950 to-slate-900 border-b border-slate-800 hidden lg:block">
+        <div className="px-6 py-4 bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-card)] border-b border-[var(--border-subtle)] hidden lg:block">
           <div className="flex items-center gap-2 mb-3">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+            <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-3">
               {isSpanish ? 'Módulos Principales' : 'Featured Modules'}
             </span>
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
           </div>
           <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {featuredModules.map(module => (
@@ -257,13 +258,15 @@ function App() {
                       ? 'text-white text-shadow-[0_0_10px_rgba(255,255,255,0.8)]'
                       : 'text-white hover:text-white'
                   }`}
+                  aria-label={`${tab.name} ${isActive ? '(current)' : ''}`}
+                  aria-current={isActive ? 'page' : undefined}
                 >
-                  <span className="flex items-center justify-center w-5 h-5 flex-shrink-0">
+                  <span className="flex items-center justify-center w-5 h-5 flex-shrink-0" aria-hidden="true">
                     {CustomIcon}
                   </span>
                   <span className="whitespace-nowrap">{tab.name}</span>
                   {isActive && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]" aria-hidden="true" />
                   )}
                 </button>
               );
