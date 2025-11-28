@@ -19,12 +19,12 @@ interface BankingCardProps {
 }
 
 export function BankingCard({ children, variant = 'default', className }: BankingCardProps) {
-  const baseClasses = 'bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-elevated)] to-[var(--bg-card)] rounded-2xl';
+  const baseClasses = 'bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-elevated)] to-[var(--bg-card)] rounded-2xl transition-all';
   
   const variantClasses = {
     default: 'card-base',
     elevated: 'card-elevated',
-    interactive: 'card-interactive'
+    interactive: 'card-interactive hover-card'
   };
 
   return (
@@ -86,13 +86,13 @@ interface BankingButtonProps {
 }
 
 export function BankingButton({ children, onClick, variant = 'primary', icon: Icon, disabled, className, ...props }: BankingButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  const baseClasses = 'px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2';
+  const baseClasses = 'px-card py-card-sm rounded-xl font-semibold transition-all flex items-center gap-card-sm min-h-[48px]';
   
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-white to-white hover:from-white hover:to-white text-black shadow-lg hover:shadow-white/20',
-    secondary: 'bg-[var(--bg-elevated)] border border-[var(--border-medium)] hover:border-[var(--border-focus)] text-[var(--text-primary)]',
-    ghost: 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]',
-    danger: 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg'
+    primary: 'bg-gradient-to-r from-white to-white hover:from-white hover:to-white text-black shadow-lg hover:shadow-white/20 hover-lift',
+    secondary: 'bg-[var(--bg-elevated)] border border-[var(--border-medium)] hover:border-[var(--border-focus)] text-[var(--text-primary)] hover-lift',
+    ghost: 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] hover-text',
+    danger: 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover-lift'
   };
 
   // Mouse tracking para efecto visual

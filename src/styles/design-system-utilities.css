@@ -367,24 +367,58 @@
    FOCUS STATES - Accesibilidad Mejorada
    ═══════════════════════════════════════════════════════════════ */
 
+/* Focus visible para todos los elementos interactivos */
 *:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(26, 77, 179, 0.2);
 }
 
+/* Botones */
 button:focus-visible,
-a:focus-visible {
+button[type="button"]:focus-visible,
+button[type="submit"]:focus-visible,
+button[type="reset"]:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(26, 77, 179, 0.2);
 }
 
+/* Enlaces */
+a:focus-visible,
+a[href]:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(26, 77, 179, 0.2);
+  border-radius: var(--radius-sm);
+}
+
+/* Inputs */
 input:focus-visible,
+input[type="text"]:focus-visible,
+input[type="email"]:focus-visible,
+input[type="password"]:focus-visible,
+input[type="number"]:focus-visible,
+input[type="search"]:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(26, 77, 179, 0.2);
+}
+
+/* Cards interactivas */
+.card-interactive:focus-visible,
+[role="button"]:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(26, 77, 179, 0.2);
+}
+
+/* Remover outline por defecto (solo mostrar con focus-visible) */
+*:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* ═══════════════════════════════════════════════════════════════

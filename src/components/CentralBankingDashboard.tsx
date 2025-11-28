@@ -307,7 +307,7 @@ export function CentralBankingDashboard() {
                 <h1 className="text-heading">
                   Digital Commercial Bank Ltd
                 </h1>
-                <p className="text-secondary">
+                <p className="text-body-sm">
                   {isSpanish ? 'Panel Central de Control' : 'Central Control Panel'} • {fmt.dateTime(currentTime)}
                 </p>
               </div>
