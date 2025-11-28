@@ -1042,18 +1042,18 @@ Timestamp: ${AUDIT_DATA.timestamp}
             </div>
 
             <div className="text-center py-8 relative z-20">
-              <p className="text-white text-sm mb-card uppercase tracking-wide font-semibold">
+              <p className="text-white text-sm mb-card uppercase tracking-wide font-semibold" style={{ color: '#FFFFFF' }}>
                 {isSpanish ? "Balance de Tesorería" : "Treasury Balance"}
               </p>
               {balancesVisible ? (
                 <>
-                  <p className="text-6xl font-black text-white mb-card-sm relative z-20 break-words leading-tight" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                  <p className="text-6xl font-black text-white mb-card-sm relative z-20 break-words leading-tight" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
                     {fmt.currency(selectedMasterAccount.balance, selectedMasterAccount.currency)}
                   </p>
-                  <p className="text-white text-lg relative z-20 font-semibold" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+                  <p className="text-white text-lg relative z-20 font-semibold" style={{ color: '#FFFFFF', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
                     ({selectedMasterAccount.balance.toExponential(2)} {selectedMasterAccount.currency})
                   </p>
-                  <p className="text-white text-sm mt-card-sm relative z-20" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+                  <p className="text-white text-sm mt-card-sm relative z-20" style={{ color: '#FFFFFF', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
                     ≈ {(selectedMasterAccount.balance / 1000000000).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} {isSpanish ? 'Miles de Millones' : 'Billions'}
                   </p>
                 </>
