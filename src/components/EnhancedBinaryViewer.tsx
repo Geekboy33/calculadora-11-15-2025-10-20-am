@@ -956,8 +956,8 @@ export function EnhancedBinaryViewer() {
       const rowBytes = fileData.slice(i, Math.min(i + bytesPerRow, fileData.length));
 
       rows.push(
-        <div key={i} className="flex gap-4 font-mono text-sm hover:bg-slate-700/30 py-1 px-2 rounded">
-          <div className="text-slate-500 w-20 flex-shrink-0">
+        <div key={i} className="flex gap-4 font-mono text-sm hover:bg-[var(--bg-hover)]/30 py-1 px-2 rounded">
+          <div className="text-[var(--text-muted)] w-20 flex-shrink-0">
             {i.toString(16).padStart(8, '0')}
           </div>
 
@@ -972,7 +972,7 @@ export function EnhancedBinaryViewer() {
                       ? 'bg-blue-600 text-white'
                       : searchResults.includes(byteOffset)
                       ? 'ring-2 ring-yellow-400'
-                      : 'text-slate-300'
+                      : 'text-[var(--text-secondary)]'
                   } ${bookmarks.find(b => b.offset === byteOffset) ? 'border-b-2' : ''}`}
                   style={
                     bookmarks.find(b => b.offset === byteOffset)
@@ -998,7 +998,7 @@ export function EnhancedBinaryViewer() {
           </div>
 
           {viewMode !== 'ascii' && (
-            <div className="text-slate-400 w-32 flex-shrink-0 font-mono">
+            <div className="text-[var(--text-secondary)] w-32 flex-shrink-0 font-mono">
               {Array.from(rowBytes)
                 .map(b => (b >= 32 && b <= 126 ? String.fromCharCode(b) : '.'))
                 .join('')}
@@ -1014,7 +1014,7 @@ export function EnhancedBinaryViewer() {
   const totalRows = fileData ? Math.ceil(fileData.length / bytesPerRow) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-elevated)] to-[var(--bg-card)] p-6">
       {showAuth && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-[#0d0d0d] rounded-xl border border-[#1a1a1a] p-8 max-w-md w-full">
@@ -1036,14 +1036,14 @@ export function EnhancedBinaryViewer() {
                 placeholder="Usuario"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                className="w-full px-4 py-2 bg-[var(--bg-hover)] border border-[var(--border-medium)] rounded-lg text-white"
               />
               <input
                 type="password"
                 placeholder="Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                className="w-full px-4 py-2 bg-[var(--bg-hover)] border border-[var(--border-medium)] rounded-lg text-white"
                 onKeyPress={(e) => e.key === 'Enter' && handleAuthenticate()}
               />
               <div className="flex gap-3">
@@ -1059,7 +1059,7 @@ export function EnhancedBinaryViewer() {
                     setPendingFile(null);
                     setAuthError(null);
                   }}
-                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
+                  className="px-4 py-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] text-white rounded-lg"
                 >
                   Cancelar
                 </button>
@@ -1077,7 +1077,7 @@ export function EnhancedBinaryViewer() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Enhanced Binary Viewer Pro</h1>
-              <p className="text-sm text-slate-400">Professional forensic and cryptographic analysis with Digital Commercial Bank Ltd reverse engineering</p>
+              <p className="text-sm text-[var(--text-secondary)]">Professional forensic and cryptographic analysis with Digital Commercial Bank Ltd reverse engineering</p>
             </div>
           </div>
 
@@ -1085,14 +1085,14 @@ export function EnhancedBinaryViewer() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowAnalysis(!showAnalysis)}
-                className={`p-2 rounded-lg text-white ${showAnalysis ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+                className={`p-2 rounded-lg text-white ${showAnalysis ? 'bg-blue-600' : 'bg-[var(--bg-hover)] hover:bg-[var(--bg-active)]'}`}
                 title="Análisis avanzado"
               >
                 <Activity className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white"
+                className="p-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] rounded-lg text-white"
                 title="Configuración"
               >
                 <Settings className="w-5 h-5" />
@@ -1117,16 +1117,16 @@ export function EnhancedBinaryViewer() {
               </div>
               <div className="text-center">
                 <p className="text-xl font-semibold text-white mb-2">Cargar Archivo Binario</p>
-                <p className="text-slate-400 mb-4">Click para seleccionar o arrastra un archivo aquí</p>
-                <p className="text-sm text-slate-500 mb-4">Formatos soportados: .bin, .Digital Commercial Bank Ltd, .file, .dat, .hex</p>
+                <p className="text-[var(--text-secondary)] mb-4">Click para seleccionar o arrastra un archivo aquí</p>
+                <p className="text-sm text-[var(--text-muted)] mb-4">Formatos soportados: .bin, .Digital Commercial Bank Ltd, .file, .dat, .hex</p>
               </div>
             </label>
 
             <div className="mt-8 text-center">
               <div className="flex items-center gap-4 justify-center mb-4">
-                <div className="w-px h-8 bg-slate-600"></div>
-                <span className="text-slate-400 text-sm">O</span>
-                <div className="w-px h-8 bg-slate-600"></div>
+                <div className="w-px h-8 bg-[var(--bg-active)]"></div>
+                <span className="text-[var(--text-secondary)] text-sm">O</span>
+                <div className="w-px h-8 bg-[var(--bg-active)]"></div>
               </div>
 
               <div className="flex gap-3 justify-center">
@@ -1140,28 +1140,28 @@ export function EnhancedBinaryViewer() {
 
                 <button
                   onClick={downloadSampleFile}
-                  className="flex items-center gap-2 px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white rounded-lg font-medium transition-colors"
+                  className="flex items-center gap-2 px-6 py-3 bg-[var(--bg-active)] hover:bg-slate-500 text-white rounded-lg font-medium transition-colors"
                 >
                   <Download className="w-5 h-5" />
                   Descargar Ejemplo
                 </button>
               </div>
 
-              <p className="text-xs text-slate-500 mt-2">
+              <p className="text-xs text-[var(--text-muted)] mt-2">
                 Crea un archivo de muestra con datos bancarios para probar el visor
               </p>
             </div>
 
-            <div className="mt-6 p-4 bg-slate-700/30 rounded-lg">
+            <div className="mt-6 p-4 bg-[var(--bg-hover)]/30 rounded-lg">
               <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-yellow-400" />
                 Credenciales por Defecto (para archivos encriptados)
               </h4>
-              <div className="text-xs text-slate-400 space-y-1">
-                <p><strong>Usuario:</strong> <code className="bg-slate-600 px-1 rounded">amitiel2002</code></p>
-                <p><strong>Contraseña:</strong> <code className="bg-slate-600 px-1 rounded">1a2b3c4d5e</code></p>
+              <div className="text-xs text-[var(--text-secondary)] space-y-1">
+                <p><strong>Usuario:</strong> <code className="bg-[var(--bg-active)] px-1 rounded">amitiel2002</code></p>
+                <p><strong>Contraseña:</strong> <code className="bg-[var(--bg-active)] px-1 rounded">1a2b3c4d5e</code></p>
               </div>
-              <p className="text-xs text-slate-500 mt-2">
+              <p className="text-xs text-[var(--text-muted)] mt-2">
                 Estas credenciales funcionan con archivos Digital Commercial Bank Ltd encriptados con AES-256-GCM
               </p>
             </div>
@@ -1173,7 +1173,7 @@ export function EnhancedBinaryViewer() {
                 <div className="flex items-center gap-3">
                   <FileText className="w-5 h-5 text-blue-400" />
                   <span className="font-medium text-white">{fileName}</span>
-                  <span className="text-sm text-slate-400">
+                  <span className="text-sm text-[var(--text-secondary)]">
                     {fileData.length.toLocaleString()} bytes
                   </span>
                 </div>
@@ -1182,7 +1182,7 @@ export function EnhancedBinaryViewer() {
                   <select
                     value={viewMode}
                     onChange={(e) => setViewMode(e.target.value as ViewMode)}
-                    className="px-3 py-1.5 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+                    className="px-3 py-1.5 bg-[var(--bg-hover)] border border-[var(--border-medium)] rounded-lg text-white text-sm"
                     title="Modo de visualización"
                     aria-label="Seleccionar modo de visualización"
                   >
@@ -1193,24 +1193,24 @@ export function EnhancedBinaryViewer() {
                     <option value="ascii">ASCII</option>
                   </select>
 
-                  <div className="flex gap-1 bg-slate-700 rounded-lg p-1">
+                  <div className="flex gap-1 bg-[var(--bg-hover)] rounded-lg p-1">
                     <button
                       onClick={() => exportData('hex')}
-                      className="px-3 py-1 hover:bg-slate-600 rounded text-white text-sm"
+                      className="px-3 py-1 hover:bg-[var(--bg-active)] rounded text-white text-sm"
                       title="Exportar HEX"
                     >
                       HEX
                     </button>
                     <button
                       onClick={() => exportData('base64')}
-                      className="px-3 py-1 hover:bg-slate-600 rounded text-white text-sm"
+                      className="px-3 py-1 hover:bg-[var(--bg-active)] rounded text-white text-sm"
                       title="Exportar Base64"
                     >
                       B64
                     </button>
                     <button
                       onClick={() => exportData('json')}
-                      className="px-3 py-1 hover:bg-slate-600 rounded text-white text-sm"
+                      className="px-3 py-1 hover:bg-[var(--bg-active)] rounded text-white text-sm"
                       title="Exportar JSON"
                     >
                       JSON
@@ -1231,14 +1231,14 @@ export function EnhancedBinaryViewer() {
 
               <div className="flex gap-2 mb-4">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                     placeholder="Buscar (texto o 0x1234...)"
-                    className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                    className="w-full pl-10 pr-4 py-2 bg-[var(--bg-hover)] border border-[var(--border-medium)] rounded-lg text-white"
                   />
                 </div>
                 <button
@@ -1249,18 +1249,18 @@ export function EnhancedBinaryViewer() {
                 </button>
                 {searchResults.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-400">
+                    <span className="text-sm text-[var(--text-secondary)]">
                       {currentSearchIndex + 1} / {searchResults.length}
                     </span>
                     <button
                       onClick={() => goToSearchResult((currentSearchIndex - 1 + searchResults.length) % searchResults.length)}
-                      className="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white"
+                      className="px-3 py-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] rounded-lg text-white"
                     >
                       ←
                     </button>
                     <button
                       onClick={() => goToSearchResult((currentSearchIndex + 1) % searchResults.length)}
-                      className="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white"
+                      className="px-3 py-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] rounded-lg text-white"
                     >
                       →
                     </button>
@@ -1275,20 +1275,20 @@ export function EnhancedBinaryViewer() {
                       <span className="text-blue-400">
                         Selección: 0x{selection.start.toString(16)} - 0x{selection.end.toString(16)}
                       </span>
-                      <span className="text-slate-400">
+                      <span className="text-[var(--text-secondary)]">
                         {selection.end - selection.start + 1} bytes
                       </span>
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={addBookmark}
-                        className="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-white text-sm"
+                        className="px-3 py-1 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] rounded text-white text-sm"
                       >
                         Marcar
                       </button>
                       <button
                         onClick={() => setSelection(null)}
-                        className="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-white text-sm"
+                        className="px-3 py-1 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] rounded text-white text-sm"
                       >
                         Limpiar
                       </button>
@@ -1312,7 +1312,7 @@ export function EnhancedBinaryViewer() {
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         analysisMode === 'basic'
                           ? 'bg-blue-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:bg-[var(--bg-active)]'
                       }`}
                     >
                       Básico
@@ -1323,7 +1323,7 @@ export function EnhancedBinaryViewer() {
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         analysisMode === 'forensic'
                           ? 'bg-purple-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:bg-[var(--bg-active)]'
                       }`}
                     >
                       {isAnalyzing ? 'Analizando...' : 'Forense'}
@@ -1334,7 +1334,7 @@ export function EnhancedBinaryViewer() {
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         analysisMode === 'cryptanalysis'
                           ? 'bg-red-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:bg-[var(--bg-active)]'
                       }`}
                     >
                       {isAnalyzing ? 'Analizando...' : 'Cripto'}
@@ -1344,7 +1344,7 @@ export function EnhancedBinaryViewer() {
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         analysisMode === 'pattern'
                           ? 'bg-white/20 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:bg-[var(--bg-active)]'
                       }`}
                     >
                       Patrones
@@ -1355,7 +1355,7 @@ export function EnhancedBinaryViewer() {
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         analysisMode === 'Digital Commercial Bank Ltd'
                           ? 'bg-orange-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:bg-[var(--bg-active)]'
                       }`}
                     >
                       {isAnalyzing ? 'Analizando...' : 'Digital Commercial Bank Ltd'}
@@ -1371,30 +1371,30 @@ export function EnhancedBinaryViewer() {
                       Análisis de Datos Básico
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-slate-700/50 rounded-lg p-4">
-                        <p className="text-sm text-slate-400 mb-1">Entropía</p>
+                      <div className="bg-[var(--bg-hover)]/50 rounded-lg p-4">
+                        <p className="text-sm text-[var(--text-secondary)] mb-1">Entropía</p>
                         <p className="text-2xl font-bold text-white">{analysis.entropy.toFixed(2)}</p>
-                        <div className="mt-2 h-2 bg-slate-600 rounded-full overflow-hidden">
+                        <div className="mt-2 h-2 bg-[var(--bg-active)] rounded-full overflow-hidden">
                           <div
                             className="h-full bg-blue-500"
                             style={{ width: `${(analysis.entropy / 8) * 100}%` }}
                           />
                         </div>
                       </div>
-                      <div className="bg-slate-700/50 rounded-lg p-4">
-                        <p className="text-sm text-slate-400 mb-1">Bytes únicos</p>
+                      <div className="bg-[var(--bg-hover)]/50 rounded-lg p-4">
+                        <p className="text-sm text-[var(--text-secondary)] mb-1">Bytes únicos</p>
                         <p className="text-2xl font-bold text-white">{analysis.uniqueBytes}</p>
-                        <p className="text-xs text-slate-500">{((analysis.uniqueBytes / 256) * 100).toFixed(1)}% de 256</p>
+                        <p className="text-xs text-[var(--text-muted)]">{((analysis.uniqueBytes / 256) * 100).toFixed(1)}% de 256</p>
                       </div>
-                      <div className="bg-slate-700/50 rounded-lg p-4">
-                        <p className="text-sm text-slate-400 mb-1">Bytes nulos</p>
+                      <div className="bg-[var(--bg-hover)]/50 rounded-lg p-4">
+                        <p className="text-sm text-[var(--text-secondary)] mb-1">Bytes nulos</p>
                         <p className="text-2xl font-bold text-white">{analysis.nullBytes}</p>
-                        <p className="text-xs text-slate-500">{((analysis.nullBytes / fileData.length) * 100).toFixed(1)}%</p>
+                        <p className="text-xs text-[var(--text-muted)]">{((analysis.nullBytes / fileData.length) * 100).toFixed(1)}%</p>
                       </div>
-                      <div className="bg-slate-700/50 rounded-lg p-4">
-                        <p className="text-sm text-slate-400 mb-1">Imprimibles</p>
+                      <div className="bg-[var(--bg-hover)]/50 rounded-lg p-4">
+                        <p className="text-sm text-[var(--text-secondary)] mb-1">Imprimibles</p>
                         <p className="text-2xl font-bold text-white">{analysis.printableBytes}</p>
-                        <p className="text-xs text-slate-500">{((analysis.printableBytes / fileData.length) * 100).toFixed(1)}%</p>
+                        <p className="text-xs text-[var(--text-muted)]">{((analysis.printableBytes / fileData.length) * 100).toFixed(1)}%</p>
                       </div>
                     </div>
 
@@ -1403,13 +1403,13 @@ export function EnhancedBinaryViewer() {
                         <h4 className="text-lg font-semibold text-white mb-3">Patrones Detectados</h4>
                         <div className="space-y-2">
                           {analysis.patterns.slice(0, 5).map((pattern, i) => (
-                            <div key={i} className="bg-slate-700/30 rounded-lg p-3">
+                            <div key={i} className="bg-[var(--bg-hover)]/30 rounded-lg p-3">
                               <div className="flex justify-between items-start">
                                 <div>
                                   <p className="text-white font-mono">
                                     [{pattern.pattern.map(b => `0x${b.toString(16).padStart(2, '0')}`).join(', ')}]
                                   </p>
-                                  <p className="text-slate-400 text-sm">
+                                  <p className="text-[var(--text-secondary)] text-sm">
                                     Aparece {pattern.count} veces en posiciones: {pattern.positions.slice(0, 3).join(', ')}
                                     {pattern.positions.length > 3 && '...'}
                                   </p>
@@ -1434,7 +1434,7 @@ export function EnhancedBinaryViewer() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <h4 className="text-lg font-semibold text-white mb-3">Firma del Archivo</h4>
-                        <div className="bg-slate-700/50 rounded-lg p-4">
+                        <div className="bg-[var(--bg-hover)]/50 rounded-lg p-4">
                           <p className="font-mono text-white">{forensicAnalysis.fileSignature}</p>
                         </div>
 
@@ -1442,15 +1442,15 @@ export function EnhancedBinaryViewer() {
                         <div className="space-y-2">
                           {forensicAnalysis.entropyDistribution.map((range, i) => (
                             <div key={i} className="flex justify-between items-center">
-                              <span className="text-slate-300">{range.range}</span>
+                              <span className="text-[var(--text-secondary)]">{range.range}</span>
                               <div className="flex items-center gap-2">
-                                <div className="w-24 h-2 bg-slate-600 rounded-full overflow-hidden">
+                                <div className="w-24 h-2 bg-[var(--bg-active)] rounded-full overflow-hidden">
                                   <div
                                     className="h-full bg-purple-500"
                                     style={{ width: `${range.percentage}%` }}
                                   />
                                 </div>
-                                <span className="text-slate-400 text-sm w-12">{range.percentage}%</span>
+                                <span className="text-[var(--text-secondary)] text-sm w-12">{range.percentage}%</span>
                               </div>
                             </div>
                           ))}
@@ -1462,15 +1462,15 @@ export function EnhancedBinaryViewer() {
                         <div className="space-y-1 max-h-48 overflow-y-auto">
                           {forensicAnalysis.byteFrequency.slice(0, 10).map((freq, i) => (
                             <div key={i} className="flex justify-between items-center text-sm">
-                              <span className="font-mono text-slate-300">0x{freq.byte.toString(16).padStart(2, '0')}</span>
+                              <span className="font-mono text-[var(--text-secondary)]">0x{freq.byte.toString(16).padStart(2, '0')}</span>
                               <div className="flex items-center gap-2">
-                                <div className="w-16 h-2 bg-slate-600 rounded-full overflow-hidden">
+                                <div className="w-16 h-2 bg-[var(--bg-active)] rounded-full overflow-hidden">
                                   <div
                                     className="h-full bg-blue-500"
                                     style={{ width: `${freq.percentage}%` }}
                                   />
                                 </div>
-                                <span className="text-slate-400 w-8">{freq.count}</span>
+                                <span className="text-[var(--text-secondary)] w-8">{freq.count}</span>
                               </div>
                             </div>
                           ))}
@@ -1485,7 +1485,7 @@ export function EnhancedBinaryViewer() {
                               'bg-blue-500/10 border-blue-500'
                             }`}>
                               <p className="text-white font-medium">{pattern.pattern}</p>
-                              <p className="text-slate-400 text-sm">{pattern.description}</p>
+                              <p className="text-[var(--text-secondary)] text-sm">{pattern.description}</p>
                             </div>
                           ))}
                         </div>
@@ -1507,12 +1507,12 @@ export function EnhancedBinaryViewer() {
                         <h4 className="text-lg font-semibold text-white mb-3">Algoritmos Posibles</h4>
                         <div className="space-y-2">
                           {cryptanalysis.possibleAlgorithms.map((algo, i) => (
-                            <div key={i} className="bg-slate-700/50 rounded-lg p-3">
+                            <div key={i} className="bg-[var(--bg-hover)]/50 rounded-lg p-3">
                               <div className="flex justify-between items-center mb-2">
                                 <span className="text-white font-medium">{algo.name}</span>
                                 <span className="text-white text-sm">{algo.confidence}% confianza</span>
                               </div>
-                              <div className="text-slate-400 text-sm">
+                              <div className="text-[var(--text-secondary)] text-sm">
                                 {algo.details.map((detail, j) => (
                                   <div key={j}>• {detail}</div>
                                 ))}
@@ -1524,9 +1524,9 @@ export function EnhancedBinaryViewer() {
 
                       <div>
                         <h4 className="text-lg font-semibold text-white mb-3">Estimación de Complejidad</h4>
-                        <div className="bg-slate-700/50 rounded-lg p-4">
+                        <div className="bg-[var(--bg-hover)]/50 rounded-lg p-4">
                           <div className="mb-4">
-                            <p className="text-slate-400 text-sm mb-1">Complejidad</p>
+                            <p className="text-[var(--text-secondary)] text-sm mb-1">Complejidad</p>
                             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                               cryptanalysis.bruteForceEstimates.complexity === 'very weak' ? 'bg-white/20' :
                               cryptanalysis.bruteForceEstimates.complexity === 'weak' ? 'bg-yellow-600' :
@@ -1538,11 +1538,11 @@ export function EnhancedBinaryViewer() {
                             </span>
                           </div>
                           <div className="mb-4">
-                            <p className="text-slate-400 text-sm mb-1">Tiempo estimado</p>
+                            <p className="text-[var(--text-secondary)] text-sm mb-1">Tiempo estimado</p>
                             <p className="text-white">{cryptanalysis.bruteForceEstimates.timeEstimate}</p>
                           </div>
                           <div>
-                            <p className="text-slate-400 text-sm mb-1">Contraseña simple</p>
+                            <p className="text-[var(--text-secondary)] text-sm mb-1">Contraseña simple</p>
                             <p className="font-mono text-red-400">{cryptanalysis.bruteForceEstimates.simplePassword}</p>
                           </div>
                         </div>
@@ -1552,19 +1552,19 @@ export function EnhancedBinaryViewer() {
                             <button
                               onClick={attemptBruteForceDecryption}
                               disabled={isAnalyzing}
-                              className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-600 text-white rounded-lg font-medium"
+                              className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-[var(--bg-active)] text-white rounded-lg font-medium"
                             >
                               {isAnalyzing ? 'Probando contraseñas...' : 'Intento de Fuerza Bruta'}
                             </button>
                             {bruteForceProgress > 0 && (
                               <div className="mt-2">
-                                <div className="w-full h-2 bg-slate-600 rounded-full overflow-hidden">
+                                <div className="w-full h-2 bg-[var(--bg-active)] rounded-full overflow-hidden">
                                   <div
                                     className="h-full bg-red-500"
                                     style={{ width: `${bruteForceProgress}%` }}
                                   />
                                 </div>
-                                <p className="text-slate-400 text-sm mt-1">{Math.round(bruteForceProgress)}% completado</p>
+                                <p className="text-[var(--text-secondary)] text-sm mt-1">{Math.round(bruteForceProgress)}% completado</p>
                               </div>
                             )}
                           </div>
@@ -1577,14 +1577,14 @@ export function EnhancedBinaryViewer() {
                         <h4 className="text-lg font-semibold text-white mb-3">Resultados de Fuerza Bruta</h4>
                         <div className="space-y-2 max-h-48 overflow-y-auto">
                           {bruteForceResults.map((result, i) => (
-                            <div key={i} className={`p-3 rounded-lg ${result.success ? 'bg-white/20/10 border border-white/30' : 'bg-slate-700/30'}`}>
+                            <div key={i} className={`p-3 rounded-lg ${result.success ? 'bg-white/20/10 border border-white/30' : 'bg-[var(--bg-hover)]/30'}`}>
                               <div className="flex justify-between items-center">
                                 <span className="font-mono text-white">{result.password}</span>
                                 <div className="flex items-center gap-2">
                                   <span className={`px-2 py-1 rounded text-xs ${result.success ? 'bg-white/20' : 'bg-red-600'}`}>
                                     {result.success ? 'ÉXITO' : 'FALLIDO'}
                                   </span>
-                                  <span className="text-slate-400 text-sm">{result.time}ms</span>
+                                  <span className="text-[var(--text-secondary)] text-sm">{result.time}ms</span>
                                 </div>
                               </div>
                             </div>
@@ -1606,15 +1606,15 @@ export function EnhancedBinaryViewer() {
                     {analysis.patterns.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {analysis.patterns.map((pattern, i) => (
-                          <div key={i} className="bg-slate-700/50 rounded-lg p-4">
+                          <div key={i} className="bg-[var(--bg-hover)]/50 rounded-lg p-4">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-white font-medium">Patrón {i + 1}</span>
                               <span className="text-white text-sm">{pattern.count} ocurrencias</span>
                             </div>
-                            <div className="font-mono text-slate-300 mb-2">
+                            <div className="font-mono text-[var(--text-secondary)] mb-2">
                               [{pattern.pattern.map(b => `0x${b.toString(16).padStart(2, '0')}`).join(', ')}]
                             </div>
-                            <div className="text-slate-400 text-sm">
+                            <div className="text-[var(--text-secondary)] text-sm">
                               Posiciones: {pattern.positions.slice(0, 5).join(', ')}
                               {pattern.positions.length > 5 && `... (+${pattern.positions.length - 5} más)`}
                             </div>
@@ -1622,7 +1622,7 @@ export function EnhancedBinaryViewer() {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center text-slate-400 py-8">
+                      <div className="text-center text-[var(--text-secondary)] py-8">
                         No se detectaron patrones repetitivos significativos
                       </div>
                     )}
@@ -1642,13 +1642,13 @@ export function EnhancedBinaryViewer() {
                       <div>
                         <h4 className="text-lg font-semibold text-white mb-3">📋 Información General</h4>
                         <div className="space-y-3">
-                          <div className="bg-slate-700/50 rounded-lg p-4">
-                            <p className="text-sm text-slate-400 mb-1">Firma del Archivo</p>
+                          <div className="bg-[var(--bg-hover)]/50 rounded-lg p-4">
+                            <p className="text-sm text-[var(--text-secondary)] mb-1">Firma del Archivo</p>
                             <p className="font-mono text-white">{DTC1BAnalysis.fileSignature}</p>
                           </div>
 
-                          <div className="bg-slate-700/50 rounded-lg p-4">
-                            <p className="text-sm text-slate-400 mb-1">Estructura</p>
+                          <div className="bg-[var(--bg-hover)]/50 rounded-lg p-4">
+                            <p className="text-sm text-[var(--text-secondary)] mb-1">Estructura</p>
                             <div className="text-white text-sm space-y-1">
                               <p>• Tamaño de bloque: {DTC1BAnalysis.structure.blockSize} bytes</p>
                               <p>• Total de bloques: {DTC1BAnalysis.structure.totalBlocks}</p>
@@ -1656,8 +1656,8 @@ export function EnhancedBinaryViewer() {
                             </div>
                           </div>
 
-                          <div className="bg-slate-700/50 rounded-lg p-4">
-                            <p className="text-sm text-slate-400 mb-1">Metadatos</p>
+                          <div className="bg-[var(--bg-hover)]/50 rounded-lg p-4">
+                            <p className="text-sm text-[var(--text-secondary)] mb-1">Metadatos</p>
                             <div className="text-white text-sm space-y-1 font-mono">
                               <p>Primeros bytes: {DTC1BAnalysis.extracted_data.metadata.first_bytes}</p>
                               <p>Últimos bytes: {DTC1BAnalysis.extracted_data.metadata.last_bytes}</p>
@@ -1666,9 +1666,9 @@ export function EnhancedBinaryViewer() {
                         </div>
 
                         {/* Resumen de Análisis */}
-                        <div className="mt-6 p-4 bg-slate-700/30 rounded-lg">
+                        <div className="mt-6 p-4 bg-[var(--bg-hover)]/30 rounded-lg">
                           <h5 className="text-sm font-semibold text-white mb-2">Resumen de Análisis</h5>
-                          <div className="text-sm text-slate-300 space-y-1">
+                          <div className="text-sm text-[var(--text-secondary)] space-y-1">
                             <p>• Patrones encontrados: {DTC1BAnalysis.analysis_summary.total_patterns_found}</p>
                             <p>• Instituciones detectadas: {DTC1BAnalysis.analysis_summary.institutions_detected}</p>
                             <p>• Calidad de datos: {DTC1BAnalysis.analysis_summary.data_quality_score}%</p>
@@ -1683,7 +1683,7 @@ export function EnhancedBinaryViewer() {
 
                         {DTC1BAnalysis.extracted_data.institutions.length > 0 && (
                           <div className="mb-4">
-                            <p className="text-sm text-slate-400 mb-2">Instituciones Financieras</p>
+                            <p className="text-sm text-[var(--text-secondary)] mb-2">Instituciones Financieras</p>
                             <div className="flex flex-wrap gap-2">
                               {DTC1BAnalysis.extracted_data.institutions.map((institution: string, i: number) => (
                                 <span key={i} className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs">
@@ -1696,7 +1696,7 @@ export function EnhancedBinaryViewer() {
 
                         {DTC1BAnalysis.extracted_data.bank_codes.length > 0 && (
                           <div className="mb-4">
-                            <p className="text-sm text-slate-400 mb-2">Códigos Bancarios</p>
+                            <p className="text-sm text-[var(--text-secondary)] mb-2">Códigos Bancarios</p>
                             <div className="space-y-1">
                               {DTC1BAnalysis.extracted_data.bank_codes.slice(0, 3).map((code: string, i: number) => (
                                 <div key={i} className="font-mono text-white text-sm">{code}</div>
@@ -1707,7 +1707,7 @@ export function EnhancedBinaryViewer() {
 
                         {DTC1BAnalysis.extracted_data.swift_codes.length > 0 && (
                           <div className="mb-4">
-                            <p className="text-sm text-slate-400 mb-2">Códigos SWIFT</p>
+                            <p className="text-sm text-[var(--text-secondary)] mb-2">Códigos SWIFT</p>
                             <div className="space-y-1">
                               {DTC1BAnalysis.extracted_data.swift_codes.map((code: string, i: number) => (
                                 <div key={i} className="font-mono text-purple-400 text-sm">{code}</div>
@@ -1718,7 +1718,7 @@ export function EnhancedBinaryViewer() {
 
                         {DTC1BAnalysis.extracted_data.currency_amounts.length > 0 && (
                           <div className="mb-4">
-                            <p className="text-sm text-slate-400 mb-2">Montos en Moneda</p>
+                            <p className="text-sm text-[var(--text-secondary)] mb-2">Montos en Moneda</p>
                             <div className="space-y-1">
                               {DTC1BAnalysis.extracted_data.currency_amounts.map((amount: string, i: number) => (
                                 <div key={i} className="font-mono text-yellow-400 text-sm">{amount}</div>
@@ -1729,7 +1729,7 @@ export function EnhancedBinaryViewer() {
 
                         {Object.keys(DTC1BAnalysis.potential_data.financial_keywords).length > 0 && (
                           <div className="mb-4">
-                            <p className="text-sm text-slate-400 mb-2">Palabras Clave Financieras</p>
+                            <p className="text-sm text-[var(--text-secondary)] mb-2">Palabras Clave Financieras</p>
                             <div className="flex flex-wrap gap-1">
                               {Object.entries(DTC1BAnalysis.potential_data.financial_keywords).slice(0, 8).map(([keyword, count]: [string, number]) => (
                                 <span key={keyword} className="px-2 py-1 bg-white/20/20 text-white rounded text-xs">
@@ -1749,7 +1749,7 @@ export function EnhancedBinaryViewer() {
                           <div className="mb-4">
                             <div className="space-y-2 max-h-32 overflow-y-auto">
                               {Object.entries(DTC1BAnalysis.patterns_found).map(([patternName, patternData]: [string, any]) => (
-                                <div key={patternName} className="bg-slate-700/30 rounded p-2">
+                                <div key={patternName} className="bg-[var(--bg-hover)]/30 rounded p-2">
                                   <div className="flex justify-between items-center">
                                     <span className="text-white text-sm capitalize">
                                       {patternName.replace('_', ' ')}
@@ -1757,7 +1757,7 @@ export function EnhancedBinaryViewer() {
                                     <span className="text-blue-400 text-sm">{patternData.count}</span>
                                   </div>
                                   {patternData.samples.length > 0 && (
-                                    <div className="text-slate-400 text-xs mt-1">
+                                    <div className="text-[var(--text-secondary)] text-xs mt-1">
                                       Ej: {patternData.samples[0]}
                                     </div>
                                   )}
@@ -1774,7 +1774,7 @@ export function EnhancedBinaryViewer() {
                               <div className="flex items-center justify-between mb-2">
                                 <div>
                                   <span className="text-white font-medium">{currency.name}</span>
-                                  <p className="text-slate-400 text-sm">
+                                  <p className="text-[var(--text-secondary)] text-sm">
                                     {currency.positions.length} posición{currency.positions.length !== 1 ? 'es' : ''}
                                   </p>
                                 </div>
@@ -1789,9 +1789,9 @@ export function EnhancedBinaryViewer() {
                     </div>
 
                     {/* Recomendaciones */}
-                    <div className="mt-6 p-4 bg-slate-700/30 rounded-lg">
+                    <div className="mt-6 p-4 bg-[var(--bg-hover)]/30 rounded-lg">
                       <h4 className="text-sm font-semibold text-white mb-2">💡 Recomendaciones</h4>
-                      <div className="text-sm text-slate-300 space-y-1">
+                      <div className="text-sm text-[var(--text-secondary)] space-y-1">
                         {DTC1BAnalysis.analysis_summary.recommendations.map((rec: string, i: number) => (
                           <p key={i}>{rec}</p>
                         ))}
@@ -1799,7 +1799,7 @@ export function EnhancedBinaryViewer() {
                     </div>
 
                     {/* Conclusiones de Ingeniería Inversa */}
-                    <div className="mt-6 p-4 bg-slate-700/30 rounded-lg">
+                    <div className="mt-6 p-4 bg-[var(--bg-hover)]/30 rounded-lg">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="text-sm font-semibold text-white">🔬 Conclusiones de Ingeniería Inversa</h4>
                         <button
@@ -1809,7 +1809,7 @@ export function EnhancedBinaryViewer() {
                           Exportar Reporte JSON
                         </button>
                       </div>
-                      <div className="text-sm text-slate-300 space-y-1">
+                      <div className="text-sm text-[var(--text-secondary)] space-y-1">
                         <p>• ✅ <strong>Formato identificado:</strong> Digital Commercial Bank Ltd (Datos Transaccionales de CoreBanking)</p>
                         <p>• ✅ <strong>Estructura de bloques:</strong> Cada bloque de 128 bytes contiene una transacción</p>
                         <p>• ✅ <strong>Códigos de moneda:</strong> USD, EUR, GBP con cantidades en centavos (Big Endian)</p>
@@ -1835,28 +1835,28 @@ export function EnhancedBinaryViewer() {
                     <button
                       onClick={() => setOffset(Math.max(0, offset - bytesPerRow * visibleRows))}
                       disabled={offset === 0}
-                      className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 rounded-lg text-white"
+                      className="px-4 py-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] disabled:opacity-50 rounded-lg text-white"
                     >
                       ↑ Anterior
                     </button>
-                    <span className="text-sm text-slate-400">
+                    <span className="text-sm text-[var(--text-secondary)]">
                       Fila {Math.floor(offset / bytesPerRow) + 1} de {totalRows}
                     </span>
                     <button
                       onClick={() => setOffset(Math.min(fileData.length - bytesPerRow, offset + bytesPerRow * visibleRows))}
                       disabled={offset + bytesPerRow * visibleRows >= fileData.length}
-                      className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 rounded-lg text-white"
+                      className="px-4 py-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] disabled:opacity-50 rounded-lg text-white"
                     >
                       ↓ Siguiente
                     </button>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-slate-400">Bytes por fila:</label>
+                    <label className="text-sm text-[var(--text-secondary)]">Bytes por fila:</label>
                     <select
                       value={bytesPerRow}
                       onChange={(e) => setBytesPerRow(Number(e.target.value))}
-                      className="px-3 py-1.5 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="px-3 py-1.5 bg-[var(--bg-hover)] border border-[var(--border-medium)] rounded-lg text-white"
                       title="Bytes por fila"
                       aria-label="Seleccionar bytes por fila"
                     >
@@ -1876,7 +1876,7 @@ export function EnhancedBinaryViewer() {
                   {bookmarks.map((bookmark, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 cursor-pointer"
+                      className="flex items-center justify-between p-3 bg-[var(--bg-hover)]/50 rounded-lg hover:bg-[var(--bg-hover)] cursor-pointer"
                       onClick={() => {
                         setOffset(Math.floor(bookmark.offset / bytesPerRow) * bytesPerRow);
                         setSelection({ start: bookmark.offset, end: bookmark.offset });
@@ -1888,14 +1888,14 @@ export function EnhancedBinaryViewer() {
                           style={{ backgroundColor: bookmark.color }}
                         />
                         <span className="text-white font-medium">{bookmark.label}</span>
-                        <span className="text-sm text-slate-400">0x{bookmark.offset.toString(16)}</span>
+                        <span className="text-sm text-[var(--text-secondary)]">0x{bookmark.offset.toString(16)}</span>
                       </div>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setBookmarks(bookmarks.filter((_, j) => j !== i));
                         }}
-                        className="text-slate-400 hover:text-red-400"
+                        className="text-[var(--text-secondary)] hover:text-red-400"
                       >
                         ×
                       </button>

@@ -836,7 +836,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
   };
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-black p-card">
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
@@ -902,7 +902,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
               </BankingButton>
               <button
                 onClick={() => setBalancesVisible(!balancesVisible)}
-                className="p-3 bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-slate-300 rounded-xl transition-all"
+                className="p-3 bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-[var(--text-secondary)] rounded-xl transition-all"
               >
                 {balancesVisible ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
               </button>
@@ -917,31 +917,31 @@ Timestamp: ${AUDIT_DATA.timestamp}
 
         {/* Analysis Results (si hay archivo analizado) */}
         {analysisResults && (
-          <BankingCard className="p-6 border-2 border-white/20 bg-white/3">
-            <div className="flex items-start gap-4">
+          <BankingCard className="p-card border-2 border-white/20 bg-white/3">
+            <div className="flex items-start gap-card">
               <div className="p-3 bg-white/10 rounded-xl animate-pulse">
                 <Activity className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-slate-100 mb-2">
+                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
                   {isSpanish ? "Análisis Completado" : "Analysis Completed"}
                 </h3>
                 <p className="text-white text-lg font-semibold mb-3">
                   {analysisResults.totalM2Values.toLocaleString()} {isSpanish ? "Valores M2 Detectados" : "M2 Values Detected"}
                 </p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-card text-sm">
                   <div>
-                    <p className="text-slate-500">{isSpanish ? "Total en Miles de Millones" : "Total in Billions"}</p>
-                    <p className="text-slate-100 font-bold text-xl">
+                    <p className="text-[var(--text-muted)]">{isSpanish ? "Total en Miles de Millones" : "Total in Billions"}</p>
+                    <p className="text-[var(--text-primary)] font-bold text-xl">
                       {analysisResults.totalM2Amount.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
                     </p>
                   </div>
                   <div>
-                    <p className="text-slate-500">{isSpanish ? "Archivos Analizados" : "Files Analyzed"}</p>
-                    <p className="text-slate-100 font-bold text-xl">{analysisResults.filesProcessed}</p>
+                    <p className="text-[var(--text-muted)]">{isSpanish ? "Archivos Analizados" : "Files Analyzed"}</p>
+                    <p className="text-[var(--text-primary)] font-bold text-xl">{analysisResults.filesProcessed}</p>
                   </div>
                   <div>
-                    <p className="text-slate-500">{isSpanish ? "Estado" : "Status"}</p>
+                    <p className="text-[var(--text-muted)]">{isSpanish ? "Estado" : "Status"}</p>
                     <p className="text-emerald-400 font-bold text-xl">
                       ✅ {isSpanish ? "CERTIFICADO" : "CERTIFIED"}
                     </p>
@@ -953,34 +953,34 @@ Timestamp: ${AUDIT_DATA.timestamp}
         )}
 
         {/* Audit Info Card */}
-        <BankingCard className="p-6 border-2 border-emerald-500/50">
-          <div className="flex items-start gap-4">
+        <BankingCard className="p-card border-2 border-emerald-500/50">
+          <div className="flex items-start gap-card">
             <div className="p-3 bg-emerald-500/10 rounded-xl">
               <CheckCircle className="w-8 h-8 text-emerald-400" />
             </div>
             <div className="flex-1">
-              <h3 className="text-2xl font-bold text-slate-100 mb-2">
+              <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
                 {isSpanish ? "Auditoría Técnica Verificada" : "Technical Audit Verified"}
               </h3>
               <p className="text-emerald-400 text-lg font-semibold mb-3">
                 745,381 {isSpanish ? "Cuatrillones" : "Quadrillion"} M2 {isSpanish ? "Confirmados" : "Confirmed"}
               </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-card text-sm">
                 <div>
-                  <p className="text-slate-500">{isSpanish ? "Archivos Procesados" : "Files Processed"}</p>
-                  <p className="text-slate-100 font-bold">{AUDIT_DATA.totalFiles}</p>
+                  <p className="text-[var(--text-muted)]">{isSpanish ? "Archivos Procesados" : "Files Processed"}</p>
+                  <p className="text-[var(--text-primary)] font-bold">{AUDIT_DATA.totalFiles}</p>
                 </div>
                 <div>
-                  <p className="text-slate-500">{isSpanish ? "Valores M2" : "M2 Values"}</p>
-                  <p className="text-slate-100 font-bold">{fmt.number(AUDIT_DATA.totalM2Values)}</p>
+                  <p className="text-[var(--text-muted)]">{isSpanish ? "Valores M2" : "M2 Values"}</p>
+                  <p className="text-[var(--text-primary)] font-bold">{fmt.number(AUDIT_DATA.totalM2Values)}</p>
                 </div>
                 <div>
-                  <p className="text-slate-500">{isSpanish ? "Encriptación" : "Encryption"}</p>
-                  <p className="text-slate-100 font-bold">{AUDIT_DATA.encryption}</p>
+                  <p className="text-[var(--text-muted)]">{isSpanish ? "Encriptación" : "Encryption"}</p>
+                  <p className="text-[var(--text-primary)] font-bold">{AUDIT_DATA.encryption}</p>
                 </div>
                 <div>
-                  <p className="text-slate-500">{isSpanish ? "Fuente" : "Source"}</p>
-                  <p className="text-slate-100 font-bold text-xs">Ledger1 DAES</p>
+                  <p className="text-[var(--text-muted)]">{isSpanish ? "Fuente" : "Source"}</p>
+                  <p className="text-[var(--text-primary)] font-bold text-xs">Ledger1 DAES</p>
                 </div>
               </div>
             </div>
@@ -998,7 +998,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
               <button
                 key={curr.code}
                 onClick={() => setSelectedAccount(curr.code)}
-                className={`p-4 rounded-xl border-2 transition-all ${
+                className={`p-card-sm rounded-xl border-2 transition-all ${
                   isSelected
                     ? `bg-${color}-500/20 border-${color}-500 shadow-lg`
                     : 'bg-[#0d0d0d]/50 border-[#1a1a1a] hover:border-[#1a1a1a]'
@@ -1006,8 +1006,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
               >
                 <div className="text-center">
                   <span className="text-3xl mb-2 block">{curr.flag}</span>
-                  <p className="text-slate-100 font-bold">{curr.code}</p>
-                  <p className="text-slate-500 text-xs">{(curr.percentage * 100).toFixed(1)}%</p>
+                  <p className="text-[var(--text-primary)] font-bold">{curr.code}</p>
+                  <p className="text-[var(--text-muted)] text-xs">{(curr.percentage * 100).toFixed(1)}%</p>
                   {isSelected && <CheckCircle className={`w-5 h-5 text-${color}-400 mx-auto mt-2`} />}
                 </div>
               </button>
@@ -1017,14 +1017,14 @@ Timestamp: ${AUDIT_DATA.timestamp}
 
         {/* Master Account Display */}
         <BankingCard className="overflow-hidden">
-          <div className={`p-8 border-b border-[#1a1a1a] ${
+          <div className={`p-card-lg border-b border-[#1a1a1a] ${
             selectedAccount === 'USD' 
               ? 'bg-gradient-to-r from-white/5 to-white/5'
               : 'bg-gradient-to-r from-emerald-500/10 to-teal-600/10'
           }`}>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-xl ${
+            <div className="flex items-center justify-between m-section">
+              <div className="flex items-center gap-card">
+                <div className={`p-card-sm rounded-xl ${
                   selectedAccount === 'USD' ? 'bg-white/10' : 'bg-emerald-500/20'
                 }`}>
                   <DollarSign className={`w-10 h-10 ${
@@ -1032,8 +1032,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   }`} />
                 </div>
                 <div>
-                  <h3 className="text-3xl font-bold text-slate-100">{selectedMasterAccount.name}</h3>
-                  <p className="text-slate-400">ID: {selectedMasterAccount.id}</p>
+                  <h3 className="text-3xl font-bold text-[var(--text-primary)]">{selectedMasterAccount.name}</h3>
+                  <p className="text-[var(--text-secondary)]">ID: {selectedMasterAccount.id}</p>
                 </div>
               </div>
               <BankingBadge variant="success">
@@ -1042,15 +1042,15 @@ Timestamp: ${AUDIT_DATA.timestamp}
             </div>
 
             <div className="text-center py-8">
-              <p className="text-slate-400 text-sm mb-3 uppercase tracking-wide">
+              <p className="text-[var(--text-secondary)] text-sm mb-3 uppercase tracking-wide">
                 {isSpanish ? "Balance de Tesorería" : "Treasury Balance"}
               </p>
               {balancesVisible ? (
                 <>
-                  <p className="text-6xl font-black text-slate-100 mb-2">
+                  <p className="text-6xl font-black text-[var(--text-primary)] mb-2">
                     {fmt.currency(selectedMasterAccount.balance, selectedMasterAccount.currency)}
                   </p>
-                  <p className="text-slate-500 text-lg">
+                  <p className="text-[var(--text-muted)] text-lg">
                     ({selectedMasterAccount.balance.toExponential(2)} {selectedMasterAccount.currency})
                   </p>
                   <p className="text-white text-sm mt-2">
@@ -1058,11 +1058,11 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   </p>
                 </>
               ) : (
-                <p className="text-6xl font-black text-slate-600 mb-4">
+                <p className="text-6xl font-black text-[var(--text-muted)] m-card">
                   {'*'.repeat(20)}
                 </p>
               )}
-              <div className="flex items-center justify-center gap-6 text-sm mt-4">
+              <div className="flex items-center justify-center gap-section text-sm mt-4">
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-emerald-400" />
                   <span className="text-emerald-400 font-semibold">
@@ -1079,8 +1079,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
             {/* ✅ PANTALLA DE VERIFICACIÓN Y CARGA EN TIEMPO REAL */}
             {analyzing && (
               <div className="px-8 pb-6">
-                <BankingCard className="p-6 border-2 border-white/20 bg-white/3">
-                  <div className="flex items-center justify-between mb-4">
+                <BankingCard className="p-card border-2 border-white/20 bg-white/3">
+                  <div className="flex items-center justify-between m-card">
                     <div className="flex items-center gap-3">
                       <div className="p-3 bg-white/10 rounded-xl">
                         <Activity className="w-6 h-6 text-white animate-spin" />
@@ -1089,19 +1089,19 @@ Timestamp: ${AUDIT_DATA.timestamp}
                         <p className="text-white font-bold text-xl">
                           {isSpanish ? "Escaneando y Verificando Ledger1" : "Scanning and Verifying Ledger1"}
                         </p>
-                        <p className="text-slate-400 text-sm">
+                        <p className="text-[var(--text-secondary)] text-sm">
                           {isSpanish ? "Extracción de valores M2 en proceso..." : "M2 values extraction in progress..."}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-white font-black text-3xl">{progress.toFixed(1)}%</p>
-                      <p className="text-slate-500 text-xs">{isSpanish ? "Completado" : "Completed"}</p>
+                      <p className="text-[var(--text-muted)] text-xs">{isSpanish ? "Completado" : "Completed"}</p>
                     </div>
                   </div>
                   
                   {/* Barra de progreso principal */}
-                  <div className="w-full bg-[#141414] rounded-full h-5 overflow-hidden border border-[#1a1a1a] mb-6">
+                  <div className="w-full bg-[#141414] rounded-full h-5 overflow-hidden border border-[#1a1a1a] m-section">
                     <div
                       className="h-full bg-gradient-to-r from-white via-white to-white rounded-full transition-all duration-300 relative overflow-hidden"
                       style={{ width: `${progress}%` }}
@@ -1126,15 +1126,15 @@ Timestamp: ${AUDIT_DATA.timestamp}
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xl">{curr.flag}</span>
                             <div>
-                              <p className="text-slate-100 font-bold text-sm">{curr.code}</p>
-                              <p className="text-slate-500 text-xs">{curr.percentage * 100}%</p>
+                              <p className="text-[var(--text-primary)] font-bold text-sm">{curr.code}</p>
+                              <p className="text-[var(--text-muted)] text-xs">{curr.percentage * 100}%</p>
                             </div>
                           </div>
                           <div className="text-center py-2">
                             <p className={`font-bold text-lg text-${color}-400`}>
                               {currentBalance.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
                             </p>
-                            <p className="text-slate-600 text-xs">{isSpanish ? "M.Millones" : "Billions"}</p>
+                            <p className="text-[var(--text-muted)] text-xs">{isSpanish ? "M.Millones" : "Billions"}</p>
                           </div>
                           <div className="w-full bg-[#141414] rounded-full h-1.5 overflow-hidden">
                             <div
@@ -1148,7 +1148,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   </div>
 
                   {/* Info adicional */}
-                  <div className="mt-4 text-center text-sm text-slate-400">
+                  <div className="mt-4 text-center text-sm text-[var(--text-secondary)]">
                     <p>
                       {isSpanish ? "Técnica:" : "Technique:"} Byte-by-byte 64-bit Little-endian | 
                       {isSpanish ? " Filtro:" : " Filter:"} {'>'}1 Billion | 
@@ -1160,18 +1160,18 @@ Timestamp: ${AUDIT_DATA.timestamp}
             )}
           </div>
 
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
-                <p className="text-slate-400 text-sm mb-2">{isSpanish ? "Porcentaje del Total" : "Percentage of Total"}</p>
-                <p className="text-3xl font-bold text-slate-100">{selectedMasterAccount.percentage}%</p>
+          <div className="p-card">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-card">
+              <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                <p className="text-[var(--text-secondary)] text-sm mb-2">{isSpanish ? "Porcentaje del Total" : "Percentage of Total"}</p>
+                <p className="text-3xl font-bold text-[var(--text-primary)]">{selectedMasterAccount.percentage}%</p>
               </div>
-              <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
-                <p className="text-slate-400 text-sm mb-2">{isSpanish ? "Clasificación" : "Classification"}</p>
-                <p className="text-xl font-bold text-slate-100">{selectedMasterAccount.classification}</p>
+              <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                <p className="text-[var(--text-secondary)] text-sm mb-2">{isSpanish ? "Clasificación" : "Classification"}</p>
+                <p className="text-xl font-bold text-[var(--text-primary)]">{selectedMasterAccount.classification}</p>
               </div>
-              <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
-                <p className="text-slate-400 text-sm mb-2">{isSpanish ? "Estado de Verificación" : "Verification Status"}</p>
+              <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                <p className="text-[var(--text-secondary)] text-sm mb-2">{isSpanish ? "Estado de Verificación" : "Verification Status"}</p>
                 <p className="text-emerald-400 font-bold text-xl">✅ {isSpanish ? "VERIFICADO" : "VERIFIED"}</p>
               </div>
             </div>
@@ -1179,24 +1179,24 @@ Timestamp: ${AUDIT_DATA.timestamp}
         </BankingCard>
 
         {/* Compliance Badges */}
-        <BankingCard className="p-6">
-          <h3 className="text-lg font-bold text-slate-100 mb-4">
+        <BankingCard className="p-card">
+          <h3 className="text-lg font-bold text-[var(--text-primary)] m-card">
             {isSpanish ? "Cumplimiento y Certificaciones" : "Compliance and Certifications"}
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-card">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-card-sm text-center">
               <p className="text-emerald-400 font-bold text-sm mb-1">ISO 27001</p>
               <p className="text-emerald-300 text-xs">{AUDIT_DATA.compliance.iso27001}</p>
             </div>
-            <div className="bg-white/5 border border-white/15 rounded-xl p-4 text-center">
+            <div className="bg-white/5 border border-white/15 rounded-xl p-card-sm text-center">
               <p className="text-white font-bold text-sm mb-1">SOC 2 Type II</p>
               <p className="text-white text-xs">{AUDIT_DATA.compliance.soc2TypeII}</p>
             </div>
-            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 text-center">
+            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-card-sm text-center">
               <p className="text-purple-400 font-bold text-sm mb-1">GDPR</p>
               <p className="text-purple-300 text-xs">{AUDIT_DATA.compliance.gdpr}</p>
             </div>
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center">
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-card-sm text-center">
               <p className="text-amber-400 font-bold text-sm mb-1">PCI DSS</p>
               <p className="text-amber-300 text-xs">{AUDIT_DATA.compliance.pciDss}</p>
             </div>
@@ -1211,43 +1211,43 @@ Timestamp: ${AUDIT_DATA.timestamp}
         >
           <div className="space-y-4">
             <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-5">
-              <p className="text-slate-100 font-bold mb-3">
+              <p className="text-[var(--text-primary)] font-bold mb-3">
                 {isSpanish ? "Cadena de Trazabilidad" : "Traceability Chain"}
               </p>
               <ol className="space-y-2 text-sm">
                 <li className="flex items-start gap-3">
                   <span className="text-white font-bold">1.</span>
-                  <span className="text-slate-300">
+                  <span className="text-[var(--text-secondary)]">
                     Ledger1 Digital Commercial Bank DAES {isSpanish ? "Archivo Encriptado Original" : "Original Encrypted File"}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-white font-bold">2.</span>
-                  <span className="text-slate-300">
+                  <span className="text-[var(--text-secondary)]">
                     {isSpanish ? "Procedimiento de Extracción de Datos Binarios" : "Binary Data Extraction Procedure"}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-white font-bold">3.</span>
-                  <span className="text-slate-300">
+                  <span className="text-[var(--text-secondary)]">
                     {isSpanish ? "Generación de Archivos Chunk (50 unidades)" : "Chunk File Generation (50 units)"}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-white font-bold">4.</span>
-                  <span className="text-slate-300">
+                  <span className="text-[var(--text-secondary)]">
                     {isSpanish ? "Algoritmo de Escaneo de Valores" : "Value Scanning Algorithm"}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-white font-bold">5.</span>
-                  <span className="text-slate-300">
+                  <span className="text-[var(--text-secondary)]">
                     {isSpanish ? "Clasificación Contextual M2" : "M2 Contextual Classification"}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-white font-bold">6.</span>
-                  <span className="text-slate-300">
+                  <span className="text-[var(--text-secondary)]">
                     {isSpanish ? "Agregación y Suma Matemática" : "Mathematical Aggregation and Summation"}
                   </span>
                 </li>
@@ -1261,7 +1261,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   {isSpanish ? "Confirmación" : "Confirmation"}
                 </p>
               </div>
-              <p className="text-slate-300">
+              <p className="text-[var(--text-secondary)]">
                 {isSpanish
                   ? "Todos los datos se originan del repositorio Ledger1 Digital Commercial Bank DAES verificado y fueron procesados usando métodos técnicos auditables, rastreables y reproducibles."
                   : "All data originates from the verified Ledger1 Digital Commercial Bank DAES repository and were processed using auditable, traceable, and reproducible technical methods."
@@ -1272,15 +1272,15 @@ Timestamp: ${AUDIT_DATA.timestamp}
         </BankingSection>
 
         {/* Footer */}
-        <BankingCard className="p-6">
+        <BankingCard className="p-card">
           <div className="text-center">
-            <p className="text-slate-400 text-sm mb-2">
+            <p className="text-[var(--text-secondary)] text-sm mb-2">
               {isSpanish ? "Reporte de Auditoría Técnica Final" : "Final Technical Audit Report"}
             </p>
-            <p className="text-slate-500 text-xs">
+            <p className="text-[var(--text-muted)] text-xs">
               {isSpanish ? "Preparado por:" : "Prepared by:"} {isSpanish ? "Equipo Independiente de Verificación Técnica" : "Independent Technical Verification Team"}
             </p>
-            <p className="text-slate-600 text-xs mt-2">
+            <p className="text-[var(--text-muted)] text-xs mt-2">
               Dubai | London | {AUDIT_DATA.timestamp}
             </p>
           </div>

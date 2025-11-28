@@ -291,11 +291,11 @@ export function XcpB2BInterface() {
             )}
           </div>
 
-          <div className="mt-4 bg-slate-700/50 rounded-lg p-4">
-            <p className="text-sm text-slate-300">
+          <div className="mt-4 bg-[var(--bg-hover)]/50 rounded-lg p-4">
+            <p className="text-sm text-[var(--text-secondary)]">
               <strong>Endpoint:</strong> POST /api-keys/token
             </p>
-            <p className="text-sm text-slate-300 mt-1">
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
               <strong>Auth:</strong> Bearer API_KEY + mTLS
             </p>
           </div>
@@ -327,7 +327,7 @@ export function XcpB2BInterface() {
                         ? 'bg-blue-600/30 border-blue-500 ring-2 ring-blue-400'
                         : isMain
                         ? 'bg-white/10/20 border-white/30/50 hover:border-white/30'
-                        : 'bg-slate-700/50 border-slate-600 hover:border-slate-500'
+                        : 'bg-[var(--bg-hover)]/50 border-[var(--border-medium)] hover:border-[var(--border-medium)]'
                     }`}
                     onClick={() => handleInputChange('currency', balance.currency)}
                   >
@@ -388,7 +388,7 @@ export function XcpB2BInterface() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Amount */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Monto *
                 </label>
                 <div className="flex gap-2">
@@ -398,13 +398,13 @@ export function XcpB2BInterface() {
                     required
                     value={formData.amount}
                     onChange={(e) => handleInputChange('amount', e.target.value)}
-                    className="flex-1 bg-slate-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="flex-1 bg-[var(--bg-hover)] text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="1000.00"
                   />
                   <select
                     value={formData.currency}
                     onChange={(e) => handleInputChange('currency', e.target.value)}
-                    className="bg-slate-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="bg-[var(--bg-hover)] text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     aria-label="Seleccionar moneda"
                     title="Seleccionar moneda"
                   >
@@ -429,7 +429,7 @@ export function XcpB2BInterface() {
 
               {/* Destination Account */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Cuenta Destino *
                 </label>
                 <input
@@ -437,42 +437,42 @@ export function XcpB2BInterface() {
                   required
                   value={formData.destinationAccountNumber}
                   onChange={(e) => handleInputChange('destinationAccountNumber', e.target.value)}
-                  className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full bg-[var(--bg-hover)] text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   placeholder="acc_456"
                 />
               </div>
 
               {/* Reference */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Referencia
                 </label>
                 <input
                   type="text"
                   value={formData.reference}
                   onChange={(e) => handleInputChange('reference', e.target.value)}
-                  className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full bg-[var(--bg-hover)] text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   placeholder="INV-2025-0001"
                 />
               </div>
 
               {/* Purpose Code */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Código de Propósito
                 </label>
                 <input
                   type="text"
                   value={formData.purposeCode}
                   onChange={(e) => handleInputChange('purposeCode', e.target.value)}
-                  className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full bg-[var(--bg-hover)] text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   placeholder="GDDS"
                 />
               </div>
 
               {/* Beneficiary Name */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Nombre del Beneficiario *
                 </label>
                 <input
@@ -480,21 +480,21 @@ export function XcpB2BInterface() {
                   required
                   value={formData.beneficiaryName}
                   onChange={(e) => handleInputChange('beneficiaryName', e.target.value)}
-                  className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full bg-[var(--bg-hover)] text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   placeholder="Beta Trading SA"
                 />
               </div>
 
               {/* Beneficiary IBAN */}
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   IBAN del Beneficiario
                 </label>
                 <input
                   type="text"
                   value={formData.beneficiaryIban}
                   onChange={(e) => handleInputChange('beneficiaryIban', e.target.value)}
-                  className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full bg-[var(--bg-hover)] text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   placeholder="DE89370400440532013000"
                 />
               </div>
@@ -507,9 +507,9 @@ export function XcpB2BInterface() {
                 id="urgent"
                 checked={formData.urgent}
                 onChange={(e) => handleInputChange('urgent', e.target.checked)}
-                className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500"
+                className="w-4 h-4 text-blue-600 bg-[var(--bg-hover)] border-[var(--border-medium)] rounded focus:ring-blue-500"
               />
-              <label htmlFor="urgent" className="text-sm font-medium text-slate-300">
+              <label htmlFor="urgent" className="text-sm font-medium text-[var(--text-secondary)]">
                 Transferencia Urgente (cargos adicionales aplican)
               </label>
             </div>
@@ -518,7 +518,7 @@ export function XcpB2BInterface() {
             <button
               type="submit"
               disabled={!hasToken || isSubmitting}
-              className="w-full bg-gradient-to-r from-white/10 to-emerald-600 hover:from-white/20 hover:to-emerald-500 disabled:from-slate-600 disabled:to-slate-700 text-white px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-white/10 to-emerald-600 hover:from-white/20 hover:to-emerald-500 disabled:from-slate-600 disabled:to-[var(--bg-hover)] text-white px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
@@ -543,7 +543,7 @@ export function XcpB2BInterface() {
               {availableBalances.length > 0 ? '4' : '3'}. Estado de la Remesa
             </h3>
 
-            <div className="bg-slate-700/50 rounded-lg p-6 space-y-4">
+            <div className="bg-[var(--bg-hover)]/50 rounded-lg p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-[#ffffff]">ID de Transacción</div>
@@ -607,7 +607,7 @@ export function XcpB2BInterface() {
             <FileText className="w-12 h-12 text-[#ffffff] flex-shrink-0" />
             <div className="flex-1">
               <h3 className="text-lg font-bold text-white mb-2">Documentación Completa</h3>
-              <p className="text-slate-300 text-sm mb-4">
+              <p className="text-[var(--text-secondary)] text-sm mb-4">
                 Para integración completa del módulo XCP B2B, consulta la documentación en{' '}
                 <code className="bg-[#0d0d0d] px-2 py-1 rounded text-[#ffffff]">src/xcp-b2b/README.md</code>
               </p>

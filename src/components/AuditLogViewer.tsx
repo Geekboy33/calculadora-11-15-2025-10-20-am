@@ -101,7 +101,7 @@ export function AuditLogViewer() {
       file: 'text-yellow-400',
       auth: 'text-red-400'
     };
-    return colors[service] || 'text-slate-400';
+    return colors[service] || 'text-[var(--text-secondary)]';
   };
 
   const getActionBadge = (action: string) => {
@@ -109,9 +109,9 @@ export function AuditLogViewer() {
       create: 'bg-white/10 text-white',
       update: 'bg-blue-900 text-blue-300',
       delete: 'bg-red-900 text-red-300',
-      read: 'bg-slate-700 text-slate-300'
+      read: 'bg-[var(--bg-hover)] text-[var(--text-secondary)]'
     };
-    return colors[action] || 'bg-slate-700 text-slate-300';
+    return colors[action] || 'bg-[var(--bg-hover)] text-[var(--text-secondary)]';
   };
 
   return (
@@ -125,13 +125,13 @@ export function AuditLogViewer() {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">Audit Logs</h2>
-                <p className="text-sm text-slate-400">Immutable security audit trail</p>
+                <p className="text-sm text-[var(--text-secondary)]">Immutable security audit trail</p>
               </div>
             </div>
 
             <button
               onClick={exportLogs}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] text-white rounded-lg transition-colors"
             >
               <Download className="w-4 h-4" />
               Export
@@ -140,20 +140,20 @@ export function AuditLogViewer() {
 
           <div className="flex gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
               <input
                 type="text"
                 placeholder="Search logs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-700 text-white pl-10 pr-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-[var(--bg-hover)] text-white pl-10 pr-4 py-2 rounded-lg border border-[var(--border-medium)] focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <select
               value={serviceFilter}
               onChange={(e) => setServiceFilter(e.target.value)}
-              className="bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-[var(--bg-hover)] text-white px-4 py-2 rounded-lg border border-[var(--border-medium)] focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Services</option>
               {services.map(service => (
@@ -162,14 +162,14 @@ export function AuditLogViewer() {
             </select>
           </div>
 
-          <div className="mt-4 text-sm text-slate-400">
+          <div className="mt-4 text-sm text-[var(--text-secondary)]">
             Showing {filteredLogs.length} of {logs.length} logs
           </div>
         </div>
 
         <div className="flex-1 overflow-auto p-6">
           {filteredLogs.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-slate-500">
+            <div className="flex items-center justify-center h-full text-[var(--text-muted)]">
               No audit logs found
             </div>
           ) : (
@@ -196,14 +196,14 @@ export function AuditLogViewer() {
                         {log.action}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-[var(--text-secondary)]">
                       {log.createdAt.toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-slate-300">
+                  <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
                     <span className="font-mono text-xs">{log.id}</span>
-                    <span className="text-slate-500">•</span>
+                    <span className="text-[var(--text-muted)]">•</span>
                     <span className="text-xs">Actor: {log.actorId}</span>
                   </div>
                 </div>
@@ -223,49 +223,49 @@ export function AuditLogViewer() {
 
             <div className="space-y-3 text-sm">
               <div>
-                <label className="block text-slate-400 mb-1">Log ID</label>
+                <label className="block text-[var(--text-secondary)] mb-1">Log ID</label>
                 <div className="bg-black p-2 rounded font-mono text-xs text-white break-all">
                   {selectedLog.id}
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Timestamp</label>
+                <label className="block text-[var(--text-secondary)] mb-1">Timestamp</label>
                 <div className="bg-black p-2 rounded text-white">
                   {selectedLog.createdAt.toISOString()}
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Service</label>
+                <label className="block text-[var(--text-secondary)] mb-1">Service</label>
                 <div className="bg-black p-2 rounded text-white">
                   {selectedLog.service}
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Action</label>
+                <label className="block text-[var(--text-secondary)] mb-1">Action</label>
                 <div className="bg-black p-2 rounded text-white">
                   {selectedLog.action}
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Actor ID</label>
+                <label className="block text-[var(--text-secondary)] mb-1">Actor ID</label>
                 <div className="bg-black p-2 rounded font-mono text-xs text-white">
                   {selectedLog.actorId}
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Data</label>
+                <label className="block text-[var(--text-secondary)] mb-1">Data</label>
                 <div className="bg-black p-2 rounded font-mono text-xs text-white max-h-40 overflow-auto">
                   {JSON.stringify(selectedLog.data, null, 2)}
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">HMAC Signature</label>
+                <label className="block text-[var(--text-secondary)] mb-1">HMAC Signature</label>
                 <div className="bg-black p-2 rounded font-mono text-xs text-white break-all">
                   {selectedLog.hmacSignature}
                 </div>
@@ -275,7 +275,7 @@ export function AuditLogViewer() {
             <button
               onClick={() => verifyLogSignature(selectedLog)}
               disabled={verifyingSignature}
-              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 text-white font-semibold py-2 rounded-lg transition-colors"
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 disabled:bg-[var(--bg-hover)] text-white font-semibold py-2 rounded-lg transition-colors"
             >
               {verifyingSignature ? 'Verifying...' : 'Verify Signature'}
             </button>

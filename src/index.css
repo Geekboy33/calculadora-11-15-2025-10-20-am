@@ -19,6 +19,9 @@
 /* FORZAR Wealth LIGHT como en Emirates NBD (de las imágenes) */
 @import './styles/wealth-light-force.css';
 
+/* Design System Utilities */
+@import './styles/design-system-utilities.css';
+
 /* 🎨 Paleta de Colores Futurista - Negro + Blanco Tipo Pantalla Iluminada */
 :root {
   --neon-green: #ffffff;

@@ -19,12 +19,12 @@ interface BankingCardProps {
 }
 
 export function BankingCard({ children, variant = 'default', className }: BankingCardProps) {
-  const baseClasses = 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl';
+  const baseClasses = 'bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-elevated)] to-[var(--bg-card)] rounded-2xl';
   
   const variantClasses = {
-    default: 'border border-slate-700 shadow-xl',
-    elevated: 'border border-slate-600 shadow-2xl',
-    interactive: 'border border-slate-700 hover:border-slate-600 hover:shadow-sky shadow-xl cursor-pointer transition-all'
+    default: 'card-base',
+    elevated: 'card-elevated',
+    interactive: 'card-interactive'
   };
 
   return (
@@ -46,27 +46,27 @@ interface BankingHeaderProps {
   gradient?: 'sky' | 'emerald' | 'amber' | 'purple';
 }
 
-export function BankingHeader({ icon: Icon, title, subtitle, actions, gradient = 'sky' }: BankingHeaderProps) {
+export function BankingHeader({ icon: Icon, title, subtitle, actions, gradient = 'white' }: BankingHeaderProps & { gradient?: 'white' | 'emerald' | 'amber' | 'purple' }) {
   const gradientClasses = {
-    sky: 'from-sky-500 to-blue-600',
+    white: 'from-white to-white',
     emerald: 'from-emerald-500 to-teal-600',
     amber: 'from-amber-500 to-orange-600',
     purple: 'from-purple-500 to-pink-600'
   };
 
   return (
-    <BankingCard className="p-6 mb-6">
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className={cn('p-4 rounded-xl bg-gradient-to-br', gradientClasses[gradient])}>
-            <Icon className="w-8 h-8 text-white" />
+    <BankingCard className="p-card m-section">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-section">
+        <div className="flex items-center gap-card">
+          <div className={cn('p-4 rounded-xl bg-gradient-to-br', gradientClasses[gradient])} aria-hidden="true">
+            <Icon className="w-8 h-8 text-black" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-slate-100">{title}</h1>
-            {subtitle && <p className="text-slate-400 mt-1">{subtitle}</p>}
+            <h1 className="text-heading">{title}</h1>
+            {subtitle && <p className="text-secondary mt-1">{subtitle}</p>}
           </div>
         </div>
-        {actions && <div className="flex items-center gap-3">{actions}</div>}
+        {actions && <div className="flex items-center gap-card" role="toolbar">{actions}</div>}
       </div>
     </BankingCard>
   );
@@ -85,13 +85,13 @@ interface BankingButtonProps {
   className?: string;
 }
 
-export function BankingButton({ children, onClick, variant = 'primary', icon: Icon, disabled, className }: BankingButtonProps) {
+export function BankingButton({ children, onClick, variant = 'primary', icon: Icon, disabled, className, ...props }: BankingButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const baseClasses = 'px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2';
   
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white shadow-lg hover:shadow-sky',
-    secondary: 'bg-slate-800 border border-slate-600 hover:border-slate-500 text-slate-100',
-    ghost: 'text-slate-300 hover:text-slate-100 hover:bg-slate-800',
+    primary: 'bg-gradient-to-r from-white to-white hover:from-white hover:to-white text-black shadow-lg hover:shadow-white/20',
+    secondary: 'bg-[var(--bg-elevated)] border border-[var(--border-medium)] hover:border-[var(--border-focus)] text-[var(--text-primary)]',
+    ghost: 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]',
     danger: 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg'
   };
 
@@ -100,8 +100,10 @@ export function BankingButton({ children, onClick, variant = 'primary', icon: Ic
       onClick={onClick}
       disabled={disabled}
       className={cn(baseClasses, variantClasses[variant], disabled && 'opacity-50 cursor-not-allowed', className)}
+      aria-disabled={disabled}
+      {...props}
     >
-      {Icon && <Icon className="w-5 h-5" />}
+      {Icon && <Icon className="w-5 h-5" aria-hidden="true" />}
       {children}
     </button>
   );
@@ -119,27 +121,27 @@ interface BankingMetricProps {
   color?: 'sky' | 'emerald' | 'amber' | 'purple';
 }
 
-export function BankingMetric({ label, value, icon: Icon, trend, color = 'sky' }: BankingMetricProps) {
+export function BankingMetric({ label, value, icon: Icon, trend, color = 'white' }: BankingMetricProps & { color?: 'white' | 'emerald' | 'amber' | 'purple' }) {
   const colorClasses = {
-    sky: 'bg-sky-500/10 text-sky-400',
+    white: 'bg-white/10 text-white',
     emerald: 'bg-emerald-500/10 text-emerald-400',
     amber: 'bg-amber-500/10 text-amber-400',
     purple: 'bg-purple-500/10 text-purple-400'
   };
 
   return (
-    <BankingCard className="p-6">
-      <div className="flex items-start justify-between mb-4">
+    <BankingCard className="p-card">
+      <div className="flex items-start justify-between m-card">
         <div>
-          <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">{label}</p>
-          <p className="text-4xl font-bold text-slate-100">{value}</p>
+          <p className="text-muted text-sm font-semibold uppercase tracking-wider mb-2">{label}</p>
+          <p className="text-4xl font-bold text-[var(--text-primary)]">{value}</p>
         </div>
-        <div className={cn('p-3 rounded-xl', colorClasses[color])}>
+        <div className={cn('p-3 rounded-xl', colorClasses[color])} aria-hidden="true">
           <Icon className="w-6 h-6" />
         </div>
       </div>
       {trend && (
-        <div className={cn('text-sm font-semibold', trend.positive ? 'text-emerald-400' : 'text-red-400')}>
+        <div className={cn('text-sm font-semibold', trend.positive ? 'text-emerald-400' : 'text-red-400')} aria-label={`Trend: ${trend.positive ? 'up' : 'down'} ${Math.abs(trend.value)}%`}>
           {trend.positive ? '↗' : '↘'} {Math.abs(trend.value)}%
         </div>
       )}
@@ -184,7 +186,7 @@ interface BankingStatusDotProps {
 export function BankingStatusDot({ status }: BankingStatusDotProps) {
   const statusClasses = {
     active: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse',
-    inactive: 'bg-slate-600',
+    inactive: 'bg-[var(--bg-active)]',
     warning: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)] animate-pulse',
     error: 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse'
   };
@@ -214,9 +216,9 @@ export function BankingSection({ title, icon: Icon, children, actions, color = '
 
   return (
     <BankingCard>
-      <div className="p-6 border-b border-slate-700">
+      <div className="p-6 border-b border-[var(--border-subtle)]">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-100 flex items-center gap-3">
+          <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-3">
             <Icon className={cn('w-6 h-6', colorClasses[color])} />
             {title}
           </h2>
@@ -247,7 +249,7 @@ interface BankingInputProps {
 export function BankingInput({ label, value, onChange, type = 'text', placeholder, error, required }: BankingInputProps) {
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-semibold text-slate-300">
+      <label className="block text-sm font-semibold text-[var(--text-secondary)]">
         {label}
         {required && <span className="text-red-400 ml-1">*</span>}
       </label>
@@ -257,11 +259,11 @@ export function BankingInput({ label, value, onChange, type = 'text', placeholde
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={cn(
-          'w-full bg-slate-900 border rounded-xl px-4 py-3 text-slate-100',
+          'w-full bg-[var(--bg-card)] border rounded-xl px-4 py-3 text-[var(--text-primary)]',
           'focus:outline-none focus:ring-2 transition-all',
           error 
             ? 'border-red-500/50 focus:ring-red-500/30' 
-            : 'border-slate-700 focus:border-sky-500 focus:ring-sky-500/30'
+            : 'border-[var(--border-subtle)] focus:border-sky-500 focus:ring-sky-500/30'
         )}
       />
       {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -284,14 +286,14 @@ interface BankingSelectProps {
 export function BankingSelect({ label, value, onChange, options, required }: BankingSelectProps) {
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-semibold text-slate-300">
+      <label className="block text-sm font-semibold text-[var(--text-secondary)]">
         {label}
         {required && <span className="text-red-400 ml-1">*</span>}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-slate-900 border border-slate-700 focus:border-sky-500 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/30 transition-all"
+        className="w-full bg-[var(--bg-card)] border border-[var(--border-subtle)] focus:border-sky-500 rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-sky-500/30 transition-all"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -318,8 +320,8 @@ export function BankingEmptyState({ icon: Icon, title, description, action }: Ba
   return (
     <div className="text-center py-20">
       <Icon className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-      <p className="text-slate-400 text-lg font-medium mb-2">{title}</p>
-      {description && <p className="text-slate-600 text-sm mb-4">{description}</p>}
+      <p className="text-[var(--text-secondary)] text-lg font-medium mb-2">{title}</p>
+      {description && <p className="text-[var(--text-muted)] text-sm mb-4">{description}</p>}
       {action}
     </div>
   );
@@ -335,10 +337,10 @@ interface BankingLoadingProps {
 
 export function BankingLoading({ message = 'Loading...' }: BankingLoadingProps) {
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+    <div className="min-h-screen bg-[var(--bg-main)] flex items-center justify-center">
       <div className="text-center">
         <div className="inline-block w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-slate-300 text-lg font-semibold">{message}</p>
+        <p className="text-[var(--text-secondary)] text-lg font-semibold">{message}</p>
       </div>
     </div>
   );

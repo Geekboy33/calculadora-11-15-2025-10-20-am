@@ -134,20 +134,20 @@ export function FileLoader({ onFileLoaded }: FileLoaderProps) {
   };
 
   return (
-    <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
-      <div className="p-6 border-b border-slate-700">
+    <div className="bg-[var(--bg-elevated)] rounded-lg border border-[var(--border-subtle)] overflow-hidden">
+      <div className="p-6 border-b border-[var(--border-subtle)]">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-3 bg-blue-600 rounded-lg">
             <FileText className="w-6 h-6 text-white" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">Cargar Archivo Digital Commercial Bank Ltd</h2>
-            <p className="text-sm text-slate-400">Selecciona un archivo binario desde tu disco local</p>
+            <p className="text-sm text-[var(--text-secondary)]">Selecciona un archivo binario desde tu disco local</p>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
+          <div className="border-2 border-dashed border-[var(--border-medium)] rounded-lg p-8 text-center">
             <input
               ref={fileInputRef}
               type="file"
@@ -160,14 +160,14 @@ export function FileLoader({ onFileLoaded }: FileLoaderProps) {
               htmlFor="file-input"
               className="cursor-pointer flex flex-col items-center gap-3"
             >
-              <div className="p-4 bg-slate-700 rounded-full">
+              <div className="p-4 bg-[var(--bg-hover)] rounded-full">
                 <Upload className="w-8 h-8 text-blue-400" />
               </div>
               <div>
                 <p className="text-white font-medium mb-1">
                   Click para seleccionar archivo
                 </p>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-[var(--text-secondary)]">
                   Formatos soportados: .file, .bin, .Digital Commercial Bank Ltd, .dat
                 </p>
               </div>
@@ -175,40 +175,40 @@ export function FileLoader({ onFileLoaded }: FileLoaderProps) {
           </div>
 
           {selectedFile && !loading && (
-            <div className="bg-slate-700 rounded-lg p-4">
+            <div className="bg-[var(--bg-hover)] rounded-lg p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <FileText className="w-5 h-5 text-blue-400" />
                   <div>
                     <p className="text-white font-medium">{selectedFile.name}</p>
-                    <p className="text-xs text-slate-400">{formatBytes(selectedFile.size)}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">{formatBytes(selectedFile.size)}</p>
                   </div>
                 </div>
                 <button
                   onClick={handleCancel}
-                  className="p-1 hover:bg-slate-600 rounded transition-colors"
+                  className="p-1 hover:bg-[var(--bg-active)] rounded transition-colors"
                 >
-                  <X className="w-4 h-4 text-slate-400" />
+                  <X className="w-4 h-4 text-[var(--text-secondary)]" />
                 </button>
               </div>
 
               {preview && (
-                <div className="space-y-3 mt-4 pt-4 border-t border-slate-600">
+                <div className="space-y-3 mt-4 pt-4 border-t border-[var(--border-medium)]">
                   <h3 className="text-sm font-semibold text-white mb-2">Vista Previa del Archivo</h3>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-slate-800 rounded p-3">
-                      <p className="text-xs text-slate-400 mb-1">Bloques Detectados</p>
+                    <div className="bg-[var(--bg-elevated)] rounded p-3">
+                      <p className="text-xs text-[var(--text-secondary)] mb-1">Bloques Detectados</p>
                       <p className="text-xl font-bold text-white">{preview.blocks}</p>
                     </div>
-                    <div className="bg-slate-800 rounded p-3">
-                      <p className="text-xs text-slate-400 mb-1">Tamaño</p>
+                    <div className="bg-[var(--bg-elevated)] rounded p-3">
+                      <p className="text-xs text-[var(--text-secondary)] mb-1">Tamaño</p>
                       <p className="text-xl font-bold text-white">{formatBytes(preview.size)}</p>
                     </div>
                   </div>
 
-                  <div className="bg-slate-800 rounded p-3">
-                    <p className="text-xs text-slate-400 mb-2">Monedas Detectadas</p>
+                  <div className="bg-[var(--bg-elevated)] rounded p-3">
+                    <p className="text-xs text-[var(--text-secondary)] mb-2">Monedas Detectadas</p>
                     <div className="flex gap-2">
                       {preview.currencies.map(currency => (
                         <span
@@ -221,12 +221,12 @@ export function FileLoader({ onFileLoaded }: FileLoaderProps) {
                     </div>
                   </div>
 
-                  <div className="bg-slate-800 rounded p-3">
-                    <p className="text-xs text-slate-400 mb-2">Balance Total por Moneda</p>
+                  <div className="bg-[var(--bg-elevated)] rounded p-3">
+                    <p className="text-xs text-[var(--text-secondary)] mb-2">Balance Total por Moneda</p>
                     <div className="space-y-1">
                       {Object.entries(preview.totalBalance).map(([currency, amount]) => (
                         <div key={currency} className="flex justify-between text-sm">
-                          <span className="text-slate-300">{currency}:</span>
+                          <span className="text-[var(--text-secondary)]">{currency}:</span>
                           <span className="text-white font-mono">
                             {DTC1BParser.formatAmount(amount, currency)}
                           </span>
@@ -255,7 +255,7 @@ export function FileLoader({ onFileLoaded }: FileLoaderProps) {
                 <button
                   onClick={handleLoadFile}
                   disabled={loading}
-                  className="w-full mt-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white font-semibold py-3 rounded-lg transition-colors"
+                  className="w-full mt-4 bg-blue-600 hover:bg-blue-700 disabled:bg-[var(--bg-active)] text-white font-semibold py-3 rounded-lg transition-colors"
                 >
                   {loading ? 'Cargando...' : `Cargar ${preview.blocks} Cuenta(s)`}
                 </button>
@@ -265,8 +265,8 @@ export function FileLoader({ onFileLoaded }: FileLoaderProps) {
 
           {loading && !selectedFile && (
             <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-600 border-t-blue-500"></div>
-              <p className="text-slate-400 mt-3">Analizando archivo...</p>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--border-medium)] border-t-blue-500"></div>
+              <p className="text-[var(--text-secondary)] mt-3">Analizando archivo...</p>
             </div>
           )}
         </div>

@@ -220,9 +220,9 @@ export function AccountLedger() {
           </div>
         ) : (
           <div className="bg-[#0d0d0d] rounded-xl p-12 text-center border-2 border-dashed border-[#1a1a1a] glass-panel">
-            <Database className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-slate-400 mb-2">{t.ledgerNoAccountsLoaded}</h3>
-            <p className="text-slate-500 mb-6">
+            <Database className="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-[var(--text-secondary)] mb-2">{t.ledgerNoAccountsLoaded}</h3>
+            <p className="text-[var(--text-muted)] mb-6">
               {t.ledgerNoBalancesInLedger}
             </p>
             <div className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all cursor-pointer">
@@ -234,15 +234,15 @@ export function AccountLedger() {
 
       {/* Live Update Indicator */}
       {balances.length > 0 && (
-        <div className="sticky bottom-0 bg-gradient-to-r from-slate-800 to-slate-900 border-t border-slate-700 p-4">
+        <div className="sticky bottom-0 bg-gradient-to-r from-[var(--bg-elevated)] to-[var(--bg-card)] border-t border-[var(--border-subtle)] p-4">
             <div className="flex items-center justify-between max-w-7xl mx-auto">
               <div className="flex items-center gap-3">
                 <div className={`w-3 h-3 rounded-full ${isLiveUpdating ? 'bg-white/20 animate-pulse' : 'bg-blue-400'}`}></div>
-                <span className="text-slate-300 text-sm font-semibold">
+                <span className="text-[var(--text-secondary)] text-sm font-semibold">
                   {isLiveUpdating ? t.ledgerUpdating : t.ledgerConnected}
                 </span>
               </div>
-              <div className="text-slate-400 text-xs">
+              <div className="text-[var(--text-secondary)] text-xs">
                 {t.ledgerLastUpdate}: {lastUpdate ? lastUpdate.toLocaleString() : 'N/A'}
               </div>
             </div>

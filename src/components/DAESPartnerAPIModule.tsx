@@ -1605,7 +1605,7 @@ Partner: ${partner.name}
   };
 
   return (
-    <div className="min-h-screen bg-black p-6">
+    <div className="min-h-screen bg-black p-card">
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
@@ -1639,12 +1639,12 @@ Partner: ${partner.name}
 
         {/* Verification Results */}
         {verificationResults && (
-          <BankingCard className={`p-6 border-2 ${
+          <BankingCard className={`p-card border-2 ${
             verificationResults.overall === 'SUCCESS' ? 'border-emerald-500/50' :
             verificationResults.overall === 'WARNING' ? 'border-amber-500/50' :
             'border-red-500/50'
           }`}>
-            <div className="flex items-start gap-4 mb-6">
+            <div className="flex items-start gap-card m-section">
               <div className={`p-3 rounded-xl ${
                 verificationResults.overall === 'SUCCESS' ? 'bg-emerald-500/10' :
                 verificationResults.overall === 'WARNING' ? 'bg-amber-500/10' :
@@ -1655,7 +1655,7 @@ Partner: ${partner.name}
                  <AlertCircle className="w-8 h-8 text-red-400" />}
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-slate-100 mb-2">
+                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
                   {isSpanish ? 'Resultados de Verificación' : 'Verification Results'}
                 </h3>
                 <p className={`text-lg font-semibold ${
@@ -1670,32 +1670,32 @@ Partner: ${partner.name}
                     : (isSpanish ? '❌ Errores Detectados' : '❌ Errors Detected')
                   }
                 </p>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-[var(--text-secondary)] text-sm mt-1">
                   {isSpanish ? 'Verificado:' : 'Verified:'} {fmt.dateTime(verificationResults.timestamp)}
                 </p>
               </div>
               <button
                 onClick={() => setVerificationResults(null)}
-                className="text-slate-500 hover:text-slate-300 transition-colors"
+                className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-card m-section">
+              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-card-sm text-center">
                 <p className="text-emerald-400 text-3xl font-bold">
                   {verificationResults.checks.filter((c: any) => c.status === 'SUCCESS').length}
                 </p>
                 <p className="text-emerald-300 text-sm mt-1">{isSpanish ? 'Exitosas' : 'Successful'}</p>
               </div>
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center">
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-card-sm text-center">
                 <p className="text-amber-400 text-3xl font-bold">
                   {verificationResults.checks.filter((c: any) => c.status === 'WARNING').length}
                 </p>
                 <p className="text-amber-300 text-sm mt-1">{isSpanish ? 'Advertencias' : 'Warnings'}</p>
               </div>
-              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center">
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-card-sm text-center">
                 <p className="text-red-400 text-3xl font-bold">
                   {verificationResults.checks.filter((c: any) => c.status === 'ERROR').length}
                 </p>
@@ -1707,7 +1707,7 @@ Partner: ${partner.name}
               {verificationResults.checks.map((check: any, idx: number) => (
                 <div
                   key={idx}
-                  className={`bg-[#0d0d0d]/50 border rounded-xl p-4 ${
+                  className={`bg-[#0d0d0d]/50 border rounded-xl p-card-sm ${
                     check.status === 'SUCCESS' ? 'border-emerald-500/30' :
                     check.status === 'WARNING' ? 'border-amber-500/30' :
                     'border-red-500/30'
@@ -1722,7 +1722,7 @@ Partner: ${partner.name}
                       {check.status === 'SUCCESS' ? '✅' : check.status === 'WARNING' ? '⚠️' : '❌'}
                     </div>
                     <div className="flex-1">
-                      <p className="text-slate-100 font-semibold mb-1">{check.name}</p>
+                      <p className="text-[var(--text-primary)] font-semibold mb-1">{check.name}</p>
                       <p className={`text-sm mb-2 ${
                         check.status === 'SUCCESS' ? 'text-emerald-300' :
                         check.status === 'WARNING' ? 'text-amber-300' :
@@ -1732,12 +1732,12 @@ Partner: ${partner.name}
                       </p>
                       {check.details.length > 0 && (
                         <div className="bg-[#141414]/50 rounded-lg p-3 mt-2">
-                          <ul className="text-slate-400 text-xs space-y-1">
+                          <ul className="text-[var(--text-secondary)] text-xs space-y-1">
                             {check.details.slice(0, 5).map((detail: string, i: number) => (
                               <li key={i}>• {detail}</li>
                             ))}
                             {check.details.length > 5 && (
-                              <li className="text-slate-500 italic">
+                              <li className="text-[var(--text-muted)] italic">
                                 {isSpanish ? `...y ${check.details.length - 5} más` : `...and ${check.details.length - 5} more`}
                               </li>
                             )}
@@ -1753,7 +1753,7 @@ Partner: ${partner.name}
         )}
 
         {/* Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-card">
           <BankingMetric
             label={isSpanish ? "Partners Activos" : "Active Partners"}
             value={partners.length}
@@ -1787,7 +1787,7 @@ Partner: ${partner.name}
             className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
               selectedTab === 'partners'
                 ? 'bg-gradient-to-r from-white to-white text-black shadow-lg'
-                : 'text-slate-400 hover:text-slate-100 hover:bg-[#141414]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[#141414]'
             }`}
           >
             <Users className="w-5 h-5 inline mr-2" />
@@ -1798,7 +1798,7 @@ Partner: ${partner.name}
             className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
               selectedTab === 'clients'
                 ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
-                : 'text-slate-400 hover:text-slate-100 hover:bg-[#141414]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[#141414]'
             }`}
           >
             <Wallet className="w-5 h-5 inline mr-2" />
@@ -1809,7 +1809,7 @@ Partner: ${partner.name}
             className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
               selectedTab === 'accounts'
                 ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
-                : 'text-slate-400 hover:text-slate-100 hover:bg-[#141414]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[#141414]'
             }`}
           >
             <Key className="w-5 h-5 inline mr-2" />
@@ -1820,7 +1820,7 @@ Partner: ${partner.name}
             className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
               selectedTab === 'transfers'
                 ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
-                : 'text-slate-400 hover:text-slate-100 hover:bg-[#141414]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[#141414]'
             }`}
           >
             <ArrowRight className="w-5 h-5 inline mr-2" />
@@ -1847,7 +1847,7 @@ Partner: ${partner.name}
             />
             
             <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-2">
+              <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                 {isSpanish ? "Divisas Permitidas" : "Allowed Currencies"}
               </label>
               <div className="flex flex-wrap gap-2">
@@ -1870,7 +1870,7 @@ Partner: ${partner.name}
                     className={`px-4 py-2 rounded-lg border-2 font-semibold transition-all flex items-center gap-2 ${
                       newPartner.allowedCurrencies.includes(currency.code)
                         ? 'bg-white/10 border-white/30 text-white'
-                        : 'bg-[#141414] border-[#1a1a1a] text-slate-400 hover:border-[#1a1a1a]'
+                        : 'bg-[#141414] border-[#1a1a1a] text-[var(--text-secondary)] hover:border-[#1a1a1a]'
                     }`}
                     title={currency.name}
                   >
@@ -1894,13 +1894,13 @@ Partner: ${partner.name}
 
         {/* Credenciales Generadas */}
         {createdCredentials && (
-          <BankingCard className="p-6 border-2 border-white/20">
-            <div className="flex items-start gap-4 mb-4">
+          <BankingCard className="p-card border-2 border-white/20">
+            <div className="flex items-start gap-card m-card">
               <div className="p-3 bg-white/5 rounded-xl">
                 <Key className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold text-slate-100 mb-2">
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
                   {isSpanish ? "⚠️ Credenciales Generadas (Guárdalas Ahora)" : "⚠️ Generated Credentials (Save Now)"}
                 </h3>
                 <p className="text-amber-400 text-sm font-semibold">
@@ -1909,9 +1909,9 @@ Partner: ${partner.name}
               </div>
             </div>
 
-            <div className="space-y-4 bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
+            <div className="space-y-4 bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
               <div>
-                <label className="text-slate-400 text-sm font-semibold mb-2 block">Client ID:</label>
+                <label className="text-[var(--text-secondary)] text-sm font-semibold mb-2 block">Client ID:</label>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 bg-[#141414] border border-[#1a1a1a] text-white px-4 py-3 rounded-lg font-mono text-sm">
                     {createdCredentials.clientId}
@@ -1927,14 +1927,14 @@ Partner: ${partner.name}
               </div>
 
               <div>
-                <label className="text-slate-400 text-sm font-semibold mb-2 block">Client Secret:</label>
+                <label className="text-[var(--text-secondary)] text-sm font-semibold mb-2 block">Client Secret:</label>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 bg-[#141414] border border-[#1a1a1a] text-amber-400 px-4 py-3 rounded-lg font-mono text-sm break-all">
                     {showSecret ? createdCredentials.clientSecret : '•'.repeat(64)}
                   </code>
                   <button
                     onClick={() => setShowSecret(!showSecret)}
-                    className="p-3 bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-slate-300 rounded-lg transition-all"
+                    className="p-3 bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-[var(--text-secondary)] rounded-lg transition-all"
                   >
                     {showSecret ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -1973,14 +1973,14 @@ Partner: ${partner.name}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h4 className="text-slate-100 font-bold text-lg mb-2 group-hover:text-white transition-colors">
+                        <h4 className="text-[var(--text-primary)] font-bold text-lg mb-2 group-hover:text-white transition-colors">
                           {partner.name}
                         </h4>
                         <div className="flex flex-wrap items-center gap-2">
                           <BankingBadge variant="success">
                             {partner.status}
                           </BankingBadge>
-                          <span className="text-slate-500 text-sm">ID: {partner.partnerId}</span>
+                          <span className="text-[var(--text-muted)] text-sm">ID: {partner.partnerId}</span>
                           {associatedClientsCount > 0 && (
                             <BankingBadge variant="info">
                               {associatedClientsCount} {isSpanish ? 'clientes' : 'clients'}
@@ -1990,7 +1990,7 @@ Partner: ${partner.name}
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="text-slate-400 text-sm mb-1">Client ID:</p>
+                          <p className="text-[var(--text-secondary)] text-sm mb-1">Client ID:</p>
                           <code className="text-white text-xs font-mono bg-[#141414] px-2 py-1 rounded">
                             {partner.clientId}
                           </code>
@@ -2016,7 +2016,7 @@ Partner: ${partner.name}
                     ))}
                   </div>
 
-                  <div className="mt-3 text-slate-500 text-xs">
+                  <div className="mt-3 text-[var(--text-muted)] text-xs">
                     {isSpanish ? "Creado:" : "Created:"} {fmt.dateTime(partner.createdAt)}
                   </div>
                 </div>
@@ -2025,11 +2025,11 @@ Partner: ${partner.name}
             </div>
           ) : (
             <div className="text-center py-16">
-              <Users className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-              <p className="text-slate-400 text-lg font-medium">
+              <Users className="w-20 h-20 text-slate-700 mx-auto m-card" />
+              <p className="text-[var(--text-secondary)] text-lg font-medium">
                 {isSpanish ? "No hay partners registrados" : "No partners registered"}
               </p>
-              <p className="text-slate-600 text-sm mt-2">
+              <p className="text-[var(--text-muted)] text-sm mt-2">
                 {isSpanish ? "Crea tu primer partner para comenzar" : "Create your first partner to get started"}
               </p>
             </div>
@@ -2045,56 +2045,56 @@ Partner: ${partner.name}
           <div className="space-y-6">
             {/* Endpoints */}
             <div>
-              <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-[var(--text-primary)] m-card flex items-center gap-2">
                 <ArrowRight className="w-5 h-5 text-purple-400" />
                 {isSpanish ? "Endpoints Disponibles" : "Available Endpoints"}
               </h3>
               
               <div className="space-y-3">
-                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-card-sm">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="bg-white/5 border border-white/15 text-white px-3 py-1 rounded-md text-xs font-bold">
                       POST
                     </span>
-                    <code className="text-slate-100 font-mono text-sm">/partner-api/v1/auth/token</code>
+                    <code className="text-[var(--text-primary)] font-mono text-sm">/partner-api/v1/auth/token</code>
                   </div>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-[var(--text-secondary)] text-sm">
                     {isSpanish ? "Obtener token de acceso JWT" : "Get JWT access token"}
                   </p>
                 </div>
 
-                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-card-sm">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-md text-xs font-bold">
                       POST
                     </span>
-                    <code className="text-slate-100 font-mono text-sm">/partner-api/v1/clients</code>
+                    <code className="text-[var(--text-primary)] font-mono text-sm">/partner-api/v1/clients</code>
                   </div>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-[var(--text-secondary)] text-sm">
                     {isSpanish ? "Crear cliente para el partner" : "Create client for partner"}
                   </p>
                 </div>
 
-                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-card-sm">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-3 py-1 rounded-md text-xs font-bold">
                       POST
                     </span>
-                    <code className="text-slate-100 font-mono text-sm">/partner-api/v1/clients/:clientId/accounts</code>
+                    <code className="text-[var(--text-primary)] font-mono text-sm">/partner-api/v1/clients/:clientId/accounts</code>
                   </div>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-[var(--text-secondary)] text-sm">
                     {isSpanish ? "Crear cuenta multi-moneda" : "Create multi-currency account"}
                   </p>
                 </div>
 
-                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-card-sm">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="bg-purple-500/10 border border-purple-500/30 text-purple-400 px-3 py-1 rounded-md text-xs font-bold">
                       POST
                     </span>
-                    <code className="text-slate-100 font-mono text-sm">/partner-api/v1/transfers</code>
+                    <code className="text-[var(--text-primary)] font-mono text-sm">/partner-api/v1/transfers</code>
                   </div>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-[var(--text-secondary)] text-sm">
                     {isSpanish ? "Crear transferencia con CashTransfer.v1" : "Create transfer with CashTransfer.v1"}
                   </p>
                 </div>
@@ -2103,7 +2103,7 @@ Partner: ${partner.name}
 
             {/* Divisas Soportadas */}
             <div>
-              <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-[var(--text-primary)] m-card flex items-center gap-2">
                 <Globe className="w-5 h-5 text-white" />
                 {isSpanish ? "15 Divisas Soportadas" : "15 Supported Currencies"}
               </h3>
@@ -2114,8 +2114,8 @@ Partner: ${partner.name}
                     className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-3 text-center hover:border-white/20 transition-all"
                   >
                     <div className="text-2xl mb-1">{curr.flag}</div>
-                    <p className="text-slate-100 font-bold text-sm">{curr.code}</p>
-                    <p className="text-slate-500 text-xs">{curr.name}</p>
+                    <p className="text-[var(--text-primary)] font-bold text-sm">{curr.code}</p>
+                    <p className="text-[var(--text-muted)] text-xs">{curr.name}</p>
                   </div>
                 ))}
               </div>
@@ -2123,10 +2123,10 @@ Partner: ${partner.name}
 
             {/* Ejemplo CashTransfer.v1 */}
             <div>
-              <h3 className="text-lg font-bold text-slate-100 mb-4">
+              <h3 className="text-lg font-bold text-[var(--text-primary)] m-card">
                 {isSpanish ? "Ejemplo CashTransfer.v1" : "CashTransfer.v1 Example"}
               </h3>
-              <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-4 overflow-x-auto">
+              <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-card-sm overflow-x-auto">
                 <pre className="text-white font-mono text-xs">
 {`{
   "CashTransfer.v1": {
@@ -2165,17 +2165,17 @@ Partner: ${partner.name}
               icon={Plus}
               color="emerald"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-section">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                       {isSpanish ? "Partner" : "Partner"} <span className="text-red-400">*</span>
                     </label>
                     <select
                       value={newClient.partnerIdForClient}
                       onChange={(e) => setNewClient({...newClient, partnerIdForClient: e.target.value})}
                       aria-label="Select Partner"
-                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-emerald-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
+                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-emerald-500 text-[var(--text-primary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
                     >
                       <option value="">{isSpanish ? "-- Selecciona Partner --" : "-- Select Partner --"}</option>
                       {partners.map(p => (
@@ -2203,14 +2203,14 @@ Partner: ${partner.name}
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                       {isSpanish ? "Tipo de Cliente" : "Client Type"}
                     </label>
                     <select
                       value={newClient.type}
                       onChange={(e) => setNewClient({...newClient, type: e.target.value as any})}
                       aria-label="Client Type"
-                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-emerald-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
+                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-emerald-500 text-[var(--text-primary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/30 outline-none transition-all"
                     >
                       <option value="WALLET">Wallet</option>
                       <option value="FINTECH">Fintech</option>
@@ -2220,10 +2220,10 @@ Partner: ${partner.name}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                       {isSpanish ? "Divisas para API" : "API Currencies"} <span className="text-red-400">*</span>
                     </label>
-                    <div className="flex flex-wrap gap-2 bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4 max-h-48 overflow-y-auto">
+                    <div className="flex flex-wrap gap-2 bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm max-h-48 overflow-y-auto">
                       {availableCurrencies.map(currency => (
                         <button
                           key={currency.code}
@@ -2243,14 +2243,14 @@ Partner: ${partner.name}
                           className={`px-3 py-2 rounded-lg border font-semibold text-sm transition-all ${
                             newClient.allowedCurrencies.includes(currency.code)
                               ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                              : 'bg-[#141414] border-[#1a1a1a] text-slate-400 hover:border-[#1a1a1a]'
+                              : 'bg-[#141414] border-[#1a1a1a] text-[var(--text-secondary)] hover:border-[#1a1a1a]'
                           }`}
                         >
                           {currency.flag} {currency.code}
                         </button>
                       ))}
                     </div>
-                    <p className="text-slate-500 text-xs mt-2">
+                    <p className="text-[var(--text-muted)] text-xs mt-2">
                       {isSpanish ? "Selecciona las divisas que este cliente podrá usar" : "Select currencies this client will be able to use"}
                     </p>
                   </div>
@@ -2275,7 +2275,7 @@ Partner: ${partner.name}
               color="white"
             >
               {clients.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-card">
                   {clients.map((client) => (
                     <div
                       key={client.clientId}
@@ -2283,14 +2283,14 @@ Partner: ${partner.name}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <h4 className="text-slate-100 font-bold text-lg mb-1 group-hover:text-emerald-400 transition-colors">
+                          <h4 className="text-[var(--text-primary)] font-bold text-lg mb-1 group-hover:text-emerald-400 transition-colors">
                             {client.legalName}
                           </h4>
-                          <p className="text-slate-500 text-sm mb-2">{client.externalClientId}</p>
+                          <p className="text-[var(--text-muted)] text-sm mb-2">{client.externalClientId}</p>
                           <div className="flex flex-wrap items-center gap-2">
                             <BankingBadge variant="success">{client.status}</BankingBadge>
                             <BankingBadge variant="info">{client.type}</BankingBadge>
-                            <span className="text-slate-600 text-xs">{client.country}</span>
+                            <span className="text-[var(--text-muted)] text-xs">{client.country}</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -2318,11 +2318,11 @@ Partner: ${partner.name}
 
                       <div className="space-y-2">
                         <div className="text-xs">
-                          <span className="text-slate-500">{isSpanish ? "Partner:" : "Partner:"}</span>
-                          <span className="text-slate-300 ml-2">{client.partnerName}</span>
+                          <span className="text-[var(--text-muted)]">{isSpanish ? "Partner:" : "Partner:"}</span>
+                          <span className="text-[var(--text-secondary)] ml-2">{client.partnerName}</span>
                         </div>
                         <div className="text-xs">
-                          <span className="text-slate-500">Client ID:</span>
+                          <span className="text-[var(--text-muted)]">Client ID:</span>
                           <code className="text-white ml-2 font-mono">{client.clientId}</code>
                         </div>
                         <div className="flex flex-wrap gap-1 mt-2">
@@ -2335,7 +2335,7 @@ Partner: ${partner.name}
                             );
                           })}
                         </div>
-                        <div className="text-slate-600 text-xs mt-2">
+                        <div className="text-[var(--text-muted)] text-xs mt-2">
                           {fmt.dateTime(client.createdAt)}
                         </div>
                       </div>
@@ -2344,11 +2344,11 @@ Partner: ${partner.name}
                 </div>
               ) : (
                 <div className="text-center py-16">
-                  <Wallet className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-                  <p className="text-slate-400 text-lg font-medium">
+                  <Wallet className="w-20 h-20 text-slate-700 mx-auto m-card" />
+                  <p className="text-[var(--text-secondary)] text-lg font-medium">
                     {isSpanish ? "No hay clientes registrados" : "No clients registered"}
                   </p>
-                  <p className="text-slate-600 text-sm mt-2">
+                  <p className="text-[var(--text-muted)] text-sm mt-2">
                     {isSpanish ? "Crea tu primer cliente para comenzar" : "Create your first client to get started"}
                   </p>
                 </div>
@@ -2388,15 +2388,15 @@ Partner: ${partner.name}
                 return (
                   <BankingCard key={partner.partnerId} className="overflow-hidden">
                     {/* Header del Partner */}
-                    <div className="p-6 border-b border-[#1a1a1a] bg-gradient-to-r from-[#0d0d0d] to-[#141414]">
+                    <div className="p-card border-b border-[#1a1a1a] bg-gradient-to-r from-[#0d0d0d] to-[#141414]">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-card">
                           <div className="p-3 bg-white/5 rounded-xl">
                             <Users className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-slate-100">{partner.name}</h3>
-                            <p className="text-slate-400 text-sm">Partner ID: {partner.partnerId}</p>
+                            <h3 className="text-xl font-bold text-[var(--text-primary)]">{partner.name}</h3>
+                            <p className="text-[var(--text-secondary)] text-sm">Partner ID: {partner.partnerId}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -2409,33 +2409,33 @@ Partner: ${partner.name}
                     </div>
 
                     {/* Estadísticas del Partner */}
-                    <div className="p-6 border-b border-[#1a1a1a]">
-                      <h4 className="text-lg font-bold text-slate-100 mb-4">
+                    <div className="p-card border-b border-[#1a1a1a]">
+                      <h4 className="text-lg font-bold text-[var(--text-primary)] m-card">
                         {isSpanish ? 'Estadísticas Generales' : 'General Statistics'}
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
-                          <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Volumen Total' : 'Total Volume'}</p>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-card">
+                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                          <p className="text-[var(--text-secondary)] text-sm mb-1">{isSpanish ? 'Volumen Total' : 'Total Volume'}</p>
                           <p className="text-2xl font-bold text-emerald-400">{fmt.currency(totalVolume, 'USD')}</p>
                         </div>
-                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
-                          <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Transferencias' : 'Transfers'}</p>
+                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                          <p className="text-[var(--text-secondary)] text-sm mb-1">{isSpanish ? 'Transferencias' : 'Transfers'}</p>
                           <p className="text-2xl font-bold text-white">{totalTransactionsCount}</p>
                         </div>
-                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
-                          <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Clientes' : 'Clients'}</p>
+                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                          <p className="text-[var(--text-secondary)] text-sm mb-1">{isSpanish ? 'Clientes' : 'Clients'}</p>
                           <p className="text-2xl font-bold text-purple-400">{partnerClients.length}</p>
                         </div>
-                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
-                          <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Divisas Activas' : 'Active Currencies'}</p>
+                        <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
+                          <p className="text-[var(--text-secondary)] text-sm mb-1">{isSpanish ? 'Divisas Activas' : 'Active Currencies'}</p>
                           <p className="text-2xl font-bold text-amber-400">{Object.keys(statsByCurrency).length}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Desglose por Divisa */}
-                    <div className="p-6 border-b border-[#1a1a1a]">
-                      <h4 className="text-lg font-bold text-slate-100 mb-4">
+                    <div className="p-card border-b border-[#1a1a1a]">
+                      <h4 className="text-lg font-bold text-[var(--text-primary)] m-card">
                         {isSpanish ? 'Desglose por Divisa' : 'Breakdown by Currency'}
                       </h4>
                       <div className="space-y-3">
@@ -2444,29 +2444,29 @@ Partner: ${partner.name}
                           const percentage = totalVolume > 0 ? (stats.total / totalVolume) * 100 : 0;
                           
                           return (
-                            <div key={currency} className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
+                            <div key={currency} className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-card-sm">
                               <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-3">
                                   <span className="text-2xl">{currInfo?.flag}</span>
                                   <div>
-                                    <p className="text-slate-100 font-bold">{currency}</p>
-                                    <p className="text-slate-500 text-xs">{currInfo?.name}</p>
+                                    <p className="text-[var(--text-primary)] font-bold">{currency}</p>
+                                    <p className="text-[var(--text-muted)] text-xs">{currInfo?.name}</p>
                                   </div>
                                 </div>
                                 <div className="text-right">
                                   <p className="text-emerald-400 font-bold text-xl">{fmt.currency(stats.total, currency)}</p>
-                                  <p className="text-slate-500 text-xs">{stats.count} {isSpanish ? 'transferencias' : 'transfers'}</p>
+                                  <p className="text-[var(--text-muted)] text-xs">{stats.count} {isSpanish ? 'transferencias' : 'transfers'}</p>
                                 </div>
                               </div>
                               <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
-                                  <span className="text-slate-400">{isSpanish ? 'Porcentaje del total:' : 'Percentage of total:'}</span>
+                                  <span className="text-[var(--text-secondary)]">{isSpanish ? 'Porcentaje del total:' : 'Percentage of total:'}</span>
                                   <span className="text-white font-semibold">{percentage.toFixed(1)}%</span>
                                 </div>
                                 {stats.lastTransfer && (
                                   <div className="flex justify-between text-sm">
-                                    <span className="text-slate-400">{isSpanish ? 'Última transferencia:' : 'Last transfer:'}</span>
-                                    <span className="text-slate-300">{fmt.dateTime(stats.lastTransfer)}</span>
+                                    <span className="text-[var(--text-secondary)]">{isSpanish ? 'Última transferencia:' : 'Last transfer:'}</span>
+                                    <span className="text-[var(--text-secondary)]">{fmt.dateTime(stats.lastTransfer)}</span>
                                   </div>
                                 )}
                                 <div className="w-full bg-[#141414] rounded-full h-2 overflow-hidden mt-2">
@@ -2483,8 +2483,8 @@ Partner: ${partner.name}
                     </div>
 
                     {/* Lista de Transferencias del Partner */}
-                    <div className="p-6">
-                      <h4 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+                    <div className="p-card">
+                      <h4 className="text-lg font-bold text-[var(--text-primary)] m-card flex items-center gap-2">
                         <ArrowRight className="w-5 h-5 text-purple-400" />
                         {isSpanish ? 'Historial de Transferencias' : 'Transfer History'}
                       </h4>
@@ -2493,20 +2493,20 @@ Partner: ${partner.name}
                           {partnerTransfers.map((transfer, idx) => (
                             <div
                               key={idx}
-                              className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-purple-500/50 rounded-lg p-4 transition-all"
+                              className="bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-purple-500/50 rounded-lg p-card-sm transition-all"
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-slate-100 font-semibold">{transfer.transferRequestId}</span>
+                                    <span className="text-[var(--text-primary)] font-semibold">{transfer.transferRequestId}</span>
                                     <BankingBadge variant="success">{transfer.state}</BankingBadge>
                                   </div>
                                   <div className="space-y-1 text-sm">
-                                    <div className="flex items-center gap-2 text-slate-400">
+                                    <div className="flex items-center gap-2 text-[var(--text-secondary)]">
                                       <ArrowRight className="w-3 h-3" />
                                       <span>{transfer.fromAccount} → {transfer.toAccount}</span>
                                     </div>
-                                    <div className="flex items-center gap-4 text-xs text-slate-500">
+                                    <div className="flex items-center gap-card text-xs text-[var(--text-muted)]">
                                       <span className="flex items-center gap-1">
                                         <Clock className="w-3 h-3" />
                                         {fmt.dateTime(transfer.createdAt)}
@@ -2527,7 +2527,7 @@ Partner: ${partner.name}
                           ))}
                         </div>
                       ) : (
-                        <div className="text-center py-8 text-slate-500">
+                        <div className="text-center py-8 text-[var(--text-muted)]">
                           {isSpanish ? 'Sin transferencias aún' : 'No transfers yet'}
                         </div>
                       )}
@@ -2538,11 +2538,11 @@ Partner: ${partner.name}
             ) : (
               <BankingCard className="p-12">
                 <div className="text-center">
-                  <Users className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-                  <p className="text-slate-400 text-lg font-medium">
+                  <Users className="w-20 h-20 text-slate-700 mx-auto m-card" />
+                  <p className="text-[var(--text-secondary)] text-lg font-medium">
                     {isSpanish ? 'No hay partners registrados' : 'No partners registered'}
                   </p>
-                  <p className="text-slate-600 text-sm mt-2">
+                  <p className="text-[var(--text-muted)] text-sm mt-2">
                     {isSpanish ? 'Crea tu primer partner para comenzar' : 'Create your first partner to get started'}
                   </p>
                 </div>
@@ -2560,23 +2560,23 @@ Partner: ${partner.name}
               icon={ArrowRight}
               color="purple"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-section">
                 {/* Columna Izquierda - Origen */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-slate-100 mb-4">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] m-card">
                     {isSpanish ? "Origen de Fondos" : "Source of Funds"}
                   </h3>
 
                   {/* Seleccionar Partner */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                       {isSpanish ? "1. Seleccionar Partner" : "1. Select Partner"}
                     </label>
                     <select
                       value={selectedPartner}
                       onChange={(e) => setSelectedPartner(e.target.value)}
                       aria-label="Select Partner"
-                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
+                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-[var(--text-primary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
                     >
                       <option value="">{isSpanish ? "-- Selecciona Partner --" : "-- Select Partner --"}</option>
                       {partners.map(partner => (
@@ -2589,14 +2589,14 @@ Partner: ${partner.name}
 
                   {/* Seleccionar Cuenta Custodio */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-300 mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                       {isSpanish ? "2. Seleccionar Cuenta Custodio" : "2. Select Custody Account"}
                     </label>
                     <select
                       value={selectedCustodyAccount}
                       onChange={(e) => setSelectedCustodyAccount(e.target.value)}
                       aria-label="Select Custody Account"
-                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
+                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-[var(--text-primary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
                       disabled={!selectedPartner}
                     >
                       <option value="">{isSpanish ? "-- Selecciona Cuenta --" : "-- Select Account --"}</option>
@@ -2610,7 +2610,7 @@ Partner: ${partner.name}
 
                   {/* Mostrar Balance de Cuenta Seleccionada */}
                   {selectedCustodyAccount && custodyAccounts.find(a => a.id === selectedCustodyAccount) && (
-                    <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 rounded-xl p-4">
+                    <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 rounded-xl p-card-sm">
                       {(() => {
                         const account = custodyAccounts.find(a => a.id === selectedCustodyAccount)!;
                         return (
@@ -2618,13 +2618,13 @@ Partner: ${partner.name}
                             <p className="text-emerald-400 text-sm font-semibold mb-2">
                               {isSpanish ? "Balance Disponible:" : "Available Balance:"}
                             </p>
-                            <p className="text-3xl font-black text-slate-100">
+                            <p className="text-3xl font-black text-[var(--text-primary)]">
                               {fmt.currency(account.availableBalance, account.currency)}
                             </p>
                             <div className="mt-3 space-y-1 text-sm">
                               <div className="flex justify-between">
-                                <span className="text-slate-400">{isSpanish ? "Total:" : "Total:"}</span>
-                                <span className="text-slate-100 font-semibold">{fmt.currency(account.totalBalance, account.currency)}</span>
+                                <span className="text-[var(--text-secondary)]">{isSpanish ? "Total:" : "Total:"}</span>
+                                <span className="text-[var(--text-primary)] font-semibold">{fmt.currency(account.totalBalance, account.currency)}</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-amber-400">{isSpanish ? "Reservado:" : "Reserved:"}</span>
@@ -2638,16 +2638,16 @@ Partner: ${partner.name}
                   )}
 
                   {/* Moneda y Monto */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-card">
                     <div>
-                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                      <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                         {isSpanish ? "3. Moneda" : "3. Currency"}
                       </label>
                       <select
                         value={transferForm.currency}
                         onChange={(e) => setTransferForm({...transferForm, currency: e.target.value})}
                         aria-label="Select Currency"
-                        className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
+                        className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-[var(--text-primary)] px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
                       >
                         {availableCurrencies.map(curr => (
                           <option key={curr.code} value={curr.code}>
@@ -2670,7 +2670,7 @@ Partner: ${partner.name}
 
                 {/* Columna Derecha - Destino */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-slate-100 mb-4">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] m-card">
                     {isSpanish ? "Destino de Fondos" : "Destination"}
                   </h3>
 
@@ -2697,26 +2697,26 @@ Partner: ${partner.name}
                     placeholder={isSpanish ? "Concepto de la transferencia" : "Transfer description"}
                   />
 
-                  <div className="bg-white/5 border border-white/15 rounded-xl p-4 space-y-2">
+                  <div className="bg-white/5 border border-white/15 rounded-xl p-card-sm space-y-2">
                     <div className="flex items-center gap-2 text-white font-semibold">
                       <Shield className="w-4 h-4" />
                       <span>{isSpanish ? "Resumen de la Transferencia" : "Transfer Summary"}</span>
                     </div>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isSpanish ? "Partner:" : "Partner:"}</span>
-                        <span className="text-slate-100 font-semibold">
+                        <span className="text-[var(--text-secondary)]">{isSpanish ? "Partner:" : "Partner:"}</span>
+                        <span className="text-[var(--text-primary)] font-semibold">
                           {partners.find(p => p.partnerId === selectedPartner)?.name || '-'}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isSpanish ? "Cuenta Origen:" : "Source Account:"}</span>
-                        <span className="text-slate-100 font-semibold">
+                        <span className="text-[var(--text-secondary)]">{isSpanish ? "Cuenta Origen:" : "Source Account:"}</span>
+                        <span className="text-[var(--text-primary)] font-semibold">
                           {custodyAccounts.find(a => a.id === selectedCustodyAccount)?.accountName || '-'}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">{isSpanish ? "Monto:" : "Amount:"}</span>
+                        <span className="text-[var(--text-secondary)]">{isSpanish ? "Monto:" : "Amount:"}</span>
                         <span className="text-emerald-400 font-bold text-lg">
                           {transferForm.amount ? fmt.currency(parseFloat(transferForm.amount), transferForm.currency) : '-'}
                         </span>
@@ -2755,22 +2755,22 @@ Partner: ${partner.name}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <p className="text-slate-100 font-bold text-base mb-1">
+                          <p className="text-[var(--text-primary)] font-bold text-base mb-1">
                             {transfer.partnerName}
                           </p>
-                          <p className="text-slate-400 text-sm">
+                          <p className="text-[var(--text-secondary)] text-sm">
                             {transfer.fromAccount} → {transfer.toAccount}
                           </p>
                           <div className="flex flex-wrap items-center gap-2 mt-2">
                             <BankingBadge variant="success">{transfer.state}</BankingBadge>
-                            <span className="text-slate-500 text-xs">{transfer.transferRequestId}</span>
+                            <span className="text-[var(--text-muted)] text-xs">{transfer.transferRequestId}</span>
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="text-emerald-400 font-black text-2xl">
                             {fmt.currency(parseFloat(transfer.amount), transfer.currency)}
                           </p>
-                          <p className="text-slate-500 text-xs mt-1">
+                          <p className="text-[var(--text-muted)] text-xs mt-1">
                             {fmt.dateTime(transfer.createdAt)}
                           </p>
                         </div>
@@ -2780,11 +2780,11 @@ Partner: ${partner.name}
                 </div>
               ) : (
                 <div className="text-center py-16">
-                  <ArrowRight className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-                  <p className="text-slate-400 text-lg font-medium">
+                  <ArrowRight className="w-20 h-20 text-slate-700 mx-auto m-card" />
+                  <p className="text-[var(--text-secondary)] text-lg font-medium">
                     {isSpanish ? "No hay transferencias aún" : "No transfers yet"}
                   </p>
-                  <p className="text-slate-600 text-sm mt-2">
+                  <p className="text-[var(--text-muted)] text-sm mt-2">
                     {isSpanish ? "Las transferencias aparecerán aquí" : "Transfers will appear here"}
                   </p>
                 </div>
@@ -2794,15 +2794,15 @@ Partner: ${partner.name}
         )}
 
         {/* Footer - API Info */}
-        <BankingCard className="p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <BankingCard className="p-card">
+          <div className="flex flex-wrap items-center justify-between gap-card">
             <div className="flex items-center gap-3">
               <Shield className="w-5 h-5 text-emerald-400" />
               <div>
-                <p className="text-slate-100 font-semibold">
+                <p className="text-[var(--text-primary)] font-semibold">
                   {isSpanish ? "API Segura y Lista para Producción" : "Secure & Production-Ready API"}
                 </p>
-                <p className="text-slate-400 text-sm">
+                <p className="text-[var(--text-secondary)] text-sm">
                   OAuth 2.0 • JWT • SHA-256 • Multi-tenant
                 </p>
               </div>

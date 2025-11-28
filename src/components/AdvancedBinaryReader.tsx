@@ -219,7 +219,7 @@ export function AdvancedBinaryReader() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-elevated)] to-[var(--bg-card)] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -228,7 +228,7 @@ export function AdvancedBinaryReader() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Analizador Binario Universal</h1>
-              <p className="text-sm text-slate-400">Detección automática de formatos Digital Commercial Bank Ltd</p>
+              <p className="text-sm text-[var(--text-secondary)]">Detección automática de formatos Digital Commercial Bank Ltd</p>
             </div>
           </div>
         </div>
@@ -256,7 +256,7 @@ export function AdvancedBinaryReader() {
                 <p className="text-xl text-white font-semibold mb-2">
                   Cargar Archivo para Análisis
                 </p>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-[var(--text-secondary)]">
                   Soporta archivos Digital Commercial Bank Ltd, binarios y encriptados
                 </p>
               </div>
@@ -273,7 +273,7 @@ export function AdvancedBinaryReader() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-bold text-white">{analysis.fileName}</h2>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-[var(--text-secondary)]">
                     {formatBytes(analysis.fileSize)} • Hash: {analysis.fileHash}
                   </p>
                 </div>
@@ -290,7 +290,7 @@ export function AdvancedBinaryReader() {
                       setAnalysis(null);
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
-                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                    className="px-4 py-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] text-white rounded-lg transition-colors"
                   >
                     Nuevo Archivo
                   </button>
@@ -300,7 +300,7 @@ export function AdvancedBinaryReader() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#1a1a1a]">
-                <p className="text-xs text-slate-400 mb-1">Estado Digital Commercial Bank Ltd</p>
+                <p className="text-xs text-[var(--text-secondary)] mb-1">Estado Digital Commercial Bank Ltd</p>
                 <p className={`text-lg font-bold ${
                   analysis.DTC1BAnalysis.isValidDTC1B ? 'text-white' : 'text-red-400'
                 }`}>
@@ -309,21 +309,21 @@ export function AdvancedBinaryReader() {
               </div>
 
               <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#1a1a1a]">
-                <p className="text-xs text-slate-400 mb-1">Transacciones</p>
+                <p className="text-xs text-[var(--text-secondary)] mb-1">Transacciones</p>
                 <p className="text-2xl font-bold text-white">
                   {analysis.DTC1BAnalysis.totalTransactions}
                 </p>
               </div>
 
               <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#1a1a1a]">
-                <p className="text-xs text-slate-400 mb-1">Entropía</p>
+                <p className="text-xs text-[var(--text-secondary)] mb-1">Entropía</p>
                 <p className="text-2xl font-bold text-purple-400">
                   {analysis.forensicAnalysis.entropy.toFixed(2)}
                 </p>
               </div>
 
               <div className="bg-[#0d0d0d] rounded-lg p-4 border border-[#1a1a1a]">
-                <p className="text-xs text-slate-400 mb-1">Encriptación</p>
+                <p className="text-xs text-[var(--text-secondary)] mb-1">Encriptación</p>
                 <p className={`text-lg font-bold ${
                   analysis.encryptionAnalysis.isEncrypted ? 'text-red-400' : 'text-white'
                 }`}>
@@ -344,7 +344,7 @@ export function AdvancedBinaryReader() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-white font-medium">Transacción #{i + 1}</p>
-                          <p className="text-xs text-slate-400">
+                          <p className="text-xs text-[var(--text-secondary)]">
                             Offset: 0x{tx.offset.toString(16).toUpperCase()}
                           </p>
                         </div>
@@ -362,7 +362,7 @@ export function AdvancedBinaryReader() {
 
             <div className="bg-[#0d0d0d] rounded-xl border border-[#1a1a1a] p-6">
               <h3 className="text-xl font-bold text-white mb-4">Vista Hexadecimal</h3>
-              <div className="bg-slate-950 p-4 rounded-lg font-mono text-xs text-white overflow-x-auto max-h-96 overflow-y-auto">
+              <div className="bg-[var(--bg-main)] p-4 rounded-lg font-mono text-xs text-white overflow-x-auto max-h-96 overflow-y-auto">
                 {analysis.hexDump.map((line, i) => (
                   <div key={i} className="mb-1">{line}</div>
                 ))}

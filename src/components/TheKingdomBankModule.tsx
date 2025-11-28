@@ -460,7 +460,7 @@ export function TheKingdomBankModule() {
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
                 activeTab === tab.id
                   ? 'bg-white text-black'
-                  : 'text-slate-400 hover:text-slate-100'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -478,15 +478,15 @@ export function TheKingdomBankModule() {
                   <BankingCard key={account.id} className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h4 className="text-slate-100 font-bold text-lg mb-1">
+                        <h4 className="text-[var(--text-primary)] font-bold text-lg mb-1">
                           {account.currency} Account
                         </h4>
-                        <p className="text-slate-400 text-sm">ID: {account.id}</p>
+                        <p className="text-[var(--text-secondary)] text-sm">ID: {account.id}</p>
                         {account.accountNumber && (
-                          <p className="text-slate-400 text-sm">Account: {account.accountNumber}</p>
+                          <p className="text-[var(--text-secondary)] text-sm">Account: {account.accountNumber}</p>
                         )}
                         {account.iban && (
-                          <p className="text-slate-400 text-sm">IBAN: {account.iban}</p>
+                          <p className="text-[var(--text-secondary)] text-sm">IBAN: {account.iban}</p>
                         )}
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -498,14 +498,14 @@ export function TheKingdomBankModule() {
                       </span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex justify-between py-2 border-b border-slate-800">
-                        <span className="text-slate-400">{isSpanish ? 'Balance:' : 'Balance:'}</span>
+                      <div className="flex justify-between py-2 border-b border-[var(--border-subtle)]">
+                        <span className="text-[var(--text-secondary)]">{isSpanish ? 'Balance:' : 'Balance:'}</span>
                         <span className="text-emerald-400 font-bold text-xl">
                           {fmt.currency(account.balance, account.currency)}
                         </span>
                       </div>
                       <div className="flex justify-between py-2">
-                        <span className="text-slate-400">{isSpanish ? 'Disponible:' : 'Available:'}</span>
+                        <span className="text-[var(--text-secondary)]">{isSpanish ? 'Disponible:' : 'Available:'}</span>
                         <span className="text-white font-semibold">
                           {fmt.currency(account.availableBalance, account.currency)}
                         </span>
@@ -517,7 +517,7 @@ export function TheKingdomBankModule() {
             ) : (
               <BankingCard className="p-12 text-center">
                 <CreditCard className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-                <p className="text-slate-400">
+                <p className="text-[var(--text-secondary)]">
                   {isSpanish ? 'No hay cuentas. Carga las cuentas desde TKB.' : 'No accounts. Load accounts from TKB.'}
                 </p>
               </BankingCard>
@@ -557,8 +557,8 @@ export function TheKingdomBankModule() {
                 onChange={(v) => setConfig({ ...config, signatureKey: v })}
                 type="password"
               />
-              <div className="pt-4 border-t border-slate-800">
-                <p className="text-slate-400 text-sm mb-4">
+              <div className="pt-4 border-t border-[var(--border-subtle)]">
+                <p className="text-[var(--text-secondary)] text-sm mb-4">
                   {isSpanish 
                     ? "Webhook URL para notificaciones:"
                     : "Webhook URL for notifications:"
@@ -578,7 +578,7 @@ export function TheKingdomBankModule() {
             <BankingCard className="p-6 space-y-4">
               {/* Selector de Cuenta Custody */}
               <div className="mb-4 p-4 bg-[#0d0d0d]/50 rounded-lg border border-[#1a1a1a]">
-                <label className="block text-slate-200 font-semibold mb-2">
+                <label className="block text-[var(--text-primary)] font-semibold mb-2">
                   {isSpanish ? "Seleccionar Cuenta Custody" : "Select Custody Account"}
                 </label>
                 <select
@@ -605,7 +605,7 @@ export function TheKingdomBankModule() {
                 {selectedCustodyAccountId && (() => {
                   const account = custodyAccounts.find(a => a.id === selectedCustodyAccountId);
                   return account ? (
-                    <div className="mt-2 text-sm text-slate-400">
+                    <div className="mt-2 text-sm text-[var(--text-secondary)]">
                       {isSpanish ? "Balance disponible:" : "Available balance:"} {account.currency} {account.availableBalance.toLocaleString()}
                       {account.iban && <span className="ml-4">IBAN: {account.iban}</span>}
                     </div>
@@ -646,8 +646,8 @@ export function TheKingdomBankModule() {
                   onChange={(v) => setPaymentForm({ ...paymentForm, failUrl: v })}
                 />
               </div>
-              <div className="pt-4 border-t border-slate-800">
-                <h5 className="text-slate-100 font-semibold mb-4">{isSpanish ? "Cliente" : "Customer"}</h5>
+              <div className="pt-4 border-t border-[var(--border-subtle)]">
+                <h5 className="text-[var(--text-primary)] font-semibold mb-4">{isSpanish ? "Cliente" : "Customer"}</h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <BankingInput
                     label={isSpanish ? "Nombre" : "First Name"}
@@ -704,7 +704,7 @@ export function TheKingdomBankModule() {
               <BankingCard className="p-6 space-y-4">
                 {/* Selector de Cuenta Origen Custody */}
                 <div className="mb-4 p-4 bg-[#0d0d0d]/50 rounded-lg border border-[#1a1a1a]">
-                  <label className="block text-slate-200 font-semibold mb-2">
+                  <label className="block text-[var(--text-primary)] font-semibold mb-2">
                     {isSpanish ? "Cuenta Origen (Custody)" : "Source Account (Custody)"}
                   </label>
                   <select
@@ -731,7 +731,7 @@ export function TheKingdomBankModule() {
                   {selectedFromCustodyAccountId && (() => {
                     const account = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
                     return account ? (
-                      <div className="mt-2 text-sm text-slate-400">
+                      <div className="mt-2 text-sm text-[var(--text-secondary)]">
                         {isSpanish ? "Balance disponible:" : "Available balance:"} {account.currency} {account.availableBalance.toLocaleString()}
                         {account.iban && <span className="ml-4">IBAN: {account.iban}</span>}
                       </div>
@@ -786,7 +786,7 @@ export function TheKingdomBankModule() {
               <BankingCard className="p-6 space-y-4">
                 {/* Selector de Cuenta Origen Custody */}
                 <div className="mb-4 p-4 bg-[#0d0d0d]/50 rounded-lg border border-[#1a1a1a]">
-                  <label className="block text-slate-200 font-semibold mb-2">
+                  <label className="block text-[var(--text-primary)] font-semibold mb-2">
                     {isSpanish ? "Cuenta Origen (Custody)" : "Source Account (Custody)"}
                   </label>
                   <select
@@ -813,7 +813,7 @@ export function TheKingdomBankModule() {
                   {selectedFromCustodyAccountId && (() => {
                     const account = custodyAccounts.find(a => a.id === selectedFromCustodyAccountId);
                     return account ? (
-                      <div className="mt-2 text-sm text-slate-400">
+                      <div className="mt-2 text-sm text-[var(--text-secondary)]">
                         {isSpanish ? "Balance disponible:" : "Available balance:"} {account.currency} {account.availableBalance.toLocaleString()}
                         {account.iban && <span className="ml-4">IBAN: {account.iban}</span>}
                       </div>
@@ -930,7 +930,7 @@ export function TheKingdomBankModule() {
           <BankingSection title={isSpanish ? "Historial de Transacciones" : "Transaction History"} icon={History} color="white">
             <BankingCard className="p-12 text-center">
               <History className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-              <p className="text-slate-400">
+              <p className="text-[var(--text-secondary)]">
                 {isSpanish ? 'Funcionalidad de historial próximamente' : 'History functionality coming soon'}
               </p>
             </BankingCard>

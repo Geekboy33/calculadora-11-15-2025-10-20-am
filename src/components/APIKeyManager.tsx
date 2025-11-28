@@ -81,7 +81,7 @@ export function APIKeyManager() {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">API Key Management</h2>
-                <p className="text-sm text-slate-400">Manage authentication credentials</p>
+                <p className="text-sm text-[var(--text-secondary)]">Manage authentication credentials</p>
               </div>
             </div>
             <button
@@ -99,20 +99,20 @@ export function APIKeyManager() {
             <h3 className="text-lg font-semibold text-white mb-4">Create New API Key</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-3">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-3">
                   Select Permissions
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   {availablePermissions.map(permission => (
                     <label
                       key={permission}
-                      className="flex items-center gap-2 p-3 bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors"
+                      className="flex items-center gap-2 p-3 bg-[var(--bg-hover)] rounded-lg cursor-pointer hover:bg-[var(--bg-active)] transition-colors"
                     >
                       <input
                         type="checkbox"
                         checked={selectedPermissions.includes(permission)}
                         onChange={() => togglePermission(permission)}
-                        className="w-4 h-4 rounded border-slate-500 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                        className="w-4 h-4 rounded border-[var(--border-medium)] text-blue-600 focus:ring-2 focus:ring-blue-500"
                       />
                       <span className="text-sm text-white font-mono">{permission}</span>
                     </label>
@@ -124,7 +124,7 @@ export function APIKeyManager() {
                 <button
                   onClick={handleCreateKey}
                   disabled={selectedPermissions.length === 0}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold py-2 rounded-lg transition-colors"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-white font-semibold py-2 rounded-lg transition-colors"
                 >
                   Create API Key
                 </button>
@@ -133,7 +133,7 @@ export function APIKeyManager() {
                     setShowCreateForm(false);
                     setSelectedPermissions([]);
                   }}
-                  className="px-6 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 rounded-lg transition-colors"
+                  className="px-6 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] text-white font-semibold py-2 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
@@ -156,7 +156,7 @@ export function APIKeyManager() {
 
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Public Key
                 </label>
                 <div className="flex items-center gap-2">
@@ -164,23 +164,23 @@ export function APIKeyManager() {
                     type="text"
                     value={newKeyResult.apiKey.publicKey}
                     readOnly
-                    className="flex-1 bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 font-mono text-sm"
+                    className="flex-1 bg-[var(--bg-hover)] text-white px-4 py-2 rounded-lg border border-[var(--border-medium)] font-mono text-sm"
                   />
                   <button
                     onClick={() => copyToClipboard(newKeyResult.apiKey.publicKey, 'public')}
-                    className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                    className="p-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] rounded-lg transition-colors"
                   >
                     {copiedField === 'public' ? (
                       <CheckCircle className="w-5 h-5 text-white" />
                     ) : (
-                      <Copy className="w-5 h-5 text-slate-400" />
+                      <Copy className="w-5 h-5 text-[var(--text-secondary)]" />
                     )}
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   Secret Key
                 </label>
                 <div className="flex items-center gap-2">
@@ -188,16 +188,16 @@ export function APIKeyManager() {
                     type="text"
                     value={newKeyResult.secret}
                     readOnly
-                    className="flex-1 bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 font-mono text-sm"
+                    className="flex-1 bg-[var(--bg-hover)] text-white px-4 py-2 rounded-lg border border-[var(--border-medium)] font-mono text-sm"
                   />
                   <button
                     onClick={() => copyToClipboard(newKeyResult.secret, 'secret')}
-                    className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                    className="p-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] rounded-lg transition-colors"
                   >
                     {copiedField === 'secret' ? (
                       <CheckCircle className="w-5 h-5 text-white" />
                     ) : (
-                      <Copy className="w-5 h-5 text-slate-400" />
+                      <Copy className="w-5 h-5 text-[var(--text-secondary)]" />
                     )}
                   </button>
                 </div>
@@ -205,7 +205,7 @@ export function APIKeyManager() {
 
               <button
                 onClick={() => setNewKeyResult(null)}
-                className="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 rounded-lg transition-colors"
+                className="w-full bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] text-white font-semibold py-2 rounded-lg transition-colors"
               >
                 Done
               </button>
@@ -215,7 +215,7 @@ export function APIKeyManager() {
 
         <div className="p-6">
           {apiKeys.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-[var(--text-muted)]">
               No API keys created yet
             </div>
           ) : (
@@ -225,7 +225,7 @@ export function APIKeyManager() {
                   key={apiKey.id}
                   className={`p-4 rounded-lg border transition-colors ${
                     apiKey.active
-                      ? 'bg-slate-700 border-slate-600'
+                      ? 'bg-[var(--bg-hover)] border-[var(--border-medium)]'
                       : 'bg-[#0d0d0d] border-[#1a1a1a] opacity-60'
                   }`}
                 >
@@ -241,7 +241,7 @@ export function APIKeyManager() {
                           {apiKey.active ? 'Active' : 'Revoked'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-slate-400">
+                      <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
                         <span>Created: {apiKey.createdAt.toLocaleDateString()}</span>
                         {apiKey.lastUsedAt && (
                           <span>Last used: {apiKey.lastUsedAt.toLocaleDateString()}</span>
@@ -252,12 +252,12 @@ export function APIKeyManager() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => copyToClipboard(apiKey.publicKey, `key-${apiKey.id}`)}
-                        className="p-2 hover:bg-slate-600 rounded transition-colors"
+                        className="p-2 hover:bg-[var(--bg-active)] rounded transition-colors"
                       >
                         {copiedField === `key-${apiKey.id}` ? (
                           <CheckCircle className="w-4 h-4 text-white" />
                         ) : (
-                          <Copy className="w-4 h-4 text-slate-400" />
+                          <Copy className="w-4 h-4 text-[var(--text-secondary)]" />
                         )}
                       </button>
                       {apiKey.active && (
@@ -272,7 +272,7 @@ export function APIKeyManager() {
                   </div>
 
                   <div>
-                    <div className="text-xs font-medium text-slate-400 mb-2">Permissions:</div>
+                    <div className="text-xs font-medium text-[var(--text-secondary)] mb-2">Permissions:</div>
                     <div className="flex flex-wrap gap-2">
                       {apiKey.permissions.map(permission => (
                         <span

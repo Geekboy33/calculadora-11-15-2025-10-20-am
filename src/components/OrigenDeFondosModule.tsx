@@ -425,7 +425,7 @@ ${idx + 1}. ${acc.bankName}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Activity className="w-6 h-6 text-white animate-spin" />
-                <p className="text-slate-100 font-bold text-lg">
+                <p className="text-[var(--text-primary)] font-bold text-lg">
                   {isSpanish ? 'Escaneando archivo...' : 'Scanning file...'}
                 </p>
               </div>
@@ -448,7 +448,7 @@ ${idx + 1}. ${acc.bankName}
               className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                 selectedBank === 'ALL'
                   ? 'bg-white text-black'
-                  : 'bg-[#141414] border border-[#1a1a1a] text-slate-300 hover:border-[#1a1a1a]'
+                  : 'bg-[#141414] border border-[#1a1a1a] text-[var(--text-secondary)] hover:border-[#1a1a1a]'
               }`}
             >
               {isSpanish ? 'Todos' : 'All'} ({accounts.length})
@@ -460,7 +460,7 @@ ${idx + 1}. ${acc.bankName}
                 className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                   selectedBank === bank
                     ? 'bg-white text-black'
-                    : 'bg-[#141414] border border-[#1a1a1a] text-slate-300 hover:border-[#1a1a1a]'
+                    : 'bg-[#141414] border border-[#1a1a1a] text-[var(--text-secondary)] hover:border-[#1a1a1a]'
                 }`}
               >
                 {bank} ({accounts.filter(a => a.bankName === bank).length})
@@ -486,7 +486,7 @@ ${idx + 1}. ${acc.bankName}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <Building2 className="w-5 h-5 text-white" />
-                        <h4 className="text-slate-100 font-bold text-lg">{account.bankName}</h4>
+                        <h4 className="text-[var(--text-primary)] font-bold text-lg">{account.bankName}</h4>
                       </div>
                       <div className="flex items-center gap-2">
                         <BankingBadge variant="success">{account.accountType}</BankingBadge>
@@ -503,31 +503,31 @@ ${idx + 1}. ${acc.bankName}
                   </div>
 
                   <div className="space-y-2 text-sm mb-4">
-                    <div className="flex justify-between py-2 border-b border-slate-800">
-                      <span className="text-slate-400">{isSpanish ? 'Número de Cuenta:' : 'Account Number:'}</span>
+                    <div className="flex justify-between py-2 border-b border-[var(--border-subtle)]">
+                      <span className="text-[var(--text-secondary)]">{isSpanish ? 'Número de Cuenta:' : 'Account Number:'}</span>
                       <code className="text-white font-mono font-bold">{account.accountNumber}</code>
                     </div>
                     {account.iban && (
-                      <div className="flex justify-between py-2 border-b border-slate-800">
-                        <span className="text-slate-400">IBAN:</span>
+                      <div className="flex justify-between py-2 border-b border-[var(--border-subtle)]">
+                        <span className="text-[var(--text-secondary)]">IBAN:</span>
                         <code className="text-purple-400 font-mono text-xs">{account.iban}</code>
                       </div>
                     )}
                     {account.swift && (
-                      <div className="flex justify-between py-2 border-b border-slate-800">
-                        <span className="text-slate-400">SWIFT:</span>
+                      <div className="flex justify-between py-2 border-b border-[var(--border-subtle)]">
+                        <span className="text-[var(--text-secondary)]">SWIFT:</span>
                         <code className="text-amber-400 font-mono">{account.swift}</code>
                       </div>
                     )}
                     <div className="flex justify-between py-2">
-                      <span className="text-slate-400">{isSpanish ? 'Extraído:' : 'Extracted:'}</span>
-                      <span className="text-slate-300 text-xs">{fmt.dateTime(account.extractedAt)}</span>
+                      <span className="text-[var(--text-secondary)]">{isSpanish ? 'Extraído:' : 'Extracted:'}</span>
+                      <span className="text-[var(--text-secondary)] text-xs">{fmt.dateTime(account.extractedAt)}</span>
                     </div>
                   </div>
 
                   {/* Balance destacado */}
                   <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 text-center">
-                    <p className="text-slate-400 text-xs mb-1">{isSpanish ? 'Balance' : 'Balance'}</p>
+                    <p className="text-[var(--text-secondary)] text-xs mb-1">{isSpanish ? 'Balance' : 'Balance'}</p>
                     <p className="text-emerald-400 font-black text-2xl">
                       {fmt.currency(account.balance, account.currency)}
                     </p>
@@ -540,10 +540,10 @@ ${idx + 1}. ${acc.bankName}
           <BankingCard className="p-12">
             <div className="text-center">
               <FileSearch className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-              <p className="text-slate-400 text-lg font-medium mb-2">
+              <p className="text-[var(--text-secondary)] text-lg font-medium mb-2">
                 {isSpanish ? 'No hay cuentas detectadas' : 'No accounts detected'}
               </p>
-              <p className="text-slate-600 text-sm">
+              <p className="text-[var(--text-muted)] text-sm">
                 {isSpanish ? 'Carga un archivo Ledger1 para extraer datos bancarios' : 'Load a Ledger1 file to extract bank data'}
               </p>
             </div>
@@ -556,10 +556,10 @@ ${idx + 1}. ${acc.bankName}
             <div className="flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-emerald-400" />
               <div>
-                <p className="text-slate-100 font-semibold">
+                <p className="text-[var(--text-primary)] font-semibold">
                   {isSpanish ? 'Extracción Automática de Datos Bancarios' : 'Automatic Bank Data Extraction'}
                 </p>
-                <p className="text-slate-400 text-sm">
+                <p className="text-[var(--text-secondary)] text-sm">
                   {isSpanish ? 'HSBC, JPMorgan, Citibank, y más...' : 'HSBC, JPMorgan, Citibank, and more...'}
                 </p>
               </div>

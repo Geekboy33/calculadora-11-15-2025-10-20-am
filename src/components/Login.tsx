@@ -1,12 +1,13 @@
 /**
  * Login Component - DAES Dark Theme
  * Diseño: Fondo negro, texto blanco, iconos azules
- * Tema: Dark Mode - Negro con acentos azules
+ * Migrado a CSS Modules con mejoras de accesibilidad
  */
 
 import { useState, useEffect } from 'react';
 import { Lock, User, Eye, EyeOff, Shield, Building2, AlertTriangle } from 'lucide-react';
 import { loginSecurity } from '../lib/login-security';
+import styles from './Login.module.css';
 
 interface LoginProps {
   onLogin: () => void;
@@ -88,220 +89,103 @@ export function Login({ onLogin }: LoginProps) {
     }
   };
 
+  const isBlocked = blockedUntil !== null && blockedUntil.getTime() > Date.now();
+  const isDisabled = isLoading || !username || !password || isBlocked;
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem',
-      background: '#000000',
-      fontFamily: 'Inter, sans-serif'
-    }}>
-      <style>{`
-        input::placeholder {
-          color: #6B7280 !important;
-        }
-      `}</style>
-      <div style={{ width: '100%', maxWidth: '420px' }}>
+    <div className={styles.loginContainer}>
+      <div className={styles.loginWrapper}>
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '80px',
-            height: '80px',
-            borderRadius: '20px',
-            background: 'linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%)',
-            boxShadow: '0 8px 24px rgba(26, 77, 179, 0.25)',
-            marginBottom: '1.5rem'
-          }}>
-            <Building2 style={{ width: '40px', height: '40px', color: '#FFFFFF' }} />
+        <div className={styles.logoSection}>
+          <div className={styles.logoIcon}>
+            <Building2 aria-hidden="true" />
           </div>
-          <h1 style={{
-            fontSize: '2rem',
-            fontWeight: 700,
-            color: '#FFFFFF',
-            marginBottom: '0.5rem',
-            letterSpacing: '-0.025em'
-          }}>
+          <h1 className={styles.title}>
             Digital Commercial Bank
           </h1>
           <a 
             href="https://digcommbank.com/" 
             target="_blank" 
             rel="noopener noreferrer"
-            style={{ 
-              color: '#1A4DB3', 
-              fontSize: '0.875rem',
-              textDecoration: 'none',
-              display: 'block',
-              marginBottom: '0.5rem',
-              transition: 'color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#3464C9'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#1A4DB3'}
+            className={styles.websiteLink}
+            aria-label="Visit Digital Commercial Bank website"
           >
             https://digcommbank.com/
           </a>
-          <p style={{ color: '#D1D5DB', fontSize: '1rem' }}>
+          <p className={styles.subtitle}>
             DAES CoreBanking System
           </p>
         </div>
 
         {/* Card */}
-        <div style={{
-          backgroundColor: '#0d0d0d',
-          borderRadius: '24px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
-          border: '1px solid #1a1a1a',
-          padding: '2.5rem'
-        }}>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className={styles.card}>
+          <form onSubmit={handleSubmit} className={styles.form}>
             {/* Username */}
-            <div>
-              <label style={{
-                display: 'block',
-                color: '#FFFFFF',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                marginBottom: '0.5rem'
-              }}>
+            <div className={styles.fieldGroup}>
+              <label htmlFor="username" className={styles.label}>
                 Username
               </label>
-              <div style={{ position: 'relative' }}>
-                <User style={{
-                  position: 'absolute',
-                  left: '1rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: '20px',
-                  height: '20px',
-                  color: '#1A4DB3'
-                }} />
+              <div className={styles.inputWrapper}>
+                <User className={styles.inputIcon} aria-hidden="true" />
                 <input
+                  id="username"
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter username"
                   required
-                  style={{
-                    width: '100%',
-                    paddingLeft: '3rem',
-                    paddingRight: '1rem',
-                    paddingTop: '0.875rem',
-                    paddingBottom: '0.875rem',
-                    backgroundColor: '#141414',
-                    border: '1px solid #1a1a1a',
-                    borderRadius: '12px',
-                    color: '#FFFFFF',
-                    fontSize: '1rem',
-                    outline: 'none',
-                    transition: 'all 0.2s'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#1A4DB3';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(26, 77, 179, 0.2)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#1a1a1a';
-                    e.target.style.boxShadow = 'none';
-                  }}
+                  className={styles.input}
+                  aria-label="Username input"
+                  aria-required="true"
+                  autoComplete="username"
                 />
               </div>
             </div>
 
             {/* Password */}
-            <div>
-              <label style={{
-                display: 'block',
-                color: '#FFFFFF',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                marginBottom: '0.5rem'
-              }}>
+            <div className={styles.fieldGroup}>
+              <label htmlFor="password" className={styles.label}>
                 Password
               </label>
-              <div style={{ position: 'relative' }}>
-                <Lock style={{
-                  position: 'absolute',
-                  left: '1rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: '20px',
-                  height: '20px',
-                  color: '#1A4DB3'
-                }} />
+              <div className={styles.inputWrapper}>
+                <Lock className={styles.inputIcon} aria-hidden="true" />
                 <input
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password"
                   required
-                  style={{
-                    width: '100%',
-                    paddingLeft: '3rem',
-                    paddingRight: '3rem',
-                    paddingTop: '0.875rem',
-                    paddingBottom: '0.875rem',
-                    backgroundColor: '#141414',
-                    border: '1px solid #1a1a1a',
-                    borderRadius: '12px',
-                    color: '#FFFFFF',
-                    fontSize: '1rem',
-                    outline: 'none',
-                    transition: 'all 0.2s'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#1A4DB3';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(26, 77, 179, 0.2)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#1a1a1a';
-                    e.target.style.boxShadow = 'none';
-                  }}
+                  className={`${styles.input} ${styles.passwordInput}`}
+                  aria-label="Password input"
+                  aria-required="true"
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '1rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#1A4DB3'
-                  }}
+                  className={styles.passwordToggle}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
                 >
-                  {showPassword ? <EyeOff style={{ width: '20px', height: '20px' }} /> : <Eye style={{ width: '20px', height: '20px' }} />}
+                  {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
                 </button>
               </div>
             </div>
 
             {/* Error */}
             {error && (
-              <div style={{
-                backgroundColor: '#1a1a1a',
-                border: '1px solid #E85C5C',
-                borderRadius: '12px',
-                padding: '1rem',
-                display: 'flex',
-                gap: '0.75rem',
-                alignItems: 'flex-start'
-              }}>
-                <AlertTriangle style={{ width: '18px', height: '18px', color: '#E85C5C', flexShrink: 0, marginTop: '2px' }} />
-                <div style={{ flex: 1 }}>
-                  <p style={{ color: '#E85C5C', fontSize: '0.875rem', margin: 0 }}>{error}</p>
+              <div className={styles.errorContainer} role="alert" aria-live="polite">
+                <AlertTriangle className={styles.errorIcon} aria-hidden="true" />
+                <div className={styles.errorContent}>
+                  <p className={styles.errorMessage}>{error}</p>
                   {remainingAttempts !== null && remainingAttempts > 0 && (
-                    <p style={{ color: '#D1D5DB', fontSize: '0.75rem', marginTop: '0.5rem', margin: 0 }}>
+                    <p className={styles.errorDetails}>
                       {remainingAttempts} attempt(s) remaining before account lockout.
                     </p>
                   )}
                   {blockedUntil && (
-                    <p style={{ color: '#D1D5DB', fontSize: '0.75rem', marginTop: '0.5rem', margin: 0 }}>
+                    <p className={styles.errorDetails}>
                       Blocked until: {blockedUntil.toLocaleTimeString()}
                     </p>
                   )}
@@ -312,81 +196,41 @@ export function Login({ onLogin }: LoginProps) {
             {/* Button */}
             <button
               type="submit"
-              disabled={isLoading || !username || !password || (blockedUntil !== null && blockedUntil.getTime() > Date.now())}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                background: (blockedUntil !== null && blockedUntil.getTime() > Date.now())
-                  ? 'linear-gradient(135deg, #4A4F55 0%, #1a1a1a 100%)'
-                  : 'linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%)',
-                color: '#FFFFFF',
-                fontSize: '1rem',
-                fontWeight: 600,
-                borderRadius: '12px',
-                border: 'none',
-                cursor: (isLoading || !username || !password || (blockedUntil !== null && blockedUntil.getTime() > Date.now())) ? 'not-allowed' : 'pointer',
-                opacity: (isLoading || !username || !password || (blockedUntil !== null && blockedUntil.getTime() > Date.now())) ? 0.5 : 1,
-                transition: 'all 0.2s',
-                boxShadow: '0 4px 12px rgba(26, 77, 179, 0.25)'
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoading && username && password && !(blockedUntil !== null && blockedUntil.getTime() > Date.now())) {
-                  e.currentTarget.style.background = 'linear-gradient(135deg, #003B7C 0%, #002A5C 100%)';
-                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(26, 77, 179, 0.35)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = (blockedUntil !== null && blockedUntil.getTime() > Date.now())
-                  ? 'linear-gradient(135deg, #4A4F55 0%, #1a1a1a 100%)'
-                  : 'linear-gradient(135deg, #1A4DB3 0%, #003B7C 100%)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(26, 77, 179, 0.25)';
-              }}
+              disabled={isDisabled}
+              className={styles.submitButton}
+              aria-label="Sign in to Digital Commercial Bank"
+              aria-busy={isLoading}
             >
               {isLoading 
                 ? 'Authenticating...' 
-                : (blockedUntil !== null && blockedUntil.getTime() > Date.now())
+                : isBlocked
                   ? 'Account Blocked'
                   : 'Sign In'}
             </button>
           </form>
 
           {/* Compliance */}
-          <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#D1D5DB', fontSize: '0.75rem' }}>
-              <Shield style={{ width: '16px', height: '16px', color: '#1A4DB3' }} />
+          <div className={styles.complianceSection}>
+            <div className={styles.complianceHeader}>
+              <Shield aria-hidden="true" />
               <span>Secure Authentication • AES-256</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', fontSize: '0.75rem' }}>
-              <span style={{
-                backgroundColor: '#141414',
-                color: '#59C27A',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '9999px',
-                border: '1px solid #59C27A',
-                fontWeight: 600
-              }}>ISO 27001</span>
-              <span style={{
-                backgroundColor: '#141414',
-                color: '#1A4DB3',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '9999px',
-                border: '1px solid #1A4DB3',
-                fontWeight: 600
-              }}>SOC 2</span>
-              <span style={{
-                backgroundColor: '#141414',
-                color: '#59C27A',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '9999px',
-                border: '1px solid #59C27A',
-                fontWeight: 600
-              }}>PCI DSS</span>
+            <div className={styles.badgesContainer}>
+              <span className={`${styles.badge} ${styles.badgeISO}`} aria-label="ISO 27001 Certified">
+                ISO 27001
+              </span>
+              <span className={`${styles.badge} ${styles.badgeSOC}`} aria-label="SOC 2 Type II Certified">
+                SOC 2
+              </span>
+              <span className={`${styles.badge} ${styles.badgePCI}`} aria-label="PCI DSS Compliant">
+                PCI DSS
+              </span>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <p style={{ textAlign: 'center', marginTop: '2rem', color: '#D1D5DB', fontSize: '0.75rem' }}>
+        <p className={styles.footer}>
           © 2025 Digital Commercial Bank Ltd. All rights reserved.
         </p>
       </div>

@@ -643,7 +643,7 @@ export function DTC1BAnalyzer() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-elevated)] to-[var(--bg-card)] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -652,13 +652,13 @@ export function DTC1BAnalyzer() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Analizador Digital Commercial Bank Ltd Avanzado</h1>
-              <p className="text-sm text-slate-400">Ingeniería inversa y análisis forense de archivos Digital Commercial Bank Ltd</p>
+              <p className="text-sm text-[var(--text-secondary)]">Ingeniería inversa y análisis forense de archivos Digital Commercial Bank Ltd</p>
             </div>
           </div>
         </div>
 
         {!analysis ? (
-          <div className="bg-slate-800 rounded-xl border border-slate-700 p-12">
+          <div className="bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] p-12">
             <input
               ref={fileInputRef}
               type="file"
@@ -678,10 +678,10 @@ export function DTC1BAnalyzer() {
                 <p className="text-xl text-white font-semibold mb-2">
                   Cargar Archivo Digital Commercial Bank Ltd para Análisis Avanzado
                 </p>
-                <p className="text-sm text-slate-400 mb-3">
+                <p className="text-sm text-[var(--text-secondary)] mb-3">
                   Análisis completo con detección automática de formatos y transacciones
                 </p>
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-[var(--text-muted)]">
                   <p className="mb-2">🎯 <strong>Capacidades:</strong></p>
                   <p>• Detección automática de archivos Digital Commercial Bank Ltd</p>
                   <p>• Extracción de transacciones bancarias</p>
@@ -695,7 +695,7 @@ export function DTC1BAnalyzer() {
         ) : (
           <div className="space-y-6">
             {/* Header del análisis */}
-            <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+            <div className="bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <div className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -708,7 +708,7 @@ export function DTC1BAnalyzer() {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-white">{analysis.fileName}</h2>
-                    <p className="text-sm text-slate-400">{formatBytes(analysis.fileSize)} • Hash: {analysis.fileHash}</p>
+                    <p className="text-sm text-[var(--text-secondary)]">{formatBytes(analysis.fileSize)} • Hash: {analysis.fileHash}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -740,7 +740,7 @@ export function DTC1BAnalyzer() {
                       setAnalysis(null);
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
-                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                    className="px-4 py-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] text-white rounded-lg transition-colors"
                   >
                     Nuevo Archivo
                   </button>
@@ -749,7 +749,7 @@ export function DTC1BAnalyzer() {
             </div>
 
             {/* Navegación por secciones */}
-            <div className="bg-slate-800 rounded-xl border border-slate-700">
+            <div className="bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)]">
               <div className="flex flex-wrap gap-1 p-2">
                 {[
                   { id: 'overview', name: 'Resumen', icon: '📊' },
@@ -764,7 +764,7 @@ export function DTC1BAnalyzer() {
                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       selectedSection === section.id
                         ? 'bg-blue-600 text-white'
-                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                        : 'bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:bg-[var(--bg-active)]'
                     }`}
                   >
                     {section.icon} {section.name}
@@ -775,15 +775,15 @@ export function DTC1BAnalyzer() {
 
             {/* Contenido dinámico basado en la sección seleccionada */}
             {selectedSection === 'overview' && (
-              <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+              <div className="bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] p-6">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <Gauge className="w-5 h-5 text-blue-400" />
                   Resumen del Análisis Digital Commercial Bank Ltd
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-4 bg-slate-900 rounded-lg">
-                    <p className="text-xs text-slate-400 mb-1">Estado Digital Commercial Bank Ltd</p>
+                  <div className="p-4 bg-[var(--bg-card)] rounded-lg">
+                    <p className="text-xs text-[var(--text-secondary)] mb-1">Estado Digital Commercial Bank Ltd</p>
                     <p className={`text-lg font-bold ${
                       analysis.DTC1BAnalysis.isValidDTC1B ? 'text-white' : 'text-red-400'
                     }`}>
@@ -791,18 +791,18 @@ export function DTC1BAnalyzer() {
                     </p>
                   </div>
 
-                  <div className="p-4 bg-slate-900 rounded-lg">
-                    <p className="text-xs text-slate-400 mb-1">Confianza</p>
+                  <div className="p-4 bg-[var(--bg-card)] rounded-lg">
+                    <p className="text-xs text-[var(--text-secondary)] mb-1">Confianza</p>
                     <p className="text-2xl font-bold text-purple-400">{analysis.DTC1BAnalysis.confidence}%</p>
                   </div>
 
-                  <div className="p-4 bg-slate-900 rounded-lg">
-                    <p className="text-xs text-slate-400 mb-1">Transacciones</p>
+                  <div className="p-4 bg-[var(--bg-card)] rounded-lg">
+                    <p className="text-xs text-[var(--text-secondary)] mb-1">Transacciones</p>
                     <p className="text-2xl font-bold text-white">{analysis.DTC1BAnalysis.totalTransactions}</p>
                   </div>
 
-                  <div className="p-4 bg-slate-900 rounded-lg">
-                    <p className="text-xs text-slate-400 mb-1">Encriptación</p>
+                  <div className="p-4 bg-[var(--bg-card)] rounded-lg">
+                    <p className="text-xs text-[var(--text-secondary)] mb-1">Encriptación</p>
                     <p className={`text-lg font-bold ${
                       analysis.encryptionAnalysis.isEncrypted ? 'text-red-400' : 'text-white'
                     }`}>
@@ -814,7 +814,7 @@ export function DTC1BAnalyzer() {
             )}
 
             {selectedSection === 'transactions' && (
-              <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+              <div className="bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] p-6">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-white" />
                   Transacciones Digital Commercial Bank Ltd ({analysis.DTC1BAnalysis.totalTransactions})
@@ -823,7 +823,7 @@ export function DTC1BAnalyzer() {
                 {analysis.DTC1BAnalysis.transactions.length > 0 ? (
                   <div className="space-y-4">
                     {analysis.DTC1BAnalysis.transactions.map((transaction, i) => (
-                      <div key={i} className="p-4 bg-slate-900 rounded-lg border border-slate-700">
+                      <div key={i} className="p-4 bg-[var(--bg-card)] rounded-lg border border-[var(--border-subtle)]">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
@@ -831,31 +831,31 @@ export function DTC1BAnalyzer() {
                             </div>
                             <div>
                               <p className="text-white font-medium">Transacción #{i + 1}</p>
-                              <p className="text-xs text-slate-400">Offset: 0x{transaction.offset.toString(16).toUpperCase()}</p>
+                              <p className="text-xs text-[var(--text-secondary)]">Offset: 0x{transaction.offset.toString(16).toUpperCase()}</p>
                             </div>
                           </div>
                           <div className="text-right">
                             <p className="text-2xl font-bold text-white">
                               {formatCurrency(transaction.amount, transaction.currency)}
                             </p>
-                            <p className="text-xs text-slate-400">{transaction.amount.toString()} centavos</p>
+                            <p className="text-xs text-[var(--text-secondary)]">{transaction.amount.toString()} centavos</p>
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <span className="text-slate-400">Moneda:</span>
+                            <span className="text-[var(--text-secondary)]">Moneda:</span>
                             <span className="text-white ml-2 font-medium">{transaction.currency}</span>
                           </div>
                           <div>
-                            <span className="text-slate-400">Bloque:</span>
+                            <span className="text-[var(--text-secondary)]">Bloque:</span>
                             <span className="text-white ml-2">{transaction.blockIndex}</span>
                           </div>
                         </div>
 
                         <div className="mt-3">
-                          <p className="text-xs text-slate-400 mb-1">Datos hexadecimales del bloque:</p>
-                          <div className="bg-slate-950 p-2 rounded font-mono text-xs text-white overflow-x-auto">
+                          <p className="text-xs text-[var(--text-secondary)] mb-1">Datos hexadecimales del bloque:</p>
+                          <div className="bg-[var(--bg-main)] p-2 rounded font-mono text-xs text-white overflow-x-auto">
                             {Array.from(transaction.rawData.slice(0, 32)).map(b => b.toString(16).padStart(2, '0')).join(' ')}
                           </div>
                         </div>
@@ -863,7 +863,7 @@ export function DTC1BAnalyzer() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center text-slate-400 py-8">
+                  <div className="text-center text-[var(--text-secondary)] py-8">
                     <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>No se encontraron transacciones Digital Commercial Bank Ltd en este archivo.</p>
                     <p className="text-sm mt-2">Esto podría indicar que:</p>
@@ -878,7 +878,7 @@ export function DTC1BAnalyzer() {
             )}
 
             {selectedSection === 'forensic' && (
-              <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+              <div className="bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] p-6">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <Shield className="w-5 h-5 text-red-400" />
                   Análisis Forense
@@ -888,9 +888,9 @@ export function DTC1BAnalyzer() {
                   <div>
                     <h4 className="text-lg font-semibold text-white mb-3">Evaluación de Seguridad</h4>
                     <div className="space-y-4">
-                      <div className="p-4 bg-slate-900 rounded-lg">
+                      <div className="p-4 bg-[var(--bg-card)] rounded-lg">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-slate-400">Nivel de Entropía</span>
+                          <span className="text-[var(--text-secondary)]">Nivel de Entropía</span>
                           <span className={`font-bold text-lg ${
                             analysis.forensicAnalysis.entropy > 7.5 ? 'text-red-400' :
                             analysis.forensicAnalysis.entropy > 6.5 ? 'text-yellow-400' : 'text-white'
@@ -898,7 +898,7 @@ export function DTC1BAnalyzer() {
                             {analysis.forensicAnalysis.entropy.toFixed(3)}
                           </span>
                         </div>
-                        <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div className="w-full h-2 bg-[var(--bg-hover)] rounded-full overflow-hidden">
                           <div
                             className={`h-full ${
                               analysis.forensicAnalysis.entropy > 7.5 ? 'bg-red-500' :
@@ -907,15 +907,15 @@ export function DTC1BAnalyzer() {
                             style={{ width: `${Math.min(100, (analysis.forensicAnalysis.entropy / 8) * 100)}%` }}
                           />
                         </div>
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs text-[var(--text-secondary)] mt-1">
                           {analysis.forensicAnalysis.entropy > 7.5 ? 'Alta aleatoriedad (probable encriptación)' :
                            analysis.forensicAnalysis.entropy > 6.5 ? 'Moderada aleatoriedad' : 'Baja aleatoriedad (datos estructurados)'}
                         </p>
                       </div>
 
-                      <div className="p-3 bg-slate-900 rounded-lg">
+                      <div className="p-3 bg-[var(--bg-card)] rounded-lg">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-slate-400">Nivel de Riesgo</span>
+                          <span className="text-[var(--text-secondary)]">Nivel de Riesgo</span>
                           <span className={`font-bold ${
                             analysis.forensicAnalysis.riskLevel === 'critical' ? 'text-red-400' :
                             analysis.forensicAnalysis.riskLevel === 'high' ? 'text-orange-400' :
@@ -926,7 +926,7 @@ export function DTC1BAnalyzer() {
                              analysis.forensicAnalysis.riskLevel === 'medium' ? 'MEDIO' : 'BAJO'}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-[var(--text-secondary)]">
                           Basado en análisis de entropía y patrones
                         </p>
                       </div>
@@ -959,7 +959,7 @@ export function DTC1BAnalyzer() {
             )}
 
             {selectedSection === 'encryption' && (
-              <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+              <div className="bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] p-6">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <Key className="w-5 h-5 text-yellow-400" />
                   Análisis de Encriptación
@@ -986,7 +986,7 @@ export function DTC1BAnalyzer() {
                             }`}>
                               {analysis.encryptionAnalysis.isEncrypted ? '🔒 Encriptado' : '🔓 Sin Encriptar'}
                             </p>
-                            <p className="text-xs text-slate-400">
+                            <p className="text-xs text-[var(--text-secondary)]">
                               {analysis.encryptionAnalysis.isEncrypted ? 'El archivo requiere autenticación' : 'El archivo está en texto plano'}
                             </p>
                           </div>
@@ -994,15 +994,15 @@ export function DTC1BAnalyzer() {
                       </div>
 
                       {analysis.encryptionAnalysis.isEncrypted && (
-                        <div className="p-4 bg-slate-900 rounded-lg">
+                        <div className="p-4 bg-[var(--bg-card)] rounded-lg">
                           <h5 className="text-sm font-semibold text-white mb-2">Algoritmo Detectado</h5>
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
-                              <span className="text-slate-400">Tipo:</span>
+                              <span className="text-[var(--text-secondary)]">Tipo:</span>
                               <span className="text-white">{analysis.encryptionAnalysis.algorithm || 'Desconocido'}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-400">Confianza:</span>
+                              <span className="text-[var(--text-secondary)]">Confianza:</span>
                               <span className="text-white">{analysis.encryptionAnalysis.confidence}%</span>
                             </div>
                           </div>
@@ -1053,13 +1053,13 @@ export function DTC1BAnalyzer() {
             )}
 
             {selectedSection === 'hexdump' && (
-              <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+              <div className="bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)] p-6">
                 <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                   <Hash className="w-5 h-5 text-orange-400" />
                   Vista Hexadecimal
                 </h3>
 
-                <div className="bg-slate-950 p-4 rounded-lg font-mono text-xs text-white overflow-x-auto max-h-96 overflow-y-auto">
+                <div className="bg-[var(--bg-main)] p-4 rounded-lg font-mono text-xs text-white overflow-x-auto max-h-96 overflow-y-auto">
                   {analysis.hexDump.map((line, i) => (
                     <div key={i} className="mb-1">{line}</div>
                   ))}
@@ -1067,12 +1067,12 @@ export function DTC1BAnalyzer() {
 
                 <div className="mt-4 flex items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-slate-400">Offset inicial:</label>
+                    <label className="text-sm text-[var(--text-secondary)]">Offset inicial:</label>
                     <input
                       type="number"
                       value={hexViewOffset}
                       onChange={(e) => setHexViewOffset(Number(e.target.value))}
-                      className="w-20 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm"
+                      className="w-20 px-2 py-1 bg-[var(--bg-hover)] border border-[var(--border-medium)] rounded text-white text-sm"
                       min="0"
                       max={analysis.fileSize - 1}
                       title="Offset inicial"
@@ -1080,11 +1080,11 @@ export function DTC1BAnalyzer() {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-slate-400">Longitud:</label>
+                    <label className="text-sm text-[var(--text-secondary)]">Longitud:</label>
                     <select
                       value={hexViewLimit}
                       onChange={(e) => setHexViewLimit(Number(e.target.value))}
-                      className="px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm"
+                      className="px-2 py-1 bg-[var(--bg-hover)] border border-[var(--border-medium)] rounded text-white text-sm"
                       title="Longitud de vista hexadecimal"
                       aria-label="Seleccionar longitud de bytes a mostrar"
                     >

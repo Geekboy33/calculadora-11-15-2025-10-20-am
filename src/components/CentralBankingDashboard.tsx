@@ -253,8 +253,8 @@ export function CentralBankingDashboard() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4" />
-          <p className="text-slate-300 text-lg font-semibold">
+          <div className="inline-block w-16 h-16 border-4 border-white/30 border-t-transparent rounded-full animate-spin m-card" />
+          <p className="text-[var(--text-secondary)] text-lg font-semibold">
             {isSpanish ? 'Cargando Panel Central...' : 'Loading Central Panel...'}
           </p>
         </div>
@@ -266,25 +266,25 @@ export function CentralBankingDashboard() {
   const currencyIndex = currencies.indexOf(selectedCurrency);
 
   return (
-    <div className="w-full bg-black p-4 sm:p-6 lg:p-8">
+    <div className="w-full bg-black p-card-sm sm:p-card lg:p-card-lg">
       <div className="max-w-[1800px] mx-auto space-y-6">
         
         {/* Professional Header */}
-        <header className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl p-6">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <header className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl p-card">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-section">
             {/* Brand & Title */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-card">
               <div className="relative">
                 <div className="absolute inset-0 bg-white/20 blur-xl opacity-30" />
-                <div className="relative bg-gradient-to-br from-white to-white p-4 rounded-xl">
+                <div className="relative bg-gradient-to-br from-white to-white p-card-sm rounded-xl">
                   <Building2 className="w-8 h-8 text-black" />
                 </div>
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 mb-1">
+                <h1 className="text-heading">
                   Digital Commercial Bank Ltd
                 </h1>
-                <p className="text-slate-400 text-sm font-medium">
+                <p className="text-secondary">
                   {isSpanish ? 'Panel Central de Control' : 'Central Control Panel'} • {fmt.dateTime(currentTime)}
                 </p>
               </div>
@@ -293,24 +293,32 @@ export function CentralBankingDashboard() {
             {/* Status & Actions */}
             <div className="flex flex-wrap items-center gap-3">
               {/* System Status */}
-              <div className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-lg border',
-                metrics.systemHealth === 'excellent' && 'bg-emerald-500/10 border-emerald-500/30',
-                metrics.systemHealth === 'good' && 'bg-white/5 border-white/15',
-                metrics.systemHealth === 'warning' && 'bg-amber-500/10 border-amber-500/30',
-                metrics.systemHealth === 'critical' && 'bg-red-500/10 border-red-500/30'
-              )}>
-                <div className={cn(
-                  'w-2 h-2 rounded-full',
-                  metrics.systemHealth === 'excellent' && BankingStyles.status.dot.active,
-                  metrics.systemHealth === 'good' && BankingStyles.status.dot.active,
-                  metrics.systemHealth === 'warning' && BankingStyles.status.dot.warning,
-                  metrics.systemHealth === 'critical' && BankingStyles.status.dot.error
-                )} />
+              <div 
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-lg border',
+                  metrics.systemHealth === 'excellent' && 'bg-emerald-500/10 border-emerald-500/30',
+                  metrics.systemHealth === 'good' && 'bg-white/5 border-white/15',
+                  metrics.systemHealth === 'warning' && 'bg-amber-500/10 border-amber-500/30',
+                  metrics.systemHealth === 'critical' && 'bg-red-500/10 border-red-500/30'
+                )}
+                role="status"
+                aria-live="polite"
+                aria-label={`System status: ${metrics.systemHealth}`}
+              >
+                <div 
+                  className={cn(
+                    'w-2 h-2 rounded-full',
+                    metrics.systemHealth === 'excellent' && BankingStyles.status.dot.active,
+                    metrics.systemHealth === 'good' && BankingStyles.status.dot.active,
+                    metrics.systemHealth === 'warning' && BankingStyles.status.dot.warning,
+                    metrics.systemHealth === 'critical' && BankingStyles.status.dot.error
+                  )}
+                  aria-hidden="true"
+                />
                 <span className={cn(
                   'text-sm font-semibold',
                   metrics.systemHealth === 'excellent' && 'text-emerald-400',
-                  metrics.systemHealth === 'good' && 'text-sky-400',
+                  metrics.systemHealth === 'good' && 'text-white',
                   metrics.systemHealth === 'warning' && 'text-amber-400',
                   metrics.systemHealth === 'critical' && 'text-red-400'
                 )}>
@@ -322,8 +330,9 @@ export function CentralBankingDashboard() {
               <button
                 onClick={handleExportStatement}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-white to-white hover:from-white hover:to-white text-black font-semibold transition-all shadow-lg hover:shadow-white/20"
+                aria-label={isSpanish ? 'Exportar estado financiero en formato TXT' : 'Export financial statement as TXT'}
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-4 h-4" aria-hidden="true" />
                 <span className="hidden sm:inline">{isSpanish ? 'Exportar TXT' : 'Export TXT'}</span>
               </button>
 
@@ -331,9 +340,11 @@ export function CentralBankingDashboard() {
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-slate-300 hover:text-slate-100 font-medium transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#141414] border border-[#1a1a1a] hover:border-[#1a1a1a] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-all disabled:opacity-50"
+                aria-label={isSpanish ? 'Actualizar datos del panel' : 'Refresh panel data'}
+                aria-busy={refreshing}
               >
-                <RefreshCw className={cn('w-4 h-4', refreshing && 'animate-spin')} />
+                <RefreshCw className={cn('w-4 h-4', refreshing && 'animate-spin')} aria-hidden="true" />
                 <span className="hidden sm:inline">{isSpanish ? 'Actualizar' : 'Refresh'}</span>
               </button>
 
@@ -353,10 +364,10 @@ export function CentralBankingDashboard() {
         </header>
 
         {/* Main Metrics - 4 Cards Premium */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-card">
           {/* Total Assets */}
           <div className={BankingStyles.metric.container}>
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between m-card">
               <div>
                 <p className={BankingStyles.metric.label}>
                   {isSpanish ? 'Activos Totales' : 'Total Assets'}
@@ -366,7 +377,7 @@ export function CentralBankingDashboard() {
                 </p>
               </div>
               <div className="p-3 bg-white/5 rounded-xl">
-                <DollarSign className="w-6 h-6 text-sky-400" />
+                <DollarSign className="w-6 h-6 text-white" />
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -379,7 +390,7 @@ export function CentralBankingDashboard() {
 
           {/* Active Accounts */}
           <div className={BankingStyles.metric.container}>
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between m-card">
               <div>
                 <p className={BankingStyles.metric.label}>
                   {isSpanish ? 'Cuentas Activas' : 'Active Accounts'}
@@ -390,7 +401,7 @@ export function CentralBankingDashboard() {
                 <Wallet className="w-6 h-6 text-emerald-400" />
               </div>
             </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
+            <div className="flex items-center gap-2 text-[var(--text-secondary)] text-sm">
               <Users className="w-4 h-4" />
               <span>{metrics.accountsByType.blockchain} Blockchain • {metrics.accountsByType.banking} Banking</span>
             </div>
@@ -398,7 +409,7 @@ export function CentralBankingDashboard() {
 
           {/* Active Pledges */}
           <div className={BankingStyles.metric.container}>
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between m-card">
               <div>
                 <p className={BankingStyles.metric.label}>
                   {isSpanish ? 'Fondos Reservados' : 'Reserved Funds'}
@@ -411,7 +422,7 @@ export function CentralBankingDashboard() {
                 <Lock className="w-6 h-6 text-amber-400" />
               </div>
             </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
+            <div className="flex items-center gap-2 text-[var(--text-secondary)] text-sm">
               <FileText className="w-4 h-4" />
               <span>{metrics.activePledges} {isSpanish ? 'pledges activos' : 'active pledges'}</span>
             </div>
@@ -419,7 +430,7 @@ export function CentralBankingDashboard() {
 
           {/* Transactions */}
           <div className={BankingStyles.metric.container}>
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between m-card">
               <div>
                 <p className={BankingStyles.metric.label}>
                   {isSpanish ? 'Transacciones' : 'Transactions'}
@@ -430,7 +441,7 @@ export function CentralBankingDashboard() {
                 <Activity className="w-6 h-6 text-purple-400" />
               </div>
             </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
+            <div className="flex items-center gap-2 text-[var(--text-secondary)] text-sm">
               <Database className="w-4 h-4" />
               <span>{metrics.activeCurrencies} {isSpanish ? 'divisas' : 'currencies'}</span>
             </div>
@@ -439,28 +450,28 @@ export function CentralBankingDashboard() {
 
         {/* Balance Carousel - Professional */}
         <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
-          <div className="p-6 border-b border-[#1a1a1a]">
+          <div className="p-card border-b border-[#1a1a1a]">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-100 flex items-center gap-3">
-                <Coins className="w-6 h-6 text-sky-400" />
+              <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-3">
+                <Coins className="w-6 h-6 text-white" />
                 {isSpanish ? 'Balances por Divisa' : 'Balance by Currency'}
               </h2>
               <div className="flex items-center gap-2">
-                <span className="text-slate-400 text-sm">
+                <span className="text-[var(--text-secondary)] text-sm">
                   {currencyIndex + 1} / {currencies.length}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="p-8">
-            <div className="flex items-center gap-6">
+          <div className="p-card-lg">
+            <div className="flex items-center gap-section">
               {/* Previous Button */}
               <button
                 onClick={() => navigateCurrency('prev')}
                 disabled={currencies.length <= 1}
                 aria-label={isSpanish ? 'Divisa anterior' : 'Previous currency'}
-                className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-[#141414] to-[#0d0d0d] border-2 border-[#1a1a1a] hover:border-sky-500 text-slate-300 hover:text-sky-400 font-bold shadow-lg hover:shadow-sky transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center group"
+                className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-[#141414] to-[#0d0d0d] border-2 border-[#1a1a1a] hover:border-white/30 text-[var(--text-secondary)] hover:text-white font-bold shadow-lg hover:shadow-white/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center group"
               >
                 <ChevronLeft className="w-7 h-7 group-hover:scale-110 transition-transform" />
               </button>
@@ -473,35 +484,35 @@ export function CentralBankingDashboard() {
                   
                   <div className="relative z-10 text-center">
                     {/* Currency Code */}
-                    <div className="flex items-center justify-center gap-3 mb-4">
+                    <div className="flex items-center justify-center gap-3 m-card">
                       <div className="flex items-center gap-2 bg-[#141414]/80 border border-[#1a1a1a] px-6 py-2 rounded-full backdrop-blur-sm">
-                        <Globe className="w-5 h-5 text-sky-400" />
-                        <span className="text-slate-100 text-xl font-bold tracking-wide">
+                        <Globe className="w-5 h-5 text-white" />
+                        <span className="text-[var(--text-primary)] text-xl font-bold tracking-wide">
                           {selectedCurrency}
                         </span>
                       </div>
-                      <span className="text-slate-500 text-sm">
+                      <span className="text-[var(--text-muted)] text-sm">
                         {isSpanish ? 'Saldo Disponible' : 'Available Balance'}
                       </span>
                     </div>
 
                     {/* Main Balance */}
-                    <p className="text-6xl sm:text-7xl font-bold text-slate-100 mb-4 tracking-tight">
+                    <p className="text-6xl sm:text-7xl font-bold text-[var(--text-primary)] m-card tracking-tight">
                       {fmt.currency(currentCurrencyBalance, selectedCurrency)}
                     </p>
 
                     {/* Stats Row */}
-                    <div className="flex items-center justify-center gap-6 text-sm">
+                    <div className="flex items-center justify-center gap-section text-sm">
                       <div className="flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-slate-500" />
-                        <span className="text-slate-400">
+                        <Activity className="w-4 h-4 text-[var(--text-muted)]" />
+                        <span className="text-[var(--text-secondary)]">
                           {balances.find(b => b.currency === selectedCurrency)?.transactionCount || 0} {isSpanish ? 'trans.' : 'txns'}
                         </span>
                       </div>
-                      <div className="w-px h-4 bg-slate-600" />
+                      <div className="w-px h-4 bg-[var(--bg-active)]" />
                       <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-slate-500" />
-                        <span className="text-slate-400">
+                        <Clock className="w-4 h-4 text-[var(--text-muted)]" />
+                        <span className="text-[var(--text-secondary)]">
                           {isSpanish ? 'Actualizado ahora' : 'Updated now'}
                         </span>
                       </div>
@@ -519,7 +530,7 @@ export function CentralBankingDashboard() {
                         'transition-all rounded-full',
                         idx === currencyIndex
                           ? 'w-10 h-2 bg-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.8)]'
-                          : 'w-2 h-2 bg-slate-600 hover:bg-slate-500'
+                          : 'w-2 h-2 bg-[var(--bg-active)] hover:bg-slate-500'
                       )}
                       title={curr}
                     />
@@ -532,7 +543,7 @@ export function CentralBankingDashboard() {
                 onClick={() => navigateCurrency('next')}
                 disabled={currencies.length <= 1}
                 aria-label={isSpanish ? 'Siguiente divisa' : 'Next currency'}
-                className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-[#141414] to-[#0d0d0d] border-2 border-[#1a1a1a] hover:border-sky-500 text-slate-300 hover:text-sky-400 font-bold shadow-lg hover:shadow-sky transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center group"
+                className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-[#141414] to-[#0d0d0d] border-2 border-[#1a1a1a] hover:border-white/30 text-[var(--text-secondary)] hover:text-white font-bold shadow-lg hover:shadow-white/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center group"
               >
                 <ChevronRight className="w-7 h-7 group-hover:scale-110 transition-transform" />
               </button>
@@ -541,16 +552,16 @@ export function CentralBankingDashboard() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-section">
           {/* Left Column - Accounts & Pledges */}
           <div className="xl:col-span-2 space-y-6">
             
             {/* Custody Accounts - Professional Table */}
             <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
-              <div className="p-6 border-b border-[#1a1a1a]">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-slate-100 flex items-center gap-3">
-                    <Shield className="w-6 h-6 text-sky-400" />
+              <div className="p-card border-b border-[#1a1a1a]">
+                <div className="flex items-center justify-between m-card">
+                  <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-3">
+                    <Shield className="w-6 h-6 text-white" />
                     {isSpanish ? 'Cuentas Custodio' : 'Custody Accounts'}
                   </h2>
                   <div className="flex items-center gap-3">
@@ -560,7 +571,7 @@ export function CentralBankingDashboard() {
                         onClick={() => setFilterType('all')}
                         className={cn(
                           'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-                          filterType === 'all' ? 'bg-white text-black' : 'text-slate-400 hover:text-slate-200'
+                          filterType === 'all' ? 'bg-white text-black' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                         )}
                       >
                         {isSpanish ? 'Todas' : 'All'}
@@ -569,7 +580,7 @@ export function CentralBankingDashboard() {
                         onClick={() => setFilterType('blockchain')}
                         className={cn(
                           'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-                          filterType === 'blockchain' ? 'bg-white text-black' : 'text-slate-400 hover:text-slate-200'
+                          filterType === 'blockchain' ? 'bg-white text-black' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                         )}
                       >
                         ⛓️ Blockchain
@@ -578,39 +589,39 @@ export function CentralBankingDashboard() {
                         onClick={() => setFilterType('banking')}
                         className={cn(
                           'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-                          filterType === 'banking' ? 'bg-white text-black' : 'text-slate-400 hover:text-slate-200'
+                          filterType === 'banking' ? 'bg-white text-black' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                         )}
                       >
                         🏦 Banking
                       </button>
                     </div>
                     <div className="bg-[#141414] px-3 py-2 rounded-lg">
-                      <span className="text-slate-100 font-bold text-lg">{filteredAccounts.length}</span>
+                      <span className="text-[var(--text-primary)] font-bold text-lg">{filteredAccounts.length}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Accounts Grid */}
-              <div className="p-6">
+              <div className="p-card">
                 {filteredAccounts.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-card max-h-[600px] overflow-y-auto pr-2">
                     {filteredAccounts.map((account) => (
                       <div
                         key={account.id}
-                        className="group bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-white/20 rounded-xl p-5 transition-all hover:shadow-sky cursor-pointer"
+                        className="group bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-white/20 rounded-xl p-5 transition-all hover:shadow-white/20 cursor-pointer"
                       >
                         {/* Header */}
-                        <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start justify-between m-card">
                           <div className="flex-1">
-                            <p className="text-slate-100 font-bold text-base mb-1 group-hover:text-sky-400 transition-colors">
+                            <p className="text-[var(--text-primary)] font-bold text-base mb-1 group-hover:text-white transition-colors">
                               {account.accountName}
                             </p>
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="bg-white/5 border border-white/15 text-sky-400 px-2 py-0.5 rounded-md text-xs font-bold">
+                              <span className="bg-white/5 border border-white/15 text-white px-2 py-0.5 rounded-md text-xs font-bold">
                                 {account.currency}
                               </span>
-                              <span className="text-slate-500 text-xs">
+                              <span className="text-[var(--text-muted)] text-xs">
                                 {account.accountType === 'blockchain' ? '⛓️ Blockchain' : '🏦 Banking'}
                               </span>
                             </div>
@@ -622,13 +633,13 @@ export function CentralBankingDashboard() {
 
                         {/* Balances */}
                         <div className="space-y-2 text-sm">
-                          <div className="flex justify-between items-center py-2 border-b border-slate-800">
-                            <span className="text-slate-400 font-medium">{isSpanish ? 'Total' : 'Total'}</span>
-                            <span className="text-slate-100 font-bold">
+                          <div className="flex justify-between items-center py-2 border-b border-[var(--border-subtle)]">
+                            <span className="text-[var(--text-secondary)] font-medium">{isSpanish ? 'Total' : 'Total'}</span>
+                            <span className="text-[var(--text-primary)] font-bold">
                               {fmt.currency(account.totalBalance, account.currency)}
                             </span>
                           </div>
-                          <div className="flex justify-between items-center py-2 border-b border-slate-800">
+                          <div className="flex justify-between items-center py-2 border-b border-[var(--border-subtle)]">
                             <span className="text-amber-400 font-medium">{isSpanish ? 'Reservado' : 'Reserved'}</span>
                             <span className="text-amber-300 font-bold">
                               {fmt.currency(account.reservedBalance, account.currency)}
@@ -644,7 +655,7 @@ export function CentralBankingDashboard() {
 
                         {/* Progress Bar */}
                         <div className="mt-4">
-                          <div className="flex justify-between text-xs text-slate-500 mb-2">
+                          <div className="flex justify-between text-xs text-[var(--text-muted)] mb-2">
                             <span>{isSpanish ? 'Utilización' : 'Utilization'}</span>
                             <span>
                               {account.totalBalance > 0 
@@ -666,11 +677,11 @@ export function CentralBankingDashboard() {
                   </div>
                 ) : (
                   <div className="text-center py-20">
-                    <Wallet className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-                    <p className="text-slate-400 text-lg font-medium">
+                    <Wallet className="w-20 h-20 text-slate-700 mx-auto m-card" />
+                    <p className="text-[var(--text-secondary)] text-lg font-medium">
                       {isSpanish ? 'No hay cuentas custodio' : 'No custody accounts'}
                     </p>
-                    <p className="text-slate-600 text-sm mt-2">
+                    <p className="text-[var(--text-muted)] text-sm mt-2">
                       {isSpanish ? 'Crea tu primera cuenta para comenzar' : 'Create your first account to get started'}
                     </p>
                   </div>
@@ -680,9 +691,9 @@ export function CentralBankingDashboard() {
 
             {/* Active Pledges - Professional */}
             <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
-              <div className="p-6 border-b border-[#1a1a1a]">
+              <div className="p-card border-b border-[#1a1a1a]">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-slate-100 flex items-center gap-3">
+                  <h2 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-3">
                     <Lock className="w-6 h-6 text-amber-400" />
                     {isSpanish ? 'Reservas Activas (Pledges)' : 'Active Reserves (Pledges)'}
                   </h2>
@@ -693,7 +704,7 @@ export function CentralBankingDashboard() {
                 </div>
               </div>
 
-              <div className="p-6">
+              <div className="p-card">
                 {pledges.filter(p => p.status === 'ACTIVE').length > 0 ? (
                   <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                     {pledges.filter(p => p.status === 'ACTIVE').map((pledge) => (
@@ -703,15 +714,15 @@ export function CentralBankingDashboard() {
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <p className="text-slate-100 font-bold text-base mb-1 group-hover:text-amber-400 transition-colors">
+                            <p className="text-[var(--text-primary)] font-bold text-base mb-1 group-hover:text-amber-400 transition-colors">
                               {pledge.account_name}
                             </p>
-                            <p className="text-slate-400 text-sm mb-3">{pledge.beneficiary}</p>
+                            <p className="text-[var(--text-secondary)] text-sm mb-3">{pledge.beneficiary}</p>
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-2 py-1 rounded-md text-xs font-bold">
                                 {pledge.currency}
                               </span>
-                              <span className="bg-white/5 border border-white/15 text-sky-400 px-2 py-1 rounded-md text-xs font-bold">
+                              <span className="bg-white/5 border border-white/15 text-white px-2 py-1 rounded-md text-xs font-bold">
                                 {pledge.source_module}
                               </span>
                               {pledge.token_symbol && (
@@ -725,7 +736,7 @@ export function CentralBankingDashboard() {
                             <p className="text-amber-400 font-black text-2xl mb-1">
                               {fmt.currency(pledge.amount, pledge.currency)}
                             </p>
-                            <p className="text-slate-500 text-xs">
+                            <p className="text-[var(--text-muted)] text-xs">
                               {fmt.date(pledge.created_at)}
                             </p>
                           </div>
@@ -735,8 +746,8 @@ export function CentralBankingDashboard() {
                   </div>
                 ) : (
                   <div className="text-center py-20">
-                    <Lock className="w-20 h-20 text-slate-700 mx-auto mb-4" />
-                    <p className="text-slate-400 text-lg font-medium">
+                    <Lock className="w-20 h-20 text-slate-700 mx-auto m-card" />
+                    <p className="text-[var(--text-secondary)] text-lg font-medium">
                       {isSpanish ? 'No hay pledges activos' : 'No active pledges'}
                     </p>
                   </div>
@@ -748,26 +759,26 @@ export function CentralBankingDashboard() {
           {/* Right Column - Activity & Status */}
           <div className="space-y-6">
             {/* Ledger Analysis Status */}
-            <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl p-6">
-              <div className="flex items-center gap-3 mb-6">
+            <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl p-card">
+              <div className="flex items-center gap-3 m-section">
                 <div className="p-3 bg-white/5 rounded-xl">
-                  <Database className="w-6 h-6 text-sky-400" />
+                  <Database className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-100">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">
                     {isSpanish ? 'Análisis del Ledger' : 'Ledger Analysis'}
                   </h3>
-                  <p className="text-slate-500 text-xs">Digital Commercial Bank Ltd</p>
+                  <p className="text-[var(--text-muted)] text-xs">Digital Commercial Bank Ltd</p>
                 </div>
               </div>
 
               {/* Progress */}
-              <div className="mb-6">
+              <div className="m-section">
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-slate-400 text-sm font-medium">
+                  <span className="text-[var(--text-secondary)] text-sm font-medium">
                     {isSpanish ? 'Progreso de Análisis' : 'Analysis Progress'}
                   </span>
-                  <span className="text-sky-400 font-bold text-xl">
+                  <span className="text-white font-bold text-xl">
                     {metrics.ledgerProgress.toFixed(1)}%
                   </span>
                 </div>
@@ -782,25 +793,25 @@ export function CentralBankingDashboard() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
-                  <p className="text-slate-500 text-xs mb-1">{isSpanish ? 'Divisas' : 'Currencies'}</p>
-                  <p className="text-2xl font-bold text-slate-100">{metrics.activeCurrencies}</p>
+              <div className="grid grid-cols-2 gap-card">
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-card-sm">
+                  <p className="text-[var(--text-muted)] text-xs mb-1">{isSpanish ? 'Divisas' : 'Currencies'}</p>
+                  <p className="text-2xl font-bold text-[var(--text-primary)]">{metrics.activeCurrencies}</p>
                 </div>
-                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
-                  <p className="text-slate-500 text-xs mb-1">{isSpanish ? 'Operaciones' : 'Operations'}</p>
-                  <p className="text-2xl font-bold text-slate-100">{fmt.compact(metrics.totalTransactions)}</p>
+                <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-card-sm">
+                  <p className="text-[var(--text-muted)] text-xs mb-1">{isSpanish ? 'Operaciones' : 'Operations'}</p>
+                  <p className="text-2xl font-bold text-[var(--text-primary)]">{fmt.compact(metrics.totalTransactions)}</p>
                 </div>
               </div>
 
               {metrics.ledgerProgress > 0 && metrics.ledgerProgress < 100 && (
                 <div className="mt-4 bg-white/5 border border-white/15 rounded-lg p-3 flex items-center gap-3">
-                  <Activity className="w-5 h-5 text-sky-400 animate-spin" />
+                  <Activity className="w-5 h-5 text-white animate-spin" />
                   <div className="flex-1">
-                    <p className="text-sky-400 font-semibold text-sm">
+                    <p className="text-white font-semibold text-sm">
                       {isSpanish ? 'Análisis en curso...' : 'Analysis in progress...'}
                     </p>
-                    <p className="text-slate-500 text-xs">
+                    <p className="text-[var(--text-muted)] text-xs">
                       {isSpanish ? 'Puede continuar usando otros módulos' : 'You can continue using other modules'}
                     </p>
                   </div>
@@ -809,16 +820,16 @@ export function CentralBankingDashboard() {
             </div>
 
             {/* Recent Activity Timeline */}
-            <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl p-6">
-              <div className="flex items-center gap-3 mb-6">
+            <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl p-card">
+              <div className="flex items-center gap-3 m-section">
                 <div className="p-3 bg-purple-500/10 rounded-xl">
                   <Bell className="w-6 h-6 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-100">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">
                     {isSpanish ? 'Actividad Reciente' : 'Recent Activity'}
                   </h3>
-                  <p className="text-slate-500 text-xs">
+                  <p className="text-[var(--text-muted)] text-xs">
                     {isSpanish ? 'Últimas operaciones del sistema' : 'Latest system operations'}
                   </p>
                 </div>
@@ -829,7 +840,7 @@ export function CentralBankingDashboard() {
                   recentActivity.map((activity, idx) => (
                     <div
                       key={activity.id}
-                      className="relative bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-[#1a1a1a] rounded-lg p-4 transition-all group"
+                      className="relative bg-[#0d0d0d]/50 border border-[#1a1a1a] hover:border-[#1a1a1a] rounded-lg p-card-sm transition-all group"
                     >
                       {/* Timeline Line */}
                       {idx < recentActivity.length - 1 && (
@@ -846,26 +857,26 @@ export function CentralBankingDashboard() {
                         )}>
                           {activity.type === 'account_created' && <Wallet className={cn('w-5 h-5', activity.status === 'success' && 'text-emerald-400')} />}
                           {activity.type === 'pledge_active' && <Lock className={cn('w-5 h-5', activity.status === 'warning' && 'text-amber-400')} />}
-                          {activity.type === 'transfer' && <ArrowRight className={cn('w-5 h-5', activity.status === 'info' && 'text-sky-400')} />}
-                          {activity.type === 'analysis' && <BarChart3 className={cn('w-5 h-5', activity.status === 'info' && 'text-sky-400')} />}
+                          {activity.type === 'transfer' && <ArrowRight className={cn('w-5 h-5', activity.status === 'info' && 'text-white')} />}
+                          {activity.type === 'analysis' && <BarChart3 className={cn('w-5 h-5', activity.status === 'info' && 'text-white')} />}
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between mb-1">
-                            <p className="text-slate-100 font-semibold text-sm group-hover:text-sky-400 transition-colors">
+                            <p className="text-[var(--text-primary)] font-semibold text-sm group-hover:text-white transition-colors">
                               {activity.title}
                             </p>
                             {activity.amount && activity.currency && (
-                              <span className="text-slate-100 font-bold text-sm ml-2">
+                              <span className="text-[var(--text-primary)] font-bold text-sm ml-2">
                                 {fmt.currency(activity.amount, activity.currency)}
                               </span>
                             )}
                           </div>
-                          <p className="text-slate-400 text-xs mb-2 truncate">
+                          <p className="text-[var(--text-secondary)] text-xs mb-2 truncate">
                             {activity.description}
                           </p>
-                          <div className="flex items-center gap-2 text-slate-500 text-xs">
+                          <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs">
                             <Clock className="w-3 h-3" />
                             <span>{fmt.relativeTime(activity.timestamp)}</span>
                             <span className="text-slate-700">•</span>
@@ -877,8 +888,8 @@ export function CentralBankingDashboard() {
                   ))
                 ) : (
                   <div className="text-center py-16">
-                    <Activity className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-                    <p className="text-slate-400 font-medium">
+                    <Activity className="w-16 h-16 text-slate-700 mx-auto m-card" />
+                    <p className="text-[var(--text-secondary)] font-medium">
                       {isSpanish ? 'No hay actividad reciente' : 'No recent activity'}
                     </p>
                   </div>
@@ -889,26 +900,26 @@ export function CentralBankingDashboard() {
         </div>
 
         {/* Footer - Trust & Compliance */}
-        <footer className="bg-gradient-to-r from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-xl p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-4 text-sm">
+        <footer className="bg-gradient-to-r from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-xl p-card">
+          <div className="flex flex-wrap items-center justify-between gap-card">
+            <div className="flex items-center gap-card text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-emerald-400" />
-                <span className="text-slate-400">
+                <span className="text-[var(--text-secondary)]">
                   {isSpanish ? 'Sistema Verificado' : 'Verified System'}
                 </span>
               </div>
               <div className="hidden sm:block w-px h-4 bg-[#1a1a1a]" />
               <div className="hidden sm:flex items-center gap-2">
-                <Shield className="w-4 h-4 text-sky-400" />
-                <span className="text-slate-400">
+                <Shield className="w-4 h-4 text-white" />
+                <span className="text-[var(--text-secondary)]">
                   {isSpanish ? 'Cumplimiento Total' : 'Fully Compliant'}
                 </span>
               </div>
               <div className="hidden md:block w-px h-4 bg-[#1a1a1a]" />
               <div className="hidden md:flex items-center gap-2">
                 <Lock className="w-4 h-4 text-amber-400" />
-                <span className="text-slate-400">
+                <span className="text-[var(--text-secondary)]">
                   {isSpanish ? 'Encriptación de Grado Bancario' : 'Bank-Grade Encryption'}
                 </span>
               </div>

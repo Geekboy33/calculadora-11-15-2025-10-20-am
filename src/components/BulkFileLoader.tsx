@@ -264,13 +264,13 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">Carga de Archivos Digital Commercial Bank Ltd</h2>
-              <p className="text-sm text-slate-400">Selecciona archivos desde tu disco local</p>
+              <p className="text-sm text-[var(--text-secondary)]">Selecciona archivos desde tu disco local</p>
             </div>
           </div>
           {selectedFiles.length > 0 && (
             <button
               onClick={() => setShowDebug(!showDebug)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] text-white text-sm rounded transition-colors"
             >
               <Search className="w-3 h-3" />
               {showDebug ? 'Ocultar' : 'Ver'} Debug
@@ -280,7 +280,7 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
 
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+            <div className="border-2 border-dashed border-[var(--border-medium)] rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
               <input
                 ref={folderInputRef}
                 type="file"
@@ -302,17 +302,17 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
                   <p className="text-white font-medium mb-1">
                     Escanear Carpeta
                   </p>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-[var(--text-secondary)]">
                     Detecta automáticamente archivos Digital Commercial Bank Ltd
                   </p>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-[var(--text-muted)] mt-1">
                     Recomendado: escanea toda una carpeta
                   </p>
                 </div>
               </label>
             </div>
 
-            <div className="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center hover:border-slate-500 transition-colors">
+            <div className="border-2 border-dashed border-[var(--border-medium)] rounded-lg p-6 text-center hover:border-[var(--border-medium)] transition-colors">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -326,17 +326,17 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
                 htmlFor="bulk-file-input"
                 className="cursor-pointer flex flex-col items-center gap-3"
               >
-                <div className="p-4 bg-slate-700 rounded-full">
+                <div className="p-4 bg-[var(--bg-hover)] rounded-full">
                   <Upload className="w-8 h-8 text-blue-400" />
                 </div>
                 <div>
                   <p className="text-white font-medium mb-1">
                     Seleccionar Archivos
                   </p>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-[var(--text-secondary)]">
                     Formatos: .file, .bin, .Digital Commercial Bank Ltd, .dat
                   </p>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-[var(--text-muted)] mt-1">
                     Selección manual de archivos
                   </p>
                 </div>
@@ -370,13 +370,13 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
 
           {selectedFiles.length > 0 && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-[var(--bg-hover)] rounded-lg">
                 <div>
                   <p className="text-white font-semibold">
                     {selectedFiles.length} archivo(s) escaneado(s)
                   </p>
                   {totalBlocks > 0 ? (
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-[var(--text-secondary)]">
                       {totalBlocks} cuentas detectadas • {allCurrencies.join(', ') || 'Sin monedas'}
                     </p>
                   ) : (
@@ -388,17 +388,17 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
                 <button
                   onClick={handleCancel}
                   disabled={processing}
-                  className="p-2 hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
+                  className="p-2 hover:bg-[var(--bg-active)] rounded transition-colors disabled:opacity-50"
                 >
-                  <X className="w-5 h-5 text-slate-400" />
+                  <X className="w-5 h-5 text-[var(--text-secondary)]" />
                 </button>
               </div>
 
               {processing && overallProgress.total > 0 && (
-                <div className="p-4 bg-slate-700 rounded-lg">
+                <div className="p-4 bg-[var(--bg-hover)] rounded-lg">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-slate-300">Progreso general</span>
-                    <span className="text-sm text-slate-300 font-mono">
+                    <span className="text-sm text-[var(--text-secondary)]">Progreso general</span>
+                    <span className="text-sm text-[var(--text-secondary)] font-mono">
                       {overallProgress.current} / {overallProgress.total}
                     </span>
                   </div>
@@ -438,7 +438,7 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
                             </span>
                           )}
                         </div>
-                        <p className={`text-xs ${filePreview.isTargetFile ? 'text-white font-semibold' : 'text-slate-400'}`}>
+                        <p className={`text-xs ${filePreview.isTargetFile ? 'text-white font-semibold' : 'text-[var(--text-secondary)]'}`}>
                           {formatBytes(filePreview.size)} • {filePreview.blocks} cuenta(s)
                         </p>
 
@@ -466,14 +466,14 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
 
                         {showDebug && filePreview.debugInfo && (
                           <div className="mt-2 p-2 bg-black rounded text-xs font-mono space-y-1">
-                            <div className="text-slate-400">Debug Info:</div>
-                            <div className="text-slate-300">Primeros bytes: {filePreview.debugInfo.firstBytes}</div>
-                            <div className="text-slate-300">
+                            <div className="text-[var(--text-secondary)]">Debug Info:</div>
+                            <div className="text-[var(--text-secondary)]">Primeros bytes: {filePreview.debugInfo.firstBytes}</div>
+                            <div className="text-[var(--text-secondary)]">
                               Monedas: USD={filePreview.debugInfo.hasUSD ? '✓' : '✗'}
                               {' '}EUR={filePreview.debugInfo.hasEUR ? '✓' : '✗'}
                               {' '}GBP={filePreview.debugInfo.hasGBP ? '✓' : '✗'}
                             </div>
-                            <div className="text-slate-300">Matches: {filePreview.debugInfo.matchesFound}</div>
+                            <div className="text-[var(--text-secondary)]">Matches: {filePreview.debugInfo.matchesFound}</div>
                             {filePreview.blocks === 0 && (
                               <div className="text-yellow-400 mt-1">
                                 El archivo no contiene patrones de moneda reconocibles en formato Digital Commercial Bank Ltd
@@ -491,7 +491,7 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
                 <button
                   onClick={handleLoadAllFiles}
                   disabled={processing}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-[var(--bg-active)] text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   {processing ? (
                     <>

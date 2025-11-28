@@ -691,7 +691,7 @@ export function AccountDashboard() {
                 Herramientas profesionales para análisis forense de archivos binarios,
                 detección de manipulaciones y evaluación de integridad.
               </p>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-[var(--text-secondary)]">
                 • Entropía • Patrones sospechosos • Firma digital • Metadatos
               </div>
             </div>
@@ -710,17 +710,17 @@ export function AccountDashboard() {
                 Detección automática de algoritmos de encriptación, análisis de
                 complejidad y herramientas de recuperación de datos.
               </p>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-[var(--text-secondary)]">
                 • AES-GCM • AES-CBC • Fuerza bruta • Análisis de claves
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
+          <div className="bg-[var(--bg-hover)]/30 rounded-lg p-4 border border-[var(--border-medium)]/50">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h4 className="font-semibold text-white mb-1">Acceso a Herramientas Avanzadas</h4>
-                <p className="text-sm text-slate-400 mb-3">
+                <p className="text-sm text-[var(--text-secondary)] mb-3">
                   Navega a la pestaña "Analizador Digital Commercial Bank Ltd Pro" para acceder a todas las funcionalidades profesionales
                   de análisis forense y criptográfico avanzado.
                 </p>
@@ -738,14 +738,14 @@ export function AccountDashboard() {
                       link.download = 'analizador_Digital Commercial Bank Ltd.py';
                       link.click();
                     }}
-                    className="px-3 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg text-sm font-medium transition-colors"
+                    className="px-3 py-2 bg-[var(--bg-active)] hover:bg-slate-500 text-white rounded-lg text-sm font-medium transition-colors"
                   >
                     Descargar Script Python
                   </button>
                 </div>
               </div>
               <div className="text-right ml-4">
-                <div className="text-xs text-slate-500 mb-1">Estado del Sistema</div>
+                <div className="text-xs text-[var(--text-muted)] mb-1">Estado del Sistema</div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-white/20 rounded-full animate-pulse"></div>
                   <span className="text-sm font-semibold text-white">Operativo</span>

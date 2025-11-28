@@ -138,7 +138,7 @@ export function DTC1BProcessor() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">Digital Commercial Bank Ltd File Processor</h2>
-              <p className="text-sm text-slate-400">AES-256-GCM encryption and binary parsing</p>
+              <p className="text-sm text-[var(--text-secondary)]">AES-256-GCM encryption and binary parsing</p>
             </div>
           </div>
 
@@ -146,7 +146,7 @@ export function DTC1BProcessor() {
             {!file && (
               <button
                 onClick={generateSampleFile}
-                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                className="px-4 py-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] text-white rounded-lg transition-colors"
               >
                 Generate Sample
               </button>
@@ -167,10 +167,10 @@ export function DTC1BProcessor() {
 
         {file && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-slate-700 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-[var(--bg-hover)] rounded-lg">
               <div>
                 <div className="text-white font-medium">{file.name}</div>
-                <div className="text-sm text-slate-400">
+                <div className="text-sm text-[var(--text-secondary)]">
                   {fileData?.length} bytes • {parsedBlocks.length} blocks detected
                 </div>
               </div>
@@ -181,7 +181,7 @@ export function DTC1BProcessor() {
                   className={`px-4 py-2 rounded transition-colors ${
                     currentView === 'original'
                       ? 'bg-blue-600 text-white'
-                      : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                      : 'bg-[var(--bg-active)] text-[var(--text-secondary)] hover:bg-slate-500'
                   }`}
                 >
                   Original
@@ -193,7 +193,7 @@ export function DTC1BProcessor() {
                     className={`px-4 py-2 rounded transition-colors ${
                       currentView === 'encrypted'
                         ? 'bg-blue-600 text-white'
-                        : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                        : 'bg-[var(--bg-active)] text-[var(--text-secondary)] hover:bg-slate-500'
                     }`}
                   >
                     Encrypted
@@ -206,7 +206,7 @@ export function DTC1BProcessor() {
                     className={`px-4 py-2 rounded transition-colors ${
                       currentView === 'decrypted'
                         ? 'bg-blue-600 text-white'
-                        : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                        : 'bg-[var(--bg-active)] text-[var(--text-secondary)] hover:bg-slate-500'
                     }`}
                   >
                     Decrypted
@@ -219,7 +219,7 @@ export function DTC1BProcessor() {
               <button
                 onClick={handleEncrypt}
                 disabled={!fileData || loading}
-                className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-white rounded-lg transition-colors"
               >
                 <Lock className="w-4 h-4" />
                 Encrypt (AES-256-GCM)
@@ -229,7 +229,7 @@ export function DTC1BProcessor() {
                 <button
                   onClick={handleDecrypt}
                   disabled={loading}
-                  className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-white rounded-lg transition-colors"
                 >
                   <Unlock className="w-4 h-4" />
                   Decrypt
@@ -239,7 +239,7 @@ export function DTC1BProcessor() {
               {currentData && (
                 <button
                   onClick={() => downloadData(currentData, `${file.name}.${currentView}`)}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-hover)] hover:bg-[var(--bg-active)] text-white rounded-lg transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   Download {currentView}
@@ -258,26 +258,26 @@ export function DTC1BProcessor() {
             </div>
 
             {keyString && (
-              <div className="p-4 bg-slate-700 rounded-lg space-y-3">
+              <div className="p-4 bg-[var(--bg-hover)] rounded-lg space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                     Encryption Key (Base64)
                   </label>
                   <textarea
                     value={keyString}
                     readOnly
                     rows={2}
-                    className="w-full bg-[#0d0d0d] text-white px-3 py-2 rounded border border-slate-600 font-mono text-xs"
+                    className="w-full bg-[#0d0d0d] text-white px-3 py-2 rounded border border-[var(--border-medium)] font-mono text-xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                     Nonce (Base64)
                   </label>
                   <input
                     value={nonce ? btoa(String.fromCharCode(...nonce)) : ''}
                     readOnly
-                    className="w-full bg-[#0d0d0d] text-white px-3 py-2 rounded border border-slate-600 font-mono text-xs"
+                    className="w-full bg-[#0d0d0d] text-white px-3 py-2 rounded border border-[var(--border-medium)] font-mono text-xs"
                   />
                 </div>
               </div>
@@ -294,7 +294,7 @@ export function DTC1BProcessor() {
             matches={matches}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-slate-500">
+          <div className="flex items-center justify-center h-full text-[var(--text-muted)]">
             Upload a file or generate a sample to begin
           </div>
         )}
