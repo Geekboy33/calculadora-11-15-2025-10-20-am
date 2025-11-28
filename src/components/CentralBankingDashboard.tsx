@@ -19,6 +19,8 @@ import { useLanguage } from '../lib/i18n';
 import { useFormatters } from '../lib/professional-formatters';
 import { BankingStyles, cn } from '../lib/design-system';
 import { StatementExporter } from '../lib/statement-exporter';
+import { useSwipeable } from '../hooks/useSwipeable';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 
 interface DashboardMetrics {
   totalBalances: { [currency: string]: number };
@@ -364,9 +366,12 @@ export function CentralBankingDashboard() {
         </header>
 
         {/* Main Metrics - 4 Cards Premium */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-card">
+        <div 
+          ref={metricsRef}
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-card stagger-container ${metricsVisible ? 'visible' : ''}`}
+        >
           {/* Total Assets */}
-          <div className={`${BankingStyles.metric.container} stagger-item scroll-reveal`}>
+          <div className={`${BankingStyles.metric.container} stagger-item`}>
             <div className="flex items-start justify-between m-card">
               <div>
                 <p className={BankingStyles.metric.label}>
@@ -389,7 +394,7 @@ export function CentralBankingDashboard() {
           </div>
 
           {/* Active Accounts */}
-          <div className={BankingStyles.metric.container}>
+          <div className={`${BankingStyles.metric.container} stagger-item`}>
             <div className="flex items-start justify-between m-card">
               <div>
                 <p className={BankingStyles.metric.label}>
@@ -408,7 +413,7 @@ export function CentralBankingDashboard() {
           </div>
 
           {/* Active Pledges */}
-          <div className={BankingStyles.metric.container}>
+          <div className={`${BankingStyles.metric.container} stagger-item`}>
             <div className="flex items-start justify-between m-card">
               <div>
                 <p className={BankingStyles.metric.label}>
@@ -449,7 +454,11 @@ export function CentralBankingDashboard() {
         </div>
 
         {/* Balance Carousel - Professional */}
-        <div className="bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden">
+        <div 
+          ref={balanceRef}
+          {...currencySwipeHandlers}
+          className={`bg-gradient-to-br from-[#0d0d0d] via-[#141414] to-[#0d0d0d] border border-[#1a1a1a] rounded-2xl shadow-2xl overflow-hidden scroll-reveal ${balanceVisible ? 'visible' : ''}`}
+        >
           <div className="p-card border-b border-[#1a1a1a]">
             <div className="flex items-center justify-between">
               <h2 className="text-heading-sm flex items-center gap-3">
