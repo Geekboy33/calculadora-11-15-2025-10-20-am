@@ -20,13 +20,13 @@ export function CentralPanelIcon({ size = 24, className = '', active = false }: 
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
       <rect x="5" y="6" width="14" height="14" rx="1" 
         fill="none" 
-        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
-        strokeWidth="1.5"
+        stroke="#000000" 
+        strokeWidth="2"
       />
-      <line x1="9" y1="10" x2="15" y2="10" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
-      <line x1="9" y1="13" x2="15" y2="13" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
-      <line x1="9" y1="16" x2="13" y2="16" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
-      <circle cx="12" cy="4" r="1.5" fill={active ? '#4F8DFF' : '#1A4DB3'} />
+      <line x1="9" y1="10" x2="15" y2="10" stroke="#000000" strokeWidth="1.5" />
+      <line x1="9" y1="13" x2="15" y2="13" stroke="#000000" strokeWidth="1.5" />
+      <line x1="9" y1="16" x2="13" y2="16" stroke="#000000" strokeWidth="1.5" />
+      <circle cx="12" cy="4" r="1.5" fill="#000000" />
     </svg>
   );
 }
@@ -40,11 +40,11 @@ export function PrivateCentralBankIcon({ size = 24, className = '', active = fal
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M12 2 L20 5 L20 11 C20 16 15 20 12 22 C9 20 4 16 4 11 L4 5 Z"
         fill="none"
-        stroke={active ? '#4F8DFF' : '#1A4DB3'} 
-        strokeWidth="1.5"
+        stroke="#000000" 
+        strokeWidth="2"
       />
-      <circle cx="12" cy="10" r="2" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
-      <line x1="12" y1="6" x2="12" y2="14" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
+      <circle cx="12" cy="10" r="2" fill="none" stroke="#000000" strokeWidth="2" />
+      <line x1="12" y1="6" x2="12" y2="14" stroke="#000000" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -56,10 +56,10 @@ export function PrivateCentralBankIcon({ size = 24, className = '', active = fal
 export function SourceOfFundsIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      <circle cx="10" cy="10" r="6" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
-      <line x1="15" y1="15" x2="20" y2="20" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="10" y1="6" x2="10" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="7" y1="10" x2="13" y2="10" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="10" cy="10" r="6" fill="none" stroke="#000000" strokeWidth="2" />
+      <line x1="15" y1="15" x2="20" y2="20" stroke="#000000" strokeWidth="2" strokeLinecap="round" />
+      <line x1="10" y1="6" x2="10" y2="14" stroke="#000000" strokeWidth="2" strokeLinecap="round" />
+      <line x1="7" y1="10" x2="13" y2="10" stroke="#000000" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -71,11 +71,11 @@ export function SourceOfFundsIcon({ size = 24, className = '', active = false }:
 export function TheKingdomBankIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      <path d="M5 16 L5 20 L19 20 L19 16 L12 8 Z" fill="none" stroke={active ? '#F5D576' : '#C8A56A'} strokeWidth="1.5" />
-      <path d="M12 8 L8 12 L10 12 L12 8 L14 12 L16 12 Z" fill="none" stroke={active ? '#F5D576' : '#C8A56A'} strokeWidth="1.5" />
-      <circle cx="8" cy="12" r="1" fill={active ? '#F5D576' : '#C8A56A'} />
-      <circle cx="12" cy="10" r="1" fill={active ? '#F5D576' : '#C8A56A'} />
-      <circle cx="16" cy="12" r="1" fill={active ? '#F5D576' : '#C8A56A'} />
+      <path d="M5 16 L5 20 L19 20 L19 16 L12 8 Z" fill="none" stroke="#000000" strokeWidth="2" />
+      <path d="M12 8 L8 12 L10 12 L12 8 L14 12 L16 12 Z" fill="none" stroke="#000000" strokeWidth="2" />
+      <circle cx="8" cy="12" r="1" fill="#000000" />
+      <circle cx="12" cy="10" r="1" fill="#000000" />
+      <circle cx="16" cy="12" r="1" fill="#000000" />
     </svg>
   );
 }
@@ -87,11 +87,11 @@ export function TheKingdomBankIcon({ size = 24, className = '', active = false }
 export function DAESPartnerAPIIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      <circle cx="12" cy="12" r="8" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
-      <line x1="4" y1="12" x2="20" y2="12" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
-      <ellipse cx="12" cy="8" rx="6" ry="1.5" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
-      <ellipse cx="12" cy="16" rx="6" ry="1.5" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1" />
-      <circle cx="12" cy="12" r="2" fill={active ? '#FFFFFF' : '#FFFFFF'} />
+      <circle cx="12" cy="12" r="8" fill="none" stroke="#000000" strokeWidth="2" />
+      <line x1="4" y1="12" x2="20" y2="12" stroke="#000000" strokeWidth="1.5" />
+      <ellipse cx="12" cy="8" rx="6" ry="1.5" fill="none" stroke="#000000" strokeWidth="1.5" />
+      <ellipse cx="12" cy="16" rx="6" ry="1.5" fill="none" stroke="#000000" strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="2" fill="#000000" />
     </svg>
   );
 }
