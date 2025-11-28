@@ -15,6 +15,7 @@ import { PublicVerificationPage } from './components/PublicVerificationPage';
 import { useLanguage } from './lib/i18n.tsx';
 import { useAuth } from './lib/auth.tsx';
 import { MobileMenu } from './components/ui/MobileMenu';
+import { PageTransition } from './components/ui/PageTransition';
 import { GlobalProcessingIndicator } from './components/GlobalProcessingIndicator';
 import { NotificationCenter } from './components/NotificationCenter';
 import { ToastNotification } from './components/ToastNotification';
