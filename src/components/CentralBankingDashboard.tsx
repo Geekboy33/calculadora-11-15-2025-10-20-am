@@ -62,6 +62,27 @@ export function CentralBankingDashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [filterType, setFilterType] = useState<'all' | 'blockchain' | 'banking'>('all');
 
+  // Scroll reveal para secciones
+  const { ref: metricsRef, isVisible: metricsVisible } = useScrollReveal({ threshold: 0.1 });
+  const { ref: balanceRef, isVisible: balanceVisible } = useScrollReveal({ threshold: 0.1 });
+
+  // Touch gestures para carousel de monedas
+  const currencySwipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      const currentIdx = currencies.indexOf(selectedCurrency);
+      if (currentIdx < currencies.length - 1) {
+        setSelectedCurrency(currencies[currentIdx + 1] || currencies[0]);
+      }
+    },
+    onSwipedRight: () => {
+      const currentIdx = currencies.indexOf(selectedCurrency);
+      if (currentIdx > 0) {
+        setSelectedCurrency(currencies[currentIdx - 1] || currencies[0]);
+      }
+    },
+    trackMouse: true, // También funciona con mouse drag
+  });
+
   // Update time every second
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
