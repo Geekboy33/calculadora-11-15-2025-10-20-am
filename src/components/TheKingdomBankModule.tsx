@@ -764,6 +764,8 @@ export function TheKingdomBankModule() {
                     }
                   }}
                   className="w-full px-card-sm py-card-sm bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-white/30"
+                  aria-label={isSpanish ? "Seleccionar cuenta de Custody Accounts" : "Select Custody Account"}
+                  title={isSpanish ? "Seleccionar cuenta de Custody Accounts" : "Select Custody Account"}
                 >
                   <option value="">{isSpanish ? "-- Seleccionar cuenta --" : "-- Select account --"}</option>
                   {custodyAccounts
@@ -890,6 +892,8 @@ export function TheKingdomBankModule() {
                       }
                     }}
                     className="w-full px-card-sm py-card-sm bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-emerald-500"
+                    aria-label={isSpanish ? "Seleccionar cuenta origen de Custody Accounts" : "Select source Custody Account"}
+                    title={isSpanish ? "Seleccionar cuenta origen de Custody Accounts" : "Select source Custody Account"}
                   >
                     <option value="">{isSpanish ? "-- Seleccionar cuenta origen --" : "-- Select source account --"}</option>
                     {custodyAccounts
@@ -972,6 +976,8 @@ export function TheKingdomBankModule() {
                       }
                     }}
                     className="w-full px-card-sm py-card-sm bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-purple-500"
+                    aria-label={isSpanish ? "Seleccionar cuenta origen de Custody Accounts" : "Select source Custody Account"}
+                    title={isSpanish ? "Seleccionar cuenta origen de Custody Accounts" : "Select source Custody Account"}
                   >
                     <option value="">{isSpanish ? "-- Seleccionar cuenta origen --" : "-- Select source account --"}</option>
                     {custodyAccounts
