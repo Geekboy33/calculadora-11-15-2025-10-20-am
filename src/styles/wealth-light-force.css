@@ -41,6 +41,7 @@ div[class*="rounded"],
   background-image: none !important;
   box-shadow: 0 2px 8px rgba(0, 59, 124, 0.08) !important;
   border: 1px solid #E2E6EE !important;
+  color: #000000 !important; /* Texto negro sobre fondo blanco */
 }
 
 /* TEXTOS - Oscuros para legibilidad */
