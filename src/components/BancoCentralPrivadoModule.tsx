@@ -953,33 +953,33 @@ Timestamp: ${AUDIT_DATA.timestamp}
         )}
 
         {/* Audit Info Card */}
-        <BankingCard className="p-card border-2 border-emerald-500/50">
+        <BankingCard className="p-card border-2 border-emerald-500/50 bg-white">
           <div className="flex items-start gap-card">
             <div className="p-card-sm bg-emerald-500/10 rounded-xl">
-              <CheckCircle className="w-8 h-8 text-emerald-400" />
+              <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-heading text-white mb-card-sm">
+              <h3 className="text-heading text-black mb-card-sm font-bold">
                 {isSpanish ? "Auditoría Técnica Verificada" : "Technical Audit Verified"}
               </h3>
-              <p className="text-emerald-400 text-heading-sm mb-card">
+              <p className="text-emerald-600 text-heading-sm mb-card font-semibold">
                 745,381 {isSpanish ? "Cuatrillones" : "Quadrillion"} M2 {isSpanish ? "Confirmados" : "Confirmed"}
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-card text-sm">
                 <div>
-                  <p className="text-black">{isSpanish ? "Archivos Procesados" : "Files Processed"}</p>
+                  <p className="text-black font-medium">{isSpanish ? "Archivos Procesados" : "Files Processed"}</p>
                   <p className="text-black font-bold">{AUDIT_DATA.totalFiles}</p>
                 </div>
                 <div>
-                  <p className="text-black">{isSpanish ? "Valores M2" : "M2 Values"}</p>
+                  <p className="text-black font-medium">{isSpanish ? "Valores M2" : "M2 Values"}</p>
                   <p className="text-black font-bold">{fmt.number(AUDIT_DATA.totalM2Values)}</p>
                 </div>
                 <div>
-                  <p className="text-black">{isSpanish ? "Encriptación" : "Encryption"}</p>
+                  <p className="text-black font-medium">{isSpanish ? "Encriptación" : "Encryption"}</p>
                   <p className="text-black font-bold">{AUDIT_DATA.encryption}</p>
                 </div>
                 <div>
-                  <p className="text-black">{isSpanish ? "Fuente" : "Source"}</p>
+                  <p className="text-black font-medium">{isSpanish ? "Fuente" : "Source"}</p>
                   <p className="text-black font-bold text-xs">Ledger1 DAES</p>
                 </div>
               </div>
@@ -1071,10 +1071,10 @@ Timestamp: ${AUDIT_DATA.timestamp}
             {/* ✅ PANTALLA DE VERIFICACIÓN Y CARGA EN TIEMPO REAL */}
             {analyzing && (
               <div className="px-8 pb-6">
-                <BankingCard className="p-card border-2 border-white/20 bg-white/3">
+                <BankingCard className="p-card border-2 border-gray-200 bg-white">
                   <div className="flex items-center justify-between m-card">
                     <div className="flex items-center gap-card">
-                      <div className="p-card-sm bg-white/10 rounded-xl">
+                      <div className="p-card-sm bg-gray-100 rounded-xl">
                         <Activity className="w-6 h-6 text-black animate-spin" />
                       </div>
                       <div>
@@ -1140,8 +1140,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   </div>
 
                   {/* Info adicional */}
-                  <div className="mt-card text-center text-sm text-black">
-                    <p>
+                  <div className="mt-card text-center text-sm text-black bg-white p-card-sm rounded-lg">
+                    <p className="font-medium">
                       {isSpanish ? "Técnica:" : "Technique:"} Byte-by-byte 64-bit Little-endian | 
                       {isSpanish ? " Filtro:" : " Filter:"} {'>'}1 Billion | 
                       {isSpanish ? " Clasificación:" : " Classification:"} M2 Money Supply
@@ -1180,7 +1180,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
               <p className="text-emerald-400 font-bold text-sm mb-1">ISO 27001</p>
               <p className="text-emerald-300 text-xs">{AUDIT_DATA.compliance.iso27001}</p>
             </div>
-            <div className="bg-white/5 border border-white/15 rounded-xl p-card-sm text-center">
+            <div className="bg-white border border-gray-200 rounded-xl p-card-sm text-center">
               <p className="text-black font-bold text-sm mb-1">SOC 2 Type II</p>
               <p className="text-black text-xs">{AUDIT_DATA.compliance.soc2TypeII}</p>
             </div>
@@ -1246,14 +1246,14 @@ Timestamp: ${AUDIT_DATA.timestamp}
               </ol>
             </div>
 
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-5">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
               <div className="flex items-center gap-card mb-card">
-                <CheckCircle className="w-6 h-6 text-emerald-400" />
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
                 <p className="text-black font-bold text-lg">
                   {isSpanish ? "Confirmación" : "Confirmation"}
                 </p>
               </div>
-              <p className="text-white">
+              <p className="text-black">
                 {isSpanish
                   ? "Todos los datos se originan del repositorio Ledger1 Digital Commercial Bank DAES verificado y fueron procesados usando métodos técnicos auditables, rastreables y reproducibles."
                   : "All data originates from the verified Ledger1 Digital Commercial Bank DAES repository and were processed using auditable, traceable, and reproducible technical methods."
