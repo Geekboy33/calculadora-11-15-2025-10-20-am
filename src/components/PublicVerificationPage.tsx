@@ -80,7 +80,7 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
           </h1>
           <p className="text-gray-400">Data and Exchange Settlement - Official Verification</p>
           <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white/20/20 border border-white/30/50 rounded-full">
-            <CheckCircle className="w-5 h-5 text-white" />
+            <CheckCircle className="w-5 h-5 text-black" />
             <span className="text-white font-semibold">Verified Account</span>
           </div>
         </div>
@@ -201,7 +201,7 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
                 <div>
                   <div className="text-sm text-gray-400">API Status</div>
                   <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ${
-                    account.apiStatus === 'active' ? 'bg-white/20/20 text-white' :
+                    account.apiStatus === 'active' ? 'bg-white/20/20 text-black' :
                     account.apiStatus === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
                     'bg-gray-500/20 text-gray-400'
                   }`}>
@@ -232,7 +232,7 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
                 <div>
                   <div className="text-sm text-gray-400">Risk Level</div>
                   <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                    account.riskLevel === 'low' ? 'bg-white/20/20 text-white' :
+                    account.riskLevel === 'low' ? 'bg-white/20/20 text-black' :
                     account.riskLevel === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
                     'bg-red-500/20 text-red-400'
                   }`}>
@@ -357,7 +357,7 @@ export function PublicVerificationPage({ accountId }: VerificationPageProps) {
                       <Shield className="w-5 h-5 text-white" />
                       <span className="font-semibold text-white">API VUSD</span>
                     </div>
-                    <div className="px-3 py-1 bg-white/20/20 text-white rounded-full text-xs font-semibold">
+                    <div className="px-3 py-1 bg-white/20/20 text-black rounded-full text-xs font-semibold">
                       ACTIVE
                     </div>
                   </div>

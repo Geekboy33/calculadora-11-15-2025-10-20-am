@@ -716,7 +716,7 @@ export default function APIGlobalModule() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETED': return 'text-white bg-white/20/20';
+      case 'COMPLETED': return 'text-black bg-white/20/20';
       case 'PROCESSING': return 'text-blue-400 bg-blue-500/20';
       case 'PENDING': return 'text-yellow-400 bg-yellow-500/20';
       case 'FAILED': return 'text-red-400 bg-red-500/20';
@@ -1029,7 +1029,7 @@ export default function APIGlobalModule() {
               </h3>
               <div className="flex items-center gap-4">
                 <div className={`px-4 py-2 rounded-lg font-bold ${
-                  apiStatus === 'connected' ? 'bg-white/20/20 text-white' :
+                  apiStatus === 'connected' ? 'bg-white/20/20 text-black' :
                   apiStatus === 'error' ? 'bg-red-500/20 text-red-400' :
                   'bg-yellow-500/20 text-yellow-400'
                 }`}>
@@ -1328,7 +1328,7 @@ export default function APIGlobalModule() {
 
               {success && (
                 <>
-                  <div className="mt-4 p-4 bg-white/10/20 border border-white/30/30 rounded-lg text-white">
+                  <div className="mt-4 p-4 bg-white/10/20 border border-white/30/30 rounded-lg text-black">
                     <CheckCircle className="w-5 h-5 inline mr-2" />
                     {success}
                   </div>

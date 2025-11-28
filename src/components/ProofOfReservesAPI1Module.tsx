@@ -968,7 +968,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
             </h2>
             <button
               onClick={() => setShowCreatePledgeModal(true)}
-              className="px-6 py-3 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 flex items-center gap-2 font-bold"
+              className="px-6 py-3 bg-white/20/20 border border-white/30 text-black rounded-lg hover:bg-white/20/30 flex items-center gap-2 font-bold"
             >
               <Lock className="w-5 h-5" />
               {isSpanish ? 'Crear Pledge' : 'Create Pledge'}
@@ -997,7 +997,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="px-3 py-1 bg-white/20/20 text-white text-xs rounded font-bold">
+                        <span className="px-3 py-1 bg-white/20/20 text-black text-xs rounded font-bold">
                           {pledge.status}
                         </span>
                         <span className="text-white font-mono text-sm">{pledge.pledgeId}</span>
@@ -1136,7 +1136,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                     <div>
                       <div className="flex items-center gap-3 mb-2">
                         <span className={`px-3 py-1 text-xs rounded font-bold ${
-                          payout.status === 'COMPLETED' ? 'bg-white/20/20 text-white' :
+                          payout.status === 'COMPLETED' ? 'bg-white/20/20 text-black' :
                           payout.status === 'PROCESSING' ? 'bg-yellow-500/20 text-yellow-300' :
                           payout.status === 'FAILED' ? 'bg-red-500/20 text-red-400' :
                           'bg-blue-500/20 text-blue-300'
@@ -1196,7 +1196,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
               <button
                 onClick={downloadReconciliationCSV}
                 disabled={loading}
-                className="px-4 py-2 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 flex items-center gap-2 disabled:opacity-50"
+                className="px-4 py-2 bg-white/20/20 border border-white/30 text-black rounded-lg hover:bg-white/20/30 flex items-center gap-2 disabled:opacity-50"
               >
                 <Download className="w-4 h-4" />
                 CSV
@@ -1233,7 +1233,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                     <div className="text-purple-300 font-bold">{reconciliationData.date}</div>
                   </div>
                   <div className="bg-white/10/20 rounded p-3">
-                    <div className="text-white/60 mb-1">{isSpanish ? 'Pledges:' : 'Pledges:'}</div>
+                    <div className="text-black/60 mb-1">{isSpanish ? 'Pledges:' : 'Pledges:'}</div>
                     <div className="text-white font-bold">{reconciliationData.summary.totalPledges}</div>
                   </div>
                   <div className="bg-blue-900/20 rounded p-3">
@@ -1436,7 +1436,7 @@ ${isSpanish ? 'Webhooks:' : 'Webhooks:'}             HMAC-SHA256 signed
                       className={`px-4 py-2 rounded-lg font-bold transition-all ${
                         pledgeForm.termDays === days
                           ? 'bg-white/20 text-black'
-                          : 'bg-white/20/20 border border-white/30/30 text-white hover:bg-white/20/30'
+                          : 'bg-white/20/20 border border-white/30/30 text-black hover:bg-white/20/30'
                       }`}
                     >
                       {days}d

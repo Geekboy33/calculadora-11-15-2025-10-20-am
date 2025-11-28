@@ -750,12 +750,12 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                       (account.accountType || 'blockchain') === 'blockchain' 
                         ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400' 
-                        : 'bg-white/20/20 border border-white/30/40 text-white'
+                        : 'bg-white/20/20 border border-white/30/40 text-black'
                     }`}>
                       {(account.accountType || 'blockchain') === 'blockchain' ? 'BLOCKCHAIN CUSTODY' : 'BANKING ACCOUNT'}
                     </span>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      account.apiStatus === 'active' ? 'bg-white/20/20 text-white' :
+                      account.apiStatus === 'active' ? 'bg-white/20/20 text-black' :
                       account.apiStatus === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
                       'bg-red-500/20 text-red-400'
                     }`}>
@@ -1150,7 +1150,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-mono text-[#ffffff]">{reservation.id}</span>
                           <span className={`px-2 py-1 rounded text-xs font-bold ${
-                            reservation.status === 'confirmed' ? 'bg-white/20/20 text-white' :
+                            reservation.status === 'confirmed' ? 'bg-white/20/20 text-black' :
                             reservation.status === 'reserved' ? 'bg-yellow-500/20 text-yellow-400' :
                             'bg-gray-500/20 text-gray-400'
                           }`}>
@@ -1179,7 +1179,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                           {reservation.status === 'reserved' && (
                             <button
                               onClick={() => custodyStore.confirmReservation(account.id, reservation.id)}
-                              className="px-3 py-1 bg-white/20/20 border border-white/30/40 text-white rounded text-xs hover:bg-white/20/30"
+                              className="px-3 py-1 bg-white/20/20 border border-white/30/40 text-black rounded text-xs hover:bg-white/20/30"
                             >
                               <Check className="w-3 h-3 inline mr-1" />
                               Confirmar
@@ -1284,7 +1284,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     onClick={() => setFormData({...formData, accountType: 'banking'})}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       formData.accountType === 'banking'
-                        ? 'border-white/30 bg-white/20/20 text-white'
+                        ? 'border-white/30 bg-white/20/20 text-black'
                         : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#ffffff] hover:border-white/30/30'
                     }`}
                   >
@@ -1490,7 +1490,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   </div>
 
                   <div className="bg-white/10/20 border border-white/30/30 rounded p-3 space-y-1">
-                    <div className="text-xs text-white font-semibold">
+                    <div className="text-xs text-black font-semibold">
                       ℹ️ {language === 'es' ? 'Se generarán automáticamente:' : 'Will be auto-generated:'}
                     </div>
                     <div className="text-xs text-white/80">
@@ -1878,14 +1878,14 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 <span className={`px-4 py-2 rounded-lg border-2 font-bold ${
                   (selectedAccount.accountType || 'blockchain') === 'blockchain' 
                     ? 'border-cyan-500 bg-cyan-500/20 text-cyan-400' 
-                    : 'border-white/30 bg-white/20/20 text-white'
+                    : 'border-white/30 bg-white/20/20 text-black'
                 }`}>
                   {(selectedAccount.accountType || 'blockchain') === 'blockchain' 
                     ? (language === 'es' ? '🌐 BLOCKCHAIN CUSTODY' : '🌐 BLOCKCHAIN CUSTODY')
                     : (language === 'es' ? '🏦 CUENTA BANCARIA' : '🏦 BANKING ACCOUNT')}
                 </span>
                 <span className={`px-4 py-2 rounded-lg border-2 font-bold ${
-                  selectedAccount.apiStatus === 'active' ? 'border-white/30 bg-white/20/20 text-white' :
+                  selectedAccount.apiStatus === 'active' ? 'border-white/30 bg-white/20/20 text-black' :
                   selectedAccount.apiStatus === 'pending' ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400' :
                   'border-red-500 bg-red-500/20 text-red-400'
                 }`}>
@@ -2198,7 +2198,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-mono text-[#ffffff]">{r.id}</span>
                           <span className={`px-2 py-1 rounded text-xs font-bold ${
-                            r.status === 'confirmed' ? 'bg-white/20/20 text-white' :
+                            r.status === 'confirmed' ? 'bg-white/20/20 text-black' :
                             r.status === 'reserved' ? 'bg-yellow-500/20 text-yellow-400' :
                             r.status === 'completed' ? 'bg-blue-500/20 text-blue-400' :
                             'bg-gray-500/20 text-gray-400'
@@ -2332,7 +2332,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   onClick={() => setBalanceOperation('add')}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     balanceOperation === 'add'
-                      ? 'border-white/30 bg-white/20/20 text-white'
+                      ? 'border-white/30 bg-white/20/20 text-black'
                       : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#ffffff] hover:border-white/30/30'
                   }`}
                 >

@@ -1774,7 +1774,7 @@ Versión: 5.0
                 🌍 IBANs ({extractedData.ibanCodes.length})
               </button>
               <button onClick={() => document.getElementById('section-swift')?.scrollIntoView({ behavior: 'smooth' })} 
-                className="px-3 py-1 bg-white/20/20 border border-white/30/40 text-white text-xs rounded hover:bg-white/20/30 transition-colors">
+                className="px-3 py-1 bg-white/20/20 border border-white/30/40 text-black text-xs rounded hover:bg-white/20/30 transition-colors">
                 📡 SWIFT ({extractedData.swiftCodes.length})
               </button>
               <button onClick={() => document.getElementById('section-banks')?.scrollIntoView({ behavior: 'smooth' })} 
@@ -1901,7 +1901,7 @@ Versión: 5.0
               <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
                 <TrendingUp className="w-5 h-5" />
                 📡 Códigos SWIFT/BIC ({extractedData.swiftCodes.length})
-                <span className="ml-auto text-xs text-white bg-white/20/20 px-2 py-1 rounded">
+                <span className="ml-auto text-xs text-black bg-white/20/20 px-2 py-1 rounded">
                   Scroll para ver todos →
                 </span>
               </h3>
@@ -2010,7 +2010,7 @@ Versión: 5.0
               <h3 className="text-xl font-bold text-[#ffffff] mb-4 flex items-center gap-2">
                 🧬 Ingeniería Inversa - Análisis Profundo
                 <span className={`ml-auto px-3 py-1 rounded-full text-xs font-bold ${
-                  extractedData.reverseEngineering.confidence >= 80 ? 'bg-white/20/20 text-white' :
+                  extractedData.reverseEngineering.confidence >= 80 ? 'bg-white/20/20 text-black' :
                   extractedData.reverseEngineering.confidence >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
                   'bg-red-500/20 text-red-400'
                 }`}>
@@ -2179,7 +2179,7 @@ Versión: 5.0
                 const colors = {
                   M0: { bg: 'bg-purple-500/20 border-purple-500/40', text: 'text-purple-400' },
                   M1: { bg: 'bg-blue-500/20 border-blue-500/40', text: 'text-blue-400' },
-                  M2: { bg: 'bg-white/20/20 border-white/30/40', text: 'text-white' },
+                  M2: { bg: 'bg-white/20/20 border-white/30/40', text: 'text-black' },
                   M3: { bg: 'bg-yellow-500/20 border-yellow-500/40', text: 'text-yellow-400' },
                   M4: { bg: 'bg-red-500/20 border-red-500/40', text: 'text-red-400' },
                 };
@@ -2279,7 +2279,7 @@ Versión: 5.0
             <h2 className="text-xl font-semibold text-[#ffffff] mb-6 flex items-center justify-between">
               <span>{t.auditDetailedFindings} ({results.hallazgos.length})</span>
               {showFullData && (
-                <span className="text-xs text-white bg-white/20/20 px-3 py-1 rounded">
+                <span className="text-xs text-black bg-white/20/20 px-3 py-1 rounded">
                   👁️ Vista Completa Activa - Todos los datos visibles
                 </span>
               )}
@@ -2289,7 +2289,7 @@ Versión: 5.0
                 const classColors = {
                   M0: { bg: 'bg-purple-500/20 border-purple-500/40', text: 'text-purple-400' },
                   M1: { bg: 'bg-blue-500/20 border-blue-500/40', text: 'text-blue-400' },
-                  M2: { bg: 'bg-white/20/20 border-white/30/40', text: 'text-white' },
+                  M2: { bg: 'bg-white/20/20 border-white/30/40', text: 'text-black' },
                   M3: { bg: 'bg-yellow-500/20 border-yellow-500/40', text: 'text-yellow-400' },
                   M4: { bg: 'bg-red-500/20 border-red-500/40', text: 'text-red-400' },
                 };

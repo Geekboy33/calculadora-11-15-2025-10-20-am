@@ -31,7 +31,7 @@ export function LedgerStatusIndicator({ onLoadFile, showFullDetails = false }: L
   const getStatusColor = () => {
     if (!status.isLoaded) return 'text-red-400 border-red-500 bg-red-500/10';
     if (status.isProcessing) return 'text-yellow-400 border-yellow-500 bg-yellow-500/10';
-    if (status.isComplete) return 'text-white border-white/30 bg-white/20/10';
+    if (status.isComplete) return 'text-black border-white/30 bg-white/20/10';
     return 'text-orange-400 border-orange-500 bg-orange-500/10';
   };
 
@@ -143,7 +143,7 @@ export function LedgerStatusIndicator({ onLoadFile, showFullDetails = false }: L
               {/* Estado de Completado */}
               {status.isComplete && (
                 <div className="bg-white/10/30 border border-white/30/30 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-white">
+                  <div className="flex items-center gap-2 text-black">
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-sm font-semibold">
                       {isSpanish 

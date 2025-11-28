@@ -1415,7 +1415,7 @@ export function APIVUSDModule() {
               {lastPledgeData && (
                 <button
                   onClick={handleGenerateBlackScreen}
-                  className="px-4 py-2 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 flex items-center gap-2"
+                  className="px-4 py-2 bg-white/20/20 border border-white/30 text-black rounded-lg hover:bg-white/20/30 flex items-center gap-2"
                 >
                   <FileText className="w-4 h-4" />
                   Generate Black Screen
@@ -2005,7 +2005,7 @@ export function APIVUSDModule() {
                                 </div>
                               </div>
                               <div className="bg-white/10/30 rounded p-2">
-                                <div className="text-xs text-white/80 mb-1">Restante</div>
+                                <div className="text-xs text-black/80 mb-1">Restante</div>
                                 <div className="text-sm font-bold text-white">
                                   {remainingBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                                 </div>

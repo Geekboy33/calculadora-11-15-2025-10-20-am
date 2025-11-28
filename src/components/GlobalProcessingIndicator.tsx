@@ -121,7 +121,7 @@ export function GlobalProcessingIndicator() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsMinimized(true)}
-              className="text-white hover:bg-white/20 rounded p-1 transition-colors"
+              className="text-black hover:bg-white/20 rounded p-1 transition-colors"
               title="Minimizar"
             >
               <span className="text-xs">_</span>
@@ -129,7 +129,7 @@ export function GlobalProcessingIndicator() {
             {processingState.status === 'completed' && (
               <button
                 onClick={async () => await processingStore.clearState()}
-                className="text-white hover:bg-white/20 rounded p-1 transition-colors"
+                className="text-black hover:bg-white/20 rounded p-1 transition-colors"
                 title="Cerrar"
               >
                 <X className="w-4 h-4" />
@@ -266,7 +266,7 @@ export function GlobalProcessingIndicator() {
 
           {/* Mensaje de éxito */}
           {processingState.status === 'completed' && (
-            <div className="bg-white/10/20 border border-white/30/30 rounded p-2 text-xs text-white">
+            <div className="bg-white/10/20 border border-white/30/30 rounded p-2 text-xs text-black">
               ✓ Procesamiento completado exitosamente
             </div>
           )}

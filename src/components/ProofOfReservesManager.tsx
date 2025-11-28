@@ -178,7 +178,7 @@ export function ProofOfReservesManager() {
                         <h3 className="text-lg font-semibold">{key.name}</h3>
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
                           key.status === 'active'
-                            ? 'bg-white/10/30 text-white border border-white/30/30'
+                            ? 'bg-white/10/30 text-black border border-white/30/30'
                             : 'bg-red-900/30 text-red-400 border border-red-500/30'
                         }`}>
                           {key.status}

@@ -416,7 +416,7 @@ export function ProfilesModule() {
                   <button
                     onClick={handleExportProfile}
                     disabled={!selectedProfile}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/20/10 border border-white/30/30 text-white text-xs font-semibold hover:bg-white/20/20 transition disabled:opacity-40"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/20/10 border border-white/30/30 text-black text-xs font-semibold hover:bg-white/20/20 transition disabled:opacity-40"
                   >
                     <Download className="w-3 h-3" />
                     {isSpanish ? 'Exportar' : 'Export'}
@@ -656,7 +656,7 @@ export function ProfilesModule() {
                   )}
                   <button
                     onClick={handleExportProfile}
-                    className="w-full flex items-center justify-center gap-2 bg-white/20/10 border border-white/30/30 rounded-xl py-3 font-semibold text-white hover:border-white/30/60 transition"
+                    className="w-full flex items-center justify-center gap-2 bg-white/20/10 border border-white/30/30 rounded-xl py-3 font-semibold text-black hover:border-white/30/60 transition"
                   >
                     <Download className="w-4 h-4" />
                     {isSpanish ? 'Exportar como archivo' : 'Export as file'}
@@ -709,7 +709,7 @@ export function ProfilesModule() {
                   className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
                     autoConfig.enabled
                       ? 'bg-[#ffffff]/20 border border-[#ffffff]/40 text-[#ffffff]'
-                      : 'bg-white/5 border border-white/20 text-white/60'
+                      : 'bg-white/5 border border-white/20 text-black/60'
                   }`}
                 >
                   {autoConfig.enabled ? (isSpanish ? 'Activado' : 'Enabled') : (isSpanish ? 'Desactivado' : 'Disabled')}
@@ -768,7 +768,7 @@ export function ProfilesModule() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                  <h4 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-black/70 mb-3 flex items-center gap-2">
                     <Database className="w-4 h-4" />
                     {isSpanish ? 'Resumen de datos' : 'Data summary'}
                   </h4>
@@ -801,7 +801,7 @@ export function ProfilesModule() {
                 </div>
 
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                  <h4 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-black/70 mb-3 flex items-center gap-2">
                     <HardDrive className="w-4 h-4" />
                     {isSpanish ? 'Almacenamiento' : 'Storage'}
                   </h4>
@@ -832,7 +832,7 @@ export function ProfilesModule() {
 
               {previewProfile.stats.ledger && (
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                  <h4 className="text-sm font-semibold text-white/70 mb-3 flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-black/70 mb-3 flex items-center gap-2">
                     <Server className="w-4 h-4" />
                     Ledger1 {isSpanish ? 'incluido' : 'included'}
                   </h4>
@@ -904,7 +904,7 @@ export function ProfilesModule() {
 
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                <h4 className="text-sm font-semibold text-white/70 mb-4">
+                <h4 className="text-sm font-semibold text-black/70 mb-4">
                   {isSpanish ? 'Resumen de cambios' : 'Changes summary'}
                 </h4>
                 <div className="space-y-3 text-sm">
@@ -934,7 +934,7 @@ export function ProfilesModule() {
               </div>
 
               <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                <h4 className="text-sm font-semibold text-white/70 mb-4">
+                <h4 className="text-sm font-semibold text-black/70 mb-4">
                   {isSpanish ? 'Tamaño del snapshot' : 'Snapshot size'}
                 </h4>
                 <div className="space-y-3 text-sm">
@@ -965,7 +965,7 @@ export function ProfilesModule() {
 
             {diffData.added.length > 0 && (
               <div className="mt-6 bg-white/20/10 border border-white/30/30 rounded-2xl p-5">
-                <h4 className="text-sm font-semibold text-white mb-3">
+                <h4 className="text-sm font-semibold text-black mb-3">
                   {isSpanish ? 'Keys agregadas' : 'Added keys'} ({diffData.added.length})
                 </h4>
                 <div className="max-h-40 overflow-y-auto">

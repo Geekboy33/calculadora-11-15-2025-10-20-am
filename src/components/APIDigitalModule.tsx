@@ -815,7 +815,7 @@ export function APIDigitalModule() {
       case 'APPROVED':
       case 'ACSC':
       case 'ACTIVE':
-        return 'bg-white/20/20 text-white border border-white/30/30';
+        return 'bg-white/20/20 text-black border border-white/30/30';
       case 'PENDING':
       case 'ACCP':
       case 'ACTC':
@@ -902,7 +902,7 @@ export function APIDigitalModule() {
 
       {success && (
         <div className="mb-6 p-4 bg-white/20/10 border border-white/30/30 rounded-lg flex items-start gap-3">
-          <CheckCircle className="w-5 h-5 text-white flex-shrink-0 mt-0.5" />
+          <CheckCircle className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <div className="font-semibold text-white">Success</div>
             <div className="text-white text-sm whitespace-pre-wrap">{success}</div>
@@ -1078,7 +1078,7 @@ export function APIDigitalModule() {
               ) : (
                 <div className="space-y-4">
                   <div className="p-4 bg-white/20/10 border border-white/30/30 rounded-lg">
-                    <div className="flex items-center gap-2 text-white mb-2">
+                    <div className="flex items-center gap-2 text-black mb-2">
                       <CheckCircle className="w-5 h-5" />
                       <strong>Authenticated Successfully</strong>
                     </div>
@@ -2332,7 +2332,7 @@ export function APIDigitalModule() {
                       : bankingServerStatus === 'connecting'
                       ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                       : bankingServerStatus === 'connected'
-                      ? 'bg-white/20/20 text-white border border-white/30/30'
+                      ? 'bg-white/20/20 text-black border border-white/30/30'
                       : 'bg-red-500/20 text-red-400 border border-red-500/30'
                   }`}>
                     {bankingServerStatus.toUpperCase()}
@@ -2473,7 +2473,7 @@ export function APIDigitalModule() {
 
               {/* Connection Benefits */}
               <div className="mt-4 p-4 bg-white/20/10 border border-white/30/30 rounded-lg">
-                <h3 className="text-sm font-semibold text-white mb-2">Connection Benefits</h3>
+                <h3 className="text-sm font-semibold text-black mb-2">Connection Benefits</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-400">
                   <div className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-white flex-shrink-0 mt-0.5" />

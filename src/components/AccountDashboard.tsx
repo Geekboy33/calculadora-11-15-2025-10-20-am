@@ -748,7 +748,7 @@ export function AccountDashboard() {
                 <div className="text-xs text-[var(--text-muted)] mb-1">Estado del Sistema</div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-white/20 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-semibold text-white">Operativo</span>
+                  <span className="text-sm font-semibold text-black">Operativo</span>
                 </div>
               </div>
             </div>

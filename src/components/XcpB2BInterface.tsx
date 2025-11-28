@@ -261,7 +261,7 @@ export function XcpB2BInterface() {
               disabled={isLoadingToken || hasToken}
               className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
                 hasToken
-                  ? 'bg-white/20 text-white cursor-not-allowed'
+                  ? 'bg-white/20 text-black cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`}
             >
@@ -590,7 +590,7 @@ export function XcpB2BInterface() {
 
               {remittanceStatus.status === 'COMPLETED' && (
                 <div className="mt-4 bg-white/10/20 border border-white/30 rounded-lg p-4 flex items-center gap-3">
-                  <CheckCircle className="w-6 h-6 text-white" />
+                  <CheckCircle className="w-6 h-6 text-black" />
                   <div>
                     <div className="text-white font-semibold">Transferencia Completada</div>
                     <div className="text-white text-sm">Los fondos han sido transferidos exitosamente</div>

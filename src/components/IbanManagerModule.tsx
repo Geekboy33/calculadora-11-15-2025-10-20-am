@@ -503,7 +503,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'bg-white/20/20 text-white border-white/30/40';
+      case 'ACTIVE': return 'bg-white/20/20 text-black border-white/30/40';
       case 'PENDING': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40';
       case 'BLOCKED': return 'bg-red-500/20 text-red-300 border-red-500/40';
       case 'CLOSED': return 'bg-gray-500/20 text-gray-300 border-gray-500/40';
@@ -663,7 +663,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                           setStatusForm({ ...statusForm, newStatus: 'ACTIVE' });
                           setShowStatusModal(true);
                         }}
-                        className="px-4 py-2 rounded-xl bg-white/20/10 border border-white/30/30 text-white text-sm font-semibold hover:bg-white/20/20 transition flex items-center gap-2"
+                        className="px-4 py-2 rounded-xl bg-white/20/10 border border-white/30/30 text-black text-sm font-semibold hover:bg-white/20/20 transition flex items-center gap-2"
                       >
                         <Unlock className="w-4 h-4" />
                         {isSpanish ? 'Activar' : 'Activate'}
@@ -792,7 +792,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       className={`px-4 py-3 rounded-xl font-semibold transition ${
                         allocateForm.countryCode === country
                           ? 'bg-[#ffffff]/20 border-2 border-[#ffffff]/60 text-[#ffffff]'
-                          : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
+                          : 'bg-white/5 border border-white/20 text-black/60 hover:border-white/40'
                       }`}
                     >
                       <div className="text-lg font-mono">{country}</div>
@@ -820,7 +820,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                         className={`px-4 py-3 rounded-xl font-semibold transition ${
                           allocateForm.currency === curr
                             ? 'bg-cyan-500/20 border-2 border-cyan-400/60 text-cyan-300'
-                            : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
+                            : 'bg-white/5 border border-white/20 text-black/60 hover:border-white/40'
                         }`}
                       >
                         <div className="text-lg font-mono">{curr}</div>
@@ -912,7 +912,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
             </div>
 
             <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 text-sm">
-              <p className="text-white/60">{isSpanish ? 'Estado actual:' : 'Current status:'} <span className="text-white font-semibold">{selectedIban.status}</span></p>
+              <p className="text-black/60">{isSpanish ? 'Estado actual:' : 'Current status:'} <span className="text-white font-semibold">{selectedIban.status}</span></p>
             </div>
 
             <div className="space-y-4">
@@ -929,11 +929,11 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       className={`px-4 py-3 rounded-xl font-semibold transition ${
                         statusForm.newStatus === status
                           ? status === 'ACTIVE'
-                            ? 'bg-white/20/20 border-2 border-white/30/60 text-white'
+                            ? 'bg-white/20/20 border-2 border-white/30/60 text-black'
                             : status === 'BLOCKED'
                             ? 'bg-orange-500/20 border-2 border-orange-400/60 text-orange-300'
                             : 'bg-gray-500/20 border-2 border-gray-400/60 text-gray-300'
-                          : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
+                          : 'bg-white/5 border border-white/20 text-black/60 hover:border-white/40'
                       }`}
                     >
                       {status}
@@ -1015,8 +1015,8 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                   </div>
                   {log.previousStatus && log.newStatus && (
                     <div className="flex items-center gap-2 text-sm mt-2">
-                      <span className="px-2 py-1 rounded bg-white/10 text-white/70">{log.previousStatus}</span>
-                      <span className="text-white/40">→</span>
+                      <span className="px-2 py-1 rounded bg-white/10 text-black/70">{log.previousStatus}</span>
+                      <span className="text-black/40">→</span>
                       <span className="px-2 py-1 rounded bg-[#ffffff]/20 text-[#ffffff]">{log.newStatus}</span>
                     </div>
                   )}

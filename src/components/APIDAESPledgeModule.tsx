@@ -339,7 +339,7 @@ export function APIDAESPledgeModule() {
 
               <button
                 onClick={handleConfigure}
-                className="w-full bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded font-semibold transition-colors"
+                className="w-full bg-white/20 hover:bg-white/30 text-black px-6 py-3 rounded font-semibold transition-colors"
               >
                 {language === 'es' ? 'Configurar API' : 'Configure API'}
               </button>
@@ -384,7 +384,7 @@ export function APIDAESPledgeModule() {
 
         {success && (
           <div className="bg-white/20/10 border border-white/30 rounded-lg p-4 mb-6 flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-white flex-shrink-0" />
+            <CheckCircle className="w-5 h-5 text-black flex-shrink-0" />
             <span className="text-white">{success}</span>
             <button onClick={() => setSuccess(null)} className="ml-auto text-white hover:text-white">
               <XCircle className="w-5 h-5" />
@@ -407,8 +407,8 @@ export function APIDAESPledgeModule() {
               onClick={() => setSelectedView(tab.id as ViewType)}
               className={`flex items-center gap-2 px-4 py-2 rounded transition-colors whitespace-nowrap ${
                 selectedView === tab.id
-                  ? 'bg-white/20 text-white'
-                  : 'bg-white/20/20 text-white hover:bg-white/20/30'
+                  ? 'bg-white/20 text-black'
+                  : 'bg-white/20/20 text-black hover:bg-white/20/30'
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -535,7 +535,7 @@ export function APIDAESPledgeModule() {
                       <div className="text-sm text-gray-400">{pledge.purpose}</div>
                     </div>
                     <div className={`px-3 py-1 rounded text-sm font-semibold ${
-                      pledge.status === 'ACTIVE' ? 'bg-white/20/20 text-white' :
+                      pledge.status === 'ACTIVE' ? 'bg-white/20/20 text-black' :
                       pledge.status === 'RELEASED' ? 'bg-gray-500/20 text-gray-400' :
                       'bg-yellow-500/20 text-yellow-400'
                     }`}>
@@ -619,7 +619,7 @@ export function APIDAESPledgeModule() {
                       <div className="text-sm text-gray-400">{payout.external_ref}</div>
                     </div>
                     <div className={`px-3 py-1 rounded text-sm font-semibold ${
-                      payout.state === 'COMPLETED' ? 'bg-white/20/20 text-white' :
+                      payout.state === 'COMPLETED' ? 'bg-white/20/20 text-black' :
                       payout.state === 'FAILED' ? 'bg-red-500/20 text-red-400' :
                       payout.state === 'PROCESSING' ? 'bg-blue-500/20 text-blue-400' :
                       'bg-yellow-500/20 text-yellow-400'
@@ -729,7 +729,7 @@ export function APIDAESPledgeModule() {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className={`px-3 py-1 rounded text-xs font-semibold ${
-                        event.delivered ? 'bg-white/20/20 text-white' : 'bg-yellow-500/20 text-yellow-400'
+                        event.delivered ? 'bg-white/20/20 text-black' : 'bg-yellow-500/20 text-yellow-400'
                       }`}>
                         {event.delivered ? 'Delivered' : `Retry ${event.retry_count}`}
                       </div>
@@ -993,8 +993,8 @@ export function APIDAESPledgeModule() {
                       onClick={() => setAdjustForm({ ...adjustForm, type: 'IN' })}
                       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded transition-colors ${
                         adjustForm.type === 'IN'
-                          ? 'bg-white/20 text-white'
-                          : 'bg-white/20/20 text-white hover:bg-white/20/30'
+                          ? 'bg-white/20 text-black'
+                          : 'bg-white/20/20 text-black hover:bg-white/20/30'
                       }`}
                     >
                       <ArrowUpRight className="w-4 h-4" />

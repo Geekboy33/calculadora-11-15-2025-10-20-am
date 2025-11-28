@@ -762,7 +762,7 @@ ${isSpanish
               loadPorReports();
               setShowCreateKeyModal(true);
             }}
-            className="px-6 py-3 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 flex items-center gap-2 font-bold"
+            className="px-6 py-3 bg-white/20/20 border border-white/30 text-black rounded-lg hover:bg-white/20/30 flex items-center gap-2 font-bold"
           >
             <Key className="w-5 h-5" />
             {isSpanish ? 'Generar Nueva API Key' : 'Generate New API Key'}
@@ -815,7 +815,7 @@ ${isSpanish
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                         key.status === 'active' 
-                          ? 'bg-white/20/20 text-white' 
+                          ? 'bg-white/20/20 text-black' 
                           : 'bg-red-500/20 text-red-300'
                       }`}>
                         {key.status === 'active' 
@@ -853,7 +853,7 @@ ${isSpanish
                         </code>
                         <button
                           onClick={() => copyToClipboard(key.apiKey, 'API Key')}
-                          className="p-2 bg-white/20/20 border border-white/30 text-white rounded hover:bg-white/20/30"
+                          className="p-2 bg-white/20/20 border border-white/30 text-black rounded hover:bg-white/20/30"
                         >
                           <Copy className="w-4 h-4" />
                         </button>
@@ -910,7 +910,7 @@ ${isSpanish
                             </button>
                             <button
                               onClick={() => simulateApiCall(key, key.apiUrls.baseEndpoint)}
-                              className="px-3 py-2 bg-white/20/20 border border-white/30 text-white rounded hover:bg-white/20/30 text-xs font-bold"
+                              className="px-3 py-2 bg-white/20/20 border border-white/30 text-black rounded hover:bg-white/20/30 text-xs font-bold"
                             >
                               {isSpanish ? 'Probar' : 'Test'}
                             </button>
@@ -946,7 +946,7 @@ ${isSpanish
                             </code>
                             <button
                               onClick={() => copyToClipboard(key.apiUrls.downloadEndpoint, 'Download Endpoint')}
-                              className="p-2 bg-white/20/20 border border-white/30 text-white rounded hover:bg-white/20/30"
+                              className="p-2 bg-white/20/20 border border-white/30 text-black rounded hover:bg-white/20/30"
                             >
                               <Copy className="w-4 h-4" />
                             </button>
@@ -1102,7 +1102,7 @@ ${isSpanish
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-1 rounded text-xs font-bold ${
                         log.status === 'success'
-                          ? 'bg-white/20/20 text-white'
+                          ? 'bg-white/20/20 text-black'
                           : 'bg-red-500/20 text-red-300'
                       }`}>
                         {log.method}
@@ -1295,7 +1295,7 @@ ${isSpanish
                 </button>
                 <button
                   onClick={handleCreateApiKey}
-                  className="flex-1 px-6 py-3 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 font-bold flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-3 bg-white/20/20 border border-white/30 text-black rounded-lg hover:bg-white/20/30 font-bold flex items-center justify-center gap-2"
                 >
                   <Key className="w-5 h-5" />
                   {isSpanish ? 'Generar API Key' : 'Generate API Key'}
@@ -1332,7 +1332,7 @@ ${isSpanish
                   </code>
                   <button
                     onClick={() => copyToClipboard(newKeyData.apiKey, 'API Key')}
-                    className="p-3 bg-white/20/20 border border-white/30 text-white rounded hover:bg-white/20/30"
+                    className="p-3 bg-white/20/20 border border-white/30 text-black rounded hover:bg-white/20/30"
                   >
                     <Copy className="w-5 h-5" />
                   </button>
@@ -1550,7 +1550,7 @@ print(data)
                     setShowSecretModal(false);
                     setNewKeyData(null);
                   }}
-                  className="flex-1 px-6 py-4 bg-white/20/20 border border-white/30 text-white rounded-lg hover:bg-white/20/30 font-bold text-lg"
+                  className="flex-1 px-6 py-4 bg-white/20/20 border border-white/30 text-black rounded-lg hover:bg-white/20/30 font-bold text-lg"
                 >
                   {isSpanish ? 'Cerrar' : 'Close'}
                 </button>

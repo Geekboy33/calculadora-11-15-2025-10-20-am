@@ -235,7 +235,7 @@ export function APIKeyManager() {
                         <span className="font-mono text-sm text-white">{apiKey.publicKey}</span>
                         <span className={`text-xs px-2 py-0.5 rounded ${
                           apiKey.active
-                            ? 'bg-white/10 text-white'
+                            ? 'bg-white/10 text-black'
                             : 'bg-red-900 text-red-300'
                         }`}>
                           {apiKey.active ? 'Active' : 'Revoked'}

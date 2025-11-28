@@ -918,7 +918,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETED': return 'bg-white/20/20 text-white border-white/30/40';
+      case 'COMPLETED': return 'bg-white/20/20 text-black border-white/30/40';
       case 'PENDING': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40';
       case 'SENT': return 'bg-blue-500/20 text-blue-300 border-blue-500/40';
       case 'FAILED': return 'bg-red-500/20 text-red-300 border-red-500/40';
@@ -969,7 +969,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
             </button>
             <button
               onClick={downloadReport}
-              className="flex items-center gap-2 px-4 py-2 bg-white/20/10 border border-white/30/30 rounded-xl text-white hover:bg-white/20/20 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-white/20/10 border border-white/30/30 rounded-xl text-black hover:bg-white/20/20 transition"
             >
               <Download className="w-4 h-4" />
               {isSpanish ? 'Descargar reporte' : 'Download report'}
@@ -1096,7 +1096,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                     )}
                     <button
                       onClick={() => handleDownloadReceipt(settlement)}
-                      className="px-4 py-2 rounded-xl bg-white/20/10 border border-white/30/30 text-white text-sm font-semibold hover:bg-white/20/20 transition flex items-center gap-2"
+                      className="px-4 py-2 rounded-xl bg-white/20/10 border border-white/30/30 text-black text-sm font-semibold hover:bg-white/20/20 transition flex items-center gap-2"
                     >
                       <FileText className="w-4 h-4" />
                       {isSpanish ? 'Descargar comprobante' : 'Download receipt'}
@@ -1458,7 +1458,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
 
               {selectedSourceIban && createForm.destinationBeneficiaryId && (
                 <div className="bg-white/20/10 border border-white/30/30 rounded-xl p-4 text-sm">
-                  <p className="text-white font-semibold mb-2 flex items-center gap-2">
+                  <p className="text-black font-semibold mb-2 flex items-center gap-2">
                     <Building2 className="w-4 h-4" />
                     {isSpanish ? 'Transferencia:' : 'Transfer:'}
                   </p>
@@ -1563,11 +1563,11 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       className={`px-4 py-3 rounded-xl font-semibold transition ${
                         confirmForm.status === status
                           ? status === 'COMPLETED'
-                            ? 'bg-white/20/20 border-2 border-white/30/60 text-white'
+                            ? 'bg-white/20/20 border-2 border-white/30/60 text-black'
                             : status === 'FAILED'
                             ? 'bg-red-500/20 border-2 border-red-400/60 text-red-300'
                             : 'bg-blue-500/20 border-2 border-blue-400/60 text-blue-300'
-                          : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
+                          : 'bg-white/5 border border-white/20 text-black/60 hover:border-white/40'
                       }`}
                     >
                       {status}
@@ -1668,8 +1668,8 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                   </div>
                   {log.previousStatus && log.newStatus && (
                     <div className="flex items-center gap-2 text-sm mt-2">
-                      <span className="px-2 py-1 rounded bg-white/10 text-white/70">{log.previousStatus}</span>
-                      <span className="text-white/40">→</span>
+                      <span className="px-2 py-1 rounded bg-white/10 text-black/70">{log.previousStatus}</span>
+                      <span className="text-black/40">→</span>
                       <span className="px-2 py-1 rounded bg-[#ffffff]/20 text-[#ffffff]">{log.newStatus}</span>
                     </div>
                   )}
@@ -1733,7 +1733,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       className={`px-4 py-3 rounded-xl font-semibold transition ${
                         newBeneficiaryForm.accountType === type
                           ? 'bg-cyan-500/20 border-2 border-cyan-400/60 text-cyan-300'
-                          : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
+                          : 'bg-white/5 border border-white/20 text-black/60 hover:border-white/40'
                       }`}
                     >
                       {type}
@@ -1784,8 +1784,8 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       onClick={() => setNewBeneficiaryForm({ ...newBeneficiaryForm, currency: curr })}
                       className={`px-4 py-3 rounded-xl font-semibold transition ${
                         newBeneficiaryForm.currency === curr
-                          ? 'bg-white/20/20 border-2 border-white/30/60 text-white'
-                          : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
+                          ? 'bg-white/20/20 border-2 border-white/30/60 text-black'
+                          : 'bg-white/5 border border-white/20 text-black/60 hover:border-white/40'
                       }`}
                     >
                       {curr}
@@ -1833,7 +1833,7 @@ ${isSpanish ? 'Generado el:' : 'Generated on:'} ${new Date().toLocaleString(isSp
                       className={`px-4 py-2 rounded-xl font-semibold transition ${
                         newBeneficiaryForm.countryCode === country
                           ? 'bg-purple-500/20 border-2 border-purple-400/60 text-purple-300'
-                          : 'bg-white/5 border border-white/20 text-white/60 hover:border-white/40'
+                          : 'bg-white/5 border border-white/20 text-black/60 hover:border-white/40'
                       }`}
                     >
                       {country}

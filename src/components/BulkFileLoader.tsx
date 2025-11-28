@@ -433,7 +433,7 @@ export function BulkFileLoader({ onFileLoaded }: FileLoaderProps) {
                             {filePreview.file.name}
                           </p>
                           {filePreview.isTargetFile && (
-                            <span className="text-xs px-2 py-0.5 bg-white/20 text-white rounded font-bold">
+                            <span className="text-xs px-2 py-0.5 bg-white/20 text-black rounded font-bold">
                               OBJETIVO
                             </span>
                           )}

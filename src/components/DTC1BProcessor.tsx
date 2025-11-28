@@ -124,7 +124,7 @@ export function DTC1BProcessor() {
   const highlights = parsedBlocks.map(block => ({
     start: block.offsetStart,
     end: block.offsetEnd,
-    color: 'bg-white/20 text-white',
+    color: 'bg-white/20 text-black',
     label: `${block.currency} - ${DTC1BParser.formatAmount(block.amountMinorUnits, block.currency)}`
   }));
 
@@ -219,7 +219,7 @@ export function DTC1BProcessor() {
               <button
                 onClick={handleEncrypt}
                 disabled={!fileData || loading}
-                className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-white rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 disabled:bg-[var(--bg-hover)] disabled:text-[var(--text-muted)] text-black rounded-lg transition-colors"
               >
                 <Lock className="w-4 h-4" />
                 Encrypt (AES-256-GCM)

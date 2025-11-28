@@ -179,7 +179,7 @@ export function CoreBankingAPIModule() {
       
       {success && (
         <div className="bg-white/10/30 border border-white/30/50 rounded-lg p-4 flex items-center gap-3">
-          <CheckCircle className="w-5 h-5 text-white" />
+          <CheckCircle className="w-5 h-5 text-black" />
           <span className="text-white">{success}</span>
         </div>
       )}
@@ -378,7 +378,7 @@ export function CoreBankingAPIModule() {
                   const statusColors = {
                     pending: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/40' },
                     accepted: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/40' },
-                    settled: { bg: 'bg-white/20/20', text: 'text-white', border: 'border-white/30/40' },
+                    settled: { bg: 'bg-white/20/20', text: 'text-black', border: 'border-white/30/40' },
                     failed: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/40' },
                     rejected: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/40' },
                   };
@@ -423,7 +423,7 @@ export function CoreBankingAPIModule() {
                           </button>
                           <button
                             onClick={() => simulateWebhook(tx.transaction_id, 'settled')}
-                            className="flex-1 px-3 py-1 bg-white/20/20 border border-white/30/40 text-white text-xs rounded hover:bg-white/20/30"
+                            className="flex-1 px-3 py-1 bg-white/20/20 border border-white/30/40 text-black text-xs rounded hover:bg-white/20/30"
                           >
                             ✓ Liquidar
                           </button>

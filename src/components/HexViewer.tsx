@@ -204,7 +204,7 @@ export function HexViewer({ data, highlights = [], matches = [], onSelectOffset 
                   {match.amount ? `${match.amount.toString()} units` : 'N/A'}
                 </span>
                 <span className={`text-xs px-2 py-0.5 rounded ${
-                  match.confidence === 'high' ? 'bg-white/10 text-white' :
+                  match.confidence === 'high' ? 'bg-white/10 text-black' :
                   match.confidence === 'medium' ? 'bg-yellow-900 text-yellow-300' :
                   'bg-red-900 text-red-300'
                 }`}>

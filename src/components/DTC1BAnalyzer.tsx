@@ -699,7 +699,7 @@ export function DTC1BAnalyzer() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    analysis.DTC1BAnalysis.isValidDTC1B ? 'bg-white/20/20 text-white' :
+                    analysis.DTC1BAnalysis.isValidDTC1B ? 'bg-white/20/20 text-black' :
                     analysis.encryptionAnalysis.isEncrypted ? 'bg-red-500/20 text-red-300' :
                     'bg-blue-500/20 text-blue-300'
                   }`}>
@@ -721,7 +721,7 @@ export function DTC1BAnalyzer() {
                   </button>
                   <button
                     onClick={exportToCSV}
-                    className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-black rounded-lg transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     CSV
@@ -948,7 +948,7 @@ export function DTC1BAnalyzer() {
                         ))
                       ) : (
                         <div className="p-4 bg-white/10/20 border border-white/30/30 rounded-lg text-center">
-                          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-white" />
+                          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-black" />
                           <p className="text-white text-sm">No se detectaron patrones sospechosos</p>
                         </div>
                       )}
@@ -1041,7 +1041,7 @@ export function DTC1BAnalyzer() {
                         </>
                       ) : (
                         <div className="p-4 bg-white/10/20 border border-white/30/30 rounded-lg text-center">
-                          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-white" />
+                          <CheckCircle className="w-8 h-8 mx-auto mb-2 text-black" />
                           <p className="text-white text-sm">El archivo no está encriptado</p>
                           <p className="text-xs text-white mt-1">Los datos están disponibles directamente</p>
                         </div>

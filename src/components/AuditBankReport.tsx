@@ -914,7 +914,7 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                       )}
                       {a.M2 > 0 && (
                         <div className="bg-white/10/20 border border-white/30/40 rounded p-1 text-center">
-                          <div className="text-white font-bold">M2</div>
+                          <div className="text-black font-bold">M2</div>
                           <div className="text-white font-mono text-xs">{a.M2.toLocaleString()}</div>
                         </div>
                       )}
@@ -944,7 +944,7 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               {[
                 { label: 'M0', value: totals.current.M0, color: 'bg-purple-500', textColor: 'text-purple-400' },
                 { label: 'M1', value: totals.current.M1, color: 'bg-blue-500', textColor: 'text-blue-400' },
-                { label: 'M2', value: totals.current.M2, color: 'bg-white/20', textColor: 'text-white' },
+                { label: 'M2', value: totals.current.M2, color: 'bg-white/20', textColor: 'text-black' },
                 { label: 'M3', value: totals.current.M3, color: 'bg-yellow-500', textColor: 'text-yellow-400' },
                 { label: 'M4', value: totals.current.M4, color: 'bg-red-500', textColor: 'text-red-400' },
               ].map(({ label, value, color, textColor }) => {

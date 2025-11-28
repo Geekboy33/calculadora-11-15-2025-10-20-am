@@ -1132,7 +1132,7 @@ export function EnhancedBinaryViewer() {
               <div className="flex gap-3 justify-center">
                 <button
                   onClick={generateSampleFile}
-                  className="flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium transition-colors"
+                  className="flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 text-black rounded-lg font-medium transition-colors"
                 >
                   <FilePlus className="w-5 h-5" />
                   Cargar Ejemplo
@@ -1343,7 +1343,7 @@ export function EnhancedBinaryViewer() {
                       onClick={() => setAnalysisMode('pattern')}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         analysisMode === 'pattern'
-                          ? 'bg-white/20 text-white'
+                          ? 'bg-white/20 text-black'
                           : 'bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:bg-[var(--bg-active)]'
                       }`}
                     >
@@ -1533,7 +1533,7 @@ export function EnhancedBinaryViewer() {
                               cryptanalysis.bruteForceEstimates.complexity === 'medium' ? 'bg-orange-600' :
                               cryptanalysis.bruteForceEstimates.complexity === 'strong' ? 'bg-red-600' :
                               'bg-purple-600'
-                            } text-white`}>
+                            } text-black`}>
                               {cryptanalysis.bruteForceEstimates.complexity.toUpperCase()}
                             </span>
                           </div>
@@ -1732,7 +1732,7 @@ export function EnhancedBinaryViewer() {
                             <p className="text-sm text-[var(--text-secondary)] mb-2">Palabras Clave Financieras</p>
                             <div className="flex flex-wrap gap-1">
                               {Object.entries(DTC1BAnalysis.potential_data.financial_keywords).slice(0, 8).map(([keyword, count]: [string, number]) => (
-                                <span key={keyword} className="px-2 py-1 bg-white/20/20 text-white rounded text-xs">
+                                <span key={keyword} className="px-2 py-1 bg-white/20/20 text-black rounded text-xs">
                                   {keyword} ({count})
                                 </span>
                               ))}

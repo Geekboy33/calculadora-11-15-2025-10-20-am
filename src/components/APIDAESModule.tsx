@@ -360,7 +360,7 @@ export function APIDAESModule() {
                     <div className="text-2xl">🏦</div>
                     <h3 className="text-xl font-bold text-[#ffffff]">{account.accountName}</h3>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      account.apiStatus === 'active' ? 'bg-white/20/20 text-white' :
+                      account.apiStatus === 'active' ? 'bg-white/20/20 text-black' :
                       'bg-yellow-500/20 text-yellow-400'
                     }`}>
                       {account.apiStatus?.toUpperCase() || 'PENDING'}
@@ -407,7 +407,7 @@ export function APIDAESModule() {
                 <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-3">
                   <div className="text-xs text-[#ffffff] mb-1">{language === 'es' ? 'Privilegios' : 'Privileges'}</div>
                   <div className="flex gap-2">
-                    <span className="px-2 py-1 bg-white/20/20 text-white text-xs rounded">
+                    <span className="px-2 py-1 bg-white/20/20 text-black text-xs rounded">
                       <Send className="w-3 h-3 inline" /> {language === 'es' ? 'ENVIAR' : 'SEND'}
                     </span>
                     <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">
@@ -717,7 +717,7 @@ export function APIDAESModule() {
                 <div className="text-sm font-semibold text-purple-400 mb-3 flex items-center gap-2">
                   🔌 {language === 'es' ? 'Conectar API Externa' : 'Connect External API'}
                   {selectedAPI?.externalConnected && (
-                    <span className="px-2 py-1 bg-white/20/20 text-white text-xs rounded">
+                    <span className="px-2 py-1 bg-white/20/20 text-black text-xs rounded">
                       ✓ {language === 'es' ? 'CONECTADA' : 'CONNECTED'}
                     </span>
                   )}

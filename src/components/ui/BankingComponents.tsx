@@ -140,7 +140,7 @@ interface BankingMetricProps {
 
 export function BankingMetric({ label, value, icon: Icon, trend, color = 'white' }: BankingMetricProps & { color?: 'white' | 'emerald' | 'amber' | 'purple' }) {
   const colorClasses = {
-    white: 'bg-white/10 text-white',
+    white: 'bg-white/10 text-black',
     emerald: 'bg-emerald-500/10 text-emerald-400',
     amber: 'bg-amber-500/10 text-amber-400',
     purple: 'bg-purple-500/10 text-purple-400'

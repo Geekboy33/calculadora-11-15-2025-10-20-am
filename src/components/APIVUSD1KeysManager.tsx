@@ -225,7 +225,7 @@ export function APIVUSD1KeysManager() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'text-white bg-white/20/10 border-white/30/30';
+      case 'active': return 'text-black bg-white/20/10 border-white/30/30';
       case 'revoked': return 'text-red-400 bg-red-400/10 border-red-400/30';
       case 'expired': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30';
       default: return 'text-gray-400 bg-gray-400/10 border-gray-400/30';
@@ -469,7 +469,7 @@ export function APIVUSD1KeysManager() {
                       ))}
                     </select>
                     <div className="mt-3 p-3 bg-white/10/20 border border-white/30/30 rounded">
-                      <p className="text-white font-semibold flex items-center gap-2">
+                      <p className="text-black font-semibold flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" />
                         {availablePledges.length} Active Pledge{availablePledges.length !== 1 ? 's' : ''} Available
                       </p>
@@ -628,7 +628,7 @@ export function APIVUSD1KeysManager() {
                   <div key={i} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className={`px-2 py-1 rounded text-xs font-bold ${
-                        req.status_code < 400 ? 'bg-white/20/20 text-white' : 'bg-red-400/20 text-red-400'
+                        req.status_code < 400 ? 'bg-white/20/20 text-black' : 'bg-red-400/20 text-red-400'
                       }`}>
                         {req.status_code}
                       </span>
