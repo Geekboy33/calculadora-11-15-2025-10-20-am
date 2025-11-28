@@ -920,13 +920,13 @@ Timestamp: ${AUDIT_DATA.timestamp}
           <BankingCard className="p-6 border-2 border-white/20 bg-white/3">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-white/10 rounded-xl animate-pulse">
-                <Activity className="w-8 h-8 text-sky-400" />
+                <Activity className="w-8 h-8 text-white" />
               </div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-slate-100 mb-2">
                   {isSpanish ? "Análisis Completado" : "Analysis Completed"}
                 </h3>
-                <p className="text-sky-400 text-lg font-semibold mb-3">
+                <p className="text-white text-lg font-semibold mb-3">
                   {analysisResults.totalM2Values.toLocaleString()} {isSpanish ? "Valores M2 Detectados" : "M2 Values Detected"}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
@@ -1028,7 +1028,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   selectedAccount === 'USD' ? 'bg-white/10' : 'bg-emerald-500/20'
                 }`}>
                   <DollarSign className={`w-10 h-10 ${
-                    selectedAccount === 'USD' ? 'text-sky-400' : 'text-emerald-400'
+                    selectedAccount === 'USD' ? 'text-white' : 'text-emerald-400'
                   }`} />
                 </div>
                 <div>
@@ -1053,7 +1053,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   <p className="text-slate-500 text-lg">
                     ({selectedMasterAccount.balance.toExponential(2)} {selectedMasterAccount.currency})
                   </p>
-                  <p className="text-sky-400 text-sm mt-2">
+                  <p className="text-white text-sm mt-2">
                     ≈ {(selectedMasterAccount.balance / 1000000000).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })} {isSpanish ? 'Miles de Millones' : 'Billions'}
                   </p>
                 </>
@@ -1070,8 +1070,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Database className="w-4 h-4 text-sky-400" />
-                  <span className="text-sky-400">{selectedMasterAccount.classification}</span>
+                  <Database className="w-4 h-4 text-white" />
+                  <span className="text-white">{selectedMasterAccount.classification}</span>
                 </div>
               </div>
             </div>
@@ -1083,10 +1083,10 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="p-3 bg-white/10 rounded-xl">
-                        <Activity className="w-6 h-6 text-sky-400 animate-spin" />
+                        <Activity className="w-6 h-6 text-white animate-spin" />
                       </div>
                       <div>
-                        <p className="text-sky-400 font-bold text-xl">
+                        <p className="text-white font-bold text-xl">
                           {isSpanish ? "Escaneando y Verificando Ledger1" : "Scanning and Verifying Ledger1"}
                         </p>
                         <p className="text-slate-400 text-sm">
@@ -1095,7 +1095,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sky-400 font-black text-3xl">{progress.toFixed(1)}%</p>
+                      <p className="text-white font-black text-3xl">{progress.toFixed(1)}%</p>
                       <p className="text-slate-500 text-xs">{isSpanish ? "Completado" : "Completed"}</p>
                     </div>
                   </div>
@@ -1103,7 +1103,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
                   {/* Barra de progreso principal */}
                   <div className="w-full bg-[#141414] rounded-full h-5 overflow-hidden border border-[#1a1a1a] mb-6">
                     <div
-                      className="h-full bg-gradient-to-r from-sky-500 via-blue-600 to-white rounded-full transition-all duration-300 relative overflow-hidden"
+                      className="h-full bg-gradient-to-r from-white via-white to-white rounded-full transition-all duration-300 relative overflow-hidden"
                       style={{ width: `${progress}%` }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
@@ -1189,8 +1189,8 @@ Timestamp: ${AUDIT_DATA.timestamp}
               <p className="text-emerald-300 text-xs">{AUDIT_DATA.compliance.iso27001}</p>
             </div>
             <div className="bg-white/5 border border-white/15 rounded-xl p-4 text-center">
-              <p className="text-sky-400 font-bold text-sm mb-1">SOC 2 Type II</p>
-              <p className="text-sky-300 text-xs">{AUDIT_DATA.compliance.soc2TypeII}</p>
+              <p className="text-white font-bold text-sm mb-1">SOC 2 Type II</p>
+              <p className="text-white text-xs">{AUDIT_DATA.compliance.soc2TypeII}</p>
             </div>
             <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 text-center">
               <p className="text-purple-400 font-bold text-sm mb-1">GDPR</p>
@@ -1216,37 +1216,37 @@ Timestamp: ${AUDIT_DATA.timestamp}
               </p>
               <ol className="space-y-2 text-sm">
                 <li className="flex items-start gap-3">
-                  <span className="text-sky-400 font-bold">1.</span>
+                  <span className="text-white font-bold">1.</span>
                   <span className="text-slate-300">
                     Ledger1 Digital Commercial Bank DAES {isSpanish ? "Archivo Encriptado Original" : "Original Encrypted File"}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-sky-400 font-bold">2.</span>
+                  <span className="text-white font-bold">2.</span>
                   <span className="text-slate-300">
                     {isSpanish ? "Procedimiento de Extracción de Datos Binarios" : "Binary Data Extraction Procedure"}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-sky-400 font-bold">3.</span>
+                  <span className="text-white font-bold">3.</span>
                   <span className="text-slate-300">
                     {isSpanish ? "Generación de Archivos Chunk (50 unidades)" : "Chunk File Generation (50 units)"}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-sky-400 font-bold">4.</span>
+                  <span className="text-white font-bold">4.</span>
                   <span className="text-slate-300">
                     {isSpanish ? "Algoritmo de Escaneo de Valores" : "Value Scanning Algorithm"}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-sky-400 font-bold">5.</span>
+                  <span className="text-white font-bold">5.</span>
                   <span className="text-slate-300">
                     {isSpanish ? "Clasificación Contextual M2" : "M2 Contextual Classification"}
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-sky-400 font-bold">6.</span>
+                  <span className="text-white font-bold">6.</span>
                   <span className="text-slate-300">
                     {isSpanish ? "Agregación y Suma Matemática" : "Mathematical Aggregation and Summation"}
                   </span>

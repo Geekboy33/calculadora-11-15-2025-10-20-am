@@ -424,12 +424,12 @@ ${idx + 1}. ${acc.bankName}
           <BankingCard className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Activity className="w-6 h-6 text-sky-400 animate-spin" />
+                <Activity className="w-6 h-6 text-white animate-spin" />
                 <p className="text-slate-100 font-bold text-lg">
                   {isSpanish ? 'Escaneando archivo...' : 'Scanning file...'}
                 </p>
               </div>
-              <p className="text-sky-400 font-bold text-2xl">{progress.toFixed(1)}%</p>
+              <p className="text-white font-bold text-2xl">{progress.toFixed(1)}%</p>
             </div>
             <div className="w-full bg-[#141414] rounded-full h-4 overflow-hidden">
               <div
@@ -485,7 +485,7 @@ ${idx + 1}. ${acc.bankName}
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <Building2 className="w-5 h-5 text-sky-400" />
+                        <Building2 className="w-5 h-5 text-white" />
                         <h4 className="text-slate-100 font-bold text-lg">{account.bankName}</h4>
                       </div>
                       <div className="flex items-center gap-2">
@@ -505,7 +505,7 @@ ${idx + 1}. ${acc.bankName}
                   <div className="space-y-2 text-sm mb-4">
                     <div className="flex justify-between py-2 border-b border-slate-800">
                       <span className="text-slate-400">{isSpanish ? 'Número de Cuenta:' : 'Account Number:'}</span>
-                      <code className="text-sky-400 font-mono font-bold">{account.accountNumber}</code>
+                      <code className="text-white font-mono font-bold">{account.accountNumber}</code>
                     </div>
                     {account.iban && (
                       <div className="flex justify-between py-2 border-b border-slate-800">

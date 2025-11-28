@@ -1869,7 +1869,7 @@ Partner: ${partner.name}
                     }}
                     className={`px-4 py-2 rounded-lg border-2 font-semibold transition-all flex items-center gap-2 ${
                       newPartner.allowedCurrencies.includes(currency.code)
-                        ? 'bg-white/10 border-sky-500 text-sky-400'
+                        ? 'bg-white/10 border-white/30 text-white'
                         : 'bg-[#141414] border-[#1a1a1a] text-slate-400 hover:border-[#1a1a1a]'
                     }`}
                     title={currency.name}
@@ -1897,7 +1897,7 @@ Partner: ${partner.name}
           <BankingCard className="p-6 border-2 border-white/20">
             <div className="flex items-start gap-4 mb-4">
               <div className="p-3 bg-white/5 rounded-xl">
-                <Key className="w-6 h-6 text-sky-400" />
+                <Key className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-slate-100 mb-2">
@@ -1913,7 +1913,7 @@ Partner: ${partner.name}
               <div>
                 <label className="text-slate-400 text-sm font-semibold mb-2 block">Client ID:</label>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-[#141414] border border-[#1a1a1a] text-sky-400 px-4 py-3 rounded-lg font-mono text-sm">
+                  <code className="flex-1 bg-[#141414] border border-[#1a1a1a] text-white px-4 py-3 rounded-lg font-mono text-sm">
                     {createdCredentials.clientId}
                   </code>
                   <BankingButton
@@ -1973,7 +1973,7 @@ Partner: ${partner.name}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h4 className="text-slate-100 font-bold text-lg mb-2 group-hover:text-sky-400 transition-colors">
+                        <h4 className="text-slate-100 font-bold text-lg mb-2 group-hover:text-white transition-colors">
                           {partner.name}
                         </h4>
                         <div className="flex flex-wrap items-center gap-2">
@@ -1991,7 +1991,7 @@ Partner: ${partner.name}
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <p className="text-slate-400 text-sm mb-1">Client ID:</p>
-                          <code className="text-sky-400 text-xs font-mono bg-[#141414] px-2 py-1 rounded">
+                          <code className="text-white text-xs font-mono bg-[#141414] px-2 py-1 rounded">
                             {partner.clientId}
                           </code>
                         </div>
@@ -2053,7 +2053,7 @@ Partner: ${partner.name}
               <div className="space-y-3">
                 <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-lg p-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="bg-white/5 border border-white/15 text-sky-400 px-3 py-1 rounded-md text-xs font-bold">
+                    <span className="bg-white/5 border border-white/15 text-white px-3 py-1 rounded-md text-xs font-bold">
                       POST
                     </span>
                     <code className="text-slate-100 font-mono text-sm">/partner-api/v1/auth/token</code>
@@ -2104,7 +2104,7 @@ Partner: ${partner.name}
             {/* Divisas Soportadas */}
             <div>
               <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-sky-400" />
+                <Globe className="w-5 h-5 text-white" />
                 {isSpanish ? "15 Divisas Soportadas" : "15 Supported Currencies"}
               </h3>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
@@ -2127,7 +2127,7 @@ Partner: ${partner.name}
                 {isSpanish ? "Ejemplo CashTransfer.v1" : "CashTransfer.v1 Example"}
               </h3>
               <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-4 overflow-x-auto">
-                <pre className="text-sky-400 font-mono text-xs">
+                <pre className="text-white font-mono text-xs">
 {`{
   "CashTransfer.v1": {
     "SendingName": "Digital Commercial Bank Ltd",
@@ -2301,7 +2301,7 @@ Partner: ${partner.name}
                                 generateClientCredentialsTXT(client, partnerForClient);
                               }
                             }}
-                            className="p-2 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-sky-500 text-sky-400 rounded-lg transition-all"
+                            className="p-2 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-white/30 text-white rounded-lg transition-all"
                             title={isSpanish ? "Descargar credenciales TXT" : "Download credentials TXT"}
                           >
                             <Download className="w-5 h-5" />
@@ -2323,7 +2323,7 @@ Partner: ${partner.name}
                         </div>
                         <div className="text-xs">
                           <span className="text-slate-500">Client ID:</span>
-                          <code className="text-sky-400 ml-2 font-mono">{client.clientId}</code>
+                          <code className="text-white ml-2 font-mono">{client.clientId}</code>
                         </div>
                         <div className="flex flex-wrap gap-1 mt-2">
                           {client.allowedCurrencies.map((curr: string) => {
@@ -2392,7 +2392,7 @@ Partner: ${partner.name}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className="p-3 bg-white/5 rounded-xl">
-                            <Users className="w-6 h-6 text-sky-400" />
+                            <Users className="w-6 h-6 text-white" />
                           </div>
                           <div>
                             <h3 className="text-xl font-bold text-slate-100">{partner.name}</h3>
@@ -2420,7 +2420,7 @@ Partner: ${partner.name}
                         </div>
                         <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
                           <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Transferencias' : 'Transfers'}</p>
-                          <p className="text-2xl font-bold text-sky-400">{totalTransactionsCount}</p>
+                          <p className="text-2xl font-bold text-white">{totalTransactionsCount}</p>
                         </div>
                         <div className="bg-[#0d0d0d]/50 border border-[#1a1a1a] rounded-xl p-4">
                           <p className="text-slate-400 text-sm mb-1">{isSpanish ? 'Clientes' : 'Clients'}</p>
@@ -2461,7 +2461,7 @@ Partner: ${partner.name}
                               <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                   <span className="text-slate-400">{isSpanish ? 'Porcentaje del total:' : 'Percentage of total:'}</span>
-                                  <span className="text-sky-400 font-semibold">{percentage.toFixed(1)}%</span>
+                                  <span className="text-white font-semibold">{percentage.toFixed(1)}%</span>
                                 </div>
                                 {stats.lastTransfer && (
                                   <div className="flex justify-between text-sm">
@@ -2576,7 +2576,7 @@ Partner: ${partner.name}
                       value={selectedPartner}
                       onChange={(e) => setSelectedPartner(e.target.value)}
                       aria-label="Select Partner"
-                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-sky-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-sky-500/30 outline-none transition-all"
+                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
                     >
                       <option value="">{isSpanish ? "-- Selecciona Partner --" : "-- Select Partner --"}</option>
                       {partners.map(partner => (
@@ -2596,7 +2596,7 @@ Partner: ${partner.name}
                       value={selectedCustodyAccount}
                       onChange={(e) => setSelectedCustodyAccount(e.target.value)}
                       aria-label="Select Custody Account"
-                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-sky-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-sky-500/30 outline-none transition-all"
+                      className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
                       disabled={!selectedPartner}
                     >
                       <option value="">{isSpanish ? "-- Selecciona Cuenta --" : "-- Select Account --"}</option>
@@ -2647,7 +2647,7 @@ Partner: ${partner.name}
                         value={transferForm.currency}
                         onChange={(e) => setTransferForm({...transferForm, currency: e.target.value})}
                         aria-label="Select Currency"
-                        className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-sky-500 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-sky-500/30 outline-none transition-all"
+                        className="w-full bg-[#0d0d0d] border border-[#1a1a1a] focus:border-white/30 text-slate-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-white/30/30 outline-none transition-all"
                       >
                         {availableCurrencies.map(curr => (
                           <option key={curr.code} value={curr.code}>
@@ -2698,7 +2698,7 @@ Partner: ${partner.name}
                   />
 
                   <div className="bg-white/5 border border-white/15 rounded-xl p-4 space-y-2">
-                    <div className="flex items-center gap-2 text-sky-400 font-semibold">
+                    <div className="flex items-center gap-2 text-white font-semibold">
                       <Shield className="w-4 h-4" />
                       <span>{isSpanish ? "Resumen de la Transferencia" : "Transfer Summary"}</span>
                     </div>

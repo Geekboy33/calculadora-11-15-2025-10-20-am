@@ -506,7 +506,7 @@ export function TheKingdomBankModule() {
                       </div>
                       <div className="flex justify-between py-2">
                         <span className="text-slate-400">{isSpanish ? 'Disponible:' : 'Available:'}</span>
-                        <span className="text-sky-400 font-semibold">
+                        <span className="text-white font-semibold">
                           {fmt.currency(account.availableBalance, account.currency)}
                         </span>
                       </div>
@@ -564,7 +564,7 @@ export function TheKingdomBankModule() {
                     : "Webhook URL for notifications:"
                   }
                 </p>
-                <code className="block p-3 bg-[#0d0d0d] rounded-lg text-sky-400 text-sm">
+                <code className="block p-3 bg-[#0d0d0d] rounded-lg text-white text-sm">
                   https://luxliqdaes.cloud/webhooks/tkb/payments
                 </code>
               </div>
@@ -590,7 +590,7 @@ export function TheKingdomBankModule() {
                       setPaymentForm({ ...paymentForm, currency: account.currency });
                     }
                   }}
-                  className="w-full px-4 py-2 bg-[#141414] border border-[#1a1a1a] rounded-lg text-white focus:outline-none focus:border-sky-500"
+                  className="w-full px-4 py-2 bg-[#141414] border border-[#1a1a1a] rounded-lg text-white focus:outline-none focus:border-white/30"
                 >
                   <option value="">{isSpanish ? "-- Seleccionar cuenta --" : "-- Select account --"}</option>
                   {custodyAccounts
