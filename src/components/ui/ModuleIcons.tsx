@@ -586,7 +586,7 @@ export function ModuleIconWidget({ icon, label, active = false, onClick }: Modul
       <span className={`
         text-xs font-medium text-center
         transition-colors duration-300
-        ${active ? 'text-sky-400' : 'text-slate-400 group-hover:text-slate-300'}
+        ${active ? 'text-white' : 'text-white group-hover:text-white'}
       `}>
         {label}
       </span>

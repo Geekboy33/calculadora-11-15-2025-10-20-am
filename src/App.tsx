@@ -249,7 +249,7 @@ function App() {
         <div className="px-card py-card bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-card)] border-b border-[var(--border-subtle)] hidden lg:block">
           <div className="flex items-center gap-card-sm mb-card">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-            <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-card-sm">
+            <span className="text-xs font-semibold text-white uppercase tracking-wider px-card-sm">
               {isSpanish ? 'Módulos Principales' : 'Featured Modules'}
             </span>
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
@@ -279,8 +279,8 @@ function App() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-card-sm.5 px-card-sm py-card-sm font-medium transition-all relative min-w-fit ${
                     isActive
-                      ? 'text-[var(--text-primary)] text-shadow-[0_0_10px_rgba(255,255,255,0.8)]'
-                      : 'text-[var(--text-primary)] hover:text-[var(--text-primary)]'
+                      ? 'text-white text-shadow-[0_0_10px_rgba(255,255,255,0.8)]'
+                      : 'text-white hover:text-white'
                   }`}
                   aria-label={`${tab.name} ${isActive ? '(current)' : ''}`}
                   aria-current={isActive ? 'page' : undefined}
