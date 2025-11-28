@@ -26,7 +26,7 @@
 .logoIcon {
   display: inline-flex;
   align-items: center;
-  justify-center;
+  justify-content: center;
   width: 80px;
   height: 80px;
   border-radius: var(--radius-xl);
