@@ -917,7 +917,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
 
         {/* Analysis Results (si hay archivo analizado) */}
         {analysisResults && (
-          <BankingCard className="p-card border-2 border-white/20 bg-white/3">
+          <BankingCard className="p-card border-2 border-white/20 bg-[var(--bg-card)]/80">
             <div className="flex items-start gap-card">
               <div className="p-card-sm bg-white/10 rounded-xl animate-pulse">
                 <Activity className="w-8 h-8 text-white" />
@@ -931,17 +931,17 @@ Timestamp: ${AUDIT_DATA.timestamp}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-card text-sm">
                   <div>
-                    <p className="text-black">{isSpanish ? "Total en Miles de Millones" : "Total in Billions"}</p>
-                    <p className="text-black font-bold text-xl">
+                    <p className="text-white">{isSpanish ? "Total en Miles de Millones" : "Total in Billions"}</p>
+                    <p className="text-white font-bold text-xl">
                       {analysisResults.totalM2Amount.toLocaleString(isSpanish ? 'es-ES' : 'en-US', { maximumFractionDigits: 0 })}
                     </p>
                   </div>
                   <div>
-                    <p className="text-black">{isSpanish ? "Archivos Analizados" : "Files Analyzed"}</p>
-                    <p className="text-black font-bold text-xl">{analysisResults.filesProcessed}</p>
+                    <p className="text-white">{isSpanish ? "Archivos Analizados" : "Files Analyzed"}</p>
+                    <p className="text-white font-bold text-xl">{analysisResults.filesProcessed}</p>
                   </div>
                   <div>
-                    <p className="text-black">{isSpanish ? "Estado" : "Status"}</p>
+                    <p className="text-white">{isSpanish ? "Estado" : "Status"}</p>
                     <p className="text-emerald-400 font-bold text-xl">
                       ✅ {isSpanish ? "CERTIFICADO" : "CERTIFIED"}
                     </p>
