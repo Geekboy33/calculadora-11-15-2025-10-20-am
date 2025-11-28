@@ -1047,10 +1047,10 @@ Timestamp: ${AUDIT_DATA.timestamp}
               </p>
               {balancesVisible ? (
                 <>
-                  <p className="text-6xl font-black text-black mb-card-sm">
+                  <p className="text-6xl font-black text-white mb-card-sm">
                     {fmt.currency(selectedMasterAccount.balance, selectedMasterAccount.currency)}
                   </p>
-                  <p className="text-black text-lg">
+                  <p className="text-white text-lg">
                     ({selectedMasterAccount.balance.toExponential(2)} {selectedMasterAccount.currency})
                   </p>
                   <p className="text-black text-sm mt-card-sm">
@@ -1257,7 +1257,7 @@ Timestamp: ${AUDIT_DATA.timestamp}
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-5">
               <div className="flex items-center gap-card mb-card">
                 <CheckCircle className="w-6 h-6 text-emerald-400" />
-                <p className="text-emerald-400 font-bold text-lg">
+                <p className="text-black font-bold text-lg">
                   {isSpanish ? "Confirmación" : "Confirmation"}
                 </p>
               </div>
