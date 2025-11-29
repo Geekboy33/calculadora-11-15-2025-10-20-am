@@ -1,0 +1,337 @@
+/**
+ * Banking Professional Design System
+ * Nivel: JP Morgan Wealth | Goldman Sachs | Emirates NBD Private Banking
+ * Implementación completa de mejoras profesionales
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   ESCALA TIPOGRÁFICA PROFESIONAL BANCARIA
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Escala Tipográfica */
+  --font-scale-hero: 4rem;        /* 64px - Balance principal */
+  --font-scale-display: 3rem;     /* 48px - Títulos principales */
+  --font-scale-heading-1: 2.25rem; /* 36px - Secciones */
+  --font-scale-heading-2: 1.875rem; /* 30px - Subsections */
+  --font-scale-heading-3: 1.5rem;  /* 24px - Cards */
+  --font-scale-body-lg: 1.125rem;  /* 18px - Body grande */
+  --font-scale-body: 1rem;        /* 16px - Body estándar */
+  --font-scale-body-sm: 0.875rem;  /* 14px - Body pequeño */
+  --font-scale-caption: 0.75rem;   /* 12px - Captions */
+  --font-scale-xs: 0.625rem;      /* 10px - Extra pequeño */
+
+  /* Line Heights Optimizados */
+  --leading-tight: 1.2;    /* Títulos */
+  --leading-snug: 1.375;   /* Subtítulos */
+  --leading-normal: 1.5;    /* Body */
+  --leading-relaxed: 1.75; /* Párrafos largos */
+  --leading-loose: 2;       /* Espaciado amplio */
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;  /* Títulos muy grandes */
+  --tracking-tight: -0.02em;    /* Títulos grandes */
+  --tracking-normal: 0;         /* Body */
+  --tracking-wide: 0.05em;       /* Uppercase labels */
+  --tracking-wider: 0.1em;       /* Headers uppercase */
+
+  /* ═══════════════════════════════════════════════════════════════
+     SISTEMA DE ESPACIADO 8px BASE
+     ═══════════════════════════════════════════════════════════════ */
+  
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+  --space-20: 5rem;    /* 80px */
+  --space-24: 6rem;    /* 96px */
+  --space-32: 8rem;    /* 128px */
+
+  /* Espaciado Específico Bancario */
+  --gap-section: var(--space-8);   /* Entre secciones grandes */
+  --gap-card: var(--space-6);      /* Entre cards */
+  --gap-card-sm: var(--space-4);   /* Dentro de cards */
+  --gap-element: var(--space-3);   /* Entre elementos relacionados */
+  --gap-tight: var(--space-2);    /* Elementos muy relacionados */
+
+  /* ═══════════════════════════════════════════════════════════════
+     SISTEMA DE ELEVACIÓN Y SOMBRAS
+     ═══════════════════════════════════════════════════════════════ */
+  
+  --elevation-0: none;
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --elevation-3: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --elevation-4: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --elevation-5: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* ═══════════════════════════════════════════════════════════════
+     COLORES DE ESTADO PROFESIONALES
+     ═══════════════════════════════════════════════════════════════ */
+  
+  --status-success: #10B981;      /* Verde éxito */
+  --status-success-bg: #D1FAE5;   /* Fondo éxito */
+  --status-success-text: #065F46; /* Texto éxito */
+  --status-warning: #F59E0B;      /* Amarillo advertencia */
+  --status-warning-bg: #FEF3C7;   /* Fondo advertencia */
+  --status-warning-text: #92400E; /* Texto advertencia */
+  --status-error: #EF4444;         /* Rojo error */
+  --status-error-bg: #FEE2E2;      /* Fondo error */
+  --status-error-text: #991B1B;    /* Texto error */
+  --status-info: #3B82F6;         /* Azul información */
+  --status-info-bg: #DBEAFE;      /* Fondo información */
+  --status-info-text: #1E40AF;    /* Texto información */
+
+  /* Contraste WCAG AAA */
+  --text-on-white: #0E1525;       /* Ratio 12.6:1 */
+  --text-on-dark: #FFFFFF;        /* Ratio 12.6:1 */
+  --text-secondary-on-white: #4A4F55; /* Ratio 7.1:1 */
+  --text-secondary-on-dark: #D1D5DB;  /* Ratio 7.1:1 */
+  --text-muted-on-white: #6B7280;     /* Ratio 4.5:1 */
+  --text-muted-on-dark: #9CA3AF;      /* Ratio 4.5:1 */
+
+  /* ═══════════════════════════════════════════════════════════════
+     TIMING FUNCTIONS Y DURACIONES
+     ═══════════════════════════════════════════════════════════════ */
+  
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out-back: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --duration-slower: 500ms;
+  --duration-slowest: 750ms;
+
+  /* ═══════════════════════════════════════════════════════════════
+     TAMAÑOS DE ICONOS ESTÁNDAR
+     ═══════════════════════════════════════════════════════════════ */
+  
+  --icon-xs: 12px;
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+  --icon-xl: 32px;
+  --icon-2xl: 40px;
+  --icon-3xl: 48px;
+
+  --icon-stroke-thin: 1.5;
+  --icon-stroke-normal: 2;
+  --icon-stroke-bold: 2.5;
+
+  /* ═══════════════════════════════════════════════════════════════
+     BREAKPOINTS PROFESIONALES
+     ═══════════════════════════════════════════════════════════════ */
+  
+  --breakpoint-xs: 375px;   /* iPhone SE */
+  --breakpoint-sm: 640px;   /* Tablets pequeñas */
+  --breakpoint-md: 768px;   /* Tablets */
+  --breakpoint-lg: 1024px;  /* Laptops */
+  --breakpoint-xl: 1280px;  /* Desktops */
+  --breakpoint-2xl: 1536px; /* Large Desktops */
+  --breakpoint-3xl: 1920px; /* Ultra-wide */
+
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CLASES TIPOGRÁFICAS PROFESIONALES
+   ═══════════════════════════════════════════════════════════════ */
+
+.font-hero {
+  font-size: var(--font-scale-hero);
+  font-weight: 900;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+.font-display {
+  font-size: var(--font-scale-display);
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+
+.font-heading-1 {
+  font-size: var(--font-scale-heading-1);
+  font-weight: 700;
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-normal);
+}
+
+.font-heading-2 {
+  font-size: var(--font-scale-heading-2);
+  font-weight: 700;
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-normal);
+}
+
+.font-heading-3 {
+  font-size: var(--font-scale-heading-3);
+  font-weight: 600;
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+}
+
+.font-body-lg {
+  font-size: var(--font-scale-body-lg);
+  font-weight: 400;
+  line-height: var(--leading-relaxed);
+  letter-spacing: var(--tracking-normal);
+}
+
+.font-body {
+  font-size: var(--font-scale-body);
+  font-weight: 400;
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+}
+
+.font-body-sm {
+  font-size: var(--font-scale-body-sm);
+  font-weight: 400;
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+}
+
+.font-caption {
+  font-size: var(--font-scale-caption);
+  font-weight: 500;
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CLASES DE ELEVACIÓN
+   ═══════════════════════════════════════════════════════════════ */
+
+.elevation-0 { box-shadow: var(--elevation-0); }
+.elevation-1 { box-shadow: var(--elevation-1); }
+.elevation-2 { box-shadow: var(--elevation-2); }
+.elevation-3 { box-shadow: var(--elevation-3); }
+.elevation-4 { box-shadow: var(--elevation-4); }
+.elevation-5 { box-shadow: var(--elevation-5); }
+
+/* ═══════════════════════════════════════════════════════════════
+   MICROINTERACCIONES Y ANIMACIONES
+   ═══════════════════════════════════════════════════════════════ */
+
+.button-hover {
+  transition: all var(--duration-normal) var(--ease-in-out-quart);
+}
+
+.button-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--elevation-3);
+}
+
+.card-hover {
+  transition: all var(--duration-slow) var(--ease-out-expo);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--elevation-4);
+}
+
+.number-countup {
+  animation: countUp var(--duration-slower) var(--ease-out-expo);
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-in-out-quart);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp var(--duration-slow) var(--ease-out-expo);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ESTADOS DE ESTADO PROFESIONALES
+   ═══════════════════════════════════════════════════════════════ */
+
+.status-success {
+  color: var(--status-success-text);
+  background-color: var(--status-success-bg);
+  border-color: var(--status-success);
+}
+
+.status-warning {
+  color: var(--status-warning-text);
+  background-color: var(--status-warning-bg);
+  border-color: var(--status-warning);
+}
+
+.status-error {
+  color: var(--status-error-text);
+  background-color: var(--status-error-bg);
+  border-color: var(--status-error);
+}
+
+.status-info {
+  color: var(--status-info-text);
+  background-color: var(--status-info-bg);
+  border-color: var(--status-info);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  :root {
+    --font-scale-hero: 2.5rem;      /* 40px en móvil */
+    --font-scale-display: 2rem;     /* 32px en móvil */
+    --font-scale-heading-1: 1.75rem; /* 28px en móvil */
+    --gap-section: var(--space-6);
+    --gap-card: var(--space-4);
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --font-scale-hero: 5rem;        /* 80px en ultra-wide */
+    --font-scale-display: 3.5rem;   /* 56px en ultra-wide */
+  }
+}
+

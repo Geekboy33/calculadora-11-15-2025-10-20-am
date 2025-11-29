@@ -171,8 +171,57 @@ app.get('/api/v1/proof-of-reserves/:apiKey/download', requireAuth, async (req, r
   res.send(content || 'No Proof of Reserves linked.');
 });
 
+// ============================================================================
+// MG WEBHOOK PROXY - Reenvía peticiones a MG Productive Investments
+// ============================================================================
+app.post('/api/mg-webhook/transfer', async (req, res) => {
+  const MG_WEBHOOK_URL = process.env.MG_WEBHOOK_URL || 'https://api.mgproductiveinvestments.com/webhook/dcb/transfer';
+  
+  try {
+    console.log('[MG Webhook Proxy] 📤 Reenviando transferencia a MG:', {
+      url: MG_WEBHOOK_URL,
+      payload: req.body
+    });
+
+    const response = await fetch(MG_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'DAES-CoreBanking/1.0',
+        // Agregar headers adicionales si MG los requiere
+        ...(req.headers['x-mg-api-key'] && { 'X-API-Key': req.headers['x-mg-api-key'] }),
+      },
+      body: JSON.stringify(req.body),
+      // Timeout de 30 segundos
+      timeout: 30000
+    });
+
+    const responseData = await response.json().catch(() => ({ error: 'Invalid JSON response' }));
+
+    console.log('[MG Webhook Proxy] ✅ Respuesta de MG:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: responseData
+    });
+
+    // Reenviar la respuesta de MG al frontend
+    res.status(response.status).json(responseData);
+
+  } catch (error) {
+    console.error('[MG Webhook Proxy] ❌ Error al conectar con MG:', error.message);
+    
+    res.status(500).json({
+      success: false,
+      error: 'MG Webhook Proxy Error',
+      message: error.message,
+      code: error.code || 'UNKNOWN_ERROR'
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`[PoR API] Server listening on http://localhost:${PORT}`);
+  console.log(`[MG Webhook Proxy] Proxy endpoint available at http://localhost:${PORT}/api/mg-webhook/transfer`);
 });
 
 

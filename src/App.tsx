@@ -1,5 +1,5 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
-import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard } from 'lucide-react';
+import { useState, useEffect, lazy, Suspense, useRef } from 'react';
+import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight } from 'lucide-react';
 import { 
   CentralPanelIcon, 
   PrivateCentralBankIcon, 
@@ -18,6 +18,7 @@ import { MobileMenu } from './components/ui/MobileMenu';
 import { PageTransition } from './components/ui/PageTransition';
 import { GlobalProcessingIndicator } from './components/GlobalProcessingIndicator';
 import { NotificationCenter } from './components/NotificationCenter';
+import { ToastProvider } from './components/ui/ToastNotification';
 import { ToastNotification } from './components/ToastNotification';
 import { processingStore } from './lib/processing-store';
 
@@ -42,6 +43,7 @@ const AuditBankWindow = lazy(() => import('./components/AuditBankWindow').then(m
 const CoreBankingAPIModule = lazy(() => import('./components/CoreBankingAPIModule').then(m => ({ default: m.CoreBankingAPIModule })));
 const CustodyAccountsModule = lazy(() => import('./components/CustodyAccountsModule').then(m => ({ default: m.CustodyAccountsModule })));
 const APIDAESModule = lazy(() => import('./components/APIDAESModule').then(m => ({ default: m.APIDAESModule })));
+const MGWebhookModule = lazy(() => import('./components/MGWebhookModule').then(m => ({ default: m.MGWebhookModule })));
 const APIVUSDModule = lazy(() => import('./components/APIVUSDModule').then(m => ({ default: m.APIVUSDModule })));
 const APIDAESPledgeModule = lazy(() => import('./components/APIDAESPledgeModule').then(m => ({ default: m.APIDAESPledgeModule })));
 const APIVUSD1Module = lazy(() => import('./components/APIVUSD1Module').then(m => ({ default: m.default })));
@@ -77,7 +79,7 @@ const ProfilesModule = lazy(() =>
 const BankSettlementModule = lazy(() => import('./components/BankSettlementModule').then(m => ({ default: m.BankSettlementModule })));
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 
-type Tab = 'central-dashboard' | 'banco-central-privado' | 'origen-fondos' | 'the-kingdom-bank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager';
+type Tab = 'central-dashboard' | 'banco-central-privado' | 'origen-fondos' | 'the-kingdom-bank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -85,6 +87,23 @@ function App() {
   const { t, language } = useLanguage();
   const isSpanish = language === 'es';
   const { isAuthenticated, user, login, logout } = useAuth();
+  const tabsScrollRef = useRef<HTMLDivElement>(null);
+
+  // Scroll horizontal para tabs
+  const scrollTabs = (direction: 'left' | 'right') => {
+    if (tabsScrollRef.current) {
+      const scrollAmount = 400;
+      const currentScroll = tabsScrollRef.current.scrollLeft;
+      const newScroll = direction === 'left' 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+      
+      tabsScrollRef.current.scrollTo({
+        left: newScroll,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Detectar si es una URL de verificación pública
   const checkPublicVerificationUrl = (): string | null => {
@@ -143,14 +162,6 @@ function App() {
     return <Login onLogin={login} />;
   }
 
-  // Módulos principales con iconos personalizados
-  const featuredModules = [
-    { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel' },
-    { id: 'banco-central-privado' as Tab, name: 'Treasury Reserve' },
-    { id: 'origen-fondos' as Tab, name: isSpanish ? 'Origen de Fondos' : 'Source of Funds' },
-    { id: 'the-kingdom-bank' as Tab, name: 'The Kingdom Bank' },
-    { id: 'daes-partner-api' as Tab, name: isSpanish ? 'APIs Partner DAES' : 'DAES Partner APIs' }
-  ];
 
   const tabs = [
     { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel', icon: Building2 },
@@ -165,6 +176,7 @@ function App() {
     { id: 'custody' as Tab, name: t.navCustody, icon: Lock },
     { id: 'profiles' as Tab, name: isSpanish ? 'Perfiles' : 'Profiles', icon: User },
     { id: 'api-daes' as Tab, name: 'API DAES', icon: Key },
+    { id: 'mg-webhook' as Tab, name: isSpanish ? 'MG Webhook' : 'MG Webhook', icon: Webhook },
     { id: 'api-global' as Tab, name: 'API GLOBAL', icon: Globe },
     { id: 'api-digital' as Tab, name: 'API DIGITAL', icon: Building2 },
     { id: 'api-vusd' as Tab, name: 'API VUSD', icon: TrendingUp },
@@ -197,105 +209,110 @@ function App() {
         onTabChange={(tabId) => setActiveTab(tabId as Tab)}
       />
 
-      <header className="bg-[var(--bg-main)] border-b border-[var(--border-subtle)] shadow-[0_2px_20px_rgba(0,255,136,0.1)]">
-        <div className="px-card py-card">
+      <header className="bg-[var(--bg-card)] border-b border-[var(--border-medium)] shadow-[var(--shadow-card)]">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-card">
+            <div className="flex items-center gap-4">
               {/* Hamburger button for mobile */}
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="lg:hidden p-card-sm hover:bg-[var(--bg-hover)] rounded-lg transition-colors"
+                className="lg:hidden p-2 hover:bg-[var(--bg-hover)] rounded-lg transition-all"
                 title="Abrir menú de navegación"
                 aria-label="Abrir menú de navegación"
               >
                 <Menu className="w-6 h-6 text-[var(--text-primary)]" />
               </button>
-              <div className="p-card-sm bg-gradient-to-br from-white to-[#e0e0e0] rounded-lg glow-green">
-                <Wallet className="w-6 h-6 text-black" />
+              <div className="p-3 bg-gradient-to-br from-[var(--accent-cyan)] to-[var(--accent-purple)] rounded-xl shadow-[var(--shadow-glow-cyan)]">
+                <Wallet className="w-6 h-6 text-[var(--bg-main)]" />
               </div>
               <div>
-                <h1 className="text-heading-sm text-[var(--text-primary)]">{t.headerTitle}</h1>
-                <p className="text-body-sm text-[var(--text-primary)] font-semibold">{t.headerSubtitle}</p>
-                <p className="text-muted">AES-256-GCM • Digital Commercial Bank Ltd • HMAC-SHA256</p>
+                <h1 className="text-xl font-bold text-[var(--text-primary)]">{t.headerTitle}</h1>
+                <p className="text-sm text-[var(--text-secondary)] font-semibold">{t.headerSubtitle}</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">AES-256-GCM • Digital Commercial Bank Ltd • HMAC-SHA256</p>
               </div>
             </div>
 
-          <div className="flex items-center gap-card">
+          <div className="flex items-center gap-4">
             <NotificationCenter />
             <LanguageSelector />
             <div className="text-right">
-              <div className="text-muted">{t.productionEnvironment}</div>
-              <div className="text-body-sm font-semibold text-[var(--text-primary)] pulse-green">{t.allSystemsOperational}</div>
-              <div className="text-muted mt-card-sm blink-matrix">{t.dtcAnalysisReady}</div>
-              <div className="flex items-center gap-card-sm text-muted mt-card-sm font-mono">
+              <div className="text-xs text-[var(--text-muted)]">{t.productionEnvironment}</div>
+              <div className="text-sm font-semibold text-[var(--accent-emerald)] flex items-center justify-end gap-1">
+                <span className="w-2 h-2 bg-[var(--accent-emerald)] rounded-full animate-pulse-glow"></span>
+                {t.allSystemsOperational}
+              </div>
+              <div className="text-xs text-[var(--text-muted)] mt-1">{t.dtcAnalysisReady}</div>
+              <div className="flex items-center justify-end gap-2 text-xs text-[var(--text-secondary)] mt-2 font-mono">
                 <User className="w-3 h-3" />
                 <span>{user}</span>
               </div>
             </div>
             <button
               onClick={logout}
-              className="flex items-center gap-card-sm px-card-sm py-card-sm bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] hover:text-[var(--text-primary)] hover:border-white hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] border border-[var(--border-medium)] rounded-xl text-[var(--text-primary)] hover:border-[var(--accent-cyan)] hover:bg-[var(--bg-hover)] transition-all hover-lift"
               title={t.logoutTitle}
               aria-label={t.logoutTitle}
             >
               <LogOut className="w-4 h-4" aria-hidden="true" />
-              <span className="text-body-sm font-semibold">{t.logout}</span>
+              <span className="text-sm font-semibold">{t.logout}</span>
             </button>
           </div>
           </div>
         </div>
 
-        {/* Featured Modules - Widgets Personalizados */}
-        <div className="px-card py-card bg-gradient-to-b from-[var(--bg-main)] to-[var(--bg-card)] border-b border-[var(--border-subtle)] hidden lg:block">
-          <div className="flex items-center gap-card-sm mb-card">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-            <span className="text-xs font-semibold text-white uppercase tracking-wider px-card-sm">
-              {isSpanish ? 'Módulos Principales' : 'Featured Modules'}
-            </span>
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-          </div>
-          <div className="flex items-center gap-card overflow-x-auto pb-2 scrollbar-hide">
-            {featuredModules.map(module => (
-              <ModuleIconWidget
-                key={`${module.id}-${activeTab}`}
-                icon={getModuleIcon(module.id, 28, activeTab === module.id)}
-                label={module.name}
-                active={activeTab === module.id}
-                onClick={() => setActiveTab(module.id)}
-              />
-            ))}
-          </div>
-        </div>
+        <nav className="px-card bg-[var(--bg-card)] border-t border-[var(--border-subtle)] hidden lg:block relative group">
+          {/* Botón scroll izquierda */}
+          <button
+            onClick={() => scrollTabs('left')}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-[var(--bg-elevated)] hover:bg-[var(--bg-hover)] border border-[var(--border-subtle)] hover:border-[var(--accent-cyan)] rounded-xl p-2 shadow-lg transition-all hover:scale-110 hover-glow"
+            aria-label="Scroll tabs left"
+            title={isSpanish ? 'Ver módulos anteriores' : 'View previous modules'}
+          >
+            <ChevronLeft className="w-5 h-5 text-[var(--text-primary)]" />
+          </button>
 
-        <nav className="px-card bg-[var(--bg-main)] border-t border-[var(--border-subtle)] hidden lg:block">
-          <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+          {/* Contenedor de tabs con scroll */}
+          <div 
+            ref={tabsScrollRef}
+            className="flex gap-1 overflow-x-auto scroll-smooth modules-scroll-container mx-12 py-2"
+          >
             {tabs.map(tab => {
               const isActive = activeTab === tab.id;
-              const CustomIcon = getModuleIcon(tab.id, 20, isActive);
+              const CustomIcon = getModuleIcon(tab.id, 18, isActive);
 
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-card-sm.5 px-card-sm py-card-sm font-medium transition-all relative min-w-fit ${
+                  className={`flex items-center gap-2 px-4 py-2.5 font-medium transition-all relative min-w-fit rounded-lg ${
                     isActive
-                      ? 'text-white text-shadow-[0_0_10px_rgba(255,255,255,0.8)]'
-                      : 'text-white hover:text-white'
+                      ? 'text-[var(--accent-cyan)] bg-[var(--accent-cyan-muted)] border border-[var(--accent-cyan)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
                   }`}
                   aria-label={`${tab.name} ${isActive ? '(current)' : ''}`}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <span className="flex items-center justify-center w-5 h-5 flex-shrink-0" aria-hidden="true">
+                  <span className="flex items-center justify-center w-4 h-4 flex-shrink-0" aria-hidden="true">
                     {CustomIcon}
                   </span>
-                  <span className="whitespace-nowrap">{tab.name}</span>
+                  <span className="whitespace-nowrap text-sm font-semibold">{tab.name}</span>
                   {isActive && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]" aria-hidden="true" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-cyan)] shadow-[0_0_10px_var(--accent-cyan)]" aria-hidden="true" />
                   )}
                 </button>
               );
             })}
           </div>
+
+          {/* Botón scroll derecha */}
+          <button
+            onClick={() => scrollTabs('right')}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-[var(--bg-elevated)] hover:bg-[var(--bg-hover)] border border-[var(--border-subtle)] hover:border-[var(--accent-cyan)] rounded-xl p-2 shadow-lg transition-all hover:scale-110 hover-glow"
+            aria-label="Scroll tabs right"
+            title={isSpanish ? 'Ver más módulos' : 'View more modules'}
+          >
+            <ChevronRight className="w-5 h-5 text-[var(--text-primary)]" />
+          </button>
         </nav>
       </header>
 
@@ -344,6 +361,7 @@ function App() {
           {activeTab === 'custody' && <CustodyAccountsModule />}
           {activeTab === 'profiles' && <ProfilesModule />}
           {activeTab === 'api-daes' && <APIDAESModule />}
+          {activeTab === 'mg-webhook' && <MGWebhookModule />}
           {activeTab === 'api-global' && <APIGlobalModule />}
           {activeTab === 'api-digital' && <APIDigitalModule />}
           {activeTab === 'api-vusd' && <APIVUSDModule />}
@@ -367,17 +385,17 @@ function App() {
         </Suspense>
       </main>
 
-      <footer className="bg-[var(--bg-main)] border-t border-[var(--border-subtle)] px-card py-card-sm shadow-[0_-2px_20px_rgba(0,255,136,0.1)]">
-        <div className="flex items-center justify-between text-xs text-[var(--text-primary)]">
-          <div className="flex items-center gap-section">
-            <span className="hover:text-[var(--text-primary)] transition-colors">{t.footerVersion}</span>
+      <footer className="bg-[var(--bg-card)] border-t border-[var(--border-subtle)] px-6 py-3 shadow-[var(--shadow-sm)]">
+        <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
+          <div className="flex items-center gap-6">
+            <span className="hover:text-[var(--text-primary)] transition-colors font-medium">{t.footerVersion}</span>
             <span className="hover:text-[var(--text-primary)] transition-colors">{t.footerIsoCompliant}</span>
             <span className="hover:text-[var(--text-primary)] transition-colors">{t.footerPciReady}</span>
           </div>
-          <div className="flex items-center gap-section">
+          <div className="flex items-center gap-6">
             <span className="hover:text-[var(--text-primary)] transition-colors">{t.footerMultiCurrency}</span>
             <span className="hover:text-[var(--text-primary)] transition-colors">{t.footerEncryption}</span>
-            <span className="text-cyber font-bold pulse-green">{t.footerForensicAnalysis}</span>
+            <span className="text-[var(--accent-cyan)] font-semibold">{t.footerForensicAnalysis}</span>
           </div>
         </div>
       </footer>
