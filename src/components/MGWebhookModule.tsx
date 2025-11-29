@@ -588,6 +588,68 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
     setTimeout(() => setSuccess(null), 2000);
   };
 
+  // Generar TXT con todo el historial
+  const handleDownloadHistoryTxt = () => {
+    if (transferHistory.length === 0) {
+      alert(isSpanish ? 'No hay transferencias para exportar.' : 'There are no transfers to export.');
+      return;
+    }
+
+    let txtContent = '';
+    txtContent += '==============================================\n';
+    txtContent += ' DAES → MG Webhook - Transfer History Export\n';
+    txtContent += '==============================================\n';
+    txtContent += `Generado: ${new Date().toLocaleString(isSpanish ? 'es-ES' : 'en-US')}\n`;
+    txtContent += `Total transferencias: ${transferHistory.length}\n\n`;
+
+    transferHistory.forEach((transfer, index) => {
+      txtContent += `----------------------------------------------\n`;
+      txtContent += `TRANSFERENCIA ${index + 1}\n`;
+      txtContent += `----------------------------------------------\n`;
+      txtContent += `TransferRequestID: ${transfer.transferRequestId}\n`;
+      txtContent += `Estado: ${transfer.status}\n`;
+      txtContent += `Monto: ${transfer.currency} ${transfer.amount}\n`;
+      txtContent += `Cuenta MG: ${transfer.receivingAccount}\n`;
+      txtContent += `Remitente: ${transfer.sendingName}\n`;
+      txtContent += `Fecha: ${new Date(transfer.timestamp).toLocaleString()}\n`;
+
+      if (transfer.custodyAccountName) {
+        txtContent += `Cuenta Custodio: ${transfer.custodyAccountName}\n`;
+        txtContent += `Saldo Referencia: ${transfer.custodyAccountBalance ? fmt.currency(transfer.custodyAccountBalance, transfer.currency) : '-'}\n`;
+      }
+
+      if (transfer.resendCount && transfer.resendCount > 0) {
+        txtContent += `Reenvíos: ${transfer.resendCount}`;
+        if (transfer.lastResendAt) {
+          txtContent += ` (Último: ${new Date(transfer.lastResendAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')})`;
+        }
+        txtContent += '\n';
+      }
+
+      if (transfer.verified) {
+        txtContent += `Verificado: ✅`;
+        if (transfer.lastVerificationAt) {
+          txtContent += ` (${new Date(transfer.lastVerificationAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')})`;
+        }
+        txtContent += '\n';
+      }
+
+      if (transfer.response) {
+        txtContent += `Respuesta MG: ${JSON.stringify(transfer.response)}\n`;
+      }
+
+      if (transfer.error) {
+        txtContent += `Error: ${transfer.error}\n`;
+      }
+
+      txtContent += '\n';
+    });
+
+    const filename = `MGWebhook_History_${new Date().toISOString().split('T')[0]}.txt`;
+    downloadTXT(txtContent, filename);
+    console.log('[MG Webhook] 📄 Historial exportado a TXT:', filename);
+  };
+
   // Limpiar historial
   const clearHistory = () => {
     if (confirm(isSpanish ? '¿Eliminar todo el historial?' : 'Delete all history?')) {
@@ -1246,15 +1308,26 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
                     ? `${transferHistory.length} transferencias registradas`
                     : `${transferHistory.length} transfers recorded`}
                 </p>
-                {transferHistory.length > 0 && (
-                  <BankingButton
-                    variant="secondary"
-                    icon={XCircle}
-                    onClick={clearHistory}
-                  >
-                    {isSpanish ? 'Limpiar Historial' : 'Clear History'}
-                  </BankingButton>
-                )}
+                <div className="flex items-center gap-2">
+                  {transferHistory.length > 0 && (
+                    <>
+                      <BankingButton
+                        variant="secondary"
+                        icon={Download}
+                        onClick={handleDownloadHistoryTxt}
+                      >
+                        {isSpanish ? 'Exportar TXT' : 'Export TXT'}
+                      </BankingButton>
+                      <BankingButton
+                        variant="secondary"
+                        icon={XCircle}
+                        onClick={clearHistory}
+                      >
+                        {isSpanish ? 'Limpiar' : 'Clear'}
+                      </BankingButton>
+                    </>
+                  )}
+                </div>
               </div>
 
               {transferHistory.length > 0 ? (
