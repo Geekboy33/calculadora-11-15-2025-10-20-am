@@ -74,14 +74,28 @@ export interface MgWebhookResponse {
  * El proxy reenvía la petición al endpoint real de MG
  */
 const getWebhookUrl = (): string => {
-  // Leer desde variable de entorno si existe
+  // 1) Variable de entorno explícita
   const viteUrl = (import.meta.env?.VITE_MG_WEBHOOK_URL as string | undefined);
   if (viteUrl) {
     return viteUrl;
   }
-  
-  // USAR PROXY DEL BACKEND (evita CORS)
-  // El backend en localhost:8787 reenvía la petición a MG
+
+  // 2) Detección automática de dominio de producción
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+
+    // Producción oficial: luxliqdaes.cloud
+    if (host.includes('luxliqdaes.cloud')) {
+      return 'https://luxliqdaes.cloud/api/mg-webhook/transfer';
+    }
+
+    // Otros dominios públicos (por si desplegamos en otro host HTTPS)
+    if (window.location.protocol === 'https:') {
+      return `${window.location.origin}/api/mg-webhook/transfer`;
+    }
+  }
+
+  // 3) Fallback local (desarrollo)
   return 'http://localhost:8787/api/mg-webhook/transfer';
 };
 
