@@ -94,6 +94,17 @@ export function MGWebhookModule() {
     return saved || 'http://localhost:8787/api/mg-webhook/transfer → https://api.mgproductiveinvestments.com/webhook/dcb/transfer';
   });
 
+  // Endpoint real de MG (configurable)
+  const [mgEndpoint, setMgEndpoint] = useState(() => {
+    const saved = localStorage.getItem('mg_real_endpoint');
+    return saved || 'https://api.mgproductiveinvestments.com/webhook/dcb/transfer';
+  });
+
+  const [endpointMode, setEndpointMode] = useState<'production' | 'staging' | 'sandbox' | 'custom'>(() => {
+    const saved = localStorage.getItem('mg_endpoint_mode');
+    return (saved as any) || 'production';
+  });
+
   const [showConfig, setShowConfig] = useState(false);
 
   // API Connection status
@@ -784,30 +795,120 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
 
               {showConfig && (
                 <div className="space-y-4 mt-4">
+                  {/* Selector de Modo */}
                   <div>
                     <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-                      {isSpanish ? 'URL del Webhook' : 'Webhook URL'}
+                      {isSpanish ? 'Modo de Endpoint' : 'Endpoint Mode'}
+                    </label>
+                    <select
+                      value={endpointMode}
+                      onChange={(e) => {
+                        const mode = e.target.value as typeof endpointMode;
+                        setEndpointMode(mode);
+                        localStorage.setItem('mg_endpoint_mode', mode);
+                        
+                        // Actualizar endpoint según el modo
+                        let newEndpoint = '';
+                        switch (mode) {
+                          case 'production':
+                            newEndpoint = 'https://api.mgproductiveinvestments.com/webhook/dcb/transfer';
+                            break;
+                          case 'staging':
+                            newEndpoint = 'https://staging-api.mgproductiveinvestments.com/webhook/dcb/transfer';
+                            break;
+                          case 'sandbox':
+                            newEndpoint = 'https://webhook.site/unique-id-here';
+                            break;
+                          case 'custom':
+                            newEndpoint = mgEndpoint;
+                            break;
+                        }
+                        setMgEndpoint(newEndpoint);
+                        localStorage.setItem('mg_real_endpoint', newEndpoint);
+                      }}
+                      className="w-full bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] px-4 py-2 rounded-lg focus:ring-2 focus:ring-white/30 outline-none"
+                    >
+                      <option value="production">
+                        {isSpanish ? 'Producción (MG Real)' : 'Production (MG Real)'}
+                      </option>
+                      <option value="staging">
+                        {isSpanish ? 'Staging (MG Pruebas)' : 'Staging (MG Testing)'}
+                      </option>
+                      <option value="sandbox">
+                        {isSpanish ? 'Sandbox (Webhook.site para pruebas)' : 'Sandbox (Webhook.site for testing)'}
+                      </option>
+                      <option value="custom">
+                        {isSpanish ? 'Personalizado' : 'Custom'}
+                      </option>
+                    </select>
+                  </div>
+
+                  {/* Endpoint Real de MG */}
+                  <div>
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                      {isSpanish ? 'Endpoint Real de MG' : 'MG Real Endpoint'}
                     </label>
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        value={webhookUrl}
+                        value={mgEndpoint}
                         onChange={(e) => {
-                          setWebhookUrl(e.target.value);
-                          localStorage.setItem('mg_webhook_url', e.target.value);
+                          setMgEndpoint(e.target.value);
+                          localStorage.setItem('mg_real_endpoint', e.target.value);
                         }}
-                        className="flex-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] px-4 py-2 rounded-lg focus:ring-2 focus:ring-white/30 outline-none"
+                        disabled={endpointMode !== 'custom'}
+                        className="flex-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] px-4 py-2 rounded-lg focus:ring-2 focus:ring-white/30 outline-none disabled:opacity-50"
                         placeholder="https://api.mgproductiveinvestments.com/webhook/dcb/transfer"
                       />
                       <BankingButton
                         variant="secondary"
                         icon={Copy}
-                        onClick={() => copyToClipboard(webhookUrl)}
+                        onClick={() => copyToClipboard(mgEndpoint)}
                       >
                         {isSpanish ? 'Copiar' : 'Copy'}
                       </BankingButton>
                     </div>
+                    <p className="text-xs text-[var(--text-muted)] mt-2">
+                      {isSpanish 
+                        ? '⚠️ IMPORTANTE: El dominio api.mgproductiveinvestments.com NO EXISTE actualmente. Por favor configura un endpoint válido.'
+                        : '⚠️ IMPORTANT: The domain api.mgproductiveinvestments.com DOES NOT EXIST currently. Please configure a valid endpoint.'}
+                    </p>
                   </div>
+
+                  {/* Información del Proxy */}
+                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-blue-400 mb-2">
+                      {isSpanish ? 'Información del Proxy' : 'Proxy Information'}
+                    </h4>
+                    <div className="text-xs text-[var(--text-secondary)] space-y-1">
+                      <p>
+                        <strong>{isSpanish ? 'Proxy Local:' : 'Local Proxy:'}</strong> http://localhost:8787/api/mg-webhook/transfer
+                      </p>
+                      <p>
+                        <strong>{isSpanish ? 'Destino Final:' : 'Final Destination:'}</strong> {mgEndpoint}
+                      </p>
+                      <p className="mt-2 text-yellow-400">
+                        💡 {isSpanish 
+                          ? 'El proxy reenvía tus peticiones al endpoint configurado arriba'
+                          : 'The proxy forwards your requests to the endpoint configured above'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Opciones de Sandbox */}
+                  {endpointMode === 'sandbox' && (
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+                      <h4 className="text-sm font-semibold text-amber-400 mb-2">
+                        {isSpanish ? 'Configurar Webhook.site' : 'Setup Webhook.site'}
+                      </h4>
+                      <div className="text-xs text-[var(--text-secondary)] space-y-2">
+                        <p>1. {isSpanish ? 'Ve a' : 'Go to'} <a href="https://webhook.site" target="_blank" className="text-amber-400 underline">webhook.site</a></p>
+                        <p>2. {isSpanish ? 'Copia tu URL única' : 'Copy your unique URL'}</p>
+                        <p>3. {isSpanish ? 'Pégala arriba en "Endpoint Real de MG"' : 'Paste it above in "MG Real Endpoint"'}</p>
+                        <p>4. {isSpanish ? 'Cambia a modo "Personalizado"' : 'Switch to "Custom" mode'}</p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Email Configuration */}
                   <div className="border-t border-[var(--border-subtle)] pt-4">

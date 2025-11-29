@@ -189,9 +189,15 @@ function normalizeDateTime(dateTime?: string): string {
  * ```
  */
 export async function sendTransferToMG(
-  params: MgTransferParams
+  params: MgTransferParams,
+  customEndpoint?: string
 ): Promise<MgWebhookResponse> {
   const webhookUrl = getWebhookUrl();
+  
+  // Leer endpoint real configurado (si existe)
+  const mgRealEndpoint = customEndpoint || 
+                         localStorage.getItem('mg_real_endpoint') || 
+                         'https://api.mgproductiveinvestments.com/webhook/dcb/transfer';
   
   try {
     // 1. Validar parámetros
@@ -214,7 +220,8 @@ export async function sendTransferToMG(
     
     // 4. Log antes de enviar
     console.log('[MG Webhook] Enviando transferencia a MG:', {
-      url: webhookUrl,
+      proxyUrl: webhookUrl,
+      realEndpoint: mgRealEndpoint,
       transferRequestId: params.transferRequestId,
       amount: params.amount,
       receivingCurrency: params.receivingCurrency,
@@ -223,13 +230,14 @@ export async function sendTransferToMG(
     });
     console.log('[MG Webhook] Payload completo:', JSON.stringify(payload, null, 2));
     
-    // 5. Realizar petición HTTP POST
+    // 5. Realizar petición HTTP POST al proxy (que reenvía al endpoint real)
     const response: AxiosResponse<MgWebhookResponse> = await axios.post(
       webhookUrl,
       payload,
       {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-MG-Endpoint': mgRealEndpoint // Enviar endpoint configurado al proxy
         },
         timeout: REQUEST_TIMEOUT_MS
       }

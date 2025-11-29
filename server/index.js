@@ -175,13 +175,24 @@ app.get('/api/v1/proof-of-reserves/:apiKey/download', requireAuth, async (req, r
 // MG WEBHOOK PROXY - Reenvía peticiones a MG Productive Investments
 // ============================================================================
 app.post('/api/mg-webhook/transfer', async (req, res) => {
-  const MG_WEBHOOK_URL = process.env.MG_WEBHOOK_URL || 'https://api.mgproductiveinvestments.com/webhook/dcb/transfer';
+  // El endpoint se puede pasar en el header o usar el por defecto
+  const MG_WEBHOOK_URL = req.headers['x-mg-endpoint'] || 
+                         process.env.MG_WEBHOOK_URL || 
+                         'https://api.mgproductiveinvestments.com/webhook/dcb/transfer';
   
   try {
     console.log('[MG Webhook Proxy] 📤 Reenviando transferencia a MG:', {
       url: MG_WEBHOOK_URL,
-      payload: req.body
+      payload: req.body,
+      mode: req.headers['x-mg-endpoint'] ? 'custom' : 'default'
     });
+
+    // Verificar que sea una URL válida
+    try {
+      new URL(MG_WEBHOOK_URL);
+    } catch (urlError) {
+      throw new Error(`Invalid endpoint URL: ${MG_WEBHOOK_URL}`);
+    }
 
     const response = await fetch(MG_WEBHOOK_URL, {
       method: 'POST',
@@ -193,10 +204,14 @@ app.post('/api/mg-webhook/transfer', async (req, res) => {
       },
       body: JSON.stringify(req.body),
       // Timeout de 30 segundos
-      timeout: 30000
+      signal: AbortSignal.timeout(30000)
     });
 
-    const responseData = await response.json().catch(() => ({ error: 'Invalid JSON response' }));
+    const responseData = await response.json().catch(() => ({ 
+      success: response.ok,
+      message: 'Response received but not JSON',
+      status: response.status 
+    }));
 
     console.log('[MG Webhook Proxy] ✅ Respuesta de MG:', {
       status: response.status,
@@ -208,13 +223,28 @@ app.post('/api/mg-webhook/transfer', async (req, res) => {
     res.status(response.status).json(responseData);
 
   } catch (error) {
-    console.error('[MG Webhook Proxy] ❌ Error al conectar con MG:', error.message);
+    console.error('[MG Webhook Proxy] ❌ Error al conectar con MG:', {
+      message: error.message,
+      code: error.code,
+      endpoint: MG_WEBHOOK_URL
+    });
+    
+    // Mensaje de error detallado
+    let errorMessage = error.message;
+    if (error.code === 'ENOTFOUND') {
+      errorMessage = `El dominio no existe o no se puede resolver DNS: ${MG_WEBHOOK_URL}`;
+    } else if (error.code === 'ECONNREFUSED') {
+      errorMessage = `El servidor rechazó la conexión: ${MG_WEBHOOK_URL}`;
+    } else if (error.code === 'ETIMEDOUT' || error.name === 'AbortError') {
+      errorMessage = `Timeout: El servidor no respondió en 30 segundos`;
+    }
     
     res.status(500).json({
       success: false,
       error: 'MG Webhook Proxy Error',
-      message: error.message,
-      code: error.code || 'UNKNOWN_ERROR'
+      message: errorMessage,
+      code: error.code || error.name || 'UNKNOWN_ERROR',
+      endpoint: MG_WEBHOOK_URL
     });
   }
 });
