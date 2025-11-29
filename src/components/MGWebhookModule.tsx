@@ -108,7 +108,8 @@ export function MGWebhookModule() {
   const [webhookUrl, setWebhookUrl] = useState(() => {
     const saved = localStorage.getItem('mg_webhook_url');
     if (saved) {
-      if (saved.includes('http://localhost:8787/api/mg-webhook/transfer →')) {
+      const needsUpgrade = saved.includes('localhost:8787') || saved.includes('→');
+      if (needsUpgrade) {
         const detected = detectDefaultProxyUrl();
         localStorage.setItem('mg_webhook_url', detected);
         return detected;
@@ -119,6 +120,16 @@ export function MGWebhookModule() {
     localStorage.setItem('mg_webhook_url', detected);
     return detected;
   });
+  useEffect(() => {
+    if (webhookUrl && (webhookUrl.includes('localhost:8787') || webhookUrl.includes('→'))) {
+      const detected = detectDefaultProxyUrl();
+      if (detected !== webhookUrl) {
+        setWebhookUrl(detected);
+        localStorage.setItem('mg_webhook_url', detected);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Endpoint real de MG (configurable)
   const [mgEndpoint, setMgEndpoint] = useState(() => {
