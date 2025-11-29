@@ -26,7 +26,9 @@ import {
   Mail,
   Activity,
   Zap,
-  Building2
+  Building2,
+  RotateCw,
+  Shield
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { sendTransferToMG, MgTransferParams, MgWebhookResponse } from '../services/mgWebhookService';
@@ -50,6 +52,11 @@ interface TransferHistory {
   custodyAccountId?: string;
   custodyAccountName?: string;
   custodyAccountBalance?: number;
+  // Reenvíos y verificación
+  resendCount?: number;
+  lastResendAt?: string;
+  verified?: boolean;
+  lastVerificationAt?: string;
 }
 
 export function MGWebhookModule() {
@@ -456,6 +463,110 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
     const email = prompt(isSpanish ? 'Ingrese el email del destinatario:' : 'Enter recipient email:');
     if (email) {
       sendReceiptByEmail(transfer, email);
+    }
+  };
+
+  // Reenviar transferencia al webhook de MG
+  const handleResendTransfer = async (transfer: TransferHistory) => {
+    if (!confirm(isSpanish 
+      ? '¿Reenviar esta transferencia al webhook de MG?\n\nEsto enviará nuevamente la misma transferencia.'
+      : 'Resend this transfer to MG webhook?\n\nThis will send the same transfer again.')) {
+      return;
+    }
+
+    setProcessing(true);
+    setError(null);
+
+    try {
+      console.log('[MG Webhook] 🔄 Reenviando transferencia:', transfer.transferRequestId);
+
+      // Reenviar con los mismos datos
+      const params: MgTransferParams = {
+        transferRequestId: transfer.transferRequestId,
+        amount: transfer.amount,
+        receivingCurrency: transfer.currency,
+        receivingAccount: transfer.receivingAccount,
+        sendingName: transfer.sendingName,
+        dateTime: new Date().toISOString() // Nuevo timestamp
+      };
+
+      const response = await sendTransferToMG(params);
+
+      // Actualizar historial
+      setTransferHistory(prev => prev.map(t => 
+        t.id === transfer.id 
+          ? {
+              ...t,
+              status: 'SUCCESS',
+              response,
+              resendCount: (t.resendCount || 0) + 1,
+              lastResendAt: new Date().toISOString()
+            }
+          : t
+      ));
+
+      setSuccess(isSpanish 
+        ? `✅ Transferencia reenviada exitosamente`
+        : `✅ Transfer resent successfully`);
+      
+      console.log('[MG Webhook] ✅ Transferencia reenviada:', response);
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(isSpanish 
+        ? `Error al reenviar: ${errorMessage}`
+        : `Resend error: ${errorMessage}`);
+      console.error('[MG Webhook] ❌ Error al reenviar:', err);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // Verificar estado de transferencia
+  const handleVerifyTransfer = async (transfer: TransferHistory) => {
+    setProcessing(true);
+    setError(null);
+
+    try {
+      console.log('[MG Webhook] 🔍 Verificando transferencia:', transfer.transferRequestId);
+
+      // Crear una transferencia de verificación (amount 0.01 para test)
+      const verificationParams: MgTransferParams = {
+        transferRequestId: `VERIFY-${transfer.transferRequestId}`,
+        amount: '0.01',
+        receivingCurrency: transfer.currency,
+        receivingAccount: transfer.receivingAccount,
+        sendingName: 'VERIFICATION_REQUEST',
+        dateTime: new Date().toISOString()
+      };
+
+      const response = await sendTransferToMG(verificationParams);
+
+      // Actualizar historial con verificación
+      setTransferHistory(prev => prev.map(t => 
+        t.id === transfer.id 
+          ? {
+              ...t,
+              verified: true,
+              lastVerificationAt: new Date().toISOString()
+            }
+          : t
+      ));
+
+      setSuccess(isSpanish 
+        ? `✅ Transferencia verificada. Estado: ${response.success ? 'RECIBIDA' : 'PENDIENTE'}`
+        : `✅ Transfer verified. Status: ${response.success ? 'RECEIVED' : 'PENDING'}`);
+      
+      console.log('[MG Webhook] ✅ Verificación completada:', response);
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(isSpanish 
+        ? `Error en verificación: ${errorMessage}`
+        : `Verification error: ${errorMessage}`);
+      console.error('[MG Webhook] ❌ Error en verificación:', err);
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -1100,26 +1211,86 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
                           )}
 
                           {/* Botones de acción */}
-                          {transfer.status === 'SUCCESS' && (
-                            <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] flex gap-2">
+                          <div className="mt-3 pt-3 border-t border-[var(--border-subtle)] space-y-2">
+                            {/* Fila 1: Descargar y Email */}
+                            {transfer.status === 'SUCCESS' && (
+                              <div className="flex gap-2">
+                                <BankingButton
+                                  variant="secondary"
+                                  icon={Download}
+                                  onClick={() => handleDownloadReceipt(transfer)}
+                                  className="flex-1"
+                                >
+                                  {isSpanish ? 'Descargar' : 'Download'}
+                                </BankingButton>
+                                <BankingButton
+                                  variant="secondary"
+                                  icon={Mail}
+                                  onClick={() => handleEmailReceipt(transfer)}
+                                  className="flex-1"
+                                >
+                                  {isSpanish ? 'Email' : 'Email'}
+                                </BankingButton>
+                              </div>
+                            )}
+
+                            {/* Fila 2: Reenviar y Verificar */}
+                            <div className="flex gap-2">
                               <BankingButton
                                 variant="secondary"
-                                icon={Download}
-                                onClick={() => handleDownloadReceipt(transfer)}
+                                icon={RotateCw}
+                                onClick={() => handleResendTransfer(transfer)}
                                 className="flex-1"
+                                disabled={processing}
                               >
-                                {isSpanish ? 'Descargar Recibo' : 'Download Receipt'}
+                                {isSpanish ? 'Reenviar' : 'Resend'}
+                                {transfer.resendCount && transfer.resendCount > 0 && (
+                                  <span className="ml-1 text-xs">({transfer.resendCount})</span>
+                                )}
                               </BankingButton>
                               <BankingButton
                                 variant="secondary"
-                                icon={Mail}
-                                onClick={() => handleEmailReceipt(transfer)}
+                                icon={Shield}
+                                onClick={() => handleVerifyTransfer(transfer)}
                                 className="flex-1"
+                                disabled={processing}
                               >
-                                {isSpanish ? 'Enviar por Email' : 'Send by Email'}
+                                {isSpanish ? 'Verificar' : 'Verify'}
                               </BankingButton>
                             </div>
-                          )}
+
+                            {/* Información de reenvíos */}
+                            {transfer.resendCount && transfer.resendCount > 0 && (
+                              <div className="text-xs text-[var(--text-muted)] flex items-center gap-1">
+                                <RotateCw className="w-3 h-3" />
+                                <span>
+                                  {isSpanish 
+                                    ? `Reenviado ${transfer.resendCount} ${transfer.resendCount === 1 ? 'vez' : 'veces'}`
+                                    : `Resent ${transfer.resendCount} ${transfer.resendCount === 1 ? 'time' : 'times'}`}
+                                </span>
+                                {transfer.lastResendAt && (
+                                  <span className="text-[var(--text-muted)]">
+                                    • {new Date(transfer.lastResendAt).toLocaleTimeString()}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Información de verificación */}
+                            {transfer.verified && (
+                              <div className="text-xs text-emerald-400 flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded">
+                                <Shield className="w-3 h-3" />
+                                <span>
+                                  {isSpanish ? 'Verificado' : 'Verified'}
+                                </span>
+                                {transfer.lastVerificationAt && (
+                                  <span className="text-[var(--text-muted)]">
+                                    • {new Date(transfer.lastVerificationAt).toLocaleTimeString()}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
 
                           {/* Información de cuenta custodio */}
                           {transfer.custodyAccountName && (
