@@ -47,7 +47,7 @@ PASO 1: CONFIGURAR ENDPOINT EN EL FRONTEND
       a. Abre https://webhook.site
       b. Copia tu URL única
       c. Pega la URL en “Endpoint Real de MG”
-      d. Cambia a modo “Personalizado”
+      d. Cambia el modo a “Custom”
 6. Guarda automáticamente (se persiste en localStorage).
 
 PASO 2: PROBAR CONEXIÓN
