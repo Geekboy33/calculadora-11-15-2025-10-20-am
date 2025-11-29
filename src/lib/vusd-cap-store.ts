@@ -292,7 +292,8 @@ class VUSDCapStore {
         const custodyAccount = accounts.find(a => a.id === pledge.custody_account_id);
 
         if (custodyAccount) {
-          const availableBalance = custodyAccount.totalBalance - totalReserved;
+          // CAMBIO: El monto reservado también está disponible
+          const availableBalance = custodyAccount.totalBalance; // Todo disponible
 
           console.log('[VUSD Store] 🔍 Validación de capital en store:', {
             account: custodyAccount.accountName,
@@ -300,21 +301,20 @@ class VUSDCapStore {
             currentlyReserved: totalReserved,
             available: availableBalance,
             requested: pledge.amount,
-            willBeAvailable: availableBalance - pledge.amount
+            willBeAvailable: availableBalance - pledge.amount,
+            note: 'El monto reservado también está disponible'
           });
 
           if (availableBalance < pledge.amount) {
             throw new Error(
               `❌ CAPITAL INSUFICIENTE\n\n` +
               `Cuenta: ${custodyAccount.accountName}\n` +
-              `Total: ${custodyAccount.currency} ${custodyAccount.totalBalance.toLocaleString()}\n` +
-              `Ya Reservado: ${custodyAccount.currency} ${totalReserved.toLocaleString()}\n` +
-              `Disponible: ${custodyAccount.currency} ${availableBalance.toLocaleString()}\n` +
+              `Total Disponible: ${custodyAccount.currency} ${custodyAccount.totalBalance.toLocaleString()}\n` +
               `Solicitado: ${pledge.currency} ${pledge.amount.toLocaleString()}\n\n` +
+              `Nota: El monto reservado también está disponible para uso.\n\n` +
               `Solución:\n` +
               `1. Reduce el monto del pledge\n` +
-              `2. Libera un pledge existente de esta cuenta\n` +
-              `3. Usa una cuenta con más capital disponible`
+              `2. Usa una cuenta con más capital disponible`
             );
           }
         }

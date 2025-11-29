@@ -245,7 +245,7 @@ class CustodyStore {
       accountName,
       currency,
       reservedBalance: 0,
-      availableBalance: balance,
+      availableBalance: balance, // Incluye todo el balance (reservado + libre)
       totalBalance: balance,
       encryptedData,
       verificationHash,
@@ -655,7 +655,9 @@ class CustodyStore {
     };
 
     account.reservedBalance += amount;
-    account.availableBalance -= amount;
+    // CAMBIO: availableBalance NO se reduce cuando se reserva
+    // El monto reservado sigue disponible para uso
+    // account.availableBalance -= amount; // COMENTADO - El reservado sigue disponible
     account.reservations.push(reservation);
     account.lastUpdated = new Date().toISOString();
 
@@ -738,7 +740,8 @@ class CustodyStore {
 
     // Liberar fondos reservados
     account.reservedBalance -= reservation.amount;
-    account.availableBalance += reservation.amount;
+    // CAMBIO: availableBalance no cambia porque ya incluía el monto reservado
+    // account.availableBalance += reservation.amount; // COMENTADO - Ya estaba disponible
     reservation.status = 'released';
     account.lastUpdated = new Date().toISOString();
 
@@ -798,7 +801,8 @@ class CustodyStore {
     const oldBalance = account.totalBalance;
     const change = newTotalBalance - oldBalance;
     account.totalBalance = newTotalBalance;
-    account.availableBalance = newTotalBalance - account.reservedBalance;
+    // CAMBIO: availableBalance = totalBalance (incluye reservado)
+    account.availableBalance = newTotalBalance; // Disponible = Total (reservado también disponible)
     account.lastUpdated = new Date().toISOString();
     
     this.saveAccounts(accounts);

@@ -248,7 +248,8 @@ class UnifiedPledgeStore {
       
       // Nueva reserva = reservas manuales + pledges actuales
       const newReservedBalance = manualReserved + totalPledged;
-      const newAvailableBalance = account.totalBalance - newReservedBalance;
+      // CAMBIO: availableBalance = totalBalance (incluye reservado)
+      const newAvailableBalance = account.totalBalance; // Todo el balance disponible
 
       console.log('[UnifiedPledgeStore] 🔄 Actualizando balance de cuenta (preservando reservas manuales):', {
         accountId: custodyAccountId,
