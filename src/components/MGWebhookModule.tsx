@@ -59,6 +59,22 @@ interface TransferHistory {
   lastVerificationAt?: string;
 }
 
+const detectDefaultProxyUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+
+    if (host.includes('luxliqdaes.cloud')) {
+      return 'https://luxliqdaes.cloud/api/mg-webhook/transfer';
+    }
+
+    if (window.location.protocol === 'https:') {
+      return `${window.location.origin}/api/mg-webhook/transfer`;
+    }
+  }
+
+  return 'http://localhost:8787/api/mg-webhook/transfer';
+};
+
 export function MGWebhookModule() {
   const { t, language } = useLanguage();
   const isSpanish = language === 'es';
@@ -91,7 +107,17 @@ export function MGWebhookModule() {
   // Configuración del webhook
   const [webhookUrl, setWebhookUrl] = useState(() => {
     const saved = localStorage.getItem('mg_webhook_url');
-    return saved || 'http://localhost:8787/api/mg-webhook/transfer → https://api.mgproductiveinvestments.com/webhook/dcb/transfer';
+    if (saved) {
+      if (saved.includes('http://localhost:8787/api/mg-webhook/transfer →')) {
+        const detected = detectDefaultProxyUrl();
+        localStorage.setItem('mg_webhook_url', detected);
+        return detected;
+      }
+      return saved;
+    }
+    const detected = detectDefaultProxyUrl();
+    localStorage.setItem('mg_webhook_url', detected);
+    return detected;
   });
 
   // Endpoint real de MG (configurable)
@@ -183,7 +209,8 @@ export function MGWebhookModule() {
 
     try {
       console.log('[MG Webhook] 🔍 Testing connection to MG Productive Investments...');
-      console.log('[MG Webhook] URL:', 'https://api.mgproductiveinvestments.com/webhook/dcb/transfer');
+      console.log('[MG Webhook] Proxy URL:', webhookUrl);
+      console.log('[MG Webhook] MG Endpoint:', mgEndpoint);
 
       const testParams: MgTransferParams = {
         transferRequestId: `TEST-${Date.now()}`,
@@ -772,7 +799,7 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
                 {apiStatus === 'connected' && <CheckCircle className="w-6 h-6 text-emerald-400 flex-shrink-0" />}
                 {apiStatus === 'error' && <XCircle className="w-6 h-6 text-red-400 flex-shrink-0" />}
                 {apiStatus === 'checking' && <RefreshCw className="w-6 h-6 text-yellow-400 animate-spin flex-shrink-0" />}
-                <div className="flex-1">
+                <div className="flex-1 space-y-1">
                   <p className={`font-bold text-lg ${
                     apiStatus === 'connected' ? 'text-green-400' :
                     apiStatus === 'error' ? 'text-red-400' :
@@ -782,9 +809,20 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
                     {apiStatus === 'error' && (isSpanish ? '❌ Error de conexión' : '❌ Connection error')}
                     {apiStatus === 'checking' && (isSpanish ? '🔄 Verificando...' : '🔄 Checking...')}
                   </p>
-                  <p className="text-sm text-[var(--text-secondary)] mt-1 break-all">
-                    {webhookUrl}
-                  </p>
+                  <div className="text-xs text-[var(--text-secondary)] mt-1 space-y-0.5 break-all">
+                    <p>
+                      <span className="font-semibold text-[var(--text-primary)]">
+                        {isSpanish ? 'Proxy:' : 'Proxy:'}
+                      </span>{' '}
+                      {webhookUrl}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-[var(--text-primary)]">
+                        {isSpanish ? 'Endpoint MG:' : 'MG Endpoint:'}
+                      </span>{' '}
+                      {mgEndpoint || '-'}
+                    </p>
+                  </div>
                   {connectionError && (
                     <div className="mt-3 p-3 bg-red-900/30 border border-red-500/50 rounded-lg">
                       <p className="text-xs font-semibold text-red-300 mb-2">
@@ -979,15 +1017,18 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
                     </h4>
                     <div className="text-xs text-[var(--text-secondary)] space-y-1">
                       <p>
+                        <strong>{isSpanish ? 'Proxy Producción:' : 'Production Proxy:'}</strong> https://luxliqdaes.cloud/api/mg-webhook/transfer
+                      </p>
+                      <p>
                         <strong>{isSpanish ? 'Proxy Local:' : 'Local Proxy:'}</strong> http://localhost:8787/api/mg-webhook/transfer
                       </p>
                       <p>
-                        <strong>{isSpanish ? 'Destino Final:' : 'Final Destination:'}</strong> {mgEndpoint}
+                        <strong>{isSpanish ? 'Destino Final (MG):' : 'Final Destination (MG):'}</strong> {mgEndpoint}
                       </p>
                       <p className="mt-2 text-yellow-400">
                         💡 {isSpanish 
-                          ? 'El proxy reenvía tus peticiones al endpoint configurado arriba'
-                          : 'The proxy forwards your requests to the endpoint configured above'}
+                          ? 'El proxy detecta automáticamente si estás en producción (luxliqdaes.cloud) o en local'
+                          : 'The proxy auto-detects whether you are in production (luxliqdaes.cloud) or local'}
                       </p>
                     </div>
                   </div>
