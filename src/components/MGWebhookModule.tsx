@@ -650,6 +650,27 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
     console.log('[MG Webhook] 📄 Historial exportado a TXT:', filename);
   };
 
+  // Descargar guía de configuración del endpoint
+  const handleDownloadEndpointGuide = async () => {
+    try {
+      const response = await fetch('/docs/MG_WEBHOOK_ENDPOINT_SETUP.txt');
+      if (!response.ok) {
+        throw new Error('Failed to fetch endpoint setup guide');
+      }
+      const text = await response.text();
+      downloadTXT(text, 'MG_WEBHOOK_ENDPOINT_SETUP.txt');
+      setSuccess(isSpanish
+        ? '📄 Guía descargada: MG_WEBHOOK_ENDPOINT_SETUP.txt'
+        : '📄 Guide downloaded: MG_WEBHOOK_ENDPOINT_SETUP.txt');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(isSpanish
+        ? `No se pudo descargar la guía: ${errorMessage}`
+        : `Unable to download guide: ${errorMessage}`);
+      console.error('[MG Webhook] ❌ Error downloading endpoint guide:', err);
+    }
+  };
+
   // Limpiar historial
   const clearHistory = () => {
     if (confirm(isSpanish ? '¿Eliminar todo el historial?' : 'Delete all history?')) {
@@ -857,6 +878,20 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
 
               {showConfig && (
                 <div className="space-y-4 mt-4">
+                  <div className="flex flex-col md:flex-row gap-2">
+                    <BankingButton
+                      variant="secondary"
+                      icon={Download}
+                      onClick={handleDownloadEndpointGuide}
+                    >
+                      {isSpanish ? 'Guía de Configuración (TXT)' : 'Endpoint Setup Guide (TXT)'}
+                    </BankingButton>
+                    <p className="text-xs text-[var(--text-secondary)] flex items-center">
+                      {isSpanish
+                        ? 'Descarga la guía completa paso a paso para configurar el endpoint.'
+                        : 'Download the complete step-by-step endpoint setup guide.'}
+                    </p>
+                  </div>
                   {/* Selector de Modo */}
                   <div>
                     <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">

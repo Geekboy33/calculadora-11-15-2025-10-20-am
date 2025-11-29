@@ -1,0 +1,148 @@
+============================================================
+MG WEBHOOK – CONFIGURACIÓN COMPLETA DE ENDPOINT (PASO A PASO)
+============================================================
+
+OBJETIVO
+--------
+Permitir que el módulo **MG Webhook** de DAES envíe transferencias al
+webhook correcto (producción, pruebas, sandbox o personalizado) y
+garantizar que el backend reenviará las peticiones al destino final.
+
+REQUISITOS
+----------
+1. Backend DAES en ejecución:
+      npm run server
+2. Frontend DAES en ejecución:
+      npm run dev
+3. Credenciales del sistema DAES (login).
+4. Endpoint válido para recibir las transferencias:
+      - Webhook real de MG (cuando exista)
+      - Servidor propio (ej: http://localhost:9000/webhook/dcb/transfer)
+      - Webhook.site o RequestBin para pruebas.
+
+ARQUITECTURA DEL WEBHOOK
+------------------------
+Frontend (MG Webhook Module)  →  Proxy local (server/index.js)
+                              →  Endpoint configurado (X-MG-Endpoint)
+
+El proxy acepta POST en http://localhost:8787/api/mg-webhook/transfer y
+reenviará la petición al endpoint indicado en el header `X-MG-Endpoint`.
+
+PASO 1: CONFIGURAR ENDPOINT EN EL FRONTEND
+-----------------------------------------
+1. Ingresa a DAES CoreBanking.
+2. Ve a la pestaña **“MG Webhook”** → vista **“Overview”**.
+3. En la tarjeta “Configuración” pulsa **“Mostrar”**.
+4. Selecciona uno de los modos:
+      - Production  → https://api.mgproductiveinvestments.com/webhook/dcb/transfer
+      - Staging     → https://staging-api.mgproductiveinvestments.com/webhook/dcb/transfer
+      - Sandbox     → https://webhook.site/tu-id
+      - Custom      → cualquier URL (ejemplo: http://localhost:9000/webhook/dcb/transfer)
+5. Si usas Sandbox:
+      a. Abre https://webhook.site
+      b. Copia tu URL única
+      c. Pega la URL en “Endpoint Real de MG”
+      d. Cambia a modo “Personalizado”
+6. Guarda automáticamente (se persiste en localStorage).
+
+PASO 2: PROBAR CONEXIÓN
+-----------------------
+1. En la misma vista “Overview” pulsa **“Probar conexión”**.
+2. Si todo está correcto verás “✅ Conectado”.
+3. Si aparece error:
+      - ENOTFOUND → el dominio no existe. Usa Sandbox o Custom.
+      - Timeout   → el servidor no respondió. Verifica que esté en línea.
+      - ECONNREFUSED → el servidor rechazó la conexión (firewall o puerto incorrecto).
+
+PASO 3: ENVIAR TRANSFERENCIA
+----------------------------
+1. Ve a la vista **“Nueva Transferencia”**.
+2. Selecciona una cuenta custodio.
+3. Completa:
+      - TransferRequestID (puedes generar uno)
+      - Monto (amount)
+      - Moneda
+      - Cuenta receptora
+      - Nombre del remitente
+4. Pulsa **“Enviar Transferencia a MG”**.
+5. Revisa la respuesta en el panel y en el endpoint configurado.
+
+PASO 4: REENVIAR O VERIFICAR
+---------------------------
+En la vista **“Historial”** cada transferencia exitosa muestra:
+      - Descargar recibo
+      - Enviar por email
+      - **Reenviar** (reenvía exactamente la misma transferencia)
+      - **Verificar** (envía una transferencia TEST de 0.01 para comprobar conectividad)
+Se registran los reenvíos y verificaciones con fecha y contador.
+
+CONFIGURACIÓN DEL PROXY (server/index.js)
+-----------------------------------------
+- Endpoint local: http://localhost:8787/api/mg-webhook/transfer
+- Headers aceptados:
+      Content-Type: application/json
+      X-MG-Endpoint: <URL real configurada>
+      X-MG-API-Key (opcional si MG requiere API key)
+- Manejo de errores:
+      ENOTFOUND → “El dominio no existe o no se puede resolver DNS”
+      ECONNREFUSED, ETIMEDOUT, AbortError → mensajes específicos
+
+EJEMPLO DE CURL (ENVÍO MANUAL)
+-----------------------------
+curl -X POST "http://localhost:8787/api/mg-webhook/transfer" ^
+     -H "Content-Type: application/json" ^
+     -H "X-MG-Endpoint: https://webhook.site/TU-ID" ^
+     -d "{
+          \"CashTransfer.v1\": {
+             \"TransferRequestID\": \"TX-2025-00001\",
+             \"Amount\": \"1000.00\",
+             \"ReceivingCurrency\": \"USD\",
+             \"ReceivingAccount\": \"MG-001\",
+             \"SendingName\": \"Digital Commercial Bank Ltd\",
+             \"DateTime\": \"2025-11-28T15:14:02Z\"
+          }
+        }"
+
+EJEMPLO DE SERVIDOR DE RECEPCIÓN (LOCAL)
+----------------------------------------
+// mg-test-server.js
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.post('/webhook/dcb/transfer', (req, res) => {
+  console.log('Transferencia recibida:', req.body);
+  res.json({
+    success: true,
+    message: 'Transfer received',
+    transfer_id: req.body['CashTransfer.v1'].TransferRequestID,
+    amount: req.body['CashTransfer.v1'].Amount,
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.listen(9000, () => {
+  console.log('MG Test Server → http://localhost:9000/webhook/dcb/transfer');
+});
+
+LUEGO:
+  node mg-test-server.js
+  Configura modo “Custom” con http://localhost:9000/webhook/dcb/transfer
+
+RECOMENDACIONES
+---------------
+1. Usa Sandbox (Webhook.site) mientras MG activa su endpoint real.
+2. Cuando MG proporcione el endpoint oficial, cámbialo en la UI.
+3. Documenta cualquier API key o header adicional que MG requiera.
+4. Mantén activo el proxy (npm run server) para evitar CORS.
+
+ESTADO ACTUAL
+-------------
+✔ MG Webhook Module funcional (envío, historial, reenviar, verificar)
+✔ Proxy backend con endpoint dinámico
+✔ Documentación y TXT con pasos
+✖ Endpoint real de MG: NO EXISTE (usar sandbox/personalizado)
+
+FIN DEL DOCUMENTO
+============================================================
+
