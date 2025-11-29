@@ -1,3 +1,7 @@
+@import './styles/daes-futuristic-minimal.css';
+@import './styles/advanced-interactions.css';
+@import './styles/hover-states.css';
+
 /* ═══════════════════════════════════════════════════════════════
    DAES COREBANKING - FUTURISTIC MINIMAL DESIGN SYSTEM
    Sistema de diseño unificado - Sin conflictos
@@ -7,15 +11,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* DAES Futuristic Minimal - Sistema Principal */
-@import './styles/daes-futuristic-minimal.css';
-
-/* Advanced Interactions & Micro-animations */
-@import './styles/advanced-interactions.css';
-
-/* Hover States Estandarizados */
-@import './styles/hover-states.css';
 
 /* Scroll horizontal suave para módulos */
 .modules-scroll-container {
