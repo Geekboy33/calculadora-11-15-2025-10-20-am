@@ -119,7 +119,8 @@ export default function APIGlobalModule() {
   useEffect(() => {
     console.log('[API GLOBAL] Component mounted, initializing...');
     loadData();
-    checkAPIConnection();
+    // ✅ REMOVIDO: checkAPIConnection() - Solo se verifica antes de transferir
+    // checkAPIConnection(); // No verificar automáticamente para evitar pings masivos
     loadM2Balance();
 
     // Listen to balance changes
@@ -329,6 +330,16 @@ export default function APIGlobalModule() {
       amount: transferForm.amount,
       currency: transferForm.currency
     });
+
+    // ✅ VERIFICAR CONEXIÓN SOLO ANTES DE TRANSFERIR (evita pings masivos)
+    console.log('[API GLOBAL] 🔍 Verifying API connection before transfer...');
+    await checkAPIConnection();
+    
+    // Si la conexión falla, detener la transferencia
+    if (apiStatus === 'error') {
+      setError('API connection failed. Please check connection and try again.');
+      return;
+    }
 
     if (!selectedAccount) {
       console.log('[API GLOBAL] ❌ No account selected');
