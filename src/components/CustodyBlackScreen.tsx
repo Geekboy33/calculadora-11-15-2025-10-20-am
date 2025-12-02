@@ -3,10 +3,11 @@
  * Genera Black Screen para cuentas custodio individuales
  */
 
-import { X, Download, Printer, Image as ImageIcon } from 'lucide-react';
+import { X, Download, Printer, Image as ImageIcon, FileText } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { BankIcon, BlockchainIcon, SecurityIcon, ComplianceIcon, AwardIcon, CheckIcon, IconText } from './CustomIcons';
 
 interface CustodyBlackScreenProps {
@@ -160,6 +161,67 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
     }
   };
 
+  const handleDownloadPdf = async () => {
+    if (!blackScreenRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(blackScreenRef.current, {
+        backgroundColor: '#000000',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        width: blackScreenRef.current.scrollWidth,
+        height: blackScreenRef.current.scrollHeight
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Calcular dimensiones para ajustar la imagen al PDF
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      
+      // Calcular ratio para mantener proporción
+      const ratio = pdfWidth / imgWidth;
+      const imgWidthFinal = pdfWidth;
+      const imgHeightFinal = imgHeight * ratio;
+      
+      // Si la imagen es más alta que una página, dividirla en múltiples páginas
+      if (imgHeightFinal > pdfHeight) {
+        let heightLeft = imgHeightFinal;
+        let position = 0;
+        const pageHeight = pdfHeight;
+        
+        // Primera página
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidthFinal, imgHeightFinal);
+        heightLeft -= pageHeight;
+        
+        // Páginas adicionales si es necesario
+        while (heightLeft > 0) {
+          position = -imgHeightFinal + heightLeft;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidthFinal, imgHeightFinal);
+          heightLeft -= pageHeight;
+        }
+      } else {
+        // Imagen cabe en una sola página
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidthFinal, imgHeightFinal);
+      }
+      
+      pdf.save(`CustodyAccount_${account.accountNumber || account.id}_${Date.now()}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert(language === 'es' ? 'Error al generar el PDF' : 'Error generating PDF');
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -187,6 +249,13 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
             >
               <ImageIcon className="w-4 h-4 inline mr-1" />
               {language === 'es' ? 'Imagen' : 'Image'}
+            </button>
+            <button
+              onClick={handleDownloadPdf}
+              className="px-3 py-2 bg-[#ffffff]/10 border border-[#ffffff]/30 text-[#ffffff] rounded hover:bg-[#ffffff]/20 text-sm"
+            >
+              <FileText className="w-4 h-4 inline mr-1" />
+              PDF
             </button>
             <button
               onClick={handlePrint}
