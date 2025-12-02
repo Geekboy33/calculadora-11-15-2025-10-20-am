@@ -749,6 +749,11 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
     try {
       await downloadPDF(txtContent, filename);
       console.log('[MG Webhook] Historial exportado a PDF:', filename);
+      setSuccess(isSpanish ? 'Historial exportado a PDF' : 'History exported to PDF');
+    } catch (error) {
+      console.error('Error exporting history to PDF:', error);
+      setError(isSpanish ? 'Error al exportar historial a PDF' : 'Error exporting history to PDF');
+    }
   };
 
   // Descargar guía de configuración del endpoint
