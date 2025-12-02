@@ -36,6 +36,7 @@ import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingInput
 import { useBankingTheme } from '../hooks/useBankingTheme';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
 import { downloadTXT } from '../lib/download-helper';
+import { CheckIcon, ErrorIcon, RefreshIcon, AlertIcon, ChartIcon, IdeaIcon, IconText } from './CustomIcons';
 
 interface TransferHistory {
   id: string;
@@ -176,7 +177,7 @@ export function MGWebhookModule() {
         a && a.accountType === 'banking'
       );
       setCustodyAccounts(bankingAccounts);
-      console.log('[MG Webhook] 📊 Cuentas custodio cargadas:', bankingAccounts.length);
+      console.log('[MG Webhook] Cuentas custodio cargadas:', bankingAccounts.length);
     };
 
     loadCustodyAccounts();
@@ -239,9 +240,9 @@ export function MGWebhookModule() {
       setApiStatus('connected');
       setConnectionError(null);
       setSuccess(isSpanish 
-        ? '✅ Conexión exitosa con MG Productive Investments'
-        : '✅ Successfully connected to MG Productive Investments');
-      console.log('[MG Webhook] ✅ Connection test PASSED');
+        ? 'Conexión exitosa con MG Productive Investments'
+        : 'Successfully connected to MG Productive Investments');
+      console.log('[MG Webhook] Connection test PASSED');
       console.log('[MG Webhook] Response:', response);
     } catch (err) {
       setApiStatus('error');
@@ -250,7 +251,7 @@ export function MGWebhookModule() {
       setError(isSpanish 
         ? `Error de conexión`
         : `Connection error`);
-      console.error('[MG Webhook] ❌ Connection test FAILED');
+      console.error('[MG Webhook] Connection test FAILED');
       console.error('[MG Webhook] Error details:', err);
     } finally {
       setTestingConnection(false);
@@ -527,7 +528,7 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
     setError(null);
 
     try {
-      console.log('[MG Webhook] 🔄 Reenviando transferencia:', transfer.transferRequestId);
+      console.log('[MG Webhook] Reenviando transferencia:', transfer.transferRequestId);
 
       // Reenviar con los mismos datos
       const params: MgTransferParams = {
@@ -555,17 +556,17 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
       ));
 
       setSuccess(isSpanish 
-        ? `✅ Transferencia reenviada exitosamente`
-        : `✅ Transfer resent successfully`);
+        ? `Transferencia reenviada exitosamente`
+        : `Transfer resent successfully`);
       
-      console.log('[MG Webhook] ✅ Transferencia reenviada:', response);
+      console.log('[MG Webhook] Transferencia reenviada:', response);
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       setError(isSpanish 
         ? `Error al reenviar: ${errorMessage}`
         : `Resend error: ${errorMessage}`);
-      console.error('[MG Webhook] ❌ Error al reenviar:', err);
+      console.error('[MG Webhook] Error al reenviar:', err);
     } finally {
       setProcessing(false);
     }
@@ -603,17 +604,17 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
       ));
 
       setSuccess(isSpanish 
-        ? `✅ Transferencia verificada. Estado: ${response.success ? 'RECIBIDA' : 'PENDIENTE'}`
-        : `✅ Transfer verified. Status: ${response.success ? 'RECEIVED' : 'PENDING'}`);
+        ? `Transferencia verificada. Estado: ${response.success ? 'RECIBIDA' : 'PENDIENTE'}`
+        : `Transfer verified. Status: ${response.success ? 'RECEIVED' : 'PENDING'}`);
       
-      console.log('[MG Webhook] ✅ Verificación completada:', response);
+      console.log('[MG Webhook] Verificación completada:', response);
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       setError(isSpanish 
         ? `Error en verificación: ${errorMessage}`
         : `Verification error: ${errorMessage}`);
-      console.error('[MG Webhook] ❌ Error en verificación:', err);
+      console.error('[MG Webhook] Error en verificación:', err);
     } finally {
       setProcessing(false);
     }
@@ -665,7 +666,7 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
       }
 
       if (transfer.verified) {
-        txtContent += `Verificado: ✅`;
+        txtContent += `Verificado: ${IconText.check}`;
         if (transfer.lastVerificationAt) {
           txtContent += ` (${new Date(transfer.lastVerificationAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')})`;
         }
@@ -705,7 +706,7 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
       setError(isSpanish
         ? `No se pudo descargar la guía: ${errorMessage}`
         : `Unable to download guide: ${errorMessage}`);
-      console.error('[MG Webhook] ❌ Error downloading endpoint guide:', err);
+      console.error('[MG Webhook] Error downloading endpoint guide:', err);
     }
   };
 
@@ -816,9 +817,24 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
                     apiStatus === 'error' ? 'text-red-400' :
                     'text-yellow-400'
                   }`}>
-                    {apiStatus === 'connected' && (isSpanish ? '✅ Conectado' : '✅ Connected')}
-                    {apiStatus === 'error' && (isSpanish ? '❌ Error de conexión' : '❌ Connection error')}
-                    {apiStatus === 'checking' && (isSpanish ? '🔄 Verificando...' : '🔄 Checking...')}
+                    {apiStatus === 'connected' && (
+                      <span className="flex items-center gap-2">
+                        <CheckIcon className="text-green-400" size={20} />
+                        <span>{isSpanish ? 'Conectado' : 'Connected'}</span>
+                      </span>
+                    )}
+                    {apiStatus === 'error' && (
+                      <span className="flex items-center gap-2">
+                        <ErrorIcon className="text-red-400" size={20} />
+                        <span>{isSpanish ? 'Error de conexión' : 'Connection error'}</span>
+                      </span>
+                    )}
+                    {apiStatus === 'checking' && (
+                      <span className="flex items-center gap-2">
+                        <RefreshIcon className="text-yellow-400 animate-spin" size={20} />
+                        <span>{isSpanish ? 'Verificando...' : 'Checking...'}</span>
+                      </span>
+                    )}
                   </p>
                   <div className="text-xs text-[var(--text-secondary)] mt-1 space-y-0.5 break-all">
                     <p>
@@ -1016,8 +1032,8 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
                     </div>
                     <p className="text-xs text-[var(--text-muted)] mt-2">
                       {isSpanish 
-                        ? '⚠️ IMPORTANTE: El dominio api.mgproductiveinvestments.com NO EXISTE actualmente. Por favor configura un endpoint válido.'
-                        : '⚠️ IMPORTANT: The domain api.mgproductiveinvestments.com DOES NOT EXIST currently. Please configure a valid endpoint.'}
+                        ? `${IconText.alert} IMPORTANTE: El dominio api.mgproductiveinvestments.com NO EXISTE actualmente. Por favor configura un endpoint válido.`
+                        : `${IconText.alert} IMPORTANT: The domain api.mgproductiveinvestments.com DOES NOT EXIST currently. Please configure a valid endpoint.`}
                     </p>
                   </div>
 
@@ -1037,7 +1053,7 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
                         <strong>{isSpanish ? 'Destino Final (MG):' : 'Final Destination (MG):'}</strong> {mgEndpoint}
                       </p>
                       <p className="mt-2 text-yellow-400">
-                        💡 {isSpanish 
+                        <IdeaIcon className="text-amber-400 inline mr-1" size={16} /> {isSpanish 
                           ? 'El proxy detecta automáticamente si estás en producción (luxliqdaes.cloud) o en local'
                           : 'The proxy auto-detects whether you are in production (luxliqdaes.cloud) or local'}
                       </p>

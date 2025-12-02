@@ -8,6 +8,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Shield, FileText, Download, Printer, CheckCircle, AlertTriangle, Lock, Building2, DollarSign, Database, X } from 'lucide-react';
 import { balanceStore, formatCurrency, getCurrencyName, type CurrencyBalance } from '../lib/balances-store';
 import { useLanguage } from '../lib/i18n.tsx';
+import { CheckIcon } from './CustomIcons';
 
 interface BlackScreenData {
   currency: string;
@@ -501,7 +502,7 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
                     <span className="text-[#ffffff]">{t.blackScreenVerificationStatus}:</span>
                     <div className="text-[#ffffff] font-bold flex items-center gap-2">
                       <CheckCircle className="w-4 h-4" />
-                      {t.blackScreenVerified} ✓
+                      {t.blackScreenVerified} <CheckIcon className="text-green-400 inline" size={16} />
                     </div>
                   </div>
                 </div>

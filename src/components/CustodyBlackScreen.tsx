@@ -7,6 +7,7 @@ import { X, Download, Printer, Image as ImageIcon } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
+import { BankIcon, BlockchainIcon, SecurityIcon, ComplianceIcon, AwardIcon, CheckIcon, IconText } from './CustomIcons';
 
 interface CustodyBlackScreenProps {
   account: any;
@@ -48,7 +49,7 @@ DOCUMENT ID:                   ${Math.random().toString(36).substring(2, 15).toU
                         ACCOUNT TYPE INFORMATION
 ═══════════════════════════════════════════════════════════════════════════════
 
-ACCOUNT TYPE:                  ${isBanking 
+ACCOUNT TYPE:                  ${IconText[isBanking ? 'bank' : 'blockchain']} ${isBanking 
   ? (isSpanish ? 'CUENTA BANCARIA CUSTODIO' : 'CUSTODY BANKING ACCOUNT')
   : (isSpanish ? 'CUENTA BLOCKCHAIN CUSTODIO' : 'CUSTODY BLOCKCHAIN ACCOUNT')}
 
@@ -81,10 +82,10 @@ VERIFIED TOTAL:                ${account.currency} ${account.totalBalance.toLoca
                         STANDARDS COMPLIANCE
 ═══════════════════════════════════════════════════════════════════════════════
 
-ISO 27001:2022                  Information Security              ✓ COMPLIANT
-ISO 20022                       Financial Interoperability         ✓ COMPATIBLE
-FATF AML/CFT                    Anti-Money Laundering             ✓ VERIFIED
-KYC                             Know Your Customer                ✓ VERIFIED
+${IconText.security} ISO 27001:2022                  Information Security              ${IconText.check} COMPLIANT
+${IconText.bank} ISO 20022                       Financial Interoperability         ${IconText.check} COMPATIBLE
+${IconText.compliance} FATF AML/CFT                    Anti-Money Laundering             ${IconText.check} VERIFIED
+KYC                             Know Your Customer                ${IconText.check} VERIFIED
 AML SCORE:                      ${account.amlScore || 95}/100
 RISK LEVEL:                     ${(account.riskLevel || 'low').toUpperCase()}
 
@@ -94,7 +95,7 @@ RISK LEVEL:                     ${(account.riskLevel || 'low').toUpperCase()}
 
 VERIFICATION HASH:              ${account.verificationHash || 'N/A'}
 ISSUE DATE:                     ${new Date(account.createdAt).toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')}
-VERIFICATION STATUS:            ✓ VERIFIED AND CERTIFIED
+VERIFICATION STATUS:            ${IconText.check} VERIFIED AND CERTIFIED
 
 ═══════════════════════════════════════════════════════════════════════════════
                         OFFICIAL BANK CERTIFICATION
@@ -106,7 +107,7 @@ available as indicated.
 
 Compliant with standards: SWIFT MT799/MT999, FEDWIRE, DTC, ISO 20022
 
-✓ DIGITALLY SIGNED
+${IconText.check} DIGITALLY SIGNED
 
 ═══════════════════════════════════════════════════════════════════════════════
                         DOCUMENT FOOTER
@@ -224,10 +225,13 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
             <div className="text-lg font-bold mb-4">
               {language === 'es' ? 'TIPO DE CUENTA' : 'ACCOUNT TYPE'}
             </div>
-            <div className="text-2xl font-bold text-[#ffffff]">
-              {isBanking 
-                ? (language === 'es' ? '🏦 CUENTA BANCARIA CUSTODIO' : '🏦 CUSTODY BANKING ACCOUNT')
-                : (language === 'es' ? '🌐 CUENTA BLOCKCHAIN CUSTODIO' : '🌐 CUSTODY BLOCKCHAIN ACCOUNT')}
+            <div className="text-2xl font-bold text-[#ffffff] flex items-center gap-2">
+              {isBanking ? <BankIcon className="text-cyan-400" size={28} /> : <BlockchainIcon className="text-cyan-400" size={28} />}
+              <span>
+                {isBanking 
+                  ? (language === 'es' ? 'CUENTA BANCARIA CUSTODIO' : 'CUSTODY BANKING ACCOUNT')
+                  : (language === 'es' ? 'CUENTA BLOCKCHAIN CUSTODIO' : 'CUSTODY BLOCKCHAIN ACCOUNT')}
+              </span>
             </div>
           </div>
 
@@ -307,25 +311,47 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
 
           {/* Cumplimiento */}
           <div>
-            <div className="text-lg font-bold mb-4 border-b border-[#ffffff]/30 pb-2">
-              {language === 'es' ? '🥇 CUMPLIMIENTO DE ESTÁNDARES' : '🥇 STANDARDS COMPLIANCE'}
+            <div className="text-lg font-bold mb-4 border-b border-[#ffffff]/30 pb-2 flex items-center gap-2">
+              <AwardIcon className="text-yellow-400" size={20} />
+              <span>{language === 'es' ? 'CUMPLIMIENTO DE ESTÁNDARES' : 'STANDARDS COMPLIANCE'}</span>
             </div>
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span>🔒 ISO 27001:2022 - {language === 'es' ? 'Seguridad de la Información' : 'Information Security'}</span>
-                <span className="text-white font-bold">✓ COMPLIANT</span>
+              <div className="flex justify-between items-center">
+                <span className="flex items-center gap-2">
+                  <SecurityIcon className="text-cyan-400" size={16} />
+                  ISO 27001:2022 - {language === 'es' ? 'Seguridad de la Información' : 'Information Security'}
+                </span>
+                <span className="text-white font-bold flex items-center gap-1">
+                  <CheckIcon className="text-green-400" size={16} />
+                  COMPLIANT
+                </span>
               </div>
-              <div className="flex justify-between">
-                <span>🏦 ISO 20022 - {language === 'es' ? 'Interoperabilidad Financiera' : 'Financial Interoperability'}</span>
-                <span className="text-white font-bold">✓ COMPATIBLE</span>
+              <div className="flex justify-between items-center">
+                <span className="flex items-center gap-2">
+                  <BankIcon className="text-cyan-400" size={16} />
+                  ISO 20022 - {language === 'es' ? 'Interoperabilidad Financiera' : 'Financial Interoperability'}
+                </span>
+                <span className="text-white font-bold flex items-center gap-1">
+                  <CheckIcon className="text-green-400" size={16} />
+                  COMPATIBLE
+                </span>
               </div>
-              <div className="flex justify-between">
-                <span>⚖️ FATF AML/CFT - {language === 'es' ? 'Anti-Lavado de Dinero' : 'Anti-Money Laundering'}</span>
-                <span className="text-white font-bold">✓ VERIFIED</span>
+              <div className="flex justify-between items-center">
+                <span className="flex items-center gap-2">
+                  <ComplianceIcon className="text-cyan-400" size={16} />
+                  FATF AML/CFT - {language === 'es' ? 'Anti-Lavado de Dinero' : 'Anti-Money Laundering'}
+                </span>
+                <span className="text-white font-bold flex items-center gap-1">
+                  <CheckIcon className="text-green-400" size={16} />
+                  VERIFIED
+                </span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span>KYC:</span>
-                <span className="text-white font-bold">✓ VERIFIED</span>
+                <span className="text-white font-bold flex items-center gap-1">
+                  <CheckIcon className="text-green-400" size={16} />
+                  VERIFIED
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>AML Score:</span>
@@ -352,10 +378,11 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
                 <span>{language === 'es' ? 'Fecha de Emisión:' : 'Issue Date:'}</span>
                 <span>{new Date(account.createdAt).toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span>{language === 'es' ? 'Estado de Verificación:' : 'Verification Status:'}</span>
-                <span className="text-white font-bold">
-                  {language === 'es' ? '✓ VERIFICADO Y CERTIFICADO' : '✓ VERIFIED AND CERTIFIED'}
+                <span className="text-white font-bold flex items-center gap-1">
+                  <CheckIcon className="text-green-400" size={16} />
+                  {language === 'es' ? 'VERIFICADO Y CERTIFICADO' : 'VERIFIED AND CERTIFIED'}
                 </span>
               </div>
             </div>
@@ -377,8 +404,9 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
               <div className="text-sm text-[#ffffff] mt-4">
                 {language === 'es' ? 'Conforme con estándares' : 'Compliant with standards'}: SWIFT MT799/MT999, FEDWIRE, DTC, ISO 20022
               </div>
-              <div className="mt-4 text-lg font-bold text-[#ffffff]">
-                {language === 'es' ? '✓ FIRMADO DIGITALMENTE' : '✓ DIGITALLY SIGNED'}
+              <div className="mt-4 text-lg font-bold text-[#ffffff] flex items-center justify-center gap-2">
+                <CheckIcon className="text-green-400" size={24} />
+                <span>{language === 'es' ? 'FIRMADO DIGITALMENTE' : 'DIGITALLY SIGNED'}</span>
               </div>
             </div>
           </div>
