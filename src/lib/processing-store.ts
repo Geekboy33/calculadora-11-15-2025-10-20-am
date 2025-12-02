@@ -1,4 +1,5 @@
 import type { CurrencyBalance } from './balances-store';
+import { balanceStore } from './balances-store';
 import { getSupabaseClient } from './supabase-client';
 
 const getSupabase = () => getSupabaseClient();
@@ -410,7 +411,6 @@ class ProcessingStore {
       // 🔥 UPDATE: Actualizar balanceStore en TIEMPO REAL
       // Esto notifica a Account Ledger y BankBlackScreen instantáneamente
       // Funciona incluso si el usuario está en otro módulo o minimiza el navegador
-      const { balanceStore } = await import('./balances-store');
       balanceStore.updateBalancesRealTime(
         balances, 
         this.currentState.fileName, 
@@ -470,7 +470,6 @@ class ProcessingStore {
       await this.saveBalancesToSupabase(balances, 100, 'completed');
 
       // 🔥 UPDATE: Notificar finalización a Account Ledger y BankBlackScreen
-      const { balanceStore } = await import('./balances-store');
       balanceStore.updateBalancesRealTime(
         balances, 
         this.currentState.fileName, 
