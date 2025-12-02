@@ -2179,7 +2179,7 @@ Versión: 5.0
                 const colors = {
                   M0: { bg: 'bg-purple-500/20 border-purple-500/40', text: 'text-purple-400' },
                   M1: { bg: 'bg-blue-500/20 border-blue-500/40', text: 'text-blue-400' },
-                  M2: { bg: 'bg-white/20/20 border-white/30/40', text: 'text-black' },
+                  M2: { bg: 'bg-white/20 border-white/30', text: 'text-white' },
                   M3: { bg: 'bg-yellow-500/20 border-yellow-500/40', text: 'text-yellow-400' },
                   M4: { bg: 'bg-red-500/20 border-red-500/40', text: 'text-red-400' },
                 };
@@ -2279,7 +2279,7 @@ Versión: 5.0
             <h2 className="text-xl font-semibold text-[#ffffff] mb-6 flex items-center justify-between">
               <span>{t.auditDetailedFindings} ({results.hallazgos.length})</span>
               {showFullData && (
-                <span className="text-xs text-black bg-white/20/20 px-3 py-1 rounded">
+                <span className="text-xs text-white bg-white/20 px-3 py-1 rounded">
                   👁️ Vista Completa Activa - Todos los datos visibles
                 </span>
               )}
@@ -2289,7 +2289,7 @@ Versión: 5.0
                 const classColors = {
                   M0: { bg: 'bg-purple-500/20 border-purple-500/40', text: 'text-purple-400' },
                   M1: { bg: 'bg-blue-500/20 border-blue-500/40', text: 'text-blue-400' },
-                  M2: { bg: 'bg-white/20/20 border-white/30/40', text: 'text-black' },
+                  M2: { bg: 'bg-white/20 border-white/30', text: 'text-white' },
                   M3: { bg: 'bg-yellow-500/20 border-yellow-500/40', text: 'text-yellow-400' },
                   M4: { bg: 'bg-red-500/20 border-red-500/40', text: 'text-red-400' },
                 };

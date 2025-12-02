@@ -106,7 +106,7 @@ export function AuditLogViewer() {
 
   const getActionBadge = (action: string) => {
     const colors: Record<string, string> = {
-      create: 'bg-white/10 text-black',
+      create: 'bg-white/10 text-white',
       update: 'bg-blue-900 text-blue-300',
       delete: 'bg-red-900 text-red-300',
       read: 'bg-[var(--bg-hover)] text-[var(--text-secondary)]'
