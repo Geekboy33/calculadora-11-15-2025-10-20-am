@@ -1,4 +1,4 @@
-import { CurrencyBalance } from './balances-store';
+import type { CurrencyBalance } from './balances-store';
 import { getSupabaseClient } from './supabase-client';
 
 const getSupabase = () => getSupabaseClient();
