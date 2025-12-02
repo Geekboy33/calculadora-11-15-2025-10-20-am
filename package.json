@@ -25,6 +25,7 @@
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "file-saver": "^2.0.5",
+    "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",
     "lucide-react": "^0.344.0",
     "lz-string": "^1.5.0",

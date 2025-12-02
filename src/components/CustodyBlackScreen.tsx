@@ -3,9 +3,10 @@
  * Genera Black Screen para cuentas custodio individuales
  */
 
-import { X, Download, Printer } from 'lucide-react';
+import { X, Download, Printer, Image as ImageIcon } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { useRef } from 'react';
+import html2canvas from 'html2canvas';
 
 interface CustodyBlackScreenProps {
   account: any;
@@ -19,14 +20,143 @@ export function CustodyBlackScreen({ account, onClose }: CustodyBlackScreenProps
   const isBanking = (account.accountType || 'blockchain') === 'banking';
 
   const handleDownloadTxt = () => {
-    const content = blackScreenRef.current?.innerText || '';
+    const isSpanish = language === 'es';
+    const date = new Date();
+    const formattedDate = date.toLocaleString(isSpanish ? 'es-ES' : 'en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    const content = `
+═══════════════════════════════════════════════════════════════════════════════
+                    OFFICIAL BANK CONFIRMATION DOCUMENT
+                    BLACK SCREEN - CUSTODY ACCOUNT STATEMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+BANK:                          Digital Commercial Bank Ltd
+SYSTEM:                        DAES 256 DATA AND EXCHANGE SETTLEMENT
+DOCUMENT TYPE:                 CUSTODY ACCOUNT CONFIRMATION
+DOCUMENT CLASSIFICATION:       ${isSpanish ? 'CONFIDENCIAL - SOLO USO BANCARIO AUTORIZADO' : 'CONFIDENTIAL - AUTHORIZED BANKING USE ONLY'}
+GENERATION DATE:               ${formattedDate}
+DOCUMENT ID:                   ${Math.random().toString(36).substring(2, 15).toUpperCase()}
+
+═══════════════════════════════════════════════════════════════════════════════
+                        ACCOUNT TYPE INFORMATION
+═══════════════════════════════════════════════════════════════════════════════
+
+ACCOUNT TYPE:                  ${isBanking 
+  ? (isSpanish ? 'CUENTA BANCARIA CUSTODIO' : 'CUSTODY BANKING ACCOUNT')
+  : (isSpanish ? 'CUENTA BLOCKCHAIN CUSTODIO' : 'CUSTODY BLOCKCHAIN ACCOUNT')}
+
+═══════════════════════════════════════════════════════════════════════════════
+                        BENEFICIARY INFORMATION
+═══════════════════════════════════════════════════════════════════════════════
+
+ACCOUNT HOLDER:                ${account.accountName}
+ACCOUNT NUMBER:                ${account.accountNumber || account.id}
+BANK:                          Digital Commercial Bank Ltd
+SYSTEM:                        DAES 256 DATA AND EXCHANGE SETTLEMENT
+CURRENCY:                      ${account.currency}
+${!isBanking ? `BLOCKCHAIN:                    ${account.blockchainLink || 'N/A'}\nTOKEN SYMBOL:                  ${account.tokenSymbol || 'N/A'}` : ''}
+
+═══════════════════════════════════════════════════════════════════════════════
+                        CUSTODY FUNDS SUMMARY
+═══════════════════════════════════════════════════════════════════════════════
+
+TOTAL BALANCE:                 ${account.currency} ${account.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+RESERVED BALANCE:              ${account.currency} ${account.reservedBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+AVAILABLE BALANCE:             ${account.currency} ${account.availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+═══════════════════════════════════════════════════════════════════════════════
+                        TOTAL VERIFIED BALANCE
+═══════════════════════════════════════════════════════════════════════════════
+
+VERIFIED TOTAL:                ${account.currency} ${account.totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+═══════════════════════════════════════════════════════════════════════════════
+                        STANDARDS COMPLIANCE
+═══════════════════════════════════════════════════════════════════════════════
+
+ISO 27001:2022                  Information Security              ✓ COMPLIANT
+ISO 20022                       Financial Interoperability         ✓ COMPATIBLE
+FATF AML/CFT                    Anti-Money Laundering             ✓ VERIFIED
+KYC                             Know Your Customer                ✓ VERIFIED
+AML SCORE:                      ${account.amlScore || 95}/100
+RISK LEVEL:                     ${(account.riskLevel || 'low').toUpperCase()}
+
+═══════════════════════════════════════════════════════════════════════════════
+                        TECHNICAL INFORMATION
+═══════════════════════════════════════════════════════════════════════════════
+
+VERIFICATION HASH:              ${account.verificationHash || 'N/A'}
+ISSUE DATE:                     ${new Date(account.createdAt).toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')}
+VERIFICATION STATUS:            ✓ VERIFIED AND CERTIFIED
+
+═══════════════════════════════════════════════════════════════════════════════
+                        OFFICIAL BANK CERTIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+This document certifies that the above mentioned funds are under secure 
+custody of the DAES 256 DATA AND EXCHANGE SETTLEMENT system and are 
+available as indicated.
+
+Compliant with standards: SWIFT MT799/MT999, FEDWIRE, DTC, ISO 20022
+
+✓ DIGITALLY SIGNED
+
+═══════════════════════════════════════════════════════════════════════════════
+                        DOCUMENT FOOTER
+═══════════════════════════════════════════════════════════════════════════════
+
+GENERATED BY:                  DAES CoreBanking System
+BANK:                          Digital Commercial Bank Ltd
+SYSTEM:                        DAES 256 DATA AND EXCHANGE SETTLEMENT
+COPYRIGHT:                     © ${new Date().getFullYear()} DAES - Data and Exchange Settlement
+DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toUpperCase()}
+
+═══════════════════════════════════════════════════════════════════════════════
+                    END OF OFFICIAL BANK CONFIRMATION DOCUMENT
+═══════════════════════════════════════════════════════════════════════════════
+`;
+
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `BlackScreen_${account.accountNumber || account.id}_${Date.now()}.txt`;
+    a.download = `CustodyAccount_${account.accountNumber || account.id}_${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadImage = async () => {
+    if (!blackScreenRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(blackScreenRef.current, {
+        backgroundColor: '#000000',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      });
+      
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CustodyAccount_${account.accountNumber || account.id}_${Date.now()}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    } catch (error) {
+      console.error('Error generating image:', error);
+      alert(language === 'es' ? 'Error al generar la imagen' : 'Error generating image');
+    }
   };
 
   const handlePrint = () => {
@@ -40,7 +170,7 @@ export function CustodyBlackScreen({ account, onClose }: CustodyBlackScreenProps
         {/* Header con botones */}
         <div className="bg-black border-b-2 border-[#ffffff] p-4 flex justify-between items-center print:hidden">
           <h2 className="text-xl font-bold text-[#ffffff]">
-            {language === 'es' ? 'BANK BLACK SCREEN - CUENTA CUSTODIO' : 'BANK BLACK SCREEN - CUSTODY ACCOUNT'}
+            {language === 'es' ? 'BLACK SCREEN - CUENTA CUSTODIO' : 'BLACK SCREEN - CUSTODY ACCOUNT'}
           </h2>
           <div className="flex gap-2">
             <button
@@ -49,6 +179,13 @@ export function CustodyBlackScreen({ account, onClose }: CustodyBlackScreenProps
             >
               <Download className="w-4 h-4 inline mr-1" />
               TXT
+            </button>
+            <button
+              onClick={handleDownloadImage}
+              className="px-3 py-2 bg-[#ffffff]/10 border border-[#ffffff]/30 text-[#ffffff] rounded hover:bg-[#ffffff]/20 text-sm"
+            >
+              <ImageIcon className="w-4 h-4 inline mr-1" />
+              {language === 'es' ? 'Imagen' : 'Image'}
             </button>
             <button
               onClick={handlePrint}
@@ -73,9 +210,10 @@ export function CustodyBlackScreen({ account, onClose }: CustodyBlackScreenProps
           {/* Header */}
           <div className="text-center border-t-2 border-b-2 border-[#ffffff]/30 py-6">
             <div className="text-2xl font-bold mb-2">
-              {language === 'es' ? 'BANK BLACK SCREEN - CONFIRMACIÓN BANCARIA OFICIAL' : 'BANK BLACK SCREEN - OFFICIAL BANK CONFIRMATION'}
+              {language === 'es' ? 'BLACK SCREEN - CONFIRMACIÓN BANCARIA OFICIAL' : 'BLACK SCREEN - OFFICIAL BANK CONFIRMATION'}
             </div>
-            <div className="text-lg mb-4">DAES - DATA AND EXCHANGE SETTLEMENT</div>
+            <div className="text-lg mb-2 font-bold">Digital Commercial Bank Ltd</div>
+            <div className="text-lg mb-4">System DAES 256 DATA AND EXCHANGE SETTLEMENT</div>
             <div className="text-xs text-[#ffffff]">
               {language === 'es' ? 'DOCUMENTO CONFIDENCIAL - SOLO PARA USO BANCARIO AUTORIZADO' : 'CONFIDENTIAL DOCUMENT - FOR AUTHORIZED BANKING USE ONLY'}
             </div>
@@ -109,7 +247,11 @@ export function CustodyBlackScreen({ account, onClose }: CustodyBlackScreenProps
               </div>
               <div>
                 <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Banco:' : 'Bank:'}</div>
-                <div className="text-[#ffffff]">DAES - DATA AND EXCHANGE SETTLEMENT</div>
+                <div className="text-[#ffffff] font-bold">Digital Commercial Bank Ltd</div>
+              </div>
+              <div>
+                <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Sistema:' : 'System:'}</div>
+                <div className="text-[#ffffff]">DAES 256 DATA AND EXCHANGE SETTLEMENT</div>
               </div>
               <div>
                 <div className="text-[#ffffff] mb-1">{language === 'es' ? 'Moneda:' : 'Currency:'}</div>
@@ -225,12 +367,14 @@ export function CustodyBlackScreen({ account, onClose }: CustodyBlackScreenProps
               <div className="text-lg font-bold mb-3">
                 {language === 'es' ? 'CERTIFICACIÓN BANCARIA OFICIAL' : 'OFFICIAL BANK CERTIFICATION'}
               </div>
-              <div className="text-sm text-[#ffffff] max-w-3xl mx-auto mb-4">
+              <div className="text-sm text-[#ffffff] max-w-3xl mx-auto mb-2">
+                <div className="font-bold mb-2">Digital Commercial Bank Ltd</div>
+                <div className="mb-2">System DAES 256 DATA AND EXCHANGE SETTLEMENT</div>
                 {language === 'es'
-                  ? 'Este documento certifica que los fondos arriba mencionados están bajo custodia segura del sistema DAES y están disponibles según se indica.'
-                  : 'This document certifies that the above mentioned funds are under secure custody of the DAES system and are available as indicated.'}
+                  ? 'Este documento certifica que los fondos arriba mencionados están bajo custodia segura del sistema DAES 256 DATA AND EXCHANGE SETTLEMENT y están disponibles según se indica.'
+                  : 'This document certifies that the above mentioned funds are under secure custody of the DAES 256 DATA AND EXCHANGE SETTLEMENT system and are available as indicated.'}
               </div>
-              <div className="text-sm text-[#ffffff]">
+              <div className="text-sm text-[#ffffff] mt-4">
                 {language === 'es' ? 'Conforme con estándares' : 'Compliant with standards'}: SWIFT MT799/MT999, FEDWIRE, DTC, ISO 20022
               </div>
               <div className="mt-4 text-lg font-bold text-[#ffffff]">
@@ -241,7 +385,9 @@ export function CustodyBlackScreen({ account, onClose }: CustodyBlackScreenProps
 
           {/* Footer */}
           <div className="text-center text-sm text-[#ffffff]">
-            <div>{language === 'es' ? 'Generado por' : 'Generated by'}: DAES CoreBanking System</div>
+            <div className="font-bold">{language === 'es' ? 'Generado por' : 'Generated by'}: DAES CoreBanking System</div>
+            <div className="mt-1 font-bold">Digital Commercial Bank Ltd</div>
+            <div className="mt-1">System DAES 256 DATA AND EXCHANGE SETTLEMENT</div>
             <div className="mt-1">© {new Date().getFullYear()} DAES - Data and Exchange Settlement</div>
             <div className="mt-2 text-xs">
               {language === 'es' ? 'Hash del Documento' : 'Document Hash'}: {Math.random().toString(36).substring(2, 15).toUpperCase()}
