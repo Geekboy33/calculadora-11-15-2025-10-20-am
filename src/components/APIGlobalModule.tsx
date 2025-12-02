@@ -158,7 +158,7 @@ export default function APIGlobalModule() {
     }
   };
 
-  const checkAPIConnection = async () => {
+  const checkAPIConnection = async (): Promise<boolean> => {
     try {
       setApiStatus('checking');
       console.log('[API GLOBAL] 🔍 Checking MindCloud API connectivity...');
@@ -195,17 +195,21 @@ export default function APIGlobalModule() {
         if (data.success) {
           setApiStatus('connected');
           console.log('[API GLOBAL] ✅ MindCloud API is CONNECTED and FUNCTIONAL');
+          return true;
         } else {
           setApiStatus('error');
           console.warn('[API GLOBAL] ⚠️ MindCloud API responded but returned error:', data);
+          return false;
         }
       } else {
         setApiStatus('error');
         console.error('[API GLOBAL] ❌ MindCloud API connection failed:', response.status);
+        return false;
       }
     } catch (error) {
       setApiStatus('error');
       console.error('[API GLOBAL] ❌ Error checking API connection:', error);
+      return false;
     }
   };
 
@@ -333,10 +337,10 @@ export default function APIGlobalModule() {
 
     // ✅ VERIFICAR CONEXIÓN SOLO ANTES DE TRANSFERIR (evita pings masivos)
     console.log('[API GLOBAL] 🔍 Verifying API connection before transfer...');
-    await checkAPIConnection();
+    const isConnected = await checkAPIConnection();
     
     // Si la conexión falla, detener la transferencia
-    if (apiStatus === 'error') {
+    if (!isConnected) {
       setError('API connection failed. Please check connection and try again.');
       return;
     }
