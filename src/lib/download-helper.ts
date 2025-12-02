@@ -53,3 +53,17 @@ export function downloadTXT(content: string, filename: string): void {
   safeDownload(content, filename, 'text/plain;charset=utf-8');
 }
 
+/**
+ * Descarga PDF desde contenido de texto
+ * Importa dinámicamente jsPDF para evitar problemas de bundle
+ */
+export async function downloadPDF(content: string, filename: string): Promise<void> {
+  try {
+    const { downloadTextAsPDFMonospace } = await import('./pdf-helper');
+    downloadTextAsPDFMonospace(content, filename);
+  } catch (error) {
+    console.error('[Download Helper] Error generating PDF:', error);
+    throw error;
+  }
+}
+

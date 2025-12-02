@@ -35,7 +35,7 @@ import { sendTransferToMG, MgTransferParams, MgWebhookResponse } from '../servic
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingInput, BankingBadge } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
-import { downloadTXT } from '../lib/download-helper';
+import { downloadTXT, downloadPDF } from '../lib/download-helper';
 import { CheckIcon, ErrorIcon, RefreshIcon, AlertIcon, ChartIcon, IdeaIcon, IconText } from './CustomIcons';
 
 interface TransferHistory {
@@ -684,9 +684,71 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
       txtContent += '\n';
     });
 
-    const filename = `MGWebhook_History_${new Date().toISOString().split('T')[0]}.txt`;
-    downloadTXT(txtContent, filename);
-    console.log('[MG Webhook] 📄 Historial exportado a TXT:', filename);
+    const filename = `MGWebhook_History_${new Date().toISOString().split('T')[0]}`;
+    downloadTXT(txtContent, `${filename}.txt`);
+    console.log('[MG Webhook] Historial exportado a TXT:', filename);
+  };
+
+  const handleExportHistoryPDF = async () => {
+    if (transferHistory.length === 0) {
+      setError(isSpanish ? 'No hay historial para exportar' : 'No history to export');
+      return;
+    }
+
+    let txtContent = '';
+    txtContent += '==============================================\n';
+    txtContent += `${isSpanish ? 'HISTORIAL DE TRANSFERENCIAS MG WEBHOOK' : 'MG WEBHOOK TRANSFER HISTORY'}\n`;
+    txtContent += '==============================================\n';
+    txtContent += `Generado: ${new Date().toLocaleString(isSpanish ? 'es-ES' : 'en-US')}\n`;
+    txtContent += `Total transferencias: ${transferHistory.length}\n\n`;
+
+    transferHistory.forEach((transfer, index) => {
+      txtContent += `----------------------------------------------\n`;
+      txtContent += `TRANSFERENCIA ${index + 1}\n`;
+      txtContent += `----------------------------------------------\n`;
+      txtContent += `TransferRequestID: ${transfer.transferRequestId}\n`;
+      txtContent += `Estado: ${transfer.status}\n`;
+      txtContent += `Monto: ${transfer.currency} ${transfer.amount}\n`;
+      txtContent += `Cuenta MG: ${transfer.receivingAccount}\n`;
+      txtContent += `Remitente: ${transfer.sendingName}\n`;
+      txtContent += `Fecha: ${new Date(transfer.timestamp).toLocaleString()}\n`;
+
+      if (transfer.custodyAccountName) {
+        txtContent += `Cuenta Custodio: ${transfer.custodyAccountName}\n`;
+        txtContent += `Saldo Referencia: ${transfer.custodyAccountBalance ? fmt.currency(transfer.custodyAccountBalance, transfer.currency) : '-'}\n`;
+      }
+
+      if (transfer.resendCount && transfer.resendCount > 0) {
+        txtContent += `Reenvíos: ${transfer.resendCount}`;
+        if (transfer.lastResendAt) {
+          txtContent += ` (Último: ${new Date(transfer.lastResendAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')})`;
+        }
+        txtContent += '\n';
+      }
+
+      if (transfer.verified) {
+        txtContent += `Verificado: ${IconText.check}`;
+        if (transfer.lastVerificationAt) {
+          txtContent += ` (${new Date(transfer.lastVerificationAt).toLocaleString(isSpanish ? 'es-ES' : 'en-US')})`;
+        }
+        txtContent += '\n';
+      }
+
+      if (transfer.response) {
+        txtContent += `Respuesta MG: ${JSON.stringify(transfer.response)}\n`;
+      }
+
+      if (transfer.error) {
+        txtContent += `Error: ${transfer.error}\n`;
+      }
+
+      txtContent += '\n';
+    });
+
+    const filename = `MGWebhook_History_${new Date().toISOString().split('T')[0]}`;
+    try {
+      await downloadPDF(txtContent, filename);
+      console.log('[MG Webhook] Historial exportado a PDF:', filename);
   };
 
   // Descargar guía de configuración del endpoint
@@ -1420,6 +1482,13 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
                         onClick={handleDownloadHistoryTxt}
                       >
                         {isSpanish ? 'Exportar TXT' : 'Export TXT'}
+                      </BankingButton>
+                      <BankingButton
+                        variant="secondary"
+                        icon={FileText}
+                        onClick={handleExportHistoryPDF}
+                      >
+                        {isSpanish ? 'Exportar PDF' : 'Export PDF'}
                       </BankingButton>
                       <BankingButton
                         variant="secondary"

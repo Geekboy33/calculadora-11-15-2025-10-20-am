@@ -4,11 +4,12 @@
  * Incluye traducciones y estándares de cumplimiento
  */
 
-import { X, Download, Printer, Shield, ChevronDown } from 'lucide-react';
+import { X, Download, Printer, Shield, ChevronDown, FileText } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { useRef, useState } from 'react';
 import { generateAuthenticityReport } from '../lib/authenticity-extractor';
 import type { AuthenticityProof } from '../lib/audit-store';
+import { downloadPDF } from '../lib/download-helper';
 
 interface Agregado {
   currency: string;
@@ -340,6 +341,118 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadPDF = async () => {
+    const timestamp = new Date().toLocaleString(language === 'es' ? 'es-ES' : 'en-US');
+    const report = `
+╔═══════════════════════════════════════════════════════════════════════╗
+║         ${txt.title.padEnd(63, ' ')}║
+║         ${txt.subtitle.padEnd(63, ' ')}║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+${txt.confidential}
+
+═══════════════════════════════════════════════════════════════════════
+${txt.summary}
+═══════════════════════════════════════════════════════════════════════
+
+${txt.date}: ${timestamp}
+${txt.status}: ${isComplete ? txt.complete + ' (100%)' : txt.inProcess + ` (${progress.toFixed(1)}%)`}
+${txt.findings}: ${results?.resumen?.total_hallazgos || 0}
+${!isComplete ? `\n⚠️ PROYECCIÓN AL 100%: Los valores mostrados incluyen proyección basada en ${progress.toFixed(1)}% actual\n` : ''}
+
+${txt.institutions}: ${extractedData?.bankNames?.length || 0}
+${txt.currencies}: ${extractedData?.metadata?.totalCurrencies || 0}
+
+═══════════════════════════════════════════════════════════════════════
+${txt.institutions.toUpperCase()}
+═══════════════════════════════════════════════════════════════════════
+
+${(extractedData?.bankNames || []).map((bank: string, i: number) => 
+  `${(i + 1).toString().padStart(3, ' ')}. ${bank}`
+).join('\n') || (language === 'es' ? 'No se identificaron instituciones' : 'No institutions identified')}
+
+═══════════════════════════════════════════════════════════════════════
+${txt.classification}
+═══════════════════════════════════════════════════════════════════════
+
+${txt.m0Title}
+${txt.m0Desc}
+${isComplete ? txt.actual + ':' : txt.actual + ' (' + progress.toFixed(1) + '%):'}     $${totals.current.M0.toLocaleString('en-US', {minimumFractionDigits: 2})}
+${!isComplete ? `${txt.projected}: $${totals.projected.M0.toLocaleString('en-US', {minimumFractionDigits: 2})}` : ''}
+${txt.percentage}: ${calculatePercentage(totals.current.M0)}%
+
+${txt.m1Title}
+${txt.m1Desc}
+${isComplete ? txt.actual + ':' : txt.actual + ' (' + progress.toFixed(1) + '%):'}     $${totals.current.M1.toLocaleString('en-US', {minimumFractionDigits: 2})}
+${!isComplete ? `${txt.projected}: $${totals.projected.M1.toLocaleString('en-US', {minimumFractionDigits: 2})}` : ''}
+${txt.percentage}: ${calculatePercentage(totals.current.M1)}%
+
+${txt.m2Title}
+${txt.m2Desc}
+${isComplete ? txt.actual + ':' : txt.actual + ' (' + progress.toFixed(1) + '%):'}     $${totals.current.M2.toLocaleString('en-US', {minimumFractionDigits: 2})}
+${!isComplete ? `${txt.projected}: $${totals.projected.M2.toLocaleString('en-US', {minimumFractionDigits: 2})}` : ''}
+${txt.percentage}: ${calculatePercentage(totals.current.M2)}%
+
+${txt.m3Title}
+${txt.m3Desc}
+${isComplete ? txt.actual + ':' : txt.actual + ' (' + progress.toFixed(1) + '%):'}     $${totals.current.M3.toLocaleString('en-US', {minimumFractionDigits: 2})}
+${!isComplete ? `${txt.projected}: $${totals.projected.M3.toLocaleString('en-US', {minimumFractionDigits: 2})}` : ''}
+${txt.percentage}: ${calculatePercentage(totals.current.M3)}%
+
+${txt.m4Title}
+${txt.m4Desc}
+${isComplete ? txt.actual + ':' : txt.actual + ' (' + progress.toFixed(1) + '%):'}     $${totals.current.M4.toLocaleString('en-US', {minimumFractionDigits: 2})}
+${!isComplete ? `${txt.projected}: $${totals.projected.M4.toLocaleString('en-US', {minimumFractionDigits: 2})}` : ''}
+${txt.percentage}: ${calculatePercentage(totals.current.M4)}%
+
+───────────────────────────────────────────────────────────────────────
+${txt.totalVerified}:
+${isComplete ? txt.actual + ':' : txt.actual + ' (' + actualProgress.toFixed(1) + '%):'}     $${grandTotalCurrent.toLocaleString('en-US', {minimumFractionDigits: 2})} USD
+${!isComplete ? `${txt.projected}: $${grandTotalProjected.toLocaleString('en-US', {minimumFractionDigits: 2})} USD` : ''}
+
+═══════════════════════════════════════════════════════════════════════
+${txt.standards}
+═══════════════════════════════════════════════════════════════════════
+
+✓ ${txt.iso27001}
+  Status: ${txt.iso27001Status}
+  Objetivo: Protección de datos bancarios y cumplimiento de seguridad
+
+✓ ${txt.iso20022}
+  Status: ${txt.iso20022Status}
+  Objetivo: Mensajería estándar con bancos centrales y entidades financieras
+
+✓ ${txt.fatf}
+  Status: ${txt.fatfStatus}
+  Objetivo: Prevención de lavado de dinero y financiamiento del terrorismo
+
+═══════════════════════════════════════════════════════════════════════
+${txt.certification}
+═══════════════════════════════════════════════════════════════════════
+
+${txt.certText}
+
+${isComplete 
+  ? txt.verified 
+  : `${txt.inProcess} (${progress.toFixed(1)}%)`}
+
+═══════════════════════════════════════════════════════════════════════
+
+${txt.generatedBy}: DAES ULTIMATE - Bank Audit System
+Timestamp: ${new Date().toISOString()}
+Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
+
+© ${new Date().getFullYear()} DAES CoreBanking System
+`;
+
+    try {
+      await downloadPDF(report, `Informe_Auditoria_Digital Commercial Bank Ltd`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert(language === 'es' ? 'Error al generar el PDF' : 'Error generating PDF');
+    }
+  };
+
   const handleDownloadAuthenticityIndividual = (currency: string) => {
     const agregado = results?.agregados?.find((a: Agregado) => a.currency === currency);
 
@@ -556,6 +669,13 @@ Hash: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
             >
               <Download className="w-4 h-4 inline mr-2" />
               {language === 'es' ? 'Descargar TXT' : 'Download TXT'}
+            </button>
+            <button
+              onClick={handleDownloadPDF}
+              className="px-4 py-2 bg-[#ffffff]/10 border border-[#ffffff]/30 text-[#ffffff] rounded hover:bg-[#ffffff]/20 transition-all"
+            >
+              <FileText className="w-4 h-4 inline mr-2" />
+              PDF
             </button>
             <div className="relative">
               <button

@@ -9,6 +9,7 @@ import { Shield, FileText, Download, Printer, CheckCircle, AlertTriangle, Lock, 
 import { balanceStore, formatCurrency, getCurrencyName, type CurrencyBalance } from '../lib/balances-store';
 import { useLanguage } from '../lib/i18n.tsx';
 import { CheckIcon } from './CustomIcons';
+import { downloadPDF } from '../lib/download-helper';
 
 interface BlackScreenData {
   currency: string;
@@ -148,10 +149,10 @@ export function BankBlackScreen() {
     }
   };
 
-  const handleDownload = () => {
-    if (!blackScreenData) return;
+  const getContent = () => {
+    if (!blackScreenData) return '';
     
-    const content = `
+    return `
 ═══════════════════════════════════════════════════════════════
         ${t.blackScreenBankConfirmation}
                     ${t.blackScreenXcpBank}
@@ -205,7 +206,11 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
                ${t.blackScreenCopyright}
 ═══════════════════════════════════════════════════════════════
     `;
+  };
 
+  const handleDownload = () => {
+    if (!blackScreenData) return;
+    const content = getContent();
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -215,6 +220,17 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!blackScreenData) return;
+    try {
+      const content = getContent();
+      await downloadPDF(content, `BLACKSCREEN-${blackScreenData.currency}`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert(t.language === 'es' ? 'Error al generar el PDF' : 'Error generating PDF');
+    }
   };
 
   return (
@@ -354,6 +370,13 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
                 >
                   <Download className="w-4 h-4" />
                   {t.blackScreenDownloadTxt}
+                </button>
+                <button
+                  onClick={handleDownloadPDF}
+                  className="bg-[#0d0d0d] border border-[#ffffff] hover:bg-[#ffffff]/20 text-[#ffffff] px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  PDF
                 </button>
                 <button
                   onClick={handlePrint}
