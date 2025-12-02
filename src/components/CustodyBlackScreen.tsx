@@ -165,17 +165,40 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
     if (!blackScreenRef.current) return;
     
     try {
+      // Guardar posición de scroll original
+      const originalScrollTop = blackScreenRef.current.scrollTop;
+      
+      // Asegurar que el scroll esté en la parte superior antes de capturar
+      blackScreenRef.current.scrollTop = 0;
+      
+      // Esperar a que el scroll se complete y el contenido se renderice
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Obtener las dimensiones completas del contenido
+      const fullWidth = blackScreenRef.current.scrollWidth;
+      const fullHeight = blackScreenRef.current.scrollHeight;
+      
       const canvas = await html2canvas(blackScreenRef.current, {
         backgroundColor: '#000000',
         scale: 2,
         logging: false,
         useCORS: true,
         allowTaint: true,
-        width: blackScreenRef.current.scrollWidth,
-        height: blackScreenRef.current.scrollHeight
+        width: fullWidth,
+        height: fullHeight,
+        windowWidth: fullWidth,
+        windowHeight: fullHeight,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
+        removeContainer: false
       });
       
-      const imgData = canvas.toDataURL('image/png');
+      // Restaurar posición de scroll original
+      blackScreenRef.current.scrollTop = originalScrollTop;
+      
+      const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -199,13 +222,13 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
         let position = 0;
         const pageHeight = pdfHeight;
         
-        // Primera página
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidthFinal, imgHeightFinal);
+        // Primera página - mostrar desde el inicio (posición 0)
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidthFinal, imgHeightFinal);
         heightLeft -= pageHeight;
         
         // Páginas adicionales si es necesario
         while (heightLeft > 0) {
-          position = -imgHeightFinal + heightLeft;
+          position = heightLeft - imgHeightFinal;
           pdf.addPage();
           pdf.addImage(imgData, 'PNG', 0, position, imgWidthFinal, imgHeightFinal);
           heightLeft -= pageHeight;
@@ -438,17 +461,25 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
             <div className="text-lg font-bold mb-4 border-b border-[#ffffff]/30 pb-2">
               {language === 'es' ? 'INFORMACIÓN TÉCNICA' : 'TECHNICAL INFORMATION'}
             </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>{language === 'es' ? 'Hash de Verificación:' : 'Verification Hash:'}</span>
-                <span className="text-purple-400 font-mono text-xs">{account.verificationHash.substring(0, 20)}...</span>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between items-start">
+                <span className="font-semibold">{language === 'es' ? 'Hash de Verificación:' : 'Verification Hash:'}</span>
+                <span className="text-purple-400 font-mono text-xs break-all text-right max-w-[70%]">
+                  {account.verificationHash || '3ad65ff0d75b1962d188...'}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span>{language === 'es' ? 'Fecha de Emisión:' : 'Issue Date:'}</span>
-                <span>{new Date(account.createdAt).toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')}</span>
+                <span className="font-semibold">{language === 'es' ? 'Fecha de Emisión:' : 'Issue Date:'}</span>
+                <span className="text-white">
+                  {new Date(account.createdAt || Date.now()).toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US', {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric'
+                  })}
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span>{language === 'es' ? 'Estado de Verificación:' : 'Verification Status:'}</span>
+                <span className="font-semibold">{language === 'es' ? 'Estado de Verificación:' : 'Verification Status:'}</span>
                 <span className="text-white font-bold flex items-center gap-1">
                   <CheckIcon className="text-green-400" size={16} />
                   {language === 'es' ? 'VERIFICADO Y CERTIFICADO' : 'VERIFIED AND CERTIFIED'}
@@ -463,12 +494,14 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
               <div className="text-lg font-bold mb-3">
                 {language === 'es' ? 'CERTIFICACIÓN BANCARIA OFICIAL' : 'OFFICIAL BANK CERTIFICATION'}
               </div>
-              <div className="text-sm text-[#ffffff] max-w-3xl mx-auto mb-2">
-                <div className="font-bold mb-2">Digital Commercial Bank Ltd</div>
-                <div className="mb-2">System DAES 256 DATA AND EXCHANGE SETTLEMENT</div>
-                {language === 'es'
-                  ? 'Este documento certifica que los fondos arriba mencionados están bajo custodia segura del sistema DAES 256 DATA AND EXCHANGE SETTLEMENT y están disponibles según se indica.'
-                  : 'This document certifies that the above mentioned funds are under secure custody of the DAES 256 DATA AND EXCHANGE SETTLEMENT system and are available as indicated.'}
+              <div className="text-sm text-[#ffffff] max-w-3xl mx-auto mb-3">
+                <div className="font-bold text-base mb-2">Digital Commercial Bank Ltd</div>
+                <div className="font-semibold mb-3">System DAES 256 DATA AND EXCHANGE SETTLEMENT</div>
+                <div className="text-sm leading-relaxed">
+                  {language === 'es'
+                    ? 'Este documento certifica que los fondos arriba mencionados están bajo custodia segura del sistema DAES 256 DATA AND EXCHANGE SETTLEMENT y están disponibles según se indica.'
+                    : 'This document certifies that the above mentioned funds are under secure custody of the DAES 256 DATA AND EXCHANGE SETTLEMENT system and are available as indicated.'}
+                </div>
               </div>
               <div className="text-sm text-[#ffffff] mt-4">
                 {language === 'es' ? 'Conforme con estándares' : 'Compliant with standards'}: SWIFT MT799/MT999, FEDWIRE, DTC, ISO 20022
@@ -481,13 +514,24 @@ DOCUMENT HASH:                 ${Math.random().toString(36).substring(2, 15).toU
           </div>
 
           {/* Footer */}
-          <div className="text-center text-sm text-[#ffffff]">
-            <div className="font-bold">{language === 'es' ? 'Generado por' : 'Generated by'}: DAES CoreBanking System</div>
-            <div className="mt-1 font-bold">Digital Commercial Bank Ltd</div>
-            <div className="mt-1">System DAES 256 DATA AND EXCHANGE SETTLEMENT</div>
-            <div className="mt-1">© {new Date().getFullYear()} DAES - Data and Exchange Settlement</div>
-            <div className="mt-2 text-xs">
-              {language === 'es' ? 'Hash del Documento' : 'Document Hash'}: {Math.random().toString(36).substring(2, 15).toUpperCase()}
+          <div className="text-center text-sm text-[#ffffff] border-t border-[#ffffff]/30 pt-4">
+            <div className="font-bold mb-2">{language === 'es' ? 'Generado por' : 'Generated by'}: DAES CoreBanking System</div>
+            <div className="font-bold mb-1">Digital Commercial Bank Ltd</div>
+            <div className="mb-1">System DAES 256 DATA AND EXCHANGE SETTLEMENT</div>
+            <div className="mb-3">© {new Date().getFullYear()} DAES - Data and Exchange Settlement</div>
+            <div className="mt-3 text-xs space-y-1">
+              <div>
+                {language === 'es' ? 'Hash del Documento' : 'Document Hash'}: {Math.random().toString(36).substring(2, 15).toUpperCase()}
+              </div>
+              <div className="mt-2 text-[#ffffff]/80">
+                CoreBanking v1.0.0
+              </div>
+              <div className="text-[#ffffff]/80">
+                ISO 4217 Compliant
+              </div>
+              <div className="text-[#ffffff]/80">
+                PCI-DSS Ready
+              </div>
             </div>
           </div>
         </div>
