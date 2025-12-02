@@ -10,7 +10,6 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { BankIcon, BlockchainIcon, SecurityIcon, ComplianceIcon, AwardIcon, CheckIcon, IconText } from './CustomIcons';
 import { downloadPDF } from '../lib/download-helper';
-import { downloadPDF } from '../lib/download-helper';
 
 interface CustodyBlackScreenProps {
   account: any;
