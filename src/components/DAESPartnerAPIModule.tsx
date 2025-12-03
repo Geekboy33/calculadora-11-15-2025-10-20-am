@@ -433,8 +433,8 @@ const getAccounts = async (accessToken: string) => {
     }
   });
   
-  const data = await response.json();
-  return data.data; // Array de cuentas
+    const data = await response.json();
+    return data.data; ${isSpanish ? '// Array de cuentas' : '// Array of accounts'}
 };
 \`\`\`
 
@@ -453,9 +453,9 @@ Headers:
   Authorization: Bearer [ACCESS_TOKEN]
 
 Query Params:
-  ?status=SETTLED          (opcional: filtrar por estado)
-  ?currency=USD            (opcional: filtrar por divisa)
-  ?limit=50                (opcional: límite de resultados)
+  ?status=SETTLED          ${isSpanish ? '(opcional: filtrar por estado)' : '(optional: filter by status)'}
+  ?currency=USD            ${isSpanish ? '(opcional: filtrar por divisa)' : '(optional: filter by currency)'}
+  ?limit=50                ${isSpanish ? '(opcional: límite de resultados)' : '(optional: result limit)'}
 
 Response (200 OK):
 {
@@ -498,49 +498,32 @@ ${isSpanish ? '- Tú las RECIBES en las cuentas que creaste' : '- You RECEIVE th
 ${isSpanish ? '- Consulta este endpoint para ver transferencias recibidas' : '- Query this endpoint to see received transfers'}
 ${isSpanish ? '- El campo cashTransfer contiene toda la información CashTransfer.v1' : '- The cashTransfer field contains all CashTransfer.v1 information'}
 
-${isSpanish ? 'Ejemplo COMPLETO en código:' : 'Complete code example:'}
+${isSpanish ? 'Ejemplo en código para consultar transferencias recibidas:' : 'Code example to query received transfers:'}
 \`\`\`typescript
-const createTransfer = async (
-  accessToken: string,
-  fromAccountId: string,
-  toAccountName: string,
-  toAccountId: string,
-  amount: number,
-  currency: string
-) => {
-  const transferRequestId = \`TX-\${Date.now()}\`;
-  
-  const response = await fetch('${baseUrl}/transfers', {
-    method: 'POST',
+const getReceivedTransfers = async (accessToken: string) => {
+  const response = await fetch('${baseUrl}/transfers/incoming/${client.clientId}?status=SETTLED', {
+    method: 'GET',
     headers: {
-      'Authorization': \`Bearer \${accessToken}\`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      'CashTransfer.v1': {
-        SendingName: '${client.legalName}',
-        SendingAccount: fromAccountId,
-        ReceivingName: toAccountName,
-        ReceivingAccount: toAccountId,
-        Datetime: new Date().toISOString(),
-        Amount: amount.toFixed(2),
-        SendingCurrency: currency,
-        ReceivingCurrency: currency,
-        Description: 'Payment via DAES Partner API',
-        TransferRequestID: transferRequestId,
-        ReceivingInstitution: 'Digital Commercial Bank DAES',
-        SendingInstitution: 'Digital Commercial Bank DAES',
-        method: 'API',
-        purpose: 'PAYMENT',
-        source: 'DAES_PARTNER_API'
-      }
-    })
+      'Authorization': \`Bearer \${accessToken}\`
+    }
   });
   
   const data = await response.json();
   
-  // Guardar DCBReference para tracking
-  console.log('Transfer created:', data.data.DCBReference);
+  ${isSpanish ? '// Procesar transferencias recibidas' : '// Process received transfers'}
+  for (const transfer of data.data) {
+    console.log(${isSpanish ? "'Transferencia recibida:'" : "'Transfer received:'"}, transfer.DCBReference);
+    console.log(${isSpanish ? "'  Monto:'" : "'  Amount:'"}, transfer.amount, transfer.currency);
+    console.log(${isSpanish ? "'  Estado:'" : "'  Status:'"}, transfer.state);
+    
+    ${isSpanish ? '// Actualizar tu base de datos con la transferencia recibida' : '// Update your database with the received transfer'}
+    await updateLocalDatabase({
+      reference: transfer.DCBReference,
+      amount: parseFloat(transfer.amount),
+      currency: transfer.currency,
+      receivedAt: transfer.settledAt
+    });
+  }
   
   return data.data;
 };
@@ -601,11 +584,11 @@ const checkTransferStatus = async (
   return data.data.state;
 };
 
-// Polling para esperar settlement
+${isSpanish ? '// Polling para esperar settlement' : '// Polling to wait for settlement'}
 const waitForSettlement = async (token: string, requestId: string) => {
   let state = 'PENDING';
   while (state === 'PENDING' || state === 'PROCESSING') {
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Esperar 2s
+    await new Promise(resolve => setTimeout(resolve, 2000)); ${isSpanish ? '// Esperar 2s' : '// Wait 2s'}
     state = await checkTransferStatus(token, requestId);
   }
   return state;
@@ -820,15 +803,15 @@ class DAESPartnerAPIClient {
     // Extraer información de CashTransfer.v1
     const cashTransfer = transfer.cashTransfer;
     
-    console.log('📥 TRANSFERENCIA RECIBIDA:');
-    console.log('  De:', cashTransfer.SendingName);
-    console.log('  Monto:', cashTransfer.Amount, cashTransfer.SendingCurrency);
-    console.log('  Para:', cashTransfer.ReceivingName);
-    console.log('  Cuenta destino:', cashTransfer.ReceivingAccount);
-    console.log('  Descripción:', cashTransfer.Description);
+    console.log(${isSpanish ? "'📥 TRANSFERENCIA RECIBIDA:'" : "'📥 TRANSFER RECEIVED:'"});
+    console.log(${isSpanish ? "'  De:'" : "'  From:'"}, cashTransfer.SendingName);
+    console.log(${isSpanish ? "'  Monto:'" : "'  Amount:'"}, cashTransfer.Amount, cashTransfer.SendingCurrency);
+    console.log(${isSpanish ? "'  Para:'" : "'  To:'"}, cashTransfer.ReceivingName);
+    console.log(${isSpanish ? "'  Cuenta destino:'" : "'  Destination account:'"}, cashTransfer.ReceivingAccount);
+    console.log(${isSpanish ? "'  Descripción:'" : "'  Description:'"}, cashTransfer.Description);
     
-    // Aquí actualizas TU base de datos local
-    // con la información de la transferencia recibida
+    ${isSpanish ? '// Aquí actualizas TU base de datos local' : '// Here you update YOUR local database'}
+    ${isSpanish ? '// con la información de la transferencia recibida' : '// with the received transfer information'}
     
     return {
       processed: true,
@@ -847,14 +830,14 @@ class DAESPartnerAPIClient {
       limit: 100
     });
 
-    // Filtrar solo las nuevas desde el último check
+    ${isSpanish ? '// Filtrar solo las nuevas desde el último check' : '// Filter only new ones since last check'}
     const newTransfers = lastCheckedTimestamp
       ? transfers.filter((t: any) => new Date(t.settledAt) > new Date(lastCheckedTimestamp))
       : transfers;
 
-    console.log(\`📥 Nuevas transferencias: \${newTransfers.length}\`);
+    console.log(\`📥 ${isSpanish ? 'Nuevas transferencias:' : 'New transfers:'} \${newTransfers.length}\`);
 
-    // Procesar cada una
+    ${isSpanish ? '// Procesar cada una' : '// Process each one'}
     for (const transfer of newTransfers) {
       await this.processIncomingTransfer(transfer.DCBReference);
     }
@@ -1220,37 +1203,37 @@ const daesClient = new DAESPartnerAPIClient({
 // EJEMPLO DE USO COMPLETO - MÓDULO DE RECEPCIÓN Y ENVÍO
 async function ejemploModuloRecepcion() {
   try {
-    // 1. Crear cuentas para RECIBIR en las divisas habilitadas
+    ${isSpanish ? '// 1. Crear cuentas para RECIBIR en las divisas habilitadas' : '// 1. Create accounts to RECEIVE in enabled currencies'}
     ${client.allowedCurrencies.map((curr: string) => 
       `const ${curr.toLowerCase()}Account = await daesClient.createAccount('${curr}');
-    console.log('Cuenta ${curr} lista para RECIBIR:', ${curr.toLowerCase()}Account.accountId);`
+    console.log(${isSpanish ? `'Cuenta ${curr} lista para RECIBIR:'` : `'Account ${curr} ready to RECEIVE:'`}, ${curr.toLowerCase()}Account.accountId);`
     ).join('\n    ')}
 
-    // 2. Consultar transferencias RECIBIDAS de DAES
+    ${isSpanish ? '// 2. Consultar transferencias RECIBIDAS de DAES' : '// 2. Query RECEIVED transfers from DAES'}
     const incomingTransfers = await daesClient.getIncomingTransfers({
       status: 'SETTLED'
     });
 
-    console.log(\`📥 Transferencias recibidas: \${incomingTransfers.length}\`);
+    console.log(\`📥 ${isSpanish ? 'Transferencias recibidas:' : 'Transfers received:'} \${incomingTransfers.length}\`);
 
-    // 3. Procesar cada transferencia recibida
+    ${isSpanish ? '// 3. Procesar cada transferencia recibida' : '// 3. Process each received transfer'}
     for (const transfer of incomingTransfers) {
-      console.log('\\n📥 PROCESANDO TRANSFERENCIA RECIBIDA:');
+      console.log(${isSpanish ? "'\\n📥 PROCESANDO TRANSFERENCIA RECIBIDA:'" : "'\\n📥 PROCESSING RECEIVED TRANSFER:'"});
       console.log('  DCB Reference:', transfer.DCBReference);
-      console.log('  Monto:', transfer.amount, transfer.currency);
-      console.log('  Estado:', transfer.state);
+      console.log(${isSpanish ? "'  Monto:'" : "'  Amount:'"}, transfer.amount, transfer.currency);
+      console.log(${isSpanish ? "'  Estado:'" : "'  Status:'"}, transfer.state);
 
-      // Obtener detalles completos con CashTransfer.v1
+      ${isSpanish ? '// Obtener detalles completos con CashTransfer.v1' : '// Get complete details with CashTransfer.v1'}
       const details = await daesClient.getTransferDetails(transfer.DCBReference);
       const cashTransfer = details.cashTransfer;
 
       console.log('\\n  📋 CashTransfer.v1 Info:');
-      console.log('    Remitente:', cashTransfer.SendingName);
-      console.log('    Institución:', cashTransfer.SendingInstitution);
-      console.log('    Para:', cashTransfer.ReceivingName);
-      console.log('    Descripción:', cashTransfer.Description);
+      console.log(${isSpanish ? "'    Remitente:'" : "'    Sender:'"}, cashTransfer.SendingName);
+      console.log(${isSpanish ? "'    Institución:'" : "'    Institution:'"}, cashTransfer.SendingInstitution);
+      console.log(${isSpanish ? "'    Para:'" : "'    To:'"}, cashTransfer.ReceivingName);
+      console.log(${isSpanish ? "'    Descripción:'" : "'    Description:'"}, cashTransfer.Description);
 
-      // 4. Actualizar TU base de datos con la transferencia recibida
+      ${isSpanish ? '// 4. Actualizar TU base de datos con la transferencia recibida' : '// 4. Update YOUR database with the received transfer'}
       await actualizarBaseDatosLocal({
         dcbReference: transfer.DCBReference,
         amount: parseFloat(transfer.amount),
@@ -1260,7 +1243,7 @@ async function ejemploModuloRecepcion() {
         description: cashTransfer.Description
       });
 
-      console.log('  ✅ Transferencia procesada y registrada en tu sistema');
+      console.log(${isSpanish ? "'  ✅ Transferencia procesada y registrada en tu sistema'" : "'  ✅ Transfer processed and registered in your system'"});
     }
 
     // 5. ${isSpanish ? 'EJEMPLO: ENVIAR TRANSFERENCIA con selección manual de sistema' : 'EXAMPLE: SEND TRANSFER with manual system selection'}
@@ -1315,30 +1298,30 @@ async function actualizarBaseDatosLocal(transferData: {
   //   localSystemReference: transferData.localSystemReference
   // });
 
-  console.log('💾 Guardado en base de datos local');
+  console.log(${isSpanish ? "'💾 Guardado en base de datos local'" : "'💾 Saved to local database'"});
   if (transferData.systemUsed) {
     console.log(\`  ${isSpanish ? 'Sistema utilizado:' : 'System used:'} \${transferData.systemUsed}\`);
   }
 }
 
-// POLLING AUTOMÁTICO (Ejecutar cada X minutos)
+${isSpanish ? '// POLLING AUTOMÁTICO (Ejecutar cada X minutos)' : '// AUTOMATIC POLLING (Run every X minutes)'}
 setInterval(async () => {
-  console.log('🔄 Verificando nuevas transferencias...');
+  console.log(${isSpanish ? "'🔄 Verificando nuevas transferencias...'" : "'🔄 Checking for new transfers...'"});
   
   const lastCheck = localStorage.getItem('lastTransferCheck') || new Date(0).toISOString();
   const newTransfers = await daesClient.pollNewTransfers(lastCheck);
 
   if (newTransfers.length > 0) {
-    console.log(\`📥 ¡\${newTransfers.length} nuevas transferencias recibidas!\`);
+    console.log(\`📥 ${isSpanish ? '¡' : ''}\${newTransfers.length} ${isSpanish ? 'nuevas transferencias recibidas!' : 'new transfers received!'}\`);
     
-    // Procesar cada una
+    ${isSpanish ? '// Procesar cada una' : '// Process each one'}
     for (const transfer of newTransfers) {
       await daesClient.processIncomingTransfer(transfer.DCBReference);
     }
   }
 
   localStorage.setItem('lastTransferCheck', new Date().toISOString());
-}, 60000); // Cada 1 minuto
+}, 60000); ${isSpanish ? '// Cada 1 minuto' : '// Every 1 minute'}
 \`\`\`
 
 ═══════════════════════════════════════════════════════════════════════════════
