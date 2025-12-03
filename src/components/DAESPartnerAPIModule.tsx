@@ -616,9 +616,12 @@ const waitForSettlement = async (token: string, requestId: string) => {
 ${isSpanish ? 'MÓDULO COMPLETO DE RECEPCIÓN DE TRANSFERENCIAS (TypeScript)' : 'COMPLETE TRANSFER RECEPTION MODULE (TypeScript)'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-${isSpanish ? '⭐ IMPORTANTE: Este módulo es para RECIBIR transferencias que DAES te envía' : '⭐ IMPORTANT: This module is to RECEIVE transfers that DAES sends you'}
+${isSpanish ? '⭐ IMPORTANTE: Este módulo permite RECIBIR transferencias de DAES y también ENVIAR transferencias' : '⭐ IMPORTANT: This module allows you to RECEIVE transfers from DAES and also SEND transfers'}
 
-${isSpanish ? 'Digital Commercial Bank DAES → ENVÍA → Tú RECIBES' : 'Digital Commercial Bank DAES → SENDS → You RECEIVE'}
+${isSpanish ? 'FUNCIONALIDADES:' : 'FUNCTIONALITIES:'}
+${isSpanish ? '1. RECIBIR: Digital Commercial Bank DAES → ENVÍA → Tú RECIBES' : '1. RECEIVE: Digital Commercial Bank DAES → SENDS → You RECEIVE'}
+${isSpanish ? '2. ENVIAR: Tú ENVÍAS → Sistemas locales (SWIFT, FEDWIRE, SEPA, etc.) → Destino final' : '2. SEND: You SEND → Local systems (SWIFT, FEDWIRE, SEPA, etc.) → Final destination'}
+${isSpanish ? '3. SELECCIÓN MANUAL: El usuario puede seleccionar manualmente qué sistema usar para enviar' : '3. MANUAL SELECTION: User can manually select which system to use for sending'}
 
 ${isSpanish ? 'A continuación, código completo listo para copiar y pegar en tu proyecto:' : 'Below, complete code ready to copy and paste into your project:'}
 
@@ -858,6 +861,352 @@ class DAESPartnerAPIClient {
 
     return newTransfers;
   }
+
+  /**
+   * ${isSpanish ? 'ENVIAR TRANSFERENCIA desde tu cuenta DAES a otro destino' : 'SEND TRANSFER from your DAES account to another destination'}
+   */
+  async sendTransfer(params: {
+    fromAccountId: string;
+    toAccountName: string;
+    toAccountId: string;
+    amount: number;
+    currency: string;
+    description?: string;
+    receivingInstitution?: string;
+  }) {
+    const token = await this.getAccessToken();
+    const transferRequestId = \`TX-\${Date.now()}-\${Math.random().toString(36).substring(2, 9).toUpperCase()}\`;
+
+    const payload = {
+      'CashTransfer.v1': {
+        SendingName: '${client.legalName}',
+        SendingAccount: params.fromAccountId,
+        ReceivingName: params.toAccountName,
+        ReceivingAccount: params.toAccountId,
+        Datetime: new Date().toISOString(),
+        Amount: params.amount.toFixed(2),
+        SendingCurrency: params.currency,
+        ReceivingCurrency: params.currency,
+        Description: params.description || 'Transfer via DAES Partner API',
+        TransferRequestID: transferRequestId,
+        ReceivingInstitution: params.receivingInstitution || 'Digital Commercial Bank DAES',
+        SendingInstitution: '${client.legalName}',
+        method: 'API',
+        purpose: 'PAYMENT',
+        source: 'DAES_PARTNER_API'
+      }
+    };
+
+    const response = await fetch(\`\${this.config.baseUrl}/transfers\`, {
+      method: 'POST',
+      headers: {
+        'Authorization': \`Bearer \${token}\`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(\`Failed to send transfer: \${response.statusText}\`);
+    }
+
+    const data = await response.json();
+    console.log(\`✅ ${isSpanish ? 'Transferencia enviada:' : 'Transfer sent:'} \${data.data.DCBReference}\`);
+    return data.data;
+  }
+}
+
+${isSpanish ? '// ========================================' : '// ========================================'}
+${isSpanish ? '// CONEXIÓN CON SISTEMAS LOCALES (SWIFT, FEDWIRE, etc.)' : '// CONNECTION WITH LOCAL SYSTEMS (SWIFT, FEDWIRE, etc.)'}
+${isSpanish ? '// ========================================' : '// ========================================'}
+
+${isSpanish ? '// Tipos de sistemas de transferencia disponibles' : '// Available transfer system types'}
+type TransferSystemType = 'SWIFT' | 'FEDWIRE' | 'SEPA' | 'ACH' | 'CHAPS' | 'TARGET2' | 'LOCAL_BANKING' | 'CUSTOM';
+
+interface TransferSystem {
+  id: string;
+  name: string;
+  type: TransferSystemType;
+  endpoint: string;
+  credentials: {
+    apiKey?: string;
+    apiSecret?: string;
+    username?: string;
+    password?: string;
+    certificate?: string;
+  };
+  enabled: boolean;
+}
+
+${isSpanish ? '// Configuración de sistemas locales' : '// Local systems configuration'}
+class LocalTransferSystemsManager {
+  private systems: TransferSystem[] = [];
+
+  ${isSpanish ? '// Agregar sistema de transferencia' : '// Add transfer system'}
+  addSystem(system: TransferSystem) {
+    this.systems.push(system);
+    console.log(\`✅ ${isSpanish ? 'Sistema agregado:' : 'System added:'} \${system.name} (\${system.type})\`);
+  }
+
+  ${isSpanish ? '// Obtener sistemas disponibles' : '// Get available systems'}
+  getAvailableSystems(): TransferSystem[] {
+    return this.systems.filter(s => s.enabled);
+  }
+
+  ${isSpanish ? '// Enviar transferencia a través de sistema local seleccionado' : '// Send transfer through selected local system'}
+  async sendTransferViaSystem(
+    systemId: string,
+    transferData: {
+      fromAccount: string;
+      toAccount: string;
+      toName: string;
+      amount: number;
+      currency: string;
+      description: string;
+      transferRequestId: string;
+    }
+  ) {
+    const system = this.systems.find(s => s.id === systemId && s.enabled);
+    if (!system) {
+      throw new Error(\`${isSpanish ? 'Sistema no encontrado o deshabilitado:' : 'System not found or disabled:'} \${systemId}\`);
+    }
+
+    console.log(\`📤 ${isSpanish ? 'Enviando transferencia vía' : 'Sending transfer via'} \${system.name} (\${system.type})...\`);
+
+    ${isSpanish ? '// Adaptar payload según el tipo de sistema' : '// Adapt payload according to system type'}
+    let payload: any;
+
+    switch (system.type) {
+      case 'SWIFT':
+        payload = {
+          messageType: 'MT103',
+          senderBIC: system.credentials.apiKey,
+          receiverBIC: transferData.toAccount.substring(0, 11),
+          amount: transferData.amount,
+          currency: transferData.currency,
+          beneficiaryName: transferData.toName,
+          beneficiaryAccount: transferData.toAccount,
+          remittanceInfo: transferData.description,
+          reference: transferData.transferRequestId
+        };
+        break;
+
+      case 'FEDWIRE':
+        payload = {
+          imad: transferData.transferRequestId,
+          amount: transferData.amount,
+          currency: transferData.currency,
+          senderAccount: transferData.fromAccount,
+          receiverAccount: transferData.toAccount,
+          receiverName: transferData.toName,
+          description: transferData.description
+        };
+        break;
+
+      case 'SEPA':
+        payload = {
+          messageId: transferData.transferRequestId,
+          amount: transferData.amount,
+          currency: transferData.currency,
+          debtorAccount: transferData.fromAccount,
+          creditorAccount: transferData.toAccount,
+          creditorName: transferData.toName,
+          remittanceInformation: transferData.description
+        };
+        break;
+
+      case 'ACH':
+        payload = {
+          transactionCode: '27',
+          amount: transferData.amount,
+          accountNumber: transferData.toAccount,
+          accountName: transferData.toName,
+          description: transferData.description,
+          traceNumber: transferData.transferRequestId
+        };
+        break;
+
+      default:
+        ${isSpanish ? '// Sistema personalizado - usar formato genérico' : '// Custom system - use generic format'}
+        payload = {
+          transferRequestId: transferData.transferRequestId,
+          fromAccount: transferData.fromAccount,
+          toAccount: transferData.toAccount,
+          toName: transferData.toName,
+          amount: transferData.amount,
+          currency: transferData.currency,
+          description: transferData.description
+        };
+    }
+
+    ${isSpanish ? '// Enviar a sistema local' : '// Send to local system'}
+    const response = await fetch(system.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(system.credentials.apiKey && { 'Authorization': \`Bearer \${system.credentials.apiKey}\` }),
+        ...(system.credentials.username && { 'X-Username': system.credentials.username }),
+        ...(system.credentials.password && { 'X-Password': system.credentials.password })
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(\`${isSpanish ? 'Error enviando a sistema local:' : 'Error sending to local system:'} \${response.statusText}\`);
+    }
+
+    const result = await response.json();
+    console.log(\`✅ ${isSpanish ? 'Transferencia enviada exitosamente vía' : 'Transfer sent successfully via'} \${system.name}\`);
+    return result;
+  }
+}
+
+${isSpanish ? '// Inicializar gestor de sistemas locales' : '// Initialize local systems manager'}
+const localSystemsManager = new LocalTransferSystemsManager();
+
+${isSpanish ? '// EJEMPLO: Configurar sistemas disponibles' : '// EXAMPLE: Configure available systems'}
+${isSpanish ? '// Puedes agregar múltiples sistemas y el usuario seleccionará cuál usar' : '// You can add multiple systems and the user will select which one to use'}
+
+localSystemsManager.addSystem({
+  id: 'swift-001',
+  name: 'SWIFT Network',
+  type: 'SWIFT',
+  endpoint: 'https://your-swift-gateway.com/api/transfer',
+  credentials: {
+    apiKey: process.env.SWIFT_API_KEY || '',
+    apiSecret: process.env.SWIFT_API_SECRET || ''
+  },
+  enabled: true
+});
+
+localSystemsManager.addSystem({
+  id: 'fedwire-001',
+  name: 'FEDWIRE',
+  type: 'FEDWIRE',
+  endpoint: 'https://your-fedwire-gateway.com/api/transfer',
+  credentials: {
+    apiKey: process.env.FEDWIRE_API_KEY || '',
+    username: process.env.FEDWIRE_USERNAME || '',
+    password: process.env.FEDWIRE_PASSWORD || ''
+  },
+  enabled: true
+});
+
+localSystemsManager.addSystem({
+  id: 'sepa-001',
+  name: 'SEPA',
+  type: 'SEPA',
+  endpoint: 'https://your-sepa-gateway.com/api/transfer',
+  credentials: {
+    apiKey: process.env.SEPA_API_KEY || ''
+  },
+  enabled: true
+});
+
+${isSpanish ? '// Función para enviar transferencia con selección manual de sistema' : '// Function to send transfer with manual system selection'}
+async function enviarTransferenciaConSistemaSeleccionado(
+  daesClient: DAESPartnerAPIClient,
+  transferData: {
+    fromAccountId: string;
+    toAccountName: string;
+    toAccountId: string;
+    amount: number;
+    currency: string;
+    description: string;
+  },
+  selectedSystemId: string ${isSpanish ? '// ID del sistema seleccionado manualmente' : '// ID of manually selected system'}
+) {
+  try {
+    ${isSpanish ? '// 1. Verificar balance disponible en cuenta DAES' : '// 1. Check available balance in DAES account'}
+    const accounts = await daesClient.getAccounts();
+    const sourceAccount = accounts.find((acc: any) => acc.accountId === transferData.fromAccountId);
+    
+    if (!sourceAccount) {
+      throw new Error(${isSpanish ? "'Cuenta origen no encontrada'" : "'Source account not found'"});
+    }
+
+    if (parseFloat(sourceAccount.availableBalance) < transferData.amount) {
+      throw new Error(${isSpanish ? "'Balance insuficiente en cuenta DAES'" : "'Insufficient balance in DAES account'"});
+    }
+
+    ${isSpanish ? '// 2. OPCIÓN A: Enviar directamente vía DAES API (recomendado para transferencias internas)' : '// 2. OPTION A: Send directly via DAES API (recommended for internal transfers)'}
+    ${isSpanish ? '// Si el destino es otra cuenta DAES, usar este método' : '// If destination is another DAES account, use this method'}
+    if (transferData.toAccountId.startsWith('${client.clientId}')) {
+      console.log('📤 ${isSpanish ? "Enviando vía DAES API (transferencia interna)..." : "Sending via DAES API (internal transfer)..."}');
+      return await daesClient.sendTransfer(transferData);
+    }
+
+    ${isSpanish ? '// 3. OPCIÓN B: Enviar vía sistema local seleccionado (SWIFT, FEDWIRE, etc.)' : '// 3. OPTION B: Send via selected local system (SWIFT, FEDWIRE, etc.)'}
+    ${isSpanish ? '// Para transferencias a sistemas externos, usar el sistema seleccionado manualmente' : '// For transfers to external systems, use manually selected system'}
+    console.log(\`📤 ${isSpanish ? "Enviando vía sistema local:" : "Sending via local system:"} \${selectedSystemId}\`);
+    
+    const transferRequestId = \`TX-\${Date.now()}-\${Math.random().toString(36).substring(2, 9).toUpperCase()}\`;
+    
+    ${isSpanish ? '// Enviar a sistema local' : '// Send to local system'}
+    const localSystemResult = await localSystemsManager.sendTransferViaSystem(selectedSystemId, {
+      fromAccount: transferData.fromAccountId,
+      toAccount: transferData.toAccountId,
+      toName: transferData.toAccountName,
+      amount: transferData.amount,
+      currency: transferData.currency,
+      description: transferData.description,
+      transferRequestId
+    });
+
+    ${isSpanish ? '// 4. Registrar la transferencia en tu sistema local' : '// 4. Register the transfer in your local system'}
+    await actualizarBaseDatosLocal({
+      dcbReference: transferRequestId,
+      amount: transferData.amount,
+      currency: transferData.currency,
+      receivedAt: new Date().toISOString(),
+      senderName: '${client.legalName}',
+      description: transferData.description,
+      systemUsed: selectedSystemId,
+      localSystemReference: localSystemResult.reference || localSystemResult.id
+    });
+
+    console.log(\`✅ ${isSpanish ? "Transferencia enviada exitosamente vía" : "Transfer sent successfully via"} \${selectedSystemId}\`);
+    return localSystemResult;
+
+  } catch (error) {
+    console.error(\`❌ ${isSpanish ? "Error enviando transferencia:" : "Error sending transfer:"}\`, error);
+    throw error;
+  }
+}
+
+${isSpanish ? '// FUNCIÓN PARA SELECCIÓN MANUAL DE SISTEMA' : '// FUNCTION FOR MANUAL SYSTEM SELECTION'}
+${isSpanish ? '// Esta función permite al usuario seleccionar manualmente qué sistema usar para enviar' : '// This function allows the user to manually select which system to use for sending'}
+async function seleccionarSistemaYEnviar(
+  daesClient: DAESPartnerAPIClient,
+  transferData: {
+    fromAccountId: string;
+    toAccountName: string;
+    toAccountId: string;
+    amount: number;
+    currency: string;
+    description: string;
+  }
+) {
+  ${isSpanish ? '// Obtener sistemas disponibles' : '// Get available systems'}
+  const availableSystems = localSystemsManager.getAvailableSystems();
+  
+  if (availableSystems.length === 0) {
+    throw new Error(${isSpanish ? "'No hay sistemas de transferencia configurados'" : "'No transfer systems configured'"});
+  }
+
+  ${isSpanish ? '// Mostrar sistemas disponibles al usuario (en tu UI)' : '// Show available systems to user (in your UI)'}
+  console.log(\`${isSpanish ? "Sistemas disponibles:" : "Available systems:"}\`);
+  availableSystems.forEach((system, index) => {
+    console.log(\`  \${index + 1}. \${system.name} (\${system.type}) - ID: \${system.id}\`);
+  });
+
+  ${isSpanish ? '// EJEMPLO: Selección manual por el usuario' : '// EXAMPLE: Manual selection by user'}
+  ${isSpanish ? '// En una aplicación real, esto sería una selección en la UI' : '// In a real application, this would be a UI selection'}
+  ${isSpanish ? '// Por ahora, usamos el primer sistema disponible como ejemplo' : '// For now, we use the first available system as example'}
+  const selectedSystemId = availableSystems[0].id; ${isSpanish ? '// Usuario selecciona manualmente' : '// User manually selects'}
+
+  ${isSpanish ? '// Enviar con el sistema seleccionado' : '// Send with selected system'}
+  return await enviarTransferenciaConSistemaSeleccionado(daesClient, transferData, selectedSystemId);
 }
 
 // INICIALIZACIÓN DEL CLIENTE
@@ -868,7 +1217,7 @@ const daesClient = new DAESPartnerAPIClient({
   apiKey: '${client.apiKey}'
 });
 
-// EJEMPLO DE USO COMPLETO - MÓDULO DE RECEPCIÓN
+// EJEMPLO DE USO COMPLETO - MÓDULO DE RECEPCIÓN Y ENVÍO
 async function ejemploModuloRecepcion() {
   try {
     // 1. Crear cuentas para RECIBIR en las divisas habilitadas
@@ -913,6 +1262,29 @@ async function ejemploModuloRecepcion() {
 
       console.log('  ✅ Transferencia procesada y registrada en tu sistema');
     }
+
+    // 5. ${isSpanish ? 'EJEMPLO: ENVIAR TRANSFERENCIA con selección manual de sistema' : 'EXAMPLE: SEND TRANSFER with manual system selection'}
+    ${isSpanish ? '// El usuario puede seleccionar manualmente qué sistema usar (SWIFT, FEDWIRE, SEPA, etc.)' : '// User can manually select which system to use (SWIFT, FEDWIRE, SEPA, etc.)'}
+    const transferToSend = {
+      fromAccountId: usdAccount.accountId,
+      toAccountName: 'Destino Externo',
+      toAccountId: 'EXTERNAL-ACC-12345',
+      amount: 500.00,
+      currency: 'USD',
+      description: 'Payment to external system'
+    };
+
+    ${isSpanish ? '// Obtener sistemas disponibles para que el usuario seleccione' : '// Get available systems for user to select'}
+    const availableSystems = localSystemsManager.getAvailableSystems();
+    console.log(\`${isSpanish ? "Sistemas disponibles para envío:" : "Available systems for sending:"} \${availableSystems.map(s => s.name).join(', ')}\`);
+
+    ${isSpanish ? '// Usuario selecciona manualmente el sistema (ejemplo: SWIFT)' : '// User manually selects the system (example: SWIFT)'}
+    const selectedSystem = availableSystems.find(s => s.type === 'SWIFT') || availableSystems[0];
+    
+    if (selectedSystem) {
+      console.log(\`📤 ${isSpanish ? "Enviando transferencia vía sistema seleccionado:" : "Sending transfer via selected system:"} \${selectedSystem.name}\`);
+      await enviarTransferenciaConSistemaSeleccionado(daesClient, transferToSend, selectedSystem.id);
+    }
   } catch (error) {
     console.error('Error:', error);
   }
@@ -927,6 +1299,8 @@ async function actualizarBaseDatosLocal(transferData: {
   receivedAt: string;
   senderName: string;
   description: string;
+  systemUsed?: string;
+  localSystemReference?: string;
 }) {
   // EJEMPLO: Guardar en tu base de datos
   // await db.transfers.insert({
@@ -936,10 +1310,15 @@ async function actualizarBaseDatosLocal(transferData: {
   //   status: 'RECEIVED',
   //   receivedAt: transferData.receivedAt,
   //   sender: transferData.senderName,
-  //   description: transferData.description
+  //   description: transferData.description,
+  //   systemUsed: transferData.systemUsed || 'DAES_API',
+  //   localSystemReference: transferData.localSystemReference
   // });
 
   console.log('💾 Guardado en base de datos local');
+  if (transferData.systemUsed) {
+    console.log(\`  ${isSpanish ? 'Sistema utilizado:' : 'System used:'} \${transferData.systemUsed}\`);
+  }
 }
 
 // POLLING AUTOMÁTICO (Ejecutar cada X minutos)
@@ -1103,7 +1482,7 @@ ${client.webhookUrl ? `\n${isSpanish ? 'URL del Webhook:' : 'Webhook URL:'} ${cl
 ${client.webhookSecret ? `\n${isSpanish ? 'Webhook Secret:' : 'Webhook Secret:'} ${client.webhookSecret}` : ''}
 
 ${isSpanish ? 'FORMATO DEL WEBHOOK (Lo que recibirás):' : 'WEBHOOK FORMAT (What you will receive):'}
-POST [TU_WEBHOOK_URL]
+POST ${client.webhookUrl || (isSpanish ? '[TU_WEBHOOK_URL]' : '[YOUR_WEBHOOK_URL]')}
 Headers:
   Content-Type: application/json
   X-DAES-Signature: [HMAC-SHA256]
