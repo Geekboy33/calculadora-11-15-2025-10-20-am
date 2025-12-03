@@ -80,7 +80,7 @@ export function DAESPartnerAPIModule() {
     externalClientId: '',
     legalName: '',
     country: 'US',
-    type: 'WALLET' as 'FINTECH' | 'PSP' | 'WALLET' | 'EXCHANGE',
+    type: 'WALLET' as 'FINTECH' | 'PSP' | 'WALLET' | 'EXCHANGE' | 'BANK' | 'CENTRAL_BANK',
     allowedCurrencies: ['USD']
   });
   
@@ -2216,6 +2216,8 @@ Partner: ${partner.name}
                       <option value="FINTECH">Fintech</option>
                       <option value="PSP">PSP (Payment Service Provider)</option>
                       <option value="EXCHANGE">Exchange</option>
+                      <option value="BANK">Bank</option>
+                      <option value="CENTRAL_BANK">Central Bank</option>
                     </select>
                   </div>
 
