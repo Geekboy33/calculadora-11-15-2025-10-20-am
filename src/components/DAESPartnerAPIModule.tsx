@@ -1465,6 +1465,9 @@ Partner: ${partner.name}
     // Contar clientes asociados
     const associatedClients = clients.filter(c => c.partnerId === partnerId);
     
+    // Verificar si hay credenciales generadas para este partner
+    const hasGeneratedCredentials = createdCredentials && createdCredentials.clientId === partner.clientId;
+    
     const confirmed = confirm(
       `⚠️ ${isSpanish ? 'ELIMINAR PARTNER' : 'DELETE PARTNER'}\n\n` +
       `Partner: ${partner.name}\n` +
@@ -1472,8 +1475,9 @@ Partner: ${partner.name}
       `${isSpanish ? 'También se eliminarán:' : 'This will also delete:'}\n` +
       `- ${associatedClients.length} ${isSpanish ? 'cliente(s) asociado(s)' : 'associated client(s)'}\n` +
       `- ${isSpanish ? 'Todas las cuentas de esos clientes' : 'All accounts of those clients'}\n` +
-      `- ${isSpanish ? 'Todo el historial de transferencias' : 'All transfer history'}\n\n` +
-      `${isSpanish ? '¿Estás SEGURO?' : 'Are you SURE?'}\n` +
+      `- ${isSpanish ? 'Todo el historial de transferencias' : 'All transfer history'}\n` +
+      (hasGeneratedCredentials ? `- ${isSpanish ? 'Credenciales generadas pendientes de guardar' : 'Generated credentials not yet saved'}\n` : '') +
+      `\n${isSpanish ? '¿Estás SEGURO?' : 'Are you SURE?'}\n` +
       `${isSpanish ? 'Esta acción NO se puede deshacer.' : 'This action CANNOT be undone.'}`
     );
 
@@ -1487,11 +1491,17 @@ Partner: ${partner.name}
       // Eliminar transferencias asociadas
       setTransfers(transfers.filter(t => t.partnerId !== partnerId));
 
+      // Eliminar credenciales generadas si corresponden a este partner
+      if (hasGeneratedCredentials) {
+        setCreatedCredentials(null);
+      }
+
       alert(
         `✅ ${isSpanish ? 'ELIMINADO EXITOSAMENTE' : 'DELETED SUCCESSFULLY'}\n\n` +
         `Partner: ${partner.name}\n` +
         `${isSpanish ? 'Clientes eliminados:' : 'Clients deleted:'} ${associatedClients.length}\n` +
-        `${isSpanish ? 'Transferencias eliminadas:' : 'Transfers deleted:'} ${transfers.filter(t => t.partnerId === partnerId).length}`
+        `${isSpanish ? 'Transferencias eliminadas:' : 'Transfers deleted:'} ${transfers.filter(t => t.partnerId === partnerId).length}` +
+        (hasGeneratedCredentials ? `\n${isSpanish ? 'Credenciales generadas eliminadas' : 'Generated credentials deleted'}` : '')
       );
     }
   };
