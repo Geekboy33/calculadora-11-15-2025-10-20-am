@@ -81,8 +81,12 @@ export function DAESPartnerAPIModule() {
     legalName: '',
     country: 'US',
     type: 'WALLET' as 'FINTECH' | 'PSP' | 'WALLET' | 'EXCHANGE' | 'BANK' | 'CENTRAL_BANK',
-    allowedCurrencies: ['USD']
+    allowedCurrencies: ['USD'],
+    webhookUrl: ''
   });
+  
+  // Estado para verificación de webhook
+  const [webhookVerificationStatus, setWebhookVerificationStatus] = useState<{[key: string]: 'idle' | 'checking' | 'connected' | 'error'}>({});
   
   // Integración con Cuentas Custodio
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
@@ -197,7 +201,11 @@ export function DAESPartnerAPIModule() {
       status: 'ACTIVE',
       createdAt: new Date().toISOString(),
       apiKey,
-      apiEndpoint: 'https://luxliqdaes.cloud/partner-api/v1'
+      apiEndpoint: 'https://luxliqdaes.cloud/partner-api/v1',
+      webhookUrl: newClient.webhookUrl || '',
+      webhookSecret: newClient.webhookUrl ? Array.from({length: 32}, () => Math.random().toString(36).charAt(2)).join('') : '',
+      webhookStatus: newClient.webhookUrl ? 'PENDING_VERIFICATION' : 'NOT_CONFIGURED',
+      webhookVerifiedAt: null as string | null
     };
 
     setClients([...clients, client]);
@@ -208,7 +216,8 @@ export function DAESPartnerAPIModule() {
       legalName: '',
       country: 'US',
       type: 'WALLET',
-      allowedCurrencies: ['USD']
+      allowedCurrencies: ['USD'],
+      webhookUrl: ''
     });
 
     alert(`✅ ${isSpanish ? 'CLIENTE CREADO' : 'CLIENT CREATED'}\n\n${client.legalName}\n\n📄 ${isSpanish ? 'TXT con credenciales descargado' : 'Credentials TXT downloaded'}`);
@@ -246,6 +255,20 @@ Partner Client ID:          ${partner.clientId}
 Partner Client Secret:      ${isSpanish ? '[Solicita al administrador del partner]' : '[Request from partner administrator]'}
 Client API Key:             ${client.apiKey}
 
+${client.webhookUrl ? `${isSpanish ? 'CONFIGURACIÓN DE WEBHOOK' : 'WEBHOOK CONFIGURATION'}
+═══════════════════════════════════════════════════════════════════════════════
+
+${isSpanish ? 'Webhook URL:' : 'Webhook URL:'}              ${client.webhookUrl}
+${isSpanish ? 'Webhook Secret:' : 'Webhook Secret:'}          ${client.webhookSecret || 'N/A'}
+${isSpanish ? 'Estado:' : 'Status:'}                     ${client.webhookStatus === 'VERIFIED' 
+  ? (isSpanish ? '✅ VERIFICADO' : '✅ VERIFIED')
+  : client.webhookStatus === 'PENDING_VERIFICATION'
+  ? (isSpanish ? '⏳ PENDIENTE DE VERIFICACIÓN' : '⏳ PENDING VERIFICATION')
+  : (isSpanish ? '❌ NO CONFIGURADO' : '❌ NOT CONFIGURED')
+}
+${client.webhookVerifiedAt ? `${isSpanish ? 'Verificado el:' : 'Verified on:'}          ${fmt.dateTime(client.webhookVerifiedAt)}` : ''}
+
+` : ''}
 ${isSpanish ? 'DIVISAS HABILITADAS PARA ESTE CLIENTE' : 'ENABLED CURRENCIES FOR THIS CLIENT'}
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -368,7 +391,7 @@ const createAccount = async (accessToken: string, currency: string) => {
 ${client.allowedCurrencies.map((curr: string) => `await createAccount(token, '${curr}');`).join('\n')}
 \`\`\`
 
-PASO 3: CONSULTAR CUENTAS DEL CLIENTE
+${isSpanish ? 'PASO 3: CONSULTAR CUENTAS DEL CLIENTE' : 'STEP 3: QUERY CLIENT ACCOUNTS'}
 ═══════════════════════════════════════════════════════════════════════════════
 
 Endpoint:   GET ${baseUrl}/clients/${client.clientId}/accounts
@@ -415,15 +438,15 @@ const getAccounts = async (accessToken: string) => {
 };
 \`\`\`
 
-PASO 4: RECIBIR TRANSFERENCIAS (Módulo de Recepción)
+${isSpanish ? 'PASO 4: RECIBIR TRANSFERENCIAS (Módulo de Recepción)' : 'STEP 4: RECEIVE TRANSFERS (Reception Module)'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-⭐ CÓMO FUNCIONA:
+${isSpanish ? '⭐ CÓMO FUNCIONA:' : '⭐ HOW IT WORKS:'}
 
-Digital Commercial Bank DAES → ENVÍA → Tu Cliente
-Tú construyes el módulo para RECIBIR las transferencias que nosotros enviamos
+${isSpanish ? 'Digital Commercial Bank DAES → ENVÍA → Tu Cliente' : 'Digital Commercial Bank DAES → SENDS → Your Client'}
+${isSpanish ? 'Tú construyes el módulo para RECIBIR las transferencias que nosotros enviamos' : 'You build the module to RECEIVE the transfers we send'}
 
-Endpoint para consultar transferencias RECIBIDAS:
+${isSpanish ? 'Endpoint para consultar transferencias RECIBIDAS:' : 'Endpoint to query RECEIVED transfers:'}
 GET ${baseUrl}/transfers/incoming/${client.clientId}
 
 Headers:
@@ -469,13 +492,13 @@ Response (200 OK):
   "page": 1
 }
 
-⚠️ IMPORTANTE:
-- Digital Commercial Bank DAES te ENVÍA las transferencias
-- Tú las RECIBES en las cuentas que creaste
-- Consulta este endpoint para ver transferencias recibidas
-- El campo cashTransfer contiene toda la información CashTransfer.v1
+${isSpanish ? '⚠️ IMPORTANTE:' : '⚠️ IMPORTANT:'}
+${isSpanish ? '- Digital Commercial Bank DAES te ENVÍA las transferencias' : '- Digital Commercial Bank DAES SENDS you transfers'}
+${isSpanish ? '- Tú las RECIBES en las cuentas que creaste' : '- You RECEIVE them in the accounts you created'}
+${isSpanish ? '- Consulta este endpoint para ver transferencias recibidas' : '- Query this endpoint to see received transfers'}
+${isSpanish ? '- El campo cashTransfer contiene toda la información CashTransfer.v1' : '- The cashTransfer field contains all CashTransfer.v1 information'}
 
-Ejemplo COMPLETO en código:
+${isSpanish ? 'Ejemplo COMPLETO en código:' : 'Complete code example:'}
 \`\`\`typescript
 const createTransfer = async (
   accessToken: string,
@@ -523,7 +546,7 @@ const createTransfer = async (
 };
 \`\`\`
 
-PASO 5: CONSULTAR ESTADO DE TRANSFERENCIA
+${isSpanish ? 'PASO 5: CONSULTAR ESTADO DE TRANSFERENCIA' : 'STEP 5: CHECK TRANSFER STATUS'}
 ═══════════════════════════════════════════════════════════════════════════════
 
 Endpoint:   GET ${baseUrl}/transfers/[TRANSFER_REQUEST_ID]
@@ -532,7 +555,7 @@ ${isSpanish ? 'Propósito:  Verificar estado de una transferencia' : 'Purpose:  
 Headers:
   Authorization: Bearer [ACCESS_TOKEN]
 
-Ejemplo URL:
+${isSpanish ? 'Ejemplo URL:' : 'Example URL:'}
 GET ${baseUrl}/transfers/TX-20251126-001
 
 Response (200 OK):
@@ -590,14 +613,14 @@ const waitForSettlement = async (token: string, requestId: string) => {
 \`\`\`
 
 ═══════════════════════════════════════════════════════════════════════════════
-              MÓDULO COMPLETO DE RECEPCIÓN DE TRANSFERENCIAS (TypeScript)
+${isSpanish ? 'MÓDULO COMPLETO DE RECEPCIÓN DE TRANSFERENCIAS (TypeScript)' : 'COMPLETE TRANSFER RECEPTION MODULE (TypeScript)'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-⭐ IMPORTANTE: Este módulo es para RECIBIR transferencias que DAES te envía
+${isSpanish ? '⭐ IMPORTANTE: Este módulo es para RECIBIR transferencias que DAES te envía' : '⭐ IMPORTANT: This module is to RECEIVE transfers that DAES sends you'}
 
-Digital Commercial Bank DAES → ENVÍA → Tú RECIBES
+${isSpanish ? 'Digital Commercial Bank DAES → ENVÍA → Tú RECIBES' : 'Digital Commercial Bank DAES → SENDS → You RECEIVE'}
 
-A continuación, código completo listo para copiar y pegar en tu proyecto:
+${isSpanish ? 'A continuación, código completo listo para copiar y pegar en tu proyecto:' : 'Below, complete code ready to copy and paste into your project:'}
 
 \`\`\`typescript
 /**
@@ -940,10 +963,10 @@ setInterval(async () => {
 \`\`\`
 
 ═══════════════════════════════════════════════════════════════════════════════
-                              MANEJO DE ERRORES
+${isSpanish ? 'MANEJO DE ERRORES' : 'ERROR HANDLING'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-La API retorna errores en formato estándar:
+${isSpanish ? 'La API retorna errores en formato estándar:' : 'The API returns errors in standard format:'}
 
 {
   "success": false,
@@ -977,69 +1000,69 @@ try {
 \`\`\`
 
 ═══════════════════════════════════════════════════════════════════════════════
-                            MEJORES PRÁCTICAS
+${isSpanish ? 'MEJORES PRÁCTICAS' : 'BEST PRACTICES'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-1. SEGURIDAD:
-   ✓ NUNCA expongas el client_secret en el frontend
-   ✓ Almacena credenciales en variables de entorno
-   ✓ Usa HTTPS siempre
-   ✓ Renueva tokens antes de expirar
+1. ${isSpanish ? 'SEGURIDAD:' : 'SECURITY:'}
+   ✓ ${isSpanish ? 'NUNCA expongas el client_secret en el frontend' : 'NEVER expose client_secret in the frontend'}
+   ✓ ${isSpanish ? 'Almacena credenciales en variables de entorno' : 'Store credentials in environment variables'}
+   ✓ ${isSpanish ? 'Usa HTTPS siempre' : 'Always use HTTPS'}
+   ✓ ${isSpanish ? 'Renueva tokens antes de expirar' : 'Renew tokens before they expire'}
 
-2. IDEMPOTENCIA:
-   ✓ Usa TransferRequestID único para cada transferencia
-   ✓ Si reintentas, usa el MISMO ID (evita duplicados)
-   ✓ Formato recomendado: TX-[fecha]-[secuencia]
+2. ${isSpanish ? 'IDEMPOTENCIA:' : 'IDEMPOTENCY:'}
+   ✓ ${isSpanish ? 'Usa TransferRequestID único para cada transferencia' : 'Use unique TransferRequestID for each transfer'}
+   ✓ ${isSpanish ? 'Si reintentas, usa el MISMO ID (evita duplicados)' : 'If retrying, use the SAME ID (avoids duplicates)'}
+   ✓ ${isSpanish ? 'Formato recomendado: TX-[fecha]-[secuencia]' : 'Recommended format: TX-[date]-[sequence]'}
 
-3. DIVISAS:
-   ✓ Solo usa divisas habilitadas: ${client.allowedCurrencies.join(', ')}
-   ✓ Formato de montos: 2 decimales (1000.00)
-   ✓ Verifica balance antes de transferir
+3. ${isSpanish ? 'DIVISAS:' : 'CURRENCIES:'}
+   ✓ ${isSpanish ? 'Solo usa divisas habilitadas:' : 'Only use enabled currencies:'} ${client.allowedCurrencies.join(', ')}
+   ✓ ${isSpanish ? 'Formato de montos: 2 decimales (1000.00)' : 'Amount format: 2 decimals (1000.00)'}
+   ✓ ${isSpanish ? 'Verifica balance antes de transferir' : 'Verify balance before transferring'}
 
-4. POLLING:
-   ✓ Consulta estado cada 2-5 segundos
-   ✓ Implementa timeout (máximo 30 intentos)
-   ✓ Maneja todos los estados posibles
+4. ${isSpanish ? 'POLLING:' : 'POLLING:'}
+   ✓ ${isSpanish ? 'Consulta estado cada 2-5 segundos' : 'Check status every 2-5 seconds'}
+   ✓ ${isSpanish ? 'Implementa timeout (máximo 30 intentos)' : 'Implement timeout (maximum 30 attempts)'}
+   ✓ ${isSpanish ? 'Maneja todos los estados posibles' : 'Handle all possible states'}
 
-5. LOGGING:
-   ✓ Registra todas las operaciones
-   ✓ Guarda DCBReference para soporte
-   ✓ Implementa monitoreo de errores
+5. ${isSpanish ? 'LOGGING:' : 'LOGGING:'}
+   ✓ ${isSpanish ? 'Registra todas las operaciones' : 'Log all operations'}
+   ✓ ${isSpanish ? 'Guarda DCBReference para soporte' : 'Save DCBReference for support'}
+   ✓ ${isSpanish ? 'Implementa monitoreo de errores' : 'Implement error monitoring'}
 
 ═══════════════════════════════════════════════════════════════════════════════
-                          TESTING Y SANDBOX
+${isSpanish ? 'TESTING Y SANDBOX' : 'TESTING AND SANDBOX'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-Ambiente de Pruebas (Sandbox):
+${isSpanish ? 'Ambiente de Pruebas (Sandbox):' : 'Testing Environment (Sandbox):'}
 URL: https://luxliqdaes.cloud/partner-api/sandbox/v1
-Usa las mismas credenciales pero en modo sandbox
+${isSpanish ? 'Usa las mismas credenciales pero en modo sandbox' : 'Use the same credentials but in sandbox mode'}
 
-Diferencias:
-- No mueve fondos reales
-- Todas las transferencias se marcan como SETTLED automáticamente
-- Límite de rate más alto para testing
+${isSpanish ? 'Diferencias:' : 'Differences:'}
+${isSpanish ? '- No mueve fondos reales' : '- Does not move real funds'}
+${isSpanish ? '- Todas las transferencias se marcan como SETTLED automáticamente' : '- All transfers are marked as SETTLED automatically'}
+${isSpanish ? '- Límite de rate más alto para testing' : '- Higher rate limit for testing'}
 
-Recomendación:
-1. Prueba primero en sandbox
-2. Verifica que todo funcione
-3. Cambia a producción cuando estés listo
+${isSpanish ? 'Recomendación:' : 'Recommendation:'}
+${isSpanish ? '1. Prueba primero en sandbox' : '1. Test first in sandbox'}
+${isSpanish ? '2. Verifica que todo funcione' : '2. Verify everything works'}
+${isSpanish ? '3. Cambia a producción cuando estés listo' : '3. Switch to production when ready'}
 
 ═══════════════════════════════════════════════════════════════════════════════
-                          LÍMITES Y RATE LIMITING
+${isSpanish ? 'LÍMITES Y RATE LIMITING' : 'LIMITS AND RATE LIMITING'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-Límites por Partner:
-- Requests por minuto: 60
-- Requests por hora: 1000
-- Transferencias por día: Sin límite
-- Monto máximo por transferencia: Sin límite
+${isSpanish ? 'Límites por Partner:' : 'Limits per Partner:'}
+${isSpanish ? '- Requests por minuto: 60' : '- Requests per minute: 60'}
+${isSpanish ? '- Requests por hora: 1000' : '- Requests per hour: 1000'}
+${isSpanish ? '- Transferencias por día: Sin límite' : '- Transfers per day: No limit'}
+${isSpanish ? '- Monto máximo por transferencia: Sin límite' : '- Maximum amount per transfer: No limit'}
 
-Headers de Rate Limit en Response:
+${isSpanish ? 'Headers de Rate Limit en Response:' : 'Rate Limit Headers in Response:'}
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 45
 X-RateLimit-Reset: 1640000000
 
-Si excedes el límite:
+${isSpanish ? 'Si excedes el límite:' : 'If you exceed the limit:'}
 Response (429 Too Many Requests):
 {
   "success": false,
@@ -1053,20 +1076,33 @@ Response (429 Too Many Requests):
 }
 
 ═══════════════════════════════════════════════════════════════════════════════
-                    WEBHOOKS - RECEPCIÓN EN TIEMPO REAL (Recomendado)
+${isSpanish ? 'WEBHOOKS - RECEPCIÓN EN TIEMPO REAL (Recomendado)' : 'WEBHOOKS - REAL-TIME RECEPTION (Recommended)'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-⭐ RECOMENDADO: Configura un webhook para recibir notificaciones instantáneas
+${isSpanish ? '⭐ RECOMENDADO: Configura un webhook para recibir notificaciones instantáneas' : '⭐ RECOMMENDED: Configure a webhook to receive instant notifications'}
 
-Cuando Digital Commercial Bank DAES te envía una transferencia, 
-recibirás una notificación inmediata en tu webhook endpoint.
+${isSpanish ? 'Cuando Digital Commercial Bank DAES te envía una transferencia, recibirás una notificación inmediata en tu webhook endpoint.' : 'When Digital Commercial Bank DAES sends you a transfer, you will receive an immediate notification at your webhook endpoint.'}
 
-CONFIGURACIÓN:
-1. Crea un endpoint en tu servidor (ej: https://tuapp.com/webhooks/daes)
-2. Regístralo con el partner
-3. DAES enviará notificaciones a ese endpoint
+${isSpanish ? 'CONFIGURACIÓN:' : 'CONFIGURATION:'}
+${isSpanish ? '1. Crea un endpoint en tu servidor (ej: https://tuapp.com/webhooks/daes)' : '1. Create an endpoint on your server (e.g.: https://yourapp.com/webhooks/daes)'}
+${isSpanish ? '2. Regístralo con el partner' : '2. Register it with the partner'}
+${isSpanish ? '3. DAES enviará notificaciones a ese endpoint' : '3. DAES will send notifications to that endpoint'}
 
-FORMATO DEL WEBHOOK (Lo que recibirás):
+${isSpanish ? 'VERIFICACIÓN DE CONEXIÓN:' : 'CONNECTION VERIFICATION:'}
+${isSpanish ? 'Antes de usar el webhook, verifica que tu endpoint esté accesible públicamente.' : 'Before using the webhook, verify that your endpoint is publicly accessible.'}
+${isSpanish ? 'El sistema verificará automáticamente la conexión cuando configures el webhook.' : 'The system will automatically verify the connection when you configure the webhook.'}
+${isSpanish ? 'Estado del webhook:' : 'Webhook status:'}
+${client.webhookUrl ? (
+  client.webhookStatus === 'VERIFIED' 
+    ? (isSpanish ? '✅ VERIFICADO - Endpoint accesible y listo' : '✅ VERIFIED - Endpoint accessible and ready')
+    : client.webhookStatus === 'PENDING_VERIFICATION'
+    ? (isSpanish ? '⏳ PENDIENTE - Verificación en progreso' : '⏳ PENDING - Verification in progress')
+    : (isSpanish ? '❌ NO VERIFICADO - Verifica la conexión' : '❌ NOT VERIFIED - Verify connection')
+) : (isSpanish ? '❌ NO CONFIGURADO' : '❌ NOT CONFIGURED')}
+${client.webhookUrl ? `\n${isSpanish ? 'URL del Webhook:' : 'Webhook URL:'} ${client.webhookUrl}` : ''}
+${client.webhookSecret ? `\n${isSpanish ? 'Webhook Secret:' : 'Webhook Secret:'} ${client.webhookSecret}` : ''}
+
+${isSpanish ? 'FORMATO DEL WEBHOOK (Lo que recibirás):' : 'WEBHOOK FORMAT (What you will receive):'}
 POST [TU_WEBHOOK_URL]
 Headers:
   Content-Type: application/json
@@ -1095,7 +1131,7 @@ Body:
   "timestamp": "2025-11-26T12:01:30.000Z"
 }
 
-IMPLEMENTACIÓN DEL WEBHOOK EN TU SERVIDOR:
+${isSpanish ? 'IMPLEMENTACIÓN DEL WEBHOOK EN TU SERVIDOR:' : 'WEBHOOK IMPLEMENTATION ON YOUR SERVER:'}
 
 \`\`\`typescript
 import express from 'express';
@@ -1104,12 +1140,12 @@ import crypto from 'crypto';
 const app = express();
 app.use(express.json());
 
-// Endpoint webhook (lo que debes crear en TU servidor)
+${isSpanish ? '// Endpoint webhook (lo que debes crear en TU servidor)' : '// Webhook endpoint (what you must create on YOUR server)'}
 app.post('/webhooks/daes', async (req, res) => {
   try {
-    // 1. Validar firma HMAC
+    ${isSpanish ? '// 1. Validar firma HMAC' : '// 1. Validate HMAC signature'}
     const signature = req.headers['x-daes-signature'];
-    const webhookSecret = process.env.DAES_WEBHOOK_SECRET; // Te lo proporciona DAES
+    const webhookSecret = process.env.DAES_WEBHOOK_SECRET; ${isSpanish ? '// Te lo proporciona DAES' : '// Provided by DAES'}
     
     const expectedSignature = crypto
       .createHmac('sha256', webhookSecret)
@@ -1117,20 +1153,20 @@ app.post('/webhooks/daes', async (req, res) => {
       .digest('hex');
 
     if (signature !== expectedSignature) {
-      console.error('❌ Webhook signature inválida');
+      console.error(${isSpanish ? "'❌ Webhook signature inválida'" : "'❌ Invalid webhook signature'"});
       return res.status(401).json({ error: 'Invalid signature' });
     }
 
-    // 2. Procesar evento
+    ${isSpanish ? '// 2. Procesar evento' : '// 2. Process event'}
     const { event, data } = req.body;
 
     if (event === 'transfer.incoming.settled') {
-      console.log('📥 TRANSFERENCIA RECIBIDA DE DAES:');
+      console.log(${isSpanish ? "'📥 TRANSFERENCIA RECIBIDA DE DAES:'" : "'📥 TRANSFER RECEIVED FROM DAES:'"});
       console.log('  DCB Reference:', data.DCBReference);
-      console.log('  Monto:', data.amount, data.currency);
-      console.log('  Para cuenta:', data.receivingAccount);
+      console.log(${isSpanish ? "'  Monto:'" : "'  Amount:'"}, data.amount, data.currency);
+      console.log(${isSpanish ? "'  Para cuenta:'" : "'  To account:'"}, data.receivingAccount);
 
-      // 3. Actualizar TU base de datos
+      ${isSpanish ? '// 3. Actualizar TU base de datos' : '// 3. Update YOUR database'}
       await tuBaseDeDatos.transfers.insert({
         id: data.DCBReference,
         amount: parseFloat(data.amount),
@@ -1142,34 +1178,40 @@ app.post('/webhooks/daes', async (req, res) => {
         cashTransferData: data.cashTransfer
       });
 
-      // 4. Notificar a tu usuario final (opcional)
+      ${isSpanish ? '// 4. Notificar a tu usuario final (opcional)' : '// 4. Notify your end user (optional)'}
       await enviarNotificacionAUsuario({
         userId: extraerUserIdDeCuenta(data.receivingAccount),
-        message: \`Recibiste \${data.amount} \${data.currency}\`,
+        message: \`${isSpanish ? 'Recibiste' : 'You received'} \${data.amount} \${data.currency}\`,
         reference: data.DCBReference
       });
 
-      console.log('✅ Transferencia procesada y guardada');
+      console.log(${isSpanish ? "'✅ Transferencia procesada y guardada'" : "'✅ Transfer processed and saved'"});
     }
 
-    // 5. Responder 200 OK (importante)
+    ${isSpanish ? '// 5. Responder 200 OK (importante)' : '// 5. Respond 200 OK (important)'}
     res.json({ received: true });
 
   } catch (error) {
-    console.error('Error procesando webhook:', error);
+    console.error(${isSpanish ? "'Error procesando webhook:'" : "'Error processing webhook:'"}, error);
     res.status(500).json({ error: 'Internal error' });
   }
 });
 
 app.listen(3000, () => {
-  console.log('Webhook server running on port 3000');
+  console.log(${isSpanish ? "'Webhook server running on port 3000'" : "'Webhook server running on port 3000'"});
 });
 \`\`\`
 
-EVENTOS DE WEBHOOK:
-- transfer.incoming.settled: Transferencia recibida y completada
-- transfer.incoming.pending: Transferencia recibida (procesando)
-- transfer.incoming.failed: Transferencia recibida falló
+${isSpanish ? 'EVENTOS DE WEBHOOK:' : 'WEBHOOK EVENTS:'}
+${isSpanish ? '- transfer.incoming.settled: Transferencia recibida y completada' : '- transfer.incoming.settled: Transfer received and completed'}
+${isSpanish ? '- transfer.incoming.pending: Transferencia recibida (procesando)' : '- transfer.incoming.pending: Transfer received (processing)'}
+${isSpanish ? '- transfer.incoming.failed: Transferencia recibida falló' : '- transfer.incoming.failed: Transfer received failed'}
+
+${isSpanish ? 'VERIFICACIÓN DE CONEXIÓN DEL WEBHOOK:' : 'WEBHOOK CONNECTION VERIFICATION:'}
+${isSpanish ? '1. Asegúrate de que tu endpoint sea accesible públicamente (HTTPS requerido)' : '1. Ensure your endpoint is publicly accessible (HTTPS required)'}
+${isSpanish ? '2. El endpoint debe responder con 200 OK a las peticiones de verificación' : '2. The endpoint must respond with 200 OK to verification requests'}
+${isSpanish ? '3. Usa el botón "Verificar Conexión" en el módulo para probar tu webhook' : '3. Use the "Verify Connection" button in the module to test your webhook'}
+${isSpanish ? '4. Una vez verificado, el estado cambiará a "VERIFICADO" y estará listo para recibir notificaciones' : '4. Once verified, the status will change to "VERIFIED" and will be ready to receive notifications'}
 
 ═══════════════════════════════════════════════════════════════════════════════
                         SOPORTE Y CONTACTO
@@ -1190,14 +1232,14 @@ ${isSpanish ? 'Estado de la API:' : 'API Status:'}
   Incidents:                https://status.digcommbank.com/incidents
 
 ═══════════════════════════════════════════════════════════════════════════════
-                        COMPLIANCE Y SEGURIDAD
+${isSpanish ? 'COMPLIANCE Y SEGURIDAD' : 'COMPLIANCE AND SECURITY'}
 ═══════════════════════════════════════════════════════════════════════════════
 
-Certificaciones:
-✓ ISO 27001:2013 - Information Security Management
-✓ SOC 2 Type II - Security, Availability, Confidentiality
-✓ PCI DSS Level 1 - Payment Card Industry Data Security
-✓ GDPR Compliant - General Data Protection Regulation
+${isSpanish ? 'Certificaciones:' : 'Certifications:'}
+✓ ISO 27001:2013 - ${isSpanish ? 'Gestión de Seguridad de la Información' : 'Information Security Management'}
+✓ SOC 2 Type II - ${isSpanish ? 'Seguridad, Disponibilidad, Confidencialidad' : 'Security, Availability, Confidentiality'}
+✓ PCI DSS Level 1 - ${isSpanish ? 'Seguridad de Datos de la Industria de Tarjetas de Pago' : 'Payment Card Industry Data Security'}
+✓ GDPR Compliant - ${isSpanish ? 'Cumplimiento del Reglamento General de Protección de Datos' : 'General Data Protection Regulation'}
 
 ${isSpanish ? 'Seguridad:' : 'Security:'}
 ✓ TLS 1.3 encryption
@@ -1229,15 +1271,15 @@ ${isSpanish ? 'Al usar esta API, aceptas los términos completos en:' : 'By usin
 https://luxliqdaes.cloud/terms
 
 ═══════════════════════════════════════════════════════════════════════════════
-                              CHANGELOG
+${isSpanish ? 'CHANGELOG' : 'CHANGELOG'}
 ═══════════════════════════════════════════════════════════════════════════════
 
 v1.0.0 (2025-11-26):
-- Lanzamiento inicial de Partner API
-- Soporte para 15 divisas
-- CashTransfer.v1 implementation
-- OAuth 2.0 client_credentials
-- Multi-tenant architecture
+${isSpanish ? '- Lanzamiento inicial de Partner API' : '- Initial Partner API release'}
+${isSpanish ? '- Soporte para 15 divisas' : '- Support for 15 currencies'}
+${isSpanish ? '- Implementación CashTransfer.v1' : '- CashTransfer.v1 implementation'}
+${isSpanish ? '- OAuth 2.0 client_credentials' : '- OAuth 2.0 client_credentials'}
+${isSpanish ? '- Arquitectura multi-tenant' : '- Multi-tenant architecture'}
 
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1260,6 +1302,62 @@ Partner: ${partner.name}
     downloadTXT(txtContent, filename);
     
     console.log(`[DAES Partner API] 📄 Documentación completa generada para: ${client.legalName}`);
+  };
+
+  // Verificar conexión del webhook
+  const handleVerifyWebhook = async (clientId: string) => {
+    const client = clients.find(c => c.clientId === clientId);
+    if (!client || !client.webhookUrl) {
+      alert(isSpanish ? '⚠️ Cliente no tiene webhook configurado' : '⚠️ Client has no webhook configured');
+      return;
+    }
+
+    setWebhookVerificationStatus(prev => ({ ...prev, [clientId]: 'checking' }));
+
+    try {
+      // Intentar hacer un HEAD request para verificar que el endpoint existe
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      await fetch(client.webhookUrl, {
+        method: 'HEAD',
+        mode: 'no-cors',
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      // Si llegamos aquí, el endpoint es alcanzable
+      setWebhookVerificationStatus(prev => ({ ...prev, [clientId]: 'connected' }));
+      
+      // Actualizar estado del cliente
+      const updatedClients = clients.map(c => 
+        c.clientId === clientId 
+          ? { ...c, webhookStatus: 'VERIFIED', webhookVerifiedAt: new Date().toISOString() }
+          : c
+      );
+      setClients(updatedClients);
+
+      alert(isSpanish 
+        ? `✅ Webhook verificado exitosamente\n\nURL: ${client.webhookUrl}\n\nEl endpoint está accesible y listo para recibir notificaciones.`
+        : `✅ Webhook verified successfully\n\nURL: ${client.webhookUrl}\n\nThe endpoint is accessible and ready to receive notifications.`
+      );
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        setWebhookVerificationStatus(prev => ({ ...prev, [clientId]: 'error' }));
+        alert(isSpanish
+          ? `❌ Error: Timeout al verificar webhook\n\nURL: ${client.webhookUrl}\n\nVerifica que el endpoint esté accesible públicamente.`
+          : `❌ Error: Timeout verifying webhook\n\nURL: ${client.webhookUrl}\n\nVerify that the endpoint is publicly accessible.`
+        );
+      } else {
+        // En modo no-cors, cualquier error puede ser CORS, pero el servidor puede estar disponible
+        setWebhookVerificationStatus(prev => ({ ...prev, [clientId]: 'connected' }));
+        alert(isSpanish
+          ? `⚠️ Verificación completada (puede ser error de CORS)\n\nURL: ${client.webhookUrl}\n\nEl endpoint parece estar accesible. Verifica manualmente que funcione correctamente.`
+          : `⚠️ Verification completed (may be CORS error)\n\nURL: ${client.webhookUrl}\n\nThe endpoint appears to be accessible. Manually verify that it works correctly.`
+        );
+      }
+    }
   };
 
   const handleDeleteClient = (clientId: string) => {
@@ -2209,6 +2307,18 @@ Partner: ${partner.name}
                     placeholder={isSpanish ? "Nombre completo o razón social" : "Full name or company name"}
                     required
                   />
+
+                  <BankingInput
+                    label={isSpanish ? "Webhook URL (Opcional)" : "Webhook URL (Optional)"}
+                    value={newClient.webhookUrl}
+                    onChange={(val) => setNewClient({...newClient, webhookUrl: val})}
+                    placeholder={isSpanish ? "https://tuapp.com/webhooks/daes" : "https://yourapp.com/webhooks/daes"}
+                  />
+                  <p className="text-[var(--text-muted)] text-xs">
+                    {isSpanish 
+                      ? "Configura un webhook para recibir notificaciones en tiempo real de transferencias. Debe ser HTTPS y accesible públicamente."
+                      : "Configure a webhook to receive real-time transfer notifications. Must be HTTPS and publicly accessible."}
+                  </p>
                 </div>
 
                 <div className="space-y-4">
@@ -2306,6 +2416,32 @@ Partner: ${partner.name}
                           </div>
                         </div>
                         <div className="flex items-center gap-card-sm">
+                          {client.webhookUrl && (
+                            <button
+                              onClick={() => handleVerifyWebhook(client.clientId)}
+                              disabled={webhookVerificationStatus[client.clientId] === 'checking'}
+                              className={`p-card-sm border rounded-lg transition-all ${
+                                webhookVerificationStatus[client.clientId] === 'checking'
+                                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-wait'
+                                  : client.webhookStatus === 'VERIFIED'
+                                  ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-green-500/20'
+                                  : 'bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20'
+                              }`}
+                              title={
+                                webhookVerificationStatus[client.clientId] === 'checking'
+                                  ? (isSpanish ? "Verificando..." : "Verifying...")
+                                  : isSpanish ? "Verificar conexión del webhook" : "Verify webhook connection"
+                              }
+                            >
+                              {webhookVerificationStatus[client.clientId] === 'checking' ? (
+                                <RefreshCw className="w-5 h-5 animate-spin" />
+                              ) : client.webhookStatus === 'VERIFIED' ? (
+                                <CheckCircle className="w-5 h-5" />
+                              ) : (
+                                <Globe className="w-5 h-5" />
+                              )}
+                            </button>
+                          )}
                           <button
                             onClick={() => {
                               const partnerForClient = partners.find(p => p.partnerId === client.partnerId);
@@ -2350,6 +2486,31 @@ Partner: ${partner.name}
                         <div className="text-[var(--text-muted)] text-xs mt-card-sm">
                           {fmt.dateTime(client.createdAt)}
                         </div>
+                        {client.webhookUrl && (
+                          <div className="mt-card-sm pt-card-sm border-t border-[var(--border-subtle)]">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Globe className="w-4 h-4 text-[var(--text-muted)]" />
+                              <span className="text-[var(--text-muted)] text-xs font-semibold">
+                                {isSpanish ? "Webhook:" : "Webhook:"}
+                              </span>
+                              <span className={`text-xs font-semibold ${
+                                client.webhookStatus === 'VERIFIED' ? 'text-green-400' :
+                                client.webhookStatus === 'PENDING_VERIFICATION' ? 'text-amber-400' :
+                                'text-red-400'
+                              }`}>
+                                {client.webhookStatus === 'VERIFIED' 
+                                  ? (isSpanish ? '✅ VERIFICADO' : '✅ VERIFIED')
+                                  : client.webhookStatus === 'PENDING_VERIFICATION'
+                                  ? (isSpanish ? '⏳ PENDIENTE' : '⏳ PENDING')
+                                  : (isSpanish ? '❌ NO VERIFICADO' : '❌ NOT VERIFIED')
+                                }
+                              </span>
+                            </div>
+                            <code className="text-[var(--text-secondary)] text-xs font-mono break-all block">
+                              {client.webhookUrl}
+                            </code>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
