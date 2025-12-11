@@ -96,7 +96,7 @@ const getWebhookUrl = (): string => {
   }
 
   // 3) Fallback local (desarrollo)
-  return 'http://localhost:8787/api/mg-webhook/transfer';
+  return 'http://localhost:3000/api/mg-webhook/transfer';
 };
 
 /**

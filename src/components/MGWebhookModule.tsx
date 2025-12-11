@@ -73,7 +73,7 @@ const detectDefaultProxyUrl = (): string => {
     }
   }
 
-  return 'http://localhost:8787/api/mg-webhook/transfer';
+  return 'http://localhost:3000/api/mg-webhook/transfer';
 };
 
 export function MGWebhookModule() {
@@ -1114,7 +1114,7 @@ ${isSpanish ? 'Sistema DAES CoreBanking' : 'DAES CoreBanking System'}
                         <strong>{isSpanish ? 'Proxy Producción:' : 'Production Proxy:'}</strong> https://luxliqdaes.cloud/api/mg-webhook/transfer
                       </p>
                       <p>
-                        <strong>{isSpanish ? 'Proxy Local:' : 'Local Proxy:'}</strong> http://localhost:8787/api/mg-webhook/transfer
+                        <strong>{isSpanish ? 'Proxy Local:' : 'Local Proxy:'}</strong> http://localhost:3000/api/mg-webhook/transfer
                       </p>
                       <p>
                         <strong>{isSpanish ? 'Destino Final (MG):' : 'Final Destination (MG):'}</strong> {mgEndpoint}

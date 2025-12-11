@@ -5,11 +5,13 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { Shield, FileText, Download, Printer, CheckCircle, AlertTriangle, Lock, Building2, DollarSign, Database, X } from 'lucide-react';
+import { Shield, FileText, Download, Printer, CheckCircle, AlertTriangle, Lock, Building2, DollarSign, Database, X, Image as ImageIcon } from 'lucide-react';
 import { balanceStore, formatCurrency, getCurrencyName, type CurrencyBalance } from '../lib/balances-store';
 import { useLanguage } from '../lib/i18n.tsx';
 import { CheckIcon } from './CustomIcons';
 import { downloadPDF } from '../lib/download-helper';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface BlackScreenData {
   currency: string;
@@ -85,9 +87,9 @@ export function BankBlackScreen() {
 
     return {
       currency: balance.currency,
-      accountNumber: `DAES-${balance.currency}-${Math.floor(Math.random() * 100000000).toString().padStart(8, '0')}`,
-      beneficiaryName: 'DAES MASTER ACCOUNT',
-      beneficiaryBank: 'DAES - DATA AND EXCHANGE SETTLEMENT',
+      accountNumber: `DCB-${balance.currency}-${Math.floor(Math.random() * 100000000).toString().padStart(8, '0')}`,
+      beneficiaryName: 'Digital Commercial Bank Ltd MASTER ACCOUNT',
+      beneficiaryBank: 'Digital Commercial Bank Ltd',
       balanceM1,
       balanceM2,
       balanceM3,
@@ -165,8 +167,6 @@ ${t.blackScreenBeneficiaryInfo}
 ${t.blackScreenHolder}:              ${blackScreenData.beneficiaryName}
 ${t.blackScreenAccount}:             ${blackScreenData.accountNumber}
 ${t.blackScreenBank}:                ${blackScreenData.beneficiaryBank}
-${t.blackScreenSwift}:               ${blackScreenData.swiftCode}
-${t.blackScreenRoutingNumber}:       ${blackScreenData.routingNumber}
 ${t.blackScreenCurrency}:            ${blackScreenData.currency} (${getCurrencyName(blackScreenData.currency)})
 
 ${t.blackScreenMonetaryAggregates}
@@ -230,6 +230,90 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert(t.language === 'es' ? 'Error al generar el PDF' : 'Error generating PDF');
+    }
+  };
+
+  const handleDownloadPDFImage = async () => {
+    if (!blackScreenRef.current || !blackScreenData) return;
+    
+    try {
+      // Guardar posición de scroll original
+      const originalScrollTop = blackScreenRef.current.scrollTop;
+      
+      // Asegurar que el scroll esté en la parte superior antes de capturar
+      blackScreenRef.current.scrollTop = 0;
+      
+      // Esperar a que el scroll se complete y el contenido se renderice
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Obtener las dimensiones completas del contenido
+      const fullWidth = blackScreenRef.current.scrollWidth;
+      const fullHeight = blackScreenRef.current.scrollHeight;
+      
+      const canvas = await html2canvas(blackScreenRef.current, {
+        backgroundColor: '#000000',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        width: fullWidth,
+        height: fullHeight,
+        windowWidth: fullWidth,
+        windowHeight: fullHeight,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
+        removeContainer: false
+      });
+      
+      // Restaurar posición de scroll original
+      blackScreenRef.current.scrollTop = originalScrollTop;
+      
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Calcular dimensiones para ajustar la imagen al PDF
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      
+      // Calcular ratio para mantener proporción
+      const ratio = pdfWidth / imgWidth;
+      const imgWidthFinal = pdfWidth;
+      const imgHeightFinal = imgHeight * ratio;
+      
+      // Si la imagen es más alta que una página, dividirla en múltiples páginas
+      if (imgHeightFinal > pdfHeight) {
+        let heightLeft = imgHeightFinal;
+        let position = 0;
+        const pageHeight = pdfHeight;
+        
+        // Primera página - mostrar desde el inicio (posición 0)
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidthFinal, imgHeightFinal);
+        heightLeft -= pageHeight;
+        
+        // Páginas adicionales si es necesario
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeightFinal;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidthFinal, imgHeightFinal);
+          heightLeft -= pageHeight;
+        }
+      } else {
+        // Imagen cabe en una sola página
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidthFinal, imgHeightFinal);
+      }
+      
+      pdf.save(`BLACKSCREEN-${blackScreenData.currency}-${Date.now()}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF Image:', error);
+      alert(t.language === 'es' ? 'Error al generar el PDF Imagen' : 'Error generating PDF Image');
     }
   };
 
@@ -379,6 +463,13 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
                   PDF
                 </button>
                 <button
+                  onClick={handleDownloadPDFImage}
+                  className="bg-[#0d0d0d] border border-[#ffffff] hover:bg-[#ffffff]/20 text-[#ffffff] px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  PDF Image
+                </button>
+                <button
                   onClick={handlePrint}
                   className="bg-[#0d0d0d] border border-[#ffffff] hover:bg-[#ffffff]/20 text-[#ffffff] px-4 py-2 rounded-lg transition-all flex items-center gap-2"
                 >
@@ -429,14 +520,6 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
                   <div>
                     <span className="text-[#ffffff]">{t.blackScreenBank}:</span>
                     <div className="text-[#ffffff] font-bold">{blackScreenData.beneficiaryBank}</div>
-                  </div>
-                  <div>
-                    <span className="text-[#ffffff]">{t.blackScreenSwift}:</span>
-                    <div className="text-[#ffffff] font-bold">{blackScreenData.swiftCode}</div>
-                  </div>
-                  <div>
-                    <span className="text-[#ffffff]">{t.blackScreenRoutingNumber}:</span>
-                    <div className="text-[#ffffff] font-bold">{blackScreenData.routingNumber}</div>
                   </div>
                   <div>
                     <span className="text-[#ffffff]">{t.blackScreenCurrency}:</span>

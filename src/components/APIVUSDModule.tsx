@@ -733,7 +733,7 @@ export function APIVUSDModule() {
         totalAmount: lastPledgeData.amount,
         transactionCount: 1,
         beneficiaryName: lastPledgeData.beneficiary,
-        beneficiaryBank: 'DAES - DATA AND EXCHANGE SETTLEMENT',
+        beneficiaryBank: 'Digital Commercial Bank Ltd',
       });
 
       downloadBlackScreenHTML(blackScreenData);

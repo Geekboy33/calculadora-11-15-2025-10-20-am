@@ -89,7 +89,7 @@ export function generateBlackScreenData(params: {
   // Account number si no se proporciona
   const generatedAccountNumber =
     accountNumber ||
-    `DAES-${currency}-${Math.floor(Math.random() * 100000000)
+    `DCB-${currency}-${Math.floor(Math.random() * 100000000)
       .toString()
       .padStart(8, '0')}`;
 
@@ -100,8 +100,8 @@ export function generateBlackScreenData(params: {
   return {
     currency,
     accountNumber: generatedAccountNumber,
-    beneficiaryName: beneficiaryName || 'DAES MASTER ACCOUNT',
-    beneficiaryBank: beneficiaryBank || 'DAES - DATA AND EXCHANGE SETTLEMENT',
+    beneficiaryName: beneficiaryName || 'Digital Commercial Bank Ltd MASTER ACCOUNT',
+    beneficiaryBank: beneficiaryBank || 'Digital Commercial Bank Ltd',
     balanceM1,
     balanceM2,
     balanceM3,
@@ -159,8 +159,6 @@ export function generateBlackScreenHTML(data: BlackScreenData): string {
             <p style="margin: 5px 0;"><strong>ACCOUNT NUMBER:</strong> ${data.accountNumber}</p>
             <p style="margin: 5px 0;"><strong>BENEFICIARY:</strong> ${data.beneficiaryName}</p>
             <p style="margin: 5px 0;"><strong>BANK:</strong> ${data.beneficiaryBank}</p>
-            <p style="margin: 5px 0;"><strong>SWIFT CODE:</strong> ${data.swiftCode}</p>
-            <p style="margin: 5px 0;"><strong>ROUTING NUMBER:</strong> ${data.routingNumber}</p>
             <p style="margin: 5px 0;"><strong>CURRENCY:</strong> ${data.currency}</p>
           </div>
         </div>

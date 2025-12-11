@@ -3,11 +3,28 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 import { ensureDataFiles, getApiKeys, saveApiKeys, getPorReports, savePorReports } from './storage.js';
 
-const PORT = process.env.PORT || 8787;
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
+
+// Middleware de manejo de errores global
+app.use((err, req, res, next) => {
+  console.error('[Server Error]', err);
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'Invalid JSON', 
+      message: 'El cuerpo de la petición no es un JSON válido' 
+    });
+  }
+  res.status(500).json({ 
+    success: false, 
+    error: 'Internal Server Error', 
+    message: err.message 
+  });
+});
 
 ensureDataFiles();
 
@@ -252,6 +269,14 @@ app.post('/api/mg-webhook/transfer', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`[PoR API] Server listening on http://localhost:${PORT}`);
   console.log(`[MG Webhook Proxy] Proxy endpoint available at http://localhost:${PORT}/api/mg-webhook/transfer`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`❌ Error: El puerto ${PORT} ya está en uso`);
+    console.error(`   Solución: Detén el proceso que usa el puerto ${PORT} o cambia el puerto en server/index.js`);
+  } else {
+    console.error(`❌ Error al iniciar el servidor:`, err);
+  }
+  process.exit(1);
 });
 
 

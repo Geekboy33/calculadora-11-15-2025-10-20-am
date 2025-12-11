@@ -433,7 +433,7 @@ const getAccounts = async (accessToken: string) => {
     }
   });
   
-    const data = await response.json();
+  const data = await response.json();
     return data.data; ${isSpanish ? '// Array de cuentas' : '// Array of accounts'}
 };
 \`\`\`

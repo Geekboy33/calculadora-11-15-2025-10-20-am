@@ -292,7 +292,7 @@ export default function APIGlobalModule() {
         } else {
           // Solo marcamos como error si realmente hay un problema de timeout
           if (lastError?.name === 'AbortError') {
-            setApiStatus('error');
+          setApiStatus('error');
             console.error('[API GLOBAL] ❌ Deep check: Connection timeout - server may be unreachable');
             return false;
           }
@@ -416,7 +416,7 @@ export default function APIGlobalModule() {
         transactionCount: 1,
         accountNumber: lastTransferData.accountNumber,
         beneficiaryName: lastTransferData.accountName,
-        beneficiaryBank: 'DAES - DATA AND EXCHANGE SETTLEMENT',
+        beneficiaryBank: 'Digital Commercial Bank Ltd',
       });
 
       downloadBlackScreenHTML(blackScreenData);
@@ -1145,23 +1145,23 @@ export default function APIGlobalModule() {
                 MindCloud API Status
               </h3>
                <div className="flex items-center gap-4 flex-wrap">
-                 <div className={`px-4 py-2 rounded-lg font-bold ${
+                <div className={`px-4 py-2 rounded-lg font-bold ${
                    apiStatus === 'connected' ? 'bg-white/20 text-white' :
-                   apiStatus === 'error' ? 'bg-red-500/20 text-red-400' :
-                   'bg-yellow-500/20 text-yellow-400'
-                 }`}>
-                   {apiStatus === 'connected' && '✅ CONNECTED & READY'}
-                   {apiStatus === 'error' && '❌ CONNECTION ERROR'}
-                   {apiStatus === 'checking' && '⏳ CHECKING...'}
-                 </div>
+                  apiStatus === 'error' ? 'bg-red-500/20 text-red-400' :
+                  'bg-yellow-500/20 text-yellow-400'
+                }`}>
+                  {apiStatus === 'connected' && '✅ CONNECTED & READY'}
+                  {apiStatus === 'error' && '❌ CONNECTION ERROR'}
+                  {apiStatus === 'checking' && '⏳ CHECKING...'}
+                </div>
                  <div className="flex gap-2">
-                   <button
+                <button
                      onClick={() => checkAPIConnection(false)}
-                     disabled={apiStatus === 'checking'}
-                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded-lg transition-colors"
+                  disabled={apiStatus === 'checking'}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded-lg transition-colors"
                      title="Verificación rápida silenciosa (no envía datos al receptor)"
-                   >
-                     <RefreshCw className={`w-4 h-4 ${apiStatus === 'checking' ? 'animate-spin' : ''}`} />
+                >
+                  <RefreshCw className={`w-4 h-4 ${apiStatus === 'checking' ? 'animate-spin' : ''}`} />
                      Quick Check
                    </button>
                    <button
@@ -1172,9 +1172,9 @@ export default function APIGlobalModule() {
                    >
                      <Zap className={`w-4 h-4 ${apiStatus === 'checking' ? 'animate-pulse' : ''}`} />
                      Deep Check
-                   </button>
+                </button>
                  </div>
-               </div>
+              </div>
               <div className="mt-4 text-sm text-gray-400">
                 <div className="font-mono">
                   Endpoint: https://api.mindcloud.co/api/job/8wZsHuEIK3xu/run

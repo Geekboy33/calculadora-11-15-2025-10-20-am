@@ -66,7 +66,7 @@ interface WebhookLog {
 
 export function ProofOfReservesAPIModule() {
   const { language } = useLanguage();
-  const API_BASE = (import.meta as any).env?.VITE_POR_API_BASE || 'http://localhost:8787';
+  const API_BASE = (import.meta as any).env?.VITE_POR_API_BASE || 'http://localhost:3000';
   const [porReports, setPorReports] = useState<PorReport[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKeyData[]>([]);
   const [showCreateKeyModal, setShowCreateKeyModal] = useState(false);

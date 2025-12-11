@@ -381,7 +381,7 @@ export function CustodyAccountsModule() {
     const statement = `
 ╔═══════════════════════════════════════════════════════════════════════╗
 ║           ${language === 'es' ? 'ESTADO DE CUENTA CUSTODIO' : 'CUSTODY ACCOUNT STATEMENT'}                    ║
-║           DAES - DATA AND EXCHANGE SETTLEMENT                        ║
+║           Digital Commercial Bank Ltd                                ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 
 ${language === 'es' ? 'DOCUMENTO CONFIDENCIAL' : 'CONFIDENTIAL DOCUMENT'}

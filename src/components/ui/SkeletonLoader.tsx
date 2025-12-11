@@ -121,3 +121,5 @@ export function CardSkeleton({ variant = 'default', showImage = false, className
   );
 }
 
+
+
