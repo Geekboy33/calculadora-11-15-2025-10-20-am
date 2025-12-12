@@ -46,12 +46,26 @@ export function AccountLedger() {
   };
 
   const getCurrencyColor = (currency: string, index: number) => {
-    if (currency === 'USD') return 'from-[#ffffff] to-[#e0e0e0] border-[#ffffff]';
-    if (currency === 'EUR') return 'from-[#ffffff] to-[#ffffff] border-[#ffffff]';
-    if (currency === 'GBP') return 'from-[#ffffff]/90 to-[#e0e0e0]/90 border-[#ffffff]/90';
-    if (currency === 'CHF') return 'from-[#39ff14] to-[#ffffff] border-[#39ff14]';
-    if (index < 8) return 'from-[#e0e0e0] to-[#e0e0e0] border-[#e0e0e0]';
-    return 'from-[#0d0d0d] to-[#0a0a0a] border-[#1a1a1a]';
+    // Colores claros para todas las divisas para asegurar contraste con texto negro
+    const colors: Record<string, string> = {
+      'USD': 'from-[#ffffff] to-[#e8e8e8] border-[#ffffff]',
+      'EUR': 'from-[#e8f4fc] to-[#d0e8f8] border-[#4dabf7]',
+      'GBP': 'from-[#f0e8f8] to-[#e0d0f0] border-[#9775fa]',
+      'CHF': 'from-[#e8fff0] to-[#d0f8e0] border-[#51cf66]',
+      'JPY': 'from-[#fff8e8] to-[#f8f0d0] border-[#fab005]',
+      'CAD': 'from-[#ffe8e8] to-[#f8d8d8] border-[#fa5252]',
+      'AUD': 'from-[#fff0e8] to-[#f8e0d0] border-[#fd7e14]',
+      'CNY': 'from-[#ffe8f0] to-[#f8d0e0] border-[#f06595]',
+      'INR': 'from-[#f0fff8] to-[#d8f8e8] border-[#20c997]',
+      'MXN': 'from-[#f8f8e8] to-[#f0f0d0] border-[#94d82d]',
+      'BRL': 'from-[#e8f8f0] to-[#d0f0e0] border-[#12b886]',
+      'KRW': 'from-[#f8e8ff] to-[#f0d0f8] border-[#be4bdb]',
+      'SGD': 'from-[#e8fff8] to-[#d0f8f0] border-[#38d9a9]',
+      'HKD': 'from-[#fff0f8] to-[#f8e0f0] border-[#e64980]',
+      'NZD': 'from-[#f0f8ff] to-[#e0f0f8] border-[#339af0]',
+    };
+    
+    return colors[currency] || 'from-[#f0f0f0] to-[#e0e0e0] border-[#c0c0c0]';
   };
 
   const refreshBalances = () => {

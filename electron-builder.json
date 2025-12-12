@@ -19,29 +19,24 @@
     "target": [
       {
         "target": "nsis",
-        "arch": ["x64", "ia32"]
+        "arch": ["x64"]
       },
       {
         "target": "portable",
         "arch": ["x64"]
       }
     ],
-    "icon": "public/icon.ico",
     "artifactName": "ledgerdaesterminal-${version}-win-${arch}.${ext}",
-    "publisherName": "DAES - Data and Exchange Settlement"
+    "signAndEditExecutable": false
   },
   "nsis": {
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
     "deleteAppDataOnUninstall": false,
-    "installerIcon": "public/icon.ico",
-    "uninstallerIcon": "public/icon.ico",
-    "installerHeaderIcon": "public/icon.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "LedgerDAESTerminal",
-    "license": "LICENSE"
+    "shortcutName": "LedgerDAESTerminal"
   },
   "portable": {
     "artifactName": "ledgerdaesterminal-${version}-portable.${ext}"
@@ -50,44 +45,21 @@
     "target": [
       {
         "target": "dmg",
-        "arch": ["universal"]
+        "arch": ["x64"]
       }
     ],
-    "icon": "public/icon.icns",
     "artifactName": "ledgerdaesterminal-${version}-mac-${arch}.${ext}",
-    "category": "public.app-category.finance",
-    "hardenedRuntime": true,
-    "gatekeeperAssess": false
-  },
-  "dmg": {
-    "contents": [
-      {
-        "x": 130,
-        "y": 220
-      },
-      {
-        "x": 410,
-        "y": 220,
-        "type": "link",
-        "path": "/Applications"
-      }
-    ]
+    "category": "public.app-category.finance"
   },
   "linux": {
     "target": [
-      {
-        "target": "deb",
-        "arch": ["x64"]
-      },
       {
         "target": "AppImage",
         "arch": ["x64"]
       }
     ],
-    "icon": "public/icon.png",
     "artifactName": "ledgerdaesterminal-${version}-linux-${arch}.${ext}",
-    "category": "Finance",
-    "maintainer": "DAES Team"
+    "category": "Finance"
   },
   "publish": {
     "provider": "github",

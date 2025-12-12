@@ -34,3 +34,4 @@ PoR_API_SETUP.md
 # Local Netlify folder
 .netlify
 .netlify.state.json
+release/
