@@ -462,6 +462,22 @@ export function XcpB2BIcon({ size = 24, className = '', active = false }: Module
 }
 
 // ═══════════════════════════════════════════════════════════════
+// DOWNLOADS ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function DownloadsIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <rect x="4" y="14" width="16" height="6" rx="1" fill="none" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" />
+      <path d="M12 4 L12 12" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M8 10 L12 14 L16 10" stroke={active ? '#4F8DFF' : '#1A4DB3'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <circle cx="8" cy="17" r="1" fill={active ? '#FFFFFF' : '#FFFFFF'} />
+      <circle cx="16" cy="17" r="1" fill={active ? '#FFFFFF' : '#FFFFFF'} />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 // HELPER: Get Icon by Tab ID
 // ═══════════════════════════════════════════════════════════════
 
@@ -528,6 +544,8 @@ export function getModuleIcon(tabId: string, size: number = 20, active: boolean 
       return <XcpB2BIcon {...props} />;
     case 'api-daes-pledge':
       return <APIVUSDIcon {...props} />;
+    case 'downloads':
+      return <DownloadsIcon {...props} />;
     default:
       return <CentralPanelIcon {...props} />;
   }
