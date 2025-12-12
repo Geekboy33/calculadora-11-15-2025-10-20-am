@@ -31,7 +31,8 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   } else {
     // En producción, cargar el archivo index.html compilado
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    const indexPath = path.join(app.getAppPath(), 'dist', 'index.html');
+    mainWindow.loadFile(indexPath);
   }
 
   // Mostrar ventana cuando esté lista
