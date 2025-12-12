@@ -5,7 +5,7 @@
   "description": "LedgerDAESTerminal - Digital Commercial Bank Ltd",
   "author": "DAES Team",
   "type": "module",
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "server": "node server/index.js",
