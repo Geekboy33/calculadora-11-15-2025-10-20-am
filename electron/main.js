@@ -53,9 +53,9 @@ function createWindow() {
 // Menú de la aplicación
 const menuTemplate = [
   {
-    label: 'DAES CoreBanking',
+    label: 'LedgerDAESTerminal',
     submenu: [
-      { role: 'about', label: 'Acerca de DAES CoreBanking' },
+      { role: 'about', label: 'Acerca de LedgerDAESTerminal' },
       { type: 'separator' },
       { role: 'services' },
       { type: 'separator' },

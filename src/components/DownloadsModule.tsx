@@ -36,8 +36,8 @@ export function DownloadsModule() {
       name: 'Windows (64-bit)',
       version: currentVersion,
       size: '~85 MB',
-      filename: `DAES-CoreBanking-${currentVersion}-win-x64.exe`,
-      downloadUrl: `/downloads/DAES-CoreBanking-${currentVersion}-win-x64.exe`,
+      filename: `ledgerdaesterminal-${currentVersion}-win-x64.exe`,
+      downloadUrl: `/downloads/ledgerdaesterminal-${currentVersion}-win-x64.exe`,
       releaseDate,
       features: [
         isSpanish ? 'Instalador automático' : 'Automatic installer',
@@ -57,8 +57,8 @@ export function DownloadsModule() {
       name: 'Windows (32-bit)',
       version: currentVersion,
       size: '~80 MB',
-      filename: `DAES-CoreBanking-${currentVersion}-win-x86.exe`,
-      downloadUrl: `/downloads/DAES-CoreBanking-${currentVersion}-win-x86.exe`,
+      filename: `ledgerdaesterminal-${currentVersion}-win-ia32.exe`,
+      downloadUrl: `/downloads/ledgerdaesterminal-${currentVersion}-win-ia32.exe`,
       releaseDate,
       features: [
         isSpanish ? 'Compatible con sistemas antiguos' : 'Compatible with older systems',
@@ -77,8 +77,8 @@ export function DownloadsModule() {
       name: 'macOS (Universal)',
       version: currentVersion,
       size: '~95 MB',
-      filename: `DAES-CoreBanking-${currentVersion}-mac-universal.dmg`,
-      downloadUrl: `/downloads/DAES-CoreBanking-${currentVersion}-mac-universal.dmg`,
+      filename: `ledgerdaesterminal-${currentVersion}-mac-universal.dmg`,
+      downloadUrl: `/downloads/ledgerdaesterminal-${currentVersion}-mac-universal.dmg`,
       releaseDate,
       features: [
         isSpanish ? 'Compatible con Intel y Apple Silicon' : 'Intel & Apple Silicon compatible',
@@ -97,8 +97,8 @@ export function DownloadsModule() {
       name: 'Linux (Debian/Ubuntu)',
       version: currentVersion,
       size: '~75 MB',
-      filename: `DAES-CoreBanking-${currentVersion}-linux-amd64.deb`,
-      downloadUrl: `/downloads/DAES-CoreBanking-${currentVersion}-linux-amd64.deb`,
+      filename: `ledgerdaesterminal-${currentVersion}-linux-x64.deb`,
+      downloadUrl: `/downloads/ledgerdaesterminal-${currentVersion}-linux-x64.deb`,
       releaseDate,
       features: [
         isSpanish ? 'Paquete .deb para fácil instalación' : '.deb package for easy installation',
@@ -214,8 +214,8 @@ export function DownloadsModule() {
             </h1>
             <p className="text-white/70">
               {isSpanish 
-                ? 'Descarga DAES CoreBanking para tu sistema operativo'
-                : 'Download DAES CoreBanking for your operating system'}
+                ? 'Descarga LedgerDAESTerminal para tu sistema operativo'
+                : 'Download LedgerDAESTerminal for your operating system'}
             </p>
           </div>
           <div className="text-right">

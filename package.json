@@ -1,8 +1,8 @@
 {
-  "name": "daes-corebanking",
+  "name": "ledgerdaesterminal",
   "private": true,
   "version": "1.0.0",
-  "description": "DAES CoreBanking - Digital Commercial Bank Ltd",
+  "description": "LedgerDAESTerminal - Digital Commercial Bank Ltd",
   "author": "DAES Team",
   "type": "module",
   "main": "electron/main.js",

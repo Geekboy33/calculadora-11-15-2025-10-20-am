@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "com.daes.corebanking",
-  "productName": "DAES CoreBanking",
+  "appId": "com.ledgerdaes.terminal",
+  "productName": "LedgerDAESTerminal",
   "copyright": "Copyright © 2025 DAES - Data and Exchange Settlement",
   "directories": {
     "output": "release",
@@ -27,7 +27,7 @@
       }
     ],
     "icon": "public/icon.ico",
-    "artifactName": "DAES-CoreBanking-${version}-win-${arch}.${ext}",
+    "artifactName": "ledgerdaesterminal-${version}-win-${arch}.${ext}",
     "publisherName": "DAES - Data and Exchange Settlement"
   },
   "nsis": {
@@ -40,11 +40,11 @@
     "installerHeaderIcon": "public/icon.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "DAES CoreBanking",
+    "shortcutName": "LedgerDAESTerminal",
     "license": "LICENSE"
   },
   "portable": {
-    "artifactName": "DAES-CoreBanking-${version}-portable.${ext}"
+    "artifactName": "ledgerdaesterminal-${version}-portable.${ext}"
   },
   "mac": {
     "target": [
@@ -54,7 +54,7 @@
       }
     ],
     "icon": "public/icon.icns",
-    "artifactName": "DAES-CoreBanking-${version}-mac-${arch}.${ext}",
+    "artifactName": "ledgerdaesterminal-${version}-mac-${arch}.${ext}",
     "category": "public.app-category.finance",
     "hardenedRuntime": true,
     "gatekeeperAssess": false
@@ -85,7 +85,7 @@
       }
     ],
     "icon": "public/icon.png",
-    "artifactName": "DAES-CoreBanking-${version}-linux-${arch}.${ext}",
+    "artifactName": "ledgerdaesterminal-${version}-linux-${arch}.${ext}",
     "category": "Finance",
     "maintainer": "DAES Team"
   },
