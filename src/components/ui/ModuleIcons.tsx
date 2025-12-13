@@ -81,6 +81,37 @@ export function TheKingdomBankIcon({ size = 24, className = '', active = false }
 }
 
 // ═══════════════════════════════════════════════════════════════
+// SBERBANK ICON - Futurista Minimalista
+// ═══════════════════════════════════════════════════════════════
+
+export function SberbankIcon({ size = 24, className = '', active = false }: ModuleIconProps) {
+  const color = active ? '#21a038' : '#FFFFFF';
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      {/* S letter stylized as Sberbank logo */}
+      <circle cx="12" cy="12" r="9" fill="none" stroke={color} strokeWidth="2" />
+      <path 
+        d="M8 9.5 C8 8 9.5 7 12 7 C14.5 7 16 8.5 16 10 C16 11.5 14 12 12 12.5 C10 13 8 13.5 8 15 C8 16.5 9.5 17 12 17 C14.5 17 16 16 16 14.5" 
+        fill="none" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round"
+      />
+      {/* Tick mark like in Sberbank logo */}
+      <path 
+        d="M6 12 L9 15 L18 6" 
+        fill="none" 
+        stroke={active ? '#21a038' : '#FFFFFF'} 
+        strokeWidth="1.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+        opacity="0.5"
+      />
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 // DAES PARTNER API ICON - Futurista Minimalista
 // ═══════════════════════════════════════════════════════════════
 
