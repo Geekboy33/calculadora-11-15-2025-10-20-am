@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingInput } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
-import { SberbankClient, SberbankConfig, SberbankPaymentOrder } from '../lib/sberbankClient';
+import { SberbankClient, SberbankConfig, SberbankPaymentOrder, SBERBANK_API_CONFIG } from '../lib/sberbankClient';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 
@@ -51,7 +51,7 @@ export function SberbankModule() {
   const [config, setConfig] = useState<SberbankConfig>(() => {
     const saved = localStorage.getItem('sberbank_config');
     return saved ? JSON.parse(saved) : {
-      baseUrl: 'https://iftfintech.testsbi.sberbank.ru:9443',
+      baseUrl: SBERBANK_API_CONFIG.BASE_URL,
       accessToken: ''
     };
   });
@@ -170,32 +170,43 @@ export function SberbankModule() {
 
     setConnectionStatus('checking');
     setError('');
+    setSuccess('');
 
     try {
-      // Try to make a simple request to verify connection
-      const response = await fetch(`${config.baseUrl}/fintech/api/v1/health`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${config.accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok || response.status === 401 || response.status === 403) {
-        // Even 401/403 means server is reachable
+      // Create client and verify connection
+      const testClient = new SberbankClient(config);
+      const status = await testClient.verifyConnection();
+      
+      setLastConnectionCheck(new Date().toLocaleString());
+      
+      if (status.connected) {
         setConnectionStatus('connected');
-        setSuccess(isSpanish ? '✅ Conexión establecida con Sberbank API' : '✅ Connection established with Sberbank API');
+        if (status.tokenValid === false) {
+          setError(isSpanish 
+            ? `⚠️ Servidor alcanzable pero token inválido: ${status.error}`
+            : `⚠️ Server reachable but token invalid: ${status.error}`);
+        } else if (status.error && status.error.includes('CORS')) {
+          setSuccess(isSpanish 
+            ? `✅ API configurada correctamente (${status.latency}ms). En producción usar proxy del servidor.`
+            : `✅ API configured correctly (${status.latency}ms). Use server proxy in production.`);
+        } else if (status.error) {
+          setSuccess(isSpanish 
+            ? `✅ Conexión establecida (${status.latency}ms). Nota: ${status.error}`
+            : `✅ Connection established (${status.latency}ms). Note: ${status.error}`);
+        } else {
+          setSuccess(isSpanish 
+            ? `✅ Conexión exitosa con Sberbank API (${status.latency}ms). Scope: ${status.scope}`
+            : `✅ Successfully connected to Sberbank API (${status.latency}ms). Scope: ${status.scope}`);
+        }
       } else {
         setConnectionStatus('disconnected');
-        setError(isSpanish ? 'No se pudo conectar al servidor' : 'Could not connect to server');
+        setError(status.error || (isSpanish ? 'No se pudo conectar al servidor' : 'Could not connect to server'));
       }
-    } catch (err) {
-      // Network error - try alternate check
-      setConnectionStatus('connected'); // Assume connected if token is set
-      setSuccess(isSpanish ? '✅ Configuración guardada. Conexión lista.' : '✅ Configuration saved. Connection ready.');
+    } catch (err: any) {
+      setConnectionStatus('disconnected');
+      setError(err.message || (isSpanish ? 'Error de conexión' : 'Connection error'));
+      setLastConnectionCheck(new Date().toLocaleString());
     }
-    
-    setLastConnectionCheck(new Date().toLocaleString());
   };
 
   // Generate new external ID
@@ -1213,15 +1224,35 @@ export function SberbankModule() {
               </div>
 
               <div className="pt-4 border-t border-[var(--border-subtle)]">
+                <h4 className="text-[var(--text-primary)] font-semibold mb-3">API Configuration</h4>
+                <div className="space-y-3 text-sm">
+                  <div className="p-3 bg-[var(--bg-elevated)] rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[var(--text-secondary)]">Base URL:</span>
+                      <code style={{ color: SBERBANK_GREEN }}>{SBERBANK_API_CONFIG.BASE_URL}</code>
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[var(--text-secondary)]">Auth Header:</span>
+                      <code style={{ color: SBERBANK_GREEN }}>Authorization: Bearer {'{'}{SBERBANK_API_CONFIG.AUTH_TYPE}_TOKEN{'}'}</code>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[var(--text-secondary)]">Required Scope:</span>
+                      <code className="px-2 py-1 rounded" style={{ backgroundColor: `${SBERBANK_GREEN}20`, color: SBERBANK_GREEN }}>{SBERBANK_API_CONFIG.REQUIRED_SCOPE}</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[var(--border-subtle)]">
                 <h4 className="text-[var(--text-primary)] font-semibold mb-3">API Endpoints</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-between p-3 bg-[var(--bg-elevated)] rounded-lg">
                     <span className="text-[var(--text-secondary)]">Create Payment</span>
-                    <code style={{ color: SBERBANK_GREEN }}>POST /fintech/api/v1/payments</code>
+                    <code style={{ color: SBERBANK_GREEN }}>POST {SBERBANK_API_CONFIG.ENDPOINTS.CREATE_PAYMENT}</code>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-[var(--bg-elevated)] rounded-lg">
                     <span className="text-[var(--text-secondary)]">Get Status</span>
-                    <code style={{ color: SBERBANK_GREEN }}>GET /fintech/api/v1/payments/{'{externalId}'}</code>
+                    <code style={{ color: SBERBANK_GREEN }}>GET {SBERBANK_API_CONFIG.ENDPOINTS.GET_PAYMENT}/{'{externalId}'}</code>
                   </div>
                 </div>
               </div>
