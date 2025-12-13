@@ -12,7 +12,17 @@ import {
 } from 'lucide-react';
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingInput } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
-import { SberbankClient, SberbankConfig, SberbankPaymentOrder, SBERBANK_API_CONFIG } from '../lib/sberbankClient';
+import { 
+  SberbankClient, 
+  SberbankConfig, 
+  SberbankPaymentOrder, 
+  SBERBANK_API_CONFIG,
+  BANK_STATUS,
+  isFinalStatus,
+  isFinalSuccessStatus,
+  isFinalFailedStatus,
+  isIntermediateStatus
+} from '../lib/sberbankClient';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
 
@@ -50,9 +60,19 @@ export function SberbankModule() {
   // API Configuration
   const [config, setConfig] = useState<SberbankConfig>(() => {
     const saved = localStorage.getItem('sberbank_config');
-    return saved ? JSON.parse(saved) : {
-      baseUrl: SBERBANK_API_CONFIG.BASE_URL,
-      accessToken: ''
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Ensure environment is set
+      if (!parsed.environment) {
+        parsed.environment = 'TEST';
+        parsed.baseUrl = SBERBANK_API_CONFIG.ENVIRONMENTS.TEST;
+      }
+      return parsed;
+    }
+    return {
+      baseUrl: SBERBANK_API_CONFIG.ENVIRONMENTS.TEST,
+      accessToken: '',
+      environment: 'TEST' as 'TEST' | 'PRODUCTION'
     };
   });
 
@@ -1198,65 +1218,140 @@ export function SberbankModule() {
           <BankingSection title={isSpanish ? "Configuración API" : "API Configuration"} icon={Settings} color="purple">
             <BankingCard className="p-card space-y-6">
               {/* Connection Test */}
-              <div className="p-4 rounded-lg" style={{ backgroundColor: connectionStatus === 'connected' ? `${SBERBANK_GREEN}20` : 'rgba(239, 68, 68, 0.1)' }}>
-                <div className="flex items-center justify-between">
+              <div className="p-4 rounded-lg" style={{ backgroundColor: connectionStatus === 'connected' ? `${SBERBANK_GREEN}20` : connectionStatus === 'checking' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)' }}>
+                <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="flex items-center gap-3">
-                    {connectionStatus === 'connected' ? <Wifi className="w-5 h-5" style={{ color: SBERBANK_GREEN }} /> : <WifiOff className="w-5 h-5 text-red-400" />}
+                    {connectionStatus === 'connected' ? <Wifi className="w-5 h-5" style={{ color: SBERBANK_GREEN }} /> : connectionStatus === 'checking' ? <RefreshCw className="w-5 h-5 text-amber-400 animate-spin" /> : <WifiOff className="w-5 h-5 text-red-400" />}
                     <div>
-                      <p className="font-semibold" style={{ color: connectionStatus === 'connected' ? SBERBANK_GREEN : '#ef4444' }}>
-                        {connectionStatus === 'connected' ? (isSpanish ? 'API Conectada' : 'API Connected') : (isSpanish ? 'API Desconectada' : 'API Disconnected')}
+                      <p className="font-semibold" style={{ color: connectionStatus === 'connected' ? SBERBANK_GREEN : connectionStatus === 'checking' ? '#f59e0b' : '#ef4444' }}>
+                        {connectionStatus === 'connected' ? (isSpanish ? 'API Conectada' : 'API Connected') : connectionStatus === 'checking' ? (isSpanish ? 'Verificando...' : 'Checking...') : (isSpanish ? 'API Desconectada' : 'API Disconnected')}
                       </p>
                       {lastConnectionCheck && <p className="text-xs text-[var(--text-secondary)]">{isSpanish ? 'Última verificación:' : 'Last check:'} {lastConnectionCheck}</p>}
                     </div>
                   </div>
                   <BankingButton variant="secondary" icon={RefreshCw} onClick={handleCheckConnection} disabled={connectionStatus === 'checking'}>
-                    {isSpanish ? 'Verificar' : 'Test'}
+                    {isSpanish ? 'Verificar Conexión' : 'Test Connection'}
                   </BankingButton>
                 </div>
               </div>
 
-              <BankingInput label="Base URL" value={config.baseUrl} onChange={(v) => setConfig({ ...config, baseUrl: v })} placeholder="https://iftfintech.testsbi.sberbank.ru:9443" />
+              {/* Environment Selector */}
+              <div>
+                <label className="block text-[var(--text-primary)] font-semibold mb-3">{isSpanish ? 'Ambiente' : 'Environment'}</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setConfig({ ...config, environment: 'TEST', baseUrl: SBERBANK_API_CONFIG.ENVIRONMENTS.TEST })}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${config.environment === 'TEST' ? 'border-amber-500 bg-amber-500/10' : 'border-[var(--border-subtle)] hover:border-amber-500/50'}`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-3 h-3 rounded-full ${config.environment === 'TEST' ? 'bg-amber-500' : 'bg-[var(--border-subtle)]'}`} />
+                      <span className={`font-semibold ${config.environment === 'TEST' ? 'text-amber-400' : 'text-[var(--text-secondary)]'}`}>TEST</span>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)]">iftfintech.testsbi.sberbank.ru</p>
+                    <p className="text-xs text-amber-400 mt-1">⚠️ IMPLEMENTED no retornado</p>
+                  </button>
+                  <button
+                    onClick={() => setConfig({ ...config, environment: 'PRODUCTION', baseUrl: SBERBANK_API_CONFIG.ENVIRONMENTS.PRODUCTION })}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${config.environment === 'PRODUCTION' ? 'border-emerald-500 bg-emerald-500/10' : 'border-[var(--border-subtle)] hover:border-emerald-500/50'}`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-3 h-3 rounded-full ${config.environment === 'PRODUCTION' ? 'bg-emerald-500' : 'bg-[var(--border-subtle)]'}`} />
+                      <span className={`font-semibold ${config.environment === 'PRODUCTION' ? 'text-emerald-400' : 'text-[var(--text-secondary)]'}`}>PRODUCTION</span>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)]">fintech.sberbank.ru</p>
+                    <p className="text-xs text-emerald-400 mt-1">✓ Ambiente real</p>
+                  </button>
+                </div>
+              </div>
+
+              {/* Base URL */}
+              <div>
+                <label className="block text-[var(--text-secondary)] text-sm mb-2">Base URL</label>
+                <input type="text" value={config.baseUrl} readOnly className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] opacity-70" />
+              </div>
               
+              {/* Access Token */}
               <div>
                 <label className="block text-[var(--text-secondary)] text-sm mb-2">Access Token (SSO) *</label>
                 <input type="password" value={config.accessToken} onChange={(e) => setConfig({ ...config, accessToken: e.target.value })} className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)]" placeholder="f8ad3141-b7e8-4924-92de-3de4fd0a464e-1" />
-                <p className="text-xs text-[var(--text-secondary)] mt-1">{isSpanish ? 'Token de acceso obtenido via SSO (scope: PAY_DOC_RU)' : 'Access token obtained via SSO (scope: PAY_DOC_RU)'}</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">{isSpanish ? 'Token SSO con scope: PAY_DOC_RU' : 'SSO token with scope: PAY_DOC_RU'}</p>
               </div>
 
+              {/* API Configuration */}
               <div className="pt-4 border-t border-[var(--border-subtle)]">
-                <h4 className="text-[var(--text-primary)] font-semibold mb-3">API Configuration</h4>
-                <div className="space-y-3 text-sm">
-                  <div className="p-3 bg-[var(--bg-elevated)] rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[var(--text-secondary)]">Base URL:</span>
-                      <code style={{ color: SBERBANK_GREEN }}>{SBERBANK_API_CONFIG.BASE_URL}</code>
-                    </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[var(--text-secondary)]">Auth Header:</span>
-                      <code style={{ color: SBERBANK_GREEN }}>Authorization: Bearer {'{'}{SBERBANK_API_CONFIG.AUTH_TYPE}_TOKEN{'}'}</code>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[var(--text-secondary)]">Required Scope:</span>
-                      <code className="px-2 py-1 rounded" style={{ backgroundColor: `${SBERBANK_GREEN}20`, color: SBERBANK_GREEN }}>{SBERBANK_API_CONFIG.REQUIRED_SCOPE}</code>
-                    </div>
+                <h4 className="text-[var(--text-primary)] font-semibold mb-3">{isSpanish ? 'Configuración de API' : 'API Configuration'}</h4>
+                <div className="p-4 bg-[var(--bg-elevated)] rounded-lg space-y-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[var(--text-secondary)]">Auth:</span>
+                    <code style={{ color: SBERBANK_GREEN }}>Authorization: Bearer {'{'} token {'}'}</code>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[var(--text-secondary)]">Content-Type:</span>
+                    <code style={{ color: SBERBANK_GREEN }}>application/json</code>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[var(--text-secondary)]">Scope:</span>
+                    <code className="px-2 py-1 rounded" style={{ backgroundColor: `${SBERBANK_GREEN}20`, color: SBERBANK_GREEN }}>PAY_DOC_RU</code>
                   </div>
                 </div>
               </div>
 
+              {/* API Endpoints */}
               <div className="pt-4 border-t border-[var(--border-subtle)]">
                 <h4 className="text-[var(--text-primary)] font-semibold mb-3">API Endpoints</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-between p-3 bg-[var(--bg-elevated)] rounded-lg">
-                    <span className="text-[var(--text-secondary)]">Create Payment</span>
-                    <code style={{ color: SBERBANK_GREEN }}>POST {SBERBANK_API_CONFIG.ENDPOINTS.CREATE_PAYMENT}</code>
+                    <span className="text-[var(--text-secondary)]">{isSpanish ? 'Crear Pago' : 'Create Payment'}</span>
+                    <code style={{ color: SBERBANK_GREEN }}>POST /fintech/api/v1/payments</code>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-[var(--bg-elevated)] rounded-lg">
-                    <span className="text-[var(--text-secondary)]">Get Status</span>
-                    <code style={{ color: SBERBANK_GREEN }}>GET {SBERBANK_API_CONFIG.ENDPOINTS.GET_PAYMENT}/{'{externalId}'}</code>
+                    <span className="text-[var(--text-secondary)]">{isSpanish ? 'Obtener Estado' : 'Get Status'}</span>
+                    <code style={{ color: SBERBANK_GREEN }}>GET /fintech/api/v1/payments/{'{id}'}/state</code>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-[var(--bg-elevated)] rounded-lg">
+                    <span className="text-[var(--text-secondary)]">{isSpanish ? 'Obtener Documento' : 'Get Document'}</span>
+                    <code style={{ color: SBERBANK_GREEN }}>GET /fintech/api/v1/payments/{'{id}'}</code>
                   </div>
                 </div>
               </div>
 
+              {/* Bank Status Reference */}
+              <div className="pt-4 border-t border-[var(--border-subtle)]">
+                <h4 className="text-[var(--text-primary)] font-semibold mb-3">{isSpanish ? 'Estados del Banco (bankStatus)' : 'Bank Status Reference'}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                    <p className="font-semibold text-amber-400 mb-2">{isSpanish ? 'Intermedios' : 'Intermediate'}</p>
+                    <p className="text-amber-300/80">CREATED, SIGNED, ACCEPTED, PROCESSING_RZK, DELIVERED...</p>
+                    <p className="text-amber-400 mt-1">→ {isSpanish ? 'Continuar polling' : 'Keep polling'}</p>
+                  </div>
+                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                    <p className="font-semibold text-red-400 mb-2">{isSpanish ? 'Fallidos' : 'Failed'}</p>
+                    <p className="text-red-300/80">DELETED, REFUSEDBYBANK, FRAUDDENY, REQUISITEERROR...</p>
+                    <p className="text-red-400 mt-1">→ {isSpanish ? 'Parar polling' : 'Stop polling'}</p>
+                  </div>
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                    <p className="font-semibold text-emerald-400 mb-2">{isSpanish ? 'Exitoso' : 'Success'}</p>
+                    <p className="text-emerald-300/80">IMPLEMENTED</p>
+                    <p className="text-amber-400 mt-1">⚠️ {isSpanish ? 'No en TEST' : 'Not in TEST'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Response Codes */}
+              <div className="pt-4 border-t border-[var(--border-subtle)]">
+                <h4 className="text-[var(--text-primary)] font-semibold mb-3">{isSpanish ? 'Códigos HTTP' : 'HTTP Codes'}</h4>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded">201 Created</span>
+                  <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded">400 Bad Request</span>
+                  <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded">401 Unauthorized</span>
+                  <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded">403 Forbidden</span>
+                  <span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded">429 Rate Limit</span>
+                  <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded">500 Server Error</span>
+                  <span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded">503 Unavailable</span>
+                </div>
+              </div>
+
+              {/* Documentation */}
               <div className="pt-4 border-t border-[var(--border-subtle)]">
                 <a href="https://developers.sber.ru/docs/ru/sber-api/specifications/payments/create-payment" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:opacity-80" style={{ color: SBERBANK_GREEN }}>
                   <span>Sberbank API Documentation</span>
