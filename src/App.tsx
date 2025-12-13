@@ -1,4 +1,7 @@
 import { useState, useEffect, lazy, Suspense, useRef } from 'react';
+
+// Inicializar sincronización de base de datos
+import './lib/database-sync';
 import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight } from 'lucide-react';
 import { 
   CentralPanelIcon, 
