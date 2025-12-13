@@ -1,10 +1,47 @@
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, shell, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 // Determinar si estamos en desarrollo o producción
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
+// Auto-updater (solo en producción)
+let autoUpdater = null;
+if (!isDev) {
+  try {
+    autoUpdater = require('electron-updater').autoUpdater;
+    autoUpdater.autoDownload = false;
+    autoUpdater.autoInstallOnAppQuit = true;
+  } catch (e) {
+    console.log('Auto-updater not available:', e.message);
+  }
+}
+
 let mainWindow;
+
+// Obtener la ruta de datos del usuario (persiste entre actualizaciones)
+const userDataPath = app.getPath('userData');
+const databasePath = path.join(userDataPath, 'databases');
+
+// Asegurar que existan las carpetas de datos
+function ensureDataDirectories() {
+  const directories = [
+    databasePath,
+    path.join(userDataPath, 'profiles'),
+    path.join(userDataPath, 'backups'),
+    path.join(userDataPath, 'exports'),
+    path.join(userDataPath, 'logs'),
+  ];
+
+  directories.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+      console.log('[Main] Created directory:', dir);
+    }
+  });
+
+  console.log('[Main] Data directories ready at:', userDataPath);
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -17,6 +54,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
+      preload: path.join(__dirname, 'preload.cjs'),
     },
     show: false,
     backgroundColor: '#0a0a0a',
@@ -26,11 +64,9 @@ function createWindow() {
 
   // Cargar la aplicación
   if (isDev) {
-    // En desarrollo, cargar desde Vite dev server
     mainWindow.loadURL('http://localhost:4000');
     mainWindow.webContents.openDevTools();
   } else {
-    // En producción, cargar el archivo index.html compilado
     const indexPath = path.join(app.getAppPath(), 'dist', 'index.html');
     mainWindow.loadFile(indexPath);
   }
@@ -38,6 +74,13 @@ function createWindow() {
   // Mostrar ventana cuando esté lista
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    
+    // Verificar actualizaciones al iniciar (solo en producción)
+    if (autoUpdater && !isDev) {
+      setTimeout(() => {
+        checkForUpdates(true);
+      }, 3000);
+    }
   });
 
   // Abrir enlaces externos en el navegador predeterminado
@@ -51,12 +94,133 @@ function createWindow() {
   });
 }
 
-// Menú de la aplicación
+// ════════════════════════════════════════════════════════════════════════════
+// AUTO-UPDATER
+// ════════════════════════════════════════════════════════════════════════════
+
+function checkForUpdates(silent = false) {
+  if (!autoUpdater) {
+    if (!silent) {
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'Actualizaciones',
+        message: 'El sistema de actualizaciones no está disponible en modo desarrollo.',
+      });
+    }
+    return;
+  }
+
+  autoUpdater.checkForUpdates().catch(err => {
+    console.error('[AutoUpdater] Error checking for updates:', err);
+    if (!silent) {
+      dialog.showErrorBox('Error', 'No se pudo verificar actualizaciones: ' + err.message);
+    }
+  });
+}
+
+if (autoUpdater) {
+  autoUpdater.on('checking-for-update', () => {
+    console.log('[AutoUpdater] Checking for updates...');
+    sendStatusToWindow('checking-for-update');
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    console.log('[AutoUpdater] Update available:', info.version);
+    sendStatusToWindow('update-available', info);
+    
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Actualización disponible',
+      message: `Nueva versión ${info.version} disponible.\n\n¿Desea descargarla ahora?\n\nSus datos y configuraciones se conservarán.`,
+      buttons: ['Descargar', 'Después'],
+      defaultId: 0,
+    }).then(({ response }) => {
+      if (response === 0) {
+        autoUpdater.downloadUpdate();
+      }
+    });
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('[AutoUpdater] No updates available');
+    sendStatusToWindow('update-not-available', info);
+  });
+
+  autoUpdater.on('download-progress', (progress) => {
+    console.log('[AutoUpdater] Download progress:', Math.round(progress.percent) + '%');
+    sendStatusToWindow('download-progress', progress);
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('[AutoUpdater] Update downloaded:', info.version);
+    sendStatusToWindow('update-downloaded', info);
+    
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Actualización lista',
+      message: `La versión ${info.version} se descargó correctamente.\n\n¿Reiniciar ahora para aplicar la actualización?\n\nSus datos se conservarán.`,
+      buttons: ['Reiniciar ahora', 'Después'],
+      defaultId: 0,
+    }).then(({ response }) => {
+      if (response === 0) {
+        autoUpdater.quitAndInstall(false, true);
+      }
+    });
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('[AutoUpdater] Error:', err);
+    sendStatusToWindow('error', { message: err.message });
+  });
+}
+
+function sendStatusToWindow(status, data = {}) {
+  if (mainWindow && mainWindow.webContents) {
+    mainWindow.webContents.send('updater-status', { status, data });
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// IPC HANDLERS
+// ════════════════════════════════════════════════════════════════════════════
+
+ipcMain.handle('get-app-info', () => {
+  return {
+    version: app.getVersion(),
+    name: app.getName(),
+    userDataPath: userDataPath,
+    databasePath: databasePath,
+    isDev: isDev,
+    platform: process.platform,
+  };
+});
+
+ipcMain.handle('check-for-updates', () => {
+  checkForUpdates(false);
+});
+
+ipcMain.handle('get-user-data-path', () => {
+  return userDataPath;
+});
+
+ipcMain.handle('get-database-path', () => {
+  return databasePath;
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// MENÚ DE LA APLICACIÓN
+// ════════════════════════════════════════════════════════════════════════════
+
 const menuTemplate = [
   {
     label: 'LedgerDAESTerminal',
     submenu: [
       { role: 'about', label: 'Acerca de LedgerDAESTerminal' },
+      { type: 'separator' },
+      {
+        label: 'Buscar actualizaciones...',
+        click: () => checkForUpdates(false),
+      },
       { type: 'separator' },
       { role: 'services' },
       { type: 'separator' },
@@ -70,6 +234,21 @@ const menuTemplate = [
   {
     label: 'Archivo',
     submenu: [
+      {
+        label: 'Abrir carpeta de datos',
+        click: () => {
+          shell.openPath(userDataPath);
+        }
+      },
+      {
+        label: 'Exportar base de datos',
+        click: () => {
+          if (mainWindow) {
+            mainWindow.webContents.send('menu-export-database');
+          }
+        }
+      },
+      { type: 'separator' },
       { role: 'close', label: 'Cerrar ventana' }
     ]
   },
@@ -122,12 +301,24 @@ const menuTemplate = [
         click: async () => {
           await shell.openExternal('https://github.com/Geekboy33/calculadora-11-15-2025-10-20-am/issues');
         }
+      },
+      { type: 'separator' },
+      {
+        label: 'Verificar actualizaciones',
+        click: () => checkForUpdates(false),
       }
     ]
   }
 ];
 
+// ════════════════════════════════════════════════════════════════════════════
+// INICIALIZACIÓN
+// ════════════════════════════════════════════════════════════════════════════
+
 app.whenReady().then(() => {
+  // Crear carpetas de datos
+  ensureDataDirectories();
+  
   const menu = Menu.buildFromTemplate(menuTemplate);
   Menu.setApplicationMenu(menu);
   
@@ -154,3 +345,7 @@ app.on('web-contents-created', (event, contents) => {
   });
 });
 
+console.log('[Main] LedgerDAESTerminal started');
+console.log('[Main] Version:', app.getVersion());
+console.log('[Main] User data path:', userDataPath);
+console.log('[Main] Is dev:', isDev);

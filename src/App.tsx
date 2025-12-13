@@ -28,6 +28,7 @@ const BancoCentralPrivadoModule = lazy(() => import('./components/BancoCentralPr
 const OrigenDeFondosModule = lazy(() => import('./components/OrigenDeFondosModule').then(m => ({ default: m.OrigenDeFondosModule })));
 const TheKingdomBankModule = lazy(() => import('./components/TheKingdomBankModule').then(m => ({ default: m.TheKingdomBankModule })));
 const SberbankModule = lazy(() => import('./components/SberbankModule').then(m => ({ default: m.SberbankModule })));
+const DatabaseModule = lazy(() => import('./components/DatabaseModule'));
 const DAESPartnerAPIModule = lazy(() => import('./components/DAESPartnerAPIModule').then(m => ({ default: m.DAESPartnerAPIModule })));
 const AdvancedBankingDashboard = lazy(() => import(/* webpackPrefetch: true */ './components/AdvancedBankingDashboard').then(m => ({ default: m.AdvancedBankingDashboard })));
 const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard').then(m => ({ default: m.AnalyticsDashboard })));
@@ -82,7 +83,7 @@ const BankSettlementModule = lazy(() => import('./components/BankSettlementModul
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 const DownloadsModule = lazy(() => import('./components/DownloadsModule').then(m => ({ default: m.DownloadsModule })));
 
-type Tab = 'central-dashboard' | 'banco-central-privado' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads';
+type Tab = 'central-dashboard' | 'banco-central-privado' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -191,6 +192,7 @@ function App() {
     { id: 'bank-settlement' as Tab, name: isSpanish ? 'Liquidación Bancaria' : 'Bank Settlement', icon: Building2 },
     { id: 'iban-manager' as Tab, name: isSpanish ? 'Gestor de IBANs' : 'IBAN Manager', icon: CreditCard },
     { id: 'downloads' as Tab, name: isSpanish ? 'Descargas' : 'Downloads', icon: FileText },
+    { id: 'database' as Tab, name: isSpanish ? 'Base de Datos' : 'Database', icon: Database },
     { id: 'api-daes-pledge' as Tab, name: 'DAES Pledge/Escrow', icon: TrendingUp },
     { id: 'audit-bank' as Tab, name: t.navAuditBank, icon: FileSearch },
     { id: 'corebanking-api' as Tab, name: 'CoreBanking API', icon: ArrowRightLeft },
@@ -382,6 +384,7 @@ function App() {
           {activeTab === 'bank-settlement' && <BankSettlementModule />}
           {activeTab === 'iban-manager' && <IbanManagerModule />}
           {activeTab === 'downloads' && <DownloadsModule />}
+          {activeTab === 'database' && <DatabaseModule />}
           {activeTab === 'api-daes-pledge' && <APIDAESPledgeModule />}
           {activeTab === 'audit-bank' && <AuditBankWindow />}
           {activeTab === 'corebanking-api' && <CoreBankingAPIModule />}

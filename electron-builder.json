@@ -15,6 +15,8 @@
   "extraMetadata": {
     "main": "electron/main.cjs"
   },
+  "asar": true,
+  "compression": "maximum",
   "win": {
     "target": [
       {
@@ -36,7 +38,8 @@
     "deleteAppDataOnUninstall": false,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "LedgerDAESTerminal"
+    "shortcutName": "LedgerDAESTerminal",
+    "differentialPackage": true
   },
   "portable": {
     "artifactName": "ledgerdaesterminal-${version}-portable.${ext}"

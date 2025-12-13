@@ -1,10 +1,15 @@
 /**
  * Downloads Module - Centro de Descargas
  * Permite descargar versiones de escritorio para Windows, Mac y Linux
+ * Incluye verificación de actualizaciones para la versión de escritorio
  */
 
-import { useState } from 'react';
-import { Download, Monitor, Apple, Terminal, CheckCircle, Clock, HardDrive, Shield, Zap, Globe, Package, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { 
+  Download, Monitor, Apple, Terminal, CheckCircle, Clock, HardDrive, Shield, 
+  Zap, Globe, Package, ExternalLink, RefreshCw, AlertCircle, ArrowUpCircle,
+  Database, Folder
+} from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 
 interface DownloadItem {
@@ -20,14 +25,91 @@ interface DownloadItem {
   requirements: string[];
 }
 
+interface UpdaterStatus {
+  status: string;
+  data?: {
+    version?: string;
+    percent?: number;
+    message?: string;
+  };
+}
+
+// Detectar si estamos en Electron
+declare global {
+  interface Window {
+    electronAPI?: {
+      getAppInfo: () => Promise<{
+        version: string;
+        name: string;
+        userDataPath: string;
+        databasePath: string;
+        isDev: boolean;
+        platform: string;
+      }>;
+      checkForUpdates: () => void;
+      onUpdaterStatus: (callback: (status: UpdaterStatus) => void) => () => void;
+      isElectron: boolean;
+      platform: string;
+    };
+  }
+}
+
 export function DownloadsModule() {
   const { language } = useLanguage();
   const isSpanish = language === 'es';
   const [downloading, setDownloading] = useState<string | null>(null);
   const [downloadProgress, setDownloadProgress] = useState(0);
+  
+  // Electron state
+  const [isElectron, setIsElectron] = useState(false);
+  const [appInfo, setAppInfo] = useState<{
+    version: string;
+    userDataPath: string;
+    databasePath: string;
+    platform: string;
+  } | null>(null);
+  const [updaterStatus, setUpdaterStatus] = useState<UpdaterStatus | null>(null);
+  const [checkingUpdates, setCheckingUpdates] = useState(false);
 
   const currentVersion = '1.0.0';
-  const releaseDate = '2025-12-12';
+  const releaseDate = '2025-12-13';
+  const githubReleasesUrl = 'https://github.com/Geekboy33/calculadora-11-15-2025-10-20-am/releases';
+
+  useEffect(() => {
+    // Detectar Electron
+    if (window.electronAPI?.isElectron) {
+      setIsElectron(true);
+      
+      // Obtener info de la app
+      window.electronAPI.getAppInfo().then(info => {
+        setAppInfo({
+          version: info.version,
+          userDataPath: info.userDataPath,
+          databasePath: info.databasePath,
+          platform: info.platform,
+        });
+      });
+
+      // Escuchar estado del actualizador
+      const unsubscribe = window.electronAPI.onUpdaterStatus((status) => {
+        setUpdaterStatus(status);
+        if (status.status === 'checking-for-update') {
+          setCheckingUpdates(true);
+        } else {
+          setCheckingUpdates(false);
+        }
+      });
+
+      return () => unsubscribe();
+    }
+  }, []);
+
+  const handleCheckUpdates = () => {
+    if (window.electronAPI?.checkForUpdates) {
+      setCheckingUpdates(true);
+      window.electronAPI.checkForUpdates();
+    }
+  };
 
   const downloads: DownloadItem[] = [
     {
@@ -37,13 +119,13 @@ export function DownloadsModule() {
       version: currentVersion,
       size: '~85 MB',
       filename: `ledgerdaesterminal-${currentVersion}-win-x64.exe`,
-      downloadUrl: `/downloads/ledgerdaesterminal-${currentVersion}-win-x64.exe`,
+      downloadUrl: `${githubReleasesUrl}/download/v${currentVersion}/ledgerdaesterminal-${currentVersion}-win-x64.exe`,
       releaseDate,
       features: [
-        isSpanish ? 'Instalador automático' : 'Automatic installer',
+        isSpanish ? 'Instalador automático NSIS' : 'Automatic NSIS installer',
         isSpanish ? 'Acceso directo en escritorio' : 'Desktop shortcut',
         isSpanish ? 'Actualizaciones automáticas' : 'Auto-updates',
-        isSpanish ? 'Modo offline disponible' : 'Offline mode available',
+        isSpanish ? 'Datos persisten entre actualizaciones' : 'Data persists between updates',
       ],
       requirements: [
         'Windows 10/11 (64-bit)',
@@ -52,60 +134,61 @@ export function DownloadsModule() {
       ],
     },
     {
-      id: 'windows-x86',
+      id: 'windows-portable',
       platform: 'windows',
-      name: 'Windows (32-bit)',
+      name: 'Windows Portable',
       version: currentVersion,
       size: '~80 MB',
-      filename: `ledgerdaesterminal-${currentVersion}-win-ia32.exe`,
-      downloadUrl: `/downloads/ledgerdaesterminal-${currentVersion}-win-ia32.exe`,
+      filename: `ledgerdaesterminal-${currentVersion}-portable.exe`,
+      downloadUrl: `${githubReleasesUrl}/download/v${currentVersion}/ledgerdaesterminal-${currentVersion}-portable.exe`,
       releaseDate,
       features: [
-        isSpanish ? 'Compatible con sistemas antiguos' : 'Compatible with older systems',
-        isSpanish ? 'Instalador automático' : 'Automatic installer',
-        isSpanish ? 'Modo offline disponible' : 'Offline mode available',
+        isSpanish ? 'No requiere instalación' : 'No installation required',
+        isSpanish ? 'Ejecutar desde USB' : 'Run from USB',
+        isSpanish ? 'Portátil' : 'Portable',
       ],
       requirements: [
-        'Windows 7/8/10 (32-bit)',
-        '2 GB RAM',
-        '400 MB ' + (isSpanish ? 'espacio en disco' : 'disk space'),
+        'Windows 10/11',
+        '4 GB RAM',
+        '100 MB ' + (isSpanish ? 'espacio libre' : 'free space'),
       ],
     },
     {
-      id: 'mac-universal',
+      id: 'mac-x64',
       platform: 'mac',
-      name: 'macOS (Universal)',
+      name: 'macOS (Intel)',
       version: currentVersion,
       size: '~95 MB',
-      filename: `ledgerdaesterminal-${currentVersion}-mac-universal.dmg`,
-      downloadUrl: `/downloads/ledgerdaesterminal-${currentVersion}-mac-universal.dmg`,
+      filename: `ledgerdaesterminal-${currentVersion}-mac-x64.dmg`,
+      downloadUrl: `${githubReleasesUrl}/download/v${currentVersion}/ledgerdaesterminal-${currentVersion}-mac-x64.dmg`,
       releaseDate,
       features: [
-        isSpanish ? 'Compatible con Intel y Apple Silicon' : 'Intel & Apple Silicon compatible',
+        isSpanish ? 'Compatible con Mac Intel' : 'Intel Mac compatible',
         isSpanish ? 'Integración con macOS' : 'macOS integration',
-        isSpanish ? 'Notificaciones nativas' : 'Native notifications',
+        isSpanish ? 'Actualizaciones automáticas' : 'Auto-updates',
       ],
       requirements: [
-        'macOS 10.15+',
+        'macOS 10.15+ (Catalina)',
         '4 GB RAM',
         '500 MB ' + (isSpanish ? 'espacio en disco' : 'disk space'),
       ],
     },
     {
-      id: 'linux-deb',
+      id: 'linux-appimage',
       platform: 'linux',
-      name: 'Linux (Debian/Ubuntu)',
+      name: 'Linux (AppImage)',
       version: currentVersion,
-      size: '~75 MB',
-      filename: `ledgerdaesterminal-${currentVersion}-linux-x64.deb`,
-      downloadUrl: `/downloads/ledgerdaesterminal-${currentVersion}-linux-x64.deb`,
+      size: '~90 MB',
+      filename: `ledgerdaesterminal-${currentVersion}-linux-x64.AppImage`,
+      downloadUrl: `${githubReleasesUrl}/download/v${currentVersion}/ledgerdaesterminal-${currentVersion}-linux-x64.AppImage`,
       releaseDate,
       features: [
-        isSpanish ? 'Paquete .deb para fácil instalación' : '.deb package for easy installation',
-        isSpanish ? 'Integración con el sistema' : 'System integration',
+        isSpanish ? 'AppImage universal' : 'Universal AppImage',
+        isSpanish ? 'No requiere instalación' : 'No installation required',
+        isSpanish ? 'Compatible con mayoría de distros' : 'Compatible with most distros',
       ],
       requirements: [
-        'Ubuntu 20.04+ / Debian 10+',
+        'Ubuntu 20.04+ / Fedora 34+',
         '4 GB RAM',
         '500 MB ' + (isSpanish ? 'espacio en disco' : 'disk space'),
       ],
@@ -138,37 +221,9 @@ export function DownloadsModule() {
     }
   };
 
-  const handleDownload = async (item: DownloadItem) => {
-    setDownloading(item.id);
-    setDownloadProgress(0);
-
-    // Simular progreso de descarga
-    const interval = setInterval(() => {
-      setDownloadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + Math.random() * 15;
-      });
-    }, 200);
-
-    // Después de "completar", mostrar mensaje
-    setTimeout(() => {
-      clearInterval(interval);
-      setDownloadProgress(100);
-      
-      setTimeout(() => {
-        setDownloading(null);
-        setDownloadProgress(0);
-        
-        // Mostrar alerta de que la versión está en desarrollo
-        alert(isSpanish 
-          ? `⚠️ La versión de escritorio está en desarrollo.\n\nPor ahora, puedes usar la versión web en:\nhttp://localhost:4000\n\nPróximamente estará disponible el archivo:\n${item.filename}`
-          : `⚠️ Desktop version is under development.\n\nFor now, you can use the web version at:\nhttp://localhost:4000\n\nComing soon:\n${item.filename}`
-        );
-      }, 500);
-    }, 3000);
+  const handleDownload = (item: DownloadItem) => {
+    // Abrir URL de descarga directamente
+    window.open(item.downloadUrl, '_blank');
   };
 
   const features = [
@@ -176,37 +231,58 @@ export function DownloadsModule() {
       icon: <Zap className="w-6 h-6" />,
       title: isSpanish ? 'Rendimiento Nativo' : 'Native Performance',
       description: isSpanish 
-        ? 'Aplicación de escritorio optimizada para máximo rendimiento'
-        : 'Desktop app optimized for maximum performance',
+        ? 'Aplicación de escritorio optimizada con Electron'
+        : 'Desktop app optimized with Electron',
     },
     {
-      icon: <Shield className="w-6 h-6" />,
-      title: isSpanish ? 'Seguridad Mejorada' : 'Enhanced Security',
+      icon: <Database className="w-6 h-6" />,
+      title: isSpanish ? 'Base de Datos Local' : 'Local Database',
       description: isSpanish
-        ? 'Almacenamiento local encriptado y conexiones seguras'
-        : 'Encrypted local storage and secure connections',
+        ? 'IndexedDB persistente que sobrevive a actualizaciones'
+        : 'Persistent IndexedDB that survives updates',
     },
     {
-      icon: <Globe className="w-6 h-6" />,
-      title: isSpanish ? 'Modo Offline' : 'Offline Mode',
+      icon: <ArrowUpCircle className="w-6 h-6" />,
+      title: isSpanish ? 'Actualizaciones Seguras' : 'Safe Updates',
       description: isSpanish
-        ? 'Trabaja sin conexión y sincroniza cuando te reconectes'
-        : 'Work offline and sync when you reconnect',
+        ? 'Actualiza sin perder datos ni configuraciones'
+        : 'Update without losing data or settings',
     },
     {
-      icon: <Package className="w-6 h-6" />,
-      title: isSpanish ? 'Actualizaciones Automáticas' : 'Auto Updates',
+      icon: <Folder className="w-6 h-6" />,
+      title: isSpanish ? 'Carpeta de Datos' : 'Data Folder',
       description: isSpanish
-        ? 'Recibe las últimas funciones automáticamente'
-        : 'Receive the latest features automatically',
+        ? 'Todos los datos en carpeta accesible del usuario'
+        : 'All data in accessible user folder',
     },
   ];
+
+  const getUpdaterStatusMessage = () => {
+    if (!updaterStatus) return null;
+    
+    switch (updaterStatus.status) {
+      case 'checking-for-update':
+        return { text: isSpanish ? 'Verificando actualizaciones...' : 'Checking for updates...', color: 'text-yellow-400' };
+      case 'update-available':
+        return { text: isSpanish ? `Nueva versión ${updaterStatus.data?.version} disponible` : `New version ${updaterStatus.data?.version} available`, color: 'text-green-400' };
+      case 'update-not-available':
+        return { text: isSpanish ? 'Ya tienes la última versión' : 'You have the latest version', color: 'text-green-400' };
+      case 'download-progress':
+        return { text: isSpanish ? `Descargando: ${Math.round(updaterStatus.data?.percent || 0)}%` : `Downloading: ${Math.round(updaterStatus.data?.percent || 0)}%`, color: 'text-cyan-400' };
+      case 'update-downloaded':
+        return { text: isSpanish ? 'Actualización lista para instalar' : 'Update ready to install', color: 'text-green-400' };
+      case 'error':
+        return { text: isSpanish ? `Error: ${updaterStatus.data?.message}` : `Error: ${updaterStatus.data?.message}`, color: 'text-red-400' };
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] overflow-auto">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#0d0d0d] to-[#1a1a1a] border-b border-white/10 p-8 sticky top-0 z-10">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
               <Download className="w-10 h-10 text-cyan-400" />
@@ -220,7 +296,7 @@ export function DownloadsModule() {
           </div>
           <div className="text-right">
             <div className="text-white/50 text-sm">{isSpanish ? 'Versión Actual' : 'Current Version'}</div>
-            <div className="text-2xl font-bold text-cyan-400">v{currentVersion}</div>
+            <div className="text-2xl font-bold text-cyan-400">v{appInfo?.version || currentVersion}</div>
             <div className="text-white/50 text-xs mt-1">
               <Clock className="w-3 h-3 inline mr-1" />
               {releaseDate}
@@ -231,6 +307,49 @@ export function DownloadsModule() {
 
       {/* Main Content */}
       <div className="p-6 space-y-8">
+        {/* Electron Info Panel (si estamos en Electron) */}
+        {isElectron && appInfo && (
+          <div className="bg-gradient-to-r from-cyan-900/30 to-blue-900/30 border border-cyan-500/30 rounded-xl p-6">
+            <div className="flex items-start justify-between flex-wrap gap-4">
+              <div className="flex items-start gap-4">
+                <div className="bg-cyan-500/20 p-3 rounded-xl">
+                  <Monitor className="w-8 h-8 text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg mb-2">
+                    {isSpanish ? 'Aplicación de Escritorio Activa' : 'Desktop App Active'}
+                  </h3>
+                  <div className="text-white/70 text-sm space-y-1">
+                    <p><span className="text-white/50">Versión:</span> v{appInfo.version}</p>
+                    <p><span className="text-white/50">Plataforma:</span> {appInfo.platform}</p>
+                    <p><span className="text-white/50">Carpeta de datos:</span> <code className="text-xs bg-black/30 px-2 py-1 rounded">{appInfo.userDataPath}</code></p>
+                  </div>
+                  
+                  {/* Updater Status */}
+                  {updaterStatus && getUpdaterStatusMessage() && (
+                    <div className={`mt-3 ${getUpdaterStatusMessage()?.color}`}>
+                      {getUpdaterStatusMessage()?.text}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <button
+                onClick={handleCheckUpdates}
+                disabled={checkingUpdates}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                  checkingUpdates 
+                    ? 'bg-white/10 text-white/50 cursor-wait'
+                    : 'bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/30'
+                }`}
+              >
+                <RefreshCw className={`w-4 h-4 ${checkingUpdates ? 'animate-spin' : ''}`} />
+                {isSpanish ? 'Verificar actualizaciones' : 'Check for updates'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {features.map((feature, index) => (
@@ -243,6 +362,39 @@ export function DownloadsModule() {
               <p className="text-white/60 text-sm">{feature.description}</p>
             </div>
           ))}
+        </div>
+
+        {/* Data Persistence Info */}
+        <div className="bg-green-900/20 border border-green-500/30 rounded-xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="bg-green-500/20 p-3 rounded-xl">
+              <Shield className="w-8 h-8 text-green-400" />
+            </div>
+            <div>
+              <h3 className="text-white font-bold text-lg mb-2">
+                {isSpanish ? 'Tus Datos Están Seguros' : 'Your Data is Safe'}
+              </h3>
+              <p className="text-white/70 mb-3">
+                {isSpanish 
+                  ? 'Al actualizar la aplicación, todos tus datos, perfiles, historiales y configuraciones se mantienen intactos. Los datos se almacenan en una carpeta separada que no se modifica durante las actualizaciones.'
+                  : 'When updating the app, all your data, profiles, histories and settings remain intact. Data is stored in a separate folder that is not modified during updates.'}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">
+                  ✓ {isSpanish ? 'Perfiles' : 'Profiles'}
+                </span>
+                <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">
+                  ✓ {isSpanish ? 'Base de datos' : 'Database'}
+                </span>
+                <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">
+                  ✓ {isSpanish ? 'Historiales' : 'Histories'}
+                </span>
+                <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">
+                  ✓ {isSpanish ? 'APIs configuradas' : 'Configured APIs'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Downloads Section */}
@@ -303,90 +455,61 @@ export function DownloadsModule() {
                   {/* Download Button */}
                   <button
                     onClick={() => handleDownload(item)}
-                    disabled={downloading !== null}
-                    className={`w-full py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${
-                      downloading === item.id
-                        ? 'bg-cyan-600 cursor-wait'
-                        : downloading !== null
-                        ? 'bg-white/10 text-white/50 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg hover:shadow-cyan-500/25'
-                    }`}
+                    className="w-full py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg hover:shadow-cyan-500/25"
                   >
-                    {downloading === item.id ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        {isSpanish ? 'Descargando...' : 'Downloading...'} {Math.min(100, Math.round(downloadProgress))}%
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-5 h-5" />
-                        {isSpanish ? 'Descargar' : 'Download'} {item.filename.split('-').pop()}
-                      </>
-                    )}
+                    <Download className="w-5 h-5" />
+                    {isSpanish ? 'Descargar' : 'Download'}
                   </button>
-
-                  {/* Progress Bar */}
-                  {downloading === item.id && (
-                    <div className="mt-3 bg-white/10 rounded-full h-2 overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full transition-all duration-300"
-                        style={{ width: `${Math.min(100, downloadProgress)}%` }}
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Web Version Notice */}
-        <div className="bg-gradient-to-r from-cyan-900/30 to-blue-900/30 border border-cyan-500/30 rounded-xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="bg-cyan-500/20 p-3 rounded-xl">
-              <Globe className="w-8 h-8 text-cyan-400" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-white font-bold text-lg mb-2">
-                {isSpanish ? '¿Prefieres la versión web?' : 'Prefer the web version?'}
+        {/* GitHub Releases Link */}
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h3 className="text-white font-bold text-lg mb-1">
+                {isSpanish ? 'Todas las Versiones' : 'All Releases'}
               </h3>
-              <p className="text-white/70 mb-4">
+              <p className="text-white/60 text-sm">
                 {isSpanish 
-                  ? 'También puedes acceder a DAES CoreBanking directamente desde tu navegador sin necesidad de instalar nada.'
-                  : 'You can also access DAES CoreBanking directly from your browser without installing anything.'}
+                  ? 'Consulta todas las versiones disponibles en GitHub'
+                  : 'Check all available versions on GitHub'}
               </p>
-              <a 
-                href="http://localhost:4000"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 px-4 py-2 rounded-lg hover:bg-cyan-500/30 transition-all"
-              >
-                <ExternalLink className="w-4 h-4" />
-                {isSpanish ? 'Abrir versión web' : 'Open web version'}
-              </a>
             </div>
+            <a
+              href={githubReleasesUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-white/10 border border-white/20 px-4 py-2 rounded-lg text-white hover:bg-white/20 transition-all"
+            >
+              <ExternalLink className="w-4 h-4" />
+              GitHub Releases
+            </a>
           </div>
         </div>
 
-        {/* Build Instructions (for developers) */}
+        {/* Build Instructions */}
         <div className="bg-white/5 border border-white/10 rounded-xl p-6">
           <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
             <Terminal className="w-5 h-5 text-cyan-400" />
-            {isSpanish ? 'Para Desarrolladores' : 'For Developers'}
+            {isSpanish ? 'Compilar Localmente' : 'Build Locally'}
           </h3>
-          <p className="text-white/70 mb-4">
-            {isSpanish 
-              ? 'Para compilar la versión de escritorio localmente, ejecuta:'
-              : 'To build the desktop version locally, run:'}
-          </p>
-          <div className="bg-black/50 border border-white/10 rounded-lg p-4 font-mono text-sm">
-            <div className="text-green-400"># {isSpanish ? 'Instalar dependencias de Electron' : 'Install Electron dependencies'}</div>
-            <div className="text-white">npm install electron electron-builder --save-dev</div>
-            <div className="text-white/50 mt-3"># {isSpanish ? 'Compilar para Windows' : 'Build for Windows'}</div>
+          <div className="bg-black/50 border border-white/10 rounded-lg p-4 font-mono text-sm space-y-2">
+            <div className="text-green-400"># {isSpanish ? 'Compilar para Windows' : 'Build for Windows'}</div>
             <div className="text-white">npm run electron:build:win</div>
-            <div className="text-white/50 mt-3"># {isSpanish ? 'Compilar para todas las plataformas' : 'Build for all platforms'}</div>
-            <div className="text-white">npm run electron:build</div>
+            <div className="text-green-400 mt-3"># {isSpanish ? 'Compilar para macOS' : 'Build for macOS'}</div>
+            <div className="text-white">npm run electron:build:mac</div>
+            <div className="text-green-400 mt-3"># {isSpanish ? 'Compilar para Linux' : 'Build for Linux'}</div>
+            <div className="text-white">npm run electron:build:linux</div>
           </div>
+          <p className="text-white/50 text-xs mt-3">
+            {isSpanish 
+              ? 'Los archivos compilados se guardarán en la carpeta /release'
+              : 'Compiled files will be saved in the /release folder'}
+          </p>
         </div>
       </div>
     </div>
@@ -394,4 +517,3 @@ export function DownloadsModule() {
 }
 
 export default DownloadsModule;
-

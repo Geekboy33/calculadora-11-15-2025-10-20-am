@@ -1,24 +1,29 @@
-// Preload script para Electron
-// Este archivo se ejecuta antes de que se cargue la página web
-// y tiene acceso a las APIs de Node.js
-
 const { contextBridge, ipcRenderer } = require('electron');
 
-// Exponer APIs seguras al proceso de renderizado
+// Exponer APIs seguras al renderer
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Información del sistema
+  // Información de la app
+  getAppInfo: () => ipcRenderer.invoke('get-app-info'),
+  getUserDataPath: () => ipcRenderer.invoke('get-user-data-path'),
+  getDatabasePath: () => ipcRenderer.invoke('get-database-path'),
+  
+  // Auto-updater
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  onUpdaterStatus: (callback) => {
+    ipcRenderer.on('updater-status', (event, data) => callback(data));
+    return () => ipcRenderer.removeListener('updater-status', callback);
+  },
+  
+  // Eventos del menú
+  onMenuExportDatabase: (callback) => {
+    ipcRenderer.on('menu-export-database', () => callback());
+    return () => ipcRenderer.removeListener('menu-export-database', callback);
+  },
+  
+  // Verificar si estamos en Electron
+  isElectron: true,
   platform: process.platform,
-  arch: process.arch,
   version: process.versions.electron,
-  
-  // Métodos seguros
-  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
-  
-  // Notificaciones
-  showNotification: (title, body) => {
-    new Notification(title, { body });
-  }
 });
 
-console.log('DAES CoreBanking - Electron preload script loaded');
-
+console.log('[Preload] LedgerDAESTerminal preload script loaded');
