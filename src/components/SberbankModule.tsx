@@ -143,6 +143,62 @@ export function SberbankModule() {
   // Immediate processing toggle (digestSignatures)
   const [immediateProcessing, setImmediateProcessing] = useState(true);
 
+  // Predefined payer accounts for Digital Commercial Bank Ltd
+  const predefinedPayerAccounts = [
+    { 
+      id: '1',
+      name: 'DCB Principal Account',
+      account: '40702810938000000001',
+      bankBic: '044525225',
+      corrAccount: '30101810400000000225',
+      bankName: 'Sberbank Moscow'
+    },
+    { 
+      id: '2',
+      name: 'DCB Operations Account',
+      account: '40702810500000012345',
+      bankBic: '044525225',
+      corrAccount: '30101810400000000225',
+      bankName: 'Sberbank Moscow'
+    },
+    { 
+      id: '3',
+      name: 'DCB Treasury Account',
+      account: '40702810700000067890',
+      bankBic: '044525593',
+      corrAccount: '30101810200000000593',
+      bankName: 'VTB Bank'
+    },
+    { 
+      id: '4',
+      name: 'DCB Reserve Account',
+      account: '40702810100000054321',
+      bankBic: '044525974',
+      corrAccount: '30101810145250000974',
+      bankName: 'Alfa-Bank'
+    },
+    { 
+      id: '5',
+      name: 'DCB International Account',
+      account: '40702810200000098765',
+      bankBic: '044525700',
+      corrAccount: '30101810700000000700',
+      bankName: 'Rosbank'
+    },
+  ];
+
+  const handleSelectPayerAccount = (accountId: string) => {
+    const selected = predefinedPayerAccounts.find(a => a.id === accountId);
+    if (selected) {
+      setPaymentForm(prev => ({
+        ...prev,
+        payerAccount: selected.account,
+        payerBankBic: selected.bankBic,
+        payerBankCorrAccount: selected.corrAccount,
+      }));
+    }
+  };
+
   // Load Custody Accounts
   useEffect(() => {
     const loadCustodyAccounts = () => {
@@ -986,7 +1042,29 @@ export function SberbankModule() {
 
             {/* Payer Info */}
             <BankingSection title={isSpanish ? "Pagador" : "Payer"} icon={Building2} color="purple">
-              <BankingCard className="p-card">
+              <BankingCard className="p-card space-y-4">
+                {/* Account Selector */}
+                <div className="p-4 rounded-lg" style={{ backgroundColor: `${SBERBANK_GREEN}10`, border: `1px solid ${SBERBANK_GREEN}30` }}>
+                  <label className="block text-[var(--text-primary)] font-semibold mb-2">
+                    {isSpanish ? 'Seleccionar Cuenta del Pagador' : 'Select Payer Account'}
+                  </label>
+                  <select
+                    onChange={(e) => handleSelectPayerAccount(e.target.value)}
+                    className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)]"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>{isSpanish ? '-- Seleccionar cuenta predefinida --' : '-- Select predefined account --'}</option>
+                    {predefinedPayerAccounts.map(acc => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.name} | {acc.account} | {acc.bankName}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-[var(--text-secondary)] mt-2">
+                    {isSpanish ? 'Digital Commercial Bank Ltd - Cuentas en Rublos (RUB)' : 'Digital Commercial Bank Ltd - Ruble Accounts (RUB)'}
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-card">
                   <BankingInput label={isSpanish ? "Nombre *" : "Name *"} value={paymentForm.payerName} onChange={(v) => setPaymentForm({ ...paymentForm, payerName: v.slice(0, 160) })} />
                   <BankingInput label="INN *" value={paymentForm.payerInn} onChange={(v) => setPaymentForm({ ...paymentForm, payerInn: v.replace(/\D/g, '').slice(0, 12) })} />
