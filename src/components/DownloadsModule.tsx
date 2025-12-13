@@ -222,8 +222,38 @@ export function DownloadsModule() {
   };
 
   const handleDownload = (item: DownloadItem) => {
-    // Abrir URL de descarga directamente
-    window.open(item.downloadUrl, '_blank');
+    // Mostrar mensaje indicando que hay que compilar primero
+    const message = isSpanish 
+      ? `⚠️ El archivo "${item.filename}" aún no está disponible para descarga directa.\n\n` +
+        `Para obtener la aplicación de escritorio, debes compilarla localmente:\n\n` +
+        `1. Abre una terminal en el proyecto\n` +
+        `2. Ejecuta: npm run electron:build:win\n` +
+        `3. El archivo se generará en la carpeta /release\n\n` +
+        `¿Deseas ver las instrucciones de compilación?`
+      : `⚠️ The file "${item.filename}" is not yet available for direct download.\n\n` +
+        `To get the desktop app, you need to build it locally:\n\n` +
+        `1. Open a terminal in the project\n` +
+        `2. Run: npm run electron:build:win\n` +
+        `3. The file will be generated in the /release folder\n\n` +
+        `Do you want to see the build instructions?`;
+    
+    if (confirm(message)) {
+      // Scroll a la sección de instrucciones
+      const buildSection = document.querySelector('[data-build-instructions]');
+      if (buildSection) {
+        buildSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  // Función para verificar si la carpeta release existe (solo en Electron)
+  const handleOpenReleaseFolder = () => {
+    if (window.electronAPI) {
+      // En Electron, abrir carpeta de release
+      alert(isSpanish 
+        ? 'Abre la carpeta del proyecto y busca /release después de compilar.'
+        : 'Open the project folder and look for /release after building.');
+    }
   };
 
   const features = [
@@ -307,6 +337,48 @@ export function DownloadsModule() {
 
       {/* Main Content */}
       <div className="p-6 space-y-8">
+        {/* Notice: Build Required */}
+        {!isElectron && (
+          <div className="bg-gradient-to-r from-amber-900/30 to-yellow-900/30 border border-amber-500/40 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <div className="bg-amber-500/20 p-3 rounded-xl">
+                <AlertCircle className="w-8 h-8 text-amber-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-white font-bold text-lg mb-2">
+                  {isSpanish ? '📦 Compilación Requerida' : '📦 Build Required'}
+                </h3>
+                <p className="text-white/70 mb-4">
+                  {isSpanish 
+                    ? 'Los archivos de descarga aún no están publicados. Para obtener la aplicación de escritorio, debes compilarla localmente usando los comandos de abajo.'
+                    : 'Download files are not yet published. To get the desktop app, you need to build it locally using the commands below.'}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => {
+                      const buildSection = document.querySelector('[data-build-instructions]');
+                      if (buildSection) buildSection.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-2 bg-amber-500/20 border border-amber-500/50 text-amber-400 px-4 py-2 rounded-lg hover:bg-amber-500/30 transition-all"
+                  >
+                    <Terminal className="w-4 h-4" />
+                    {isSpanish ? 'Ver instrucciones' : 'View instructions'}
+                  </button>
+                  <a
+                    href={githubReleasesUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 bg-white/10 border border-white/20 text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    GitHub Releases
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Electron Info Panel (si estamos en Electron) */}
         {isElectron && appInfo && (
           <div className="bg-gradient-to-r from-cyan-900/30 to-blue-900/30 border border-cyan-500/30 rounded-xl p-6">
@@ -492,10 +564,10 @@ export function DownloadsModule() {
         </div>
 
         {/* Build Instructions */}
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+        <div data-build-instructions className="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-500/30 rounded-xl p-6">
           <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
-            <Terminal className="w-5 h-5 text-cyan-400" />
-            {isSpanish ? 'Compilar Localmente' : 'Build Locally'}
+            <Terminal className="w-5 h-5 text-yellow-400" />
+            {isSpanish ? '⚡ Compilar Aplicación de Escritorio' : '⚡ Build Desktop App'}
           </h3>
           <div className="bg-black/50 border border-white/10 rounded-lg p-4 font-mono text-sm space-y-2">
             <div className="text-green-400"># {isSpanish ? 'Compilar para Windows' : 'Build for Windows'}</div>
