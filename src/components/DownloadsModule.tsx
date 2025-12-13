@@ -118,8 +118,8 @@ export function DownloadsModule() {
       name: 'Windows (64-bit)',
       version: currentVersion,
       size: '~85 MB',
-      filename: `ledgerdaesterminal-${currentVersion}-win-x64.exe`,
-      downloadUrl: `${githubReleasesUrl}/download/latest/ledgerdaesterminal-${currentVersion}-win-x64.exe`,
+      filename: 'LedgerDAESTerminal-Setup.exe',
+      downloadUrl: `${githubReleasesUrl}/latest`,
       releaseDate,
       features: [
         isSpanish ? 'Instalador con opción Actualizar' : 'Installer with Update option',
@@ -139,8 +139,8 @@ export function DownloadsModule() {
       name: 'Windows Portable',
       version: currentVersion,
       size: '~80 MB',
-      filename: `ledgerdaesterminal-${currentVersion}-portable.exe`,
-      downloadUrl: `${githubReleasesUrl}/download/latest/ledgerdaesterminal-${currentVersion}-portable.exe`,
+      filename: 'LedgerDAESTerminal-Portable.exe',
+      downloadUrl: `${githubReleasesUrl}/latest`,
       releaseDate,
       features: [
         isSpanish ? 'No requiere instalación' : 'No installation required',
@@ -159,8 +159,8 @@ export function DownloadsModule() {
       name: 'macOS (Intel)',
       version: currentVersion,
       size: '~95 MB',
-      filename: `ledgerdaesterminal-${currentVersion}-mac-x64.dmg`,
-      downloadUrl: `${githubReleasesUrl}/download/latest/ledgerdaesterminal-${currentVersion}-mac-x64.dmg`,
+      filename: 'LedgerDAESTerminal.dmg',
+      downloadUrl: `${githubReleasesUrl}/latest`,
       releaseDate,
       features: [
         isSpanish ? 'Compatible con Mac Intel' : 'Intel Mac compatible',
@@ -179,8 +179,8 @@ export function DownloadsModule() {
       name: 'Linux (AppImage)',
       version: currentVersion,
       size: '~90 MB',
-      filename: `ledgerdaesterminal-${currentVersion}-linux-x64.AppImage`,
-      downloadUrl: `${githubReleasesUrl}/download/latest/ledgerdaesterminal-${currentVersion}-linux-x64.AppImage`,
+      filename: 'LedgerDAESTerminal.AppImage',
+      downloadUrl: `${githubReleasesUrl}/latest`,
       releaseDate,
       features: [
         isSpanish ? 'AppImage universal' : 'Universal AppImage',
@@ -222,32 +222,8 @@ export function DownloadsModule() {
   };
 
   const handleDownload = (item: DownloadItem) => {
-    // Intentar abrir la URL de descarga de GitHub releases
-    const latestReleaseUrl = `${githubReleasesUrl}/latest`;
-    
-    // Primero intentamos abrir el archivo directo, si falla abrimos la página de releases
+    // Abrir página de releases donde el usuario puede descargar el archivo correcto
     window.open(item.downloadUrl, '_blank');
-    
-    // Mostrar mensaje informativo
-    setTimeout(() => {
-      const message = isSpanish 
-        ? `📥 Descarga iniciada\n\n` +
-          `Si la descarga no comenzó automáticamente, el archivo puede no estar disponible aún.\n\n` +
-          `Opciones:\n` +
-          `1. Ir a GitHub Releases para ver versiones disponibles\n` +
-          `2. Compilar localmente con: npm run electron:build:win\n\n` +
-          `¿Deseas ir a GitHub Releases?`
-        : `📥 Download started\n\n` +
-          `If the download didn't start automatically, the file may not be available yet.\n\n` +
-          `Options:\n` +
-          `1. Go to GitHub Releases to see available versions\n` +
-          `2. Build locally with: npm run electron:build:win\n\n` +
-          `Do you want to go to GitHub Releases?`;
-      
-      if (confirm(message)) {
-        window.open(latestReleaseUrl, '_blank');
-      }
-    }, 2000);
   };
 
   // Función para verificar si la carpeta release existe (solo en Electron)
