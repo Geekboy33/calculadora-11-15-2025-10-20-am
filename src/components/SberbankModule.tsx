@@ -8,7 +8,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Building2, Send, History, Settings, CheckCircle, AlertCircle,
   FileText, CreditCard, Copy, RefreshCw, Info, Download, FileDown,
-  Wifi, WifiOff, Eye, Trash2, Filter, Calendar, BarChart3, Printer
+  Wifi, WifiOff, Eye, Trash2, Filter, Calendar, BarChart3, Clock
 } from 'lucide-react';
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingInput } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
@@ -133,6 +133,9 @@ export function SberbankModule() {
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     to: new Date().toISOString().split('T')[0]
   });
+
+  // Immediate processing toggle (digestSignatures)
+  const [immediateProcessing, setImmediateProcessing] = useState(true);
 
   // Load Custody Accounts
   useEffect(() => {
@@ -312,7 +315,14 @@ export function SberbankModule() {
     setSuccess('');
 
     try {
-      const response = await client.createPaymentOrder(paymentForm);
+      // Build payment order with optional digestSignatures for immediate processing
+      const orderToSubmit: SberbankPaymentOrder = {
+        ...paymentForm,
+        // Add digestSignatures for immediate processing (not DRAFT)
+        digestSignatures: immediateProcessing ? [{ externalId: paymentForm.externalId }] : undefined,
+      };
+
+      const response = await client.createPaymentOrder(orderToSubmit);
       
       // Create history entry
       const historyEntry: PaymentHistoryEntry = {
@@ -996,12 +1006,65 @@ export function SberbankModule() {
               </BankingCard>
             </BankingSection>
 
+            {/* Processing Mode */}
+            <BankingCard className="p-card">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${immediateProcessing ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
+                    {immediateProcessing ? <Send className="w-5 h-5 text-emerald-400" /> : <Clock className="w-5 h-5 text-amber-400" />}
+                  </div>
+                  <div>
+                    <p className="text-[var(--text-primary)] font-semibold">
+                      {immediateProcessing 
+                        ? (isSpanish ? 'Procesamiento Inmediato' : 'Immediate Processing')
+                        : (isSpanish ? 'Guardar como Borrador' : 'Save as Draft')
+                      }
+                    </p>
+                    <p className="text-[var(--text-secondary)] text-sm">
+                      {immediateProcessing 
+                        ? (isSpanish ? 'digestSignatures incluido → Banco procesa inmediatamente' : 'digestSignatures included → Bank processes immediately')
+                        : (isSpanish ? 'Sin firma → Debe firmarse en SberBusiness UI' : 'No signature → Must be signed in SberBusiness UI')
+                      }
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setImmediateProcessing(!immediateProcessing)}
+                  className={`relative w-14 h-7 rounded-full transition-all ${immediateProcessing ? 'bg-emerald-500' : 'bg-[var(--border-subtle)]'}`}
+                >
+                  <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${immediateProcessing ? 'left-8' : 'left-1'}`} />
+                </button>
+              </div>
+            </BankingCard>
+
             {/* Submit */}
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-4">
               <BankingButton variant="primary" icon={Send} onClick={handleCreatePayment} disabled={loading} className="px-8" style={{ backgroundColor: SBERBANK_GREEN }}>
-                {loading ? (isSpanish ? 'Procesando...' : 'Processing...') : (isSpanish ? 'Crear Orden de Pago' : 'Create Payment Order')}
+                {loading 
+                  ? (isSpanish ? 'Procesando...' : 'Processing...') 
+                  : immediateProcessing
+                    ? (isSpanish ? 'Crear y Procesar' : 'Create & Process')
+                    : (isSpanish ? 'Guardar Borrador' : 'Save Draft')
+                }
               </BankingButton>
             </div>
+
+            {/* Workflow Info */}
+            <BankingCard className="p-card bg-blue-500/10 border-blue-500/30">
+              <div className="flex items-start gap-3">
+                <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="text-sm">
+                  <p className="font-semibold text-blue-400 mb-2">{isSpanish ? 'Flujo de Trabajo' : 'Workflow'}</p>
+                  <div className="text-blue-300/80 space-y-1">
+                    <p>1. Ledger Debit (RUB) → Reservar fondos</p>
+                    <p>2. POST /fintech/api/v1/payments → Crear orden</p>
+                    <p>3. {immediateProcessing ? 'digestSignatures → Processing' : 'Sin firma → DRAFT'}</p>
+                    <p>4. Poll GET /payments/{'{externalId}'} → bankStatus</p>
+                    <p>5. IMPLEMENTED → Settlement final</p>
+                  </div>
+                </div>
+              </div>
+            </BankingCard>
           </div>
         )}
 

@@ -43,8 +43,9 @@ export const SBERBANK_API_CONFIG = {
     GET_PAYMENT_STATE: '/fintech/api/v1/payments', // + /{externalId}/state
   },
   
-  // Authorization
-  AUTH_TYPE: 'Bearer',
+  // Authorization - NOTE: According to working example, NO "Bearer " prefix
+  // The token is sent directly in the Authorization header
+  AUTH_TYPE: '', // Empty - token sent directly without Bearer prefix
   
   // Required Scopes
   SCOPES: {
@@ -196,26 +197,48 @@ export interface SberbankVat {
 }
 
 /**
- * Departmental Info - For tax/budget payments
+ * Departmental Info - Contains payer/payee information
+ * 
+ * IMPORTANT: According to working example, this object contains ALL payer/payee fields
  */
 export interface SberbankDepartmentalInfo {
-  uip?: string;            // Unique payment identifier
-  drawerStatus?: string;   // Drawer status (101-110)
-  kbk?: string;            // Budget classification code (20 digits)
-  oktmo?: string;          // OKTMO code (8-11 digits)
-  taxPeriod?: string;      // Tax period
-  docNumber?: string;      // Document number
-  docDate?: string;        // Document date
-  paymentType?: string;    // Payment type
+  // Payer fields
+  payerName: string;            // Payer's full name (max 160 chars)
+  payerInn: string;             // Payer's INN
+  payerKpp?: string;            // Payer's KPP (9 digits)
+  payerAccount: string;         // Payer's account (20 digits)
+  payerBankBic: string;         // Payer's bank BIC (9 digits)
+  payerBankCorrAccount: string; // Payer's bank correspondent account (20 digits)
+  
+  // Payee fields
+  payeeName: string;            // Payee's full name (max 160 chars)
+  payeeInn?: string;            // Payee's INN
+  payeeKpp?: string;            // Payee's KPP (9 digits)
+  payeeAccount?: string;        // Payee's account (20 digits)
+  payeeBankBic: string;         // Payee's bank BIC (9 digits)
+  payeeBankCorrAccount?: string;// Payee's bank correspondent account (20 digits)
+  
+  // Tax/Budget fields (optional)
+  uip?: string;                 // Unique payment identifier
+  drawerStatus?: string;        // Drawer status (101-110)
+  kbk?: string;                 // Budget classification code (20 digits)
+  oktmo?: string;               // OKTMO code (8-11 digits)
+  taxPeriod?: string;           // Tax period
+  docNumber?: string;           // Document number
+  docDate?: string;             // Document date
+  paymentType?: string;         // Payment type
 }
 
 /**
  * Digital Signature - If provided, Bank starts processing immediately
  * If not provided, document is created as DRAFT
+ * 
+ * IMPORTANT: In the working example, only externalId is required
  */
 export interface SberbankDigestSignature {
-  signature: string;       // Base64 encoded signature
-  certificateUuid: string; // Certificate UUID
+  externalId: string;       // Must match the payment's externalId
+  signature?: string;       // Optional: Base64 encoded signature
+  certificateUuid?: string; // Optional: Certificate UUID
 }
 
 /**
@@ -451,7 +474,8 @@ export class SberbankClient {
   }
 
   private getAuthHeader(): string {
-    return `${SBERBANK_API_CONFIG.AUTH_TYPE} ${this.config.accessToken}`;
+    // According to working example: Authorization header contains token directly (no Bearer prefix)
+    return this.config.accessToken;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────────────
@@ -710,7 +734,7 @@ export class SberbankClient {
   /**
    * Creates a Ruble Payment Order (RPO) document.
    * 
-   * Authorization: Bearer {SSO_ACCESS_TOKEN}
+   * Authorization: {SSO_ACCESS_TOKEN} (NO Bearer prefix)
    * Required Scope: PAY_DOC_RU
    * 
    * IMPORTANT: 
@@ -719,50 +743,93 @@ export class SberbankClient {
    *   and must be signed in SberBusiness UI
    * 
    * Response Codes: 201, 400, 401, 403, 429, 500, 503
+   * 
+   * WORKING EXAMPLE STRUCTURE:
+   * - Payer/Payee fields go inside departmentalInfo object
+   * - digestSignatures only needs externalId to trigger processing
    */
   async createPaymentOrder(order: SberbankPaymentOrder): Promise<SberbankPaymentResponse> {
-    // Validate required fields with exact regex from documentation
+    // Validate required fields
     this.validatePaymentOrder(order);
 
-    // Build clean request body (remove undefined fields)
+    // Build request body according to WORKING EXAMPLE structure
+    // departmentalInfo contains ALL payer/payee information
     const requestBody: any = {
+      number: order.number || this.generateDocumentNumber(),
       date: order.date,
       externalId: order.externalId,
       amount: order.amount,
       operationCode: order.operationCode || '01',
-      priority: order.priority || '5',
+      deliveryKind: order.deliveryKind || 'electronic',
+      priority: order.priority || '3',
+      urgencyCode: order.urgencyCode || 'NORMAL',
       purpose: order.purpose,
-      payerName: order.payerName,
-      payerInn: order.payerInn,
-      payerAccount: order.payerAccount,
-      payerBankBic: order.payerBankBic,
-      payerBankCorrAccount: order.payerBankCorrAccount,
-      payeeName: order.payeeName,
-      payeeBankBic: order.payeeBankBic,
+      
+      // departmentalInfo contains payer and payee information
+      departmentalInfo: {
+        payerName: order.payerName,
+        payerInn: order.payerInn,
+        payerKpp: order.payerKpp || undefined,
+        payerAccount: order.payerAccount,
+        payerBankBic: order.payerBankBic,
+        payerBankCorrAccount: order.payerBankCorrAccount,
+        
+        payeeName: order.payeeName,
+        payeeInn: order.payeeInn || undefined,
+        payeeKpp: order.payeeKpp || undefined,
+        payeeAccount: order.payeeAccount || undefined,
+        payeeBankBic: order.payeeBankBic,
+        payeeBankCorrAccount: order.payeeBankCorrAccount || undefined,
+        
+        // Tax/budget fields from departmentalInfo if provided
+        ...(order.departmentalInfo ? {
+          uip: order.departmentalInfo.uip,
+          drawerStatus: order.departmentalInfo.drawerStatus,
+          kbk: order.departmentalInfo.kbk,
+          oktmo: order.departmentalInfo.oktmo,
+          taxPeriod: order.departmentalInfo.taxPeriod,
+          docNumber: order.departmentalInfo.docNumber,
+          docDate: order.departmentalInfo.docDate,
+          paymentType: order.departmentalInfo.paymentType,
+        } : {}),
+      },
     };
 
-    // Add optional fields only if provided
-    if (order.number) requestBody.number = order.number;
-    if (order.deliveryKind) requestBody.deliveryKind = order.deliveryKind;
-    if (order.urgencyCode) requestBody.urgencyCode = order.urgencyCode;
+    // Add optional fields
     if (order.voCode) requestBody.voCode = order.voCode;
-    if (order.payerKpp) requestBody.payerKpp = order.payerKpp;
-    if (order.payeeInn) requestBody.payeeInn = order.payeeInn;
-    if (order.payeeKpp) requestBody.payeeKpp = order.payeeKpp;
-    if (order.payeeAccount) requestBody.payeeAccount = order.payeeAccount;
-    if (order.payeeBankCorrAccount) requestBody.payeeBankCorrAccount = order.payeeBankCorrAccount;
-    if (order.departmentalInfo) requestBody.departmentalInfo = order.departmentalInfo;
-    if (order.vat) requestBody.vat = order.vat;
     if (order.incomeTypeCode) requestBody.incomeTypeCode = order.incomeTypeCode;
     if (order.isPaidByCredit !== undefined) requestBody.isPaidByCredit = order.isPaidByCredit;
     if (order.creditContractNumber) requestBody.creditContractNumber = order.creditContractNumber;
-    if (order.digestSignatures) requestBody.digestSignatures = order.digestSignatures;
+    if (order.vat) requestBody.vat = order.vat;
+    
+    // Add digestSignatures for immediate processing
+    // According to working example: only externalId is needed
+    if (order.digestSignatures && order.digestSignatures.length > 0) {
+      requestBody.digestSignatures = order.digestSignatures;
+    }
+
+    // Clean undefined values from departmentalInfo
+    Object.keys(requestBody.departmentalInfo).forEach(key => {
+      if (requestBody.departmentalInfo[key] === undefined) {
+        delete requestBody.departmentalInfo[key];
+      }
+    });
+
+    console.log('[Sberbank API] Request body (WORKING EXAMPLE FORMAT):', JSON.stringify(requestBody, null, 2));
 
     return this.request<SberbankPaymentResponse>(
       SBERBANK_API_CONFIG.ENDPOINTS.CREATE_PAYMENT,
       'POST',
       requestBody
     );
+  }
+
+  /**
+   * Generate document number (8 digits max)
+   */
+  private generateDocumentNumber(): string {
+    const num = Math.floor(Math.random() * 99999999).toString().padStart(8, '0');
+    return num;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────────────
