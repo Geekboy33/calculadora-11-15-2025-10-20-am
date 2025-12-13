@@ -35,11 +35,15 @@
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
+    "allowElevation": true,
     "deleteAppDataOnUninstall": false,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "shortcutName": "LedgerDAESTerminal",
-    "differentialPackage": true
+    "differentialPackage": true,
+    "runAfterFinish": true,
+    "license": "LICENSE",
+    "language": "1034"
   },
   "portable": {
     "artifactName": "ledgerdaesterminal-${version}-portable.${ext}"

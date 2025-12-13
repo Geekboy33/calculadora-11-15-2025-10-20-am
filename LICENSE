@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 CoreBanking System
+Copyright (c) 2025 DAES - Data and Exchange Settlement
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+================================================================================
+
+LEDGER DAES TERMINAL - Software de Gestión Bancaria
+
+Este software permite la gestión de:
+- Cuentas de custodia
+- Transacciones bancarias
+- Perfiles redundantes
+- Reportes financieros
+- Integraciones API
+
+Los datos del usuario se almacenan localmente y NO se eliminan durante las
+actualizaciones de la aplicación.
+
+Para soporte: https://github.com/Geekboy33/calculadora-11-15-2025-10-20-am/issues

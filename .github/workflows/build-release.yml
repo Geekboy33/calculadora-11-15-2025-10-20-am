@@ -1,0 +1,208 @@
+name: Build and Release Desktop App
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win
+          - os: macos-latest
+            platform: mac
+          - os: ubuntu-latest
+            platform: linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Vite app
+        run: npm run build
+
+      - name: Build Electron app (Windows)
+        if: matrix.platform == 'win'
+        run: npm run electron:build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Electron app (macOS)
+        if: matrix.platform == 'mac'
+        run: npm run electron:build:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Electron app (Linux)
+        if: matrix.platform == 'linux'
+        run: npm run electron:build:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows artifacts
+        if: matrix.platform == 'win'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: |
+            release/*.exe
+            release/*.exe.blockmap
+          retention-days: 30
+
+      - name: Upload macOS artifacts
+        if: matrix.platform == 'mac'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: |
+            release/*.dmg
+            release/*.dmg.blockmap
+          retention-days: 30
+
+      - name: Upload Linux artifacts
+        if: matrix.platform == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: |
+            release/*.AppImage
+          retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: release/
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-build
+          path: release/
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build
+          path: release/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release/*.exe
+            release/*.dmg
+            release/*.AppImage
+            release/*.blockmap
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Auto-release on main push (creates draft)
+  auto-release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')
+    
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from package.json
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: release/
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-build
+          path: release/
+        continue-on-error: true
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build
+          path: release/
+        continue-on-error: true
+
+      - name: List release files
+        run: ls -la release/
+
+      - name: Delete existing latest release
+        run: |
+          gh release delete latest --yes || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Latest Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          name: "Latest Build v${{ steps.version.outputs.version }}"
+          files: |
+            release/*.exe
+            release/*.dmg
+            release/*.AppImage
+            release/*.blockmap
+          draft: false
+          prerelease: true
+          body: |
+            ## 🚀 Última compilación automática
+            
+            **Versión:** v${{ steps.version.outputs.version }}
+            **Fecha:** ${{ github.event.head_commit.timestamp }}
+            
+            ### 📥 Descargas
+            - **Windows:** `ledgerdaesterminal-*-win-x64.exe`
+            - **macOS:** `ledgerdaesterminal-*-mac-x64.dmg`
+            - **Linux:** `ledgerdaesterminal-*-linux-x64.AppImage`
+            
+            ### ⚡ Actualización
+            Si ya tienes instalada la aplicación, el actualizador automático te notificará de esta versión.
+            
+            ### 📝 Cambios
+            ${{ github.event.head_commit.message }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
