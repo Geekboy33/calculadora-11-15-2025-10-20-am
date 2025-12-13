@@ -93,22 +93,28 @@ export function SberbankModule() {
   const [activeTab, setActiveTab] = useState<'payment' | 'history' | 'reports' | 'settings'>('payment');
   const [client, setClient] = useState<SberbankClient | null>(null);
 
-  // Payment form state
+  // Payment form state - Pre-filled with Digital Commercial Bank Ltd (Payer)
   const [paymentForm, setPaymentForm] = useState<SberbankPaymentOrder>({
     number: '',
     date: SberbankClient.formatDate(),
     externalId: SberbankClient.generateExternalId(),
     amount: 0,
     operationCode: '01',
-    priority: '5',
+    priority: '3',
     urgencyCode: 'NORMAL',
     purpose: '',
-    payerName: '',
-    payerInn: '',
-    payerKpp: '',
-    payerAccount: '',
-    payerBankBic: '044525225',
-    payerBankCorrAccount: '30101810400000000225',
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PAYER: Digital Commercial Bank Ltd (Russia)
+    // ═══════════════════════════════════════════════════════════════════════════
+    payerName: 'DIGITAL COMMERCIAL BANK LTD',           // Nombre legal completo
+    payerInn: '7707083893',                             // INN (10 dígitos - empresa)
+    payerKpp: '770701001',                              // KPP (código de registro fiscal)
+    payerAccount: '40702810938000000001',               // Cuenta corriente (20 dígitos)
+    payerBankBic: '044525225',                          // BIC Sberbank Moscow
+    payerBankCorrAccount: '30101810400000000225',       // Cuenta corresponsal Sberbank
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PAYEE: (To be filled by user)
+    // ═══════════════════════════════════════════════════════════════════════════
     payeeName: '',
     payeeInn: '',
     payeeKpp: '',
