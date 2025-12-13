@@ -106,12 +106,12 @@ export function SberbankModule() {
     // ═══════════════════════════════════════════════════════════════════════════
     // PAYER: Digital Commercial Bank Ltd (Russia)
     // ═══════════════════════════════════════════════════════════════════════════
-    payerName: 'DIGITAL COMMERCIAL BANK LTD',           // Nombre legal completo
-    payerInn: '7707083893',                             // INN (10 dígitos - empresa)
-    payerKpp: '770701001',                              // KPP (código de registro fiscal)
-    payerAccount: '40702810938000000001',               // Cuenta corriente (20 dígitos)
-    payerBankBic: '044525225',                          // BIC Sberbank Moscow
-    payerBankCorrAccount: '30101810400000000225',       // Cuenta corresponsal Sberbank
+    payerName: '',                                       // Seleccionar desde lista de bancos
+    payerInn: '',                                       // Se auto-completa al seleccionar banco
+    payerKpp: '',                                       // Se auto-completa al seleccionar banco
+    payerAccount: '',                                   // Seleccionar cuenta desde lista
+    payerBankBic: '',                                   // Se auto-completa al seleccionar banco
+    payerBankCorrAccount: '',                           // Se auto-completa al seleccionar banco
     // ═══════════════════════════════════════════════════════════════════════════
     // PAYEE: (To be filled by user)
     // ═══════════════════════════════════════════════════════════════════════════
@@ -143,47 +143,84 @@ export function SberbankModule() {
   // Immediate processing toggle (digestSignatures)
   const [immediateProcessing, setImmediateProcessing] = useState(true);
 
-  // Predefined payer accounts for Digital Commercial Bank Ltd
+  // Predefined payer accounts - Russian Banks
   const predefinedPayerAccounts = [
     { 
       id: '1',
-      name: 'DCB Principal Account',
+      name: 'Sberbank - Cuenta Principal',
+      payerName: 'PAO SBERBANK',
+      payerInn: '7707083893',
+      payerKpp: '773601001',
       account: '40702810938000000001',
       bankBic: '044525225',
       corrAccount: '30101810400000000225',
-      bankName: 'Sberbank Moscow'
+      bankName: 'Sberbank'
     },
     { 
       id: '2',
-      name: 'DCB Operations Account',
+      name: 'Sberbank - Cuenta Operaciones',
+      payerName: 'PAO SBERBANK',
+      payerInn: '7707083893',
+      payerKpp: '773601001',
       account: '40702810500000012345',
       bankBic: '044525225',
       corrAccount: '30101810400000000225',
-      bankName: 'Sberbank Moscow'
+      bankName: 'Sberbank'
     },
     { 
       id: '3',
-      name: 'DCB Treasury Account',
+      name: 'VTB Bank - Cuenta Tesorería',
+      payerName: 'BANK VTB (PAO)',
+      payerInn: '7702070139',
+      payerKpp: '770943002',
       account: '40702810700000067890',
-      bankBic: '044525593',
-      corrAccount: '30101810200000000593',
+      bankBic: '044525187',
+      corrAccount: '30101810700000000187',
       bankName: 'VTB Bank'
     },
     { 
       id: '4',
-      name: 'DCB Reserve Account',
+      name: 'Alfa-Bank - Cuenta Reserva',
+      payerName: 'AO ALFA-BANK',
+      payerInn: '7728168971',
+      payerKpp: '770801001',
       account: '40702810100000054321',
-      bankBic: '044525974',
-      corrAccount: '30101810145250000974',
+      bankBic: '044525593',
+      corrAccount: '30101810200000000593',
       bankName: 'Alfa-Bank'
     },
     { 
       id: '5',
-      name: 'DCB International Account',
+      name: 'Gazprombank - Cuenta Internacional',
+      payerName: 'GAZPROMBANK (AO)',
+      payerInn: '7744001497',
+      payerKpp: '772801001',
       account: '40702810200000098765',
-      bankBic: '044525700',
-      corrAccount: '30101810700000000700',
+      bankBic: '044525823',
+      corrAccount: '30101810200000000823',
+      bankName: 'Gazprombank'
+    },
+    { 
+      id: '6',
+      name: 'Rosbank - Cuenta Comercial',
+      payerName: 'PAO ROSBANK',
+      payerInn: '7730060164',
+      payerKpp: '771401001',
+      account: '40702810300000011111',
+      bankBic: '044525256',
+      corrAccount: '30101810000000000256',
       bankName: 'Rosbank'
+    },
+    { 
+      id: '7',
+      name: 'Tinkoff Bank - Cuenta Digital',
+      payerName: 'AO TINKOFF BANK',
+      payerInn: '7710140679',
+      payerKpp: '773401001',
+      account: '40702810400000022222',
+      bankBic: '044525974',
+      corrAccount: '30101810145250000974',
+      bankName: 'Tinkoff Bank'
     },
   ];
 
@@ -192,6 +229,9 @@ export function SberbankModule() {
     if (selected) {
       setPaymentForm(prev => ({
         ...prev,
+        payerName: selected.payerName,
+        payerInn: selected.payerInn,
+        payerKpp: selected.payerKpp,
         payerAccount: selected.account,
         payerBankBic: selected.bankBic,
         payerBankCorrAccount: selected.corrAccount,
@@ -1061,7 +1101,7 @@ export function SberbankModule() {
                     ))}
                   </select>
                   <p className="text-xs text-[var(--text-secondary)] mt-2">
-                    {isSpanish ? 'Digital Commercial Bank Ltd - Cuentas en Rublos (RUB)' : 'Digital Commercial Bank Ltd - Ruble Accounts (RUB)'}
+                    {isSpanish ? 'Bancos rusos disponibles - Cuentas en Rublos (RUB)' : 'Available Russian banks - Ruble Accounts (RUB)'}
                   </p>
                 </div>
 
