@@ -28,6 +28,7 @@ import { processingStore } from './lib/processing-store';
 
 const CentralBankingDashboard = lazy(() => import(/* webpackPrefetch: true */ './components/CentralBankingDashboard').then(m => ({ default: m.CentralBankingDashboard })));
 const BancoCentralPrivadoModule = lazy(() => import('./components/BancoCentralPrivadoModule').then(m => ({ default: m.BancoCentralPrivadoModule })));
+const BancoCentralPrivado1Module = lazy(() => import('./components/BancoCentralPrivado1Module').then(m => ({ default: m.BancoCentralPrivado1Module })));
 const OrigenDeFondosModule = lazy(() => import('./components/OrigenDeFondosModule').then(m => ({ default: m.OrigenDeFondosModule })));
 const TheKingdomBankModule = lazy(() => import('./components/TheKingdomBankModule').then(m => ({ default: m.TheKingdomBankModule })));
 const SberbankModule = lazy(() => import('./components/SberbankModule').then(m => ({ default: m.SberbankModule })));
@@ -86,7 +87,7 @@ const BankSettlementModule = lazy(() => import('./components/BankSettlementModul
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 const DownloadsModule = lazy(() => import('./components/DownloadsModule').then(m => ({ default: m.DownloadsModule })));
 
-type Tab = 'central-dashboard' | 'banco-central-privado' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
+type Tab = 'central-dashboard' | 'banco-central-privado' | 'banco-central-privado-1' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -173,6 +174,7 @@ function App() {
   const tabs = [
     { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel', icon: Building2 },
     { id: 'banco-central-privado' as Tab, name: 'Treasury Reserve', icon: Shield },
+    { id: 'banco-central-privado-1' as Tab, name: 'Treasury Reserve1', icon: Zap },
     { id: 'origen-fondos' as Tab, name: isSpanish ? 'Origen de Fondos' : 'Source of Funds', icon: FileSearch },
     { id: 'the-kingdom-bank' as Tab, name: 'The Kingdom Bank', icon: Key },
     { id: 'sberbank' as Tab, name: 'Sberbank', icon: Building2 },
@@ -343,6 +345,11 @@ function App() {
           {activeTab === 'banco-central-privado' && (
             <PageTransition key="banco-central-privado">
               <BancoCentralPrivadoModule />
+            </PageTransition>
+          )}
+          {activeTab === 'banco-central-privado-1' && (
+            <PageTransition key="banco-central-privado-1">
+              <BancoCentralPrivado1Module />
             </PageTransition>
           )}
           {activeTab === 'origen-fondos' && (
