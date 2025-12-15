@@ -316,6 +316,27 @@ export function CustodyAccountsModule() {
 
     const isBanking = (selectedAccount.accountType || 'blockchain') === 'banking';
 
+    // Verificar si ya existe una reserva activa
+    const hasActiveReservation = selectedAccount.reservations?.some(
+      r => r.status === 'reserved' || r.status === 'confirmed'
+    );
+
+    if (hasActiveReservation && !bypassLimits) {
+      const activeRes = selectedAccount.reservations?.find(r => r.status === 'reserved' || r.status === 'confirmed');
+      alert(
+        language === 'es' 
+          ? `⚠️ Ya existe una reserva activa en esta cuenta.\n\n` +
+            `Estado: ${activeRes?.status?.toUpperCase()}\n` +
+            `Monto: ${selectedAccount.currency} ${activeRes?.amount?.toLocaleString()}\n\n` +
+            `Complete o libere la reserva actual antes de crear una nueva.`
+          : `⚠️ This account already has an active reservation.\n\n` +
+            `Status: ${activeRes?.status?.toUpperCase()}\n` +
+            `Amount: ${selectedAccount.currency} ${activeRes?.amount?.toLocaleString()}\n\n` +
+            `Complete or release the current reservation before creating a new one.`
+      );
+      return;
+    }
+
     // Validar campos según tipo
     if (!isBanking && !reserveData.contractAddress) {
       alert(language === 'es' ? 'Ingresa la dirección del contrato blockchain' : 'Enter blockchain contract address');

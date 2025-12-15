@@ -613,6 +613,52 @@ class CustodyStore {
       return false;
     }
 
+    // ✅ VERIFICAR SI YA EXISTE UNA RESERVA ACTIVA PARA EVITAR DUPLICADOS
+    const existingActiveReservation = account.reservations.find(
+      r => (r.status === 'reserved' || r.status === 'confirmed') && 
+           r.contractAddress === contractAddress &&
+           contractAddress !== '' // Solo verificar si hay un contractAddress
+    );
+
+    if (existingActiveReservation) {
+      console.warn('[CustodyStore] ⚠️ Ya existe una reserva activa para este contrato:', {
+        reservationId: existingActiveReservation.id,
+        contractAddress,
+        amount: existingActiveReservation.amount,
+        status: existingActiveReservation.status
+      });
+      custodyHistory.createAlert(
+        accountId,
+        account.accountName,
+        'security',
+        'medium',
+        'Reserva Duplicada Bloqueada',
+        `Ya existe una reserva activa (${existingActiveReservation.status}) para el contrato ${contractAddress}. Monto: ${account.currency} ${existingActiveReservation.amount.toLocaleString()}`,
+        true
+      );
+      return false;
+    }
+
+    // ✅ VERIFICAR SI YA HAY RESERVAS ACTIVAS (prevenir múltiples reservas)
+    const hasAnyActiveReservation = account.reservations.some(
+      r => r.status === 'reserved' || r.status === 'confirmed'
+    );
+
+    if (hasAnyActiveReservation && !bypassLimits) {
+      console.warn('[CustodyStore] ⚠️ Ya existe una reserva activa en esta cuenta');
+      const activeReservation = account.reservations.find(r => r.status === 'reserved' || r.status === 'confirmed');
+      custodyHistory.createAlert(
+        accountId,
+        account.accountName,
+        'security',
+        'medium',
+        'Reserva Existente',
+        `Esta cuenta ya tiene una reserva activa (${activeReservation?.status}). Complete o libere la reserva actual antes de crear una nueva.`,
+        true
+      );
+      return false;
+    }
+
     if (account.availableBalance < amount) {
       console.error('[CustodyStore] Balance insuficiente');
       // Crear alerta de error
