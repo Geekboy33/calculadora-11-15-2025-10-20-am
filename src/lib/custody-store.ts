@@ -17,6 +17,8 @@ export interface CustodyAccount {
   reservedBalance: number;
   availableBalance: number;
   totalBalance: number;
+  // Fund Denomination (M1/M2)
+  fundDenomination: 'M1' | 'M2'; // M1 = Liquid Cash, M2 = Near Money
   // Blockchain fields (si accountType = 'blockchain')
   blockchainLink?: string;
   contractAddress?: string;
@@ -213,7 +215,8 @@ class CustodyStore {
     blockchain?: string,
     tokenSymbol?: string,
     bankName?: string,
-    contractAddress?: string
+    contractAddress?: string,
+    fundDenomination: 'M1' | 'M2' = 'M1'
   ): CustodyAccount {
     // 🔢 GENERAR NÚMERO DE CUENTA SECUENCIAL ISO BANCARIO
     const generatedAccountNumber = this.getNextAccountNumber(accountType, currency);
@@ -247,6 +250,7 @@ class CustodyStore {
       reservedBalance: 0,
       availableBalance: balance, // Incluye todo el balance (reservado + libre)
       totalBalance: balance,
+      fundDenomination, // M1 = Liquid Cash, M2 = Near Money
       encryptedData,
       verificationHash,
       // API Configuration
@@ -1057,6 +1061,45 @@ class CustodyStore {
       confirmedReservations: accounts.reduce((sum, a) => sum + a.reservations.filter(r => r.status === 'confirmed').length, 0),
       currencies: [...new Set(accounts.map(a => a.currency))],
     };
+  }
+
+  /**
+   * Obtener totales por denominación de fondos (M1/M2)
+   */
+  getM1M2Stats() {
+    const accounts = this.getAccounts();
+    
+    const m1Accounts = accounts.filter(a => a.fundDenomination === 'M1' || !a.fundDenomination);
+    const m2Accounts = accounts.filter(a => a.fundDenomination === 'M2');
+    
+    const m1Stats = {
+      count: m1Accounts.length,
+      totalBalance: m1Accounts.reduce((sum, a) => sum + a.totalBalance, 0),
+      availableBalance: m1Accounts.reduce((sum, a) => sum + a.availableBalance, 0),
+      reservedBalance: m1Accounts.reduce((sum, a) => sum + a.reservedBalance, 0),
+      currencies: [...new Set(m1Accounts.map(a => a.currency))],
+      byCurrency: {} as Record<string, number>,
+    };
+    
+    const m2Stats = {
+      count: m2Accounts.length,
+      totalBalance: m2Accounts.reduce((sum, a) => sum + a.totalBalance, 0),
+      availableBalance: m2Accounts.reduce((sum, a) => sum + a.availableBalance, 0),
+      reservedBalance: m2Accounts.reduce((sum, a) => sum + a.reservedBalance, 0),
+      currencies: [...new Set(m2Accounts.map(a => a.currency))],
+      byCurrency: {} as Record<string, number>,
+    };
+    
+    // Agrupar por divisa
+    m1Accounts.forEach(a => {
+      m1Stats.byCurrency[a.currency] = (m1Stats.byCurrency[a.currency] || 0) + a.totalBalance;
+    });
+    
+    m2Accounts.forEach(a => {
+      m2Stats.byCurrency[a.currency] = (m2Stats.byCurrency[a.currency] || 0) + a.totalBalance;
+    });
+    
+    return { m1: m1Stats, m2: m2Stats };
   }
 
   /**

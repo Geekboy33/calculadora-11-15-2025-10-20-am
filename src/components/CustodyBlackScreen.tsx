@@ -71,6 +71,16 @@ CURRENCY:                      ${account.currency}
 ${!isBanking ? `BLOCKCHAIN:                    ${account.blockchainLink || 'N/A'}\nTOKEN SYMBOL:                  ${account.tokenSymbol || 'N/A'}` : ''}
 
 ═══════════════════════════════════════════════════════════════════════════════
+                        FUND DENOMINATION / DENOMINACIÓN DE FONDOS
+═══════════════════════════════════════════════════════════════════════════════
+
+CLASSIFICATION:                ${account.fundDenomination || 'M1'}
+TYPE:                          ${(account.fundDenomination === 'M2') 
+  ? (isSpanish ? 'CUASI-DINERO (M1 + depósitos de ahorro, mercado monetario)' : 'NEAR MONEY (M1 + savings, money market)')
+  : (isSpanish ? 'EFECTIVO LÍQUIDO (Billetes, monedas, depósitos a la vista)' : 'LIQUID CASH (Currency, coins, demand deposits)')}
+STATUS:                        ✓ VERIFIED / VERIFICADO
+
+═══════════════════════════════════════════════════════════════════════════════
                         CUSTODY FUNDS SUMMARY
 ═══════════════════════════════════════════════════════════════════════════════
 

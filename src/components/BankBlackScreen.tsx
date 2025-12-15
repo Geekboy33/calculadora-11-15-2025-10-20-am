@@ -30,6 +30,8 @@ interface BlackScreenData {
   routingNumber: string;
   issueDate: Date;
   expiryDate: Date;
+  fundDenomination?: 'M1' | 'M2'; // Denominación de fondos si viene de cuenta custodio
+  custodyAccountName?: string; // Nombre de cuenta custodio si aplica
 }
 
 export function BankBlackScreen() {
@@ -153,6 +155,19 @@ export function BankBlackScreen() {
 
   const getContent = () => {
     if (!blackScreenData) return '';
+
+    // Sección de denominación de fondos (si aplica)
+    const fundDenominationSection = blackScreenData.fundDenomination ? `
+FUND DENOMINATION / DENOMINACIÓN DE FONDOS
+────────────────────────────────────────────────────────────────
+Classification:          ${blackScreenData.fundDenomination}
+Type:                    ${blackScreenData.fundDenomination === 'M1' 
+  ? 'LIQUID CASH - Efectivo Líquido (Billetes, monedas, depósitos a la vista)'
+  : 'NEAR MONEY - Cuasi-Dinero (M1 + depósitos de ahorro, mercado monetario)'}
+${blackScreenData.custodyAccountName ? `Custody Account:         ${blackScreenData.custodyAccountName}` : ''}
+Status:                  ✓ VERIFIED / VERIFICADO
+
+` : '';
     
     return `
 ═══════════════════════════════════════════════════════════════
@@ -168,7 +183,7 @@ ${t.blackScreenHolder}:              ${blackScreenData.beneficiaryName}
 ${t.blackScreenAccount}:             ${blackScreenData.accountNumber}
 ${t.blackScreenBank}:                ${blackScreenData.beneficiaryBank}
 ${t.blackScreenCurrency}:            ${blackScreenData.currency} (${getCurrencyName(blackScreenData.currency)})
-
+${fundDenominationSection}
 ${t.blackScreenMonetaryAggregates}
 ────────────────────────────────────────────────────────────────
 ${t.blackScreenM1Liquid}:           ${formatCurrency(blackScreenData.balanceM1, blackScreenData.currency)}

@@ -66,6 +66,7 @@ export function CustodyAccountsModule() {
     tokenSymbol: '',
     contractAddress: '',
     bankName: 'DAES - Data and Exchange Settlement',
+    fundDenomination: 'M1' as 'M1' | 'M2', // Denominación de fondos
   });
 
 
@@ -183,7 +184,8 @@ export function CustodyAccountsModule() {
       formData.blockchain,
       tokenSymbol,
       formData.bankName,
-      formData.contractAddress || undefined
+      formData.contractAddress || undefined,
+      formData.fundDenomination
     );
 
     setShowCreateModal(false);
@@ -196,6 +198,7 @@ export function CustodyAccountsModule() {
       tokenSymbol: '',
       contractAddress: '',
       bankName: 'DAES - Data and Exchange Settlement',
+      fundDenomination: 'M1',
     });
     
     // Mostrar mensaje de confirmación
@@ -1363,6 +1366,59 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono focus:outline-none focus:border-[#ffffff]/50"
                     placeholder="0.00"
                   />
+                </div>
+              </div>
+
+              {/* 🏦 Selector de Denominación de Fondos (M1/M2) */}
+              <div className="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-500/30 rounded-lg p-4">
+                <label className="text-sm text-emerald-400 mb-3 block font-semibold">
+                  💰 {language === 'es' ? 'Denominación de Fondos (Agregado Monetario)' : 'Fund Denomination (Monetary Aggregate)'}
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({...formData, fundDenomination: 'M1'})}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      formData.fundDenomination === 'M1'
+                        ? 'border-emerald-500 bg-emerald-500/20'
+                        : 'border-[#1a1a1a] bg-[#0a0a0a] hover:border-emerald-500/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">💵</span>
+                      <span className={`font-bold text-lg ${formData.fundDenomination === 'M1' ? 'text-emerald-400' : 'text-[#ffffff]'}`}>M1</span>
+                    </div>
+                    <div className={`text-sm ${formData.fundDenomination === 'M1' ? 'text-emerald-300' : 'text-[#888]'}`}>
+                      {language === 'es' ? 'Efectivo Líquido' : 'Liquid Cash'}
+                    </div>
+                    <div className={`text-xs mt-1 ${formData.fundDenomination === 'M1' ? 'text-emerald-400/70' : 'text-[#666]'}`}>
+                      {language === 'es' 
+                        ? 'Billetes, monedas, depósitos a la vista' 
+                        : 'Currency, coins, demand deposits'}
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({...formData, fundDenomination: 'M2'})}
+                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      formData.fundDenomination === 'M2'
+                        ? 'border-blue-500 bg-blue-500/20'
+                        : 'border-[#1a1a1a] bg-[#0a0a0a] hover:border-blue-500/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">🏦</span>
+                      <span className={`font-bold text-lg ${formData.fundDenomination === 'M2' ? 'text-blue-400' : 'text-[#ffffff]'}`}>M2</span>
+                    </div>
+                    <div className={`text-sm ${formData.fundDenomination === 'M2' ? 'text-blue-300' : 'text-[#888]'}`}>
+                      {language === 'es' ? 'Cuasi-Dinero' : 'Near Money'}
+                    </div>
+                    <div className={`text-xs mt-1 ${formData.fundDenomination === 'M2' ? 'text-blue-400/70' : 'text-[#666]'}`}>
+                      {language === 'es' 
+                        ? 'M1 + depósitos de ahorro, mercado monetario' 
+                        : 'M1 + savings, money market deposits'}
+                    </div>
+                  </button>
                 </div>
               </div>
 

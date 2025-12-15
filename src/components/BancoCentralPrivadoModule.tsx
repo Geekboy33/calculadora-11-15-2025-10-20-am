@@ -14,6 +14,7 @@ import { useBankingTheme } from '../hooks/useBankingTheme';
 import { downloadTXT } from '../lib/download-helper';
 import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
 import { balanceStore } from '../lib/balances-store';
+import { custodyStore } from '../lib/custody-store';
 
 // Datos de la Auditoría Técnica Final
 const AUDIT_DATA = {
@@ -106,6 +107,27 @@ export function BancoCentralPrivadoModule() {
   });
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const processingRef = React.useRef(false);
+
+  // 💰 Estados para M1/M2 detectados desde Custody Accounts
+  const [custodyM1M2Stats, setCustodyM1M2Stats] = useState(() => {
+    return custodyStore.getM1M2Stats();
+  });
+
+  // 🔄 Suscribirse a cambios en cuentas custodio para actualizar M1/M2
+  React.useEffect(() => {
+    const updateM1M2Stats = () => {
+      const stats = custodyStore.getM1M2Stats();
+      setCustodyM1M2Stats(stats);
+      console.log('[Treasury Reserve] 📊 M1/M2 Stats actualizados:', stats);
+    };
+    
+    updateM1M2Stats();
+    const unsubscribe = custodyStore.subscribe(() => {
+      updateM1M2Stats();
+    });
+    
+    return () => unsubscribe();
+  }, []);
 
   // ✅ Cargar resultados guardados al iniciar
   React.useEffect(() => {
@@ -914,6 +936,141 @@ Timestamp: ${AUDIT_DATA.timestamp}
             </div>
           }
         />
+
+        {/* 💰 M1/M2 Detectados desde Cuentas Custodio */}
+        {(custodyM1M2Stats.m1.count > 0 || custodyM1M2Stats.m2.count > 0) && (
+          <BankingCard className="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border-emerald-500/30">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-emerald-500/20 rounded-lg">
+                  <Database className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-emerald-400">
+                    💰 {isSpanish ? 'Agregados Monetarios Detectados' : 'Detected Monetary Aggregates'}
+                  </h3>
+                  <p className="text-sm text-emerald-300/70">
+                    {isSpanish 
+                      ? 'Valores M1 y M2 sincronizados desde Cuentas Custodio'
+                      : 'M1 and M2 values synced from Custody Accounts'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-6">
+                {/* M1 - Efectivo Líquido */}
+                <div className="bg-[var(--bg-elevated)] rounded-xl p-5 border border-emerald-500/20">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-3xl">💵</span>
+                    <div>
+                      <h4 className="text-emerald-400 font-bold text-lg">M1 - {isSpanish ? 'Efectivo Líquido' : 'Liquid Cash'}</h4>
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        {isSpanish ? 'Billetes, monedas, depósitos a la vista' : 'Currency, coins, demand deposits'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Cuentas:' : 'Accounts:'}</span>
+                      <span className="text-emerald-400 font-bold">{custodyM1M2Stats.m1.count}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Total:' : 'Total:'}</span>
+                      <span className="text-emerald-400 font-mono font-bold">
+                        ${custodyM1M2Stats.m1.totalBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Disponible:' : 'Available:'}</span>
+                      <span className="text-emerald-300 font-mono">
+                        ${custodyM1M2Stats.m1.availableBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Reservado:' : 'Reserved:'}</span>
+                      <span className="text-amber-400 font-mono">
+                        ${custodyM1M2Stats.m1.reservedBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                    {Object.keys(custodyM1M2Stats.m1.byCurrency).length > 0 && (
+                      <div className="pt-2 border-t border-emerald-500/20">
+                        <span className="text-xs text-[var(--text-secondary)]">{isSpanish ? 'Por divisa:' : 'By currency:'}</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {Object.entries(custodyM1M2Stats.m1.byCurrency).map(([curr, amount]) => (
+                            <span key={curr} className="px-2 py-0.5 bg-emerald-500/10 rounded text-xs text-emerald-300">
+                              {curr}: {(amount as number).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* M2 - Cuasi-Dinero */}
+                <div className="bg-[var(--bg-elevated)] rounded-xl p-5 border border-blue-500/20">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-3xl">🏦</span>
+                    <div>
+                      <h4 className="text-blue-400 font-bold text-lg">M2 - {isSpanish ? 'Cuasi-Dinero' : 'Near Money'}</h4>
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        {isSpanish ? 'M1 + depósitos de ahorro, mercado monetario' : 'M1 + savings, money market'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Cuentas:' : 'Accounts:'}</span>
+                      <span className="text-blue-400 font-bold">{custodyM1M2Stats.m2.count}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Total:' : 'Total:'}</span>
+                      <span className="text-blue-400 font-mono font-bold">
+                        ${custodyM1M2Stats.m2.totalBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Disponible:' : 'Available:'}</span>
+                      <span className="text-blue-300 font-mono">
+                        ${custodyM1M2Stats.m2.availableBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Reservado:' : 'Reserved:'}</span>
+                      <span className="text-amber-400 font-mono">
+                        ${custodyM1M2Stats.m2.reservedBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                    {Object.keys(custodyM1M2Stats.m2.byCurrency).length > 0 && (
+                      <div className="pt-2 border-t border-blue-500/20">
+                        <span className="text-xs text-[var(--text-secondary)]">{isSpanish ? 'Por divisa:' : 'By currency:'}</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {Object.entries(custodyM1M2Stats.m2.byCurrency).map(([curr, amount]) => (
+                            <span key={curr} className="px-2 py-0.5 bg-blue-500/10 rounded text-xs text-blue-300">
+                              {curr}: {(amount as number).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Combinado */}
+              <div className="mt-4 pt-4 border-t border-emerald-500/20">
+                <div className="flex justify-between items-center">
+                  <span className="text-[var(--text-primary)] font-semibold">
+                    {isSpanish ? 'Total M1 + M2 (Cuentas Custodio):' : 'Total M1 + M2 (Custody Accounts):'}
+                  </span>
+                  <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                    ${(custodyM1M2Stats.m1.totalBalance + custodyM1M2Stats.m2.totalBalance).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </BankingCard>
+        )}
 
         {/* Analysis Results (si hay archivo analizado) */}
         {analysisResults && (
