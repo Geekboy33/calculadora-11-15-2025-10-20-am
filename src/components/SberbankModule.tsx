@@ -145,6 +145,9 @@ export function SberbankModule() {
 
   // Predefined payer accounts - Russian Banks
   const predefinedPayerAccounts = [
+    // ═══════════════════════════════════════════════════════════════
+    // TOP 5 BANCOS RUSOS
+    // ═══════════════════════════════════════════════════════════════
     { 
       id: '1',
       name: 'Sberbank - Cuenta Principal',
@@ -200,6 +203,9 @@ export function SberbankModule() {
       corrAccount: '30101810200000000823',
       bankName: 'Gazprombank'
     },
+    // ═══════════════════════════════════════════════════════════════
+    // BANCOS ADICIONALES RUSOS
+    // ═══════════════════════════════════════════════════════════════
     { 
       id: '6',
       name: 'Rosbank - Cuenta Comercial',
@@ -221,6 +227,116 @@ export function SberbankModule() {
       bankBic: '044525974',
       corrAccount: '30101810145250000974',
       bankName: 'Tinkoff Bank'
+    },
+    { 
+      id: '8',
+      name: 'Otkritie Bank - Cuenta Corporativa',
+      payerName: 'PAO BANK OTKRITIE',
+      payerInn: '7706092528',
+      payerKpp: '770543001',
+      account: '40702810500000033333',
+      bankBic: '044525985',
+      corrAccount: '30101810300000000985',
+      bankName: 'Otkritie Bank'
+    },
+    { 
+      id: '9',
+      name: 'Promsvyazbank - Cuenta Empresarial',
+      payerName: 'PAO PROMSVYAZBANK',
+      payerInn: '7744000912',
+      payerKpp: '775001001',
+      account: '40702810600000044444',
+      bankBic: '044525555',
+      corrAccount: '30101810400000000555',
+      bankName: 'Promsvyazbank'
+    },
+    { 
+      id: '10',
+      name: 'Raiffeisenbank - Cuenta Internacional',
+      payerName: 'AO RAIFFEISENBANK',
+      payerInn: '7744000302',
+      payerKpp: '770201001',
+      account: '40702810700000055555',
+      bankBic: '044525700',
+      corrAccount: '30101810200000000700',
+      bankName: 'Raiffeisenbank'
+    },
+    { 
+      id: '11',
+      name: 'UniCredit Bank - Cuenta Premium',
+      payerName: 'AO UNICREDIT BANK',
+      payerInn: '7710030411',
+      payerKpp: '770401001',
+      account: '40702810800000066666',
+      bankBic: '044525545',
+      corrAccount: '30101810300000000545',
+      bankName: 'UniCredit Bank'
+    },
+    { 
+      id: '12',
+      name: 'Sovcombank - Cuenta Principal',
+      payerName: 'PAO SOVCOMBANK',
+      payerInn: '4401116480',
+      payerKpp: '770343001',
+      account: '40702810900000077777',
+      bankBic: '044525360',
+      corrAccount: '30101810445250000360',
+      bankName: 'Sovcombank'
+    },
+    { 
+      id: '13',
+      name: 'Credit Bank of Moscow - Cuenta Business',
+      payerName: 'PAO CREDIT BANK OF MOSCOW',
+      payerInn: '7734202860',
+      payerKpp: '773401001',
+      account: '40702810100000088888',
+      bankBic: '044525659',
+      corrAccount: '30101810845250000659',
+      bankName: 'MKB'
+    },
+    { 
+      id: '14',
+      name: 'Bank Saint Petersburg - Cuenta Regional',
+      payerName: 'PAO BANK SAINT PETERSBURG',
+      payerInn: '7831000027',
+      payerKpp: '783501001',
+      account: '40702810200000099999',
+      bankBic: '044030790',
+      corrAccount: '30101810900000000790',
+      bankName: 'Bank SPB'
+    },
+    { 
+      id: '15',
+      name: 'Ak Bars Bank - Cuenta Tatarstan',
+      payerName: 'PAO AK BARS BANK',
+      payerInn: '1653001805',
+      payerKpp: '165501001',
+      account: '40702810300000010101',
+      bankBic: '049205805',
+      corrAccount: '30101810000000000805',
+      bankName: 'Ak Bars Bank'
+    },
+    { 
+      id: '16',
+      name: 'Uralsib Bank - Cuenta Ural',
+      payerName: 'PAO BANK URALSIB',
+      payerInn: '0274062111',
+      payerKpp: '770943002',
+      account: '40702810400000020202',
+      bankBic: '044525787',
+      corrAccount: '30101810100000000787',
+      bankName: 'Uralsib'
+    },
+    { 
+      id: '17',
+      name: 'Absolut Bank - Cuenta Inversiones',
+      payerName: 'PAO ABSOLUT BANK',
+      payerInn: '7736046991',
+      payerKpp: '770901001',
+      account: '40702810500000030303',
+      bankBic: '044525976',
+      corrAccount: '30101810500000000976',
+      bankName: 'Absolut Bank'
     },
   ];
 
