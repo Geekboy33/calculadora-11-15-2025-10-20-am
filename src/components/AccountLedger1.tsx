@@ -8,26 +8,38 @@ import { RefreshCw, TrendingUp, Database, CheckCircle, Activity, DollarSign, Cpu
 import { ledgerPersistenceStoreV2, type LedgerBalanceV2 } from '../lib/ledger-persistence-store-v2';
 import { useLanguage } from '../lib/i18n.tsx';
 
-// Función para formatear moneda
-function formatCurrency(amount: number, currency: string): string {
-  if (amount >= 1e15) {
-    return `${(amount / 1e15).toLocaleString(undefined, { maximumFractionDigits: 0 })} Q`;
-  }
-  if (amount >= 1e12) {
-    return `${(amount / 1e12).toLocaleString(undefined, { maximumFractionDigits: 0 })} T`;
-  }
-  if (amount >= 1e9) {
-    return `${(amount / 1e9).toLocaleString(undefined, { maximumFractionDigits: 0 })} B`;
-  }
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency,
-      maximumFractionDigits: 0
-    }).format(amount);
-  } catch {
-    return `${currency} ${amount.toLocaleString()}`;
-  }
+// Función para formatear moneda con TODOS los ceros
+function formatCurrencyFull(amount: number, currency: string): string {
+  // Convertir a BigInt para manejar números muy grandes sin pérdida de precisión
+  const bigAmount = BigInt(Math.floor(amount));
+  
+  // Formatear el número con separadores de miles
+  const formatted = bigAmount.toLocaleString('en-US');
+  
+  // Agregar símbolo de moneda
+  const symbols: Record<string, string> = {
+    'USD': '$', 'EUR': '€', 'GBP': '£', 'CHF': 'CHF ', 'CAD': 'C$',
+    'AUD': 'A$', 'JPY': '¥', 'CNY': '¥', 'INR': '₹', 'MXN': 'MX$',
+    'BRL': 'R$', 'RUB': '₽', 'KRW': '₩', 'SGD': 'S$', 'HKD': 'HK$'
+  };
+  
+  return `${symbols[currency] || currency + ' '}${formatted}`;
+}
+
+// Función para mostrar el número de ceros
+function countZeros(amount: number): number {
+  if (amount <= 0) return 0;
+  return Math.floor(Math.log10(amount));
+}
+
+// Función para formatear con notación científica clara
+function formatScientific(amount: number, currency: string): string {
+  if (amount <= 0) return `${currency} 0`;
+  
+  const exponent = Math.floor(Math.log10(amount));
+  const mantissa = amount / Math.pow(10, exponent);
+  
+  return `${currency} ${mantissa.toFixed(2)} × 10^${exponent}`;
 }
 
 // Nombres de divisas
@@ -380,12 +392,22 @@ export function AccountLedger1() {
                   {/* Balance Amount */}
                   <div className="mb-4 bg-black/30 rounded-lg p-4">
                     <p className="text-white/60 text-xs mb-1 uppercase tracking-wide">{isSpanish ? 'Balance Total' : 'Total Balance'}</p>
-                    <p className={`text-2xl font-black text-white ${isProcessing ? 'animate-pulse' : ''}`}>
-                      {formatCurrency(balance.balance, balance.currency)}
-                    </p>
-                    <p className="text-white/50 text-xs mt-2">
-                      {balance.balance.toExponential(2)} {balance.currency}
-                    </p>
+                    {/* Mostrar valor completo con todos los ceros */}
+                    <div className={`${isProcessing ? 'animate-pulse' : ''}`}>
+                      <p className="text-lg font-black text-white break-all leading-tight">
+                        {formatCurrencyFull(balance.balance, balance.currency)}
+                      </p>
+                      {balance.balance > 0 && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-amber-400 text-xs font-mono bg-amber-500/20 px-2 py-1 rounded">
+                            {countZeros(balance.balance)} {isSpanish ? 'ceros' : 'zeros'}
+                          </span>
+                          <span className="text-purple-300 text-xs font-mono">
+                            ({formatScientific(balance.balance, balance.currency)})
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Statistics Grid */}
@@ -396,8 +418,8 @@ export function AccountLedger1() {
                     </div>
                     <div className="bg-black/20 rounded-lg p-2">
                       <p className="text-white/60 text-xs">{isSpanish ? 'Promedio' : 'Average'}</p>
-                      <p className="text-sm font-bold text-white">
-                        {formatCurrency(balance.averageTransaction, balance.currency)}
+                      <p className="text-xs font-bold text-white break-all">
+                        {formatCurrencyFull(balance.averageTransaction, balance.currency)}
                       </p>
                     </div>
                   </div>
