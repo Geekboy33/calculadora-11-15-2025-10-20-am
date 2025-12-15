@@ -21,6 +21,8 @@ import {
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingMetric, BankingBadge } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
 import { downloadTXT } from '../lib/download-helper';
+import { balanceStore } from '../lib/balances-store';
+import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTES PARA EL TARGET DE 745,381 QUADRILLION
@@ -577,17 +579,26 @@ export function BancoCentralPrivado1Module() {
   const handleReset = () => {
     const confirmed = confirm(
       `🔄 ${isSpanish ? 'REINICIAR TREASURY RESERVE1' : 'RESET TREASURY RESERVE1'}\n\n` +
-      `${isSpanish ? '¿Reiniciar completamente el análisis profundo?' : 'Completely restart deep analysis?'}`
+      `${isSpanish ? '¿Reiniciar completamente el análisis profundo?' : 'Completely restart deep analysis?'}\n\n` +
+      `${isSpanish ? 'Esto también reseteará:' : 'This will also reset:'}\n` +
+      `- Central Panel\n` +
+      `- Account Ledger\n` +
+      `- ${isSpanish ? 'Todos los balances globales' : 'All global balances'}`
     );
     
     if (confirmed) {
       processingRef.current = false;
       scannerRef.current.reset();
       
+      // Limpiar localStorage local
       localStorage.removeItem('treasury_reserve1_currency_balances');
       localStorage.removeItem('treasury_reserve1_analysis_results');
       localStorage.removeItem('treasury_reserve1_last_offset');
       localStorage.removeItem('treasury_reserve1_current_file');
+      
+      // ✅ LIMPIAR STORES GLOBALES (sincroniza con Central Panel, Account Ledger, etc.)
+      balanceStore.clearBalances();
+      ledgerPersistenceStore.reset();
       
       const resetBalances: {[key: string]: number} = {};
       CURRENCY_DISTRIBUTION.forEach(curr => {
@@ -605,6 +616,7 @@ export function BancoCentralPrivado1Module() {
       setScannerLogs([]);
       
       addLog('🔄 Sistema reseteado completamente');
+      addLog('🔄 Stores globales limpiados (Central Panel, Account Ledger)');
     }
   };
   

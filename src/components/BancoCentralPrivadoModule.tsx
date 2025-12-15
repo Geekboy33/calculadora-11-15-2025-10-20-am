@@ -444,7 +444,8 @@ export function BancoCentralPrivadoModule() {
       `${isSpanish ? 'Esto eliminará:' : 'This will delete:'}\n` +
       `- ${isSpanish ? 'Progreso guardado' : 'Saved progress'}\n` +
       `- ${isSpanish ? 'Balances de las 15 divisas' : 'Balances of 15 currencies'}\n` +
-      `- ${isSpanish ? 'Certificación' : 'Certification'}\n\n` +
+      `- ${isSpanish ? 'Certificación' : 'Certification'}\n` +
+      `- ${isSpanish ? 'Balances en Central Panel y Account Ledger' : 'Balances in Central Panel and Account Ledger'}\n\n` +
       `${isSpanish ? 'El próximo archivo empezará desde 0%' : 'Next file will start from 0%'}`
     );
 
@@ -452,14 +453,23 @@ export function BancoCentralPrivadoModule() {
       // ✅ Detener procesamiento
       processingRef.current = false;
 
-      // ✅ Limpiar TODO
+      // ✅ Limpiar localStorage local
       localStorage.removeItem('banco_central_currency_balances');
       localStorage.removeItem('banco_central_analysis_results');
       localStorage.removeItem('banco_central_last_offset');
       localStorage.removeItem('banco_central_current_file');
 
-      // ✅ Resetear a valores iniciales (auditoría)
-      setCurrencyBalances(initialBalances);
+      // ✅ LIMPIAR STORES GLOBALES (sincroniza con Central Panel, Account Ledger, etc.)
+      balanceStore.clearBalances();
+      ledgerPersistenceStore.reset();
+
+      // ✅ Resetear estados locales a 0 (no a valores de auditoría)
+      const zeroBalances: {[key: string]: number} = {};
+      CURRENCY_DISTRIBUTION.forEach(curr => {
+        zeroBalances[curr.code] = 0;
+      });
+      
+      setCurrencyBalances(zeroBalances);
       setAnalysisResults(null);
       setProgress(0);
       setCurrentScannedAmount(0);
@@ -469,10 +479,11 @@ export function BancoCentralPrivadoModule() {
       alert(
         `✅ ${isSpanish ? 'RESETEO COMPLETO' : 'COMPLETE RESET'}\n\n` +
         `${isSpanish ? '- Progreso: 0%' : '- Progress: 0%'}\n` +
-        `${isSpanish ? '- 15 divisas restauradas a valores de auditoría' : '- 15 currencies restored to audit values'}\n` +
+        `${isSpanish ? '- Todos los balances: 0' : '- All balances: 0'}\n` +
+        `${isSpanish ? '- Central Panel y Account Ledger sincronizados' : '- Central Panel and Account Ledger synced'}\n` +
         `${isSpanish ? '- Listo para cargar nuevo archivo' : '- Ready to load new file'}`
       );
-      console.log('[Banco Central] 🔄 RESET COMPLETO: Todo limpiado, valores de auditoría restaurados');
+      console.log('[Treasury Reserve] 🔄 RESET COMPLETO: Todo a 0, stores globales limpiados');
     }
   };
 
