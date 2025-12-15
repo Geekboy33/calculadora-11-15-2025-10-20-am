@@ -443,6 +443,124 @@ export function SberbankModule() {
     }
   };
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CUENTAS DE BENEFICIARIO (PAYEE) PREDEFINIDAS
+  // ═══════════════════════════════════════════════════════════════════════════
+  const predefinedPayeeAccounts = [
+    {
+      id: 'payee1',
+      name: 'KAMENSKIKH ELENA VLADIMIROVNA',
+      payeeName: 'KAMENSKIKH ELENA VLADIMIROVNA',
+      payeeInn: '7707083893',
+      payeeKpp: '183502001',
+      account: '40817810268783338156',
+      bankBic: '049401601',
+      corrAccount: '30101810400000000601',
+      bankName: 'UDMURTSKOE OTDELENIE N8618 PAO SBERBANK',
+      address: 'g.Izhevsk, ul.Lenina, 6',
+      cardInfo: 'MIR Sberkarta •• 7319'
+    },
+    {
+      id: 'payee2',
+      name: 'OOO TECH SOLUTIONS',
+      payeeName: 'OOO TECH SOLUTIONS',
+      payeeInn: '7701234567',
+      payeeKpp: '770101001',
+      account: '40702810500000098765',
+      bankBic: '044525225',
+      corrAccount: '30101810400000000225',
+      bankName: 'PAO SBERBANK MOSCOW',
+      address: 'Moscow, ul.Tverskaya, 15'
+    },
+    {
+      id: 'payee3',
+      name: 'ZAO RUSSIAN SUPPLIER LLC',
+      payeeName: 'ZAO RUSSIAN SUPPLIER LLC',
+      payeeInn: '7812345678',
+      payeeKpp: '781201001',
+      account: '40702810400000000002',
+      bankBic: '044525593',
+      corrAccount: '30101810200000000593',
+      bankName: 'AO ALFA-BANK',
+      address: 'Saint Petersburg, Nevsky pr., 100'
+    },
+    {
+      id: 'payee4',
+      name: 'PETROV IVAN SERGEEVICH',
+      payeeName: 'PETROV IVAN SERGEEVICH',
+      payeeInn: '772501234567',
+      payeeKpp: '',
+      account: '40817810955000012345',
+      bankBic: '044525187',
+      corrAccount: '30101810700000000187',
+      bankName: 'BANK VTB (PAO)',
+      address: 'Moscow'
+    },
+    {
+      id: 'payee5',
+      name: 'OOO GAZPROM NEFT TRADING',
+      payeeName: 'OOO GAZPROM NEFT TRADING',
+      payeeInn: '7736654321',
+      payeeKpp: '773601001',
+      account: '40702810823000054321',
+      bankBic: '044525823',
+      corrAccount: '30101810200000000823',
+      bankName: 'GAZPROMBANK (AO)',
+      address: 'Moscow, ul.Nametkina, 16'
+    },
+    {
+      id: 'payee6',
+      name: 'SIDOROVA MARIA ALEXANDROVNA',
+      payeeName: 'SIDOROVA MARIA ALEXANDROVNA',
+      payeeInn: '5001987654',
+      payeeKpp: '',
+      account: '40817810974000067890',
+      bankBic: '044525974',
+      corrAccount: '30101810145250000974',
+      bankName: 'AO TINKOFF BANK',
+      address: 'Kazan'
+    },
+    {
+      id: 'payee7',
+      name: 'OOO IMPORT EXPORT RUS',
+      payeeName: 'OOO IMPORT EXPORT RUS',
+      payeeInn: '7743001234',
+      payeeKpp: '774301001',
+      account: '40702810700000011111',
+      bankBic: '044525700',
+      corrAccount: '30101810200000000700',
+      bankName: 'AO RAIFFEISENBANK',
+      address: 'Moscow, Smolenskaya-Sennaya pl., 28'
+    },
+    {
+      id: 'payee8',
+      name: 'KUZNETSOV DMITRY PAVLOVICH',
+      payeeName: 'KUZNETSOV DMITRY PAVLOVICH',
+      payeeInn: '6658123456',
+      payeeKpp: '',
+      account: '40817810316000022222',
+      bankBic: '046577674',
+      corrAccount: '30101810500000000674',
+      bankName: 'PAO SBERBANK URAL',
+      address: 'Yekaterinburg'
+    },
+  ];
+
+  const handleSelectPayeeAccount = (accountId: string) => {
+    const selected = predefinedPayeeAccounts.find(a => a.id === accountId);
+    if (selected) {
+      setPaymentForm(prev => ({
+        ...prev,
+        payeeName: selected.payeeName,
+        payeeInn: selected.payeeInn || '',
+        payeeKpp: selected.payeeKpp || '',
+        payeeAccount: selected.account,
+        payeeBankBic: selected.bankBic,
+        payeeBankCorrAccount: selected.corrAccount,
+      }));
+    }
+  };
+
   // Load Custody Accounts
   useEffect(() => {
     const loadCustodyAccounts = () => {
@@ -1321,8 +1439,30 @@ export function SberbankModule() {
             </BankingSection>
 
             {/* Payee Info */}
-            <BankingSection title={isSpanish ? "Beneficiario" : "Payee"} icon={Send} color="white">
-              <BankingCard className="p-card">
+            <BankingSection title={isSpanish ? "Beneficiario" : "Payee"} icon={Send} color="cyan">
+              <BankingCard className="p-card space-y-4">
+                {/* Payee Account Selector */}
+                <div className="p-4 rounded-lg" style={{ backgroundColor: `${SBERBANK_GREEN}10`, border: `1px solid ${SBERBANK_GREEN}30` }}>
+                  <label className="block text-[var(--text-primary)] font-semibold mb-2">
+                    {isSpanish ? 'Seleccionar Beneficiario Guardado' : 'Select Saved Payee'}
+                  </label>
+                  <select
+                    onChange={(e) => handleSelectPayeeAccount(e.target.value)}
+                    className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)]"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>{isSpanish ? '-- Seleccionar beneficiario --' : '-- Select payee --'}</option>
+                    {predefinedPayeeAccounts.map(acc => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.name} | {acc.account} | {acc.bankName}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-[var(--text-secondary)] mt-2">
+                    {isSpanish ? 'Beneficiarios guardados con datos verificados' : 'Saved payees with verified data'}
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-card">
                   <BankingInput label={isSpanish ? "Nombre *" : "Name *"} value={paymentForm.payeeName} onChange={(v) => setPaymentForm({ ...paymentForm, payeeName: v.slice(0, 160) })} />
                   <BankingInput label="INN" value={paymentForm.payeeInn || ''} onChange={(v) => setPaymentForm({ ...paymentForm, payeeInn: v.replace(/\D/g, '').slice(0, 12) })} />
