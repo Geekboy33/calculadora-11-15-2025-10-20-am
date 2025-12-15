@@ -8,7 +8,7 @@ import { RefreshCw, TrendingUp, Database, CheckCircle, Activity, DollarSign, Cpu
 import { ledgerPersistenceStoreV2, type LedgerBalanceV2 } from '../lib/ledger-persistence-store-v2';
 import { useLanguage } from '../lib/i18n.tsx';
 
-// Función para formatear moneda con TODOS los ceros
+// Función para formatear moneda con TODOS los ceros y .00 al final
 function formatCurrencyFull(amount: number, currency: string): string {
   // Convertir a BigInt para manejar números muy grandes sin pérdida de precisión
   const bigAmount = BigInt(Math.floor(amount));
@@ -23,7 +23,8 @@ function formatCurrencyFull(amount: number, currency: string): string {
     'BRL': 'R$', 'RUB': '₽', 'KRW': '₩', 'SGD': 'S$', 'HKD': 'HK$'
   };
   
-  return `${symbols[currency] || currency + ' '}${formatted}`;
+  // Agregar .00 al final para formato monetario completo
+  return `${symbols[currency] || currency + ' '}${formatted}.00`;
 }
 
 // Función para mostrar el número de ceros
