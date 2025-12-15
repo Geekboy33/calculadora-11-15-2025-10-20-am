@@ -885,35 +885,83 @@ ${idx + 1}. ${curr.flag} ${curr.code} - ${curr.name}
                   <p className="text-purple-300">ID: {selectedMasterAccount.id}</p>
                 </div>
               </div>
-              <BankingBadge variant={selectedMasterAccount.balance > 0 ? 'success' : 'warning'}>
-                {selectedMasterAccount.balance > 0 ? 'ACTIVE' : 'PENDING'}
+              <BankingBadge variant={analyzing ? 'warning' : (selectedMasterAccount.balance > 0 ? 'success' : 'warning')}>
+                {analyzing ? (isSpanish ? 'ESCANEANDO...' : 'SCANNING...') : (selectedMasterAccount.balance > 0 ? 'ACTIVE' : 'PENDING')}
               </BankingBadge>
             </div>
 
             <div className="text-center py-8">
               <p className="text-purple-300 text-sm mb-2">
-                {isSpanish ? "Balance de Tesorería (Deep Scan)" : "Treasury Balance (Deep Scan)"}
+                {analyzing 
+                  ? (isSpanish ? "🔍 Balance Detectado en Tiempo Real" : "🔍 Real-Time Detected Balance")
+                  : (isSpanish ? "Balance de Tesorería (Deep Scan)" : "Treasury Balance (Deep Scan)")
+                }
               </p>
               {balancesVisible ? (
                 <>
-                  <p className="text-5xl font-black text-white mb-2">
-                    {selectedMasterAccount.balance > 0 
-                      ? `${(selectedMasterAccount.balance / 1e15).toLocaleString()} Quadrillion`
+                  {/* Balance Principal - Tiempo Real */}
+                  <p className={`text-5xl font-black mb-2 transition-all duration-300 ${analyzing ? 'text-amber-400 animate-pulse' : 'text-white'}`}>
+                    {currentQuadrillion > 0 || selectedMasterAccount.balance > 0
+                      ? `${currentQuadrillion.toLocaleString()} Quadrillion`
                       : '---'
                     }
                   </p>
-                  <p className="text-purple-400 font-mono">
-                    {selectedMasterAccount.balance.toExponential(2)} {selectedMasterAccount.currency}
+                  
+                  {/* Valor en la divisa seleccionada */}
+                  <p className="text-purple-400 font-mono text-lg">
+                    {selectedMasterAccount.balance > 0 
+                      ? selectedMasterAccount.balance.toExponential(2) 
+                      : (currentScannedAmount > 0 ? currentScannedAmount.toExponential(2) : '0')
+                    } {selectedMasterAccount.currency}
                   </p>
+                  
+                  {/* Info adicional durante escaneo */}
+                  {analyzing && (
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center justify-center gap-2">
+                        <Activity className="w-4 h-4 text-amber-400 animate-spin" />
+                        <span className="text-amber-300 text-sm">
+                          {isSpanish ? 'Escaneando binarios...' : 'Scanning binaries...'}
+                        </span>
+                      </div>
+                      <p className="text-purple-300 text-xs">
+                        {isSpanish ? 'Progreso:' : 'Progress:'} {progress.toFixed(2)}% | 
+                        {isSpanish ? ' Valores detectados:' : ' Values detected:'} {
+                          deepScanStats 
+                            ? (deepScanStats.values32bit + deepScanStats.values64bit + deepScanStats.values128bit + deepScanStats.valuesFloat64).toLocaleString()
+                            : 0
+                        }
+                      </p>
+                    </div>
+                  )}
                 </>
               ) : (
                 <p className="text-5xl font-black text-white">{'*'.repeat(15)}</p>
               )}
             </div>
+            
+            {/* Barra de progreso visual durante escaneo */}
+            {analyzing && (
+              <div className="px-6 pb-4">
+                <div className="w-full bg-purple-900/50 rounded-full h-3 overflow-hidden border border-purple-500/30">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-full transition-all duration-500 relative"
+                    style={{ width: `${progress}%` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+                  </div>
+                </div>
+                <div className="flex justify-between text-xs mt-2 text-purple-300">
+                  <span>0%</span>
+                  <span className="text-amber-400 font-bold">{progress.toFixed(1)}%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="p-card">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-card">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-card">
               <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-card-sm">
                 <p className="text-purple-300 text-sm mb-1">{isSpanish ? "Porcentaje" : "Percentage"}</p>
                 <p className="text-white text-xl font-bold">{selectedMasterAccount.percentage}%</p>
@@ -923,9 +971,18 @@ ${idx + 1}. ${curr.flag} ${curr.code} - ${curr.name}
                 <p className="text-white text-xl font-bold">{selectedMasterAccount.classification}</p>
               </div>
               <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-card-sm">
+                <p className="text-purple-300 text-sm mb-1">{isSpanish ? "Quadrillion Actual" : "Current Quadrillion"}</p>
+                <p className={`text-xl font-bold ${analyzing ? 'text-amber-400' : 'text-emerald-400'}`}>
+                  {currentQuadrillion.toLocaleString()} Q
+                </p>
+              </div>
+              <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-card-sm">
                 <p className="text-purple-300 text-sm mb-1">{isSpanish ? "Estado" : "Status"}</p>
-                <p className={`text-xl font-bold ${analysisResults?.certified ? 'text-emerald-400' : 'text-amber-400'}`}>
-                  {analysisResults?.certified ? '✅ CERTIFICADO' : '⏳ PENDIENTE'}
+                <p className={`text-xl font-bold ${analyzing ? 'text-amber-400' : (analysisResults?.certified ? 'text-emerald-400' : 'text-amber-400')}`}>
+                  {analyzing 
+                    ? `🔍 ${progress.toFixed(0)}%` 
+                    : (analysisResults?.certified ? '✅ CERTIFICADO' : '⏳ PENDIENTE')
+                  }
                 </p>
               </div>
             </div>
