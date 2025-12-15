@@ -613,49 +613,36 @@ class CustodyStore {
       return false;
     }
 
-    // ✅ VERIFICAR SI YA EXISTE UNA RESERVA ACTIVA PARA EVITAR DUPLICADOS
-    const existingActiveReservation = account.reservations.find(
-      r => (r.status === 'reserved' || r.status === 'confirmed') && 
-           r.contractAddress === contractAddress &&
-           contractAddress !== '' // Solo verificar si hay un contractAddress
-    );
-
-    if (existingActiveReservation) {
-      console.warn('[CustodyStore] ⚠️ Ya existe una reserva activa para este contrato:', {
-        reservationId: existingActiveReservation.id,
-        contractAddress,
-        amount: existingActiveReservation.amount,
-        status: existingActiveReservation.status
-      });
-      custodyHistory.createAlert(
+    // ✅ VERIFICACIÓN PRINCIPAL: SI YA HAY BALANCE RESERVADO, NO PERMITIR MÁS RESERVAS
+    if (account.reservedBalance > 0) {
+      console.warn('[CustodyStore] ⛔ BLOQUEADO: Ya existe balance reservado en esta cuenta:', {
         accountId,
-        account.accountName,
-        'security',
-        'medium',
-        'Reserva Duplicada Bloqueada',
-        `Ya existe una reserva activa (${existingActiveReservation.status}) para el contrato ${contractAddress}. Monto: ${account.currency} ${existingActiveReservation.amount.toLocaleString()}`,
-        true
-      );
+        accountName: account.accountName,
+        reservedBalance: account.reservedBalance,
+        intentoDeReservar: amount
+      });
+      
+      alert(`⛔ Esta cuenta ya tiene fondos reservados.\n\n` +
+            `Balance Reservado: ${account.currency} ${account.reservedBalance.toLocaleString()}\n\n` +
+            `No se puede crear otra reserva hasta que se complete o libere la reserva actual.`);
+      
       return false;
     }
 
-    // ✅ VERIFICAR SI YA HAY RESERVAS ACTIVAS (prevenir múltiples reservas)
+    // ✅ VERIFICAR SI YA HAY RESERVAS ACTIVAS EN EL ARRAY
     const hasAnyActiveReservation = account.reservations.some(
       r => r.status === 'reserved' || r.status === 'confirmed'
     );
 
-    if (hasAnyActiveReservation && !bypassLimits) {
-      console.warn('[CustodyStore] ⚠️ Ya existe una reserva activa en esta cuenta');
+    if (hasAnyActiveReservation) {
+      console.warn('[CustodyStore] ⛔ BLOQUEADO: Ya existe una reserva activa en esta cuenta');
       const activeReservation = account.reservations.find(r => r.status === 'reserved' || r.status === 'confirmed');
-      custodyHistory.createAlert(
-        accountId,
-        account.accountName,
-        'security',
-        'medium',
-        'Reserva Existente',
-        `Esta cuenta ya tiene una reserva activa (${activeReservation?.status}). Complete o libere la reserva actual antes de crear una nueva.`,
-        true
-      );
+      
+      alert(`⛔ Esta cuenta ya tiene una reserva activa.\n\n` +
+            `Estado: ${activeReservation?.status?.toUpperCase()}\n` +
+            `Monto: ${account.currency} ${activeReservation?.amount?.toLocaleString()}\n\n` +
+            `Complete o libere la reserva actual antes de crear una nueva.`);
+      
       return false;
     }
 

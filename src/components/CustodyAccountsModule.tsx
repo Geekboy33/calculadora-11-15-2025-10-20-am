@@ -314,28 +314,21 @@ export function CustodyAccountsModule() {
       return;
     }
 
-    const isBanking = (selectedAccount.accountType || 'blockchain') === 'banking';
-
-    // Verificar si ya existe una reserva activa
-    const hasActiveReservation = selectedAccount.reservations?.some(
-      r => r.status === 'reserved' || r.status === 'confirmed'
-    );
-
-    if (hasActiveReservation && !bypassLimits) {
-      const activeRes = selectedAccount.reservations?.find(r => r.status === 'reserved' || r.status === 'confirmed');
+    // ⛔ VERIFICACIÓN PRINCIPAL: Si ya hay balance reservado, bloquear
+    if (selectedAccount.reservedBalance > 0) {
       alert(
         language === 'es' 
-          ? `⚠️ Ya existe una reserva activa en esta cuenta.\n\n` +
-            `Estado: ${activeRes?.status?.toUpperCase()}\n` +
-            `Monto: ${selectedAccount.currency} ${activeRes?.amount?.toLocaleString()}\n\n` +
-            `Complete o libere la reserva actual antes de crear una nueva.`
-          : `⚠️ This account already has an active reservation.\n\n` +
-            `Status: ${activeRes?.status?.toUpperCase()}\n` +
-            `Amount: ${selectedAccount.currency} ${activeRes?.amount?.toLocaleString()}\n\n` +
-            `Complete or release the current reservation before creating a new one.`
+          ? `⛔ Esta cuenta ya tiene fondos reservados.\n\n` +
+            `Balance Reservado: ${selectedAccount.currency} ${selectedAccount.reservedBalance.toLocaleString()}\n\n` +
+            `No se puede crear otra reserva hasta que se complete o libere la reserva actual.`
+          : `⛔ This account already has reserved funds.\n\n` +
+            `Reserved Balance: ${selectedAccount.currency} ${selectedAccount.reservedBalance.toLocaleString()}\n\n` +
+            `Cannot create another reservation until the current one is completed or released.`
       );
       return;
     }
+
+    const isBanking = (selectedAccount.accountType || 'blockchain') === 'banking';
 
     // Validar campos según tipo
     if (!isBanking && !reserveData.contractAddress) {
