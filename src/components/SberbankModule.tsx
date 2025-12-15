@@ -146,18 +146,18 @@ export function SberbankModule() {
   // Predefined payer accounts - Russian Banks
   const predefinedPayerAccounts = [
     // ═══════════════════════════════════════════════════════════════
-    // TOP 5 BANCOS RUSOS
+    // SBERBANK - MÚLTIPLES CUENTAS
     // ═══════════════════════════════════════════════════════════════
     { 
       id: '1',
-      name: 'Sberbank - Cuenta Principal',
+      name: 'Sberbank - Cuenta Principal Moscow',
       payerName: 'PAO SBERBANK',
       payerInn: '7707083893',
       payerKpp: '773601001',
       account: '40702810938000000001',
       bankBic: '044525225',
       corrAccount: '30101810400000000225',
-      bankName: 'Sberbank'
+      bankName: 'Sberbank Moscow'
     },
     { 
       id: '2',
@@ -169,6 +169,94 @@ export function SberbankModule() {
       bankBic: '044525225',
       corrAccount: '30101810400000000225',
       bankName: 'Sberbank'
+    },
+    { 
+      id: 'sb3',
+      name: 'Sberbank - Tesorería Central',
+      payerName: 'PAO SBERBANK',
+      payerInn: '7707083893',
+      payerKpp: '773601001',
+      account: '40702810938000000100',
+      bankBic: '044525225',
+      corrAccount: '30101810400000000225',
+      bankName: 'Sberbank Treasury'
+    },
+    { 
+      id: 'sb4',
+      name: 'Sberbank - Comercio Exterior',
+      payerName: 'PAO SBERBANK',
+      payerInn: '7707083893',
+      payerKpp: '773601001',
+      account: '40702810938000000200',
+      bankBic: '044525225',
+      corrAccount: '30101810400000000225',
+      bankName: 'Sberbank Trade'
+    },
+    { 
+      id: 'sb5',
+      name: 'Sberbank - Inversiones Corporativas',
+      payerName: 'PAO SBERBANK',
+      payerInn: '7707083893',
+      payerKpp: '773601001',
+      account: '40702810938000000300',
+      bankBic: '044525225',
+      corrAccount: '30101810400000000225',
+      bankName: 'Sberbank Invest'
+    },
+    { 
+      id: 'sb6',
+      name: 'Sberbank - Reservas Estratégicas',
+      payerName: 'PAO SBERBANK',
+      payerInn: '7707083893',
+      payerKpp: '773601001',
+      account: '40702810938000000400',
+      bankBic: '044525225',
+      corrAccount: '30101810400000000225',
+      bankName: 'Sberbank Reserve'
+    },
+    { 
+      id: 'sb7',
+      name: 'Sberbank - Saint Petersburg',
+      payerName: 'PAO SBERBANK',
+      payerInn: '7707083893',
+      payerKpp: '784101001',
+      account: '40702810455000000001',
+      bankBic: '044030653',
+      corrAccount: '30101810500000000653',
+      bankName: 'Sberbank SPB'
+    },
+    { 
+      id: 'sb8',
+      name: 'Sberbank - Novosibirsk',
+      payerName: 'PAO SBERBANK',
+      payerInn: '7707083893',
+      payerKpp: '540602001',
+      account: '40702810244000000001',
+      bankBic: '045004641',
+      corrAccount: '30101810500000000641',
+      bankName: 'Sberbank Novosibirsk'
+    },
+    { 
+      id: 'sb9',
+      name: 'Sberbank - Yekaterinburg',
+      payerName: 'PAO SBERBANK',
+      payerInn: '7707083893',
+      payerKpp: '665801001',
+      account: '40702810316000000001',
+      bankBic: '046577674',
+      corrAccount: '30101810500000000674',
+      bankName: 'Sberbank Ural'
+    },
+    { 
+      id: 'sb10',
+      name: 'Sberbank - Kazan',
+      payerName: 'PAO SBERBANK',
+      payerInn: '7707083893',
+      payerKpp: '165501001',
+      account: '40702810862000000001',
+      bankBic: '049205603',
+      corrAccount: '30101810600000000603',
+      bankName: 'Sberbank Kazan'
     },
     { 
       id: '3',
