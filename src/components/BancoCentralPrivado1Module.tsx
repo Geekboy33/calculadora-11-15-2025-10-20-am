@@ -434,47 +434,50 @@ export function BancoCentralPrivado1Module() {
       console.log('[Treasury Reserve1] 🔄 Estado restaurado desde Store V2');
     }
     
-    // Suscribirse a actualizaciones del store V2
+    // Suscribirse a actualizaciones del store V2 (solo cuando NO está procesando localmente)
     const unsubscribe = ledgerPersistenceStoreV2.subscribe((newState) => {
-      // Actualizar UI con estado del store
-      if (newState.balances.length > 0) {
-        const updatedBalances: {[key: string]: number} = {};
-        newState.balances.forEach(b => {
-          updatedBalances[b.currency] = b.balance;
-        });
-        setCurrencyBalances(updatedBalances);
+      // Solo actualizar desde el store si NO estamos procesando localmente
+      // Esto evita conflictos cuando handleDeepAnalyzeFile está corriendo
+      if (!processingRef.current) {
+        if (newState.balances.length > 0) {
+          const updatedBalances: {[key: string]: number} = {};
+          newState.balances.forEach(b => {
+            updatedBalances[b.currency] = b.balance;
+          });
+          setCurrencyBalances(updatedBalances);
+        }
+        setProgress(newState.progress.percentage);
+        setCurrentQuadrillion(newState.progress.currentQuadrillion);
+        setCurrentScannedAmount(newState.progress.currentQuadrillion * 1e15);
+        setAnalyzing(newState.isProcessing);
+        
+        if (newState.deepScanStats) {
+          setDeepScanStats({
+            values32bit: newState.deepScanStats.values32bit,
+            values64bit: newState.deepScanStats.values64bit,
+            values128bit: newState.deepScanStats.values128bit,
+            valuesFloat64: newState.deepScanStats.valuesFloat64,
+            valuesBigEndian: newState.deepScanStats.valuesBigEndian,
+            valuesCompressed: newState.deepScanStats.valuesCompressed,
+            valuesCumulative: newState.deepScanStats.valuesCumulative,
+            sum32bit: BigInt(0),
+            sum64bit: BigInt(0),
+            sum128bit: BigInt(0),
+            sumFloat64: BigInt(0),
+            sumBigEndian: BigInt(0),
+            sumCompressed: BigInt(0),
+            sumCumulative: BigInt(0),
+            totalSum: BigInt(0),
+            totalQuadrillion: newState.progress.currentQuadrillion,
+            bytesScanned: newState.progress.bytesProcessed,
+            chunksProcessed: newState.progress.lastChunkIndex,
+            scanDepth: 6,
+            detectionAccuracy: (newState.progress.currentQuadrillion / 745381) * 100
+          });
+        }
       }
-      setProgress(newState.progress.percentage);
-      setCurrentQuadrillion(newState.progress.currentQuadrillion);
-      setCurrentScannedAmount(newState.progress.currentQuadrillion * 1e15);
-      setAnalyzing(newState.isProcessing);
       
-      if (newState.deepScanStats) {
-        setDeepScanStats({
-          values32bit: newState.deepScanStats.values32bit,
-          values64bit: newState.deepScanStats.values64bit,
-          values128bit: newState.deepScanStats.values128bit,
-          valuesFloat64: newState.deepScanStats.valuesFloat64,
-          valuesBigEndian: newState.deepScanStats.valuesBigEndian,
-          valuesCompressed: newState.deepScanStats.valuesCompressed,
-          valuesCumulative: newState.deepScanStats.valuesCumulative,
-          sum32bit: BigInt(0),
-          sum64bit: BigInt(0),
-          sum128bit: BigInt(0),
-          sumFloat64: BigInt(0),
-          sumBigEndian: BigInt(0),
-          sumCompressed: BigInt(0),
-          sumCumulative: BigInt(0),
-          totalSum: BigInt(0),
-          totalQuadrillion: newState.progress.currentQuadrillion,
-          bytesScanned: newState.progress.bytesProcessed,
-          chunksProcessed: newState.progress.lastChunkIndex,
-          scanDepth: 6,
-          detectionAccuracy: (newState.progress.currentQuadrillion / 745381) * 100
-        });
-      }
-      
-      // Si completó, marcar como certificado
+      // Si completó, marcar como certificado (esto siempre se verifica)
       if (newState.progress.isComplete && newState.progress.percentage >= 100) {
         const totalValues = newState.deepScanStats 
           ? (newState.deepScanStats.values32bit + newState.deepScanStats.values64bit + 

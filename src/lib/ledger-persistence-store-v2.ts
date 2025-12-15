@@ -213,12 +213,18 @@ class LedgerPersistenceStoreV2 {
     const totalValue = currentQuadrillion * 1e15; // Convertir a unidades base
     this.updateBalancesFromTotal(totalValue);
     
-    // Guardar cada 2%
-    if (percentage % 2 < 0.5) {
+    // Guardar cada 1% para no perder progreso
+    if (percentage % 1 < 0.3) {
       this.saveToStorage();
     }
     
+    // ✅ NOTIFICAR SIEMPRE - Tiempo real
     this.notifyListeners();
+    
+    // Log para debug
+    if (percentage % 5 < 0.3) {
+      console.log(`[Ledger Store V2] 📊 ${percentage.toFixed(1)}% | ${currentQuadrillion.toLocaleString()} Q | Listeners: ${this.listeners.size}`);
+    }
   }
 
   private updateBalancesFromTotal(totalValue: number) {

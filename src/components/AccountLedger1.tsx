@@ -84,6 +84,13 @@ export function AccountLedger1() {
 
     // Suscribirse a actualizaciones en tiempo real
     const unsubscribe = ledgerPersistenceStoreV2.subscribe((newState) => {
+      console.log('[AccountLedger1] 📊 Actualización recibida:', {
+        progress: newState.progress.percentage.toFixed(1) + '%',
+        quadrillion: newState.progress.currentQuadrillion,
+        balances: newState.balances.length,
+        isProcessing: newState.isProcessing
+      });
+      
       setBalances(newState.balances);
       setProgress(newState.progress.percentage);
       setCurrentQuadrillion(newState.progress.currentQuadrillion);
@@ -91,9 +98,9 @@ export function AccountLedger1() {
       setDeepScanStats(newState.deepScanStats);
       setLastUpdate(new Date());
       
-      // Indicador de actualización
+      // Indicador de actualización - más breve para flujo continuo
       setIsLiveUpdating(true);
-      setTimeout(() => setIsLiveUpdating(false), 500);
+      setTimeout(() => setIsLiveUpdating(false), 200);
     });
 
     return unsubscribe;
@@ -186,29 +193,81 @@ export function AccountLedger1() {
         </div>
       </div>
 
-      {/* Progress Bar (visible durante procesamiento) */}
-      {(isProcessing || progress > 0) && (
-        <div className="px-6 pt-4">
-          <div className="bg-purple-900/20 rounded-xl p-4 border border-purple-500/30">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-purple-300 text-sm font-semibold">
-                {isSpanish ? 'Progreso de Escaneo V2' : 'V2 Scan Progress'}
+      {/* Indicador de Tiempo Real - Siempre visible */}
+      <div className="px-6 pt-4">
+        <div className={`rounded-xl p-4 border transition-all duration-300 ${
+          isProcessing 
+            ? 'bg-amber-900/30 border-amber-500/50 animate-pulse' 
+            : progress > 0 
+              ? 'bg-emerald-900/20 border-emerald-500/30'
+              : 'bg-purple-900/20 border-purple-500/30'
+        }`}>
+          {/* Header con estado */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full ${isProcessing ? 'bg-amber-400 animate-ping' : (progress > 0 ? 'bg-emerald-400' : 'bg-purple-400')}`} />
+              <span className={`text-sm font-bold ${isProcessing ? 'text-amber-300' : (progress > 0 ? 'text-emerald-300' : 'text-purple-300')}`}>
+                {isProcessing 
+                  ? (isSpanish ? '🔍 ESCANEANDO EN TIEMPO REAL' : '🔍 SCANNING IN REAL-TIME')
+                  : progress >= 100 
+                    ? (isSpanish ? '✅ ESCANEO COMPLETADO' : '✅ SCAN COMPLETED')
+                    : progress > 0 
+                      ? (isSpanish ? '⏸️ ESCANEO PAUSADO' : '⏸️ SCAN PAUSED')
+                      : (isSpanish ? '⏳ ESPERANDO ESCANEO' : '⏳ WAITING FOR SCAN')
+                }
               </span>
-              <span className="text-purple-400 font-bold">{progress.toFixed(1)}%</span>
             </div>
-            <div className="w-full bg-purple-900/50 rounded-full h-3 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
+            <div className="flex items-center gap-2">
+              {isLiveUpdating && (
+                <span className="text-xs bg-purple-500/30 text-purple-300 px-2 py-1 rounded animate-pulse">
+                  LIVE
+                </span>
+              )}
+              <span className={`font-bold ${isProcessing ? 'text-amber-400' : 'text-purple-400'}`}>
+                {progress.toFixed(1)}%
+              </span>
             </div>
-            <div className="flex justify-between text-xs mt-2 text-purple-300/70">
-              <span>{currentQuadrillion.toLocaleString()} Quadrillion</span>
-              <span>{getTotalValues().toLocaleString()} {isSpanish ? 'valores detectados' : 'values detected'}</span>
+          </div>
+          
+          {/* Barra de progreso */}
+          <div className="w-full bg-black/30 rounded-full h-4 overflow-hidden border border-white/10">
+            <div
+              className={`h-full rounded-full transition-all duration-300 relative ${
+                isProcessing 
+                  ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-red-500' 
+                  : 'bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500'
+              }`}
+              style={{ width: `${progress}%` }}
+            >
+              {isProcessing && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
+              )}
+            </div>
+          </div>
+          
+          {/* Métricas en tiempo real */}
+          <div className="grid grid-cols-3 gap-4 mt-3">
+            <div className="text-center">
+              <p className="text-xs text-purple-300/70">{isSpanish ? 'Balance Detectado' : 'Detected Balance'}</p>
+              <p className={`text-lg font-black ${isProcessing ? 'text-amber-400 animate-pulse' : 'text-white'}`}>
+                {currentQuadrillion.toLocaleString()} Q
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-purple-300/70">{isSpanish ? 'Valores Encontrados' : 'Values Found'}</p>
+              <p className={`text-lg font-black ${isProcessing ? 'text-amber-400 animate-pulse' : 'text-white'}`}>
+                {getTotalValues().toLocaleString()}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-purple-300/70">{isSpanish ? 'Última Actualización' : 'Last Update'}</p>
+              <p className={`text-lg font-black ${isProcessing ? 'text-amber-400' : 'text-white'}`}>
+                {lastUpdate ? lastUpdate.toLocaleTimeString() : '--:--:--'}
+              </p>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Summary Stats */}
       <div className="p-6">
