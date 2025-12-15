@@ -937,19 +937,19 @@ Timestamp: ${AUDIT_DATA.timestamp}
           }
         />
 
-        {/* 💰 M1/M2 Detectados desde Cuentas Custodio */}
+        {/* M1/M2 Detectados desde Cuentas Custodio */}
         {(custodyM1M2Stats.m1.count > 0 || custodyM1M2Stats.m2.count > 0) && (
-          <BankingCard className="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border-emerald-500/30">
+          <BankingCard className="border border-[var(--border-subtle)]">
             <div className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-emerald-500/20 rounded-lg">
-                  <Database className="w-6 h-6 text-emerald-400" />
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl border border-emerald-500/30">
+                  <TrendingUp className="w-7 h-7 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-emerald-400">
-                    💰 {isSpanish ? 'Agregados Monetarios Detectados' : 'Detected Monetary Aggregates'}
+                  <h3 className="text-xl font-bold text-[var(--text-primary)]">
+                    {isSpanish ? 'Agregados Monetarios Detectados' : 'Detected Monetary Aggregates'}
                   </h3>
-                  <p className="text-sm text-emerald-300/70">
+                  <p className="text-sm text-[var(--text-secondary)]">
                     {isSpanish 
                       ? 'Valores M1 y M2 sincronizados desde Cuentas Custodio'
                       : 'M1 and M2 values synced from Custody Accounts'}
@@ -959,45 +959,50 @@ Timestamp: ${AUDIT_DATA.timestamp}
               
               <div className="grid grid-cols-2 gap-6">
                 {/* M1 - Efectivo Líquido */}
-                <div className="bg-[var(--bg-elevated)] rounded-xl p-5 border border-emerald-500/20">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-3xl">💵</span>
+                <div className="bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 rounded-xl p-5 border border-emerald-500/20">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2.5 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
+                      <DollarSign className="w-6 h-6 text-emerald-400" />
+                    </div>
                     <div>
-                      <h4 className="text-emerald-400 font-bold text-lg">M1 - {isSpanish ? 'Efectivo Líquido' : 'Liquid Cash'}</h4>
-                      <p className="text-xs text-[var(--text-secondary)]">
-                        {isSpanish ? 'Billetes, monedas, depósitos a la vista' : 'Currency, coins, demand deposits'}
+                      <h4 className="text-emerald-400 font-bold text-lg">M1</h4>
+                      <p className="text-sm text-[var(--text-secondary)]">
+                        {isSpanish ? 'Efectivo Líquido' : 'Liquid Cash'}
                       </p>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <p className="text-xs text-[var(--text-secondary)] mb-4 pb-3 border-b border-emerald-500/20">
+                    {isSpanish ? 'Billetes, monedas, depósitos a la vista' : 'Currency, coins, demand deposits'}
+                  </p>
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Cuentas:' : 'Accounts:'}</span>
-                      <span className="text-emerald-400 font-bold">{custodyM1M2Stats.m1.count}</span>
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Cuentas' : 'Accounts'}</span>
+                      <span className="text-emerald-400 font-bold text-lg">{custodyM1M2Stats.m1.count}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Total:' : 'Total:'}</span>
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Total' : 'Total'}</span>
                       <span className="text-emerald-400 font-mono font-bold">
                         ${custodyM1M2Stats.m1.totalBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Disponible:' : 'Available:'}</span>
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Disponible' : 'Available'}</span>
                       <span className="text-emerald-300 font-mono">
                         ${custodyM1M2Stats.m1.availableBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Reservado:' : 'Reserved:'}</span>
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Reservado' : 'Reserved'}</span>
                       <span className="text-amber-400 font-mono">
                         ${custodyM1M2Stats.m1.reservedBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </span>
                     </div>
                     {Object.keys(custodyM1M2Stats.m1.byCurrency).length > 0 && (
-                      <div className="pt-2 border-t border-emerald-500/20">
-                        <span className="text-xs text-[var(--text-secondary)]">{isSpanish ? 'Por divisa:' : 'By currency:'}</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
+                      <div className="pt-3 border-t border-emerald-500/20">
+                        <span className="text-xs text-[var(--text-secondary)] uppercase tracking-wider">{isSpanish ? 'Por divisa' : 'By currency'}</span>
+                        <div className="flex flex-wrap gap-2 mt-2">
                           {Object.entries(custodyM1M2Stats.m1.byCurrency).map(([curr, amount]) => (
-                            <span key={curr} className="px-2 py-0.5 bg-emerald-500/10 rounded text-xs text-emerald-300">
+                            <span key={curr} className="px-2.5 py-1 bg-emerald-500/10 rounded-lg text-xs text-emerald-300 font-mono border border-emerald-500/20">
                               {curr}: {(amount as number).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                             </span>
                           ))}
@@ -1008,45 +1013,50 @@ Timestamp: ${AUDIT_DATA.timestamp}
                 </div>
 
                 {/* M2 - Cuasi-Dinero */}
-                <div className="bg-[var(--bg-elevated)] rounded-xl p-5 border border-blue-500/20">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-3xl">🏦</span>
+                <div className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 rounded-xl p-5 border border-blue-500/20">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2.5 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                      <Building2 className="w-6 h-6 text-blue-400" />
+                    </div>
                     <div>
-                      <h4 className="text-blue-400 font-bold text-lg">M2 - {isSpanish ? 'Cuasi-Dinero' : 'Near Money'}</h4>
-                      <p className="text-xs text-[var(--text-secondary)]">
-                        {isSpanish ? 'M1 + depósitos de ahorro, mercado monetario' : 'M1 + savings, money market'}
+                      <h4 className="text-blue-400 font-bold text-lg">M2</h4>
+                      <p className="text-sm text-[var(--text-secondary)]">
+                        {isSpanish ? 'Cuasi-Dinero' : 'Near Money'}
                       </p>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <p className="text-xs text-[var(--text-secondary)] mb-4 pb-3 border-b border-blue-500/20">
+                    {isSpanish ? 'M1 + depósitos de ahorro, mercado monetario' : 'M1 + savings, money market'}
+                  </p>
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Cuentas:' : 'Accounts:'}</span>
-                      <span className="text-blue-400 font-bold">{custodyM1M2Stats.m2.count}</span>
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Cuentas' : 'Accounts'}</span>
+                      <span className="text-blue-400 font-bold text-lg">{custodyM1M2Stats.m2.count}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Total:' : 'Total:'}</span>
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Total' : 'Total'}</span>
                       <span className="text-blue-400 font-mono font-bold">
                         ${custodyM1M2Stats.m2.totalBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Disponible:' : 'Available:'}</span>
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Disponible' : 'Available'}</span>
                       <span className="text-blue-300 font-mono">
                         ${custodyM1M2Stats.m2.availableBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Reservado:' : 'Reserved:'}</span>
+                      <span className="text-[var(--text-secondary)] text-sm">{isSpanish ? 'Reservado' : 'Reserved'}</span>
                       <span className="text-amber-400 font-mono">
                         ${custodyM1M2Stats.m2.reservedBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </span>
                     </div>
                     {Object.keys(custodyM1M2Stats.m2.byCurrency).length > 0 && (
-                      <div className="pt-2 border-t border-blue-500/20">
-                        <span className="text-xs text-[var(--text-secondary)]">{isSpanish ? 'Por divisa:' : 'By currency:'}</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
+                      <div className="pt-3 border-t border-blue-500/20">
+                        <span className="text-xs text-[var(--text-secondary)] uppercase tracking-wider">{isSpanish ? 'Por divisa' : 'By currency'}</span>
+                        <div className="flex flex-wrap gap-2 mt-2">
                           {Object.entries(custodyM1M2Stats.m2.byCurrency).map(([curr, amount]) => (
-                            <span key={curr} className="px-2 py-0.5 bg-blue-500/10 rounded text-xs text-blue-300">
+                            <span key={curr} className="px-2.5 py-1 bg-blue-500/10 rounded-lg text-xs text-blue-300 font-mono border border-blue-500/20">
                               {curr}: {(amount as number).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                             </span>
                           ))}
@@ -1058,11 +1068,16 @@ Timestamp: ${AUDIT_DATA.timestamp}
               </div>
 
               {/* Total Combinado */}
-              <div className="mt-4 pt-4 border-t border-emerald-500/20">
+              <div className="mt-6 pt-5 border-t border-[var(--border-subtle)]">
                 <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-primary)] font-semibold">
-                    {isSpanish ? 'Total M1 + M2 (Cuentas Custodio):' : 'Total M1 + M2 (Custody Accounts):'}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-lg">
+                      <Activity className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-[var(--text-primary)] font-semibold">
+                      {isSpanish ? 'Total M1 + M2 (Cuentas Custodio)' : 'Total M1 + M2 (Custody Accounts)'}
+                    </span>
+                  </div>
                   <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
                     ${(custodyM1M2Stats.m1.totalBalance + custodyM1M2Stats.m2.totalBalance).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </span>

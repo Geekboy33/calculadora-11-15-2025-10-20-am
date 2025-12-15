@@ -19,7 +19,9 @@ import {
   Wallet,
   ArrowUp,
   TrendingUp,
-  Database
+  Database,
+  DollarSign,
+  Building2
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
@@ -1369,10 +1371,11 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
 
-              {/* 🏦 Selector de Denominación de Fondos (M1/M2) */}
+              {/* Selector de Denominación de Fondos (M1/M2) */}
               <div className="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-500/30 rounded-lg p-4">
-                <label className="text-sm text-emerald-400 mb-3 block font-semibold">
-                  💰 {language === 'es' ? 'Denominación de Fondos (Agregado Monetario)' : 'Fund Denomination (Monetary Aggregate)'}
+                <label className="text-sm text-emerald-400 mb-3 block font-semibold flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  {language === 'es' ? 'Denominación de Fondos (Agregado Monetario)' : 'Fund Denomination (Monetary Aggregate)'}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -1384,8 +1387,10 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         : 'border-[#1a1a1a] bg-[#0a0a0a] hover:border-emerald-500/30'
                     }`}
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">💵</span>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`p-2 rounded-lg ${formData.fundDenomination === 'M1' ? 'bg-emerald-500/30' : 'bg-[#1a1a1a]'}`}>
+                        <DollarSign className={`w-5 h-5 ${formData.fundDenomination === 'M1' ? 'text-emerald-400' : 'text-[#666]'}`} />
+                      </div>
                       <span className={`font-bold text-lg ${formData.fundDenomination === 'M1' ? 'text-emerald-400' : 'text-[#ffffff]'}`}>M1</span>
                     </div>
                     <div className={`text-sm ${formData.fundDenomination === 'M1' ? 'text-emerald-300' : 'text-[#888]'}`}>
@@ -1406,8 +1411,10 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         : 'border-[#1a1a1a] bg-[#0a0a0a] hover:border-blue-500/30'
                     }`}
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">🏦</span>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`p-2 rounded-lg ${formData.fundDenomination === 'M2' ? 'bg-blue-500/30' : 'bg-[#1a1a1a]'}`}>
+                        <Building2 className={`w-5 h-5 ${formData.fundDenomination === 'M2' ? 'text-blue-400' : 'text-[#666]'}`} />
+                      </div>
                       <span className={`font-bold text-lg ${formData.fundDenomination === 'M2' ? 'text-blue-400' : 'text-[#ffffff]'}`}>M2</span>
                     </div>
                     <div className={`text-sm ${formData.fundDenomination === 'M2' ? 'text-blue-300' : 'text-[#888]'}`}>
