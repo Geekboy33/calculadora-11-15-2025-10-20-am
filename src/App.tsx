@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense, useRef } from 'react';
 
 // Inicializar sincronización de base de datos
 import './lib/database-sync';
-import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight, Cpu } from 'lucide-react';
 import { 
   CentralPanelIcon, 
   PrivateCentralBankIcon, 
@@ -45,6 +45,7 @@ const EnhancedBinaryViewer = lazy(() => import('./components/EnhancedBinaryViewe
 const LargeFileDTC1BAnalyzer = lazy(() => import('./components/LargeFileDTC1BAnalyzer').then(m => ({ default: m.LargeFileDTC1BAnalyzer })));
 const XcpB2BInterface = lazy(() => import('./components/XcpB2BInterface').then(m => ({ default: m.XcpB2BInterface })));
 const AccountLedger = lazy(() => import('./components/AccountLedger').then(m => ({ default: m.AccountLedger })));
+const AccountLedger1 = lazy(() => import('./components/AccountLedger1').then(m => ({ default: m.AccountLedger1 })));
 const BankBlackScreen = lazy(() => import('./components/BankBlackScreen').then(m => ({ default: m.BankBlackScreen })));
 const AuditBankWindow = lazy(() => import('./components/AuditBankWindow').then(m => ({ default: m.AuditBankWindow })));
 const CoreBankingAPIModule = lazy(() => import('./components/CoreBankingAPIModule').then(m => ({ default: m.CoreBankingAPIModule })));
@@ -87,7 +88,7 @@ const BankSettlementModule = lazy(() => import('./components/BankSettlementModul
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 const DownloadsModule = lazy(() => import('./components/DownloadsModule').then(m => ({ default: m.DownloadsModule })));
 
-type Tab = 'central-dashboard' | 'banco-central-privado' | 'banco-central-privado-1' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
+type Tab = 'central-dashboard' | 'banco-central-privado' | 'banco-central-privado-1' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -182,6 +183,7 @@ function App() {
     { id: 'dashboard' as Tab, name: t.navDashboard, icon: LayoutDashboard },
     { id: 'analytics' as Tab, name: 'Analytics', icon: TrendingUp },
     { id: 'ledger' as Tab, name: t.navLedger, icon: BookOpen },
+    { id: 'ledger1' as Tab, name: 'Account Ledger1', icon: Cpu },
     { id: 'blackscreen' as Tab, name: t.navBlackScreen, icon: FileCheck },
     { id: 'custody' as Tab, name: t.navCustody, icon: Lock },
     { id: 'profiles' as Tab, name: isSpanish ? 'Perfiles' : 'Profiles', icon: User },
@@ -379,6 +381,7 @@ function App() {
           )}
           {activeTab === 'analytics' && <AnalyticsDashboard />}
           {activeTab === 'ledger' && <AccountLedger />}
+          {activeTab === 'ledger1' && <AccountLedger1 />}
           {activeTab === 'blackscreen' && <BankBlackScreen />}
           {activeTab === 'custody' && <CustodyAccountsModule />}
           {activeTab === 'profiles' && <ProfilesModule />}

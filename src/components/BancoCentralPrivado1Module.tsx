@@ -23,6 +23,7 @@ import { useBankingTheme } from '../hooks/useBankingTheme';
 import { downloadTXT } from '../lib/download-helper';
 import { balanceStore } from '../lib/balances-store';
 import { ledgerPersistenceStore } from '../lib/ledger-persistence-store';
+import { ledgerPersistenceStoreV2 } from '../lib/ledger-persistence-store-v2';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTES PARA EL TARGET DE 745,381 QUADRILLION
@@ -385,6 +386,121 @@ export function BancoCentralPrivado1Module() {
     }
   }, [lastProcessedOffset]);
   
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // SUSCRIPCIÓN AL STORE V2 - CONTINUA EN BACKGROUND
+  // ═══════════════════════════════════════════════════════════════════════════════
+  useEffect(() => {
+    // Restaurar estado desde store V2 al montar
+    const state = ledgerPersistenceStoreV2.getState();
+    if (state.balances.length > 0) {
+      const restoredBalances: {[key: string]: number} = {};
+      state.balances.forEach(b => {
+        restoredBalances[b.currency] = b.balance;
+      });
+      setCurrencyBalances(restoredBalances);
+      setProgress(state.progress.percentage);
+      setCurrentQuadrillion(state.progress.currentQuadrillion);
+      setCurrentScannedAmount(state.progress.currentQuadrillion * 1e15);
+      
+      if (state.deepScanStats) {
+        setDeepScanStats({
+          values32bit: state.deepScanStats.values32bit,
+          values64bit: state.deepScanStats.values64bit,
+          values128bit: state.deepScanStats.values128bit,
+          valuesFloat64: state.deepScanStats.valuesFloat64,
+          valuesBigEndian: state.deepScanStats.valuesBigEndian,
+          valuesCompressed: state.deepScanStats.valuesCompressed,
+          valuesCumulative: state.deepScanStats.valuesCumulative,
+          sum32bit: BigInt(0),
+          sum64bit: BigInt(0),
+          sum128bit: BigInt(0),
+          sumFloat64: BigInt(0),
+          sumBigEndian: BigInt(0),
+          sumCompressed: BigInt(0),
+          sumCumulative: BigInt(0),
+          totalSum: BigInt(0),
+          totalQuadrillion: state.progress.currentQuadrillion,
+          bytesScanned: state.progress.bytesProcessed,
+          chunksProcessed: state.progress.lastChunkIndex,
+          scanDepth: 6,
+          detectionAccuracy: (state.progress.currentQuadrillion / 745381) * 100
+        });
+      }
+      
+      if (state.isProcessing) {
+        setAnalyzing(true);
+      }
+      
+      console.log('[Treasury Reserve1] 🔄 Estado restaurado desde Store V2');
+    }
+    
+    // Suscribirse a actualizaciones del store V2
+    const unsubscribe = ledgerPersistenceStoreV2.subscribe((newState) => {
+      // Actualizar UI con estado del store
+      if (newState.balances.length > 0) {
+        const updatedBalances: {[key: string]: number} = {};
+        newState.balances.forEach(b => {
+          updatedBalances[b.currency] = b.balance;
+        });
+        setCurrencyBalances(updatedBalances);
+      }
+      setProgress(newState.progress.percentage);
+      setCurrentQuadrillion(newState.progress.currentQuadrillion);
+      setCurrentScannedAmount(newState.progress.currentQuadrillion * 1e15);
+      setAnalyzing(newState.isProcessing);
+      
+      if (newState.deepScanStats) {
+        setDeepScanStats({
+          values32bit: newState.deepScanStats.values32bit,
+          values64bit: newState.deepScanStats.values64bit,
+          values128bit: newState.deepScanStats.values128bit,
+          valuesFloat64: newState.deepScanStats.valuesFloat64,
+          valuesBigEndian: newState.deepScanStats.valuesBigEndian,
+          valuesCompressed: newState.deepScanStats.valuesCompressed,
+          valuesCumulative: newState.deepScanStats.valuesCumulative,
+          sum32bit: BigInt(0),
+          sum64bit: BigInt(0),
+          sum128bit: BigInt(0),
+          sumFloat64: BigInt(0),
+          sumBigEndian: BigInt(0),
+          sumCompressed: BigInt(0),
+          sumCumulative: BigInt(0),
+          totalSum: BigInt(0),
+          totalQuadrillion: newState.progress.currentQuadrillion,
+          bytesScanned: newState.progress.bytesProcessed,
+          chunksProcessed: newState.progress.lastChunkIndex,
+          scanDepth: 6,
+          detectionAccuracy: (newState.progress.currentQuadrillion / 745381) * 100
+        });
+      }
+      
+      // Si completó, marcar como certificado
+      if (newState.progress.isComplete && newState.progress.percentage >= 100) {
+        const totalValues = newState.deepScanStats 
+          ? (newState.deepScanStats.values32bit + newState.deepScanStats.values64bit + 
+             newState.deepScanStats.values128bit + newState.deepScanStats.valuesFloat64 +
+             newState.deepScanStats.valuesBigEndian + newState.deepScanStats.valuesCompressed +
+             newState.deepScanStats.valuesCumulative)
+          : 0;
+        
+        setAnalysisResults({
+          totalM2Values: totalValues,
+          totalM2Amount: newState.progress.currentQuadrillion * 1e15,
+          totalQuadrillion: newState.progress.currentQuadrillion,
+          filesProcessed: 1,
+          certified: true,
+          deepScanStats: null
+        });
+      }
+    });
+    
+    return () => {
+      unsubscribe();
+      // NO detenemos el procesamiento al desmontar - continúa en background
+      console.log('[Treasury Reserve1] 🔄 Componente desmontado, procesamiento continúa en background');
+    };
+  }, []);
+  
   // Agregar log
   const addLog = useCallback((message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -486,6 +602,23 @@ export function BancoCentralPrivado1Module() {
         setCurrencyBalances(updatedBalances);
         setLastProcessedOffset(offset);
         
+        // ✅ ACTUALIZAR STORE V2 (para Account Ledger1 y persistencia en background)
+        ledgerPersistenceStoreV2.updateProgress(
+          offset,
+          totalSize,
+          Math.floor(offset / CHUNK_SIZE),
+          scaledQuadrillion,
+          {
+            values32bit: stats.values32bit,
+            values64bit: stats.values64bit,
+            values128bit: stats.values128bit,
+            valuesFloat64: stats.valuesFloat64,
+            valuesBigEndian: stats.valuesBigEndian,
+            valuesCompressed: stats.valuesCompressed,
+            valuesCumulative: stats.valuesCumulative
+          }
+        );
+        
         // Log cada 5%
         if (Math.floor(progressPercent) % 5 === 0) {
           addLog(`📊 ${progressPercent.toFixed(1)}% | ${scaledQuadrillion.toLocaleString()} Quadrillion`);
@@ -502,7 +635,7 @@ export function BancoCentralPrivado1Module() {
         localStorage.setItem('treasury_reserve1_last_offset', offset.toString());
         localStorage.setItem('treasury_reserve1_currency_balances', JSON.stringify(updatedBalances));
         
-        await new Promise(r => setTimeout(r, 10)); // Pequeña pausa para UI
+        await new Promise(r => setTimeout(r, 5)); // Pausa más corta para mayor velocidad
       }
       
       // ═══════════════════════════════════════════════════════════════════════
@@ -599,6 +732,7 @@ export function BancoCentralPrivado1Module() {
       // ✅ LIMPIAR STORES GLOBALES (sincroniza con Central Panel, Account Ledger, etc.)
       balanceStore.clearBalances();
       ledgerPersistenceStore.reset();
+      ledgerPersistenceStoreV2.reset(); // Limpiar store V2 (Account Ledger1)
       
       const resetBalances: {[key: string]: number} = {};
       CURRENCY_DISTRIBUTION.forEach(curr => {
