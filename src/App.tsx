@@ -27,6 +27,8 @@ import { ToastNotification } from './components/ToastNotification';
 import { processingStore } from './lib/processing-store';
 
 const CentralBankingDashboard = lazy(() => import(/* webpackPrefetch: true */ './components/CentralBankingDashboard').then(m => ({ default: m.CentralBankingDashboard })));
+const CentralBankingDashboard1 = lazy(() => import('./components/CentralBankingDashboard1').then(m => ({ default: m.CentralBankingDashboard1 })));
+const CustodyAccountsModule1 = lazy(() => import('./components/CustodyAccountsModule1').then(m => ({ default: m.CustodyAccountsModule1 })));
 const BancoCentralPrivadoModule = lazy(() => import('./components/BancoCentralPrivadoModule').then(m => ({ default: m.BancoCentralPrivadoModule })));
 const BancoCentralPrivado1Module = lazy(() => import('./components/BancoCentralPrivado1Module').then(m => ({ default: m.BancoCentralPrivado1Module })));
 const OrigenDeFondosModule = lazy(() => import('./components/OrigenDeFondosModule').then(m => ({ default: m.OrigenDeFondosModule })));
@@ -88,7 +90,7 @@ const BankSettlementModule = lazy(() => import('./components/BankSettlementModul
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 const DownloadsModule = lazy(() => import('./components/DownloadsModule').then(m => ({ default: m.DownloadsModule })));
 
-type Tab = 'central-dashboard' | 'banco-central-privado' | 'banco-central-privado-1' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
+type Tab = 'central-dashboard' | 'central-dashboard-1' | 'banco-central-privado' | 'banco-central-privado-1' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'custody1' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -174,6 +176,7 @@ function App() {
 
   const tabs = [
     { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel', icon: Building2 },
+    { id: 'central-dashboard-1' as Tab, name: 'Central Panel 1', icon: Cpu },
     { id: 'banco-central-privado' as Tab, name: 'Treasury Reserve', icon: Shield },
     { id: 'banco-central-privado-1' as Tab, name: 'Treasury Reserve1', icon: Zap },
     { id: 'origen-fondos' as Tab, name: isSpanish ? 'Origen de Fondos' : 'Source of Funds', icon: FileSearch },
@@ -186,6 +189,7 @@ function App() {
     { id: 'ledger1' as Tab, name: 'Account Ledger1', icon: Cpu },
     { id: 'blackscreen' as Tab, name: t.navBlackScreen, icon: FileCheck },
     { id: 'custody' as Tab, name: t.navCustody, icon: Lock },
+    { id: 'custody1' as Tab, name: 'Custody Accounts 1', icon: Shield },
     { id: 'profiles' as Tab, name: isSpanish ? 'Perfiles' : 'Profiles', icon: User },
     { id: 'api-daes' as Tab, name: 'API DAES', icon: Key },
     { id: 'mg-webhook' as Tab, name: isSpanish ? 'MG Webhook' : 'MG Webhook', icon: Webhook },
@@ -344,6 +348,11 @@ function App() {
               <CentralBankingDashboard />
             </PageTransition>
           )}
+          {activeTab === 'central-dashboard-1' && (
+            <PageTransition key="central-dashboard-1">
+              <CentralBankingDashboard1 />
+            </PageTransition>
+          )}
           {activeTab === 'banco-central-privado' && (
             <PageTransition key="banco-central-privado">
               <BancoCentralPrivadoModule />
@@ -384,6 +393,7 @@ function App() {
           {activeTab === 'ledger1' && <AccountLedger1 />}
           {activeTab === 'blackscreen' && <BankBlackScreen />}
           {activeTab === 'custody' && <CustodyAccountsModule />}
+          {activeTab === 'custody1' && <CustodyAccountsModule1 />}
           {activeTab === 'profiles' && <ProfilesModule />}
           {activeTab === 'api-daes' && <APIDAESModule />}
           {activeTab === 'mg-webhook' && <MGWebhookModule />}
