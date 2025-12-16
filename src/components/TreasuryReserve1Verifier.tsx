@@ -503,7 +503,31 @@ export function TreasuryReserve1Verifier() {
       invalidData: isSpanish ? 'Datos inválidos' : 'Invalid data',
       analysisError: isSpanish ? 'Error en análisis' : 'Analysis error',
       errorCalculating: isSpanish ? 'Error calculando métricas de calidad' : 'Error calculating quality metrics',
-      noName: isSpanish ? 'Sin nombre' : 'No name'
+      noName: isSpanish ? 'Sin nombre' : 'No name',
+      systemInfo: isSpanish ? 'INFORMACIÓN DEL SISTEMA' : 'SYSTEM INFORMATION',
+      currencyLabel: isSpanish ? 'DIVISA' : 'CURRENCY',
+      noCode: isSpanish ? 'SIN CÓDIGO' : 'NO CODE',
+      level: isSpanish ? 'NIVEL' : 'LEVEL',
+      interpretation: isSpanish ? 'INTERPRETACIÓN' : 'INTERPRETATION',
+      highlyRealLabel: isSpanish ? 'ALTAMENTE REAL' : 'HIGHLY REAL',
+      moderatelyRealLabel: isSpanish ? 'MODERADAMENTE REAL' : 'MODERATELY REAL',
+      potentiallySimulatedLabel: isSpanish ? 'POTENCIALMENTE SIMULADO' : 'POTENTIALLY SIMULATED',
+      excellentLabel: isSpanish ? 'EXCELENTE (90-100%)' : 'EXCELLENT (90-100%)',
+      highLabel: isSpanish ? 'ALTA (80-89%)' : 'HIGH (80-89%)',
+      goodLabel: isSpanish ? 'BUENA (70-79%)' : 'GOOD (70-79%)',
+      moderateLabel: isSpanish ? 'MODERADA (60-69%)' : 'MODERATE (60-69%)',
+      lowLabel: isSpanish ? 'BAJA (<60%)' : 'LOW (<60%)',
+      algorithmDesc: isSpanish ? 'Análisis Multifacético de 10 Pruebas Independientes' : 'Multifaceted Analysis of 10 Independent Tests',
+      methodologyDescText: isSpanish ? 'Validación Cuántica y Cualitativa Combinada' : 'Combined Quantum and Qualitative Validation',
+      globalAuthenticityVerdict: isSpanish ? 'VEREDICTO GLOBAL DE AUTENTICIDAD' : 'GLOBAL AUTHENTICITY VERDICT',
+      verdict: isSpanish ? 'VEREDICTO' : 'VERDICT',
+      highlyRealText: isSpanish ? 'altamente reales' : 'highly real',
+      moderatelyRealText: isSpanish ? 'moderadamente reales' : 'moderately real',
+      potentiallySimulatedText: isSpanish ? 'potencialmente simuladas' : 'potentially simulated',
+      bankingSystemInfo: isSpanish ? 'INFORMACIÓN DEL SISTEMA BANCARIO' : 'BANKING SYSTEM INFORMATION',
+      securityProtocol: isSpanish ? 'Protocolo de seguridad de nivel bancario' : 'Bank-level security protocol',
+      cryptographicStandard: isSpanish ? 'Estándar criptográfico avanzado' : 'Advanced cryptographic standard',
+      reservesVerificationSystem: isSpanish ? 'SISTEMA DE VERIFICACIÓN DE RESERVAS 1.0' : 'RESERVES VERIFICATION SYSTEM 1.0'
     };
 
     let report = `================================================================================
@@ -519,7 +543,7 @@ TIMESTAMP UTC: ${reportTimestamp}
 ${t.reportId}: TR1V-${Date.now()}
 ${t.systemVersion}: 1.0.0
 
-INFORMACIÓN DEL SISTEMA / SYSTEM INFORMATION
+${t.systemInfo}
 ================================================================================
 SYSTEM: CoreBanking System
 DAES: Data and Exchange Settlement
@@ -571,15 +595,15 @@ ${t.classification}:
         console.warn('[TreasuryReserve1Verifier] Análisis inválido en índice', idx);
         return;
       }
-      const authenticityLevel = analysis.score >= 80 ? 'ALTAMENTE REAL' :
-                               analysis.score >= 60 ? 'MODERADAMENTE REAL' : 'POTENCIALMENTE SIMULADO';
+      const authenticityLevel = analysis.score >= 80 ? t.highlyRealLabel :
+                               analysis.score >= 60 ? t.moderatelyRealLabel : t.potentiallySimulatedLabel;
 
-      const authenticityLevelText = analysis.score >= 80 ? (isSpanish ? 'ALTAMENTE REAL' : 'HIGHLY REAL') :
-                                   analysis.score >= 60 ? (isSpanish ? 'MODERADAMENTE REAL' : 'MODERATELY REAL') : 
-                                   (isSpanish ? 'POTENCIALMENTE SIMULADO' : 'POTENTIALLY SIMULATED');
+      const authenticityLevelText = analysis.score >= 80 ? t.highlyRealLabel :
+                                   analysis.score >= 60 ? t.moderatelyRealLabel : 
+                                   t.potentiallySimulatedLabel;
 
       report += `
-${isSpanish ? 'DIVISA' : 'CURRENCY'} ${idx + 1}: ${currency.currency || (isSpanish ? 'SIN CÓDIGO' : 'NO CODE')}
+${t.currencyLabel} ${idx + 1}: ${currency.currency || t.noCode}
 ================================================================================
 ${t.basicInfo}
 --------------------------------------------------------------------------------
@@ -629,16 +653,16 @@ ${t.scoreInterpretation}
 ${t.scoreObtained}: ${analysis.score}/100 ${t.points}
 `;
       if (analysis.score >= 80) {
-        report += `${isSpanish ? 'NIVEL' : 'LEVEL'}: ${t.excellent}
-${isSpanish ? 'INTERPRETACIÓN' : 'INTERPRETATION'}: ${t.excellentDesc}
+        report += `${t.level}: ${t.excellent}
+${t.interpretation}: ${t.excellentDesc}
 `;
       } else if (analysis.score >= 60) {
-        report += `${isSpanish ? 'NIVEL' : 'LEVEL'}: ${t.good}
-${isSpanish ? 'INTERPRETACIÓN' : 'INTERPRETATION'}: ${t.goodDesc}
+        report += `${t.level}: ${t.good}
+${t.interpretation}: ${t.goodDesc}
 `;
       } else {
-        report += `${isSpanish ? 'NIVEL' : 'LEVEL'}: ${t.low}
-${isSpanish ? 'INTERPRETACIÓN' : 'INTERPRETATION'}: ${t.lowDesc}
+        report += `${t.level}: ${t.low}
+${t.interpretation}: ${t.lowDesc}
 `;
       }
 
@@ -734,11 +758,11 @@ ${t.confidenceByCurrency}
     if (balances.length > 0 && allAnalysis.length > 0) {
       balances.forEach((currency, idx) => {
         const analysis = allAnalysis[idx];
-        const confidenceLevel = analysis.score >= 90 ? (isSpanish ? 'EXCELENTE (90-100%)' : 'EXCELLENT (90-100%)') :
-                               analysis.score >= 80 ? (isSpanish ? 'ALTA (80-89%)' : 'HIGH (80-89%)') :
-                               analysis.score >= 70 ? (isSpanish ? 'BUENA (70-79%)' : 'GOOD (70-79%)') :
-                               analysis.score >= 60 ? (isSpanish ? 'MODERADA (60-69%)' : 'MODERATE (60-69%)') : 
-                               (isSpanish ? 'BAJA (<60%)' : 'LOW (<60%)');
+        const confidenceLevel = analysis.score >= 90 ? t.excellentLabel :
+                               analysis.score >= 80 ? t.highLabel :
+                               analysis.score >= 70 ? t.goodLabel :
+                               analysis.score >= 60 ? t.moderateLabel : 
+                               t.lowLabel;
         report += `${currency.currency}: ${analysis.score}% - ${confidenceLevel}
 `;
       });
@@ -758,8 +782,8 @@ ${t.confidenceByCurrency}
 ${t.verificationFramework}
 --------------------------------------------------------------------------------
 ${t.system}: Treasury Reserve1 Verifier v1.0.0
-${t.algorithm}: ${isSpanish ? 'Análisis Multifacético de 10 Pruebas Independientes' : 'Multifaceted Analysis of 10 Independent Tests'}
-${t.methodologyDesc}: ${isSpanish ? 'Validación Cuántica y Cualitativa Combinada' : 'Combined Quantum and Qualitative Validation'}
+${t.algorithm}: ${t.algorithmDesc}
+${t.methodologyDesc}: ${t.methodologyDescText}
 
 ${t.testsPerCurrency}
 ================================================================================
@@ -797,18 +821,18 @@ ${t.testsPerCurrency}
                     ${t.auditConclusions}
 ================================================================================
 
-${isSpanish ? 'VEREDICTO GLOBAL DE AUTENTICIDAD' : 'GLOBAL AUTHENTICITY VERDICT'}
+${t.globalAuthenticityVerdict}
 ================================================================================
 `;
 
     const currentConfidence = confidence || 0;
     if (currentConfidence >= 80) {
-      report += `${isSpanish ? 'VEREDICTO' : 'VERDICT'}: ${t.confirmed}
+      report += `${t.verdict}: ${t.confirmed}
 --------------------------------------------------------------------------------
 ${t.confirmedDesc}
 
 ${t.mainEvidence}:
-• ${highlyRealCount}/${balances.length || 0} ${t.classified} ${isSpanish ? 'altamente reales' : 'highly real'}
+• ${highlyRealCount}/${balances.length || 0} ${t.classified} ${t.highlyRealText}
 • ${t.perfectConsistency}
 • ${t.authenticPatterns}
 • ${t.realActivity}
@@ -816,23 +840,23 @@ ${t.mainEvidence}:
 
 `;
     } else if (currentConfidence >= 60) {
-      report += `${isSpanish ? 'VEREDICTO' : 'VERDICT'}: ${t.moderate}
+      report += `${t.verdict}: ${t.moderate}
 --------------------------------------------------------------------------------
 ${t.moderateDesc} (${currentConfidence.toFixed(1)}%).
 
 ${t.observations}:
-• ${moderatelyRealCount}/${balances.length || 0} ${t.classified} ${isSpanish ? 'moderadamente reales' : 'moderately real'}
+• ${moderatelyRealCount}/${balances.length || 0} ${t.classified} ${t.moderatelyRealText}
 • ${t.inconsistencies}
 • ${t.complementary}
 
 `;
     } else {
-      report += `${isSpanish ? 'VEREDICTO' : 'VERDICT'}: ${t.lowAuth}
+      report += `${t.verdict}: ${t.lowAuth}
 --------------------------------------------------------------------------------
 ${t.lowAuthDesc}
 
 ${t.concerns}:
-• ${potentiallySimulatedCount}/${balances.length || 0} ${t.classified} ${isSpanish ? 'potencialmente simuladas' : 'potentially simulated'}
+• ${potentiallySimulatedCount}/${balances.length || 0} ${t.classified} ${t.potentiallySimulatedText}
 • ${t.multipleFailed}
 • ${t.inconsistentPatterns}
 
@@ -851,15 +875,15 @@ ${t.browser}: ${typeof navigator !== 'undefined' && navigator.userAgent ? naviga
 ${t.executionTimestamp}: ${Date.now()}
 ${t.timezone}: ${typeof Intl !== 'undefined' && Intl.DateTimeFormat ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'N/A'}
 
-${isSpanish ? 'INFORMACIÓN DEL SISTEMA BANCARIO' : 'BANKING SYSTEM INFORMATION'}
+${t.bankingSystemInfo}
 --------------------------------------------------------------------------------
 SYSTEM: CoreBanking System
 DAES: Data and Exchange Settlement
 ENCRYPTION: AES-256-GCM
 INSTITUTION: Digital Commercial Bank Ltd
 AUTHENTICATION: HMAC-SHA256
-SECURITY PROTOCOL: ${isSpanish ? 'Protocolo de seguridad de nivel bancario' : 'Bank-level security protocol'}
-CRYPTOGRAPHIC STANDARD: ${isSpanish ? 'Estándar criptográfico avanzado' : 'Advanced cryptographic standard'}
+SECURITY PROTOCOL: ${t.securityProtocol}
+CRYPTOGRAPHIC STANDARD: ${t.cryptographicStandard}
 
 ${t.analysisParams}
 --------------------------------------------------------------------------------
@@ -871,7 +895,7 @@ ${t.confidenceThreshold}: ${t.thresholdValue}
 
 ================================================================================
                     DIGITAL COMMERCIAL BANK LTD
-                      ${isSpanish ? 'SISTEMA DE VERIFICACIÓN DE RESERVAS 1.0' : 'RESERVES VERIFICATION SYSTEM 1.0'}
+                      ${t.reservesVerificationSystem}
 ================================================================================
 
 ${t.reportGenerated}
