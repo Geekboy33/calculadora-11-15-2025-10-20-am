@@ -25,6 +25,8 @@ const BLOCKCHAINS = [
 
 interface CustodyAccount1 {
   id: string;
+  accountName: string;
+  accountType: 'blockchain' | 'banking';
   currency: string;
   balance: number;
   reservedBalance: number;
@@ -55,6 +57,7 @@ export function CustodyAccountsModule1() {
   const isSpanish = language === 'es';
   
   const [accounts, setAccounts] = useState<CustodyAccount1[]>([]);
+  const [ledgerBalances, setLedgerBalances] = useState<LedgerBalanceV2[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<CustodyAccount1 | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -64,6 +67,10 @@ export function CustodyAccountsModule1() {
   const [showReserveModal, setShowReserveModal] = useState(false);
   
   const [formData, setFormData] = useState({
+    accountType: 'blockchain' as 'blockchain' | 'banking',
+    accountName: '',
+    currency: 'USD',
+    amount: 0,
     blockchain: 'Ethereum',
     tokenSymbol: 'VUSD',
     fundDenomination: 'M1' as 'M1' | 'M2',
@@ -75,12 +82,14 @@ export function CustodyAccountsModule1() {
   useEffect(() => {
     const state = ledgerPersistenceStoreV2.getState();
     updateAccountsFromBalances(state.balances);
+    setLedgerBalances(state.balances);
     setProgress(state.progress.percentage);
     setCurrentQuadrillion(state.progress.currentQuadrillion);
     setIsProcessing(state.isProcessing);
 
     const unsubscribe = ledgerPersistenceStoreV2.subscribe((newState) => {
       updateAccountsFromBalances(newState.balances);
+      setLedgerBalances(newState.balances);
       setProgress(newState.progress.percentage);
       setCurrentQuadrillion(newState.progress.currentQuadrillion);
       setIsProcessing(newState.isProcessing);
@@ -116,14 +125,31 @@ export function CustodyAccountsModule1() {
   };
 
   const handleCreateAccount = () => {
+    if (!formData.accountName || formData.amount <= 0) {
+      alert(isSpanish ? 'Completa nombre y monto' : 'Complete name and amount');
+      return;
+    }
+
+    const balanceCurrency = ledgerBalances.find(b => b.currency === formData.currency);
+    if (!balanceCurrency) {
+      alert(isSpanish ? 'No hay balance para esa divisa' : 'No balance for that currency');
+      return;
+    }
+    if (formData.amount > balanceCurrency.balance) {
+      alert(isSpanish ? 'Monto supera el balance disponible en Treasury1' : 'Amount exceeds available balance from Treasury1');
+      return;
+    }
+
     const newAccount: CustodyAccount1 = {
       id: `CUSTODY1-${Date.now()}`,
-      currency: 'USD', // Por defecto USD
-      balance: 0,
+      accountName: formData.accountName,
+      accountType: formData.accountType,
+      currency: formData.currency,
+      balance: formData.amount,
       reservedBalance: 0,
-      availableBalance: 0,
+      availableBalance: formData.amount,
       blockchain: formData.blockchain,
-      tokenSymbol: formData.tokenSymbol,
+      tokenSymbol: formData.tokenSymbol || `${formData.currency}T`,
       fundDenomination: formData.fundDenomination,
       status: 'active',
       createdAt: new Date().toISOString(),
@@ -138,6 +164,10 @@ export function CustodyAccountsModule1() {
     
     // Reiniciar form
     setFormData({
+      accountType: 'blockchain',
+      accountName: '',
+      currency: 'USD',
+      amount: 0,
       blockchain: 'Ethereum',
       tokenSymbol: 'VUSD',
       fundDenomination: 'M1',
@@ -342,8 +372,8 @@ export function CustodyAccountsModule1() {
                     }
                   </div>
                   <div>
-                    <p className="font-bold">{account.id}</p>
-                    <p className="text-sm text-slate-400">{account.blockchain} • {account.tokenSymbol}</p>
+                  <p className="font-bold">{account.accountName || account.id}</p>
+                  <p className="text-xs text-slate-400">{account.accountType.toUpperCase()} • {account.currency} • {account.blockchain} • {account.tokenSymbol}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -432,6 +462,66 @@ export function CustodyAccountsModule1() {
             <h3 className="text-xl font-bold mb-4">{isSpanish ? 'Crear Cuenta Custodio' : 'Create Custody Account'}</h3>
             
             <div className="space-y-4">
+              {/* Tipo de cuenta */}
+              <div>
+                <label className="block text-sm text-purple-300 mb-1">{isSpanish ? 'Tipo de Cuenta' : 'Account Type'}</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setFormData({...formData, accountType: 'blockchain'})}
+                    className={`p-3 rounded-lg border ${formData.accountType === 'blockchain' ? 'border-cyan-400 bg-cyan-500/20 text-cyan-200' : 'border-slate-700 bg-slate-800'}`}
+                  >
+                    🌐 {isSpanish ? 'Blockchain' : 'Blockchain'}
+                  </button>
+                  <button
+                    onClick={() => setFormData({...formData, accountType: 'banking'})}
+                    className={`p-3 rounded-lg border ${formData.accountType === 'banking' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-200' : 'border-slate-700 bg-slate-800'}`}
+                  >
+                    🏦 {isSpanish ? 'Bancaria' : 'Banking'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Nombre de cuenta */}
+              <div>
+                <label className="block text-sm text-purple-300 mb-1">{isSpanish ? 'Nombre de la Cuenta' : 'Account Name'}</label>
+                <input
+                  type="text"
+                  value={formData.accountName}
+                  onChange={(e) => setFormData({...formData, accountName: e.target.value})}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                  placeholder={isSpanish ? 'Ej: Reserva USD Stablecoin' : 'Ex: USD Stablecoin Reserve'}
+                />
+              </div>
+
+              {/* Moneda y monto */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm text-purple-300 mb-1">{isSpanish ? 'Moneda' : 'Currency'}</label>
+                  <select
+                    value={formData.currency}
+                    onChange={(e) => setFormData({...formData, currency: e.target.value})}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                  >
+                    {ledgerBalances.map(b => (
+                      <option key={b.currency} value={b.currency}>
+                        {b.currency} • {isSpanish ? 'Balance' : 'Balance'}: {BigInt(Math.floor(b.balance)).toLocaleString()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-purple-300 mb-1">{isSpanish ? 'Monto' : 'Amount'}</label>
+                  <input
+                    type="number"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({...formData, amount: Number(e.target.value)})}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                    placeholder="0.00"
+                    min={0}
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm text-purple-300 mb-1">Blockchain</label>
                 <select
