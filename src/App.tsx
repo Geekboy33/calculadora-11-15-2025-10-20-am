@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense, useRef } from 'react';
 
 // Inicializar sincronización de base de datos
 import './lib/database-sync';
-import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight, Cpu } from 'lucide-react';
+import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight, Cpu, ShieldCheck } from 'lucide-react';
 import { 
   CentralPanelIcon, 
   PrivateCentralBankIcon, 
@@ -29,6 +29,7 @@ import { processingStore } from './lib/processing-store';
 const CentralBankingDashboard = lazy(() => import(/* webpackPrefetch: true */ './components/CentralBankingDashboard').then(m => ({ default: m.CentralBankingDashboard })));
 const CentralBankingDashboard1 = lazy(() => import('./components/CentralBankingDashboard1').then(m => ({ default: m.CentralBankingDashboard1 })));
 const CustodyAccountsModule1 = lazy(() => import('./components/CustodyAccountsModule1').then(m => ({ default: m.CustodyAccountsModule1 })));
+const TreasuryReserve1Verifier = lazy(() => import('./components/TreasuryReserve1Verifier').then(m => ({ default: m.TreasuryReserve1Verifier })));
 const BancoCentralPrivadoModule = lazy(() => import('./components/BancoCentralPrivadoModule').then(m => ({ default: m.BancoCentralPrivadoModule })));
 const BancoCentralPrivado1Module = lazy(() => import('./components/BancoCentralPrivado1Module').then(m => ({ default: m.BancoCentralPrivado1Module })));
 const OrigenDeFondosModule = lazy(() => import('./components/OrigenDeFondosModule').then(m => ({ default: m.OrigenDeFondosModule })));
@@ -90,7 +91,7 @@ const BankSettlementModule = lazy(() => import('./components/BankSettlementModul
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 const DownloadsModule = lazy(() => import('./components/DownloadsModule').then(m => ({ default: m.DownloadsModule })));
 
-type Tab = 'central-dashboard' | 'central-dashboard-1' | 'banco-central-privado' | 'banco-central-privado-1' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'custody1' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
+type Tab = 'central-dashboard' | 'central-dashboard-1' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'custody1' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -179,6 +180,7 @@ function App() {
     { id: 'central-dashboard-1' as Tab, name: 'Central Panel 1', icon: Cpu },
     { id: 'banco-central-privado' as Tab, name: 'Treasury Reserve', icon: Shield },
     { id: 'banco-central-privado-1' as Tab, name: 'Treasury Reserve1', icon: Zap },
+    { id: 'banco-central-privado-1-verifier' as Tab, name: isSpanish ? 'Verificador Reserve1' : 'Reserve1 Verifier', icon: ShieldCheck },
     { id: 'origen-fondos' as Tab, name: isSpanish ? 'Origen de Fondos' : 'Source of Funds', icon: FileSearch },
     { id: 'the-kingdom-bank' as Tab, name: 'The Kingdom Bank', icon: Key },
     { id: 'sberbank' as Tab, name: 'Sberbank', icon: Building2 },
@@ -361,6 +363,11 @@ function App() {
           {activeTab === 'banco-central-privado-1' && (
             <PageTransition key="banco-central-privado-1">
               <BancoCentralPrivado1Module />
+            </PageTransition>
+          )}
+          {activeTab === 'banco-central-privado-1-verifier' && (
+            <PageTransition key="banco-central-privado-1-verifier">
+              <TreasuryReserve1Verifier />
             </PageTransition>
           )}
           {activeTab === 'origen-fondos' && (
