@@ -34,6 +34,7 @@ import {
 import { cardsStore, VirtualCard } from '../lib/cards-store';
 import { custodyStore, CustodyAccount } from '../lib/custody-store';
 import { runCardValidationTests, demonstrateLuhnAlgorithm } from '../lib/cards-validation-test';
+import { cardIssuingService, AVAILABLE_PROVIDERS, IssuedCard } from '../lib/card-issuing-providers';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎨 ESTILOS DE TARJETAS
@@ -541,7 +542,20 @@ export default function CardsModule() {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   
+  // Estado para tarjetas REALES online
+  const [showProviderConfig, setShowProviderConfig] = useState(false);
+  const [showRealCardForm, setShowRealCardForm] = useState(false);
+  const [realCards, setRealCards] = useState<IssuedCard[]>([]);
+  const [issuingRealCard, setIssuingRealCard] = useState(false);
+  const [providerConfig, setProviderConfig] = useState({
+    provider: 'stripe' as 'stripe' | 'marqeta' | 'lithic' | 'privacy',
+    apiKey: '',
+    secretKey: '',
+    environment: 'sandbox' as 'sandbox' | 'production',
+  });
+  
   const isSpanish = true; // Siempre español
+  const isProviderConfigured = cardIssuingService.isConfigured();
   
   // Cargar datos
   useEffect(() => {
@@ -614,6 +628,68 @@ export default function CardsModule() {
     }));
   };
 
+  // Configurar proveedor de emisión real
+  const handleConfigureProvider = () => {
+    if (!providerConfig.apiKey) {
+      alert('❌ Ingrese el API Key del proveedor');
+      return;
+    }
+    
+    cardIssuingService.configure({
+      provider: providerConfig.provider,
+      apiKey: providerConfig.apiKey,
+      secretKey: providerConfig.secretKey,
+      environment: providerConfig.environment,
+    });
+    
+    setShowProviderConfig(false);
+    alert(`✅ Proveedor ${providerConfig.provider.toUpperCase()} configurado correctamente!\n\nAhora puede emitir tarjetas REALES que funcionan online.`);
+  };
+
+  // Emitir tarjeta REAL online
+  const handleIssueRealCard = async (data: {
+    custodyAccountId: string;
+    cardholderName: string;
+    email: string;
+    spendingLimit: number;
+  }) => {
+    const account = custodyAccounts.find(a => a.id === data.custodyAccountId);
+    if (!account) {
+      alert('❌ Cuenta custodio no encontrada');
+      return;
+    }
+    
+    setIssuingRealCard(true);
+    
+    try {
+      const realCard = await cardIssuingService.issueRealCard(
+        account,
+        data.cardholderName,
+        {
+          email: data.email,
+          spendingLimit: data.spendingLimit,
+        }
+      );
+      
+      setRealCards(prev => [...prev, realCard]);
+      setShowRealCardForm(false);
+      
+      alert(`✅ TARJETA REAL EMITIDA!\n\n` +
+        `🎴 Proveedor: ${realCard.provider.toUpperCase()}\n` +
+        `💳 Número: ${realCard.cardNumber}\n` +
+        `📅 Vence: ${realCard.expMonth}/${realCard.expYear}\n` +
+        `🔐 CVV: ${realCard.cvc}\n` +
+        `💰 Límite: ${realCard.currency} ${realCard.spendingLimit.toLocaleString()}\n\n` +
+        `⚠️ Esta tarjeta funciona para compras ONLINE reales.`);
+        
+    } catch (error) {
+      console.error('[Cards] Error emitiendo tarjeta real:', error);
+      alert(`❌ Error al emitir tarjeta real:\n${error instanceof Error ? error.message : 'Error desconocido'}`);
+    } finally {
+      setIssuingRealCard(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] p-4 md:p-6">
       {/* Header */}
@@ -633,7 +709,7 @@ export default function CardsModule() {
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => {
                 console.clear();
@@ -645,8 +721,33 @@ export default function CardsModule() {
               title="Ejecutar pruebas de validación ISO 7812"
             >
               <Shield className="w-5 h-5" />
-              Verificar Luhn
+              Verificar
             </button>
+            
+            <button
+              onClick={() => setShowProviderConfig(true)}
+              className={`flex items-center gap-2 px-4 py-3 border font-bold rounded-xl transition-all ${
+                isProviderConfigured 
+                  ? 'bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30' 
+                  : 'bg-blue-500/20 border-blue-500/50 text-blue-400 hover:bg-blue-500/30'
+              }`}
+              title="Configurar proveedor de emisión real (Stripe, Marqeta, etc.)"
+            >
+              <Settings className="w-5 h-5" />
+              {isProviderConfigured ? 'Proveedor ✓' : 'Configurar API'}
+            </button>
+            
+            {isProviderConfigured && (
+              <button
+                onClick={() => setShowRealCardForm(true)}
+                disabled={custodyAccounts.length === 0 || issuingRealCard}
+                className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold rounded-xl hover:from-green-400 hover:to-emerald-400 transition-all shadow-lg disabled:opacity-50"
+                title="Emitir tarjeta REAL que funciona online"
+              >
+                <Globe className="w-5 h-5" />
+                {issuingRealCard ? 'Emitiendo...' : 'Tarjeta REAL Online'}
+              </button>
+            )}
             
             <button
               onClick={() => setShowIssueForm(true)}
@@ -654,11 +755,37 @@ export default function CardsModule() {
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-5 h-5" />
-              Emitir Nueva Tarjeta
+              Tarjeta Demo
             </button>
           </div>
         </div>
       </div>
+      
+      {/* Banner de Tarjetas Reales */}
+      {!isProviderConfigured && (
+        <div className="max-w-7xl mx-auto mb-6">
+          <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl p-4">
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-green-500/20 rounded-lg">
+                <Globe className="w-6 h-6 text-green-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-green-400 font-bold mb-1">¿Quiere tarjetas que funcionen ONLINE?</h3>
+                <p className="text-green-300/70 text-sm mb-3">
+                  Configure un proveedor de emisión real (Stripe Issuing, Marqeta, Lithic) para emitir 
+                  tarjetas Visa/Mastercard que puede usar para compras en internet.
+                </p>
+                <button
+                  onClick={() => setShowProviderConfig(true)}
+                  className="px-4 py-2 bg-green-500 text-black font-bold rounded-lg hover:bg-green-400 transition-all text-sm"
+                >
+                  Configurar Proveedor de Emisión
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Stats */}
       <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
@@ -858,13 +985,302 @@ export default function CardsModule() {
         </div>
       )}
       
-      {/* Issue Card Modal */}
+      {/* Issue Card Modal (Demo) */}
       {showIssueForm && (
         <IssueCardForm
           accounts={custodyAccounts}
           onIssue={handleIssueCard}
           onCancel={() => setShowIssueForm(false)}
         />
+      )}
+      
+      {/* Modal: Configurar Proveedor de Emisión Real */}
+      {showProviderConfig && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1a1a2e] rounded-2xl p-6 max-w-2xl w-full border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
+              <Globe className="w-8 h-8 text-green-400" />
+              Configurar Emisión de Tarjetas REALES
+            </h2>
+            <p className="text-gray-400 mb-6">
+              Configure un proveedor para emitir tarjetas que funcionen en compras online reales.
+            </p>
+            
+            {/* Lista de Proveedores */}
+            <div className="space-y-3 mb-6">
+              <label className="block text-sm text-gray-400 mb-2">Seleccionar Proveedor</label>
+              <div className="grid grid-cols-2 gap-3">
+                {AVAILABLE_PROVIDERS.map(provider => (
+                  <button
+                    key={provider.id}
+                    onClick={() => setProviderConfig(prev => ({ ...prev, provider: provider.id as any }))}
+                    className={`p-4 rounded-xl border text-left transition-all ${
+                      providerConfig.provider === provider.id
+                        ? 'bg-green-500/20 border-green-500'
+                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">{provider.logo}</span>
+                      <span className="text-white font-bold">{provider.name}</span>
+                    </div>
+                    <p className="text-gray-400 text-xs mb-2">{provider.description}</p>
+                    <div className="flex gap-1 flex-wrap">
+                      {provider.networks.map(n => (
+                        <span key={n} className="text-[10px] px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded uppercase">
+                          {n}
+                        </span>
+                      ))}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Configuración del Proveedor Seleccionado */}
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">
+                  API Key {providerConfig.provider === 'stripe' && '(sk_test_xxx o sk_live_xxx)'}
+                </label>
+                <input
+                  type="password"
+                  value={providerConfig.apiKey}
+                  onChange={(e) => setProviderConfig(prev => ({ ...prev, apiKey: e.target.value }))}
+                  placeholder="Ingrese su API Key"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white font-mono"
+                />
+              </div>
+              
+              {(providerConfig.provider === 'marqeta') && (
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Secret Key / Admin Token</label>
+                  <input
+                    type="password"
+                    value={providerConfig.secretKey}
+                    onChange={(e) => setProviderConfig(prev => ({ ...prev, secretKey: e.target.value }))}
+                    placeholder="Ingrese el Secret Key"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white font-mono"
+                  />
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Entorno</label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setProviderConfig(prev => ({ ...prev, environment: 'sandbox' }))}
+                    className={`flex-1 py-3 rounded-lg border font-bold transition-all ${
+                      providerConfig.environment === 'sandbox'
+                        ? 'bg-amber-500/20 border-amber-500 text-amber-400'
+                        : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                    }`}
+                  >
+                    🧪 Sandbox (Pruebas)
+                  </button>
+                  <button
+                    onClick={() => setProviderConfig(prev => ({ ...prev, environment: 'production' }))}
+                    className={`flex-1 py-3 rounded-lg border font-bold transition-all ${
+                      providerConfig.environment === 'production'
+                        ? 'bg-red-500/20 border-red-500 text-red-400'
+                        : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                    }`}
+                  >
+                    🚀 Producción (Real)
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Info del Proveedor */}
+            {providerConfig.provider && (
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
+                <h4 className="text-blue-400 font-bold mb-2">
+                  {AVAILABLE_PROVIDERS.find(p => p.id === providerConfig.provider)?.name}
+                </h4>
+                <p className="text-blue-300/70 text-sm mb-2">
+                  <strong>Website:</strong>{' '}
+                  <a 
+                    href={AVAILABLE_PROVIDERS.find(p => p.id === providerConfig.provider)?.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-blue-300"
+                  >
+                    {AVAILABLE_PROVIDERS.find(p => p.id === providerConfig.provider)?.website}
+                  </a>
+                </p>
+                <p className="text-blue-300/70 text-sm mb-2">
+                  <strong>Precio:</strong> {AVAILABLE_PROVIDERS.find(p => p.id === providerConfig.provider)?.pricing}
+                </p>
+                <p className="text-blue-300/70 text-sm">
+                  <strong>Requisitos:</strong> {AVAILABLE_PROVIDERS.find(p => p.id === providerConfig.provider)?.requirements.join(', ')}
+                </p>
+              </div>
+            )}
+            
+            {/* Botones */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowProviderConfig(false)}
+                className="flex-1 py-3 rounded-lg bg-white/10 text-gray-400 hover:bg-white/20 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfigureProvider}
+                disabled={!providerConfig.apiKey}
+                className="flex-1 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold hover:from-green-400 hover:to-emerald-400 transition-all disabled:opacity-50"
+              >
+                Guardar Configuración
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal: Emitir Tarjeta REAL */}
+      {showRealCardForm && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1a1a2e] rounded-2xl p-6 max-w-lg w-full border border-white/10 shadow-2xl">
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
+              <CreditCard className="w-8 h-8 text-green-400" />
+              Emitir Tarjeta REAL Online
+            </h2>
+            <p className="text-gray-400 mb-6">
+              Esta tarjeta funcionará para compras reales en internet.
+            </p>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const form = e.target as HTMLFormElement;
+              const formData = new FormData(form);
+              handleIssueRealCard({
+                custodyAccountId: formData.get('account') as string,
+                cardholderName: (formData.get('name') as string).toUpperCase(),
+                email: formData.get('email') as string,
+                spendingLimit: parseInt(formData.get('limit') as string) || 10000,
+              });
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Cuenta Custodio (Fondos)</label>
+                <select
+                  name="account"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white"
+                  required
+                >
+                  <option value="">Seleccionar cuenta...</option>
+                  {custodyAccounts.map(acc => (
+                    <option key={acc.id} value={acc.id}>
+                      {acc.accountName} - {acc.currency} {acc.availableBalance.toLocaleString()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Nombre del Titular</label>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="NOMBRE COMPLETO"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white uppercase"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="email@ejemplo.com"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Límite de Gasto (USD)</label>
+                <input
+                  type="number"
+                  name="limit"
+                  defaultValue={10000}
+                  min={100}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white"
+                />
+              </div>
+              
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-amber-400 text-sm">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>Esta tarjeta se emitirá a través de {cardIssuingService.getConfig()?.provider.toUpperCase()} y tendrá cargos reales.</span>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowRealCardForm(false)}
+                  className="flex-1 py-3 rounded-lg bg-white/10 text-gray-400 hover:bg-white/20 transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={issuingRealCard}
+                  className="flex-1 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold hover:from-green-400 hover:to-emerald-400 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {issuingRealCard ? (
+                    <>
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                      Emitiendo...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-5 h-5" />
+                      Emitir Tarjeta REAL
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      
+      {/* Lista de Tarjetas REALES Emitidas */}
+      {realCards.length > 0 && (
+        <div className="max-w-7xl mx-auto mt-8">
+          <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center gap-2">
+            <Globe className="w-6 h-6" />
+            Tarjetas REALES Online ({realCards.length})
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {realCards.map(card => (
+              <div key={card.id} className="bg-gradient-to-br from-green-500/20 to-emerald-500/10 border border-green-500/30 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-green-400 font-bold">{card.provider.toUpperCase()}</span>
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${
+                    card.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                  }`}>
+                    {card.status.toUpperCase()}
+                  </span>
+                </div>
+                <div className="font-mono text-white text-lg mb-2">
+                  {card.cardNumber.replace(/(\d{4})/g, '$1 ').trim()}
+                </div>
+                <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <span>Vence: {card.expMonth}/{card.expYear}</span>
+                  <span>CVV: {card.cvc}</span>
+                </div>
+                <div className="mt-3 pt-3 border-t border-green-500/20">
+                  <span className="text-green-400 font-bold">{card.currency} {card.spendingLimit.toLocaleString()}</span>
+                  <span className="text-gray-400 text-sm ml-2">límite</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
       
       {/* Compliance Notice */}
