@@ -248,6 +248,576 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
     }
   };
 
+  /**
+   * PDF3 - SWIFT MT103/202 COV Professional Format
+   * Genera documento con formato de terminal SWIFT profesional
+   */
+  const generatePDF3SwiftContent = () => {
+    if (!blackScreenData) return '';
+    
+    const date = new Date();
+    const formattedDate = date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const formattedTime = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    // Generate unique identifiers
+    const sessionNumber = Math.floor(Math.random() * 9999).toString().padStart(4, '0');
+    const messageNumber = Math.floor(Math.random() * 999999).toString().padStart(6, '0');
+    const transactionId = `${date.getFullYear().toString().slice(-2)}0x${Math.floor(Math.random() * 9999999999999999).toString().padStart(16, '0')}`;
+    const transmissionRef = `DAES${Math.floor(Math.random() * 99999999999999).toString().padStart(14, '0')}`;
+    const transactionIdNum = Math.floor(Math.random() * 999999999999999999).toString().padStart(18, '0');
+    const telexCode = Math.floor(Math.random() * 999999).toString().padStart(6, '0');
+    const branchNetwork = `00${Math.floor(Math.random() * 999999).toString().padStart(6, '0')}-${blackScreenData.swiftCode}-${Math.floor(Math.random() * 999999).toString().padStart(6, '0')}`;
+    const inputRef = `${date.toISOString().slice(2, 10).replace(/-/g, '')}-${blackScreenData.swiftCode}-${Math.floor(Math.random() * 9999999999).toString().padStart(10, '0')}`;
+    
+    // SSL Certificate simulation
+    const certHash = Array.from({length: 64}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
+    const masterKey = Array.from({length: 32}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
+    const sessionId = Array.from({length: 24}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
+    
+    return `>>> Connected
+
+>>> Identification data
+
+>>> Waiting
+
+>>> MTT: ${formattedTime}
+
+>>> ${formattedDate}
+
+>>> ${sessionNumber}xxxrt${messageNumber.slice(0, 3)}
+
+>>> ${Math.floor(Math.random() * 9999)} bmcd pt
+
+>>> ${telexCode} dbf-d
+
+>>> Telex code: ${telexCode}
+
+>>> Sending date: ${date.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}
+
+>>> Input time: ${formattedTime}
+
+Privat Server IP: ${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}
+
+DNS server Domain: ${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}
+
+>>> connected
+
+(digitalCommercialBankSAS${sessionNumber})
+
+SIGNS -AUTHORIZATION PIN: ${Math.floor(Math.random() * 99999).toString().padStart(5, '0')}S SSN: ${Math.floor(Math.random() * 9999999).toString().padStart(7, '0')}
+
+SEARCHING [REF. <${transactionIdNum}>]
+
+Session Number: ${sessionNumber}
+
+Message Number: ${messageNumber}
+
+DIGITAL COMMERCIAL BANK LTD - DAES 256
+
+TRANSACTION ID: ${transactionId}
+
+Primary Certification Authority - MT 103/202 COV FTP Server ${Math.floor(Math.random() * 999999)}/AE/DCB${Math.floor(Math.random() * 9999)}
+
+CONNECTED (${Math.floor(Math.random() * 99999999).toString().padStart(8, '0')})
+
+SSL handshake has read 37814 bytes and written 38067 bytes
+
+Protocol: TLS v1.2
+
+Session-ID : ${sessionId}
+
+Master-Key: ${masterKey}
+
+═══════════════════════════════════════════════════════════════════════════════
+                    SWIFT MT103/202 COV - TREASURY TRANSFER CONFIRMATION
+═══════════════════════════════════════════════════════════════════════════════
+
+|  RCVD++ NETWORK DELIVERY STATUS    | : NETWORK                                |
+|  RCVD++ BRANCH NETWORK             | : ${branchNetwork}                       |
+|  RCVD++ MESSAGE INPUT REFERENCE    | : ${inputRef}                            |
+|  RCVD++ TRANSACTION ID             | : ${transactionId}                       |
+|  RCVD++ CONTRACT ID                | : TREASURY                               |
+|  RCVD++ ISIN                       | : ${blackScreenData.currency}${Math.floor(Math.random() * 9999999999).toString().padStart(10, '0')} |
+|  SESSION ${date.getFullYear()} SEQUENCE       | : ${date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase()} TREASURY |
+
+|  RCVD++ VALUE DATE                 | : ${date.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()} |
+|  RCVD++ VALUE AMOUNT               | : ${formatCurrency(blackScreenData.totalLiquid, blackScreenData.currency)} |
+
+---Message Header---
+
+|  57A: RCVD++ OWN/T/B/C/ID          | : ${Math.floor(Math.random() * 999999)}-DAES/DAES_${Math.floor(Math.random() * 999999)} |
+|  RCVD++ SWIFT MESSAGE TYPE         | : (ACK) 103 BOX NETWORK                  |
+|  RCVD++ RECEIVER'S BANK            | : ${blackScreenData.beneficiaryBank}     |
+|  RCVD++ RECEIVER'S BANK ADDRESS    | : DUBAI INTERNATIONAL FINANCIAL CENTRE, DUBAI, UAE |
+|  RCVD++ RECEIVER'S ACCOUNT NAME    | : ${blackScreenData.beneficiaryName}     |
+|  RCVD++ RECEIVER'S ACCOUNT NUMBER  | : ${blackScreenData.accountNumber}       |
+|  RCVD++ RECEIVER'S SWIFT CODE      | : ${blackScreenData.swiftCode}           |
+
+---
+
+Message Trailer
+
+RCVD++ ACK: SWIFT AUTHENTIFICATION CORRECT TRN21
+RCVD++ 00: EMBEDDED MESSAGE INITIALIZED
+**12* SUB MESSAGE TYPE** : FIN MT 103/202 COV
+**20* TRANSMISSION REFERENCE** : ${transmissionRef}
+**21* TRANSACTION IDENTIFICATION NUMBER** : ${transactionIdNum}
+**23B* BANK OPERATION CODE (BOC)** : CRED
+**23E* INSTRUCTION CODE** : TELC
+**26T* TRANSACTION TYPE CODE** : MO-K104
+**31C* DATE OF ISSUE** : ${date.toISOString().slice(0, 10)}
+**32B* CURRENCY/AMOUNT** : ${formatCurrency(blackScreenData.totalLiquid, blackScreenData.currency)}
+**70* REMITTANCE INFORMATION** : TREASURY RESERVE FUNDS
+**71A* DETAILS OF CHARGES** : OUR
+**72A* SENDER TO RECEIVER INFORMATION** : ADVISE THE BENEFICIARY OF THIS SWIFT THIS TRANSFER IS VALID FOR TREASURY
+UPON IDENTIFICATION, THE DAY OF RECEIPT. THE FUNDS TO THE BEST OF OUR KNOWLEDGE ARE CLEAN, CLEAR AND FREE OF ANY LEVY,
+ENCUMBRANCES AND LEGALLY OBTAINED AND FROM NON-CRIMINAL BUSINESS ACTIVITIES PLEASE.
+THIS IRREVOCABLE CASH BACKED SWIFT MT103 TRANSFER CAN BE RELIED UPON FOR FULL TREASURY VERIFICATION.
+
+---
+
+**FOR AND ON BEHALF OF DIGITAL COMMERCIAL BANK LTD**
+**CASH BACKED/${blackScreenData.currency}** : ${formatCurrency(blackScreenData.totalLiquid, blackScreenData.currency)}
+**DATE RECORDED** : ${blackScreenData.swiftCode}
+**: ${date.toISOString().slice(0, 10)}**
+
+---
+
+**Interventions**
+
+**CATEGORY** : NETWORK REPORT
+**CREATION DATE, TIME** : ${formattedDate} ${formattedTime} +0400
+**BANKING OFFICER** : DAES SYSTEM ADMINISTRATOR
+**OPERATOR** : SYSTEM : AUTOMATED
+**END TIME** : ${formattedTime} +0400
+**++MESSAGE HAS BEEN TRANSMITTED (01)**
+
+---
+
+**---End of Transmission---
+
+═══════════════════════════════════════════════════════════════════════════════
+                    MONETARY AGGREGATES - TREASURY RESERVE
+═══════════════════════════════════════════════════════════════════════════════
+
+M1 (LIQUID CASH):        ${formatCurrency(blackScreenData.balanceM1, blackScreenData.currency)}
+    └─ Currency, coins, demand deposits
+
+M2 (NEAR MONEY):         ${formatCurrency(blackScreenData.balanceM2, blackScreenData.currency)}
+    └─ M1 + savings deposits, money market funds
+
+M3 (BROAD MONEY):        ${formatCurrency(blackScreenData.balanceM3, blackScreenData.currency)}
+    └─ M2 + large time deposits
+
+M4 (TOTAL MONEY):        ${formatCurrency(blackScreenData.balanceM4, blackScreenData.currency)}
+    └─ M3 + negotiable instruments
+
+TOTAL VERIFIED:          ${formatCurrency(blackScreenData.totalLiquid, blackScreenData.currency)}
+
+═══════════════════════════════════════════════════════════════════════════════
+                    TECHNICAL INFORMATION
+═══════════════════════════════════════════════════════════════════════════════
+
+DTC1B REFERENCE:         ${blackScreenData.DTC1BReference}
+VERIFICATION HASH:       ${blackScreenData.verificationHash}
+TRANSACTIONS:            ${blackScreenData.transactionCount.toLocaleString()}
+ROUTING NUMBER:          ${blackScreenData.routingNumber}
+SWIFT CODE:              ${blackScreenData.swiftCode}
+ISSUE DATE:              ${blackScreenData.issueDate.toLocaleString()}
+EXPIRY DATE:             ${blackScreenData.expiryDate.toLocaleString()}
+
+═══════════════════════════════════════════════════════════════════════════════
+                    COMPLIANCE & VERIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ ISO 27001:2022         Information Security              COMPLIANT
+✓ ISO 20022              Financial Interoperability        COMPATIBLE
+✓ FATF AML/CFT           Anti-Money Laundering             VERIFIED
+✓ KYC                    Know Your Customer                VERIFIED
+✓ SWIFT MT799/MT999      Bank Confirmation                 COMPLIANT
+✓ FEDWIRE                Federal Reserve Wire              COMPATIBLE
+✓ DTC                    Depository Trust Company          VERIFIED
+
+═══════════════════════════════════════════════════════════════════════════════
+                    DIGITAL SIGNATURE
+═══════════════════════════════════════════════════════════════════════════════
+
+Document Hash:           ${certHash}
+Digital Signature:       VERIFIED
+Timestamp:               ${date.toISOString()}
+Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
+
+**(-)END OF TRANSMISSION**
+ENCRYPTED CIPHERED ENDTRANSMS: AE50189.${certHash.slice(0, 6)}.${Math.floor(Math.random() * 9999999999)}.DAES.${Math.floor(Math.random() * 9999999)}
+
+═══════════════════════════════════════════════════════════════════════════════
+          GENERATED BY DIGITAL COMMERCIAL BANK LTD - DAES 256
+               © ${date.getFullYear()} DAES - Data and Exchange Settlement
+═══════════════════════════════════════════════════════════════════════════════
+`;
+  };
+
+  const handleDownloadPDF3Swift = async () => {
+    if (!blackScreenData) return;
+    try {
+      const content = generatePDF3SwiftContent();
+      await downloadPDF(content, `SWIFT_MT103_Treasury_${blackScreenData.currency}`);
+    } catch (error) {
+      console.error('Error generating PDF3 SWIFT:', error);
+      alert(t.language === 'es' ? 'Error al generar PDF3 SWIFT' : 'Error generating PDF3 SWIFT');
+    }
+  };
+
+  /**
+   * PDF4 - BLACK SCREEN BANK STATEMENT
+   * Genera PDF con fondo negro y letras blancas/verdes estilo terminal bancario
+   * Documento profesional de estado de cuenta bancario - Treasury Reserve
+   * Formato de terminal bancaria con fuente monoespaciada
+   */
+  const handleDownloadPDF4BlackStatement = async () => {
+    if (!blackScreenData) return;
+    
+    try {
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 12;
+      let yPos = margin;
+      const lineHeight = 4.5;
+      const date = new Date();
+      const statementDate = date.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
+      const statementTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+      // ISO 4217 Currency Codes
+      const currencyISO: Record<string, string> = {
+        'USD': '840', 'EUR': '978', 'GBP': '826', 'CHF': '756', 'JPY': '392', 'CAD': '124',
+        'AUD': '036', 'CNY': '156', 'INR': '356', 'MXN': '484', 'BRL': '986', 'AED': '784',
+        'SGD': '702', 'HKD': '344', 'KRW': '410', 'RUB': '643'
+      };
+
+      // Generar identificadores únicos
+      const statementNumber = `STM-${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}-${Math.floor(Math.random() * 999999).toString().padStart(6, '0')}`;
+      const documentRef = `DCB/${date.getFullYear()}/${Math.floor(Math.random() * 9999999).toString().padStart(7, '0')}`;
+      const verificationCode = Array.from({length: 32}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
+      const securityHash = Array.from({length: 64}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
+
+      // Fechas del período
+      const periodStart = new Date(date.getFullYear(), date.getMonth(), 1);
+      const periodEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+      // Función helper para agregar página con fondo negro
+      const addBlackPage = () => {
+        pdf.setFillColor(0, 0, 0);
+        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+      };
+
+      // Función helper para texto verde terminal
+      const setTerminalGreen = (size: number = 8) => {
+        pdf.setTextColor(0, 255, 65);
+        pdf.setFontSize(size);
+        pdf.setFont('Courier', 'normal');
+      };
+
+      // Función helper para texto verde brillante
+      const setBrightGreen = (size: number = 8) => {
+        pdf.setTextColor(57, 255, 20);
+        pdf.setFontSize(size);
+        pdf.setFont('Courier', 'bold');
+      };
+
+      // Función helper para texto blanco
+      const setWhiteText = (size: number = 8) => {
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(size);
+        pdf.setFont('Courier', 'normal');
+      };
+
+      // Función helper para texto gris claro
+      const setGrayText = (size: number = 7) => {
+        pdf.setTextColor(180, 180, 180);
+        pdf.setFontSize(size);
+        pdf.setFont('Courier', 'normal');
+      };
+
+      // Función para dibujar línea
+      const drawLine = (y: number, width: number = 0.2) => {
+        pdf.setDrawColor(100, 100, 100);
+        pdf.setLineWidth(width);
+        pdf.line(margin, y, pageWidth - margin, y);
+      };
+
+      // Función para dibujar línea de puntos
+      const drawDottedLine = (y: number) => {
+        pdf.setDrawColor(60, 60, 60);
+        pdf.setLineWidth(0.1);
+        for (let x = margin; x < pageWidth - margin; x += 2) {
+          pdf.line(x, y, x + 1, y);
+        }
+      };
+
+      // Función para agregar nueva página
+      const checkNewPage = (requiredSpace: number = 25) => {
+        if (yPos + requiredSpace > pageHeight - margin) {
+          pdf.addPage();
+          addBlackPage();
+          yPos = margin;
+          // Mini header en páginas siguientes
+          setGrayText(6);
+          pdf.text(`Statement: ${statementNumber} | Page ${pdf.getNumberOfPages()}`, pageWidth - margin, yPos, { align: 'right' });
+          yPos += 8;
+          return true;
+        }
+        return false;
+      };
+
+      // ==================== PÁGINA 1 ====================
+      addBlackPage();
+
+      // ===== HEADER INSTITUCIONAL =====
+      setGrayText(6);
+      pdf.text('ISO 27001:2022 | ISO 20022 | FATF COMPLIANT', margin, yPos);
+      pdf.text(`REF: ${documentRef}`, pageWidth - margin, yPos, { align: 'right' });
+      yPos += 6;
+
+      drawLine(yPos, 0.5);
+      yPos += 6;
+
+      setTerminalGreen(10);
+      pdf.text('DIGITAL COMMERCIAL BANK LTD', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 5;
+
+      setWhiteText(8);
+      pdf.text('OFFICIAL TREASURY ACCOUNT STATEMENT', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 4;
+
+      setGrayText(7);
+      pdf.text('DAES 256 - DATA AND EXCHANGE SETTLEMENT SYSTEM', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 6;
+
+      drawLine(yPos, 0.5);
+      yPos += 6;
+
+      // ===== INFORMACIÓN DEL DOCUMENTO =====
+      setGrayText(6);
+      pdf.text('DOCUMENT INFORMATION', margin, yPos);
+      yPos += 5;
+
+      const docInfo = [
+        ['STATEMENT NUMBER', statementNumber],
+        ['STATEMENT DATE', statementDate],
+        ['STATEMENT TIME', statementTime + ' UTC'],
+        ['PERIOD', `${periodStart.toLocaleDateString('en-US', {month: 'short', day: '2-digit', year: 'numeric'})} - ${periodEnd.toLocaleDateString('en-US', {month: 'short', day: '2-digit', year: 'numeric'})}`],
+      ];
+
+      docInfo.forEach(([label, value]) => {
+        setTerminalGreen(7);
+        pdf.text(`${label}:`, margin, yPos);
+        setWhiteText(7);
+        pdf.text(value, margin + 45, yPos);
+        yPos += lineHeight;
+      });
+
+      yPos += 4;
+      drawDottedLine(yPos);
+      yPos += 8;
+
+      // ===== INFORMACIÓN DE LA CUENTA =====
+      setGrayText(6);
+      pdf.text('TREASURY ACCOUNT INFORMATION', margin, yPos);
+      yPos += 5;
+
+      const accountDetails = [
+        ['ACCOUNT HOLDER', blackScreenData.beneficiaryName.length > 40 ? blackScreenData.beneficiaryName.substring(0, 40) + '...' : blackScreenData.beneficiaryName],
+        ['ACCOUNT NUMBER', blackScreenData.accountNumber],
+        ['BENEFICIARY BANK', blackScreenData.beneficiaryBank],
+        ['CURRENCY', `${blackScreenData.currency} (ISO 4217: ${currencyISO[blackScreenData.currency] || blackScreenData.currency})`],
+        ['ROUTING NUMBER', blackScreenData.routingNumber],
+        ['DTC1B REFERENCE', blackScreenData.DTC1BReference.length > 35 ? blackScreenData.DTC1BReference.substring(0, 35) + '...' : blackScreenData.DTC1BReference],
+        ['ACCOUNT STATUS', 'ACTIVE - OPERATIONAL'],
+      ];
+
+      accountDetails.forEach(([label, value]) => {
+        setTerminalGreen(7);
+        pdf.text(`${label}:`, margin, yPos);
+        setWhiteText(7);
+        pdf.text(String(value), margin + 45, yPos);
+        yPos += lineHeight;
+      });
+
+      yPos += 4;
+      drawDottedLine(yPos);
+      yPos += 8;
+
+      // ===== RESUMEN DE BALANCE =====
+      checkNewPage(60);
+      
+      setGrayText(6);
+      pdf.text('BALANCE SUMMARY', margin, yPos);
+      yPos += 6;
+
+      // Balance total en formato uniforme
+      setTerminalGreen(7);
+      pdf.text('TOTAL TREASURY BALANCE', margin, yPos);
+      setWhiteText(7);
+      pdf.text(formatCurrency(blackScreenData.totalLiquid, blackScreenData.currency), pageWidth - margin, yPos, { align: 'right' });
+      yPos += lineHeight;
+
+      drawDottedLine(yPos);
+      yPos += 5;
+
+      // ===== MONETARY AGGREGATES =====
+      setGrayText(6);
+      pdf.text('MONETARY AGGREGATES BREAKDOWN', margin, yPos);
+      yPos += 6;
+
+      const aggregates = [
+        ['M1 - LIQUID CASH', formatCurrency(blackScreenData.balanceM1, blackScreenData.currency), 'Currency in circulation, demand deposits'],
+        ['M2 - NEAR MONEY', formatCurrency(blackScreenData.balanceM2, blackScreenData.currency), 'M1 + savings, money market accounts'],
+        ['M3 - BROAD MONEY', formatCurrency(blackScreenData.balanceM3, blackScreenData.currency), 'M2 + large time deposits'],
+        ['M4 - TOTAL MONEY', formatCurrency(blackScreenData.balanceM4, blackScreenData.currency), 'M3 + negotiable instruments'],
+      ];
+
+      aggregates.forEach(([label, value, desc], index) => {
+        setTerminalGreen(7);
+        pdf.text(label, margin, yPos);
+        setWhiteText(7);
+        pdf.text(value, pageWidth - margin, yPos, { align: 'right' });
+        yPos += lineHeight - 1;
+        setGrayText(5);
+        pdf.text(desc, margin + 3, yPos);
+        yPos += lineHeight + 1;
+        if (index < aggregates.length - 1) {
+          drawDottedLine(yPos);
+          yPos += 3;
+        }
+      });
+
+      yPos += 6;
+      drawLine(yPos);
+      yPos += 8;
+
+      // ===== INFORMACIÓN DE TRANSACCIONES =====
+      checkNewPage(40);
+
+      setGrayText(6);
+      pdf.text('TRANSACTION SUMMARY', margin, yPos);
+      yPos += 5;
+
+      const transactionInfo = [
+        ['TRANSACTIONS PROCESSED', blackScreenData.transactionCount.toLocaleString()],
+        ['VERIFICATION HASH', blackScreenData.verificationHash.substring(0, 24) + '...'],
+        ['ISSUE DATE', blackScreenData.issueDate.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })],
+        ['VALID UNTIL', blackScreenData.expiryDate.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })],
+      ];
+
+      transactionInfo.forEach(([label, value]) => {
+        setTerminalGreen(7);
+        pdf.text(`${label}:`, margin, yPos);
+        setWhiteText(7);
+        pdf.text(String(value), margin + 50, yPos);
+        yPos += lineHeight;
+      });
+
+      yPos += 4;
+      drawDottedLine(yPos);
+      yPos += 8;
+
+      // ===== COMPLIANCE & CERTIFICATIONS =====
+      checkNewPage(55);
+
+      setGrayText(6);
+      pdf.text('REGULATORY COMPLIANCE', margin, yPos);
+      yPos += 5;
+
+      const compliance = [
+        ['ISO 27001:2022', 'Information Security Management', 'CERTIFIED'],
+        ['ISO 20022', 'Financial Messaging Standard', 'COMPLIANT'],
+        ['FATF', 'Anti-Money Laundering Guidelines', 'VERIFIED'],
+        ['KYC/AML', 'Customer Due Diligence', 'COMPLETED'],
+        ['FEDWIRE', 'Federal Reserve Wire Network', 'COMPATIBLE'],
+        ['DTC', 'Depository Trust Company', 'VERIFIED'],
+      ];
+
+      compliance.forEach(([standard, desc, status]) => {
+        setTerminalGreen(6);
+        pdf.text(`[*] ${standard}`, margin, yPos);
+        setGrayText(6);
+        pdf.text(desc, margin + 35, yPos);
+        setTerminalGreen(6);
+        pdf.text(status, pageWidth - margin, yPos, { align: 'right' });
+        yPos += lineHeight;
+      });
+
+      yPos += 6;
+      drawLine(yPos);
+      yPos += 8;
+
+      // ===== VERIFICACIÓN DIGITAL =====
+      checkNewPage(45);
+
+      setGrayText(6);
+      pdf.text('DIGITAL VERIFICATION', margin, yPos);
+      yPos += 5;
+
+      setTerminalGreen(6);
+      pdf.text('VERIFICATION CODE:', margin, yPos);
+      setWhiteText(6);
+      pdf.text(verificationCode, margin + 38, yPos);
+      yPos += lineHeight;
+
+      setTerminalGreen(6);
+      pdf.text('SECURITY HASH:', margin, yPos);
+      setWhiteText(5);
+      pdf.text(securityHash.substring(0, 32), margin + 38, yPos);
+      yPos += lineHeight - 1;
+      pdf.text(securityHash.substring(32), margin + 38, yPos);
+      yPos += lineHeight;
+
+      setTerminalGreen(6);
+      pdf.text('TIMESTAMP:', margin, yPos);
+      setWhiteText(6);
+      pdf.text(date.toISOString(), margin + 38, yPos);
+      yPos += lineHeight;
+
+      setTerminalGreen(6);
+      pdf.text('DIGITAL SIGNATURE:', margin, yPos);
+      setWhiteText(6);
+      pdf.text('VALID - CRYPTOGRAPHICALLY VERIFIED', margin + 38, yPos);
+
+      yPos += 10;
+      drawLine(yPos, 0.5);
+      yPos += 6;
+
+      // ===== FOOTER =====
+      setGrayText(5);
+      pdf.text('This statement is electronically generated and is valid without signature.', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 4;
+      pdf.text('For verification, contact: verification@dcb-daes.com | Reference: ' + statementNumber, pageWidth / 2, yPos, { align: 'center' });
+      yPos += 6;
+
+      drawLine(yPos, 0.3);
+      yPos += 4;
+
+      setTerminalGreen(6);
+      pdf.text('DIGITAL COMMERCIAL BANK LTD', pageWidth / 2, yPos, { align: 'center' });
+      yPos += 3;
+      setGrayText(5);
+      pdf.text(`DAES 256 Data and Exchange Settlement | (C) ${date.getFullYear()} All Rights Reserved`, pageWidth / 2, yPos, { align: 'center' });
+
+      // Guardar PDF
+      pdf.save(`AccountStatement_Treasury_${blackScreenData.currency}_${statementNumber}.pdf`);
+
+    } catch (error) {
+      console.error('Error generating PDF4:', error);
+      alert(t.language === 'es' ? 'Error al generar Account Statement' : 'Error generating Account Statement');
+    }
+  };
+
   const handleDownloadPDFImage = async () => {
     if (!blackScreenRef.current || !blackScreenData) return;
     
@@ -483,6 +1053,20 @@ ${t.blackScreenDigitallySigned}:  ${new Date().toISOString()}
                 >
                   <ImageIcon className="w-4 h-4" />
                   PDF Image
+                </button>
+                <button
+                  onClick={handleDownloadPDF3Swift}
+                  className="bg-gradient-to-r from-emerald-600 to-cyan-600 border border-emerald-400/50 text-white px-4 py-2 rounded-lg transition-all flex items-center gap-2 font-bold shadow-lg shadow-emerald-500/20 hover:from-emerald-500 hover:to-cyan-500"
+                >
+                  <FileText className="w-4 h-4" />
+                  PDF3 SWIFT
+                </button>
+                <button
+                  onClick={handleDownloadPDF4BlackStatement}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 border border-purple-400/50 text-white px-4 py-2 rounded-lg transition-all flex items-center gap-2 font-bold shadow-lg shadow-purple-500/20 hover:from-purple-500 hover:to-pink-500"
+                >
+                  <FileText className="w-4 h-4" />
+                  PDF4 Account Statement
                 </button>
                 <button
                   onClick={handlePrint}

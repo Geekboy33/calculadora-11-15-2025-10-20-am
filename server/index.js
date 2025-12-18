@@ -8,6 +8,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' })); // Para form-urlencoded (OAuth)
 
 // Middleware de manejo de errores global
 app.use((err, req, res, next) => {
@@ -186,6 +187,136 @@ app.get('/api/v1/proof-of-reserves/:apiKey/download', requireAuth, async (req, r
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="por_${key.apiKey}.txt"`);
   res.send(content || 'No Proof of Reserves linked.');
+});
+
+// ============================================================================
+// SBERBANK PROXY - Proxy seguro hacia Sberbank RPO API
+// ============================================================================
+app.post('/api/sberbank/payments', async (req, res) => {
+  try {
+    const SBER_BASE_URL = process.env.SBER_BASE_URL || 'https://iftfintech.testsbi.sberbank.ru:9443';
+    const SBER_ACCESS_TOKEN = process.env.SBER_ACCESS_TOKEN;
+
+    if (!SBER_ACCESS_TOKEN) {
+      return res.status(500).json({ error: 'Sberbank env not configured' });
+    }
+
+    console.log('[Sberbank Proxy] 📤 Reenviando pago a Sberbank:', {
+      url: `${SBER_BASE_URL}/fintech/api/v1/payments`,
+      externalId: req.body?.externalId,
+      amount: req.body?.amount
+    });
+
+    const response = await fetch(`${SBER_BASE_URL}/fintech/api/v1/payments`, {
+      method: 'POST',
+      headers: {
+        'Authorization': SBER_ACCESS_TOKEN,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const text = await response.text();
+    
+    console.log('[Sberbank Proxy] ✅ Respuesta de Sberbank:', {
+      status: response.status,
+      statusText: response.statusText
+    });
+
+    res.status(response.status).send(text);
+  } catch (err) {
+    console.error('[Sberbank Proxy] ❌ Error:', err);
+    res.status(500).json({ error: err.message || 'Proxy error' });
+  }
+});
+
+// ============================================================================
+// YOOMONEY OAUTH PROXY - Proxy seguro hacia YuMoney OAuth API
+// ============================================================================
+app.post('/api/yoomoney/oauth/token', async (req, res) => {
+  try {
+    console.log('[YuMoney OAuth Proxy] 📤 Reenviando petición OAuth a YuMoney:', {
+      hasClientId: !!req.body.client_id,
+      hasClientSecret: !!req.body.client_secret,
+      hasCode: !!req.body.code,
+      grantType: req.body.grant_type
+    });
+
+    // Validate required fields
+    if (!req.body.client_id || !req.body.client_secret || !req.body.code) {
+      return res.status(400).json({
+        error: 'invalid_request',
+        error_description: 'Missing required fields: client_id, client_secret, or code'
+      });
+    }
+
+    // Prepare form data
+    const formData = new URLSearchParams();
+    formData.append('grant_type', req.body.grant_type || 'authorization_code');
+    formData.append('code', req.body.code);
+    formData.append('client_id', req.body.client_id);
+    formData.append('client_secret', req.body.client_secret);
+    formData.append('redirect_uri', req.body.redirect_uri || 'urn:ietf:wg:oauth:2.0:oob');
+
+    console.log('[YuMoney OAuth Proxy] Enviando a https://yoomoney.ru/oauth/token');
+
+    const response = await fetch('https://yoomoney.ru/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+      },
+      body: formData.toString(),
+    });
+
+    console.log('[YuMoney OAuth Proxy] Response status:', response.status, response.statusText);
+    console.log('[YuMoney OAuth Proxy] Response headers:', Object.fromEntries(response.headers.entries()));
+
+    // Get response as text first
+    const responseText = await response.text();
+    console.log('[YuMoney OAuth Proxy] Response text (first 500 chars):', responseText.substring(0, 500));
+
+    let data;
+    
+    // Try to parse as JSON
+    if (responseText.trim().length === 0) {
+      console.warn('[YuMoney OAuth Proxy] ⚠️ Empty response from YuMoney');
+      data = {
+        error: 'empty_response',
+        error_description: 'YuMoney returned an empty response'
+      };
+    } else {
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('[YuMoney OAuth Proxy] ❌ Failed to parse JSON:', parseError);
+        console.error('[YuMoney OAuth Proxy] Response text:', responseText);
+        data = {
+          error: 'invalid_response',
+          error_description: 'YuMoney returned invalid JSON',
+          raw_response: responseText.substring(0, 200)
+        };
+      }
+    }
+
+    console.log('[YuMoney OAuth Proxy] ✅ Respuesta procesada:', {
+      status: response.status,
+      hasAccessToken: !!data.access_token,
+      hasError: !!data.error
+    });
+
+    // Always return JSON, even if YuMoney returned something else
+    res.status(response.status).json(data);
+  } catch (err) {
+    console.error('[YuMoney OAuth Proxy] ❌ Error completo:', err);
+    console.error('[YuMoney OAuth Proxy] Error stack:', err.stack);
+    res.status(500).json({ 
+      error: 'proxy_error',
+      error_description: err.message || 'Error al conectar con YuMoney OAuth',
+      details: err.toString()
+    });
+  }
 });
 
 // ============================================================================

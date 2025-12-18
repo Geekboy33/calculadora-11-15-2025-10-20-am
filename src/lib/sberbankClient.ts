@@ -488,13 +488,22 @@ export class SberbankClient {
     body?: any,
     timeout: number = 30000
   ): Promise<T> {
-    const url = `${this.config.baseUrl}${endpoint}`;
+    // ✅ Si baseUrl es el proxy local, usar directamente
+    // Si es la URL de Sberbank, usar normalmente
+    const isProxy = this.config.baseUrl.startsWith('/api/sberbank') || this.config.baseUrl.includes('localhost');
+    const url = isProxy 
+      ? `${this.config.baseUrl}${endpoint === SBERBANK_API_CONFIG.ENDPOINTS.CREATE_PAYMENT ? '/payments' : endpoint}`
+      : `${this.config.baseUrl}${endpoint}`;
     
     const headers: Record<string, string> = {
-      'Authorization': this.getAuthHeader(),
       'Content-Type': SBERBANK_API_CONFIG.CONTENT_TYPE,
       'Accept': SBERBANK_API_CONFIG.CONTENT_TYPE,
     };
+    
+    // ✅ Solo agregar Authorization si NO es proxy (el proxy maneja el token)
+    if (!isProxy) {
+      headers['Authorization'] = this.getAuthHeader();
+    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);

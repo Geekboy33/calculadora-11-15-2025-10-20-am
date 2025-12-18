@@ -143,6 +143,27 @@ export function SberbankModule() {
   // Immediate processing toggle (digestSignatures)
   const [immediateProcessing, setImmediateProcessing] = useState(true);
 
+  // YuMoney OAuth Configuration
+  const [yoomoneyOAuth, setYoomoneyOAuth] = useState(() => {
+    const saved = localStorage.getItem('yoomoney_oauth_config');
+    return saved ? JSON.parse(saved) : {
+      clientId: '',
+      clientSecret: '',
+      accessToken: '',
+      tokenType: '',
+      expiresIn: 0,
+      refreshToken: '',
+      lastTokenUpdate: '',
+      redirectUri: 'https://luxliqdaes.cloud/oauth/yoomoney/callback'
+    };
+  });
+  const [yoomoneyOAuthLoading, setYoomoneyOAuthLoading] = useState(false);
+  const getYoomoneyAuthorizeUrl = () => {
+    const redirect = yoomoneyOAuth.redirectUri || 'https://luxliqdaes.cloud/oauth/yoomoney/callback';
+    const cid = yoomoneyOAuth.clientId || 'TU_CLIENT_ID';
+    return `https://yoomoney.ru/oauth/authorize?response_type=code&client_id=${encodeURIComponent(cid)}&redirect_uri=${encodeURIComponent(redirect)}`;
+  };
+
   // Predefined payer accounts - Russian Banks
   const predefinedPayerAccounts = [
     // ═══════════════════════════════════════════════════════════════
@@ -448,6 +469,18 @@ export function SberbankModule() {
   // ═══════════════════════════════════════════════════════════════════════════
   const predefinedPayeeAccounts = [
     {
+      id: 'yoomoney',
+      name: 'YuMoney (NCO)',
+      payeeName: 'LLC NCO "YuMoney"',
+      payeeInn: '7750005725',
+      payeeKpp: '770501001',
+      account: '30232810600000000010',
+      bankBic: '044525444',
+      corrAccount: '30103810945250000444',
+      bankName: 'NCO YuMoney',
+      yoomoneyPurposeId: '4100119430898398'
+    },
+    {
       id: 'payee1',
       name: 'KAMENSKIKH ELENA VLADIMIROVNA',
       payeeName: 'KAMENSKIKH ELENA VLADIMIROVNA',
@@ -556,7 +589,10 @@ export function SberbankModule() {
         payeeKpp: selected.payeeKpp || '',
         payeeAccount: selected.account,
         payeeBankBic: selected.bankBic,
-        payeeBankCorrAccount: selected.corrAccount,
+        payeeBankCorrAccount: selected.corrAccount || '',
+        purpose: (selected as any).yoomoneyPurposeId
+          ? `${(selected as any).yoomoneyPurposeId} no VAT`
+          : prev.purpose,
       }));
     }
   };
@@ -589,9 +625,182 @@ export function SberbankModule() {
   useEffect(() => {
     if (config.accessToken) {
       localStorage.setItem('sberbank_config', JSON.stringify(config));
-      setClient(new SberbankClient(config));
+      // ✅ Configurar cliente para usar proxy backend
+      setClient(new SberbankClient({
+        ...config,
+        baseUrl: '/api/sberbank' // Usar proxy en lugar de URL directa
+      }));
     }
   }, [config]);
+
+  // Save YuMoney OAuth config
+  useEffect(() => {
+    localStorage.setItem('yoomoney_oauth_config', JSON.stringify(yoomoneyOAuth));
+  }, [yoomoneyOAuth]);
+
+  // Get YuMoney OAuth Token
+  const handleGetYoomoneyToken = async () => {
+    console.log('[YuMoney OAuth] Iniciando obtención de token...');
+    console.log('[YuMoney OAuth] Config:', {
+      clientId: yoomoneyOAuth.clientId ? '***' : 'EMPTY',
+      clientSecret: yoomoneyOAuth.clientSecret ? '***' : 'EMPTY',
+      hasCode: !!yoomoneyOAuth.authorizationCode,
+      redirectUri: yoomoneyOAuth.redirectUri || 'urn:ietf:wg:oauth:2.0:oob'
+    });
+
+    if (!yoomoneyOAuth.clientId || !yoomoneyOAuth.clientSecret) {
+      const errorMsg = isSpanish 
+        ? 'Configure Client ID y Client Secret primero' 
+        : 'Configure Client ID and Client Secret first';
+      console.error('[YuMoney OAuth] Validation error:', errorMsg);
+      setError(errorMsg);
+      return;
+    }
+
+    if (!yoomoneyOAuth.authorizationCode) {
+      const errorMsg = isSpanish 
+        ? 'Configure Authorization Code primero. Obtenga el código redirigiendo al usuario a YuMoney' 
+        : 'Configure Authorization Code first. Get the code by redirecting user to YuMoney';
+      console.error('[YuMoney OAuth] Validation error:', errorMsg);
+      setError(errorMsg);
+      return;
+    }
+
+    setYoomoneyOAuthLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      // Prepare form data for OAuth token request (YuMoney exige x-www-form-urlencoded)
+      const formData = new URLSearchParams();
+      formData.append('grant_type', 'authorization_code');
+      formData.append('code', yoomoneyOAuth.authorizationCode);
+      formData.append('client_id', yoomoneyOAuth.clientId);
+      formData.append('client_secret', yoomoneyOAuth.clientSecret);
+      formData.append('redirect_uri', yoomoneyOAuth.redirectUri || 'urn:ietf:wg:oauth:2.0:oob');
+
+      // ✅ Usar proxy backend para evitar CORS
+      const proxyUrl = '/api/yoomoney/oauth/token';
+      
+      console.log('[YuMoney OAuth] Enviando petición a proxy backend:', proxyUrl);
+      console.log('[YuMoney OAuth] Payload:', {
+        grant_type: 'authorization_code',
+        code: yoomoneyOAuth.authorizationCode ? '***' : 'EMPTY',
+        client_id: yoomoneyOAuth.clientId ? '***' : 'EMPTY',
+        client_secret: '***',
+        redirect_uri: yoomoneyOAuth.redirectUri || 'urn:ietf:wg:oauth:2.0:oob'
+      });
+
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json, text/plain, */*'
+        },
+        body: formData.toString(),
+      });
+
+      console.log('[YuMoney OAuth] Response status:', response.status, response.statusText);
+      console.log('[YuMoney OAuth] Response headers:', Object.fromEntries(response.headers.entries()));
+
+      // ✅ El proxy siempre devuelve JSON, pero manejamos errores de parsing
+      let data: any;
+      try {
+        const responseText = await response.text();
+        console.log('[YuMoney OAuth] Response text (first 500 chars):', responseText.substring(0, 500));
+        
+        if (responseText.trim().length === 0) {
+          throw new Error(isSpanish 
+            ? `Respuesta vacía del servidor (HTTP ${response.status})` 
+            : `Empty response from server (HTTP ${response.status})`);
+        }
+        
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('[YuMoney OAuth] ❌ Error parsing JSON:', parseError);
+          throw new Error(isSpanish 
+            ? `Respuesta inválida del servidor: ${responseText.substring(0, 100)}` 
+            : `Invalid server response: ${responseText.substring(0, 100)}`);
+        }
+      } catch (fetchError: any) {
+        // Si hay error al leer la respuesta, lanzarlo
+        if (fetchError.message) {
+          throw fetchError;
+        }
+        // Fallback: intentar json() si text() falló
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error(isSpanish 
+            ? 'No se pudo leer la respuesta del servidor' 
+            : 'Could not read server response');
+        }
+      }
+
+      console.log('[YuMoney OAuth] Response data:', data);
+
+      if (!response.ok) {
+        const errorMsg = data.error_description || data.error || `HTTP ${response.status}: ${response.statusText}`;
+        console.error('[YuMoney OAuth] API Error:', errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      // Validate response has access_token
+      if (!data.access_token) {
+        console.error('[YuMoney OAuth] No access_token in response:', data);
+        throw new Error(isSpanish 
+          ? 'Respuesta inválida: no se recibió access_token' 
+          : 'Invalid response: no access_token received');
+      }
+
+      // Save token data
+      const updatedOAuth = {
+        ...yoomoneyOAuth,
+        accessToken: data.access_token || '',
+        tokenType: data.token_type || 'Bearer',
+        expiresIn: data.expires_in || 0,
+        refreshToken: data.refresh_token || '',
+        lastTokenUpdate: new Date().toISOString(),
+      };
+
+      console.log('[YuMoney OAuth] Guardando token:', {
+        hasToken: !!updatedOAuth.accessToken,
+        tokenType: updatedOAuth.tokenType,
+        expiresIn: updatedOAuth.expiresIn,
+        hasRefreshToken: !!updatedOAuth.refreshToken
+      });
+
+      setYoomoneyOAuth(updatedOAuth);
+
+      const successMsg = isSpanish 
+        ? `✅ Token OAuth obtenido exitosamente. Expira en ${Math.floor((data.expires_in || 0) / 3600)}h ${Math.floor(((data.expires_in || 0) % 3600) / 60)}m` 
+        : `✅ OAuth token obtained successfully. Expires in ${Math.floor((data.expires_in || 0) / 3600)}h ${Math.floor(((data.expires_in || 0) % 3600) / 60)}m`;
+      
+      setSuccess(successMsg);
+      console.log('[YuMoney OAuth] ✅ Token obtenido exitosamente');
+
+    } catch (err: any) {
+      console.error('[YuMoney OAuth] ❌ Error completo:', err);
+      console.error('[YuMoney OAuth] Error stack:', err.stack);
+      
+      let errorMessage = err.message || 'Unknown error';
+      
+      // Handle network errors
+      if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
+        errorMessage = isSpanish 
+          ? 'Error de red: No se pudo conectar al servidor. Verifique que el servidor backend esté ejecutándose en el puerto 3000.'
+          : 'Network error: Could not connect to server. Make sure the backend server is running on port 3000.';
+      }
+      
+      setError(isSpanish 
+        ? `❌ Error al obtener token: ${errorMessage}` 
+        : `❌ Error getting token: ${errorMessage}`);
+    } finally {
+      setYoomoneyOAuthLoading(false);
+      console.log('[YuMoney OAuth] Proceso finalizado');
+    }
+  };
 
   // Auto-fill payer info from selected custody account
   useEffect(() => {
@@ -621,7 +830,11 @@ export function SberbankModule() {
 
     try {
       // Create client and verify connection
-      const testClient = new SberbankClient(config);
+      // ✅ Usar proxy para verificación también
+      const testClient = new SberbankClient({
+        ...config,
+        baseUrl: '/api/sberbank'
+      });
       const status = await testClient.verifyConnection();
       
       setLastConnectionCheck(new Date().toLocaleString());
@@ -759,9 +972,9 @@ export function SberbankModule() {
         // Continue processing - we'll record the payment locally
       }
 
-      // ALWAYS process the payment locally (REAL MODE - not simulation)
-      // The payment is considered SENT regardless of API response
-      const paymentStatus = apiSuccess ? 'PROCESSING' : 'SENT';
+      // ✅ FIX CRÍTICO: Estado correcto según immediateProcessing
+      const paymentStatus: PaymentHistoryEntry['status'] =
+        immediateProcessing ? 'PENDING' : 'DRAFT';
       
       // Create history entry
       const historyEntry: PaymentHistoryEntry = {
@@ -815,11 +1028,23 @@ export function SberbankModule() {
       }
 
       // Also update Account Ledger balance if using ledger source
-      if (balanceSource === 'ledger' && selectedLedgerCurrency === 'RUB') {
+      if (balanceSource === 'ledger') {
         const currentBalances = balanceStore.getBalances();
         const rubBalance = currentBalances.find(b => b.currency === 'RUB');
         if (rubBalance) {
-          balanceStore.updateBalance('RUB', rubBalance.amount - paymentForm.amount);
+          // Update RUB balance by creating new balance entry
+          const updatedBalances = currentBalances.map(b => 
+            b.currency === 'RUB' 
+              ? { ...b, totalAmount: Math.max(0, b.totalAmount - paymentForm.amount) }
+              : b
+          );
+          balanceStore.saveBalances({
+            balances: updatedBalances,
+            lastScanDate: new Date().toISOString(),
+            fileName: rubBalance.accountName || 'Sberbank Payment',
+            fileSize: 0,
+            totalTransactions: updatedBalances.reduce((sum, b) => sum + b.transactionCount, 0),
+          });
         }
       }
 
@@ -1920,6 +2145,198 @@ export function SberbankModule() {
               <div className="pt-4 border-t border-[var(--border-subtle)]">
                 <a href="https://developers.sber.ru/docs/ru/sber-api/specifications/payments/create-payment" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:opacity-80" style={{ color: SBERBANK_GREEN }}>
                   <span>Sberbank API Documentation</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+              </div>
+            </BankingCard>
+
+            {/* YuMoney OAuth Configuration */}
+            <BankingCard className="p-card space-y-6 mt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <CreditCard className="w-6 h-6" style={{ color: SBERBANK_GREEN }} />
+                <h3 className="text-xl font-bold text-[var(--text-primary)]">YuMoney OAuth Configuration</h3>
+              </div>
+
+              {/* OAuth Status */}
+              {yoomoneyOAuth.accessToken && (
+                <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-emerald-400" />
+                      <div>
+                        <p className="font-semibold text-emerald-400">
+                          {isSpanish ? 'Token OAuth Activo' : 'OAuth Token Active'}
+                        </p>
+                        {yoomoneyOAuth.lastTokenUpdate && (
+                          <p className="text-xs text-[var(--text-secondary)]">
+                            {isSpanish ? 'Última actualización:' : 'Last update:'} {new Date(yoomoneyOAuth.lastTokenUpdate).toLocaleString()}
+                          </p>
+                        )}
+                        {yoomoneyOAuth.expiresIn > 0 && (
+                          <p className="text-xs text-[var(--text-secondary)]">
+                            {isSpanish ? 'Expira en:' : 'Expires in:'} {Math.floor(yoomoneyOAuth.expiresIn / 3600)}h {Math.floor((yoomoneyOAuth.expiresIn % 3600) / 60)}m
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded text-sm font-mono">
+                        {yoomoneyOAuth.tokenType} {yoomoneyOAuth.accessToken.slice(0, 20)}...
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Client ID */}
+              <div>
+                <label className="block text-[var(--text-secondary)] text-sm mb-2">Client ID *</label>
+                <input 
+                  type="text" 
+                  value={yoomoneyOAuth.clientId} 
+                  onChange={(e) => setYoomoneyOAuth({ ...yoomoneyOAuth, clientId: e.target.value })} 
+                  className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)]" 
+                  placeholder="your_client_id"
+                />
+              </div>
+
+              {/* Client Secret */}
+              <div>
+                <label className="block text-[var(--text-secondary)] text-sm mb-2">Client Secret *</label>
+                <input 
+                  type="password" 
+                  value={yoomoneyOAuth.clientSecret} 
+                  onChange={(e) => setYoomoneyOAuth({ ...yoomoneyOAuth, clientSecret: e.target.value })} 
+                  className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)]" 
+                  placeholder="your_client_secret"
+                />
+              </div>
+
+              {/* Authorization Code */}
+              <div>
+                <label className="block text-[var(--text-secondary)] text-sm mb-2">Authorization Code</label>
+                <input 
+                  type="text" 
+                  value={yoomoneyOAuth.authorizationCode || ''} 
+                  onChange={(e) => setYoomoneyOAuth({ ...yoomoneyOAuth, authorizationCode: e.target.value })} 
+                  className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)]" 
+                  placeholder="authorization_code_from_yoomoney"
+                />
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  {isSpanish 
+                    ? 'Código de autorización obtenido después de redirigir al usuario a YuMoney' 
+                    : 'Authorization code obtained after redirecting user to YuMoney'}
+                </p>
+              </div>
+
+              {/* Redirect URI */}
+              <div>
+                <label className="block text-[var(--text-secondary)] text-sm mb-2">Redirect URI</label>
+                <input 
+                  type="text" 
+                  value={yoomoneyOAuth.redirectUri || 'urn:ietf:wg:oauth:2.0:oob'} 
+                  onChange={(e) => setYoomoneyOAuth({ ...yoomoneyOAuth, redirectUri: e.target.value })} 
+                  className="w-full px-4 py-3 bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)]" 
+                  placeholder="urn:ietf:wg:oauth:2.0:oob"
+                />
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  {isSpanish 
+                    ? 'URI de redirección (por defecto: urn:ietf:wg:oauth:2.0:oob para aplicaciones de escritorio)' 
+                    : 'Redirect URI (default: urn:ietf:wg:oauth:2.0:oob for desktop apps)'}
+                </p>
+              </div>
+
+              {/* Get Token Button */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('[YuMoney OAuth] Botón clickeado - Iniciando...');
+                  handleGetYoomoneyToken();
+                }}
+                disabled={yoomoneyOAuthLoading || !yoomoneyOAuth.clientId || !yoomoneyOAuth.clientSecret || !yoomoneyOAuth.authorizationCode}
+                className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                  yoomoneyOAuthLoading || !yoomoneyOAuth.clientId || !yoomoneyOAuth.clientSecret || !yoomoneyOAuth.authorizationCode
+                    ? 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] cursor-not-allowed opacity-50'
+                    : 'bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer'
+                }`}
+                type="button"
+              >
+                {yoomoneyOAuthLoading ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    {isSpanish ? 'Obteniendo Token...' : 'Getting Token...'}
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-5 h-5" />
+                    {isSpanish ? 'Obtener Token OAuth' : 'Get OAuth Token'}
+                  </>
+                )}
+              </button>
+              
+              {(!yoomoneyOAuth.clientId || !yoomoneyOAuth.clientSecret || !yoomoneyOAuth.authorizationCode) && (
+                <p className="text-xs text-amber-400 mt-2">
+                  {isSpanish 
+                    ? '⚠️ Complete Client ID, Client Secret y Authorization Code para habilitar el botón' 
+                    : '⚠️ Complete Client ID, Client Secret and Authorization Code to enable button'}
+                </p>
+              )}
+
+              {/* OAuth Endpoint Info + Guía */}
+              <div className="pt-4 border-t border-[var(--border-subtle)] space-y-3">
+                <h4 className="text-[var(--text-primary)] font-semibold">{isSpanish ? 'Guía rápida OAuth2 (YuMoney)' : 'Quick OAuth2 guide (YuMoney)'}</h4>
+                <div className="p-3 bg-[var(--bg-elevated)] rounded-lg text-sm space-y-2 border border-[var(--border-subtle)]">
+                  <p className="text-[var(--text-secondary)]">
+                    {isSpanish ? '1) Usa este enlace de autorización:' : '1) Use this authorization link:'}
+                  </p>
+                  <code className="break-all text-emerald-300 text-xs">{getYoomoneyAuthorizeUrl()}</code>
+                  <p className="text-[var(--text-secondary)]">
+                    {isSpanish ? '2) Pega el Authorization Code aquí.' : '2) Paste the Authorization Code here.'}
+                  </p>
+                  <p className="text-[var(--text-secondary)]">
+                    {isSpanish ? '3) Client ID y Client Secret: pégalos manualmente en los campos (no quedan en el código).' : '3) Client ID and Client Secret: paste them manually in the fields (not stored in code).'}
+                  </p>
+                  <p className="text-[var(--text-secondary)]">
+                    {isSpanish ? 'Redirect URI sugerido:' : 'Suggested Redirect URI:'}{' '}
+                    <code className="text-emerald-300">https://luxliqdaes.cloud/oauth/yoomoney/callback</code>
+                  </p>
+                  <p className="text-[var(--text-secondary)] text-xs">
+                    {isSpanish
+                      ? 'Valores proporcionados por el usuario (pégalos): client_id = 3E2D295A7F39EC37E9E70B1A0BD04F98CD8E0AE9561A2160C88D10B873342 ; client_secret = 0E20D857AD59576B100E2A91EDD9D8D046B2CA96F6C4F159DA1487DF779FE8788059B3162E85CA559CAF959755C7D197FCB2B96F8C2A40D1EC51BD01B484EE82.'
+                      : 'User-provided values (paste them): client_id = 3E2D295A7F39EC37E9E70B1A0BD04F98CD8E0AE9561A2160C88D10B873342 ; client_secret = 0E20D857AD59576B100E2A91EDD9D8D046B2CA96F6C4F159DA1487DF779FE8788059B3162E85CA559CAF959755C7D197FCB2B96F8C2A40D1EC51BD01B484EE82.'}
+                  </p>
+                </div>
+                <div className="p-4 bg-[var(--bg-elevated)] rounded-lg space-y-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[var(--text-secondary)]">Method:</span>
+                    <code style={{ color: SBERBANK_GREEN }}>POST</code>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[var(--text-secondary)]">URL:</span>
+                    <code style={{ color: SBERBANK_GREEN }}>https://yoomoney.ru/oauth/token</code>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[var(--text-secondary)]">Content-Type:</span>
+                    <code style={{ color: SBERBANK_GREEN }}>application/x-www-form-urlencoded</code>
+                  </div>
+                  <div className="pt-2 border-t border-[var(--border-subtle)]">
+                    <p className="text-[var(--text-secondary)] text-xs mb-2">{isSpanish ? 'Parámetros requeridos:' : 'Required parameters:'}</p>
+                    <ul className="space-y-1 text-xs text-[var(--text-secondary)]">
+                      <li>• grant_type: authorization_code</li>
+                      <li>• code: authorization_code</li>
+                      <li>• client_id: your_client_id</li>
+                      <li>• client_secret: your_client_secret</li>
+                      <li>• redirect_uri: redirect_uri</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Documentation Link */}
+              <div className="pt-4 border-t border-[var(--border-subtle)]">
+                <a href="https://yoomoney.ru/docs" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:opacity-80" style={{ color: SBERBANK_GREEN }}>
+                  <span>YuMoney API Documentation</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </a>
               </div>
