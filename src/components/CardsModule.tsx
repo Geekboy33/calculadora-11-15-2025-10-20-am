@@ -561,6 +561,12 @@ export default function CardsModule() {
   useEffect(() => {
     const unsubCards = cardsStore.subscribe(setCards);
     const unsubCustody = custodyStore.subscribe(setCustodyAccounts);
+    
+    // Cargar tarjetas REALES emitidas
+    const loadedRealCards = cardIssuingService.getIssuedCards();
+    setRealCards(loadedRealCards);
+    console.log(`[Cards] Cargadas ${loadedRealCards.length} tarjetas reales`);
+    
     return () => {
       unsubCards();
       unsubCustody();
@@ -569,6 +575,7 @@ export default function CardsModule() {
   
   // Estadísticas
   const stats = cardsStore.getStats();
+  const realCardsTotal = realCards.reduce((sum, c) => sum + (c.availableBalance || c.fundedAmount || 0), 0);
   
   // Emitir tarjeta
   const handleIssueCard = (data: {
@@ -1158,11 +1165,11 @@ export default function CardsModule() {
                 custodyAccountId: formData.get('account') as string,
                 cardholderName: (formData.get('name') as string).toUpperCase(),
                 email: formData.get('email') as string,
-                spendingLimit: parseInt(formData.get('limit') as string) || 10000,
+                spendingLimit: parseInt(formData.get('fundAmount') as string) || 10000,
               });
             }} className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Cuenta Custodio (Fondos)</label>
+                <label className="block text-sm text-gray-400 mb-2">Cuenta Custodio (Fuente de Fondos)</label>
                 <select
                   name="account"
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white"
@@ -1200,14 +1207,19 @@ export default function CardsModule() {
               </div>
               
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Límite de Gasto (USD)</label>
+                <label className="block text-sm text-gray-400 mb-2">
+                  💰 MONTO A CARGAR EN LA TARJETA (se descuenta de cuenta custodio)
+                </label>
                 <input
                   type="number"
-                  name="limit"
+                  name="fundAmount"
                   defaultValue={10000}
                   min={100}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-lg font-bold"
                 />
+                <p className="text-xs text-green-400 mt-1">
+                  💡 Este monto se transferirá de la cuenta custodio a la tarjeta y podrá usarlo para compras online.
+                </p>
               </div>
               
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
@@ -1248,34 +1260,136 @@ export default function CardsModule() {
         </div>
       )}
       
-      {/* Lista de Tarjetas REALES Emitidas */}
+      {/* Lista de Tarjetas REALES Emitidas CON FONDOS */}
       {realCards.length > 0 && (
         <div className="max-w-7xl mx-auto mt-8">
           <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center gap-2">
             <Globe className="w-6 h-6" />
-            Tarjetas REALES Online ({realCards.length})
+            💳 Tarjetas REALES con Fondos ({realCards.length})
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {realCards.map(card => (
-              <div key={card.id} className="bg-gradient-to-br from-green-500/20 to-emerald-500/10 border border-green-500/30 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-green-400 font-bold">{card.provider.toUpperCase()}</span>
-                  <span className={`px-2 py-1 rounded text-xs font-bold ${
-                    card.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                  }`}>
-                    {card.status.toUpperCase()}
-                  </span>
+              <div key={card.id} className="bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/30 rounded-2xl overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">💳</span>
+                      <span className="text-green-400 font-bold text-lg">{card.provider.toUpperCase()}</span>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      card.status === 'active' ? 'bg-green-500 text-black' : 'bg-red-500/20 text-red-400'
+                    }`}>
+                      {card.status === 'active' ? '● ACTIVA' : card.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="font-mono text-white text-2xl tracking-wider">
+                    {card.cardNumber.replace(/(\d{4})/g, '$1 ').trim()}
+                  </div>
+                  <div className="flex items-center gap-6 text-sm text-gray-300 mt-2">
+                    <span>Vence: {String(card.expMonth).padStart(2, '0')}/{card.expYear}</span>
+                    <span>CVV: <span className="font-mono">{card.cvc}</span></span>
+                  </div>
                 </div>
-                <div className="font-mono text-white text-lg mb-2">
-                  {card.cardNumber.replace(/(\d{4})/g, '$1 ').trim()}
-                </div>
-                <div className="flex items-center gap-4 text-sm text-gray-400">
-                  <span>Vence: {card.expMonth}/{card.expYear}</span>
-                  <span>CVV: {card.cvc}</span>
-                </div>
-                <div className="mt-3 pt-3 border-t border-green-500/20">
-                  <span className="text-green-400 font-bold">{card.currency} {card.spendingLimit.toLocaleString()}</span>
-                  <span className="text-gray-400 text-sm ml-2">límite</span>
+                
+                {/* Fondos */}
+                <div className="p-4 space-y-4">
+                  {/* Balance Principal */}
+                  <div className="bg-black/30 rounded-xl p-4">
+                    <div className="text-gray-400 text-sm mb-1">💰 FONDOS DISPONIBLES</div>
+                    <div className="text-3xl font-bold text-green-400">
+                      {card.currency} {(card.availableBalance || card.fundedAmount || card.spendingLimit).toLocaleString()}
+                    </div>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                      <span>Cargado: {card.currency} {(card.fundedAmount || card.spendingLimit).toLocaleString()}</span>
+                      <span>Gastado: {card.currency} {(card.spentAmount || 0).toLocaleString()}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Barra de uso */}
+                  <div>
+                    <div className="flex justify-between text-xs text-gray-400 mb-1">
+                      <span>Uso de fondos</span>
+                      <span>{Math.round(((card.spentAmount || 0) / (card.fundedAmount || card.spendingLimit || 1)) * 100)}%</span>
+                    </div>
+                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all"
+                        style={{ width: `${Math.min(100, ((card.spentAmount || 0) / (card.fundedAmount || card.spendingLimit || 1)) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Info adicional */}
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="bg-white/5 rounded-lg p-3">
+                      <div className="text-gray-500 text-xs">Cuenta Custodio</div>
+                      <div className="text-white truncate">{card.custodyAccountId ? custodyAccounts.find(a => a.id === card.custodyAccountId)?.accountName || 'N/A' : 'N/A'}</div>
+                    </div>
+                    <div className="bg-white/5 rounded-lg p-3">
+                      <div className="text-gray-500 text-xs">Última recarga</div>
+                      <div className="text-white">{card.lastFundedAt ? new Date(card.lastFundedAt).toLocaleDateString() : 'N/A'}</div>
+                    </div>
+                  </div>
+                  
+                  {/* Botones de acción */}
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={async () => {
+                        const amount = prompt(`Monto a agregar a la tarjeta (${card.currency}):`);
+                        if (amount && !isNaN(Number(amount))) {
+                          try {
+                            const result = await cardIssuingService.addFundsToCard(card.id, Number(amount), card.custodyAccountId);
+                            if (result.success) {
+                              alert(`✅ Fondos agregados!\nNuevo balance: ${card.currency} ${result.newBalance.toLocaleString()}`);
+                              // Recargar tarjetas
+                              setRealCards(cardIssuingService.getIssuedCards());
+                            }
+                          } catch (error) {
+                            alert(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+                          }
+                        }
+                      }}
+                      className="flex-1 py-2 px-3 bg-green-500/20 border border-green-500/50 text-green-400 rounded-lg hover:bg-green-500/30 transition-all text-sm font-bold flex items-center justify-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Agregar Fondos
+                    </button>
+                    <button
+                      onClick={async () => {
+                        const maxWithdraw = card.availableBalance || card.fundedAmount || 0;
+                        const amount = prompt(`Monto a retirar (máx: ${card.currency} ${maxWithdraw.toLocaleString()}):`);
+                        if (amount && !isNaN(Number(amount))) {
+                          try {
+                            const result = await cardIssuingService.withdrawFundsFromCard(card.id, Number(amount));
+                            if (result.success) {
+                              alert(`✅ Fondos retirados!\nNuevo balance: ${card.currency} ${result.newBalance.toLocaleString()}`);
+                              setRealCards(cardIssuingService.getIssuedCards());
+                            }
+                          } catch (error) {
+                            alert(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+                          }
+                        }
+                      }}
+                      className="flex-1 py-2 px-3 bg-amber-500/20 border border-amber-500/50 text-amber-400 rounded-lg hover:bg-amber-500/30 transition-all text-sm font-bold flex items-center justify-center gap-2"
+                    >
+                      <DollarSign className="w-4 h-4" />
+                      Retirar
+                    </button>
+                  </div>
+                  
+                  {/* Copiar datos */}
+                  <button
+                    onClick={() => {
+                      const data = `Número: ${card.cardNumber}\nVence: ${String(card.expMonth).padStart(2, '0')}/${card.expYear}\nCVV: ${card.cvc}\nTitular: ${card.cardholderName}`;
+                      navigator.clipboard.writeText(data);
+                      alert('✅ Datos de tarjeta copiados al portapapeles');
+                    }}
+                    className="w-full py-2 bg-white/5 border border-white/10 text-gray-400 rounded-lg hover:bg-white/10 transition-all text-sm flex items-center justify-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copiar datos para pago online
+                  </button>
                 </div>
               </div>
             ))}
