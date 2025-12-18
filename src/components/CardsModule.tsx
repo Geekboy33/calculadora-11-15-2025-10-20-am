@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { cardsStore, VirtualCard } from '../lib/cards-store';
 import { custodyStore, CustodyAccount } from '../lib/custody-store';
+import { runCardValidationTests, demonstrateLuhnAlgorithm } from '../lib/cards-validation-test';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎨 ESTILOS DE TARJETAS
@@ -632,14 +633,30 @@ export default function CardsModule() {
             </div>
           </div>
           
-          <button
-            onClick={() => setShowIssueForm(true)}
-            disabled={custodyAccounts.length === 0}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Plus className="w-5 h-5" />
-            Emitir Nueva Tarjeta
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                console.clear();
+                const results = runCardValidationTests();
+                demonstrateLuhnAlgorithm('4111111111111111');
+                alert(`🧪 PRUEBAS DE VALIDACIÓN COMPLETADAS\n\n✅ Pasaron: ${results.passed}\n❌ Fallaron: ${results.failed}\n\nVer consola (F12) para detalles completos.`);
+              }}
+              className="flex items-center gap-2 px-4 py-3 bg-purple-500/20 border border-purple-500/50 text-purple-400 font-bold rounded-xl hover:bg-purple-500/30 transition-all"
+              title="Ejecutar pruebas de validación ISO 7812"
+            >
+              <Shield className="w-5 h-5" />
+              Verificar Luhn
+            </button>
+            
+            <button
+              onClick={() => setShowIssueForm(true)}
+              disabled={custodyAccounts.length === 0}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus className="w-5 h-5" />
+              Emitir Nueva Tarjeta
+            </button>
+          </div>
         </div>
       </div>
       

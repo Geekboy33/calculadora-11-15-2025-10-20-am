@@ -99,36 +99,76 @@ export interface CardTransaction {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🔢 BIN (Bank Identification Number) - Primeros 6-8 dígitos
+// Según ISO/IEC 7812 y reglas de cada red de pago
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * BINs para Testing/Demo
+ * 
+ * VISA: Empieza con 4 (4XXXXX)
+ * MASTERCARD: 51-55 (5[1-5]XXXX) o 2221-2720
+ * AMEX: 34 o 37 (34XXXX o 37XXXX)
+ * UNIONPAY: 62 (62XXXX)
+ * 
+ * Nota: En producción real, se necesita obtener BINs asignados por la red
+ */
 const CARD_BINS = {
   visa: {
-    classic: '411111', // Visa Classic Demo
-    gold: '422222',
-    platinum: '433333',
-    infinite: '445544',
-    business: '455555',
+    // Visa empieza con 4 - BINs de prueba válidos
+    classic: '400000',    // Visa Classic
+    gold: '410000',       // Visa Gold
+    platinum: '420000',   // Visa Platinum  
+    black: '430000',      // Visa Signature
+    infinite: '440000',   // Visa Infinite
+    business: '450000',   // Visa Business
   },
   mastercard: {
-    classic: '520000',
-    gold: '530000',
-    platinum: '540000',
-    world: '550000',
-    business: '510000',
+    // Mastercard: 51-55 - BINs de prueba válidos
+    classic: '510000',    // Mastercard Standard
+    gold: '520000',       // Mastercard Gold
+    platinum: '530000',   // Mastercard Platinum
+    world: '540000',      // Mastercard World
+    black: '550000',      // Mastercard World Elite
+    business: '512345',   // Mastercard Business
   },
   amex: {
-    classic: '371111',
-    gold: '377711',
-    platinum: '378282',
+    // American Express: 34 o 37 - BINs de prueba válidos
+    classic: '340000',    // Amex Green
+    gold: '370000',       // Amex Gold
+    platinum: '371449',   // Amex Platinum (BIN de prueba oficial)
+    black: '378282',      // Amex Centurion (BIN de prueba oficial)
   },
   unionpay: {
-    classic: '620000',
-    platinum: '625000',
+    // UnionPay: 62 - BINs de prueba válidos
+    classic: '620000',    // UnionPay Classic
+    gold: '621000',       // UnionPay Gold
+    platinum: '622000',   // UnionPay Platinum
+    black: '623000',      // UnionPay Diamond
   }
 };
 
-// Nombres de BIN del banco
-const DAES_ISSUER_BIN = '456789'; // BIN ficticio para DAES Bank
+// BIN institucional DAES (rango Visa para demo)
+const DAES_ISSUER_BIN = '400001'; // BIN ficticio DAES - formato Visa válido
+
+/**
+ * Longitudes de tarjeta por red (según ISO 7812)
+ */
+const CARD_LENGTHS: Record<string, number> = {
+  visa: 16,        // 13 o 16 dígitos (16 es estándar actual)
+  mastercard: 16,  // Siempre 16 dígitos
+  amex: 15,        // Siempre 15 dígitos
+  unionpay: 16,    // 16-19 dígitos (16 más común)
+};
+
+/**
+ * Longitudes de CVV por red
+ */
+const CVV_LENGTHS: Record<string, number> = {
+  visa: 3,
+  mastercard: 3,
+  amex: 4,         // Amex usa CID de 4 dígitos
+  unionpay: 3,
+};
 
 const STORAGE_KEY = 'daes_virtual_cards';
 const TRANSACTIONS_KEY = 'daes_card_transactions';
@@ -142,69 +182,150 @@ class CardsStore {
   private listeners: Set<(cards: VirtualCard[]) => void> = new Set();
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 🔐 ALGORITMO DE LUHN (Validación ISO 7812)
+  // 🔐 ALGORITMO DE LUHN (Validación ISO 7812) - IMPLEMENTACIÓN REAL
   // ═══════════════════════════════════════════════════════════════════════════
   
   /**
-   * Generar dígito de control usando algoritmo de Luhn
-   * Este es el algoritmo estándar usado por Visa, Mastercard, etc.
+   * Generar dígito de control usando algoritmo de Luhn (Mod 10)
+   * Implementación EXACTA según ISO/IEC 7812-1
+   * 
+   * El algoritmo de Luhn funciona así:
+   * 1. Desde el dígito más a la derecha (que será el check digit), yendo hacia la izquierda
+   * 2. Duplicar el valor de cada segundo dígito
+   * 3. Si el resultado de duplicar es > 9, restar 9 (equivalente a sumar los dígitos)
+   * 4. Sumar todos los dígitos
+   * 5. El check digit hace que el total sea múltiplo de 10
    */
   private generateLuhnCheckDigit(partialNumber: string): string {
+    // Invertir el número parcial (sin check digit)
     const digits = partialNumber.split('').reverse().map(Number);
     let sum = 0;
     
     for (let i = 0; i < digits.length; i++) {
       let digit = digits[i];
-      if (i % 2 === 0) { // Posiciones pares (desde el final)
+      // Posiciones pares (0, 2, 4...) se duplican porque el check digit ocupará posición impar
+      if (i % 2 === 0) {
         digit *= 2;
         if (digit > 9) digit -= 9;
       }
       sum += digit;
     }
     
+    // El check digit es el número que hace que (sum + checkDigit) % 10 === 0
     const checkDigit = (10 - (sum % 10)) % 10;
     return checkDigit.toString();
   }
 
   /**
-   * Validar número de tarjeta con algoritmo de Luhn
+   * Validar número de tarjeta con algoritmo de Luhn (Mod 10)
+   * Implementación EXACTA según ISO/IEC 7812-1
+   * 
+   * Validación usada por Visa, Mastercard, Amex, Discover, JCB, etc.
    */
   validateCardNumber(cardNumber: string): boolean {
     const cleanNumber = cardNumber.replace(/\s|-/g, '');
-    if (!/^\d{13,19}$/.test(cleanNumber)) return false;
     
+    // Validar formato: solo dígitos, longitud 13-19
+    if (!/^\d{13,19}$/.test(cleanNumber)) {
+      console.log('[Luhn] ❌ Formato inválido:', cleanNumber.length, 'dígitos');
+      return false;
+    }
+    
+    // Algoritmo de Luhn
     const digits = cleanNumber.split('').reverse().map(Number);
     let sum = 0;
     
     for (let i = 0; i < digits.length; i++) {
       let digit = digits[i];
-      if (i % 2 === 1) { // Posiciones impares (desde el final, excluyendo check digit)
+      // Posiciones impares (1, 3, 5...) desde la derecha se duplican
+      // (posición 0 es el check digit, no se duplica)
+      if (i % 2 === 1) {
         digit *= 2;
         if (digit > 9) digit -= 9;
       }
       sum += digit;
     }
     
-    return sum % 10 === 0;
+    const isValid = sum % 10 === 0;
+    console.log(`[Luhn] ${isValid ? '✅' : '❌'} Validación: ${cleanNumber.substring(0, 6)}****${cleanNumber.slice(-4)} = ${sum} (mod 10 = ${sum % 10})`);
+    return isValid;
+  }
+
+  /**
+   * Validar que el BIN corresponda a la red declarada
+   */
+  validateBIN(cardNumber: string, expectedNetwork: 'visa' | 'mastercard' | 'amex' | 'unionpay'): boolean {
+    const bin = cardNumber.substring(0, 6);
+    const firstDigit = cardNumber.charAt(0);
+    const firstTwo = cardNumber.substring(0, 2);
+    
+    switch (expectedNetwork) {
+      case 'visa':
+        // Visa empieza con 4
+        return firstDigit === '4';
+      case 'mastercard':
+        // Mastercard: 51-55 o 2221-2720
+        const mc2 = parseInt(firstTwo);
+        const mc4 = parseInt(cardNumber.substring(0, 4));
+        return (mc2 >= 51 && mc2 <= 55) || (mc4 >= 2221 && mc4 <= 2720);
+      case 'amex':
+        // American Express: 34 o 37
+        return firstTwo === '34' || firstTwo === '37';
+      case 'unionpay':
+        // UnionPay: 62
+        return firstTwo === '62';
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Detectar red de tarjeta por BIN
+   */
+  detectCardNetwork(cardNumber: string): 'visa' | 'mastercard' | 'amex' | 'unionpay' | 'unknown' {
+    const firstDigit = cardNumber.charAt(0);
+    const firstTwo = cardNumber.substring(0, 2);
+    const firstFour = cardNumber.substring(0, 4);
+    
+    // American Express: 34, 37
+    if (firstTwo === '34' || firstTwo === '37') return 'amex';
+    
+    // Mastercard: 51-55, 2221-2720
+    const mc2 = parseInt(firstTwo);
+    const mc4 = parseInt(firstFour);
+    if ((mc2 >= 51 && mc2 <= 55) || (mc4 >= 2221 && mc4 <= 2720)) return 'mastercard';
+    
+    // UnionPay: 62
+    if (firstTwo === '62') return 'unionpay';
+    
+    // Visa: 4
+    if (firstDigit === '4') return 'visa';
+    
+    return 'unknown';
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 🔢 GENERACIÓN DE NÚMEROS DE TARJETA
+  // 🔢 GENERACIÓN DE NÚMEROS DE TARJETA - ISO 7812 COMPLIANT
   // ═══════════════════════════════════════════════════════════════════════════
 
   /**
-   * Generar número de tarjeta válido según ISO 7812
+   * Generar número de tarjeta válido según ISO/IEC 7812
+   * 
+   * Estructura del PAN (Primary Account Number):
+   * - MII (Major Industry Identifier): 1er dígito
+   * - IIN/BIN (Issuer Identification Number): 6-8 dígitos
+   * - Account Number: Dígitos intermedios
+   * - Check Digit: Último dígito (Luhn)
    */
   private generateCardNumber(network: 'visa' | 'mastercard' | 'amex' | 'unionpay', tier: string): string {
     // Obtener BIN según red y tier
     const bins = CARD_BINS[network] as Record<string, string>;
     const bin = bins[tier] || bins['classic'] || DAES_ISSUER_BIN;
     
-    // Longitud del PAN
-    let length = 16;
-    if (network === 'amex') length = 15;
+    // Longitud del PAN según red
+    const length = CARD_LENGTHS[network] || 16;
     
-    // Generar dígitos aleatorios para el cuerpo
+    // Generar dígitos aleatorios para el cuerpo (entre BIN y check digit)
     const bodyLength = length - bin.length - 1; // -1 para el check digit
     let body = '';
     for (let i = 0; i < bodyLength; i++) {
@@ -219,27 +340,150 @@ class CardsStore {
     
     const fullNumber = partialNumber + checkDigit;
     
-    // Validar que el número sea correcto
-    if (!this.validateCardNumber(fullNumber)) {
-      console.error('[CardsStore] ❌ Error en generación de número de tarjeta');
+    // TRIPLE VALIDACIÓN
+    // 1. Validar Luhn
+    const luhnValid = this.validateCardNumber(fullNumber);
+    // 2. Validar BIN corresponde a la red
+    const binValid = this.validateBIN(fullNumber, network);
+    // 3. Validar longitud
+    const lengthValid = fullNumber.length === length;
+    
+    if (!luhnValid || !binValid || !lengthValid) {
+      console.error('[CardsStore] ❌ Validación fallida:', {
+        luhn: luhnValid,
+        bin: binValid,
+        length: lengthValid,
+        expected: length,
+        actual: fullNumber.length
+      });
       // Reintentar
       return this.generateCardNumber(network, tier);
     }
     
-    console.log('[CardsStore] ✅ Número de tarjeta generado (Luhn válido)');
+    console.log('[CardsStore] ✅ Tarjeta generada - Red:', network.toUpperCase(), '| Tier:', tier, '| Luhn: ✓ | BIN: ✓');
     return fullNumber;
   }
 
   /**
-   * Generar CVV/CVC
+   * Generar CVV/CVC según la red
+   * - Visa/MC/UnionPay: 3 dígitos (CVV2/CVC2)
+   * - Amex: 4 dígitos (CID)
    */
   private generateCVV(network: 'visa' | 'mastercard' | 'amex' | 'unionpay'): string {
-    const length = network === 'amex' ? 4 : 3;
+    const length = CVV_LENGTHS[network] || 3;
     let cvv = '';
     for (let i = 0; i < length; i++) {
       cvv += Math.floor(Math.random() * 10).toString();
     }
     return cvv;
+  }
+
+  /**
+   * Validar CVV tiene longitud correcta
+   */
+  validateCVV(cvv: string, network: 'visa' | 'mastercard' | 'amex' | 'unionpay'): boolean {
+    const expectedLength = CVV_LENGTHS[network] || 3;
+    return /^\d+$/.test(cvv) && cvv.length === expectedLength;
+  }
+
+  /**
+   * Validación COMPLETA de una tarjeta
+   * Retorna objeto con todos los detalles de validación
+   */
+  validateCardComplete(cardNumber: string, expiryMonth?: string, expiryYear?: string, cvv?: string): {
+    isValid: boolean;
+    luhnValid: boolean;
+    network: string;
+    networkValid: boolean;
+    lengthValid: boolean;
+    expiryValid: boolean;
+    cvvValid: boolean;
+    errors: string[];
+  } {
+    const errors: string[] = [];
+    const cleanNumber = cardNumber.replace(/\s|-/g, '');
+    
+    // 1. Detectar red
+    const network = this.detectCardNetwork(cleanNumber);
+    const networkValid = network !== 'unknown';
+    if (!networkValid) errors.push('Red de tarjeta no reconocida');
+    
+    // 2. Validar Luhn
+    const luhnValid = this.validateCardNumber(cleanNumber);
+    if (!luhnValid) errors.push('Número de tarjeta inválido (Luhn)');
+    
+    // 3. Validar longitud
+    const expectedLength = CARD_LENGTHS[network] || 16;
+    const lengthValid = cleanNumber.length === expectedLength;
+    if (!lengthValid) errors.push(`Longitud incorrecta: ${cleanNumber.length} (esperado: ${expectedLength})`);
+    
+    // 4. Validar expiración si se proporciona
+    let expiryValid = true;
+    if (expiryMonth && expiryYear) {
+      const month = parseInt(expiryMonth);
+      const year = parseInt(expiryYear);
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+      
+      if (month < 1 || month > 12) {
+        expiryValid = false;
+        errors.push('Mes de expiración inválido');
+      } else if (year < currentYear || (year === currentYear && month < currentMonth)) {
+        expiryValid = false;
+        errors.push('Tarjeta expirada');
+      } else if (year > currentYear + 10) {
+        expiryValid = false;
+        errors.push('Fecha de expiración demasiado lejana');
+      }
+    }
+    
+    // 5. Validar CVV si se proporciona
+    let cvvValid = true;
+    if (cvv && network !== 'unknown') {
+      cvvValid = this.validateCVV(cvv, network as 'visa' | 'mastercard' | 'amex' | 'unionpay');
+      if (!cvvValid) errors.push('CVV inválido');
+    }
+    
+    const isValid = luhnValid && networkValid && lengthValid && expiryValid && cvvValid;
+    
+    console.log('[CardsStore] 🔍 Validación completa:', {
+      number: `${cleanNumber.substring(0, 6)}****${cleanNumber.slice(-4)}`,
+      isValid,
+      network,
+      luhn: luhnValid ? '✓' : '✗',
+      bin: networkValid ? '✓' : '✗',
+      length: lengthValid ? '✓' : '✗',
+      expiry: expiryValid ? '✓' : '✗',
+      cvv: cvvValid ? '✓' : '✗',
+    });
+    
+    return {
+      isValid,
+      luhnValid,
+      network,
+      networkValid,
+      lengthValid,
+      expiryValid,
+      cvvValid,
+      errors,
+    };
+  }
+
+  /**
+   * Formatear número de tarjeta con espacios (para display)
+   */
+  formatCardNumber(cardNumber: string): string {
+    const clean = cardNumber.replace(/\s|-/g, '');
+    const network = this.detectCardNetwork(clean);
+    
+    // Amex usa formato 4-6-5
+    if (network === 'amex') {
+      return clean.replace(/(\d{4})(\d{6})(\d{5})/, '$1 $2 $3');
+    }
+    
+    // Otros usan formato 4-4-4-4
+    return clean.replace(/(\d{4})/g, '$1 ').trim();
   }
 
   /**
