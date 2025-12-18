@@ -91,8 +91,9 @@ const BankSettlementModule = lazy(() => import('./components/BankSettlementModul
 const IbanManagerModule = lazy(() => import('./components/IbanManagerModule').then(m => ({ default: m.IbanManagerModule })));
 const DownloadsModule = lazy(() => import('./components/DownloadsModule').then(m => ({ default: m.DownloadsModule })));
 const CardsModule = lazy(() => import('./components/CardsModule').then(m => ({ default: m.default })));
+const ThreeDSecureModule = lazy(() => import('./components/ThreeDSecureModule').then(m => ({ default: m.default })));
 
-type Tab = 'central-dashboard' | 'central-dashboard-1' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'custody1' | 'cards' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
+type Tab = 'central-dashboard' | 'central-dashboard-1' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'custody1' | 'cards' | '3d-secure' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -194,6 +195,7 @@ function App() {
     { id: 'custody' as Tab, name: t.navCustody, icon: Lock },
     { id: 'custody1' as Tab, name: 'Custody Accounts 1', icon: Shield },
     { id: 'cards' as Tab, name: isSpanish ? 'Tarjetas DAES' : 'DAES Cards', icon: CreditCard },
+    { id: '3d-secure' as Tab, name: '3D Secure', icon: Shield },
     { id: 'profiles' as Tab, name: isSpanish ? 'Perfiles' : 'Profiles', icon: User },
     { id: 'api-daes' as Tab, name: 'API DAES', icon: Key },
     { id: 'mg-webhook' as Tab, name: isSpanish ? 'MG Webhook' : 'MG Webhook', icon: Webhook },
@@ -404,6 +406,7 @@ function App() {
           {activeTab === 'custody' && <CustodyAccountsModule />}
           {activeTab === 'custody1' && <CustodyAccountsModule1 />}
           {activeTab === 'cards' && <CardsModule />}
+          {activeTab === '3d-secure' && <ThreeDSecureModule />}
           {activeTab === 'profiles' && <ProfilesModule />}
           {activeTab === 'api-daes' && <APIDAESModule />}
           {activeTab === 'mg-webhook' && <MGWebhookModule />}
