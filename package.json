@@ -1,7 +1,7 @@
 {
   "name": "ledgerdaesterminal",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "LedgerDAESTerminal - Digital Commercial Bank Ltd",
   "author": "DAES Team",
   "type": "module",
