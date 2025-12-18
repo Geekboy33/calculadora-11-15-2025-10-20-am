@@ -1,0 +1,894 @@
+/**
+ * Cards Module - Emisión de Tarjetas Virtuales DAES
+ * Protocolo Visa/Mastercard para tarjetas vinculadas a cuentas custodio
+ */
+
+import { useState, useEffect } from 'react';
+import { 
+  CreditCard, 
+  Plus, 
+  Eye, 
+  EyeOff, 
+  Shield, 
+  Lock, 
+  Unlock,
+  Trash2, 
+  RefreshCw, 
+  DollarSign,
+  Calendar,
+  User,
+  Building2,
+  Snowflake,
+  Ban,
+  Check,
+  Copy,
+  Settings,
+  Activity,
+  Wallet,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  Zap,
+  Globe
+} from 'lucide-react';
+import { cardsStore, VirtualCard } from '../lib/cards-store';
+import { custodyStore, CustodyAccount } from '../lib/custody-store';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎨 ESTILOS DE TARJETAS
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CARD_STYLES: Record<string, { bg: string; accent: string; textColor: string }> = {
+  'visa-classic': {
+    bg: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+    accent: '#1434A4',
+    textColor: '#ffffff'
+  },
+  'visa-gold': {
+    bg: 'linear-gradient(135deg, #3d3d00 0%, #8B7500 50%, #FFD700 100%)',
+    accent: '#FFD700',
+    textColor: '#000000'
+  },
+  'visa-platinum': {
+    bg: 'linear-gradient(135deg, #2C3E50 0%, #4CA1AF 50%, #C4E0E5 100%)',
+    accent: '#C4E0E5',
+    textColor: '#1a1a2e'
+  },
+  'visa-black': {
+    bg: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #333333 100%)',
+    accent: '#FFD700',
+    textColor: '#ffffff'
+  },
+  'visa-infinite': {
+    bg: 'linear-gradient(135deg, #0c0c0c 0%, #1f1f1f 30%, #4a0e4e 70%, #000000 100%)',
+    accent: '#9932CC',
+    textColor: '#ffffff'
+  },
+  'mastercard-classic': {
+    bg: 'linear-gradient(135deg, #EB001B 0%, #F79E1B 100%)',
+    accent: '#ffffff',
+    textColor: '#ffffff'
+  },
+  'mastercard-gold': {
+    bg: 'linear-gradient(135deg, #CC5500 0%, #FFD700 100%)',
+    accent: '#000000',
+    textColor: '#000000'
+  },
+  'mastercard-platinum': {
+    bg: 'linear-gradient(135deg, #4a5568 0%, #718096 50%, #a0aec0 100%)',
+    accent: '#ffffff',
+    textColor: '#ffffff'
+  },
+  'mastercard-world': {
+    bg: 'linear-gradient(135deg, #1a1a2e 0%, #eb001b 50%, #f79e1b 100%)',
+    accent: '#ffffff',
+    textColor: '#ffffff'
+  },
+  'mastercard-black': {
+    bg: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
+    accent: '#EB001B',
+    textColor: '#ffffff'
+  },
+  'amex-classic': {
+    bg: 'linear-gradient(135deg, #006FCF 0%, #00A3E0 100%)',
+    accent: '#ffffff',
+    textColor: '#ffffff'
+  },
+  'amex-gold': {
+    bg: 'linear-gradient(135deg, #B8860B 0%, #FFD700 100%)',
+    accent: '#000000',
+    textColor: '#000000'
+  },
+  'amex-platinum': {
+    bg: 'linear-gradient(135deg, #4a5568 0%, #C0C0C0 100%)',
+    accent: '#000000',
+    textColor: '#000000'
+  },
+  'unionpay-classic': {
+    bg: 'linear-gradient(135deg, #1D3557 0%, #E63946 100%)',
+    accent: '#ffffff',
+    textColor: '#ffffff'
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🖼️ LOGOS DE REDES
+// ═══════════════════════════════════════════════════════════════════════════
+
+const NetworkLogo = ({ network }: { network: string }) => {
+  if (network === 'visa') {
+    return (
+      <svg viewBox="0 0 100 32" className="h-8 w-auto">
+        <text x="0" y="26" fill="white" fontFamily="Arial Black" fontSize="28" fontWeight="bold" fontStyle="italic">
+          VISA
+        </text>
+      </svg>
+    );
+  }
+  if (network === 'mastercard') {
+    return (
+      <div className="flex items-center">
+        <div className="w-7 h-7 rounded-full bg-red-500 opacity-90" />
+        <div className="w-7 h-7 rounded-full bg-yellow-500 opacity-90 -ml-3" />
+      </div>
+    );
+  }
+  if (network === 'amex') {
+    return (
+      <div className="text-lg font-bold tracking-tight">
+        AMERICAN<br/>EXPRESS
+      </div>
+    );
+  }
+  if (network === 'unionpay') {
+    return (
+      <div className="text-sm font-bold">
+        UnionPay
+      </div>
+    );
+  }
+  return null;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎴 COMPONENTE DE TARJETA VISUAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface CardDisplayProps {
+  card: VirtualCard;
+  showDetails: boolean;
+  onToggleDetails: () => void;
+  onAction: (action: string) => void;
+}
+
+const CardDisplay = ({ card, showDetails, onToggleDetails, onAction }: CardDisplayProps) => {
+  const [copied, setCopied] = useState(false);
+  const styleKey = `${card.cardNetwork}-${card.cardTier}`;
+  const style = CARD_STYLES[styleKey] || CARD_STYLES['visa-classic'];
+  
+  const cvv = showDetails ? cardsStore.getCardCVV(card.id) : '***';
+  const fullNumber = showDetails ? card.cardNumber : card.cardNumberMasked;
+  
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const formatCardNumber = (num: string) => {
+    return num.match(/.{1,4}/g)?.join(' ') || num;
+  };
+
+  return (
+    <div className="relative group">
+      {/* Tarjeta Visual */}
+      <div 
+        className="relative w-full max-w-md aspect-[1.586/1] rounded-2xl p-6 shadow-2xl overflow-hidden transition-all duration-500 hover:scale-105"
+        style={{ 
+          background: style.bg,
+          boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px ${style.accent}30`
+        }}
+      >
+        {/* Chip */}
+        <div className="absolute top-6 left-6">
+          <div className="w-12 h-9 rounded-md bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600 flex items-center justify-center">
+            <div className="w-8 h-5 rounded-sm border border-yellow-700/30 bg-gradient-to-r from-yellow-400 to-yellow-500" />
+          </div>
+        </div>
+        
+        {/* Contactless */}
+        {card.contactless && (
+          <div className="absolute top-6 left-20 opacity-70">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={style.accent} strokeWidth="2">
+              <path d="M8.5 14.5A5 5 0 0 1 7 12a5 5 0 0 1 1.5-3.5"/>
+              <path d="M12 17a7 7 0 0 1-3-5.5 7 7 0 0 1 3-5.5"/>
+              <path d="M15.5 19.5a9 9 0 0 1-4-7 9 9 0 0 1 4-7"/>
+            </svg>
+          </div>
+        )}
+        
+        {/* Logo de Red */}
+        <div className="absolute top-4 right-6" style={{ color: style.textColor }}>
+          <NetworkLogo network={card.cardNetwork} />
+        </div>
+        
+        {/* Número de Tarjeta */}
+        <div className="absolute top-20 left-6 right-6">
+          <div 
+            className="font-mono text-xl md:text-2xl tracking-widest cursor-pointer flex items-center gap-2"
+            style={{ color: style.textColor }}
+            onClick={() => showDetails && copyToClipboard(card.cardNumber)}
+          >
+            {formatCardNumber(fullNumber)}
+            {showDetails && (
+              <Copy className="w-4 h-4 opacity-50 hover:opacity-100" />
+            )}
+          </div>
+          {copied && (
+            <span className="text-xs text-green-400 mt-1">¡Copiado!</span>
+          )}
+        </div>
+        
+        {/* Fecha y CVV */}
+        <div className="absolute bottom-16 left-6 flex gap-8" style={{ color: style.textColor }}>
+          <div>
+            <div className="text-[10px] opacity-70 uppercase tracking-wider">Valid Thru</div>
+            <div className="font-mono text-sm">{card.expiryMonth}/{card.expiryYear.slice(-2)}</div>
+          </div>
+          <div>
+            <div className="text-[10px] opacity-70 uppercase tracking-wider">CVV</div>
+            <div className="font-mono text-sm cursor-pointer" onClick={onToggleDetails}>
+              {cvv}
+            </div>
+          </div>
+        </div>
+        
+        {/* Nombre del Titular */}
+        <div className="absolute bottom-6 left-6 right-20" style={{ color: style.textColor }}>
+          <div className="font-mono text-sm tracking-wider truncate">
+            {card.cardholderName}
+          </div>
+        </div>
+        
+        {/* Tier Badge */}
+        <div 
+          className="absolute bottom-6 right-6 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded"
+          style={{ 
+            backgroundColor: `${style.accent}30`,
+            color: style.textColor,
+            border: `1px solid ${style.accent}50`
+          }}
+        >
+          {card.cardTier}
+        </div>
+        
+        {/* Status Overlay */}
+        {card.status !== 'active' && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-2xl">
+            <div className="flex items-center gap-2 text-white text-xl font-bold">
+              {card.status === 'frozen' && <Snowflake className="w-8 h-8 text-cyan-400" />}
+              {card.status === 'inactive' && <Ban className="w-8 h-8 text-gray-400" />}
+              {card.status === 'cancelled' && <Ban className="w-8 h-8 text-red-500" />}
+              {card.status === 'expired' && <AlertTriangle className="w-8 h-8 text-yellow-500" />}
+              <span className="uppercase">{card.status}</span>
+            </div>
+          </div>
+        )}
+        
+        {/* Holographic Effect */}
+        <div 
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            background: 'linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%)',
+            animation: 'shimmer 3s infinite'
+          }}
+        />
+      </div>
+      
+      {/* Actions */}
+      <div className="flex items-center justify-center gap-2 mt-4">
+        <button
+          onClick={onToggleDetails}
+          className={`p-2 rounded-lg transition-all ${showDetails ? 'bg-amber-500/20 text-amber-400' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}
+          title={showDetails ? 'Ocultar detalles' : 'Ver detalles'}
+        >
+          {showDetails ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+        </button>
+        
+        {card.status === 'active' && (
+          <button
+            onClick={() => onAction('freeze')}
+            className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-all"
+            title="Congelar tarjeta"
+          >
+            <Snowflake className="w-5 h-5" />
+          </button>
+        )}
+        
+        {card.status === 'frozen' && (
+          <button
+            onClick={() => onAction('unfreeze')}
+            className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-all"
+            title="Descongelar tarjeta"
+          >
+            <Unlock className="w-5 h-5" />
+          </button>
+        )}
+        
+        {card.status === 'inactive' && (
+          <button
+            onClick={() => onAction('activate')}
+            className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-all"
+            title="Activar tarjeta"
+          >
+            <Check className="w-5 h-5" />
+          </button>
+        )}
+        
+        <button
+          onClick={() => onAction('sync')}
+          className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-all"
+          title="Sincronizar balance"
+        >
+          <RefreshCw className="w-5 h-5" />
+        </button>
+        
+        <button
+          onClick={() => onAction('settings')}
+          className="p-2 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-all"
+          title="Configuración"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
+        
+        <button
+          onClick={() => onAction('cancel')}
+          className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all"
+          title="Cancelar tarjeta"
+        >
+          <Trash2 className="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 📝 FORMULARIO DE EMISIÓN
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface IssueCardFormProps {
+  accounts: CustodyAccount[];
+  onIssue: (data: {
+    custodyAccountId: string;
+    cardholderName: string;
+    network: 'visa' | 'mastercard' | 'amex' | 'unionpay';
+    tier: 'classic' | 'gold' | 'platinum' | 'black' | 'infinite';
+    spendingLimit: number;
+  }) => void;
+  onCancel: () => void;
+}
+
+const IssueCardForm = ({ accounts, onIssue, onCancel }: IssueCardFormProps) => {
+  const [selectedAccount, setSelectedAccount] = useState('');
+  const [cardholderName, setCardholderName] = useState('');
+  const [network, setNetwork] = useState<'visa' | 'mastercard' | 'amex' | 'unionpay'>('visa');
+  const [tier, setTier] = useState<'classic' | 'gold' | 'platinum' | 'black' | 'infinite'>('platinum');
+  const [spendingLimit, setSpendingLimit] = useState(100000);
+  
+  const selectedCustodyAccount = accounts.find(a => a.id === selectedAccount);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedAccount || !cardholderName) {
+      alert('Por favor complete todos los campos');
+      return;
+    }
+    onIssue({
+      custodyAccountId: selectedAccount,
+      cardholderName,
+      network,
+      tier,
+      spendingLimit
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+      <div className="bg-[#1a1a2e] rounded-2xl p-6 max-w-lg w-full border border-white/10 shadow-2xl">
+        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+          <CreditCard className="w-8 h-8 text-amber-400" />
+          Emitir Nueva Tarjeta Virtual
+        </h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Cuenta Custodio */}
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Cuenta Custodio (Fuente de Fondos)</label>
+            <select
+              value={selectedAccount}
+              onChange={(e) => setSelectedAccount(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white"
+              required
+            >
+              <option value="">Seleccionar cuenta...</option>
+              {accounts.map(acc => (
+                <option key={acc.id} value={acc.id}>
+                  {acc.accountName} - {acc.currency} {acc.availableBalance.toLocaleString()}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          {selectedCustodyAccount && (
+            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-green-400 text-sm">
+                <Wallet className="w-4 h-4" />
+                <span>Balance disponible: {selectedCustodyAccount.currency} {selectedCustodyAccount.availableBalance.toLocaleString()}</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Nombre del Titular */}
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Nombre del Titular</label>
+            <input
+              type="text"
+              value={cardholderName}
+              onChange={(e) => setCardholderName(e.target.value.toUpperCase())}
+              placeholder="NOMBRE APELLIDO"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white uppercase"
+              maxLength={26}
+              required
+            />
+          </div>
+          
+          {/* Red de Tarjeta */}
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Red de Pago</label>
+            <div className="grid grid-cols-4 gap-2">
+              {(['visa', 'mastercard', 'amex', 'unionpay'] as const).map(n => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setNetwork(n)}
+                  className={`p-3 rounded-lg border transition-all uppercase font-bold text-sm ${
+                    network === n 
+                      ? 'bg-amber-500/20 border-amber-500 text-amber-400' 
+                      : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Tier */}
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Categoría</label>
+            <div className="grid grid-cols-5 gap-2">
+              {(['classic', 'gold', 'platinum', 'black', 'infinite'] as const).map(t => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTier(t)}
+                  className={`p-2 rounded-lg border transition-all capitalize text-xs ${
+                    tier === t 
+                      ? 'bg-purple-500/20 border-purple-500 text-purple-400' 
+                      : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Límite de Gasto */}
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">
+              Límite de Gasto: {selectedCustodyAccount?.currency || 'USD'} {spendingLimit.toLocaleString()}
+            </label>
+            <input
+              type="range"
+              min={1000}
+              max={selectedCustodyAccount?.availableBalance || 1000000}
+              step={1000}
+              value={spendingLimit}
+              onChange={(e) => setSpendingLimit(Number(e.target.value))}
+              className="w-full accent-amber-500"
+            />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>1,000</span>
+              <span>{(selectedCustodyAccount?.availableBalance || 1000000).toLocaleString()}</span>
+            </div>
+          </div>
+          
+          {/* Botones */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex-1 py-3 rounded-lg bg-white/10 text-gray-400 hover:bg-white/20 transition-all"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="flex-1 py-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold hover:from-amber-400 hover:to-orange-400 transition-all flex items-center justify-center gap-2"
+            >
+              <CreditCard className="w-5 h-5" />
+              Emitir Tarjeta
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎴 COMPONENTE PRINCIPAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+export default function CardsModule() {
+  const [cards, setCards] = useState<VirtualCard[]>([]);
+  const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
+  const [showIssueForm, setShowIssueForm] = useState(false);
+  const [showDetails, setShowDetails] = useState<Record<string, boolean>>({});
+  const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  
+  const isSpanish = true; // Siempre español
+  
+  // Cargar datos
+  useEffect(() => {
+    const unsubCards = cardsStore.subscribe(setCards);
+    const unsubCustody = custodyStore.subscribe(setCustodyAccounts);
+    return () => {
+      unsubCards();
+      unsubCustody();
+    };
+  }, []);
+  
+  // Estadísticas
+  const stats = cardsStore.getStats();
+  
+  // Emitir tarjeta
+  const handleIssueCard = (data: {
+    custodyAccountId: string;
+    cardholderName: string;
+    network: 'visa' | 'mastercard' | 'amex' | 'unionpay';
+    tier: 'classic' | 'gold' | 'platinum' | 'black' | 'infinite';
+    spendingLimit: number;
+  }) => {
+    const card = cardsStore.issueCard(
+      data.custodyAccountId,
+      data.cardholderName,
+      {
+        network: data.network,
+        tier: data.tier,
+        spendingLimit: data.spendingLimit,
+      }
+    );
+    
+    if (card) {
+      alert(`✅ Tarjeta ${card.cardNetwork.toUpperCase()} ${card.cardTier.toUpperCase()} emitida exitosamente!\n\nNúmero: ${card.cardNumberMasked}\nVálida hasta: ${card.expiryMonth}/${card.expiryYear}`);
+      setShowIssueForm(false);
+    } else {
+      alert('❌ Error al emitir la tarjeta');
+    }
+  };
+  
+  // Acciones de tarjeta
+  const handleCardAction = (cardId: string, action: string) => {
+    switch (action) {
+      case 'freeze':
+        cardsStore.freezeCard(cardId);
+        break;
+      case 'unfreeze':
+      case 'activate':
+        cardsStore.toggleCardStatus(cardId, true);
+        break;
+      case 'cancel':
+        if (confirm('¿Está seguro de cancelar esta tarjeta? Esta acción no se puede deshacer.')) {
+          cardsStore.cancelCard(cardId);
+        }
+        break;
+      case 'sync':
+        cardsStore.syncBalanceWithCustody(cardId);
+        break;
+      case 'settings':
+        setSelectedCard(cardId);
+        break;
+    }
+  };
+  
+  // Toggle detalles
+  const toggleDetails = (cardId: string) => {
+    setShowDetails(prev => ({
+      ...prev,
+      [cardId]: !prev[cardId]
+    }));
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] p-4 md:p-6">
+      {/* Header */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg">
+              <CreditCard className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-white">
+                Tarjetas DAES
+              </h1>
+              <p className="text-gray-400">
+                Emisión de tarjetas virtuales vinculadas a cuentas custodio
+              </p>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setShowIssueForm(true)}
+            disabled={custodyAccounts.length === 0}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Plus className="w-5 h-5" />
+            Emitir Nueva Tarjeta
+          </button>
+        </div>
+      </div>
+      
+      {/* Stats */}
+      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 text-blue-400 mb-2">
+            <CreditCard className="w-5 h-5" />
+            <span className="text-sm">Total Tarjetas</span>
+          </div>
+          <div className="text-2xl font-bold text-white">{stats.totalCards}</div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 text-green-400 mb-2">
+            <Check className="w-5 h-5" />
+            <span className="text-sm">Activas</span>
+          </div>
+          <div className="text-2xl font-bold text-white">{stats.activeCards}</div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 border border-cyan-500/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 text-cyan-400 mb-2">
+            <Snowflake className="w-5 h-5" />
+            <span className="text-sm">Congeladas</span>
+          </div>
+          <div className="text-2xl font-bold text-white">{stats.frozenCards}</div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 text-purple-400 mb-2">
+            <Activity className="w-5 h-5" />
+            <span className="text-sm">Transacciones</span>
+          </div>
+          <div className="text-2xl font-bold text-white">{stats.totalTransactions}</div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 text-amber-400 mb-2">
+            <DollarSign className="w-5 h-5" />
+            <span className="text-sm">Total Gastado</span>
+          </div>
+          <div className="text-2xl font-bold text-white">${stats.totalSpent.toLocaleString()}</div>
+        </div>
+      </div>
+      
+      {/* Network Distribution */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+          <h3 className="text-sm text-gray-400 mb-3">Distribución por Red</h3>
+          <div className="flex items-center gap-6 flex-wrap">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-500" />
+              <span className="text-white font-bold">VISA</span>
+              <span className="text-gray-400">({stats.byNetwork.visa})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500" />
+              <span className="text-white font-bold">Mastercard</span>
+              <span className="text-gray-400">({stats.byNetwork.mastercard})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-cyan-500" />
+              <span className="text-white font-bold">Amex</span>
+              <span className="text-gray-400">({stats.byNetwork.amex})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-purple-500" />
+              <span className="text-white font-bold">UnionPay</span>
+              <span className="text-gray-400">({stats.byNetwork.unionpay})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Cards Grid */}
+      {cards.length === 0 ? (
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center">
+            <CreditCard className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">No hay tarjetas emitidas</h3>
+            <p className="text-gray-400 mb-6">
+              Emita su primera tarjeta virtual vinculada a una cuenta custodio
+            </p>
+            {custodyAccounts.length === 0 ? (
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 max-w-md mx-auto">
+                <div className="flex items-center gap-2 text-amber-400">
+                  <AlertTriangle className="w-5 h-5" />
+                  <span>Primero debe crear una cuenta custodio</span>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowIssueForm(true)}
+                className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all"
+              >
+                Emitir Primera Tarjeta
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+          {cards.map(card => (
+            <div key={card.id} className="space-y-4">
+              <CardDisplay
+                card={card}
+                showDetails={showDetails[card.id] || false}
+                onToggleDetails={() => toggleDetails(card.id)}
+                onAction={(action) => handleCardAction(card.id, action)}
+              />
+              
+              {/* Card Info */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Cuenta Custodio</span>
+                  <span className="text-white font-mono text-sm">{card.custodyAccountName}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Balance Disponible</span>
+                  <span className="text-green-400 font-bold">{card.currency} {card.availableBalance.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Límite de Gasto</span>
+                  <span className="text-white">{card.currency} {card.spendingLimit.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-sm">Total Gastado</span>
+                  <span className="text-amber-400">{card.currency} {card.totalSpent.toLocaleString()}</span>
+                </div>
+                
+                {/* Expand Details */}
+                <button
+                  onClick={() => setExpandedCard(expandedCard === card.id ? null : card.id)}
+                  className="w-full flex items-center justify-center gap-2 py-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  {expandedCard === card.id ? (
+                    <>
+                      <ChevronUp className="w-4 h-4" />
+                      <span className="text-sm">Menos detalles</span>
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4" />
+                      <span className="text-sm">Más detalles</span>
+                    </>
+                  )}
+                </button>
+                
+                {expandedCard === card.id && (
+                  <div className="space-y-2 pt-2 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 text-xs">Límite Diario</span>
+                      <span className="text-gray-300 text-xs">{card.currency} {card.dailyLimit.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 text-xs">Límite Mensual</span>
+                      <span className="text-gray-300 text-xs">{card.currency} {card.monthlyLimit.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 text-xs">Por Transacción</span>
+                      <span className="text-gray-300 text-xs">{card.currency} {card.perTransactionLimit.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 text-xs">3D Secure</span>
+                      <span className={`text-xs ${card.threeDSecure ? 'text-green-400' : 'text-red-400'}`}>
+                        {card.threeDSecure ? '✓ Activo' : '✗ Inactivo'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 text-xs">Contactless</span>
+                      <span className={`text-xs ${card.contactless ? 'text-green-400' : 'text-red-400'}`}>
+                        {card.contactless ? '✓ Activo' : '✗ Inactivo'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 text-xs">KYC Verificado</span>
+                      <span className={`text-xs ${card.kycVerified ? 'text-green-400' : 'text-amber-400'}`}>
+                        {card.kycVerified ? '✓ Sí' : '⚠ Pendiente'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 text-xs">Token API</span>
+                      <span className="text-gray-400 text-xs font-mono truncate max-w-[150px]">{card.cardToken}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 text-xs">Creada</span>
+                      <span className="text-gray-400 text-xs">{new Date(card.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500 text-xs">Expira</span>
+                      <span className="text-gray-400 text-xs">{new Date(card.expiresAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {/* Issue Card Modal */}
+      {showIssueForm && (
+        <IssueCardForm
+          accounts={custodyAccounts}
+          onIssue={handleIssueCard}
+          onCancel={() => setShowIssueForm(false)}
+        />
+      )}
+      
+      {/* Compliance Notice */}
+      <div className="max-w-7xl mx-auto mt-12">
+        <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <Shield className="w-6 h-6 text-blue-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-blue-400 font-bold mb-1">Protocolo de Emisión ISO 7812</h4>
+              <p className="text-blue-300/70 text-sm">
+                Las tarjetas emitidas utilizan el estándar ISO 7812 con validación Luhn. 
+                Los números BIN corresponden a rangos de prueba/demo. Para emisión comercial real
+                se requiere licencia de emisor de tarjetas y certificación PCI-DSS.
+              </p>
+              <div className="flex items-center gap-4 mt-3 flex-wrap">
+                <span className="text-xs text-blue-400/60 flex items-center gap-1">
+                  <Lock className="w-3 h-3" /> Encriptación AES-256
+                </span>
+                <span className="text-xs text-blue-400/60 flex items-center gap-1">
+                  <Shield className="w-3 h-3" /> 3D Secure Ready
+                </span>
+                <span className="text-xs text-blue-400/60 flex items-center gap-1">
+                  <Globe className="w-3 h-3" /> ISO 27001
+                </span>
+                <span className="text-xs text-blue-400/60 flex items-center gap-1">
+                  <Zap className="w-3 h-3" /> PCI-DSS Compatible
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* CSS Animation */}
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
