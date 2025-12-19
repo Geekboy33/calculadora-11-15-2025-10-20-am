@@ -660,9 +660,9 @@ export default function CardsModule() {
         cardsStore.toggleCardStatus(cardId, true);
         break;
       case 'cancel':
-        if (confirm('¿Está seguro de cancelar esta tarjeta? Esta acción no se puede deshacer.')) {
-          cardsStore.cancelCard(cardId);
-        }
+      case 'delete':
+        // Eliminar inmediatamente sin confirmación
+        cardsStore.deleteCard(cardId);
         break;
       case 'sync':
         cardsStore.syncBalanceWithCustody(cardId);
