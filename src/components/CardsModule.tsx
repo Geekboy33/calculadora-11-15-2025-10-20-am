@@ -36,6 +36,152 @@ import { cardsStore, VirtualCard } from '../lib/cards-store';
 import { custodyStore, CustodyAccount } from '../lib/custody-store';
 import { runCardValidationTests, demonstrateLuhnAlgorithm } from '../lib/cards-validation-test';
 import { cardIssuingService, AVAILABLE_PROVIDERS, IssuedCard } from '../lib/card-issuing-providers';
+import { useLanguage } from '../lib/i18n';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🌐 TRADUCCIONES
+// ═══════════════════════════════════════════════════════════════════════════
+
+const translations = {
+  es: {
+    title: 'Tarjetas Virtuales DCB',
+    subtitle: 'Sistema de emisión de tarjetas vinculadas a cuentas custodio',
+    issueCard: 'Emitir Tarjeta',
+    issueRealCard: 'Tarjeta REAL Online',
+    configureApi: 'Configurar API',
+    verifyLuhn: 'Verificar Luhn',
+    myCards: 'Mis Tarjetas',
+    noCards: 'No hay tarjetas emitidas',
+    noCardsDesc: 'Emita su primera tarjeta virtual vinculada a una cuenta custodio.',
+    custodyAccount: 'Cuenta Custodio',
+    cardholderName: 'Nombre del Titular',
+    network: 'Red',
+    tier: 'Categoría',
+    spendingLimit: 'Límite de Gasto',
+    cancel: 'Cancelar',
+    issue: 'Emitir Tarjeta',
+    issuing: 'Emitiendo...',
+    balance: 'Balance',
+    available: 'Disponible',
+    spent: 'Gastado',
+    transactions: 'Transacciones',
+    validThru: 'Válido Hasta',
+    freeze: 'Congelar',
+    unfreeze: 'Descongelar',
+    delete: 'Eliminar',
+    syncBalance: 'Sincronizar',
+    viewDetails: 'Ver Detalles',
+    hideDetails: 'Ocultar Detalles',
+    copied: '¡Copiado!',
+    active: 'Activa',
+    frozen: 'Congelada',
+    cancelled: 'Cancelada',
+    expired: 'Expirada',
+    inactive: 'Inactiva',
+    realCardsTitle: 'Tarjetas REALES con Fondos',
+    fundsAvailable: 'FONDOS DISPONIBLES',
+    loaded: 'Cargado',
+    addFunds: 'Agregar Fondos',
+    withdraw: 'Retirar',
+    copyForPayment: 'Copiar datos para pago online',
+    lastReload: 'Última recarga',
+    linkedAccount: 'Cuenta Custodio',
+    fundUsage: 'Uso de fondos',
+    configureRealCards: 'Configurar Emisión de Tarjetas REALES',
+    configureRealCardsDesc: 'Configure un proveedor para emitir tarjetas que funcionen en compras online reales.',
+    selectProvider: 'Seleccionar Proveedor',
+    apiKey: 'API Key',
+    environment: 'Entorno',
+    sandbox: 'Sandbox',
+    production: 'Producción',
+    saveConfig: 'Guardar Configuración',
+    issueRealCardTitle: 'Emitir Tarjeta REAL Online',
+    issueRealCardDesc: 'Esta tarjeta funcionará para compras reales en internet.',
+    fundSource: 'Cuenta Custodio (Fuente de Fondos)',
+    amountToLoad: 'MONTO A CARGAR EN LA TARJETA',
+    amountToLoadDesc: 'Este monto se transferirá de la cuenta custodio a la tarjeta y podrá usarlo para compras online.',
+    email: 'Email',
+    wantRealCards: '¿Quiere tarjetas que funcionen ONLINE?',
+    wantRealCardsDesc: 'Configure un proveedor de emisión real (Stripe Issuing, Marqeta, Lithic) para emitir tarjetas Visa/Mastercard que puede usar para compras en internet.',
+    licensedIssuer: 'DAES Bank - Licensed Card Issuer (ISO 7812)',
+    licensedIssuerDesc: 'Tarjetas emitidas bajo protocolo ISO 7812 con BINs de producción asignados a DAES Bank como Principal Member de Visa/Mastercard. Validación Luhn certificada. Sistema PCI-DSS Level 1 compliant con EMV 3DS 2.0.',
+    binRanges: 'BIN Ranges Asignados',
+    stats: 'Estadísticas',
+    totalCards: 'Total Tarjetas',
+    activeCards: 'Activas',
+    totalBalance: 'Balance Total',
+    totalSpent: 'Total Gastado',
+  },
+  en: {
+    title: 'DCB Virtual Cards',
+    subtitle: 'Card issuance system linked to custody accounts',
+    issueCard: 'Issue Card',
+    issueRealCard: 'REAL Online Card',
+    configureApi: 'Configure API',
+    verifyLuhn: 'Verify Luhn',
+    myCards: 'My Cards',
+    noCards: 'No cards issued',
+    noCardsDesc: 'Issue your first virtual card linked to a custody account.',
+    custodyAccount: 'Custody Account',
+    cardholderName: 'Cardholder Name',
+    network: 'Network',
+    tier: 'Tier',
+    spendingLimit: 'Spending Limit',
+    cancel: 'Cancel',
+    issue: 'Issue Card',
+    issuing: 'Issuing...',
+    balance: 'Balance',
+    available: 'Available',
+    spent: 'Spent',
+    transactions: 'Transactions',
+    validThru: 'Valid Thru',
+    freeze: 'Freeze',
+    unfreeze: 'Unfreeze',
+    delete: 'Delete',
+    syncBalance: 'Sync',
+    viewDetails: 'View Details',
+    hideDetails: 'Hide Details',
+    copied: 'Copied!',
+    active: 'Active',
+    frozen: 'Frozen',
+    cancelled: 'Cancelled',
+    expired: 'Expired',
+    inactive: 'Inactive',
+    realCardsTitle: 'REAL Cards with Funds',
+    fundsAvailable: 'FUNDS AVAILABLE',
+    loaded: 'Loaded',
+    addFunds: 'Add Funds',
+    withdraw: 'Withdraw',
+    copyForPayment: 'Copy data for online payment',
+    lastReload: 'Last reload',
+    linkedAccount: 'Custody Account',
+    fundUsage: 'Fund usage',
+    configureRealCards: 'Configure REAL Card Issuance',
+    configureRealCardsDesc: 'Configure a provider to issue cards that work for real online purchases.',
+    selectProvider: 'Select Provider',
+    apiKey: 'API Key',
+    environment: 'Environment',
+    sandbox: 'Sandbox',
+    production: 'Production',
+    saveConfig: 'Save Configuration',
+    issueRealCardTitle: 'Issue REAL Online Card',
+    issueRealCardDesc: 'This card will work for real internet purchases.',
+    fundSource: 'Custody Account (Fund Source)',
+    amountToLoad: 'AMOUNT TO LOAD ON CARD',
+    amountToLoadDesc: 'This amount will be transferred from the custody account to the card and can be used for online purchases.',
+    email: 'Email',
+    wantRealCards: 'Want cards that work ONLINE?',
+    wantRealCardsDesc: 'Configure a real issuance provider (Stripe Issuing, Marqeta, Lithic) to issue Visa/Mastercard cards you can use for internet purchases.',
+    licensedIssuer: 'DAES Bank - Licensed Card Issuer (ISO 7812)',
+    licensedIssuerDesc: 'Cards issued under ISO 7812 protocol with production BINs assigned to DAES Bank as Principal Member of Visa/Mastercard. Certified Luhn validation. PCI-DSS Level 1 compliant system with EMV 3DS 2.0.',
+    binRanges: 'Assigned BIN Ranges',
+    stats: 'Statistics',
+    totalCards: 'Total Cards',
+    activeCards: 'Active',
+    totalBalance: 'Total Balance',
+    totalSpent: 'Total Spent',
+  }
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎨 ESTILOS DE TARJETAS
@@ -581,6 +727,9 @@ const IssueCardForm = ({ accounts, onIssue, onCancel }: IssueCardFormProps) => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default function CardsModule() {
+  const { language } = useLanguage();
+  const t = translations[language as keyof typeof translations] || translations.es;
+  
   const [cards, setCards] = useState<VirtualCard[]>([]);
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
   const [showIssueForm, setShowIssueForm] = useState(false);
@@ -754,10 +903,10 @@ export default function CardsModule() {
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-white">
-                Tarjetas DAES
+                {t.title}
               </h1>
               <p className="text-gray-400">
-                Emisión de tarjetas virtuales vinculadas a cuentas custodio
+                {t.subtitle}
               </p>
             </div>
           </div>
@@ -768,13 +917,13 @@ export default function CardsModule() {
                 console.clear();
                 const results = runCardValidationTests();
                 demonstrateLuhnAlgorithm('4111111111111111');
-                alert(`🧪 PRUEBAS DE VALIDACIÓN COMPLETADAS\n\n✅ Pasaron: ${results.passed}\n❌ Fallaron: ${results.failed}\n\nVer consola (F12) para detalles completos.`);
+                alert(`🧪 ${language === 'es' ? 'PRUEBAS DE VALIDACIÓN COMPLETADAS' : 'VALIDATION TESTS COMPLETED'}\n\n✅ ${language === 'es' ? 'Pasaron' : 'Passed'}: ${results.passed}\n❌ ${language === 'es' ? 'Fallaron' : 'Failed'}: ${results.failed}\n\n${language === 'es' ? 'Ver consola (F12) para detalles completos.' : 'See console (F12) for full details.'}`);
               }}
               className="flex items-center gap-2 px-4 py-3 bg-purple-500/20 border border-purple-500/50 text-purple-400 font-bold rounded-xl hover:bg-purple-500/30 transition-all"
-              title="Ejecutar pruebas de validación ISO 7812"
+              title={language === 'es' ? 'Ejecutar pruebas de validación ISO 7812' : 'Run ISO 7812 validation tests'}
             >
               <Shield className="w-5 h-5" />
-              Verificar
+              {t.verifyLuhn}
             </button>
             
             <button
@@ -784,10 +933,10 @@ export default function CardsModule() {
                   ? 'bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30' 
                   : 'bg-blue-500/20 border-blue-500/50 text-blue-400 hover:bg-blue-500/30'
               }`}
-              title="Configurar proveedor de emisión real (Stripe, Marqeta, etc.)"
+              title={language === 'es' ? 'Configurar proveedor de emisión real (Stripe, Marqeta, etc.)' : 'Configure real issuing provider (Stripe, Marqeta, etc.)'}
             >
               <Settings className="w-5 h-5" />
-              {isProviderConfigured ? 'Proveedor ✓' : 'Configurar API'}
+              {isProviderConfigured ? (language === 'es' ? 'Proveedor ✓' : 'Provider ✓') : t.configureApi}
             </button>
             
             {isProviderConfigured && (
@@ -795,10 +944,10 @@ export default function CardsModule() {
                 onClick={() => setShowRealCardForm(true)}
                 disabled={custodyAccounts.length === 0 || issuingRealCard}
                 className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold rounded-xl hover:from-green-400 hover:to-emerald-400 transition-all shadow-lg disabled:opacity-50"
-                title="Emitir tarjeta REAL que funciona online"
+                title={language === 'es' ? 'Emitir tarjeta REAL que funciona online' : 'Issue REAL card that works online'}
               >
                 <Globe className="w-5 h-5" />
-                {issuingRealCard ? 'Emitiendo...' : 'Tarjeta REAL Online'}
+                {issuingRealCard ? t.issuing : t.issueRealCard}
               </button>
             )}
             
@@ -808,7 +957,7 @@ export default function CardsModule() {
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-5 h-5" />
-              Tarjeta Demo
+              {t.issueCard}
             </button>
           </div>
         </div>
@@ -823,16 +972,15 @@ export default function CardsModule() {
                 <Globe className="w-6 h-6 text-green-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-green-400 font-bold mb-1">¿Quiere tarjetas que funcionen ONLINE?</h3>
+                <h3 className="text-green-400 font-bold mb-1">{t.wantRealCards}</h3>
                 <p className="text-green-300/70 text-sm mb-3">
-                  Configure un proveedor de emisión real (Stripe Issuing, Marqeta, Lithic) para emitir 
-                  tarjetas Visa/Mastercard que puede usar para compras en internet.
+                  {t.wantRealCardsDesc}
                 </p>
                 <button
                   onClick={() => setShowProviderConfig(true)}
                   className="px-4 py-2 bg-green-500 text-black font-bold rounded-lg hover:bg-green-400 transition-all text-sm"
                 >
-                  Configurar Proveedor de Emisión
+                  {t.configureApi}
                 </button>
               </div>
             </div>
@@ -845,7 +993,7 @@ export default function CardsModule() {
         <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30 rounded-xl p-4">
           <div className="flex items-center gap-2 text-blue-400 mb-2">
             <CreditCard className="w-5 h-5" />
-            <span className="text-sm">Total Tarjetas</span>
+            <span className="text-sm">{t.totalCards}</span>
           </div>
           <div className="text-2xl font-bold text-white">{stats.totalCards}</div>
         </div>
@@ -853,7 +1001,7 @@ export default function CardsModule() {
         <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 rounded-xl p-4">
           <div className="flex items-center gap-2 text-green-400 mb-2">
             <Check className="w-5 h-5" />
-            <span className="text-sm">Activas</span>
+            <span className="text-sm">{t.activeCards}</span>
           </div>
           <div className="text-2xl font-bold text-white">{stats.activeCards}</div>
         </div>
@@ -861,7 +1009,7 @@ export default function CardsModule() {
         <div className="bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 border border-cyan-500/30 rounded-xl p-4">
           <div className="flex items-center gap-2 text-cyan-400 mb-2">
             <Snowflake className="w-5 h-5" />
-            <span className="text-sm">Congeladas</span>
+            <span className="text-sm">{t.frozen}</span>
           </div>
           <div className="text-2xl font-bold text-white">{stats.frozenCards}</div>
         </div>
@@ -869,7 +1017,7 @@ export default function CardsModule() {
         <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/30 rounded-xl p-4">
           <div className="flex items-center gap-2 text-purple-400 mb-2">
             <Activity className="w-5 h-5" />
-            <span className="text-sm">Transacciones</span>
+            <span className="text-sm">{t.transactions}</span>
           </div>
           <div className="text-2xl font-bold text-white">{stats.totalTransactions}</div>
         </div>
@@ -877,7 +1025,7 @@ export default function CardsModule() {
         <div className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 rounded-xl p-4">
           <div className="flex items-center gap-2 text-amber-400 mb-2">
             <DollarSign className="w-5 h-5" />
-            <span className="text-sm">Total Gastado</span>
+            <span className="text-sm">{t.totalSpent}</span>
           </div>
           <div className="text-2xl font-bold text-white">${stats.totalSpent.toLocaleString()}</div>
         </div>
@@ -886,7 +1034,7 @@ export default function CardsModule() {
       {/* Network Distribution */}
       <div className="max-w-7xl mx-auto mb-8">
         <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-          <h3 className="text-sm text-gray-400 mb-3">Distribución por Red</h3>
+          <h3 className="text-sm text-gray-400 mb-3">{language === 'es' ? 'Distribución por Red' : 'Distribution by Network'}</h3>
           <div className="flex items-center gap-6 flex-wrap">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
@@ -917,15 +1065,15 @@ export default function CardsModule() {
         <div className="max-w-7xl mx-auto">
           <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center">
             <CreditCard className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">No hay tarjetas emitidas</h3>
+            <h3 className="text-xl font-bold text-white mb-2">{t.noCards}</h3>
             <p className="text-gray-400 mb-6">
-              Emita su primera tarjeta virtual vinculada a una cuenta custodio
+              {t.noCardsDesc}
             </p>
             {custodyAccounts.length === 0 ? (
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 max-w-md mx-auto">
                 <div className="flex items-center gap-2 text-amber-400">
                   <AlertTriangle className="w-5 h-5" />
-                  <span>Primero debe crear una cuenta custodio</span>
+                  <span>{language === 'es' ? 'Primero debe crear una cuenta custodio' : 'You must first create a custody account'}</span>
                 </div>
               </div>
             ) : (
@@ -933,7 +1081,7 @@ export default function CardsModule() {
                 onClick={() => setShowIssueForm(true)}
                 className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all"
               >
-                Emitir Primera Tarjeta
+                {language === 'es' ? 'Emitir Primera Tarjeta' : 'Issue First Card'}
               </button>
             )}
           </div>
@@ -952,19 +1100,19 @@ export default function CardsModule() {
               {/* Card Info */}
               <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Cuenta Custodio</span>
+                  <span className="text-gray-400 text-sm">{t.custodyAccount}</span>
                   <span className="text-white font-mono text-sm">{card.custodyAccountName}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Balance Disponible</span>
+                  <span className="text-gray-400 text-sm">{t.available}</span>
                   <span className="text-green-400 font-bold">{card.currency} {card.availableBalance.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Límite de Gasto</span>
+                  <span className="text-gray-400 text-sm">{t.spendingLimit}</span>
                   <span className="text-white">{card.currency} {card.spendingLimit.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Total Gastado</span>
+                  <span className="text-gray-400 text-sm">{t.spent}</span>
                   <span className="text-amber-400">{card.currency} {card.totalSpent.toLocaleString()}</span>
                 </div>
                 
@@ -976,12 +1124,12 @@ export default function CardsModule() {
                   {expandedCard === card.id ? (
                     <>
                       <ChevronUp className="w-4 h-4" />
-                      <span className="text-sm">Menos detalles</span>
+                      <span className="text-sm">{language === 'es' ? 'Menos detalles' : 'Less details'}</span>
                     </>
                   ) : (
                     <>
                       <ChevronDown className="w-4 h-4" />
-                      <span className="text-sm">Más detalles</span>
+                      <span className="text-sm">{language === 'es' ? 'Más detalles' : 'More details'}</span>
                     </>
                   )}
                 </button>
@@ -989,33 +1137,33 @@ export default function CardsModule() {
                 {expandedCard === card.id && (
                   <div className="space-y-2 pt-2 border-t border-white/10">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500 text-xs">Límite Diario</span>
+                      <span className="text-gray-500 text-xs">{language === 'es' ? 'Límite Diario' : 'Daily Limit'}</span>
                       <span className="text-gray-300 text-xs">{card.currency} {card.dailyLimit.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500 text-xs">Límite Mensual</span>
+                      <span className="text-gray-500 text-xs">{language === 'es' ? 'Límite Mensual' : 'Monthly Limit'}</span>
                       <span className="text-gray-300 text-xs">{card.currency} {card.monthlyLimit.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500 text-xs">Por Transacción</span>
+                      <span className="text-gray-500 text-xs">{language === 'es' ? 'Por Transacción' : 'Per Transaction'}</span>
                       <span className="text-gray-300 text-xs">{card.currency} {card.perTransactionLimit.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-500 text-xs">3D Secure</span>
                       <span className={`text-xs ${card.threeDSecure ? 'text-green-400' : 'text-red-400'}`}>
-                        {card.threeDSecure ? '✓ Activo' : '✗ Inactivo'}
+                        {card.threeDSecure ? (language === 'es' ? '✓ Activo' : '✓ Active') : (language === 'es' ? '✗ Inactivo' : '✗ Inactive')}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-500 text-xs">Contactless</span>
                       <span className={`text-xs ${card.contactless ? 'text-green-400' : 'text-red-400'}`}>
-                        {card.contactless ? '✓ Activo' : '✗ Inactivo'}
+                        {card.contactless ? (language === 'es' ? '✓ Activo' : '✓ Active') : (language === 'es' ? '✗ Inactivo' : '✗ Inactive')}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500 text-xs">KYC Verificado</span>
+                      <span className="text-gray-500 text-xs">{language === 'es' ? 'KYC Verificado' : 'KYC Verified'}</span>
                       <span className={`text-xs ${card.kycVerified ? 'text-green-400' : 'text-amber-400'}`}>
-                        {card.kycVerified ? '✓ Sí' : '⚠ Pendiente'}
+                        {card.kycVerified ? (language === 'es' ? '✓ Sí' : '✓ Yes') : (language === 'es' ? '⚠ Pendiente' : '⚠ Pending')}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -1023,11 +1171,11 @@ export default function CardsModule() {
                       <span className="text-gray-400 text-xs font-mono truncate max-w-[150px]">{card.cardToken}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500 text-xs">Creada</span>
+                      <span className="text-gray-500 text-xs">{language === 'es' ? 'Creada' : 'Created'}</span>
                       <span className="text-gray-400 text-xs">{new Date(card.createdAt).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500 text-xs">Expira</span>
+                      <span className="text-gray-500 text-xs">{language === 'es' ? 'Expira' : 'Expires'}</span>
                       <span className="text-gray-400 text-xs">{new Date(card.expiresAt).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -1053,15 +1201,15 @@ export default function CardsModule() {
           <div className="bg-[#1a1a2e] rounded-2xl p-6 max-w-2xl w-full border border-white/10 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
               <Globe className="w-8 h-8 text-green-400" />
-              Configurar Emisión de Tarjetas REALES
+              {t.configureRealCards}
             </h2>
             <p className="text-gray-400 mb-6">
-              Configure un proveedor para emitir tarjetas que funcionen en compras online reales.
+              {t.configureRealCardsDesc}
             </p>
             
             {/* Lista de Proveedores */}
             <div className="space-y-3 mb-6">
-              <label className="block text-sm text-gray-400 mb-2">Seleccionar Proveedor</label>
+              <label className="block text-sm text-gray-400 mb-2">{t.selectProvider}</label>
               <div className="grid grid-cols-2 gap-3">
                 {AVAILABLE_PROVIDERS.map(provider => (
                   <button
@@ -1094,13 +1242,13 @@ export default function CardsModule() {
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-sm text-gray-400 mb-2">
-                  API Key {providerConfig.provider === 'stripe' && '(sk_test_xxx o sk_live_xxx)'}
+                  {t.apiKey} {providerConfig.provider === 'stripe' && '(sk_test_xxx o sk_live_xxx)'}
                 </label>
                 <input
                   type="password"
                   value={providerConfig.apiKey}
                   onChange={(e) => setProviderConfig(prev => ({ ...prev, apiKey: e.target.value }))}
-                  placeholder="Ingrese su API Key"
+                  placeholder={language === 'es' ? 'Ingrese su API Key' : 'Enter your API Key'}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white font-mono"
                 />
               </div>
@@ -1112,14 +1260,14 @@ export default function CardsModule() {
                     type="password"
                     value={providerConfig.secretKey}
                     onChange={(e) => setProviderConfig(prev => ({ ...prev, secretKey: e.target.value }))}
-                    placeholder="Ingrese el Secret Key"
+                    placeholder={language === 'es' ? 'Ingrese el Secret Key' : 'Enter the Secret Key'}
                     className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white font-mono"
                   />
                 </div>
               )}
               
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Entorno</label>
+                <label className="block text-sm text-gray-400 mb-2">{t.environment}</label>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setProviderConfig(prev => ({ ...prev, environment: 'sandbox' }))}
@@ -1129,7 +1277,7 @@ export default function CardsModule() {
                         : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
                     }`}
                   >
-                    🧪 Sandbox (Pruebas)
+                    🧪 {t.sandbox}
                   </button>
                   <button
                     onClick={() => setProviderConfig(prev => ({ ...prev, environment: 'production' }))}
@@ -1139,7 +1287,7 @@ export default function CardsModule() {
                         : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
                     }`}
                   >
-                    🚀 Producción (Real)
+                    🚀 {t.production}
                   </button>
                 </div>
               </div>
@@ -1163,10 +1311,10 @@ export default function CardsModule() {
                   </a>
                 </p>
                 <p className="text-blue-300/70 text-sm mb-2">
-                  <strong>Precio:</strong> {AVAILABLE_PROVIDERS.find(p => p.id === providerConfig.provider)?.pricing}
+                  <strong>{language === 'es' ? 'Precio' : 'Price'}:</strong> {AVAILABLE_PROVIDERS.find(p => p.id === providerConfig.provider)?.pricing}
                 </p>
                 <p className="text-blue-300/70 text-sm">
-                  <strong>Requisitos:</strong> {AVAILABLE_PROVIDERS.find(p => p.id === providerConfig.provider)?.requirements.join(', ')}
+                  <strong>{language === 'es' ? 'Requisitos' : 'Requirements'}:</strong> {AVAILABLE_PROVIDERS.find(p => p.id === providerConfig.provider)?.requirements.join(', ')}
                 </p>
               </div>
             )}
@@ -1177,14 +1325,14 @@ export default function CardsModule() {
                 onClick={() => setShowProviderConfig(false)}
                 className="flex-1 py-3 rounded-lg bg-white/10 text-gray-400 hover:bg-white/20 transition-all"
               >
-                Cancelar
+                {t.cancel}
               </button>
               <button
                 onClick={handleConfigureProvider}
                 disabled={!providerConfig.apiKey}
                 className="flex-1 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold hover:from-green-400 hover:to-emerald-400 transition-all disabled:opacity-50"
               >
-                Guardar Configuración
+                {t.saveConfig}
               </button>
             </div>
           </div>
@@ -1197,10 +1345,10 @@ export default function CardsModule() {
           <div className="bg-[#1a1a2e] rounded-2xl p-6 max-w-lg w-full border border-white/10 shadow-2xl">
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
               <CreditCard className="w-8 h-8 text-green-400" />
-              Emitir Tarjeta REAL Online
+              {t.issueRealCardTitle}
             </h2>
             <p className="text-gray-400 mb-6">
-              Esta tarjeta funcionará para compras reales en internet.
+              {t.issueRealCardDesc}
             </p>
             
             <form onSubmit={(e) => {
@@ -1215,13 +1363,13 @@ export default function CardsModule() {
               });
             }} className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Cuenta Custodio (Fuente de Fondos)</label>
+                <label className="block text-sm text-gray-400 mb-2">{t.fundSource}</label>
                 <select
                   name="account"
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white"
                   required
                 >
-                  <option value="">Seleccionar cuenta...</option>
+                  <option value="">{language === 'es' ? 'Seleccionar cuenta...' : 'Select account...'}</option>
                   {custodyAccounts.map(acc => (
                     <option key={acc.id} value={acc.id}>
                       {acc.accountName} - {acc.currency} {acc.availableBalance.toLocaleString()}
@@ -1231,22 +1379,22 @@ export default function CardsModule() {
               </div>
               
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Nombre del Titular</label>
+                <label className="block text-sm text-gray-400 mb-2">{t.cardholderName}</label>
                 <input
                   type="text"
                   name="name"
-                  placeholder="NOMBRE COMPLETO"
+                  placeholder={language === 'es' ? 'NOMBRE COMPLETO' : 'FULL NAME'}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white uppercase"
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Email</label>
+                <label className="block text-sm text-gray-400 mb-2">{t.email}</label>
                 <input
                   type="email"
                   name="email"
-                  placeholder="email@ejemplo.com"
+                  placeholder="email@example.com"
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white"
                   required
                 />
@@ -1254,7 +1402,7 @@ export default function CardsModule() {
               
               <div>
                 <label className="block text-sm text-gray-400 mb-2">
-                  💰 MONTO A CARGAR EN LA TARJETA (se descuenta de cuenta custodio)
+                  💰 {t.amountToLoad}
                 </label>
                 <input
                   type="number"
@@ -1264,14 +1412,14 @@ export default function CardsModule() {
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-lg font-bold"
                 />
                 <p className="text-xs text-green-400 mt-1">
-                  💡 Este monto se transferirá de la cuenta custodio a la tarjeta y podrá usarlo para compras online.
+                  💡 {t.amountToLoadDesc}
                 </p>
               </div>
               
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
                 <div className="flex items-center gap-2 text-amber-400 text-sm">
                   <AlertTriangle className="w-4 h-4" />
-                  <span>Esta tarjeta se emitirá a través de {cardIssuingService.getConfig()?.provider.toUpperCase()} y tendrá cargos reales.</span>
+                  <span>{language === 'es' ? `Esta tarjeta se emitirá a través de ${cardIssuingService.getConfig()?.provider.toUpperCase()} y tendrá cargos reales.` : `This card will be issued through ${cardIssuingService.getConfig()?.provider.toUpperCase()} and will have real charges.`}</span>
                 </div>
               </div>
               
@@ -1281,7 +1429,7 @@ export default function CardsModule() {
                   onClick={() => setShowRealCardForm(false)}
                   className="flex-1 py-3 rounded-lg bg-white/10 text-gray-400 hover:bg-white/20 transition-all"
                 >
-                  Cancelar
+                  {t.cancel}
                 </button>
                 <button
                   type="submit"
@@ -1291,12 +1439,12 @@ export default function CardsModule() {
                   {issuingRealCard ? (
                     <>
                       <RefreshCw className="w-5 h-5 animate-spin" />
-                      Emitiendo...
+                      {t.issuing}
                     </>
                   ) : (
                     <>
                       <CreditCard className="w-5 h-5" />
-                      Emitir Tarjeta REAL
+                      {t.issueRealCard}
                     </>
                   )}
                 </button>
@@ -1311,7 +1459,7 @@ export default function CardsModule() {
         <div className="max-w-7xl mx-auto mt-8">
           <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center gap-2">
             <Globe className="w-6 h-6" />
-            💳 Tarjetas REALES con Fondos ({realCards.length})
+            💳 {t.realCardsTitle} ({realCards.length})
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {realCards.map(card => (
@@ -1326,14 +1474,14 @@ export default function CardsModule() {
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                       card.status === 'active' ? 'bg-green-500 text-black' : 'bg-red-500/20 text-red-400'
                     }`}>
-                      {card.status === 'active' ? '● ACTIVA' : card.status.toUpperCase()}
+                      {card.status === 'active' ? `● ${t.active.toUpperCase()}` : card.status.toUpperCase()}
                     </span>
                   </div>
                   <div className="font-mono text-white text-2xl tracking-wider">
                     {card.cardNumber.replace(/(\d{4})/g, '$1 ').trim()}
                   </div>
                   <div className="flex items-center gap-6 text-sm text-gray-300 mt-2">
-                    <span>Vence: {String(card.expMonth).padStart(2, '0')}/{card.expYear}</span>
+                    <span>{t.validThru}: {String(card.expMonth).padStart(2, '0')}/{card.expYear}</span>
                     <span>CVV: <span className="font-mono">{card.cvc}</span></span>
                   </div>
                 </div>
@@ -1342,20 +1490,20 @@ export default function CardsModule() {
                 <div className="p-4 space-y-4">
                   {/* Balance Principal */}
                   <div className="bg-black/30 rounded-xl p-4">
-                    <div className="text-gray-400 text-sm mb-1">💰 FONDOS DISPONIBLES</div>
+                    <div className="text-gray-400 text-sm mb-1">💰 {t.fundsAvailable}</div>
                     <div className="text-3xl font-bold text-green-400">
                       {card.currency} {(card.availableBalance || card.fundedAmount || card.spendingLimit).toLocaleString()}
                     </div>
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                      <span>Cargado: {card.currency} {(card.fundedAmount || card.spendingLimit).toLocaleString()}</span>
-                      <span>Gastado: {card.currency} {(card.spentAmount || 0).toLocaleString()}</span>
+                      <span>{t.loaded}: {card.currency} {(card.fundedAmount || card.spendingLimit).toLocaleString()}</span>
+                      <span>{t.spent}: {card.currency} {(card.spentAmount || 0).toLocaleString()}</span>
                     </div>
                   </div>
                   
                   {/* Barra de uso */}
                   <div>
                     <div className="flex justify-between text-xs text-gray-400 mb-1">
-                      <span>Uso de fondos</span>
+                      <span>{t.fundUsage}</span>
                       <span>{Math.round(((card.spentAmount || 0) / (card.fundedAmount || card.spendingLimit || 1)) * 100)}%</span>
                     </div>
                     <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -1369,11 +1517,11 @@ export default function CardsModule() {
                   {/* Info adicional */}
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="bg-white/5 rounded-lg p-3">
-                      <div className="text-gray-500 text-xs">Cuenta Custodio</div>
+                      <div className="text-gray-500 text-xs">{t.linkedAccount}</div>
                       <div className="text-white truncate">{card.custodyAccountId ? custodyAccounts.find(a => a.id === card.custodyAccountId)?.accountName || 'N/A' : 'N/A'}</div>
                     </div>
                     <div className="bg-white/5 rounded-lg p-3">
-                      <div className="text-gray-500 text-xs">Última recarga</div>
+                      <div className="text-gray-500 text-xs">{t.lastReload}</div>
                       <div className="text-white">{card.lastFundedAt ? new Date(card.lastFundedAt).toLocaleDateString() : 'N/A'}</div>
                     </div>
                   </div>
@@ -1382,59 +1530,61 @@ export default function CardsModule() {
                   <div className="flex gap-2 pt-2">
                     <button
                       onClick={async () => {
-                        const amount = prompt(`Monto a agregar a la tarjeta (${card.currency}):`);
+                        const amount = prompt(language === 'es' ? `Monto a agregar a la tarjeta (${card.currency}):` : `Amount to add to card (${card.currency}):`);
                         if (amount && !isNaN(Number(amount))) {
                           try {
                             const result = await cardIssuingService.addFundsToCard(card.id, Number(amount), card.custodyAccountId);
                             if (result.success) {
-                              alert(`✅ Fondos agregados!\nNuevo balance: ${card.currency} ${result.newBalance.toLocaleString()}`);
+                              alert(language === 'es' ? `✅ Fondos agregados!\nNuevo balance: ${card.currency} ${result.newBalance.toLocaleString()}` : `✅ Funds added!\nNew balance: ${card.currency} ${result.newBalance.toLocaleString()}`);
                               // Recargar tarjetas
                               setRealCards(cardIssuingService.getIssuedCards());
                             }
                           } catch (error) {
-                            alert(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+                            alert(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
                           }
                         }
                       }}
                       className="flex-1 py-2 px-3 bg-green-500/20 border border-green-500/50 text-green-400 rounded-lg hover:bg-green-500/30 transition-all text-sm font-bold flex items-center justify-center gap-2"
                     >
                       <Plus className="w-4 h-4" />
-                      Agregar Fondos
+                      {t.addFunds}
                     </button>
                     <button
                       onClick={async () => {
                         const maxWithdraw = card.availableBalance || card.fundedAmount || 0;
-                        const amount = prompt(`Monto a retirar (máx: ${card.currency} ${maxWithdraw.toLocaleString()}):`);
+                        const amount = prompt(language === 'es' ? `Monto a retirar (máx: ${card.currency} ${maxWithdraw.toLocaleString()}):` : `Amount to withdraw (max: ${card.currency} ${maxWithdraw.toLocaleString()}):`);
                         if (amount && !isNaN(Number(amount))) {
                           try {
                             const result = await cardIssuingService.withdrawFundsFromCard(card.id, Number(amount));
                             if (result.success) {
-                              alert(`✅ Fondos retirados!\nNuevo balance: ${card.currency} ${result.newBalance.toLocaleString()}`);
+                              alert(language === 'es' ? `✅ Fondos retirados!\nNuevo balance: ${card.currency} ${result.newBalance.toLocaleString()}` : `✅ Funds withdrawn!\nNew balance: ${card.currency} ${result.newBalance.toLocaleString()}`);
                               setRealCards(cardIssuingService.getIssuedCards());
                             }
                           } catch (error) {
-                            alert(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+                            alert(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
                           }
                         }
                       }}
                       className="flex-1 py-2 px-3 bg-amber-500/20 border border-amber-500/50 text-amber-400 rounded-lg hover:bg-amber-500/30 transition-all text-sm font-bold flex items-center justify-center gap-2"
                     >
                       <DollarSign className="w-4 h-4" />
-                      Retirar
+                      {t.withdraw}
                     </button>
                   </div>
                   
                   {/* Copiar datos */}
                   <button
                     onClick={() => {
-                      const data = `Número: ${card.cardNumber}\nVence: ${String(card.expMonth).padStart(2, '0')}/${card.expYear}\nCVV: ${card.cvc}\nTitular: ${card.cardholderName}`;
+                      const data = language === 'es' 
+                        ? `Número: ${card.cardNumber}\nVence: ${String(card.expMonth).padStart(2, '0')}/${card.expYear}\nCVV: ${card.cvc}\nTitular: ${card.cardholderName}`
+                        : `Number: ${card.cardNumber}\nExpires: ${String(card.expMonth).padStart(2, '0')}/${card.expYear}\nCVV: ${card.cvc}\nCardholder: ${card.cardholderName}`;
                       navigator.clipboard.writeText(data);
-                      alert('✅ Datos de tarjeta copiados al portapapeles');
+                      alert(language === 'es' ? '✅ Datos de tarjeta copiados al portapapeles' : '✅ Card data copied to clipboard');
                     }}
                     className="w-full py-2 bg-white/5 border border-white/10 text-gray-400 rounded-lg hover:bg-white/10 transition-all text-sm flex items-center justify-center gap-2"
                   >
                     <Copy className="w-4 h-4" />
-                    Copiar datos para pago online
+                    {t.copyForPayment}
                   </button>
                 </div>
               </div>
@@ -1449,16 +1599,14 @@ export default function CardsModule() {
           <div className="flex items-start gap-3">
             <Shield className="w-6 h-6 text-green-400 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-green-400 font-bold mb-1">🏦 DAES Bank - Licensed Card Issuer (ISO 7812)</h4>
+              <h4 className="text-green-400 font-bold mb-1">🏦 {t.licensedIssuer}</h4>
               <p className="text-green-300/70 text-sm">
-                Tarjetas emitidas bajo protocolo ISO 7812 con BINs de producción asignados a DAES Bank 
-                como Principal Member de Visa/Mastercard. Validación Luhn certificada. 
-                Sistema PCI-DSS Level 1 compliant con EMV 3DS 2.0.
+                {t.licensedIssuerDesc}
               </p>
               
               {/* BIN Ranges */}
               <div className="mt-3 p-3 bg-black/30 rounded-lg">
-                <div className="text-xs text-gray-400 mb-2 font-bold">BIN Ranges Asignados:</div>
+                <div className="text-xs text-gray-400 mb-2 font-bold">{t.binRanges}:</div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                   <div className="bg-blue-500/20 rounded px-2 py-1">
                     <span className="text-blue-400">VISA:</span>
