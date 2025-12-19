@@ -182,6 +182,17 @@ const CardDisplay = ({ card, showDetails, onToggleDetails, onAction }: CardDispl
     return num.match(/.{1,4}/g)?.join(' ') || num;
   };
 
+  // Colores especiales por tier
+  const tierColors: Record<string, { bg: string; text: string; glow: string }> = {
+    classic: { bg: 'from-gray-600 to-gray-700', text: 'text-gray-200', glow: 'shadow-gray-500/30' },
+    gold: { bg: 'from-yellow-500 to-amber-600', text: 'text-yellow-900', glow: 'shadow-yellow-500/50' },
+    platinum: { bg: 'from-slate-300 to-slate-400', text: 'text-slate-900', glow: 'shadow-slate-300/50' },
+    black: { bg: 'from-gray-900 to-black', text: 'text-white', glow: 'shadow-purple-500/30' },
+    infinite: { bg: 'from-purple-600 to-indigo-800', text: 'text-white', glow: 'shadow-purple-500/50' },
+  };
+  
+  const tierStyle = tierColors[card.cardTier] || tierColors.classic;
+
   return (
     <div className="relative group">
       {/* Tarjeta Visual */}
@@ -192,16 +203,53 @@ const CardDisplay = ({ card, showDetails, onToggleDetails, onAction }: CardDispl
           boxShadow: `0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px ${style.accent}30`
         }}
       >
+        {/* DCB Logo y Nombre del Banco */}
+        <div className="absolute top-3 left-6 flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg">
+              <span className="text-white font-black text-xs">DCB</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[8px] font-bold tracking-wider opacity-80" style={{ color: style.textColor }}>
+                DIGITAL COMMERCIAL
+              </span>
+              <span className="text-[7px] tracking-widest opacity-60" style={{ color: style.textColor }}>
+                BANK
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        {/* TIER BADGE - Prominente en la parte superior */}
+        <div className="absolute top-2 right-6 flex flex-col items-end">
+          <div 
+            className={`px-3 py-1 rounded-md bg-gradient-to-r ${tierStyle.bg} ${tierStyle.glow} shadow-lg`}
+          >
+            <span className={`text-xs font-black tracking-widest ${tierStyle.text}`}>
+              {card.cardTier.toUpperCase()}
+            </span>
+          </div>
+          <div className="mt-1" style={{ color: style.textColor }}>
+            <NetworkLogo network={card.cardNetwork} />
+          </div>
+        </div>
+        
         {/* Chip */}
-        <div className="absolute top-6 left-6">
-          <div className="w-12 h-9 rounded-md bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600 flex items-center justify-center">
-            <div className="w-8 h-5 rounded-sm border border-yellow-700/30 bg-gradient-to-r from-yellow-400 to-yellow-500" />
+        <div className="absolute top-14 left-6">
+          <div className="w-12 h-9 rounded-md bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600 flex items-center justify-center shadow-md">
+            <div className="w-8 h-5 rounded-sm border border-yellow-700/30 bg-gradient-to-r from-yellow-400 to-yellow-500">
+              <div className="grid grid-cols-3 gap-px h-full p-0.5">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-yellow-600/40 rounded-[1px]" />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
         
         {/* Contactless */}
         {card.contactless && (
-          <div className="absolute top-6 left-20 opacity-70">
+          <div className="absolute top-14 left-20 opacity-70">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={style.accent} strokeWidth="2">
               <path d="M8.5 14.5A5 5 0 0 1 7 12a5 5 0 0 1 1.5-3.5"/>
               <path d="M12 17a7 7 0 0 1-3-5.5 7 7 0 0 1 3-5.5"/>
@@ -210,16 +258,11 @@ const CardDisplay = ({ card, showDetails, onToggleDetails, onAction }: CardDispl
           </div>
         )}
         
-        {/* Logo de Red */}
-        <div className="absolute top-4 right-6" style={{ color: style.textColor }}>
-          <NetworkLogo network={card.cardNetwork} />
-        </div>
-        
         {/* Número de Tarjeta */}
-        <div className="absolute top-20 left-6 right-6">
+        <div className="absolute top-[105px] left-6 right-6">
           <div 
-            className="font-mono text-xl md:text-2xl tracking-widest cursor-pointer flex items-center gap-2"
-            style={{ color: style.textColor }}
+            className="font-mono text-xl md:text-2xl tracking-[0.2em] cursor-pointer flex items-center gap-2"
+            style={{ color: style.textColor, textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}
             onClick={() => showDetails && copyToClipboard(card.cardNumber)}
           >
             {formatCardNumber(fullNumber)}
@@ -244,25 +287,27 @@ const CardDisplay = ({ card, showDetails, onToggleDetails, onAction }: CardDispl
               {cvv}
             </div>
           </div>
+          <div>
+            <div className="text-[10px] opacity-70 uppercase tracking-wider">Type</div>
+            <div className="font-mono text-sm uppercase">{card.cardCategory}</div>
+          </div>
         </div>
         
         {/* Nombre del Titular */}
-        <div className="absolute bottom-6 left-6 right-20" style={{ color: style.textColor }}>
-          <div className="font-mono text-sm tracking-wider truncate">
+        <div className="absolute bottom-6 left-6 right-24" style={{ color: style.textColor }}>
+          <div className="font-mono text-sm tracking-wider truncate uppercase">
             {card.cardholderName}
           </div>
         </div>
         
-        {/* Tier Badge */}
-        <div 
-          className="absolute bottom-6 right-6 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded"
-          style={{ 
-            backgroundColor: `${style.accent}30`,
-            color: style.textColor,
-            border: `1px solid ${style.accent}50`
-          }}
-        >
-          {card.cardTier}
+        {/* DCB Badge pequeño abajo derecha */}
+        <div className="absolute bottom-5 right-6 flex items-center gap-1">
+          <div className="w-5 h-5 rounded bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+            <span className="text-white font-black text-[6px]">DCB</span>
+          </div>
+          <span className="text-[8px] opacity-60" style={{ color: style.textColor }}>
+            MEMBER
+          </span>
         </div>
         
         {/* Status Overlay */}
