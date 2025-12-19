@@ -206,7 +206,7 @@ const CardDisplay = ({ card, showDetails, onToggleDetails, onAction }: CardDispl
         {/* DCB Logo y Nombre del Banco */}
         <div className="absolute top-3 left-6 flex items-center gap-2">
           <div className="flex items-center gap-1">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-900 to-black flex items-center justify-center shadow-lg border border-white/20">
               <span className="text-white font-black text-xs">DCB</span>
             </div>
             <div className="flex flex-col">
@@ -302,7 +302,7 @@ const CardDisplay = ({ card, showDetails, onToggleDetails, onAction }: CardDispl
         
         {/* DCB Badge pequeño abajo derecha */}
         <div className="absolute bottom-5 right-6 flex items-center gap-1">
-          <div className="w-5 h-5 rounded bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+          <div className="w-5 h-5 rounded bg-gradient-to-br from-gray-900 to-black flex items-center justify-center border border-white/20">
             <span className="text-white font-black text-[6px]">DCB</span>
           </div>
           <span className="text-[8px] opacity-60" style={{ color: style.textColor }}>
