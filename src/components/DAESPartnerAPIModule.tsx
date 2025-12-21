@@ -17,160 +17,743 @@ import { useEffect } from 'react';
 import jsPDF from 'jspdf';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 📄 GENERADOR DE PDF - CHECKLIST INTEGRACIÓN BANCARIA API (PROFESIONAL)
+// 📄 GENERADOR DE PDF - CHECKLIST INTEGRACIÓN BANCARIA API (INSTITUTIONAL GRADE)
+// Idiomas: ES, EN, PT, AR, RU, ZH
 // ═══════════════════════════════════════════════════════════════════════════
 
-function generateAPIChecklistPDF(language: 'es' | 'en' = 'es') {
-  const isSpanish = language === 'es';
+type PDFLanguage = 'es' | 'en' | 'pt' | 'ar' | 'ru' | 'zh';
+
+// Traducciones institucionales
+const PDF_TRANSLATIONS: Record<PDFLanguage, Record<string, string>> = {
+  es: {
+    title: 'CHECKLIST DE INTEGRACIÓN BANCARIA API',
+    subtitle: 'Documentación Técnica Institucional',
+    generalInfo: 'INFORMACIÓN INSTITUCIONAL',
+    legalName: 'Razón Social',
+    system: 'Sistema',
+    corporateWeb: 'Portal Corporativo',
+    apiPortal: 'Portal de APIs',
+    accountFormat: 'Formato de Cuenta',
+    jurisdiction: 'Jurisdicción',
+    apiSpecs: 'ESPECIFICACIONES TÉCNICAS DE API',
+    specification: 'Especificación',
+    value: 'Valor',
+    notes: 'Notas',
+    architecture: 'Arquitectura',
+    version: 'Versión',
+    stable: 'Estable',
+    dataFormat: 'Formato de Datos',
+    endpoints: 'ENDPOINTS DISPONIBLES',
+    method: 'Método',
+    description: 'Descripción',
+    createAccount: 'Crear cuenta multi-divisa',
+    listAccounts: 'Listar cuentas y balances',
+    incomingTransfers: 'Transferencias recibidas',
+    transferDetail: 'Detalle por referencia',
+    transferStatus: 'Estado de transferencia',
+    registerWebhook: 'Registrar webhook HTTPS',
+    authentication: 'AUTENTICACIÓN Y SEGURIDAD',
+    status: 'Estado',
+    implementation: 'Implementación',
+    clientCerts: 'Certificados cliente/servidor',
+    authorizedIPs: 'IPs autorizadas configurables',
+    digitalSignature: 'Firma digital de mensajes',
+    mandatoryEncryption: 'Cifrado obligatorio',
+    securityStandards: 'ESTÁNDARES DE SEGURIDAD Y CUMPLIMIENTO',
+    certification: 'Certificación',
+    scope: 'Alcance',
+    infoSecManagement: 'Gestión de Seguridad de la Información',
+    cardPayment: 'Procesamiento de pagos con tarjeta',
+    securityControls: 'Controles de seguridad y privacidad',
+    antiMoney: 'Anti-lavado de dinero',
+    dataProtection: 'Protección de datos personales',
+    identityVerification: 'Verificación de identidad',
+    capitalRequirements: 'Requisitos de capital',
+    currencies: 'DIVISAS HABILITADAS - ISO 4217',
+    isoCode: 'Código ISO',
+    currency: 'Divisa',
+    country: 'País/Región',
+    numCode: 'Código Numérico',
+    sandbox: 'AMBIENTE DE CERTIFICACIÓN',
+    resource: 'Recurso',
+    available: 'Disponible',
+    detail: 'Detalle',
+    sandboxAPI: 'API de Certificación',
+    testCredentials: 'Credenciales de Prueba',
+    testPrefix: 'Prefijo test_ (solicitar en portal)',
+    errorCodes: 'CÓDIGOS DE RESPUESTA API',
+    code: 'Código',
+    invalidCreds: 'Credenciales inválidas o expiradas',
+    expiredToken: 'Token JWT expirado (renovar)',
+    insufficientBalance: 'Balance insuficiente para operación',
+    currencyNotAllowed: 'Divisa no habilitada para cliente',
+    invalidAmount: 'Monto inválido o fuera de rango',
+    duplicateRequest: 'TransferRequestID duplicado',
+    webhookUnreachable: 'Webhook endpoint no responde',
+    rateLimitExceeded: 'Límite de solicitudes excedido',
+    operationalInfo: 'INFORMACIÓN DE CONTACTO INSTITUCIONAL',
+    department: 'Departamento',
+    channel: 'Canal',
+    techIntegration: 'Integración Técnica',
+    corporatePortal: 'Portal Corporativo',
+    partnerPortal: 'Portal de Partners',
+    support247: 'Soporte 24/7',
+    realTimeNotifications: 'Notificaciones en tiempo real',
+    compliance: 'RESUMEN DE CUMPLIMIENTO REGULATORIO',
+    regulation: 'Regulación',
+    verified: 'Verificado',
+    annualAudit: 'Auditoría anual',
+    quarterlyValidation: 'Validación trimestral',
+    independentReport: 'Informe independiente',
+    techRequirements: 'REQUISITOS TÉCNICOS PARA INTEGRACIÓN BANCARIA',
+    importantNote: 'NOTA IMPORTANTE',
+    confidentialNote: 'Este documento contiene información técnica confidencial para la integración bancaria.',
+    credentialsNote: 'La implementación requiere credenciales de producción emitidas por Digital Commercial Bank Ltd.',
+    integrationContact: 'CONTACTO PARA INTEGRACIÓN',
+    page: 'Página',
+    of: 'de',
+    generated: 'Generado',
+    confidential: 'DOCUMENTO CONFIDENCIAL'
+  },
+  en: {
+    title: 'BANKING API INTEGRATION CHECKLIST',
+    subtitle: 'Institutional Technical Documentation',
+    generalInfo: 'INSTITUTIONAL INFORMATION',
+    legalName: 'Legal Name',
+    system: 'System',
+    corporateWeb: 'Corporate Portal',
+    apiPortal: 'API Portal',
+    accountFormat: 'Account Format',
+    jurisdiction: 'Jurisdiction',
+    apiSpecs: 'API TECHNICAL SPECIFICATIONS',
+    specification: 'Specification',
+    value: 'Value',
+    notes: 'Notes',
+    architecture: 'Architecture',
+    version: 'Version',
+    stable: 'Stable',
+    dataFormat: 'Data Format',
+    endpoints: 'AVAILABLE ENDPOINTS',
+    method: 'Method',
+    description: 'Description',
+    createAccount: 'Create multi-currency account',
+    listAccounts: 'List accounts and balances',
+    incomingTransfers: 'Incoming transfers',
+    transferDetail: 'Detail by reference',
+    transferStatus: 'Transfer status',
+    registerWebhook: 'Register HTTPS webhook',
+    authentication: 'AUTHENTICATION AND SECURITY',
+    status: 'Status',
+    implementation: 'Implementation',
+    clientCerts: 'Client/server certificates',
+    authorizedIPs: 'Configurable authorized IPs',
+    digitalSignature: 'Digital message signature',
+    mandatoryEncryption: 'Mandatory encryption',
+    securityStandards: 'SECURITY AND COMPLIANCE STANDARDS',
+    certification: 'Certification',
+    scope: 'Scope',
+    infoSecManagement: 'Information Security Management',
+    cardPayment: 'Card payment processing',
+    securityControls: 'Security and privacy controls',
+    antiMoney: 'Anti-money laundering',
+    dataProtection: 'Personal data protection',
+    identityVerification: 'Identity verification',
+    capitalRequirements: 'Capital requirements',
+    currencies: 'ENABLED CURRENCIES - ISO 4217',
+    isoCode: 'ISO Code',
+    currency: 'Currency',
+    country: 'Country/Region',
+    numCode: 'Numeric Code',
+    sandbox: 'CERTIFICATION ENVIRONMENT',
+    resource: 'Resource',
+    available: 'Available',
+    detail: 'Detail',
+    sandboxAPI: 'Certification API',
+    testCredentials: 'Test Credentials',
+    testPrefix: 'Prefix test_ (request in portal)',
+    errorCodes: 'API RESPONSE CODES',
+    code: 'Code',
+    invalidCreds: 'Invalid or expired credentials',
+    expiredToken: 'Expired JWT token (renew)',
+    insufficientBalance: 'Insufficient balance for operation',
+    currencyNotAllowed: 'Currency not enabled for client',
+    invalidAmount: 'Invalid amount or out of range',
+    duplicateRequest: 'Duplicate TransferRequestID',
+    webhookUnreachable: 'Webhook endpoint not responding',
+    rateLimitExceeded: 'Request limit exceeded',
+    operationalInfo: 'INSTITUTIONAL CONTACT INFORMATION',
+    department: 'Department',
+    channel: 'Channel',
+    techIntegration: 'Technical Integration',
+    corporatePortal: 'Corporate Portal',
+    partnerPortal: 'Partner Portal',
+    support247: '24/7 Support',
+    realTimeNotifications: 'Real-time notifications',
+    compliance: 'REGULATORY COMPLIANCE SUMMARY',
+    regulation: 'Regulation',
+    verified: 'Verified',
+    annualAudit: 'Annual audit',
+    quarterlyValidation: 'Quarterly validation',
+    independentReport: 'Independent report',
+    techRequirements: 'TECHNICAL REQUIREMENTS FOR BANKING INTEGRATION',
+    importantNote: 'IMPORTANT NOTE',
+    confidentialNote: 'This document contains confidential technical information for banking integration.',
+    credentialsNote: 'Implementation requires production credentials issued by Digital Commercial Bank Ltd.',
+    integrationContact: 'INTEGRATION CONTACT',
+    page: 'Page',
+    of: 'of',
+    generated: 'Generated',
+    confidential: 'CONFIDENTIAL DOCUMENT'
+  },
+  pt: {
+    title: 'CHECKLIST DE INTEGRAÇÃO BANCÁRIA API',
+    subtitle: 'Documentação Técnica Institucional',
+    generalInfo: 'INFORMAÇÃO INSTITUCIONAL',
+    legalName: 'Razão Social',
+    system: 'Sistema',
+    corporateWeb: 'Portal Corporativo',
+    apiPortal: 'Portal de APIs',
+    accountFormat: 'Formato de Conta',
+    jurisdiction: 'Jurisdição',
+    apiSpecs: 'ESPECIFICAÇÕES TÉCNICAS DA API',
+    specification: 'Especificação',
+    value: 'Valor',
+    notes: 'Notas',
+    architecture: 'Arquitetura',
+    version: 'Versão',
+    stable: 'Estável',
+    dataFormat: 'Formato de Dados',
+    endpoints: 'ENDPOINTS DISPONÍVEIS',
+    method: 'Método',
+    description: 'Descrição',
+    createAccount: 'Criar conta multi-moeda',
+    listAccounts: 'Listar contas e saldos',
+    incomingTransfers: 'Transferências recebidas',
+    transferDetail: 'Detalhes por referência',
+    transferStatus: 'Status da transferência',
+    registerWebhook: 'Registrar webhook HTTPS',
+    authentication: 'AUTENTICAÇÃO E SEGURANÇA',
+    status: 'Status',
+    implementation: 'Implementação',
+    clientCerts: 'Certificados cliente/servidor',
+    authorizedIPs: 'IPs autorizados configuráveis',
+    digitalSignature: 'Assinatura digital de mensagens',
+    mandatoryEncryption: 'Criptografia obrigatória',
+    securityStandards: 'PADRÕES DE SEGURANÇA E CONFORMIDADE',
+    certification: 'Certificação',
+    scope: 'Escopo',
+    infoSecManagement: 'Gestão de Segurança da Informação',
+    cardPayment: 'Processamento de pagamentos com cartão',
+    securityControls: 'Controles de segurança e privacidade',
+    antiMoney: 'Anti-lavagem de dinheiro',
+    dataProtection: 'Proteção de dados pessoais',
+    identityVerification: 'Verificação de identidade',
+    capitalRequirements: 'Requisitos de capital',
+    currencies: 'MOEDAS HABILITADAS - ISO 4217',
+    isoCode: 'Código ISO',
+    currency: 'Moeda',
+    country: 'País/Região',
+    numCode: 'Código Numérico',
+    sandbox: 'AMBIENTE DE CERTIFICAÇÃO',
+    resource: 'Recurso',
+    available: 'Disponível',
+    detail: 'Detalhe',
+    sandboxAPI: 'API de Certificação',
+    testCredentials: 'Credenciais de Teste',
+    testPrefix: 'Prefixo test_ (solicitar no portal)',
+    errorCodes: 'CÓDIGOS DE RESPOSTA DA API',
+    code: 'Código',
+    invalidCreds: 'Credenciais inválidas ou expiradas',
+    expiredToken: 'Token JWT expirado (renovar)',
+    insufficientBalance: 'Saldo insuficiente para operação',
+    currencyNotAllowed: 'Moeda não habilitada para cliente',
+    invalidAmount: 'Valor inválido ou fora do intervalo',
+    duplicateRequest: 'TransferRequestID duplicado',
+    webhookUnreachable: 'Endpoint webhook não responde',
+    rateLimitExceeded: 'Limite de solicitações excedido',
+    operationalInfo: 'INFORMAÇÕES DE CONTATO INSTITUCIONAL',
+    department: 'Departamento',
+    channel: 'Canal',
+    techIntegration: 'Integração Técnica',
+    corporatePortal: 'Portal Corporativo',
+    partnerPortal: 'Portal de Parceiros',
+    support247: 'Suporte 24/7',
+    realTimeNotifications: 'Notificações em tempo real',
+    compliance: 'RESUMO DE CONFORMIDADE REGULATÓRIA',
+    regulation: 'Regulamentação',
+    verified: 'Verificado',
+    annualAudit: 'Auditoria anual',
+    quarterlyValidation: 'Validação trimestral',
+    independentReport: 'Relatório independente',
+    techRequirements: 'REQUISITOS TÉCNICOS PARA INTEGRAÇÃO BANCÁRIA',
+    importantNote: 'NOTA IMPORTANTE',
+    confidentialNote: 'Este documento contém informações técnicas confidenciais para integração bancária.',
+    credentialsNote: 'A implementação requer credenciais de produção emitidas pelo Digital Commercial Bank Ltd.',
+    integrationContact: 'CONTATO PARA INTEGRAÇÃO',
+    page: 'Página',
+    of: 'de',
+    generated: 'Gerado',
+    confidential: 'DOCUMENTO CONFIDENCIAL'
+  },
+  ar: {
+    title: 'قائمة التحقق من تكامل API المصرفي',
+    subtitle: 'الوثائق التقنية المؤسسية',
+    generalInfo: 'المعلومات المؤسسية',
+    legalName: 'الاسم القانوني',
+    system: 'النظام',
+    corporateWeb: 'البوابة المؤسسية',
+    apiPortal: 'بوابة API',
+    accountFormat: 'تنسيق الحساب',
+    jurisdiction: 'الاختصاص القضائي',
+    apiSpecs: 'المواصفات التقنية لـ API',
+    specification: 'المواصفات',
+    value: 'القيمة',
+    notes: 'ملاحظات',
+    architecture: 'البنية',
+    version: 'الإصدار',
+    stable: 'مستقر',
+    dataFormat: 'تنسيق البيانات',
+    endpoints: 'نقاط النهاية المتاحة',
+    method: 'الطريقة',
+    description: 'الوصف',
+    createAccount: 'إنشاء حساب متعدد العملات',
+    listAccounts: 'قائمة الحسابات والأرصدة',
+    incomingTransfers: 'التحويلات الواردة',
+    transferDetail: 'تفاصيل المرجع',
+    transferStatus: 'حالة التحويل',
+    registerWebhook: 'تسجيل webhook HTTPS',
+    authentication: 'المصادقة والأمان',
+    status: 'الحالة',
+    implementation: 'التنفيذ',
+    clientCerts: 'شهادات العميل/الخادم',
+    authorizedIPs: 'عناوين IP المعتمدة',
+    digitalSignature: 'التوقيع الرقمي للرسائل',
+    mandatoryEncryption: 'التشفير الإلزامي',
+    securityStandards: 'معايير الأمان والامتثال',
+    certification: 'الشهادة',
+    scope: 'النطاق',
+    infoSecManagement: 'إدارة أمن المعلومات',
+    cardPayment: 'معالجة مدفوعات البطاقات',
+    securityControls: 'ضوابط الأمان والخصوصية',
+    antiMoney: 'مكافحة غسيل الأموال',
+    dataProtection: 'حماية البيانات الشخصية',
+    identityVerification: 'التحقق من الهوية',
+    capitalRequirements: 'متطلبات رأس المال',
+    currencies: 'العملات المفعلة - ISO 4217',
+    isoCode: 'رمز ISO',
+    currency: 'العملة',
+    country: 'الدولة/المنطقة',
+    numCode: 'الرمز الرقمي',
+    sandbox: 'بيئة الاعتماد',
+    resource: 'المورد',
+    available: 'متاح',
+    detail: 'التفاصيل',
+    sandboxAPI: 'API للاعتماد',
+    testCredentials: 'بيانات الاختبار',
+    testPrefix: 'البادئة test_ (اطلب من البوابة)',
+    errorCodes: 'رموز استجابة API',
+    code: 'الرمز',
+    invalidCreds: 'بيانات اعتماد غير صالحة أو منتهية',
+    expiredToken: 'انتهت صلاحية رمز JWT',
+    insufficientBalance: 'رصيد غير كافٍ للعملية',
+    currencyNotAllowed: 'العملة غير مفعلة للعميل',
+    invalidAmount: 'مبلغ غير صالح',
+    duplicateRequest: 'طلب مكرر',
+    webhookUnreachable: 'نقطة النهاية لا تستجيب',
+    rateLimitExceeded: 'تجاوز حد الطلبات',
+    operationalInfo: 'معلومات الاتصال المؤسسية',
+    department: 'القسم',
+    channel: 'القناة',
+    techIntegration: 'التكامل التقني',
+    corporatePortal: 'البوابة المؤسسية',
+    partnerPortal: 'بوابة الشركاء',
+    support247: 'دعم على مدار الساعة',
+    realTimeNotifications: 'إشعارات فورية',
+    compliance: 'ملخص الامتثال التنظيمي',
+    regulation: 'اللائحة',
+    verified: 'تم التحقق',
+    annualAudit: 'تدقيق سنوي',
+    quarterlyValidation: 'التحقق ربع السنوي',
+    independentReport: 'تقرير مستقل',
+    techRequirements: 'المتطلبات التقنية للتكامل المصرفي',
+    importantNote: 'ملاحظة مهمة',
+    confidentialNote: 'يحتوي هذا المستند على معلومات تقنية سرية للتكامل المصرفي.',
+    credentialsNote: 'يتطلب التنفيذ بيانات اعتماد إنتاج صادرة عن Digital Commercial Bank Ltd.',
+    integrationContact: 'جهة اتصال التكامل',
+    page: 'صفحة',
+    of: 'من',
+    generated: 'تم الإنشاء',
+    confidential: 'مستند سري'
+  },
+  ru: {
+    title: 'КОНТРОЛЬНЫЙ СПИСОК ИНТЕГРАЦИИ БАНКОВСКОГО API',
+    subtitle: 'Институциональная техническая документация',
+    generalInfo: 'ИНСТИТУЦИОНАЛЬНАЯ ИНФОРМАЦИЯ',
+    legalName: 'Юридическое наименование',
+    system: 'Система',
+    corporateWeb: 'Корпоративный портал',
+    apiPortal: 'Портал API',
+    accountFormat: 'Формат счёта',
+    jurisdiction: 'Юрисдикция',
+    apiSpecs: 'ТЕХНИЧЕСКИЕ СПЕЦИФИКАЦИИ API',
+    specification: 'Спецификация',
+    value: 'Значение',
+    notes: 'Примечания',
+    architecture: 'Архитектура',
+    version: 'Версия',
+    stable: 'Стабильная',
+    dataFormat: 'Формат данных',
+    endpoints: 'ДОСТУПНЫЕ КОНЕЧНЫЕ ТОЧКИ',
+    method: 'Метод',
+    description: 'Описание',
+    createAccount: 'Создать мультивалютный счёт',
+    listAccounts: 'Список счетов и балансов',
+    incomingTransfers: 'Входящие переводы',
+    transferDetail: 'Детали по ссылке',
+    transferStatus: 'Статус перевода',
+    registerWebhook: 'Регистрация HTTPS webhook',
+    authentication: 'АУТЕНТИФИКАЦИЯ И БЕЗОПАСНОСТЬ',
+    status: 'Статус',
+    implementation: 'Реализация',
+    clientCerts: 'Сертификаты клиент/сервер',
+    authorizedIPs: 'Настраиваемые авторизованные IP',
+    digitalSignature: 'Цифровая подпись сообщений',
+    mandatoryEncryption: 'Обязательное шифрование',
+    securityStandards: 'СТАНДАРТЫ БЕЗОПАСНОСТИ И СООТВЕТСТВИЯ',
+    certification: 'Сертификация',
+    scope: 'Область',
+    infoSecManagement: 'Управление информационной безопасностью',
+    cardPayment: 'Обработка карточных платежей',
+    securityControls: 'Контроль безопасности и конфиденциальности',
+    antiMoney: 'Противодействие отмыванию денег',
+    dataProtection: 'Защита персональных данных',
+    identityVerification: 'Верификация личности',
+    capitalRequirements: 'Требования к капиталу',
+    currencies: 'ДОСТУПНЫЕ ВАЛЮТЫ - ISO 4217',
+    isoCode: 'Код ISO',
+    currency: 'Валюта',
+    country: 'Страна/Регион',
+    numCode: 'Числовой код',
+    sandbox: 'СРЕДА СЕРТИФИКАЦИИ',
+    resource: 'Ресурс',
+    available: 'Доступно',
+    detail: 'Детали',
+    sandboxAPI: 'API сертификации',
+    testCredentials: 'Тестовые учётные данные',
+    testPrefix: 'Префикс test_ (запрос на портале)',
+    errorCodes: 'КОДЫ ОТВЕТОВ API',
+    code: 'Код',
+    invalidCreds: 'Недействительные или просроченные учётные данные',
+    expiredToken: 'Истёк срок действия JWT токена',
+    insufficientBalance: 'Недостаточный баланс для операции',
+    currencyNotAllowed: 'Валюта не разрешена для клиента',
+    invalidAmount: 'Недопустимая сумма',
+    duplicateRequest: 'Дублирующийся запрос',
+    webhookUnreachable: 'Конечная точка webhook не отвечает',
+    rateLimitExceeded: 'Превышен лимит запросов',
+    operationalInfo: 'ИНСТИТУЦИОНАЛЬНАЯ КОНТАКТНАЯ ИНФОРМАЦИЯ',
+    department: 'Отдел',
+    channel: 'Канал',
+    techIntegration: 'Техническая интеграция',
+    corporatePortal: 'Корпоративный портал',
+    partnerPortal: 'Партнёрский портал',
+    support247: 'Поддержка 24/7',
+    realTimeNotifications: 'Уведомления в реальном времени',
+    compliance: 'СВОДКА РЕГУЛЯТОРНОГО СООТВЕТСТВИЯ',
+    regulation: 'Регулирование',
+    verified: 'Проверено',
+    annualAudit: 'Ежегодный аудит',
+    quarterlyValidation: 'Квартальная валидация',
+    independentReport: 'Независимый отчёт',
+    techRequirements: 'ТЕХНИЧЕСКИЕ ТРЕБОВАНИЯ ДЛЯ БАНКОВСКОЙ ИНТЕГРАЦИИ',
+    importantNote: 'ВАЖНОЕ ПРИМЕЧАНИЕ',
+    confidentialNote: 'Этот документ содержит конфиденциальную техническую информацию для банковской интеграции.',
+    credentialsNote: 'Для реализации требуются производственные учётные данные, выданные Digital Commercial Bank Ltd.',
+    integrationContact: 'КОНТАКТ ДЛЯ ИНТЕГРАЦИИ',
+    page: 'Страница',
+    of: 'из',
+    generated: 'Сгенерировано',
+    confidential: 'КОНФИДЕНЦИАЛЬНЫЙ ДОКУМЕНТ'
+  },
+  zh: {
+    title: '银行API集成检查清单',
+    subtitle: '机构技术文档',
+    generalInfo: '机构信息',
+    legalName: '法定名称',
+    system: '系统',
+    corporateWeb: '企业门户',
+    apiPortal: 'API门户',
+    accountFormat: '账户格式',
+    jurisdiction: '管辖权',
+    apiSpecs: 'API技术规范',
+    specification: '规格',
+    value: '值',
+    notes: '备注',
+    architecture: '架构',
+    version: '版本',
+    stable: '稳定',
+    dataFormat: '数据格式',
+    endpoints: '可用端点',
+    method: '方法',
+    description: '描述',
+    createAccount: '创建多币种账户',
+    listAccounts: '列出账户和余额',
+    incomingTransfers: '收到的转账',
+    transferDetail: '按参考详情',
+    transferStatus: '转账状态',
+    registerWebhook: '注册HTTPS webhook',
+    authentication: '认证和安全',
+    status: '状态',
+    implementation: '实施',
+    clientCerts: '客户端/服务器证书',
+    authorizedIPs: '可配置的授权IP',
+    digitalSignature: '消息数字签名',
+    mandatoryEncryption: '强制加密',
+    securityStandards: '安全和合规标准',
+    certification: '认证',
+    scope: '范围',
+    infoSecManagement: '信息安全管理',
+    cardPayment: '卡支付处理',
+    securityControls: '安全和隐私控制',
+    antiMoney: '反洗钱',
+    dataProtection: '个人数据保护',
+    identityVerification: '身份验证',
+    capitalRequirements: '资本要求',
+    currencies: '启用的货币 - ISO 4217',
+    isoCode: 'ISO代码',
+    currency: '货币',
+    country: '国家/地区',
+    numCode: '数字代码',
+    sandbox: '认证环境',
+    resource: '资源',
+    available: '可用',
+    detail: '详情',
+    sandboxAPI: '认证API',
+    testCredentials: '测试凭证',
+    testPrefix: '前缀 test_（在门户申请）',
+    errorCodes: 'API响应代码',
+    code: '代码',
+    invalidCreds: '无效或过期的凭证',
+    expiredToken: 'JWT令牌已过期',
+    insufficientBalance: '余额不足',
+    currencyNotAllowed: '客户未启用该货币',
+    invalidAmount: '金额无效',
+    duplicateRequest: '重复请求',
+    webhookUnreachable: 'Webhook端点无响应',
+    rateLimitExceeded: '超出请求限制',
+    operationalInfo: '机构联系信息',
+    department: '部门',
+    channel: '渠道',
+    techIntegration: '技术集成',
+    corporatePortal: '企业门户',
+    partnerPortal: '合作伙伴门户',
+    support247: '24/7支持',
+    realTimeNotifications: '实时通知',
+    compliance: '监管合规摘要',
+    regulation: '法规',
+    verified: '已验证',
+    annualAudit: '年度审计',
+    quarterlyValidation: '季度验证',
+    independentReport: '独立报告',
+    techRequirements: '银行集成技术要求',
+    importantNote: '重要说明',
+    confidentialNote: '本文档包含用于银行集成的机密技术信息。',
+    credentialsNote: '实施需要Digital Commercial Bank Ltd颁发的生产凭证。',
+    integrationContact: '集成联系方式',
+    page: '页',
+    of: '共',
+    generated: '生成时间',
+    confidential: '机密文档'
+  }
+};
+
+function generateAPIChecklistPDF(language: PDFLanguage = 'es') {
+  const t = PDF_TRANSLATIONS[language];
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const margin = 12;
+  const margin = 10;
   let y = margin;
   
-  // Colores corporativos premium
+  // Colores corporativos institucionales
   const colors = {
-    darkBlue: [10, 25, 47] as [number, number, number],
-    navy: [15, 35, 65] as [number, number, number],
-    gold: [212, 175, 55] as [number, number, number],
-    green: [34, 197, 94] as [number, number, number],
+    darkBlue: [8, 20, 40] as [number, number, number],
+    navy: [12, 30, 55] as [number, number, number],
+    gold: [197, 165, 55] as [number, number, number],
+    lightGold: [218, 190, 100] as [number, number, number],
+    green: [22, 163, 74] as [number, number, number],
     emerald: [16, 185, 129] as [number, number, number],
-    gray: [100, 116, 139] as [number, number, number],
-    lightGray: [241, 245, 249] as [number, number, number],
+    gray: [75, 85, 99] as [number, number, number],
+    lightGray: [248, 250, 252] as [number, number, number],
     black: [0, 0, 0] as [number, number, number],
     white: [255, 255, 255] as [number, number, number],
-    red: [239, 68, 68] as [number, number, number]
+    red: [220, 38, 38] as [number, number, number]
+  };
+
+  // Locale para fechas
+  const dateLocale: Record<PDFLanguage, string> = {
+    es: 'es-ES', en: 'en-US', pt: 'pt-BR', ar: 'ar-SA', ru: 'ru-RU', zh: 'zh-CN'
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // FUNCIONES DE DIBUJO
+  // FUNCIONES DE DIBUJO INSTITUCIONAL
   // ═══════════════════════════════════════════════════════════════════════════
   
-  const drawPremiumHeader = () => {
-    // Fondo degradado superior
+  const drawInstitutionalHeader = () => {
+    // Fondo principal del header
     pdf.setFillColor(...colors.darkBlue);
-    pdf.rect(0, 0, pageWidth, 52, 'F');
+    pdf.rect(0, 0, pageWidth, 58, 'F');
     
-    // Línea dorada decorativa superior
+    // Líneas doradas decorativas superiores
     pdf.setFillColor(...colors.gold);
-    pdf.rect(0, 0, pageWidth, 3, 'F');
+    pdf.rect(0, 0, pageWidth, 2, 'F');
+    pdf.setFillColor(...colors.lightGold);
+    pdf.rect(0, 2, pageWidth, 0.5, 'F');
     
-    // Patrón decorativo
+    // Marco dorado interior
     pdf.setDrawColor(...colors.gold);
-    pdf.setLineWidth(0.3);
-    for (let i = 0; i < pageWidth; i += 15) {
-      pdf.line(i, 51, i + 8, 51);
+    pdf.setLineWidth(0.8);
+    pdf.rect(8, 8, pageWidth - 16, 42, 'S');
+    
+    // Patrón de líneas decorativo inferior
+    pdf.setDrawColor(...colors.gold);
+    pdf.setLineWidth(0.2);
+    for (let i = 0; i < pageWidth; i += 6) {
+      pdf.line(i, 56, i + 3, 56);
     }
     
     // Línea dorada inferior del header
     pdf.setFillColor(...colors.gold);
-    pdf.rect(0, 52, pageWidth, 2, 'F');
+    pdf.rect(0, 58, pageWidth, 2.5, 'F');
     
-    // Nombre del banco
+    // Nombre del banco - institucional
     pdf.setTextColor(...colors.white);
-    pdf.setFontSize(24);
+    pdf.setFontSize(26);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('DIGITAL COMMERCIAL BANK LTD', pageWidth / 2, 18, { align: 'center' });
+    pdf.text('DIGITAL COMMERCIAL BANK LTD', pageWidth / 2, 22, { align: 'center' });
     
     // Sistema DAES
-    pdf.setFontSize(12);
+    pdf.setFontSize(11);
     pdf.setFont('helvetica', 'normal');
     pdf.setTextColor(...colors.gold);
-    pdf.text('DAES - Digital Asset & Electronic Services Platform', pageWidth / 2, 27, { align: 'center' });
+    pdf.text('DAES - Digital Asset & Electronic Services Platform', pageWidth / 2, 30, { align: 'center' });
     
     // URLs oficiales
-    pdf.setFontSize(8);
-    pdf.setTextColor(180, 180, 180);
-    pdf.text('digcommbank.com  |  luxliqdaes.cloud', pageWidth / 2, 35, { align: 'center' });
+    pdf.setFontSize(7);
+    pdf.setTextColor(160, 170, 180);
+    pdf.text('www.digcommbank.com    |    www.luxliqdaes.cloud', pageWidth / 2, 38, { align: 'center' });
     
     // Título del documento
-    pdf.setFontSize(14);
+    pdf.setFontSize(13);
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(...colors.white);
-    const title = isSpanish ? 'CHECKLIST DE INTEGRACIÓN BANCARIA API' : 'BANKING API INTEGRATION CHECKLIST';
-    pdf.text(title, pageWidth / 2, 46, { align: 'center' });
+    pdf.text(t.title, pageWidth / 2, 48, { align: 'center' });
     
-    y = 62;
+    // Subtítulo
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(...colors.lightGold);
+    pdf.text(t.subtitle, pageWidth / 2, 54, { align: 'center' });
+    
+    y = 68;
   };
   
-  const drawPremiumFooter = (pageNum: number, totalPages: number) => {
-    const footerY = pageHeight - 18;
+  const drawInstitutionalFooter = (pageNum: number, totalPages: number) => {
+    const footerY = pageHeight - 20;
+    
+    // Fondo del footer
+    pdf.setFillColor(248, 250, 252);
+    pdf.rect(0, footerY - 8, pageWidth, 28, 'F');
     
     // Línea dorada superior
-    pdf.setDrawColor(...colors.gold);
-    pdf.setLineWidth(0.5);
-    pdf.line(margin, footerY - 6, pageWidth - margin, footerY - 6);
+    pdf.setFillColor(...colors.gold);
+    pdf.rect(0, footerY - 8, pageWidth, 1.5, 'F');
     
     // Información del banco
     pdf.setTextColor(...colors.gray);
-    pdf.setFontSize(7);
+    pdf.setFontSize(6.5);
     pdf.setFont('helvetica', 'normal');
-    pdf.text('Digital Commercial Bank Ltd | ISO 27001 Certified | ISO 20022 Compatible | FATF AML/CFT Compliant', margin, footerY - 1);
+    pdf.text('Digital Commercial Bank Ltd | ISO 27001:2022 Certified | ISO 20022 Native | PCI-DSS Level 1 | FATF AML/CFT Compliant', pageWidth / 2, footerY - 2, { align: 'center' });
     
     // URLs
     pdf.setTextColor(...colors.darkBlue);
     pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(7);
     pdf.text('https://digcommbank.com', margin, footerY + 4);
-    pdf.text('https://luxliqdaes.cloud', margin + 45, footerY + 4);
+    pdf.text('https://luxliqdaes.cloud', margin + 48, footerY + 4);
     
     // Página
     pdf.setTextColor(...colors.gray);
     pdf.setFont('helvetica', 'normal');
-    const pageText = `${isSpanish ? 'Página' : 'Page'} ${pageNum} ${isSpanish ? 'de' : 'of'} ${totalPages}`;
+    const pageText = `${t.page} ${pageNum} ${t.of} ${totalPages}`;
     pdf.text(pageText, pageWidth - margin, footerY + 4, { align: 'right' });
     
     // Fecha de generación
-    const dateText = new Date().toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { 
-      year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
-    });
+    const dateText = `${t.generated}: ${new Date().toLocaleDateString(dateLocale[language], { 
+      year: 'numeric', month: 'long', day: 'numeric'
+    })}`;
     pdf.text(dateText, pageWidth / 2, footerY + 4, { align: 'center' });
     
     // Confidencial
     pdf.setTextColor(...colors.red);
-    pdf.setFontSize(6);
-    pdf.text(isSpanish ? 'DOCUMENTO CONFIDENCIAL' : 'CONFIDENTIAL DOCUMENT', pageWidth - margin, footerY - 1, { align: 'right' });
+    pdf.setFontSize(5.5);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(t.confidential, pageWidth - margin, footerY - 2, { align: 'right' });
   };
   
-  const drawSection = (title: string, icon?: string) => {
+  const drawSection = (title: string, sectionNum?: number) => {
     if (y > pageHeight - 50) {
       pdf.addPage();
       y = margin + 10;
     }
     
-    // Fondo de sección con borde dorado
+    // Fondo de sección institucional
     pdf.setFillColor(...colors.darkBlue);
-    pdf.rect(margin, y, pageWidth - (margin * 2), 9, 'F');
+    pdf.rect(margin, y, pageWidth - (margin * 2), 8, 'F');
     
     // Borde dorado izquierdo
     pdf.setFillColor(...colors.gold);
-    pdf.rect(margin, y, 3, 9, 'F');
+    pdf.rect(margin, y, 2.5, 8, 'F');
+    
+    // Número de sección
+    if (sectionNum) {
+      pdf.setFillColor(...colors.gold);
+      pdf.rect(margin + 4, y + 1, 12, 6, 'F');
+      pdf.setTextColor(...colors.darkBlue);
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(String(sectionNum).padStart(2, '0'), margin + 10, y + 5.2, { align: 'center' });
+    }
     
     pdf.setTextColor(...colors.white);
-    pdf.setFontSize(10);
+    pdf.setFontSize(9);
     pdf.setFont('helvetica', 'bold');
-    const displayTitle = icon ? `${icon}  ${title}` : title;
-    pdf.text(displayTitle, margin + 6, y + 6.5);
+    pdf.text(title, sectionNum ? margin + 20 : margin + 6, y + 5.5);
     
-    y += 13;
+    y += 11;
   };
   
   const drawTable = (headers: string[], rows: string[][], colWidths: number[]) => {
     const tableWidth = pageWidth - (margin * 2);
-    const rowHeight = 6.5;
+    const rowHeight = 5.8;
     const startX = margin;
     
-    // Header de tabla
+    // Header de tabla institucional
     pdf.setFillColor(...colors.navy);
-    pdf.rect(startX, y, tableWidth, rowHeight + 1, 'F');
+    pdf.rect(startX, y, tableWidth, rowHeight + 0.5, 'F');
+    
+    // Línea dorada bajo header
+    pdf.setFillColor(...colors.gold);
+    pdf.rect(startX, y + rowHeight + 0.5, tableWidth, 0.4, 'F');
     
     pdf.setTextColor(...colors.gold);
-    pdf.setFontSize(8);
+    pdf.setFontSize(7);
     pdf.setFont('helvetica', 'bold');
     
     let xPos = startX + 2;
     headers.forEach((header, i) => {
-      pdf.text(header.toUpperCase(), xPos, y + 5);
+      pdf.text(header.toUpperCase(), xPos, y + 4.2);
       xPos += colWidths[i];
     });
     
@@ -184,43 +767,39 @@ function generateAPIChecklistPDF(language: 'es' | 'en' = 'es') {
       }
       
       // Alternar colores
-      if (rowIndex % 2 === 0) {
-        pdf.setFillColor(248, 250, 252);
-      } else {
-        pdf.setFillColor(...colors.white);
-      }
+      pdf.setFillColor(rowIndex % 2 === 0 ? 250 : 255, rowIndex % 2 === 0 ? 251 : 255, rowIndex % 2 === 0 ? 252 : 255);
       pdf.rect(startX, y, tableWidth, rowHeight, 'F');
       
-      // Borde
-      pdf.setDrawColor(226, 232, 240);
+      // Borde sutil
+      pdf.setDrawColor(230, 235, 240);
       pdf.setLineWidth(0.1);
       pdf.rect(startX, y, tableWidth, rowHeight, 'S');
       
-      pdf.setFontSize(7.5);
+      pdf.setFontSize(6.8);
       
       xPos = startX + 2;
       row.forEach((cell, i) => {
-        if (cell.includes('✅')) {
-          pdf.setTextColor(...colors.emerald);
+        if (cell.includes('✓') || cell.includes('✅')) {
+          pdf.setTextColor(...colors.green);
           pdf.setFont('helvetica', 'bold');
-        } else if (cell.includes('❌')) {
+        } else if (cell.includes('✗') || cell.includes('❌')) {
           pdf.setTextColor(...colors.red);
           pdf.setFont('helvetica', 'bold');
-        } else if (cell.includes('⚠️')) {
-          pdf.setTextColor(234, 179, 8);
-          pdf.setFont('helvetica', 'bold');
+        } else if (cell.includes('○') || cell.includes('⚠️')) {
+          pdf.setTextColor(180, 140, 40);
+          pdf.setFont('helvetica', 'normal');
         } else {
           pdf.setTextColor(...colors.black);
           pdf.setFont('helvetica', 'normal');
         }
-        pdf.text(cell.substring(0, 50), xPos, y + 4.5);
+        pdf.text(cell.substring(0, 55), xPos, y + 4);
         xPos += colWidths[i];
       });
       
       y += rowHeight;
     });
     
-    y += 4;
+    y += 3;
   };
   
   const drawText = (text: string, bold: boolean = false, color?: [number, number, number]) => {
@@ -230,244 +809,320 @@ function generateAPIChecklistPDF(language: 'es' | 'en' = 'es') {
     }
     
     pdf.setTextColor(...(color || colors.black));
-    pdf.setFontSize(8);
+    pdf.setFontSize(7);
     pdf.setFont('helvetica', bold ? 'bold' : 'normal');
     pdf.text(text, margin, y);
-    y += 4.5;
+    y += 4;
   };
 
   const drawInfoBox = (title: string, content: string[], bgColor: [number, number, number]) => {
-    if (y > pageHeight - 45) {
+    if (y > pageHeight - 40) {
       pdf.addPage();
       y = margin + 10;
     }
     
-    const boxHeight = 8 + (content.length * 5);
+    const boxHeight = 7 + (content.length * 4.5);
     pdf.setFillColor(...bgColor);
-    pdf.roundedRect(margin, y, pageWidth - (margin * 2), boxHeight, 2, 2, 'F');
+    pdf.roundedRect(margin, y, pageWidth - (margin * 2), boxHeight, 1.5, 1.5, 'F');
+    
+    // Borde dorado
+    pdf.setDrawColor(...colors.gold);
+    pdf.setLineWidth(0.5);
+    pdf.roundedRect(margin, y, pageWidth - (margin * 2), boxHeight, 1.5, 1.5, 'S');
+    
+    pdf.setTextColor(...colors.gold);
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(title, margin + 4, y + 5);
     
     pdf.setTextColor(...colors.white);
-    pdf.setFontSize(9);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(title, margin + 4, y + 6);
-    
-    pdf.setFontSize(7.5);
+    pdf.setFontSize(6.5);
     pdf.setFont('helvetica', 'normal');
     content.forEach((line, i) => {
-      pdf.text(line, margin + 4, y + 12 + (i * 5));
+      pdf.text(line, margin + 4, y + 10 + (i * 4.5));
     });
     
-    y += boxHeight + 5;
+    y += boxHeight + 4;
+  };
+
+  // Función para tabla de divisas ISO 4217 profesional
+  const drawCurrencyTable = () => {
+    const currencies = [
+      { iso: 'USD', num: '840', name: 'United States Dollar', country: 'United States', symbol: '$' },
+      { iso: 'EUR', num: '978', name: 'Euro', country: 'European Union', symbol: '€' },
+      { iso: 'GBP', num: '826', name: 'Pound Sterling', country: 'United Kingdom', symbol: '£' },
+      { iso: 'JPY', num: '392', name: 'Japanese Yen', country: 'Japan', symbol: '¥' },
+      { iso: 'CHF', num: '756', name: 'Swiss Franc', country: 'Switzerland', symbol: 'Fr' },
+      { iso: 'CAD', num: '124', name: 'Canadian Dollar', country: 'Canada', symbol: 'C$' },
+      { iso: 'AUD', num: '036', name: 'Australian Dollar', country: 'Australia', symbol: 'A$' },
+      { iso: 'CNY', num: '156', name: 'Yuan Renminbi', country: 'China', symbol: '¥' },
+      { iso: 'INR', num: '356', name: 'Indian Rupee', country: 'India', symbol: 'Rs' },
+      { iso: 'BRL', num: '986', name: 'Brazilian Real', country: 'Brazil', symbol: 'R$' },
+      { iso: 'MXN', num: '484', name: 'Mexican Peso', country: 'Mexico', symbol: '$' },
+      { iso: 'KRW', num: '410', name: 'South Korean Won', country: 'South Korea', symbol: 'W' },
+      { iso: 'RUB', num: '643', name: 'Russian Ruble', country: 'Russia', symbol: 'P' },
+      { iso: 'SGD', num: '702', name: 'Singapore Dollar', country: 'Singapore', symbol: 'S$' },
+      { iso: 'HKD', num: '344', name: 'Hong Kong Dollar', country: 'Hong Kong', symbol: 'HK$' }
+    ];
+    
+    const startX = margin;
+    const tableWidth = pageWidth - (margin * 2);
+    const colW = tableWidth / 5;
+    const rowH = 5.5;
+    
+    // Header
+    pdf.setFillColor(...colors.darkBlue);
+    pdf.rect(startX, y, tableWidth, rowH + 1, 'F');
+    pdf.setFillColor(...colors.gold);
+    pdf.rect(startX, y + rowH + 1, tableWidth, 0.4, 'F');
+    
+    pdf.setTextColor(...colors.gold);
+    pdf.setFontSize(6.5);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('ISO CODE', startX + 3, y + 4);
+    pdf.text('NUMERIC', startX + colW, y + 4);
+    pdf.text(t.currency.toUpperCase(), startX + colW * 2, y + 4);
+    pdf.text(t.country.toUpperCase(), startX + colW * 3.2, y + 4);
+    pdf.text('SYMBOL', startX + colW * 4.3, y + 4);
+    
+    y += rowH + 1.5;
+    
+    currencies.forEach((curr, i) => {
+      if (y > pageHeight - 30) {
+        pdf.addPage();
+        y = margin + 10;
+      }
+      
+      pdf.setFillColor(i % 2 === 0 ? 250 : 255, i % 2 === 0 ? 251 : 255, i % 2 === 0 ? 252 : 255);
+      pdf.rect(startX, y, tableWidth, rowH, 'F');
+      pdf.setDrawColor(235, 240, 245);
+      pdf.setLineWidth(0.1);
+      pdf.rect(startX, y, tableWidth, rowH, 'S');
+      
+      pdf.setFontSize(6.5);
+      
+      // ISO Code - destacado
+      pdf.setFillColor(...colors.navy);
+      pdf.rect(startX + 2, y + 0.8, 14, rowH - 1.6, 'F');
+      pdf.setTextColor(...colors.gold);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(curr.iso, startX + 9, y + 3.8, { align: 'center' });
+      
+      // Resto de columnas
+      pdf.setTextColor(...colors.black);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(curr.num, startX + colW + 3, y + 3.8);
+      pdf.text(curr.name, startX + colW * 2, y + 3.8);
+      pdf.text(curr.country, startX + colW * 3.2, y + 3.8);
+      
+      // Símbolo destacado
+      pdf.setTextColor(...colors.darkBlue);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(curr.symbol, startX + colW * 4.4, y + 3.8);
+      
+      y += rowH;
+    });
+    
+    y += 3;
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // CONTENIDO DEL PDF PROFESIONAL
+  // CONTENIDO DEL PDF INSTITUCIONAL DE ALTA CALIDAD
   // ═══════════════════════════════════════════════════════════════════════════
   
-  drawPremiumHeader();
+  drawInstitutionalHeader();
   
-  // Box de información del sistema
+  // Box de información del sistema DAES
   drawInfoBox(
-    'DAES SYSTEM INFORMATION',
+    'DAES PLATFORM - OFFICIAL ENDPOINTS',
     [
       'Production API: https://luxliqdaes.cloud/partner-api/v1',
-      'Corporate Website: https://digcommbank.com',
+      'Corporate Portal: https://digcommbank.com',
       'Partner Portal: https://luxliqdaes.cloud/partner-portal'
     ],
     colors.navy
   );
   
-  // 1. INFORMACIÓN GENERAL
-  drawSection(isSpanish ? '1. INFORMACIÓN GENERAL DEL BANCO' : '1. GENERAL BANK INFORMATION', '🏦');
+  // 1. INFORMACIÓN INSTITUCIONAL
+  drawSection(t.generalInfo, 1);
   drawTable(
-    [isSpanish ? 'Campo' : 'Field', isSpanish ? 'Valor' : 'Value'],
+    [t.specification, t.value],
     [
-      [isSpanish ? 'Nombre Legal' : 'Legal Name', 'Digital Commercial Bank Ltd'],
-      [isSpanish ? 'Sistema' : 'System', 'DAES - Digital Asset & Electronic Services'],
-      [isSpanish ? 'Sitio Web Corporativo' : 'Corporate Website', 'https://digcommbank.com'],
-      [isSpanish ? 'Portal de APIs' : 'API Portal', 'https://luxliqdaes.cloud'],
-      [isSpanish ? 'Formato de Cuenta' : 'Account Format', 'ACC_[ISO_CURRENCY]_[TIMESTAMP]_[ID]'],
-      [isSpanish ? 'Jurisdicción' : 'Jurisdiction', 'International Banking License']
+      [t.legalName, 'Digital Commercial Bank Ltd'],
+      [t.system, 'DAES - Digital Asset & Electronic Services'],
+      [t.corporateWeb, 'https://digcommbank.com'],
+      [t.apiPortal, 'https://luxliqdaes.cloud'],
+      [t.accountFormat, 'ACC_[ISO_CURRENCY]_[TIMESTAMP]_[ID]'],
+      [t.jurisdiction, 'International Banking License']
     ],
     [55, 125]
   );
   
-  // 2. TIPO DE API
-  drawSection(isSpanish ? '2. ESPECIFICACIONES TÉCNICAS DE API' : '2. API TECHNICAL SPECIFICATIONS', '⚙️');
+  // 2. ESPECIFICACIONES TÉCNICAS API
+  drawSection(t.apiSpecs, 2);
   drawTable(
-    [isSpanish ? 'Especificación' : 'Specification', isSpanish ? 'Valor' : 'Value', isSpanish ? 'Notas' : 'Notes'],
+    [t.specification, t.value, t.notes],
     [
-      [isSpanish ? 'Arquitectura' : 'Architecture', '✅ RESTful API', 'JSON over HTTPS'],
-      [isSpanish ? 'Versión' : 'Version', 'v1.0', isSpanish ? 'Estable' : 'Stable'],
-      ['Base URL', 'luxliqdaes.cloud/partner-api/v1', 'Production'],
-      ['Sandbox URL', 'luxliqdaes.cloud/partner-api/sandbox/v1', 'Testing'],
-      [isSpanish ? 'Formato Datos' : 'Data Format', '✅ JSON', 'UTF-8 Encoding'],
+      [t.architecture, '✓ RESTful API', 'JSON over HTTPS'],
+      [t.version, 'v1.0', t.stable],
+      ['Base URL', 'https://luxliqdaes.cloud/partner-api/v1', 'Production'],
+      ['Sandbox URL', 'https://luxliqdaes.cloud/partner-api/sandbox/v1', 'Certification'],
+      [t.dataFormat, '✓ JSON', 'UTF-8 Encoding'],
       ['Content-Type', 'application/json', 'Required Header']
     ],
-    [45, 70, 65]
+    [42, 72, 66]
   );
   
   // 3. ENDPOINTS
-  drawSection(isSpanish ? '3. ENDPOINTS DISPONIBLES' : '3. AVAILABLE ENDPOINTS', '🔗');
+  drawSection(t.endpoints, 3);
   drawTable(
-    [isSpanish ? 'Método' : 'Method', 'Endpoint', isSpanish ? 'Descripción' : 'Description'],
+    [t.method, 'Endpoint', t.description],
     [
       ['POST', '/auth/token', 'OAuth 2.0 Token (client_credentials)'],
-      ['POST', '/clients/{id}/accounts', isSpanish ? 'Crear cuenta multi-divisa' : 'Create multi-currency account'],
-      ['GET', '/clients/{id}/accounts', isSpanish ? 'Listar cuentas y balances' : 'List accounts and balances'],
+      ['POST', '/clients/{id}/accounts', t.createAccount],
+      ['GET', '/clients/{id}/accounts', t.listAccounts],
       ['POST', '/transfers', 'CashTransfer.v1 (ISO 20022)'],
-      ['GET', '/transfers/incoming/{id}', isSpanish ? 'Transferencias recibidas' : 'Incoming transfers'],
-      ['GET', '/transfers/details/{ref}', isSpanish ? 'Detalle por DCBReference' : 'Detail by DCBReference'],
-      ['GET', '/transfers/status/{reqId}', isSpanish ? 'Estado de transferencia' : 'Transfer status'],
-      ['POST', '/webhooks/register', isSpanish ? 'Registrar webhook HTTPS' : 'Register HTTPS webhook']
+      ['GET', '/transfers/incoming/{id}', t.incomingTransfers],
+      ['GET', '/transfers/details/{ref}', t.transferDetail],
+      ['GET', '/transfers/status/{reqId}', t.transferStatus],
+      ['POST', '/webhooks/register', t.registerWebhook]
     ],
-    [20, 60, 100]
+    [18, 62, 100]
   );
   
   // Nueva página
   pdf.addPage();
   y = margin + 10;
   
-  // 4. AUTENTICACIÓN
-  drawSection(isSpanish ? '4. AUTENTICACIÓN Y SEGURIDAD' : '4. AUTHENTICATION AND SECURITY', '🔐');
+  // 4. AUTENTICACIÓN Y SEGURIDAD
+  drawSection(t.authentication, 4);
   drawTable(
-    [isSpanish ? 'Método' : 'Method', isSpanish ? 'Estado' : 'Status', isSpanish ? 'Implementación' : 'Implementation'],
+    [t.method, t.status, t.implementation],
     [
-      ['OAuth 2.0', '✅', 'grant_type: client_credentials | JWT Bearer'],
-      ['API Key + Secret', '✅', 'Header: X-API-Key + X-API-Secret'],
-      ['Mutual TLS (mTLS)', '✅', isSpanish ? 'Certificados X.509 cliente/servidor' : 'X.509 client/server certificates'],
-      ['IP Whitelisting', '✅', isSpanish ? 'Lista blanca de IPs autorizadas' : 'Authorized IP whitelist'],
-      ['HMAC-SHA256', '✅', isSpanish ? 'Firma digital de mensajes' : 'Digital message signature'],
-      ['TLS 1.2+', '✅', isSpanish ? 'Cifrado obligatorio' : 'Mandatory encryption']
+      ['OAuth 2.0', '✓', 'grant_type: client_credentials | JWT Bearer'],
+      ['API Key + Secret', '✓', 'Header: X-API-Key + X-API-Secret'],
+      ['Mutual TLS (mTLS)', '✓', t.clientCerts + ' X.509'],
+      ['IP Whitelisting', '✓', t.authorizedIPs],
+      ['HMAC-SHA256', '✓', t.digitalSignature],
+      ['TLS 1.2+', '✓', t.mandatoryEncryption]
     ],
-    [45, 15, 120]
+    [42, 12, 126]
   );
   
-  // 5. SEGURIDAD
-  drawSection(isSpanish ? '5. ESTÁNDARES DE SEGURIDAD' : '5. SECURITY STANDARDS', '🛡️');
+  // 5. ESTÁNDARES DE SEGURIDAD
+  drawSection(t.securityStandards, 5);
   drawTable(
-    [isSpanish ? 'Estándar' : 'Standard', isSpanish ? 'Certificación' : 'Certification', isSpanish ? 'Alcance' : 'Scope'],
+    [t.certification, t.status, t.scope],
     [
-      ['ISO 27001:2022', '✅ Certified', isSpanish ? 'Gestión de Seguridad de la Información' : 'Information Security Management'],
-      ['ISO 20022', '✅ Compatible', 'CashTransfer.v1, MT103, MT202'],
-      ['PCI-DSS', '✅ Level 1', isSpanish ? 'Procesamiento de pagos con tarjeta' : 'Card payment processing'],
-      ['SOC 2 Type II', '✅ Compliant', isSpanish ? 'Controles de seguridad y privacidad' : 'Security and privacy controls'],
-      ['FATF AML/CFT', '✅ Verified', isSpanish ? 'Anti-lavado de dinero' : 'Anti-money laundering'],
-      ['GDPR', '✅ Compliant', isSpanish ? 'Protección de datos personales' : 'Personal data protection'],
-      ['KYC/KYB', '✅ Implemented', isSpanish ? 'Verificación de identidad' : 'Identity verification']
+      ['ISO 27001:2022', '✓ Certified', t.infoSecManagement],
+      ['ISO 20022', '✓ Native', 'CashTransfer.v1, MT103, MT202'],
+      ['PCI-DSS Level 1', '✓ Compliant', t.cardPayment],
+      ['SOC 2 Type II', '✓ Certified', t.securityControls],
+      ['FATF AML/CFT', '✓ Verified', t.antiMoney],
+      ['GDPR', '✓ Compliant', t.dataProtection],
+      ['KYC/KYB', '✓ Implemented', t.identityVerification],
+      ['Basel III', '✓ Aligned', t.capitalRequirements]
     ],
-    [40, 35, 105]
+    [42, 32, 106]
   );
   
-  // 6. DIVISAS - 15 COMPLETAS CON ISO
-  drawSection(isSpanish ? '6. DIVISAS SOPORTADAS (15) - ISO 4217' : '6. SUPPORTED CURRENCIES (15) - ISO 4217', '💱');
-  drawTable(
-    ['ISO', isSpanish ? 'Moneda' : 'Currency', isSpanish ? 'País/Región' : 'Country/Region', 'ISO', isSpanish ? 'Moneda' : 'Currency', isSpanish ? 'País/Región' : 'Country/Region'],
-    [
-      ['USD', 'US Dollar', '🇺🇸 United States', 'JPY', 'Japanese Yen', '🇯🇵 Japan'],
-      ['EUR', 'Euro', '🇪🇺 Eurozone', 'CHF', 'Swiss Franc', '🇨🇭 Switzerland'],
-      ['GBP', 'Pound Sterling', '🇬🇧 United Kingdom', 'CNY', 'Yuan Renminbi', '🇨🇳 China'],
-      ['CAD', 'Canadian Dollar', '🇨🇦 Canada', 'INR', 'Indian Rupee', '🇮🇳 India'],
-      ['AUD', 'Australian Dollar', '🇦🇺 Australia', 'MXN', 'Mexican Peso', '🇲🇽 Mexico'],
-      ['BRL', 'Brazilian Real', '🇧🇷 Brazil', 'KRW', 'South Korean Won', '🇰🇷 South Korea'],
-      ['RUB', 'Russian Ruble', '🇷🇺 Russia', 'SGD', 'Singapore Dollar', '🇸🇬 Singapore'],
-      ['HKD', 'Hong Kong Dollar', '🇭🇰 Hong Kong', '', '', '']
-    ],
-    [15, 35, 40, 15, 35, 40]
-  );
+  // 6. DIVISAS - ISO 4217 PROFESIONAL
+  drawSection(t.currencies, 6);
+  drawCurrencyTable();
   
   // Nueva página
   pdf.addPage();
   y = margin + 10;
   
-  // 7. VALIDACIÓN PRE-PRODUCCIÓN
-  drawSection(isSpanish ? '7. AMBIENTE DE PRUEBAS (SANDBOX)' : '7. TESTING ENVIRONMENT (SANDBOX)', '🧪');
+  // 7. AMBIENTE DE CERTIFICACIÓN (sin Demo Accounts, etc.)
+  drawSection(t.sandbox, 7);
   drawTable(
-    [isSpanish ? 'Recurso' : 'Resource', isSpanish ? 'Disponible' : 'Available', 'URL / ' + (isSpanish ? 'Detalle' : 'Detail')],
+    [t.resource, t.available, t.detail],
     [
-      ['Sandbox API', '✅', 'https://luxliqdaes.cloud/partner-api/sandbox/v1'],
-      [isSpanish ? 'Credenciales Test' : 'Test Credentials', '✅', isSpanish ? 'Prefijo: test_ (generables en portal)' : 'Prefix: test_ (generatable in portal)'],
-      [isSpanish ? 'Cuentas Demo' : 'Demo Accounts', '✅', isSpanish ? 'Cuentas con balances ficticios' : 'Accounts with fictitious balances'],
-      [isSpanish ? 'Simulador Transferencias' : 'Transfer Simulator', '✅', isSpanish ? 'Prueba de flujos completos' : 'Full flow testing'],
-      ['Webhook Tester', '✅', isSpanish ? 'Verificación de endpoints' : 'Endpoint verification'],
-      [isSpanish ? 'Documentación Interactiva' : 'Interactive Docs', '✅', 'https://luxliqdaes.cloud/docs/partner-api']
+      [t.sandboxAPI, '✓', 'https://luxliqdaes.cloud/partner-api/sandbox/v1'],
+      [t.testCredentials, '✓', t.testPrefix]
     ],
-    [50, 20, 110]
+    [50, 18, 112]
   );
   
-  // 8. CÓDIGOS DE ERROR
-  drawSection(isSpanish ? '8. CÓDIGOS DE ERROR API' : '8. API ERROR CODES', '⚠️');
+  // 8. CÓDIGOS DE RESPUESTA API
+  drawSection(t.errorCodes, 8);
   drawTable(
-    [isSpanish ? 'Código' : 'Code', 'HTTP', isSpanish ? 'Descripción' : 'Description'],
+    [t.code, 'HTTP', t.description],
     [
-      ['INVALID_CREDENTIALS', '401', isSpanish ? 'Credenciales inválidas o expiradas' : 'Invalid or expired credentials'],
-      ['EXPIRED_TOKEN', '401', isSpanish ? 'Token JWT expirado (renovar)' : 'Expired JWT token (renew)'],
-      ['INSUFFICIENT_BALANCE', '400', isSpanish ? 'Balance insuficiente para operación' : 'Insufficient balance for operation'],
-      ['CURRENCY_NOT_ALLOWED', '403', isSpanish ? 'Divisa no habilitada para cliente' : 'Currency not enabled for client'],
-      ['INVALID_AMOUNT', '400', isSpanish ? 'Monto inválido o fuera de rango' : 'Invalid amount or out of range'],
-      ['DUPLICATE_REQUEST', '409', isSpanish ? 'TransferRequestID duplicado' : 'Duplicate TransferRequestID'],
-      ['WEBHOOK_UNREACHABLE', '503', isSpanish ? 'Webhook endpoint no responde' : 'Webhook endpoint not responding'],
-      ['RATE_LIMIT_EXCEEDED', '429', isSpanish ? 'Límite de solicitudes excedido' : 'Request limit exceeded']
+      ['INVALID_CREDENTIALS', '401', t.invalidCreds],
+      ['EXPIRED_TOKEN', '401', t.expiredToken],
+      ['INSUFFICIENT_BALANCE', '400', t.insufficientBalance],
+      ['CURRENCY_NOT_ALLOWED', '403', t.currencyNotAllowed],
+      ['INVALID_AMOUNT', '400', t.invalidAmount],
+      ['DUPLICATE_REQUEST', '409', t.duplicateRequest],
+      ['WEBHOOK_UNREACHABLE', '503', t.webhookUnreachable],
+      ['RATE_LIMIT_EXCEEDED', '429', t.rateLimitExceeded]
     ],
-    [55, 15, 110]
+    [52, 14, 114]
   );
   
-  // 9. INFORMACIÓN DE CONTACTO
-  drawSection(isSpanish ? '9. INFORMACIÓN OPERATIVA' : '9. OPERATIONAL INFORMATION', '📞');
+  // 9. INFORMACIÓN DE CONTACTO INSTITUCIONAL
+  drawSection(t.operationalInfo, 9);
   drawTable(
-    [isSpanish ? 'Departamento' : 'Department', isSpanish ? 'Canal' : 'Channel', isSpanish ? 'Detalle' : 'Detail'],
+    [t.department, t.channel, t.detail],
     [
-      [isSpanish ? 'Integración Técnica' : 'Technical Integration', 'API', 'https://luxliqdaes.cloud/support'],
-      [isSpanish ? 'Portal Corporativo' : 'Corporate Portal', 'Web', 'https://digcommbank.com'],
-      [isSpanish ? 'Portal de Partners' : 'Partner Portal', 'Web', 'https://luxliqdaes.cloud/partner-portal'],
+      [t.techIntegration, 'API', 'https://luxliqdaes.cloud/support'],
+      [t.corporatePortal, 'Web', 'https://digcommbank.com'],
+      [t.partnerPortal, 'Web', 'https://luxliqdaes.cloud/partner-portal'],
       ['Compliance', 'Email', 'compliance@digcommbank.com'],
-      [isSpanish ? 'Soporte 24/7' : '24/7 Support', 'Webhook', isSpanish ? 'Notificaciones en tiempo real' : 'Real-time notifications']
+      [t.support247, 'Webhook', t.realTimeNotifications]
     ],
-    [50, 25, 105]
+    [50, 22, 108]
   );
   
-  // 10. RESUMEN DE CUMPLIMIENTO
-  drawSection(isSpanish ? '10. RESUMEN DE CUMPLIMIENTO REGULATORIO' : '10. REGULATORY COMPLIANCE SUMMARY', '✅');
+  // 10. CUMPLIMIENTO REGULATORIO
+  drawSection(t.compliance, 10);
   drawTable(
-    [isSpanish ? 'Regulación' : 'Regulation', isSpanish ? 'Estado' : 'Status', isSpanish ? 'Verificado' : 'Verified'],
+    [t.regulation, t.status, t.verified],
     [
-      ['ISO 27001:2022', '✅ Certified', isSpanish ? 'Auditoría anual' : 'Annual audit'],
-      ['ISO 20022', '✅ Native Support', 'CashTransfer.v1'],
-      ['PCI-DSS Level 1', '✅ Compliant', isSpanish ? 'Validación trimestral' : 'Quarterly validation'],
-      ['SOC 2 Type II', '✅ Certified', isSpanish ? 'Informe independiente' : 'Independent report'],
-      ['FATF Guidelines', '✅ Implemented', 'AML/CFT/KYC'],
-      ['GDPR', '✅ Compliant', 'EU Data Protection'],
-      ['Basel III', '✅ Aligned', isSpanish ? 'Requisitos de capital' : 'Capital requirements']
+      ['ISO 27001:2022', '✓ Certified', t.annualAudit],
+      ['ISO 20022', '✓ Native Support', 'CashTransfer.v1'],
+      ['PCI-DSS Level 1', '✓ Compliant', t.quarterlyValidation],
+      ['SOC 2 Type II', '✓ Certified', t.independentReport],
+      ['FATF Guidelines', '✓ Implemented', 'AML/CFT/KYC'],
+      ['GDPR', '✓ Compliant', 'EU Data Protection'],
+      ['Basel III', '✓ Aligned', t.capitalRequirements]
     ],
-    [50, 45, 85]
+    [48, 42, 90]
   );
   
-  // Nueva página - REQUISITOS TÉCNICOS
+  // Nueva página - REQUISITOS DE INTEGRACIÓN
   pdf.addPage();
   y = margin + 10;
   
-  // 11. REQUISITOS TÉCNICOS PARA INTEGRACIÓN
-  drawSection('11. TECHNICAL REQUIREMENTS FOR BANK-TO-BANK API INTEGRATION', '🔌');
+  // 11. REQUISITOS TÉCNICOS PARA INTEGRACIÓN BANCARIA
+  drawSection(t.techRequirements, 11);
   
-  // Box especial con el mensaje en inglés
+  // Box institucional con mensaje en inglés
   y += 2;
-  pdf.setFillColor(15, 35, 65);
-  pdf.roundedRect(margin, y, pageWidth - (margin * 2), 72, 3, 3, 'F');
+  pdf.setFillColor(...colors.darkBlue);
+  pdf.roundedRect(margin, y, pageWidth - (margin * 2), 68, 2, 2, 'F');
   
   // Borde dorado
   pdf.setDrawColor(...colors.gold);
-  pdf.setLineWidth(1);
-  pdf.roundedRect(margin, y, pageWidth - (margin * 2), 72, 3, 3, 'S');
+  pdf.setLineWidth(1.2);
+  pdf.roundedRect(margin, y, pageWidth - (margin * 2), 68, 2, 2, 'S');
+  
+  // Marco interior
+  pdf.setDrawColor(...colors.lightGold);
+  pdf.setLineWidth(0.3);
+  pdf.roundedRect(margin + 3, y + 3, pageWidth - (margin * 2) - 6, 62, 1, 1, 'S');
   
   // Título
   pdf.setTextColor(...colors.gold);
-  pdf.setFontSize(11);
+  pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('INTEGRATION REQUIREMENTS', margin + 5, y + 10);
+  pdf.text('TECHNICAL INTEGRATION REQUIREMENTS', margin + 8, y + 12);
   
-  // Contenido del mensaje
+  // Contenido del mensaje institucional
   pdf.setTextColor(...colors.white);
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   pdf.setFont('helvetica', 'normal');
   
   const integrationMessage = [
@@ -477,75 +1132,75 @@ function generateAPIChecklistPDF(language: 'es' | 'en' = 'es') {
     'If this capability is not currently available on your side, please inform us accordingly.',
     '',
     'We are fully available to work jointly with your technical team to design, implement,',
-    'and complete the integration within one (1) business day, including basic testing',
-    'and validation.',
+    'and complete the integration within one (1) business day, including basic testing and validation.',
     '',
     'We remain available to coordinate technical access, specifications, and required parameters.'
   ];
   
-  let msgY = y + 18;
+  let msgY = y + 20;
   integrationMessage.forEach(line => {
-    pdf.text(line, margin + 5, msgY);
+    pdf.text(line, margin + 8, msgY);
     msgY += 5;
   });
   
-  // Firma
+  // Firma institucional
   pdf.setTextColor(...colors.gold);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Digital Commercial Bank Ltd - Technical Integration Team', margin + 5, y + 68);
+  pdf.setFontSize(7);
+  pdf.text('Digital Commercial Bank Ltd - Technical Integration Division', margin + 8, y + 63);
   
-  y += 80;
+  y += 76;
   
   // Box de contacto
   drawInfoBox(
-    isSpanish ? 'CONTACTO PARA INTEGRACIÓN' : 'INTEGRATION CONTACT',
+    t.integrationContact,
     [
       'Portal: https://luxliqdaes.cloud/partner-portal',
-      'API Docs: https://luxliqdaes.cloud/docs/partner-api',
       'Corporate: https://digcommbank.com'
     ],
     colors.emerald
   );
   
-  // Nota final
-  y += 5;
-  pdf.setFillColor(248, 250, 252);
-  pdf.roundedRect(margin, y, pageWidth - (margin * 2), 25, 2, 2, 'F');
+  // Nota final institucional
+  y += 3;
+  pdf.setFillColor(250, 251, 252);
+  pdf.roundedRect(margin, y, pageWidth - (margin * 2), 22, 1.5, 1.5, 'F');
   pdf.setDrawColor(...colors.gold);
-  pdf.setLineWidth(0.5);
-  pdf.roundedRect(margin, y, pageWidth - (margin * 2), 25, 2, 2, 'S');
+  pdf.setLineWidth(0.4);
+  pdf.roundedRect(margin, y, pageWidth - (margin * 2), 22, 1.5, 1.5, 'S');
   
   pdf.setTextColor(...colors.darkBlue);
-  pdf.setFontSize(8);
+  pdf.setFontSize(7);
   pdf.setFont('helvetica', 'bold');
-  pdf.text(isSpanish ? 'NOTA IMPORTANTE:' : 'IMPORTANT NOTE:', margin + 4, y + 7);
+  pdf.text(t.importantNote + ':', margin + 4, y + 6);
   
   pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(7);
-  const noteText = isSpanish 
-    ? 'Este documento contiene información técnica confidencial para la integración bancaria. La implementación'
-    : 'This document contains confidential technical information for banking integration. Implementation';
-  const noteText2 = isSpanish
-    ? 'completa requiere credenciales de producción emitidas por Digital Commercial Bank Ltd.'
-    : 'requires production credentials issued by Digital Commercial Bank Ltd.';
-  pdf.text(noteText, margin + 4, y + 13);
-  pdf.text(noteText2, margin + 4, y + 18);
+  pdf.setFontSize(6.5);
+  pdf.text(t.confidentialNote, margin + 4, y + 11);
+  pdf.text(t.credentialsNote, margin + 4, y + 16);
   
-  // Añadir footers a todas las páginas
+  // Añadir footers institucionales a todas las páginas
   const totalPages = pdf.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     pdf.setPage(i);
-    drawPremiumFooter(i, totalPages);
+    drawInstitutionalFooter(i, totalPages);
   }
   
-  // Guardar el PDF
-  const filename = isSpanish 
-    ? `DCB_DAES_Checklist_Integracion_Bancaria_API_${new Date().toISOString().split('T')[0]}`
-    : `DCB_DAES_Banking_API_Integration_Checklist_${new Date().toISOString().split('T')[0]}`;
+  // Nombre del archivo según idioma
+  const langSuffix: Record<PDFLanguage, string> = {
+    es: 'Integracion_Bancaria_API',
+    en: 'Banking_API_Integration',
+    pt: 'Integracao_Bancaria_API',
+    ar: 'API_Banking_Integration',
+    ru: 'Banking_API_Integration',
+    zh: 'Banking_API_Integration'
+  };
+  
+  const filename = `DCB_DAES_Checklist_${langSuffix[language]}_${language.toUpperCase()}_${new Date().toISOString().split('T')[0]}`;
   
   pdf.save(`${filename}.pdf`);
   
-  console.log(`[DAES Partner API] 📄 PDF Checklist generado: ${filename}.pdf`);
+  console.log(`[DAES Partner API] 📄 PDF Institucional generado: ${filename}.pdf (${language.toUpperCase()})`);
   return true;
 }
 
@@ -2678,27 +3333,67 @@ Partner: ${partner.name}
           gradient="white"
           actions={
             <div className="flex items-center gap-card flex-wrap">
-              {/* Botones de Descarga PDF Checklist */}
-              <div className="flex items-center gap-2">
+              {/* Botones de Descarga PDF Checklist - 6 Idiomas */}
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <BankingButton
                   variant="primary"
                   icon={FileText}
                   onClick={() => {
                     generateAPIChecklistPDF('es');
-                    alert('✅ PDF Checklist descargado en Español');
+                    alert('✅ PDF Checklist Institucional descargado en Español');
                   }}
                 >
-                  📄 Checklist ES
+                  🇪🇸 ES
                 </BankingButton>
                 <BankingButton
                   variant="primary"
                   icon={FileText}
                   onClick={() => {
                     generateAPIChecklistPDF('en');
-                    alert('✅ PDF Checklist downloaded in English');
+                    alert('✅ Institutional PDF Checklist downloaded in English');
                   }}
                 >
-                  📄 Checklist EN
+                  🇬🇧 EN
+                </BankingButton>
+                <BankingButton
+                  variant="primary"
+                  icon={FileText}
+                  onClick={() => {
+                    generateAPIChecklistPDF('pt');
+                    alert('✅ PDF Checklist Institucional baixado em Português');
+                  }}
+                >
+                  🇧🇷 PT
+                </BankingButton>
+                <BankingButton
+                  variant="primary"
+                  icon={FileText}
+                  onClick={() => {
+                    generateAPIChecklistPDF('ar');
+                    alert('✅ تم تنزيل قائمة التحقق المؤسسية PDF بالعربية');
+                  }}
+                >
+                  🇸🇦 AR
+                </BankingButton>
+                <BankingButton
+                  variant="primary"
+                  icon={FileText}
+                  onClick={() => {
+                    generateAPIChecklistPDF('ru');
+                    alert('✅ Институциональный PDF Checklist загружен на русском');
+                  }}
+                >
+                  🇷🇺 RU
+                </BankingButton>
+                <BankingButton
+                  variant="primary"
+                  icon={FileText}
+                  onClick={() => {
+                    generateAPIChecklistPDF('zh');
+                    alert('✅ 机构PDF清单已下载（中文）');
+                  }}
+                >
+                  🇨🇳 ZH
                 </BankingButton>
               </div>
               
