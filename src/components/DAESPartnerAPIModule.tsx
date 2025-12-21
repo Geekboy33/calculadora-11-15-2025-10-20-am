@@ -1070,7 +1070,7 @@ function generateAPIChecklistPDF(language: PDFLanguage = 'es') {
       [t.techIntegration, 'API', 'https://luxliqdaes.cloud/support'],
       [t.corporatePortal, 'Web', 'https://digcommbank.com'],
       [t.partnerPortal, 'Web', 'https://luxliqdaes.cloud/partner-portal'],
-      ['Compliance', 'Email', 'compliance@digcommbank.com'],
+      ['Compliance', 'Email', 'operations@digcommbank.com'],
       [t.support247, 'Webhook', t.realTimeNotifications]
     ],
     [50, 22, 108]
