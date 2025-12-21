@@ -877,6 +877,76 @@ class CustodyStore {
   }
 
   /**
+   * Actualizar balance de forma relativa (sumar o restar)
+   * @param accountId - ID de la cuenta
+   * @param amount - Monto a agregar (positivo) o restar (negativo)
+   * @returns true si fue exitoso, false si hubo error
+   */
+  updateBalance(accountId: string, amount: number): boolean {
+    const accounts = this.getAccounts();
+    const account = accounts.find(a => a.id === accountId);
+    
+    if (!account) {
+      console.error('[CustodyStore] ❌ Cuenta no encontrada:', accountId);
+      return false;
+    }
+    
+    const oldBalance = account.availableBalance;
+    const newBalance = oldBalance + amount;
+    
+    // Validar que no quede negativo
+    if (newBalance < 0) {
+      console.error('[CustodyStore] ❌ Balance insuficiente. Disponible:', oldBalance, 'Requerido:', Math.abs(amount));
+      return false;
+    }
+    
+    // Validar que no baje del monto reservado (si es una resta)
+    if (amount < 0 && newBalance < account.reservedBalance) {
+      console.error('[CustodyStore] ❌ No se puede restar más del balance disponible sobre reservas');
+      return false;
+    }
+    
+    // Actualizar balances
+    account.availableBalance = newBalance;
+    account.totalBalance = newBalance + account.reservedBalance;
+    account.lastUpdated = new Date().toISOString();
+    
+    this.saveAccounts(accounts);
+    
+    // Registrar evento
+    const eventType = amount > 0 ? 'increase' : 'decrease';
+    if (amount > 0) {
+      transactionEventStore.recordBalanceIncrease(
+        accountId,
+        account.accountName,
+        amount,
+        account.currency,
+        oldBalance,
+        newBalance
+      );
+    } else {
+      transactionEventStore.recordBalanceDecrease(
+        accountId,
+        account.accountName,
+        Math.abs(amount),
+        account.currency,
+        oldBalance,
+        newBalance
+      );
+    }
+    
+    console.log(`[CustodyStore] ✅ Balance ${eventType}:`, {
+      account: account.accountName,
+      oldBalance,
+      change: amount,
+      newBalance,
+      currency: account.currency
+    });
+    
+    return true;
+  }
+
+  /**
    * Guardar cuentas
    */
   private saveAccounts(accounts: CustodyAccount[]): void {

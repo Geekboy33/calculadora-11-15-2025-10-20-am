@@ -1692,21 +1692,36 @@ Partner: ${partner.name}
       // Si llegamos aquí, el endpoint es alcanzable
       setWebhookVerificationStatus(prev => ({ ...prev, [clientId]: 'connected' }));
       
-      // Actualizar estado del cliente
+      // ✅ CORREGIDO: Actualizar estado del cliente y guardar en localStorage
+      const verifiedAt = new Date().toISOString();
       const updatedClients = clients.map(c => 
         c.clientId === clientId 
-          ? { ...c, webhookStatus: 'VERIFIED', webhookVerifiedAt: new Date().toISOString() }
+          ? { ...c, webhookStatus: 'VERIFIED', webhookVerifiedAt: verifiedAt }
           : c
       );
       setClients(updatedClients);
+      
+      // Guardar inmediatamente en localStorage para persistencia
+      localStorage.setItem('daes_partner_api_clients', JSON.stringify(updatedClients));
+      console.log('[DAES Partner API] ✅ Webhook verificado y guardado:', client.webhookUrl);
 
       alert(isSpanish 
-        ? `✅ Webhook verificado exitosamente\n\nURL: ${client.webhookUrl}\n\nEl endpoint está accesible y listo para recibir notificaciones.`
-        : `✅ Webhook verified successfully\n\nURL: ${client.webhookUrl}\n\nThe endpoint is accessible and ready to receive notifications.`
+        ? `✅ Webhook verificado exitosamente\n\nURL: ${client.webhookUrl}\n\nEl endpoint está accesible y listo para recibir notificaciones.\n\nVerificado: ${new Date(verifiedAt).toLocaleString()}`
+        : `✅ Webhook verified successfully\n\nURL: ${client.webhookUrl}\n\nThe endpoint is accessible and ready to receive notifications.\n\nVerified: ${new Date(verifiedAt).toLocaleString()}`
       );
     } catch (error: any) {
       if (error.name === 'AbortError') {
         setWebhookVerificationStatus(prev => ({ ...prev, [clientId]: 'error' }));
+        
+        // ✅ CORREGIDO: Marcar como error en el cliente
+        const updatedClients = clients.map(c => 
+          c.clientId === clientId 
+            ? { ...c, webhookStatus: 'ERROR', webhookVerifiedAt: null }
+            : c
+        );
+        setClients(updatedClients);
+        localStorage.setItem('daes_partner_api_clients', JSON.stringify(updatedClients));
+        
         alert(isSpanish
           ? `❌ Error: Timeout al verificar webhook\n\nURL: ${client.webhookUrl}\n\nVerifica que el endpoint esté accesible públicamente.`
           : `❌ Error: Timeout verifying webhook\n\nURL: ${client.webhookUrl}\n\nVerify that the endpoint is publicly accessible.`
@@ -1714,9 +1729,21 @@ Partner: ${partner.name}
       } else {
         // En modo no-cors, cualquier error puede ser CORS, pero el servidor puede estar disponible
         setWebhookVerificationStatus(prev => ({ ...prev, [clientId]: 'connected' }));
+        
+        // ✅ CORREGIDO: Marcar como verificado con advertencia
+        const verifiedAt = new Date().toISOString();
+        const updatedClients = clients.map(c => 
+          c.clientId === clientId 
+            ? { ...c, webhookStatus: 'VERIFIED_CORS', webhookVerifiedAt: verifiedAt }
+            : c
+        );
+        setClients(updatedClients);
+        localStorage.setItem('daes_partner_api_clients', JSON.stringify(updatedClients));
+        console.log('[DAES Partner API] ⚠️ Webhook verificado (posible CORS):', client.webhookUrl);
+        
         alert(isSpanish
-          ? `⚠️ Verificación completada (puede ser error de CORS)\n\nURL: ${client.webhookUrl}\n\nEl endpoint parece estar accesible. Verifica manualmente que funcione correctamente.`
-          : `⚠️ Verification completed (may be CORS error)\n\nURL: ${client.webhookUrl}\n\nThe endpoint appears to be accessible. Manually verify that it works correctly.`
+          ? `⚠️ Verificación completada (puede ser error de CORS)\n\nURL: ${client.webhookUrl}\n\nEl endpoint parece estar accesible. Verifica manualmente que funcione correctamente.\n\nEstado guardado: VERIFIED_CORS`
+          : `⚠️ Verification completed (may be CORS error)\n\nURL: ${client.webhookUrl}\n\nThe endpoint appears to be accessible. Manually verify that it works correctly.\n\nSaved status: VERIFIED_CORS`
         );
       }
     }
@@ -1996,10 +2023,34 @@ Partner: ${partner.name}
       return;
     }
 
+    // ✅ VALIDACIÓN DE BALANCE SUFICIENTE
+    const transferAmount = parseFloat(transferForm.amount);
+    if (custodyAccount.availableBalance < transferAmount) {
+      alert(
+        isSpanish 
+          ? `❌ BALANCE INSUFICIENTE\n\nBalance disponible: ${fmt.currency(custodyAccount.availableBalance, custodyAccount.currency)}\nMonto solicitado: ${fmt.currency(transferAmount, transferForm.currency)}\n\nNo hay fondos suficientes para completar esta transferencia.`
+          : `❌ INSUFFICIENT BALANCE\n\nAvailable balance: ${fmt.currency(custodyAccount.availableBalance, custodyAccount.currency)}\nRequested amount: ${fmt.currency(transferAmount, transferForm.currency)}\n\nInsufficient funds to complete this transfer.`
+      );
+      return;
+    }
+
     setProcessing(true);
 
     try {
       const transferRequestId = `${partner.name.substring(0, 3).toUpperCase()}-TX-${Date.now()}`;
+      
+      // ✅ DESCONTAR BALANCE REAL DE LA CUENTA CUSTODIO
+      const balanceBeforeTransfer = custodyAccount.availableBalance;
+      const newBalance = balanceBeforeTransfer - transferAmount;
+      
+      // Actualizar el balance en el custody store
+      const updateResult = custodyStore.updateBalance(custodyAccount.id, -transferAmount);
+      
+      if (!updateResult) {
+        throw new Error(isSpanish ? 'Error al actualizar balance de cuenta custodio' : 'Error updating custody account balance');
+      }
+      
+      console.log(`[DAES Partner API] 💰 Balance actualizado: ${fmt.currency(balanceBeforeTransfer, custodyAccount.currency)} → ${fmt.currency(newBalance, custodyAccount.currency)}`);
       
       // Crear estructura CashTransfer.v1
       const cashTransfer = {
@@ -2009,7 +2060,7 @@ Partner: ${partner.name}
           ReceivingName: transferForm.receivingName,
           ReceivingAccount: transferForm.receivingAccount,
           Datetime: new Date().toISOString(),
-          Amount: parseFloat(transferForm.amount).toFixed(2),
+          Amount: transferAmount.toFixed(2),
           SendingCurrency: transferForm.currency,
           ReceivingCurrency: transferForm.currency,
           Description: transferForm.description,
@@ -2028,11 +2079,14 @@ Partner: ${partner.name}
         partnerName: partner.name,
         transferRequestId,
         fromAccount: custodyAccount.accountName,
+        fromAccountId: custodyAccount.id,
         toAccount: transferForm.receivingName,
         amount: transferForm.amount,
         currency: transferForm.currency,
         state: 'SETTLED' as const,
         createdAt: new Date().toISOString(),
+        balanceBefore: balanceBeforeTransfer,
+        balanceAfter: newBalance,
         cashTransfer
       };
 
@@ -2043,15 +2097,19 @@ Partner: ${partner.name}
         `=== DETALLES ===\n` +
         `Partner: ${partner.name}\n` +
         `Transfer ID: ${transferRequestId}\n` +
-        `Cuenta Origen: ${custodyAccount.accountName}\n` +
-        `Balance Disponible: ${fmt.currency(custodyAccount.availableBalance, transferForm.currency)}\n` +
-        `Monto Enviado: ${fmt.currency(parseFloat(transferForm.amount), transferForm.currency)}\n` +
-        `Destinatario: ${transferForm.receivingName}\n` +
-        `Cuenta Destino: ${transferForm.receivingAccount}\n\n` +
+        `Cuenta Origen: ${custodyAccount.accountName}\n\n` +
+        `=== MOVIMIENTO DE FONDOS ===\n` +
+        `Balance Anterior: ${fmt.currency(balanceBeforeTransfer, custodyAccount.currency)}\n` +
+        `Monto Transferido: ${fmt.currency(transferAmount, transferForm.currency)}\n` +
+        `Balance Actual: ${fmt.currency(newBalance, custodyAccount.currency)}\n\n` +
+        `=== DESTINATARIO ===\n` +
+        `Nombre: ${transferForm.receivingName}\n` +
+        `Cuenta: ${transferForm.receivingAccount}\n\n` +
         `=== VALIDACIÓN ===\n` +
         `Digital Commercial Bank DAES: ✅ YES\n` +
         `Firma Digital: ✅ YES - 1 verified\n` +
-        `CashTransfer.v1: ✅ Generado\n\n` +
+        `CashTransfer.v1: ✅ Generado\n` +
+        `Balance Descontado: ✅ YES\n\n` +
         `Estado: ✅ SETTLED`;
 
       alert(messageText);
@@ -2068,7 +2126,7 @@ Partner: ${partner.name}
 
     } catch (error) {
       console.error('[DAES Partner API] Error en transferencia:', error);
-      alert(isSpanish ? '❌ Error al procesar transferencia' : '❌ Error processing transfer');
+      alert(isSpanish ? `❌ Error al procesar transferencia: ${error instanceof Error ? error.message : 'Error desconocido'}` : `❌ Error processing transfer: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setProcessing(false);
     }
