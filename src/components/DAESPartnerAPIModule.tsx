@@ -7,13 +7,394 @@
 import { useState } from 'react';
 import { 
   Globe, Key, Users, Wallet, Shield, Copy, Eye, EyeOff,
-  CheckCircle, AlertCircle, ArrowRight, Plus, RefreshCw, Download, Clock
+  CheckCircle, AlertCircle, ArrowRight, Plus, RefreshCw, Download, Clock, FileText
 } from 'lucide-react';
 import { BankingCard, BankingHeader, BankingButton, BankingSection, BankingMetric, BankingBadge, BankingInput } from './ui/BankingComponents';
 import { useBankingTheme } from '../hooks/useBankingTheme';
 import { custodyStore, type CustodyAccount } from '../lib/custody-store';
 import { downloadTXT } from '../lib/download-helper';
 import { useEffect } from 'react';
+import jsPDF from 'jspdf';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 📄 GENERADOR DE PDF - CHECKLIST INTEGRACIÓN BANCARIA API
+// ═══════════════════════════════════════════════════════════════════════════
+
+function generateAPIChecklistPDF(language: 'es' | 'en' = 'es') {
+  const isSpanish = language === 'es';
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const margin = 15;
+  let y = margin;
+  
+  // Colores corporativos
+  const colors = {
+    darkBlue: [10, 25, 47],      // Header
+    gold: [212, 175, 55],         // Acentos
+    green: [34, 197, 94],         // Checks
+    gray: [100, 116, 139],        // Texto secundario
+    lightGray: [241, 245, 249],   // Fondos de tabla
+    black: [0, 0, 0],
+    white: [255, 255, 255]
+  };
+  
+  // Función para dibujar header
+  const drawHeader = () => {
+    // Fondo del header
+    pdf.setFillColor(...colors.darkBlue);
+    pdf.rect(0, 0, pageWidth, 45, 'F');
+    
+    // Línea dorada
+    pdf.setFillColor(...colors.gold);
+    pdf.rect(0, 45, pageWidth, 2, 'F');
+    
+    // Logo/Nombre del banco
+    pdf.setTextColor(...colors.white);
+    pdf.setFontSize(22);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('DIGITAL COMMERCIAL BANK LTD', pageWidth / 2, 18, { align: 'center' });
+    
+    // Subtítulo
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text('DAES - Digital Asset & Electronic Services', pageWidth / 2, 26, { align: 'center' });
+    
+    // Título del documento
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    const title = isSpanish ? 'CHECK LIST - INTEGRACIÓN BANCARIA API' : 'CHECK LIST - BANKING API INTEGRATION';
+    pdf.text(title, pageWidth / 2, 38, { align: 'center' });
+    
+    y = 55;
+  };
+  
+  // Función para dibujar footer
+  const drawFooter = (pageNum: number, totalPages: number) => {
+    const footerY = pageHeight - 15;
+    
+    // Línea superior del footer
+    pdf.setDrawColor(...colors.gold);
+    pdf.setLineWidth(0.5);
+    pdf.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
+    
+    // Texto del footer
+    pdf.setTextColor(...colors.gray);
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'normal');
+    
+    const footerLeft = isSpanish 
+      ? 'Digital Commercial Bank Ltd | ISO 27001 | ISO 20022 | FATF AML/CFT'
+      : 'Digital Commercial Bank Ltd | ISO 27001 | ISO 20022 | FATF AML/CFT';
+    pdf.text(footerLeft, margin, footerY);
+    
+    const footerRight = `${isSpanish ? 'Página' : 'Page'} ${pageNum}/${totalPages}`;
+    pdf.text(footerRight, pageWidth - margin, footerY, { align: 'right' });
+    
+    // Fecha de generación
+    const dateText = `${isSpanish ? 'Generado:' : 'Generated:'} ${new Date().toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')} ${new Date().toLocaleTimeString(isSpanish ? 'es-ES' : 'en-US')}`;
+    pdf.text(dateText, pageWidth / 2, footerY, { align: 'center' });
+  };
+  
+  // Función para dibujar sección
+  const drawSection = (title: string) => {
+    if (y > pageHeight - 60) {
+      pdf.addPage();
+      y = margin + 10;
+    }
+    
+    pdf.setFillColor(...colors.darkBlue);
+    pdf.rect(margin, y, pageWidth - (margin * 2), 8, 'F');
+    
+    pdf.setTextColor(...colors.white);
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(title, margin + 3, y + 5.5);
+    
+    y += 12;
+  };
+  
+  // Función para dibujar tabla
+  const drawTable = (headers: string[], rows: string[][], colWidths: number[]) => {
+    const tableWidth = pageWidth - (margin * 2);
+    const rowHeight = 7;
+    const startX = margin;
+    
+    // Header de la tabla
+    pdf.setFillColor(...colors.darkBlue);
+    pdf.rect(startX, y, tableWidth, rowHeight, 'F');
+    
+    pdf.setTextColor(...colors.white);
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'bold');
+    
+    let xPos = startX + 2;
+    headers.forEach((header, i) => {
+      pdf.text(header, xPos, y + 5);
+      xPos += colWidths[i];
+    });
+    
+    y += rowHeight;
+    
+    // Filas de datos
+    rows.forEach((row, rowIndex) => {
+      if (y > pageHeight - 30) {
+        pdf.addPage();
+        y = margin + 10;
+      }
+      
+      // Alternar colores de fila
+      if (rowIndex % 2 === 0) {
+        pdf.setFillColor(...colors.lightGray);
+        pdf.rect(startX, y, tableWidth, rowHeight, 'F');
+      }
+      
+      // Borde de fila
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.1);
+      pdf.rect(startX, y, tableWidth, rowHeight, 'S');
+      
+      pdf.setTextColor(...colors.black);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      
+      xPos = startX + 2;
+      row.forEach((cell, i) => {
+        // Check verde para ✅
+        if (cell.includes('✅') || cell === 'SÍ' || cell === 'YES') {
+          pdf.setTextColor(...colors.green);
+          pdf.setFont('helvetica', 'bold');
+        } else {
+          pdf.setTextColor(...colors.black);
+          pdf.setFont('helvetica', 'normal');
+        }
+        pdf.text(cell.substring(0, 40), xPos, y + 5);
+        xPos += colWidths[i];
+      });
+      
+      y += rowHeight;
+    });
+    
+    y += 5;
+  };
+  
+  // Función para texto simple
+  const drawText = (text: string, bold: boolean = false) => {
+    if (y > pageHeight - 25) {
+      pdf.addPage();
+      y = margin + 10;
+    }
+    
+    pdf.setTextColor(...colors.black);
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', bold ? 'bold' : 'normal');
+    pdf.text(text, margin, y);
+    y += 5;
+  };
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONTENIDO DEL PDF
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  drawHeader();
+  
+  // 1. INFORMACIÓN GENERAL
+  drawSection(isSpanish ? '1. INFORMACIÓN GENERAL' : '1. GENERAL INFORMATION');
+  drawTable(
+    [isSpanish ? 'Campo' : 'Field', isSpanish ? 'Valor' : 'Value'],
+    [
+      [isSpanish ? 'Nombre del banco' : 'Bank Name', 'Digital Commercial Bank Ltd (DCB/DAES)'],
+      [isSpanish ? 'Número de cuenta' : 'Account Number', 'ACC_[CURRENCY]_[TIMESTAMP]_[ID]'],
+      [isSpanish ? 'Titular de la cuenta' : 'Account Holder', isSpanish ? 'Configurable por cliente (legalName)' : 'Configurable per client (legalName)']
+    ],
+    [60, 120]
+  );
+  
+  // 2. TIPO DE API
+  drawSection(isSpanish ? '2. TIPO DE API' : '2. API TYPE');
+  drawTable(
+    [isSpanish ? 'Tipo' : 'Type', isSpanish ? 'Soportado' : 'Supported'],
+    [
+      ['REST', '✅ ' + (isSpanish ? 'SÍ (principal)' : 'YES (primary)')],
+      ['SOAP', '❌ No']
+    ],
+    [90, 90]
+  );
+  
+  // 3. FORMATO DE DATOS
+  drawSection(isSpanish ? '3. FORMATO DE DATOS' : '3. DATA FORMAT');
+  drawTable(
+    [isSpanish ? 'Formato' : 'Format', isSpanish ? 'Soportado' : 'Supported'],
+    [
+      ['JSON', '✅ ' + (isSpanish ? 'SÍ' : 'YES')],
+      ['XML', '❌ No'],
+      [isSpanish ? 'Versión de la API' : 'API Version', 'v1.0']
+    ],
+    [90, 90]
+  );
+  
+  // 4. ENDPOINTS
+  drawSection(isSpanish ? '4. ENDPOINTS' : '4. ENDPOINTS');
+  drawText('URL Base: https://luxliqdaes.cloud/partner-api/v1', true);
+  y += 3;
+  drawTable(
+    ['Endpoint', isSpanish ? 'Descripción' : 'Description'],
+    [
+      ['POST /auth/token', isSpanish ? 'Obtener token de acceso (OAuth 2.0)' : 'Get access token (OAuth 2.0)'],
+      ['POST /clients/{id}/accounts', isSpanish ? 'Crear cuenta en divisa específica' : 'Create account in specific currency'],
+      ['GET /clients/{id}/accounts', isSpanish ? 'Listar cuentas y balances' : 'List accounts and balances'],
+      ['POST /transfers', isSpanish ? 'Crear transferencia (CashTransfer.v1)' : 'Create transfer (CashTransfer.v1)'],
+      ['GET /transfers/incoming/{id}', isSpanish ? 'Consultar transferencias recibidas' : 'Query received transfers'],
+      ['GET /transfers/details/{ref}', isSpanish ? 'Detalles de transferencia específica' : 'Specific transfer details'],
+      ['GET /transfers/status/{reqId}', isSpanish ? 'Estado de transferencia' : 'Transfer status']
+    ],
+    [75, 105]
+  );
+  
+  // 5. MÉTODOS HTTP
+  drawSection(isSpanish ? '5. MÉTODOS HTTP' : '5. HTTP METHODS');
+  drawTable(
+    [isSpanish ? 'Método' : 'Method', isSpanish ? 'Soportado' : 'Supported', isSpanish ? 'Uso' : 'Usage'],
+    [
+      ['GET', '✅', isSpanish ? 'Consultas de cuentas, balances, transferencias' : 'Accounts, balances, transfers queries'],
+      ['POST', '✅', isSpanish ? 'Autenticación, crear cuentas, transferencias' : 'Auth, create accounts, transfers'],
+      ['PUT', '⚠️', isSpanish ? 'Actualizaciones de estado (limitado)' : 'Status updates (limited)'],
+      ['DELETE', '❌', isSpanish ? 'No expuesto públicamente' : 'Not publicly exposed']
+    ],
+    [30, 25, 125]
+  );
+  
+  // Nueva página para continuar
+  pdf.addPage();
+  y = margin + 10;
+  
+  // 6. AUTENTICACIÓN
+  drawSection(isSpanish ? '6. TIPO DE AUTENTICACIÓN' : '6. AUTHENTICATION TYPE');
+  drawTable(
+    [isSpanish ? 'Método' : 'Method', isSpanish ? 'Soportado' : 'Supported', isSpanish ? 'Detalles' : 'Details'],
+    [
+      ['OAuth 2.0', '✅', 'grant_type: client_credentials'],
+      ['Mutual TLS (mTLS)', '⚠️', isSpanish ? 'Opcional - disponible para producción' : 'Optional - available for production'],
+      ['API Key + Secret', '✅', 'client_id + client_secret'],
+      [isSpanish ? 'Certificados X.509' : 'X.509 Certificates', '⚠️', isSpanish ? 'Opcional - para SWIFT/FEDWIRE' : 'Optional - for SWIFT/FEDWIRE'],
+      [isSpanish ? 'IPs autorizadas' : 'Whitelisted IPs', '✅', isSpanish ? 'Configurable por partner' : 'Configurable per partner']
+    ],
+    [55, 20, 105]
+  );
+  
+  y += 3;
+  drawText(isSpanish ? 'Formato de credenciales generadas:' : 'Generated credentials format:', true);
+  drawText('Partner Client ID: dcb_[timestamp]_[random]');
+  drawText('Partner Client Secret: [64 ' + (isSpanish ? 'caracteres aleatorios' : 'random characters') + ']');
+  drawText('Client API Key: [48 ' + (isSpanish ? 'caracteres aleatorios' : 'random characters') + ']');
+  y += 3;
+  
+  // 7. SEGURIDAD Y CRIPTOGRAFÍA
+  drawSection(isSpanish ? '7. SEGURIDAD Y CRIPTOGRAFÍA' : '7. SECURITY AND CRYPTOGRAPHY');
+  drawTable(
+    [isSpanish ? 'Característica' : 'Feature', isSpanish ? 'Estado' : 'Status', isSpanish ? 'Detalle' : 'Detail'],
+    [
+      ['TLS 1.2+', '✅', 'HTTPS ' + (isSpanish ? 'obligatorio' : 'mandatory')],
+      [isSpanish ? 'Firma digital' : 'Digital Signature', '✅', 'HMAC-SHA256 en headers'],
+      ['Logs & ' + (isSpanish ? 'Auditoría' : 'Audit'), '✅', 'transactionEventStore'],
+      [isSpanish ? 'Encriptación datos' : 'Data Encryption', '✅', 'AES-256'],
+      ['ISO 27001', '✅', isSpanish ? 'Compliance verificado' : 'Verified compliance'],
+      ['ISO 20022', '✅', isSpanish ? 'Compatible (CashTransfer.v1)' : 'Compatible (CashTransfer.v1)']
+    ],
+    [55, 20, 105]
+  );
+  
+  // 8. VALIDACIÓN ANTES DE PRODUCCIÓN
+  drawSection(isSpanish ? '8. VALIDACIÓN ANTES DE PRODUCCIÓN' : '8. PRE-PRODUCTION VALIDATION');
+  drawTable(
+    [isSpanish ? 'Elemento' : 'Element', isSpanish ? 'Disponible' : 'Available', isSpanish ? 'URL/Detalle' : 'URL/Detail'],
+    [
+      ['Ambiente Sandbox', '✅', 'https://luxliqdaes.cloud/partner-api/sandbox/v1'],
+      [isSpanish ? 'Credenciales de prueba' : 'Test Credentials', '✅', isSpanish ? 'Generables desde el módulo' : 'Generatable from module'],
+      [isSpanish ? 'Cuentas ficticias' : 'Test Accounts', '✅', isSpanish ? 'Se crean en el sandbox' : 'Created in sandbox'],
+      [isSpanish ? 'Claves de prueba' : 'Test Keys', '✅', isSpanish ? 'Prefijo test_' : 'Prefix test_'],
+      [isSpanish ? 'Escenarios de error' : 'Error Scenarios', '✅', isSpanish ? 'Documentados en TXT' : 'Documented in TXT']
+    ],
+    [55, 20, 105]
+  );
+  
+  y += 5;
+  drawText(isSpanish ? 'Códigos de Error Implementados:' : 'Implemented Error Codes:', true);
+  const errorCodes = [
+    'INVALID_CREDENTIALS - ' + (isSpanish ? 'Credenciales incorrectas' : 'Invalid credentials'),
+    'EXPIRED_TOKEN - ' + (isSpanish ? 'Token expirado' : 'Token expired'),
+    'INSUFFICIENT_BALANCE - ' + (isSpanish ? 'Balance insuficiente' : 'Insufficient balance'),
+    'CURRENCY_NOT_ALLOWED - ' + (isSpanish ? 'Divisa no permitida' : 'Currency not allowed'),
+    'INVALID_AMOUNT - ' + (isSpanish ? 'Monto inválido' : 'Invalid amount'),
+    'DUPLICATE_TRANSFER_REQUEST - ' + (isSpanish ? 'ID duplicado' : 'Duplicate ID')
+  ];
+  errorCodes.forEach(code => drawText('• ' + code));
+  
+  // 9. INFORMACIÓN OPERATIVA
+  pdf.addPage();
+  y = margin + 10;
+  
+  drawSection(isSpanish ? '9. INFORMACIÓN OPERATIVA' : '9. OPERATIONAL INFORMATION');
+  drawTable(
+    [isSpanish ? 'Contacto' : 'Contact', isSpanish ? 'Tipo' : 'Type', isSpanish ? 'Detalle' : 'Detail'],
+    [
+      [isSpanish ? 'Portal de Partners' : 'Partner Portal', 'Web', 'https://luxliqdaes.cloud/partner-portal'],
+      [isSpanish ? 'Documentación' : 'Documentation', 'Web', 'https://luxliqdaes.cloud/docs/partner-api'],
+      [isSpanish ? 'Soporte Técnico' : 'Technical Support', 'API', isSpanish ? 'Configurable por partner (webhookUrl)' : 'Configurable per partner (webhookUrl)'],
+      ['Compliance', isSpanish ? 'Interno' : 'Internal', 'ISO 27001, FATF AML/CFT, KYC']
+    ],
+    [55, 30, 95]
+  );
+  
+  // 10. DIVISAS SOPORTADAS
+  drawSection(isSpanish ? '10. DIVISAS SOPORTADAS (15 Total)' : '10. SUPPORTED CURRENCIES (15 Total)');
+  drawTable(
+    [isSpanish ? 'Código' : 'Code', isSpanish ? 'Moneda' : 'Currency', isSpanish ? 'Código' : 'Code', isSpanish ? 'Moneda' : 'Currency'],
+    [
+      ['USD', 'US Dollar', 'JPY', 'Japanese Yen'],
+      ['EUR', 'Euro', 'CHF', 'Swiss Franc'],
+      ['GBP', 'British Pound', 'CNY', 'Chinese Yuan'],
+      ['CAD', 'Canadian Dollar', 'INR', 'Indian Rupee'],
+      ['AUD', 'Australian Dollar', 'MXN', 'Mexican Peso'],
+      ['BRL', 'Brazilian Real', 'KRW', 'South Korean Won'],
+      ['RUB', 'Russian Ruble', 'SGD', 'Singapore Dollar'],
+      ['HKD', 'Hong Kong Dollar', '', '']
+    ],
+    [25, 65, 25, 65]
+  );
+  
+  // 11. RESUMEN DE CUMPLIMIENTO
+  drawSection(isSpanish ? '11. RESUMEN DE CUMPLIMIENTO' : '11. COMPLIANCE SUMMARY');
+  drawTable(
+    [isSpanish ? 'Estándar' : 'Standard', isSpanish ? 'Estado' : 'Status'],
+    [
+      ['ISO 27001', '✅ Compliant'],
+      ['ISO 20022', '✅ Compatible'],
+      ['FATF AML/CFT', '✅ ' + (isSpanish ? 'Verificado' : 'Verified')],
+      ['KYC', '✅ ' + (isSpanish ? 'Implementado' : 'Implemented')],
+      ['PCI-DSS', '✅ Level 1'],
+      ['GDPR', '✅ Compliant']
+    ],
+    [90, 90]
+  );
+  
+  // Añadir footers a todas las páginas
+  const totalPages = pdf.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    pdf.setPage(i);
+    drawFooter(i, totalPages);
+  }
+  
+  // Guardar el PDF
+  const filename = isSpanish 
+    ? `DCB_DAES_Checklist_Integracion_API_${new Date().toISOString().split('T')[0]}`
+    : `DCB_DAES_API_Integration_Checklist_${new Date().toISOString().split('T')[0]}`;
+  
+  pdf.save(`${filename}.pdf`);
+  
+  return true;
+}
 
 interface Partner {
   partnerId: string;
@@ -2143,7 +2524,31 @@ Partner: ${partner.name}
           subtitle={isSpanish ? 'DAES Partner API - Gestión de Partners y Acceso API' : 'DAES Partner API - Partner & API Access Management'}
           gradient="white"
           actions={
-            <div className="flex items-center gap-card">
+            <div className="flex items-center gap-card flex-wrap">
+              {/* Botones de Descarga PDF Checklist */}
+              <div className="flex items-center gap-2">
+                <BankingButton
+                  variant="primary"
+                  icon={FileText}
+                  onClick={() => {
+                    generateAPIChecklistPDF('es');
+                    alert('✅ PDF Checklist descargado en Español');
+                  }}
+                >
+                  📄 Checklist ES
+                </BankingButton>
+                <BankingButton
+                  variant="primary"
+                  icon={FileText}
+                  onClick={() => {
+                    generateAPIChecklistPDF('en');
+                    alert('✅ PDF Checklist downloaded in English');
+                  }}
+                >
+                  📄 Checklist EN
+                </BankingButton>
+              </div>
+              
               <BankingButton
                 variant="secondary"
                 icon={CheckCircle}
