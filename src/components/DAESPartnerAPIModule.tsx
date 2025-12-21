@@ -18,10 +18,10 @@ import jsPDF from 'jspdf';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 📄 GENERADOR DE PDF - CHECKLIST INTEGRACIÓN BANCARIA API (INSTITUTIONAL GRADE)
-// Idiomas: ES, EN, PT, AR, RU, ZH
+// Idiomas: ES, EN, PT, FR, AR, RU, ZH
 // ═══════════════════════════════════════════════════════════════════════════
 
-type PDFLanguage = 'es' | 'en' | 'pt' | 'ar' | 'ru' | 'zh';
+type PDFLanguage = 'es' | 'en' | 'pt' | 'fr' | 'ar' | 'ru' | 'zh';
 
 // Traducciones institucionales
 const PDF_TRANSLATIONS: Record<PDFLanguage, Record<string, string>> = {
@@ -294,6 +294,96 @@ const PDF_TRANSLATIONS: Record<PDFLanguage, Record<string, string>> = {
     of: 'de',
     generated: 'Gerado',
     confidential: 'DOCUMENTO CONFIDENCIAL'
+  },
+  fr: {
+    title: 'CHECKLIST D\'INTÉGRATION BANCAIRE API',
+    subtitle: 'Documentation Technique Institutionnelle',
+    generalInfo: 'INFORMATIONS INSTITUTIONNELLES',
+    legalName: 'Raison Sociale',
+    system: 'Système',
+    corporateWeb: 'Portail Corporatif',
+    apiPortal: 'Portail APIs',
+    accountFormat: 'Format de Compte',
+    jurisdiction: 'Juridiction',
+    apiSpecs: 'SPÉCIFICATIONS TECHNIQUES API',
+    specification: 'Spécification',
+    value: 'Valeur',
+    notes: 'Notes',
+    architecture: 'Architecture',
+    version: 'Version',
+    stable: 'Stable',
+    dataFormat: 'Format de Données',
+    endpoints: 'ENDPOINTS DISPONIBLES',
+    method: 'Méthode',
+    description: 'Description',
+    createAccount: 'Créer un compte multi-devises',
+    listAccounts: 'Lister les comptes et soldes',
+    incomingTransfers: 'Transferts reçus',
+    transferDetail: 'Détail par référence',
+    transferStatus: 'Statut du transfert',
+    registerWebhook: 'Enregistrer webhook HTTPS',
+    authentication: 'AUTHENTIFICATION ET SÉCURITÉ',
+    status: 'Statut',
+    implementation: 'Implémentation',
+    clientCerts: 'Certificats client/serveur',
+    authorizedIPs: 'IPs autorisées configurables',
+    digitalSignature: 'Signature numérique des messages',
+    mandatoryEncryption: 'Chiffrement obligatoire',
+    securityStandards: 'NORMES DE SÉCURITÉ ET CONFORMITÉ',
+    certification: 'Certification',
+    scope: 'Portée',
+    infoSecManagement: 'Gestion de la Sécurité de l\'Information',
+    cardPayment: 'Traitement des paiements par carte',
+    securityControls: 'Contrôles de sécurité et confidentialité',
+    antiMoney: 'Anti-blanchiment d\'argent',
+    dataProtection: 'Protection des données personnelles',
+    identityVerification: 'Vérification d\'identité',
+    capitalRequirements: 'Exigences de capital',
+    currencies: 'DEVISES ACTIVÉES - ISO 4217',
+    isoCode: 'Code ISO',
+    currency: 'Devise',
+    country: 'Pays/Région',
+    numCode: 'Code Numérique',
+    sandbox: 'ENVIRONNEMENT DE CERTIFICATION',
+    resource: 'Ressource',
+    available: 'Disponible',
+    detail: 'Détail',
+    sandboxAPI: 'API de Certification',
+    testCredentials: 'Identifiants de Test',
+    testPrefix: 'Préfixe test_ (demander sur le portail)',
+    errorCodes: 'CODES DE RÉPONSE API',
+    code: 'Code',
+    invalidCreds: 'Identifiants invalides ou expirés',
+    expiredToken: 'Token JWT expiré (renouveler)',
+    insufficientBalance: 'Solde insuffisant pour l\'opération',
+    currencyNotAllowed: 'Devise non activée pour le client',
+    invalidAmount: 'Montant invalide ou hors plage',
+    duplicateRequest: 'TransferRequestID en double',
+    webhookUnreachable: 'Endpoint webhook ne répond pas',
+    rateLimitExceeded: 'Limite de requêtes dépassée',
+    operationalInfo: 'INFORMATIONS DE CONTACT INSTITUTIONNELLES',
+    department: 'Département',
+    channel: 'Canal',
+    techIntegration: 'Intégration Technique',
+    corporatePortal: 'Portail Corporatif',
+    partnerPortal: 'Portail Partenaires',
+    support247: 'Support 24/7',
+    realTimeNotifications: 'Notifications en temps réel',
+    compliance: 'RÉSUMÉ DE CONFORMITÉ RÉGLEMENTAIRE',
+    regulation: 'Réglementation',
+    verified: 'Vérifié',
+    annualAudit: 'Audit annuel',
+    quarterlyValidation: 'Validation trimestrielle',
+    independentReport: 'Rapport indépendant',
+    techRequirements: 'EXIGENCES TECHNIQUES POUR L\'INTÉGRATION BANCAIRE',
+    importantNote: 'NOTE IMPORTANTE',
+    confidentialNote: 'Ce document contient des informations techniques confidentielles pour l\'intégration bancaire.',
+    credentialsNote: 'L\'implémentation nécessite des identifiants de production émis par Digital Commercial Bank Ltd.',
+    integrationContact: 'CONTACT POUR L\'INTÉGRATION',
+    page: 'Page',
+    of: 'de',
+    generated: 'Généré',
+    confidential: 'DOCUMENT CONFIDENTIEL'
   },
   ar: {
     title: 'قائمة التحقق من تكامل API المصرفي',
@@ -593,7 +683,7 @@ function generateAPIChecklistPDF(language: PDFLanguage = 'es') {
 
   // Locale para fechas
   const dateLocale: Record<PDFLanguage, string> = {
-    es: 'es-ES', en: 'en-US', pt: 'pt-BR', ar: 'ar-SA', ru: 'ru-RU', zh: 'zh-CN'
+    es: 'es-ES', en: 'en-US', pt: 'pt-BR', fr: 'fr-FR', ar: 'ar-SA', ru: 'ru-RU', zh: 'zh-CN'
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1191,6 +1281,7 @@ function generateAPIChecklistPDF(language: PDFLanguage = 'es') {
     es: 'Integracion_Bancaria_API',
     en: 'Banking_API_Integration',
     pt: 'Integracao_Bancaria_API',
+    fr: 'Integration_Bancaire_API',
     ar: 'API_Banking_Integration',
     ru: 'Banking_API_Integration',
     zh: 'Banking_API_Integration'
@@ -3364,6 +3455,16 @@ Partner: ${partner.name}
                   }}
                 >
                   🇧🇷 PT
+                </BankingButton>
+                <BankingButton
+                  variant="primary"
+                  icon={FileText}
+                  onClick={() => {
+                    generateAPIChecklistPDF('fr');
+                    alert('✅ PDF Checklist Institutionnel téléchargé en Français');
+                  }}
+                >
+                  🇫🇷 FR
                 </BankingButton>
                 <BankingButton
                   variant="primary"
