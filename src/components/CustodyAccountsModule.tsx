@@ -275,6 +275,94 @@ const DEPOSIT_CONCEPTS = {
   ],
 };
 
+// Conceptos de retiro predefinidos
+const WITHDRAWAL_CONCEPTS = {
+  es: [
+    'Retiro en efectivo',
+    'Transferencia bancaria',
+    'Pago a proveedor',
+    'Pago de nómina',
+    'Pago de impuestos',
+    'Pago de dividendos',
+    'Pago de intereses',
+    'Devolución de fondos',
+    'Compra de activos',
+    'Inversión',
+    'Pago de préstamo',
+    'Retiro de capital',
+    'Distribución a socios',
+    'Pago de gastos operativos',
+    'Pago de comisiones',
+    'Pago de regalías',
+    'Pago de honorarios',
+    'Pago a cliente',
+    'Pago de facturas',
+    'Transferencia internacional',
+    'Envío de remesa',
+    'Pago de seguros',
+    'Pago de pensión',
+    'Indemnización',
+    'Pago de bonificación',
+    'Donación',
+    'Compra de inmueble',
+    'Compra de vehículo',
+    'Compra de equipos',
+    'Liquidación de contrato',
+    'Ajuste contable',
+    'Corrección de saldo',
+    'Compensación',
+    'Transferencia entre cuentas propias',
+    'Retiro parcial',
+    'Cierre de cuenta',
+    'Repatriación de fondos',
+    'Pago de servicios',
+    'Gastos administrativos',
+    'Treasury transfer',
+  ],
+  en: [
+    'Cash withdrawal',
+    'Bank transfer',
+    'Supplier payment',
+    'Payroll payment',
+    'Tax payment',
+    'Dividend payment',
+    'Interest payment',
+    'Fund return',
+    'Asset purchase',
+    'Investment',
+    'Loan payment',
+    'Capital withdrawal',
+    'Partner distribution',
+    'Operating expenses payment',
+    'Commission payment',
+    'Royalty payment',
+    'Fee payment',
+    'Client payment',
+    'Invoice payment',
+    'International transfer',
+    'Remittance',
+    'Insurance payment',
+    'Pension payment',
+    'Indemnity',
+    'Bonus payment',
+    'Donation',
+    'Real estate purchase',
+    'Vehicle purchase',
+    'Equipment purchase',
+    'Contract settlement',
+    'Accounting adjustment',
+    'Balance correction',
+    'Compensation',
+    'Transfer between own accounts',
+    'Partial withdrawal',
+    'Account closure',
+    'Fund repatriation',
+    'Service payment',
+    'Administrative expenses',
+    'Treasury transfer',
+  ],
+};
+
 export function CustodyAccountsModule() {
   const { t, language } = useLanguage();
   const isSpanish = language === 'es';
@@ -356,12 +444,19 @@ export function CustodyAccountsModule() {
     notes: '',
   });
   
-  // Estados para selectores de banco y cuenta
+  // Estados para selectores de banco y cuenta (Add Funds)
   const [selectedBankIndex, setSelectedBankIndex] = useState<number>(-1);
   const [selectedAccountIndex, setSelectedAccountIndex] = useState<number>(-1);
   const [useManualBank, setUseManualBank] = useState(true);
   const [useManualAccount, setUseManualAccount] = useState(true);
   const [useManualDescription, setUseManualDescription] = useState(true);
+  
+  // Estados para selectores de banco y cuenta (Withdraw Funds)
+  const [selectedWithdrawBankIndex, setSelectedWithdrawBankIndex] = useState<number>(-1);
+  const [selectedWithdrawAccountIndex, setSelectedWithdrawAccountIndex] = useState<number>(-1);
+  const [useManualWithdrawBank, setUseManualWithdrawBank] = useState(true);
+  const [useManualWithdrawAccount, setUseManualWithdrawAccount] = useState(true);
+  const [useManualWithdrawDescription, setUseManualWithdrawDescription] = useState(true);
   
   // Opción para enmascarar cuentas en PDF
   const [maskAccountsInPDF, setMaskAccountsInPDF] = useState(false);
@@ -3680,24 +3775,23 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
 
-              {/* Cuenta destino y banco */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-[#ffffff] mb-2 block">
-                    {isSpanish ? 'Cuenta Destino' : 'Destination Account'}
-                  </label>
-                  <input
-                    type="text"
-                    value={withdrawData.destinationAccount}
-                    onChange={e => setWithdrawData({...withdrawData, destinationAccount: e.target.value})}
-                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
-                    placeholder={isSpanish ? 'Número de cuenta' : 'Account number'}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-[#ffffff] mb-2 block">
+              {/* Banco destino */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-[#ffffff]">
                     {isSpanish ? 'Banco Destino' : 'Destination Bank'}
                   </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setUseManualWithdrawBank(!useManualWithdrawBank)}
+                      className={`text-xs px-2 py-1 rounded ${useManualWithdrawBank ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}
+                    >
+                      {useManualWithdrawBank ? (isSpanish ? 'Manual' : 'Manual') : (isSpanish ? 'Seleccionar' : 'Select')}
+                    </button>
+                  </div>
+                </div>
+                {useManualWithdrawBank ? (
                   <input
                     type="text"
                     value={withdrawData.destinationBank}
@@ -3705,21 +3799,122 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
                     placeholder={isSpanish ? 'Nombre del banco' : 'Bank name'}
                   />
-                </div>
+                ) : (
+                  <select
+                    value={selectedWithdrawBankIndex}
+                    onChange={e => {
+                      const idx = parseInt(e.target.value);
+                      setSelectedWithdrawBankIndex(idx);
+                      if (idx >= 0) {
+                        const bank = TOP_100_BANKS[idx];
+                        setWithdrawData({...withdrawData, destinationBank: `${bank.name} (${bank.swift})`});
+                        setSelectedWithdrawAccountIndex(-1);
+                      }
+                    }}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500 max-h-60"
+                  >
+                    <option value={-1}>{isSpanish ? '-- Seleccionar banco --' : '-- Select bank --'}</option>
+                    {TOP_100_BANKS.map((bank, idx) => (
+                      <option key={idx} value={idx}>
+                        {bank.name} ({bank.swift}) - {bank.country}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
-              {/* Descripción */}
+              {/* Cuenta destino */}
               <div>
-                <label className="text-sm text-[#ffffff] mb-2 block">
-                  {isSpanish ? 'Descripción' : 'Description'}
-                </label>
-                <input
-                  type="text"
-                  value={withdrawData.description}
-                  onChange={e => setWithdrawData({...withdrawData, description: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
-                  placeholder={isSpanish ? 'Concepto del retiro' : 'Withdrawal concept'}
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-[#ffffff]">
+                    {isSpanish ? 'Cuenta Destino' : 'Destination Account'}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setUseManualWithdrawAccount(!useManualWithdrawAccount)}
+                      className={`text-xs px-2 py-1 rounded ${useManualWithdrawAccount ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}
+                    >
+                      {useManualWithdrawAccount ? (isSpanish ? 'Manual' : 'Manual') : (isSpanish ? 'Librería' : 'Library')}
+                    </button>
+                  </div>
+                </div>
+                {useManualWithdrawAccount ? (
+                  <input
+                    type="text"
+                    value={withdrawData.destinationAccount}
+                    onChange={e => setWithdrawData({...withdrawData, destinationAccount: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                    placeholder={isSpanish ? 'Número de cuenta' : 'Account number'}
+                  />
+                ) : (
+                  <select
+                    value={selectedWithdrawAccountIndex}
+                    onChange={e => {
+                      const idx = parseInt(e.target.value);
+                      setSelectedWithdrawAccountIndex(idx);
+                      if (idx >= 0 && selectedWithdrawBankIndex >= 0) {
+                        const bankLib = BANK_ACCOUNTS_LIBRARY[selectedWithdrawBankIndex];
+                        if (bankLib && bankLib.accounts[idx]) {
+                          setWithdrawData({...withdrawData, destinationAccount: bankLib.accounts[idx]});
+                        }
+                      }
+                    }}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                    disabled={selectedWithdrawBankIndex < 0 && !useManualWithdrawBank}
+                  >
+                    <option value={-1}>
+                      {selectedWithdrawBankIndex < 0 && !useManualWithdrawBank 
+                        ? (isSpanish ? '-- Seleccione un banco primero --' : '-- Select a bank first --')
+                        : (isSpanish ? '-- Seleccionar cuenta --' : '-- Select account --')}
+                    </option>
+                    {selectedWithdrawBankIndex >= 0 && BANK_ACCOUNTS_LIBRARY[selectedWithdrawBankIndex]?.accounts.map((acc, idx) => (
+                      <option key={idx} value={idx}>
+                        {acc}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Descripción / Concepto */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-[#ffffff]">
+                    {isSpanish ? 'Descripción / Concepto' : 'Description / Concept'}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setUseManualWithdrawDescription(!useManualWithdrawDescription)}
+                      className={`text-xs px-2 py-1 rounded ${useManualWithdrawDescription ? 'bg-orange-500/20 text-orange-400' : 'bg-amber-500/20 text-amber-400'}`}
+                    >
+                      {useManualWithdrawDescription ? (isSpanish ? 'Manual' : 'Manual') : (isSpanish ? 'Predefinido' : 'Predefined')}
+                    </button>
+                  </div>
+                </div>
+                {useManualWithdrawDescription ? (
+                  <input
+                    type="text"
+                    value={withdrawData.description}
+                    onChange={e => setWithdrawData({...withdrawData, description: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                    placeholder={isSpanish ? 'Concepto del retiro' : 'Withdrawal concept'}
+                  />
+                ) : (
+                  <select
+                    value={withdrawData.description}
+                    onChange={e => setWithdrawData({...withdrawData, description: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                  >
+                    <option value="">{isSpanish ? '-- Seleccionar concepto --' : '-- Select concept --'}</option>
+                    {(isSpanish ? WITHDRAWAL_CONCEPTS.es : WITHDRAWAL_CONCEPTS.en).map((concept, idx) => (
+                      <option key={idx} value={concept}>
+                        {concept}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {/* Notas */}
