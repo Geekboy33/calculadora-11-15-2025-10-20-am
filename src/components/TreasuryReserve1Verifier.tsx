@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { ShieldCheck, ShieldAlert, Activity, TrendingUp, Gauge, Database, AlertTriangle, CheckCircle2, Cpu, Zap, ListChecks, Info, Microscope, FileText, Download, Calculator, BarChart3 } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Activity, TrendingUp, Gauge, Database, AlertTriangle, CheckCircle2, Cpu, Zap, ListChecks, Info, Microscope, FileText, Download, Calculator, BarChart3, Gem, RefreshCw, XCircle } from 'lucide-react';
 import { ledgerPersistenceStoreV2, type LedgerBalanceV2 } from '../lib/ledger-persistence-store-v2';
 import { useLanguage } from '../lib/i18n';
 
@@ -1244,7 +1244,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white p-6 overflow-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-6 overflow-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -1252,11 +1252,11 @@ ${t.endReport} - ${new Date().toLocaleString()}
             <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
               {isSpanish ? 'Verificador Treasury Reserve1' : 'Treasury Reserve1 Verifier'}
             </h1>
-            <span className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30">
+            <span className="text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">
               Treasury Reserve1
             </span>
           </div>
-          <p className="text-purple-300/70">
+          <p className="text-emerald-300/70">
             {isSpanish
               ? 'Verificación algorítmica de fondos contra Ledger1 Digital Commercial Bank DAES'
               : 'Algorithmic verification of funds vs Ledger1 Digital Commercial Bank DAES'}
@@ -1267,7 +1267,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
             <div className="text-xs uppercase">{isSpanish ? 'Veredicto' : 'Verdict'}</div>
             <div className="text-lg font-bold">{verdictLabel}</div>
           </div>
-          <div className="px-3 py-2 rounded-lg border border-purple-500/30 bg-purple-900/30 text-purple-200">
+          <div className="px-3 py-2 rounded-lg border border-emerald-500/30 bg-emerald-900/30 text-slate-200">
             <div className="text-xs uppercase">{isSpanish ? 'Confianza' : 'Confidence'}</div>
             <div className="text-lg font-bold">{confidence.toFixed(0)}%</div>
           </div>
@@ -1276,12 +1276,12 @@ ${t.endReport} - ${new Date().toLocaleString()}
 
       {/* Progress & Quadrillion */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-4 border border-purple-500/30">
+        <div className="bg-gradient-to-br from-emerald-900/40 to-pink-900/40 rounded-2xl p-4 border border-emerald-500/30">
           <div className="flex items-center justify-between mb-2">
-            <Activity className="w-6 h-6 text-purple-300" />
-            <span className="text-sm text-purple-200">{isProcessing ? 'LIVE' : 'IDLE'}</span>
+            <Activity className="w-6 h-6 text-emerald-300" />
+            <span className="text-sm text-slate-200">{isProcessing ? 'LIVE' : 'IDLE'}</span>
           </div>
-          <p className="text-sm text-purple-200/70 mb-1">{isSpanish ? 'Progreso de Escaneo' : 'Scan Progress'}</p>
+          <p className="text-sm text-slate-200/70 mb-1">{isSpanish ? 'Progreso de Escaneo' : 'Scan Progress'}</p>
           <p className="text-3xl font-black text-white">{progress.toFixed(1)}%</p>
         </div>
 
@@ -1309,7 +1309,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
       {/* Signals */}
       <div className="bg-slate-900/40 border border-slate-700/50 rounded-2xl p-4 mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <Database className="w-5 h-5 text-purple-300" />
+          <Database className="w-5 h-5 text-emerald-300" />
           <h2 className="text-lg font-bold text-white">{isSpanish ? 'Pruebas Algorítmicas' : 'Algorithmic Checks'}</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1331,7 +1331,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
       {/* Currency Overview */}
       <div className="bg-slate-900/40 border border-slate-700/50 rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Zap className="w-5 h-5 text-purple-300" />
+          <Zap className="w-5 h-5 text-emerald-300" />
           <h2 className="text-lg font-bold text-white">{isSpanish ? 'Divisas Detectadas' : 'Detected Currencies'}</h2>
         </div>
         {balances.length === 0 ? (
@@ -1375,11 +1375,11 @@ ${t.endReport} - ${new Date().toLocaleString()}
       </div>
 
       {/* Análisis de Autenticidad de Divisas */}
-      <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-2xl p-6 mt-6">
+      <div className="bg-gradient-to-br from-emerald-900/20 to-pink-900/20 border border-emerald-500/30 rounded-2xl p-6 mt-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <Microscope className="w-6 h-6 text-purple-400" />
-            <h2 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <Microscope className="w-6 h-6 text-emerald-400" />
+            <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-pink-400 bg-clip-text text-transparent">
               {isSpanish ? 'Análisis de Autenticidad de Divisas' : 'Currency Authenticity Analysis'}
             </h2>
             {isProcessing && (
@@ -1431,7 +1431,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
               <div key={currency.currency} className={`rounded-xl border p-4 ${authenticityColor}`}>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center font-bold text-purple-300">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center font-bold text-emerald-300">
                       {currency.currency}
                     </div>
                     <div>
@@ -1470,7 +1470,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
 
                 {/* Evidencia técnica */}
                 <div className="bg-black/20 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-purple-300 mb-2">
+                  <p className="text-xs font-semibold text-emerald-300 mb-2">
                     {isSpanish ? 'Evidencia Técnica:' : 'Technical Evidence:'}
                   </p>
                   <p className="text-xs text-slate-300">
@@ -1522,8 +1522,8 @@ ${t.endReport} - ${new Date().toLocaleString()}
                 <p className="text-slate-200">
                   {confidence.toFixed(1)}% {isSpanish ? 'confianza' : 'confidence'}
                 </p>
-                <p className="text-xs text-amber-400/70 mt-1">
-                  {verdict === 'real' ? '💎 Fondos Reales' : verdict === 'simulated' ? '⚠️ Simulados' : '🔄 Verificando'}
+                <p className="text-xs text-amber-400/70 mt-1 flex items-center gap-1">
+                  {verdict === 'real' ? <><Gem className="w-3 h-3" /> Fondos Reales</> : verdict === 'simulated' ? <><AlertTriangle className="w-3 h-3" /> Simulados</> : <><RefreshCw className="w-3 h-3 animate-spin" /> Verificando</>}
                 </p>
               </div>
             </div>
@@ -1532,7 +1532,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
 
         {/* Resumen de autenticidad */}
         <div className="mt-6 p-4 bg-black/20 rounded-xl">
-          <h3 className="font-bold text-purple-300 mb-2">
+          <h3 className="font-bold text-emerald-300 mb-2">
             {isSpanish ? 'Resumen de Autenticidad' : 'Authenticity Summary'}
           </h3>
           <div className="grid grid-cols-3 gap-4 text-sm">
@@ -1567,12 +1567,12 @@ ${t.endReport} - ${new Date().toLocaleString()}
       {/* Detalles Técnicos del Algoritmo */}
       <div className="bg-slate-900/40 border border-slate-700/50 rounded-2xl p-4 mt-6">
         <div className="flex items-center gap-2 mb-4">
-          <Calculator className="w-5 h-5 text-purple-300" />
+          <Calculator className="w-5 h-5 text-emerald-300" />
           <h2 className="text-lg font-bold text-white">{isSpanish ? 'Detalles Técnicos del Algoritmo' : 'Algorithm Technical Details'}</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
           <div>
-            <h3 className="font-semibold text-purple-300 mb-3 flex items-center gap-2">
+            <h3 className="font-semibold text-emerald-300 mb-3 flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               {isSpanish ? 'Pruebas Algorítmicas (10)' : 'Algorithmic Tests (10)'}
             </h3>
@@ -1590,7 +1590,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold text-purple-300 mb-3 flex items-center gap-2">
+            <h3 className="font-semibold text-emerald-300 mb-3 flex items-center gap-2">
               <Activity className="w-4 h-4" />
               {isSpanish ? 'Métricas de Validación' : 'Validation Metrics'}
             </h3>
@@ -1619,8 +1619,8 @@ ${t.endReport} - ${new Date().toLocaleString()}
       {/* Análisis Científico Avanzado - Explicación Técnica Detallada */}
       <div className="bg-slate-900/50 border border-slate-700/50 rounded-2xl p-6 mt-6">
         <div className="flex items-center gap-2 mb-4">
-          <Info className="w-6 h-6 text-purple-300" />
-          <h2 className="text-xl font-bold text-white bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+          <Info className="w-6 h-6 text-emerald-300" />
+          <h2 className="text-xl font-bold text-white bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
             {isSpanish ? 'Análisis Científico Avanzado de Autenticidad' : 'Advanced Scientific Authenticity Analysis'}
           </h2>
         </div>
@@ -1677,7 +1677,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
 
           {/* Consistencia Matemática */}
           <div className="bg-slate-800/30 rounded-lg p-4">
-            <h4 className="font-semibold text-purple-300 mb-3 flex items-center gap-2">
+            <h4 className="font-semibold text-emerald-300 mb-3 flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               {isSpanish ? 'Consistencia Matemática Avanzada' : 'Advanced Mathematical Consistency'}
             </h4>
@@ -1721,7 +1721,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
                 <p>{isSpanish ? 'Los timestamps muestran correlación temporal realista con picos de actividad durante horas comerciales internacionales.' : 'Timestamps show realistic temporal correlation with activity peaks during international business hours.'}</p>
               </div>
               <div>
-                <h5 className="font-semibold text-purple-300 mb-2">{isSpanish ? 'Análisis de Entropía' : 'Entropy Analysis'}</h5>
+                <h5 className="font-semibold text-emerald-300 mb-2">{isSpanish ? 'Análisis de Entropía' : 'Entropy Analysis'}</h5>
                 <p>{isSpanish ? 'La entropía de la información es consistente con datos generados por procesos estocásticos reales del sistema financiero.' : 'Information entropy is consistent with data generated by real stochastic processes of the financial system.'}</p>
               </div>
             </div>
@@ -1770,11 +1770,11 @@ ${t.endReport} - ${new Date().toLocaleString()}
             </div>
 
             {/* Punto 3: Consistencia Matemática Avanzada */}
-            <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
+            <div className="bg-emerald-900/20 border border-emerald-500/30 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-300 font-bold text-sm">3</div>
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-300 font-bold text-sm">3</div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-purple-300 mb-2">{isSpanish ? 'Consistencia Matemática Multidimensional' : 'Multidimensional Mathematical Consistency'}</h4>
+                  <h4 className="font-semibold text-emerald-300 mb-2">{isSpanish ? 'Consistencia Matemática Multidimensional' : 'Multidimensional Mathematical Consistency'}</h4>
                   <p className="text-slate-200 text-sm mb-3">
                     {isSpanish
                       ? 'Los balances mantienen relaciones matemáticas precisas con el total de quadrillones detectados. Se calcula ratio de consistencia (balance_total / quadrillions_total) con tolerancia de ±20%. Las simulaciones rara vez mantienen esta precisión matemática absoluta.'
@@ -1919,7 +1919,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
         {/* Lista de Explicaciones Adicionales */}
         <div className="space-y-4">
           <div>
-            <h3 className="font-semibold text-purple-300 mb-2">3. {isSpanish ? 'Consistencia Matemática' : 'Mathematical Consistency'}</h3>
+            <h3 className="font-semibold text-emerald-300 mb-2">3. {isSpanish ? 'Consistencia Matemática' : 'Mathematical Consistency'}</h3>
             <p className="text-slate-300">
               {isSpanish
                 ? 'La suma de balances individuales se correlaciona con los quadrillions detectados. Los datos simulados rara vez mantienen esta consistencia matemática perfecta.'
@@ -1928,7 +1928,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
           </div>
 
           <div>
-            <h3 className="font-semibold text-purple-300 mb-2">4. {isSpanish ? 'Patrones Binarios Auténticos' : 'Authentic Binary Patterns'}</h3>
+            <h3 className="font-semibold text-emerald-300 mb-2">4. {isSpanish ? 'Patrones Binarios Auténticos' : 'Authentic Binary Patterns'}</h3>
             <p className="text-slate-300">
               {isSpanish
                 ? 'El deep scan detecta patrones binarios reales (32-bit, 64-bit, float, Big-Endian) que corresponden a estructuras de datos financieras reales, no patrones aleatorios.'
@@ -1937,7 +1937,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
           </div>
 
           <div>
-            <h3 className="font-semibold text-purple-300 mb-2">5. {isSpanish ? 'Cobertura Completa Esperada' : 'Expected Complete Coverage'}</h3>
+            <h3 className="font-semibold text-emerald-300 mb-2">5. {isSpanish ? 'Cobertura Completa Esperada' : 'Expected Complete Coverage'}</h3>
             <p className="text-slate-300">
               {isSpanish
                 ? 'Se detectan 15 divisas principales del sistema financiero global. Las simulaciones suelen generar menos divisas o conjuntos inconsistentes.'
@@ -1946,7 +1946,7 @@ ${t.endReport} - ${new Date().toLocaleString()}
           </div>
 
           <div>
-            <h3 className="font-semibold text-purple-300 mb-2">6. {isSpanish ? 'Actualización en Tiempo Real' : 'Real-time Updates'}</h3>
+            <h3 className="font-semibold text-emerald-300 mb-2">6. {isSpanish ? 'Actualización en Tiempo Real' : 'Real-time Updates'}</h3>
             <p className="text-slate-300">
               {isSpanish
                 ? 'Los balances se actualizan dinámicamente durante el escaneo activo. Los datos simulados son estáticos y no responden a cambios en tiempo real.'

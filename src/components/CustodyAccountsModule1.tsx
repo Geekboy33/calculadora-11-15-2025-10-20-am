@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Shield, Plus, Lock, Unlock, ExternalLink, Check, X, Copy,
   Download, AlertCircle, CheckCircle, Wallet, ArrowUp, TrendingUp,
-  Database, DollarSign, Building2, Cpu, Zap, Activity
+  Database, DollarSign, Building2, Cpu, Zap, Activity, Search, Clock, Globe, Landmark
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { ledgerPersistenceStoreV2, type LedgerBalanceV2 } from '../lib/ledger-persistence-store-v2';
@@ -15,7 +15,7 @@ import { ledgerPersistenceStoreV2, type LedgerBalanceV2 } from '../lib/ledger-pe
 const BLOCKCHAINS = [
   { name: 'Ethereum', symbol: 'ETH', color: 'text-blue-400' },
   { name: 'Binance Smart Chain', symbol: 'BSC', color: 'text-yellow-400' },
-  { name: 'Polygon', symbol: 'MATIC', color: 'text-purple-400' },
+  { name: 'Polygon', symbol: 'MATIC', color: 'text-emerald-400' },
   { name: 'Arbitrum', symbol: 'ARB', color: 'text-cyan-400' },
   { name: 'Optimism', symbol: 'OP', color: 'text-red-400' },
   { name: 'Avalanche', symbol: 'AVAX', color: 'text-red-300' },
@@ -239,16 +239,16 @@ export function CustodyAccountsModule1() {
   const totalM2 = m2Accounts.reduce((sum, acc) => sum + acc.balance, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white p-6 overflow-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-6 overflow-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Shield className="w-10 h-10 text-purple-400" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <Shield className="w-10 h-10 text-emerald-400" />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-pink-400 bg-clip-text text-transparent">
               Custody Accounts 1
             </h1>
-            <span className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30">
+            <span className="text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">
               Treasury Reserve1
             </span>
             {isLiveUpdating && (
@@ -257,13 +257,13 @@ export function CustodyAccountsModule1() {
               </span>
             )}
           </div>
-          <p className="text-purple-300/70">
+          <p className="text-emerald-300/70">
             {isSpanish ? 'Cuentas custodio sincronizadas con Treasury Reserve1' : 'Custody accounts synced with Treasury Reserve1'}
           </p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-lg transition-colors"
         >
           <Plus className="w-5 h-5" />
           {isSpanish ? 'Crear Cuenta' : 'Create Account'}
@@ -271,18 +271,18 @@ export function CustodyAccountsModule1() {
       </div>
 
       {/* Progress Bar */}
-      <div className={`mb-6 rounded-xl p-4 border ${isProcessing ? 'bg-amber-900/20 border-amber-500/30 animate-pulse' : 'bg-purple-900/20 border-purple-500/30'}`}>
+      <div className={`mb-6 rounded-xl p-4 border ${isProcessing ? 'bg-amber-900/20 border-amber-500/30 animate-pulse' : 'bg-emerald-900/20 border-emerald-500/30'}`}>
         <div className="flex items-center justify-between mb-2">
-          <span className={`font-semibold ${isProcessing ? 'text-amber-300' : 'text-purple-300'}`}>
-            {isProcessing ? '🔍 ESCANEANDO' : progress >= 100 ? '✅ COMPLETADO' : '⏳ ESPERANDO'}
+          <span className={`font-semibold flex items-center gap-1 ${isProcessing ? 'text-amber-300' : 'text-emerald-300'}`}>
+            {isProcessing ? <><Search className="w-4 h-4 animate-pulse" /> ESCANEANDO</> : progress >= 100 ? <><CheckCircle className="w-4 h-4" /> COMPLETADO</> : <><Clock className="w-4 h-4" /> ESPERANDO</>}
           </span>
-          <span className={`font-bold ${isProcessing ? 'text-amber-400' : 'text-purple-400'}`}>
+          <span className={`font-bold ${isProcessing ? 'text-amber-400' : 'text-emerald-400'}`}>
             {progress.toFixed(1)}% | {currentQuadrillion.toLocaleString()} Q
           </span>
         </div>
         <div className="w-full bg-black/30 rounded-full h-2">
           <div
-            className={`h-full rounded-full transition-all ${isProcessing ? 'bg-amber-500' : 'bg-purple-500'}`}
+            className={`h-full rounded-full transition-all ${isProcessing ? 'bg-amber-500' : 'bg-emerald-500'}`}
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -290,10 +290,10 @@ export function CustodyAccountsModule1() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-xl p-4 border border-purple-500/30">
+        <div className="bg-gradient-to-br from-emerald-900/40 to-pink-900/40 rounded-xl p-4 border border-emerald-500/30">
           <div className="flex items-center gap-2 mb-2">
-            <Database className="w-5 h-5 text-purple-400" />
-            <span className="text-purple-300 text-sm">{isSpanish ? 'Total Cuentas' : 'Total Accounts'}</span>
+            <Database className="w-5 h-5 text-emerald-400" />
+            <span className="text-emerald-300 text-sm">{isSpanish ? 'Total Cuentas' : 'Total Accounts'}</span>
           </div>
           <p className="text-2xl font-black">{accounts.length}</p>
         </div>
@@ -346,7 +346,7 @@ export function CustodyAccountsModule1() {
 
       {/* Accounts List */}
       <div className="space-y-3">
-        <h2 className="text-xl font-bold text-purple-300 flex items-center gap-2">
+        <h2 className="text-xl font-bold text-emerald-300 flex items-center gap-2">
           <Wallet className="w-6 h-6" />
           {isSpanish ? 'Cuentas Custodio' : 'Custody Accounts'}
         </h2>
@@ -445,7 +445,7 @@ export function CustodyAccountsModule1() {
           ))
         ) : (
           <div className="bg-slate-800/30 rounded-xl p-12 text-center border border-slate-700/50">
-            <Shield className="w-16 h-16 text-purple-400 mx-auto mb-4 opacity-50" />
+            <Shield className="w-16 h-16 text-emerald-400 mx-auto mb-4 opacity-50" />
             <p className="text-slate-400">
               {isSpanish 
                 ? 'No hay cuentas custodio. Crea una para comenzar.'
@@ -458,32 +458,32 @@ export function CustodyAccountsModule1() {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 rounded-2xl p-6 w-full max-w-md border border-purple-500/30">
+          <div className="bg-slate-900 rounded-2xl p-6 w-full max-w-md border border-emerald-500/30">
             <h3 className="text-xl font-bold mb-4">{isSpanish ? 'Crear Cuenta Custodio' : 'Create Custody Account'}</h3>
             
             <div className="space-y-4">
               {/* Tipo de cuenta */}
               <div>
-                <label className="block text-sm text-purple-300 mb-1">{isSpanish ? 'Tipo de Cuenta' : 'Account Type'}</label>
+                <label className="block text-sm text-emerald-300 mb-1">{isSpanish ? 'Tipo de Cuenta' : 'Account Type'}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setFormData({...formData, accountType: 'blockchain'})}
                     className={`p-3 rounded-lg border ${formData.accountType === 'blockchain' ? 'border-cyan-400 bg-cyan-500/20 text-cyan-200' : 'border-slate-700 bg-slate-800'}`}
                   >
-                    🌐 {isSpanish ? 'Blockchain' : 'Blockchain'}
+                    <Globe className="w-4 h-4 inline mr-1" /> {isSpanish ? 'Blockchain' : 'Blockchain'}
                   </button>
                   <button
                     onClick={() => setFormData({...formData, accountType: 'banking'})}
                     className={`p-3 rounded-lg border ${formData.accountType === 'banking' ? 'border-emerald-400 bg-emerald-500/20 text-emerald-200' : 'border-slate-700 bg-slate-800'}`}
                   >
-                    🏦 {isSpanish ? 'Bancaria' : 'Banking'}
+                    <Landmark className="w-4 h-4 inline mr-1" /> {isSpanish ? 'Bancaria' : 'Banking'}
                   </button>
                 </div>
               </div>
 
               {/* Nombre de cuenta */}
               <div>
-                <label className="block text-sm text-purple-300 mb-1">{isSpanish ? 'Nombre de la Cuenta' : 'Account Name'}</label>
+                <label className="block text-sm text-emerald-300 mb-1">{isSpanish ? 'Nombre de la Cuenta' : 'Account Name'}</label>
                 <input
                   type="text"
                   value={formData.accountName}
@@ -496,7 +496,7 @@ export function CustodyAccountsModule1() {
               {/* Moneda y monto */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm text-purple-300 mb-1">{isSpanish ? 'Moneda' : 'Currency'}</label>
+                  <label className="block text-sm text-emerald-300 mb-1">{isSpanish ? 'Moneda' : 'Currency'}</label>
                   <select
                     value={formData.currency}
                     onChange={(e) => setFormData({...formData, currency: e.target.value})}
@@ -510,7 +510,7 @@ export function CustodyAccountsModule1() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-purple-300 mb-1">{isSpanish ? 'Monto' : 'Amount'}</label>
+                  <label className="block text-sm text-emerald-300 mb-1">{isSpanish ? 'Monto' : 'Amount'}</label>
                   <input
                     type="number"
                     value={formData.amount}
@@ -523,7 +523,7 @@ export function CustodyAccountsModule1() {
               </div>
 
               <div>
-                <label className="block text-sm text-purple-300 mb-1">Blockchain</label>
+                <label className="block text-sm text-emerald-300 mb-1">Blockchain</label>
                 <select
                   value={formData.blockchain}
                   onChange={(e) => setFormData({...formData, blockchain: e.target.value})}
@@ -536,7 +536,7 @@ export function CustodyAccountsModule1() {
               </div>
               
               <div>
-                <label className="block text-sm text-purple-300 mb-1">Token Symbol</label>
+                <label className="block text-sm text-emerald-300 mb-1">Token Symbol</label>
                 <input
                   type="text"
                   value={formData.tokenSymbol}
@@ -547,7 +547,7 @@ export function CustodyAccountsModule1() {
               </div>
               
               <div>
-                <label className="block text-sm text-purple-300 mb-1">{isSpanish ? 'Denominación de Fondos' : 'Fund Denomination'}</label>
+                <label className="block text-sm text-emerald-300 mb-1">{isSpanish ? 'Denominación de Fondos' : 'Fund Denomination'}</label>
                 <select
                   value={formData.fundDenomination}
                   onChange={(e) => setFormData({...formData, fundDenomination: e.target.value as 'M1' | 'M2'})}
@@ -568,7 +568,7 @@ export function CustodyAccountsModule1() {
               </button>
               <button
                 onClick={handleCreateAccount}
-                className="flex-1 bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-lg"
+                className="flex-1 bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-lg"
               >
                 {isSpanish ? 'Crear' : 'Create'}
               </button>
@@ -621,7 +621,7 @@ export function CustodyAccountsModule1() {
       )}
 
       {/* Footer */}
-      <div className="mt-8 text-center text-purple-300/50 text-sm">
+      <div className="mt-8 text-center text-emerald-300/50 text-sm">
         <p>Custody Accounts 1 - {isSpanish ? 'Sincronizado con' : 'Synced with'} Treasury Reserve1</p>
       </div>
     </div>

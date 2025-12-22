@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { RefreshCw, TrendingUp, Database, CheckCircle, Activity, DollarSign, Cpu, Zap } from 'lucide-react';
+import { RefreshCw, TrendingUp, Database, CheckCircle, Activity, DollarSign, Cpu, Zap, Search, Clock, Pause } from 'lucide-react';
 import { ledgerPersistenceStoreV2, type LedgerBalanceV2 } from '../lib/ledger-persistence-store-v2';
 import { useLanguage } from '../lib/i18n.tsx';
 
@@ -136,7 +136,7 @@ export function AccountLedger1() {
 
   const getCurrencyColor = (currency: string, index: number) => {
     const colors: Record<string, string> = {
-      'USD': 'from-purple-900/50 to-purple-800/50 border-purple-500',
+      'USD': 'from-emerald-900/50 to-slate-800/50 border-emerald-500',
       'EUR': 'from-blue-900/50 to-blue-800/50 border-blue-500',
       'GBP': 'from-indigo-900/50 to-indigo-800/50 border-indigo-500',
       'CHF': 'from-emerald-900/50 to-emerald-800/50 border-emerald-500',
@@ -166,17 +166,17 @@ export function AccountLedger1() {
   return (
     <div className="flex flex-col h-full bg-[var(--bg-main)] overflow-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-b border-purple-500/30 p-8 sticky top-0 z-10">
+      <div className="bg-gradient-to-r from-emerald-900/30 to-pink-900/30 border-b border-emerald-500/30 p-8 sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-              <Cpu className="w-10 h-10 text-purple-400" />
+              <Cpu className="w-10 h-10 text-emerald-400" />
               Account Ledger1
-              <span className="text-sm bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30">
+              <span className="text-sm bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">
                 Treasury Reserve1
               </span>
             </h1>
-            <p className="text-purple-300">
+            <p className="text-emerald-300">
               {isSpanish 
                 ? 'Balances en tiempo real desde Treasury Reserve1 - Algoritmo V2'
                 : 'Real-time balances from Treasury Reserve1 - Algorithm V2'}
@@ -190,14 +190,14 @@ export function AccountLedger1() {
               </div>
             )}
             {isLiveUpdating && (
-              <div className="flex items-center gap-2 bg-purple-500/20 text-purple-300 border border-purple-500/30 px-4 py-2 rounded-lg animate-pulse">
+              <div className="flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-4 py-2 rounded-lg animate-pulse">
                 <Zap className="w-5 h-5" />
                 <span className="font-semibold">{isSpanish ? 'Actualizando...' : 'Updating...'}</span>
               </div>
             )}
             <button
               onClick={refreshBalances}
-              className="bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
+              className="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
             >
               <RefreshCw className="w-5 h-5" />
               {isSpanish ? 'Actualizar' : 'Refresh'}
@@ -213,30 +213,30 @@ export function AccountLedger1() {
             ? 'bg-amber-900/30 border-amber-500/50 animate-pulse' 
             : progress > 0 
               ? 'bg-emerald-900/20 border-emerald-500/30'
-              : 'bg-purple-900/20 border-purple-500/30'
+              : 'bg-emerald-900/20 border-emerald-500/30'
         }`}>
           {/* Header con estado */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${isProcessing ? 'bg-amber-400 animate-ping' : (progress > 0 ? 'bg-emerald-400' : 'bg-purple-400')}`} />
-              <span className={`text-sm font-bold ${isProcessing ? 'text-amber-300' : (progress > 0 ? 'text-emerald-300' : 'text-purple-300')}`}>
+              <div className={`w-3 h-3 rounded-full ${isProcessing ? 'bg-amber-400 animate-ping' : (progress > 0 ? 'bg-emerald-400' : 'bg-emerald-400')}`} />
+              <span className={`text-sm font-bold ${isProcessing ? 'text-amber-300' : (progress > 0 ? 'text-emerald-300' : 'text-emerald-300')}`}>
                 {isProcessing 
-                  ? (isSpanish ? '🔍 ESCANEANDO EN TIEMPO REAL' : '🔍 SCANNING IN REAL-TIME')
+                  ? (isSpanish ? <><Search className="w-4 h-4 inline mr-1 animate-pulse" /> ESCANEANDO EN TIEMPO REAL</> : <><Search className="w-4 h-4 inline mr-1 animate-pulse" /> SCANNING IN REAL-TIME</>)
                   : progress >= 100 
-                    ? (isSpanish ? '✅ ESCANEO COMPLETADO' : '✅ SCAN COMPLETED')
+                    ? (isSpanish ? <><CheckCircle className="w-4 h-4 inline mr-1" /> ESCANEO COMPLETADO</> : <><CheckCircle className="w-4 h-4 inline mr-1" /> SCAN COMPLETED</>)
                     : progress > 0 
-                      ? (isSpanish ? '⏸️ ESCANEO PAUSADO' : '⏸️ SCAN PAUSED')
-                      : (isSpanish ? '⏳ ESPERANDO ESCANEO' : '⏳ WAITING FOR SCAN')
+                      ? (isSpanish ? <><Pause className="w-4 h-4 inline mr-1" /> ESCANEO PAUSADO</> : <><Pause className="w-4 h-4 inline mr-1" /> SCAN PAUSED</>)
+                      : (isSpanish ? <><Clock className="w-4 h-4 inline mr-1" /> ESPERANDO ESCANEO</> : <><Clock className="w-4 h-4 inline mr-1" /> WAITING FOR SCAN</>)
                 }
               </span>
             </div>
             <div className="flex items-center gap-2">
               {isLiveUpdating && (
-                <span className="text-xs bg-purple-500/30 text-purple-300 px-2 py-1 rounded animate-pulse">
+                <span className="text-xs bg-emerald-500/30 text-emerald-300 px-2 py-1 rounded animate-pulse">
                   LIVE
                 </span>
               )}
-              <span className={`font-bold ${isProcessing ? 'text-amber-400' : 'text-purple-400'}`}>
+              <span className={`font-bold ${isProcessing ? 'text-amber-400' : 'text-emerald-400'}`}>
                 {progress.toFixed(1)}%
               </span>
             </div>
@@ -248,7 +248,7 @@ export function AccountLedger1() {
               className={`h-full rounded-full transition-all duration-300 relative ${
                 isProcessing 
                   ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-red-500' 
-                  : 'bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500'
+                  : 'bg-gradient-to-r from-emerald-500 via-pink-500 to-amber-500'
               }`}
               style={{ width: `${progress}%` }}
             >
@@ -261,19 +261,19 @@ export function AccountLedger1() {
           {/* Métricas en tiempo real */}
           <div className="grid grid-cols-3 gap-4 mt-3">
             <div className="text-center">
-              <p className="text-xs text-purple-300/70">{isSpanish ? 'Balance Detectado' : 'Detected Balance'}</p>
+              <p className="text-xs text-emerald-300/70">{isSpanish ? 'Balance Detectado' : 'Detected Balance'}</p>
               <p className={`text-lg font-black ${isProcessing ? 'text-amber-400 animate-pulse' : 'text-white'}`}>
                 {currentQuadrillion.toLocaleString()} Q
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-purple-300/70">{isSpanish ? 'Valores Encontrados' : 'Values Found'}</p>
+              <p className="text-xs text-emerald-300/70">{isSpanish ? 'Valores Encontrados' : 'Values Found'}</p>
               <p className={`text-lg font-black ${isProcessing ? 'text-amber-400 animate-pulse' : 'text-white'}`}>
                 {getTotalValues().toLocaleString()}
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-purple-300/70">{isSpanish ? 'Última Actualización' : 'Last Update'}</p>
+              <p className="text-xs text-emerald-300/70">{isSpanish ? 'Última Actualización' : 'Last Update'}</p>
               <p className={`text-lg font-black ${isProcessing ? 'text-amber-400' : 'text-white'}`}>
                 {lastUpdate ? lastUpdate.toLocaleTimeString() : '--:--:--'}
               </p>
@@ -285,13 +285,13 @@ export function AccountLedger1() {
       {/* Summary Stats */}
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30 rounded-xl p-6">
+          <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-purple-300 text-sm font-semibold">{isSpanish ? 'Total Cuentas' : 'Total Accounts'}</span>
-              <Database className="w-6 h-6 text-purple-400" />
+              <span className="text-emerald-300 text-sm font-semibold">{isSpanish ? 'Total Cuentas' : 'Total Accounts'}</span>
+              <Database className="w-6 h-6 text-emerald-400" />
             </div>
             <div className="text-4xl font-black text-white">{balances.length}</div>
-            <div className="text-purple-300/70 text-xs mt-1">{isSpanish ? 'de 15 divisas' : 'of 15 currencies'}</div>
+            <div className="text-emerald-300/70 text-xs mt-1">{isSpanish ? 'de 15 divisas' : 'of 15 currencies'}</div>
           </div>
 
           <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl p-6">
@@ -323,8 +323,8 @@ export function AccountLedger1() {
             </div>
             <div className="text-lg font-bold text-white">
               {isProcessing 
-                ? (isSpanish ? '🔍 Escaneando' : '🔍 Scanning')
-                : (balances.length > 0 ? '✅ Operativo' : (isSpanish ? '⏳ Esperando' : '⏳ Waiting'))}
+                ? (isSpanish ? <><Search className="w-3 h-3 inline mr-1 animate-pulse" /> Escaneando</> : <><Search className="w-3 h-3 inline mr-1 animate-pulse" /> Scanning</>)
+                : (balances.length > 0 ? <><CheckCircle className="w-3 h-3 inline mr-1" /> Operativo</> : (isSpanish ? <><Clock className="w-3 h-3 inline mr-1" /> Esperando</> : <><Clock className="w-3 h-3 inline mr-1" /> Waiting</>))}
             </div>
             <div className="text-pink-300/70 text-xs mt-1">
               {isProcessing ? `${progress.toFixed(1)}% ${isSpanish ? 'completado' : 'complete'}` : (isSpanish ? 'Listo' : 'Ready')}
@@ -334,8 +334,8 @@ export function AccountLedger1() {
 
         {/* Deep Scan Stats */}
         {deepScanStats && (
-          <div className="mb-6 bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-xl p-4 border border-purple-500/20">
-            <h3 className="text-purple-300 font-semibold mb-3 flex items-center gap-2">
+          <div className="mb-6 bg-gradient-to-r from-emerald-900/20 to-pink-900/20 rounded-xl p-4 border border-emerald-500/20">
+            <h3 className="text-emerald-300 font-semibold mb-3 flex items-center gap-2">
               <Cpu className="w-4 h-4" />
               {isSpanish ? 'Estadísticas de Escaneo Profundo' : 'Deep Scan Statistics'}
             </h3>
@@ -344,7 +344,7 @@ export function AccountLedger1() {
                 { label: 'L1 (32-bit)', value: deepScanStats.values32bit, color: 'blue' },
                 { label: 'L2 (64-bit)', value: deepScanStats.values64bit, color: 'emerald' },
                 { label: 'L3 (Float)', value: deepScanStats.valuesFloat64, color: 'amber' },
-                { label: 'L4 (BigEnd)', value: deepScanStats.valuesBigEndian, color: 'purple' },
+                { label: 'L4 (BigEnd)', value: deepScanStats.valuesBigEndian, color: 'cyan' },
                 { label: 'L5 (128-bit)', value: deepScanStats.values128bit, color: 'pink' },
                 { label: 'L6 (Compress)', value: deepScanStats.valuesCompressed, color: 'cyan' },
                 { label: 'L7 (Cumul)', value: deepScanStats.valuesCumulative, color: 'orange' },
@@ -403,7 +403,7 @@ export function AccountLedger1() {
                           <span className="text-amber-400 text-xs font-mono bg-amber-500/20 px-2 py-1 rounded">
                             {countZeros(balance.balance)} {isSpanish ? 'ceros' : 'zeros'}
                           </span>
-                          <span className="text-purple-300 text-xs font-mono">
+                          <span className="text-emerald-300 text-xs font-mono">
                             ({formatScientific(balance.balance, balance.currency)})
                           </span>
                         </div>
@@ -429,12 +429,12 @@ export function AccountLedger1() {
             })}
           </div>
         ) : (
-          <div className="bg-purple-900/20 rounded-xl p-12 text-center border-2 border-dashed border-purple-500/30">
-            <Cpu className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+          <div className="bg-emerald-900/20 rounded-xl p-12 text-center border-2 border-dashed border-emerald-500/30">
+            <Cpu className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-white mb-2">
               {isSpanish ? 'Sin Cuentas Cargadas' : 'No Accounts Loaded'}
             </h3>
-            <p className="text-purple-300 mb-6">
+            <p className="text-emerald-300 mb-6">
               {isSpanish 
                 ? 'Carga un archivo en Treasury Reserve1 para ver los balances aquí'
                 : 'Load a file in Treasury Reserve1 to see balances here'}
@@ -445,17 +445,17 @@ export function AccountLedger1() {
 
       {/* Live Update Footer */}
       {balances.length > 0 && (
-        <div className="sticky bottom-0 bg-gradient-to-r from-purple-900/50 to-pink-900/50 border-t border-purple-500/30 p-4">
+        <div className="sticky bottom-0 bg-gradient-to-r from-emerald-900/50 to-pink-900/50 border-t border-emerald-500/30 p-4">
           <div className="flex items-center justify-between max-w-7xl mx-auto">
             <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${isProcessing ? 'bg-amber-400 animate-pulse' : (isLiveUpdating ? 'bg-purple-400 animate-pulse' : 'bg-emerald-400')}`} />
-              <span className="text-purple-300 text-sm font-semibold">
+              <div className={`w-3 h-3 rounded-full ${isProcessing ? 'bg-amber-400 animate-pulse' : (isLiveUpdating ? 'bg-emerald-400 animate-pulse' : 'bg-emerald-400')}`} />
+              <span className="text-emerald-300 text-sm font-semibold">
                 {isProcessing 
                   ? (isSpanish ? `Escaneando... ${progress.toFixed(1)}%` : `Scanning... ${progress.toFixed(1)}%`)
                   : (isLiveUpdating ? (isSpanish ? 'Actualizando...' : 'Updating...') : (isSpanish ? 'Conectado a Treasury Reserve1' : 'Connected to Treasury Reserve1'))}
               </span>
             </div>
-            <div className="text-purple-300/70 text-xs">
+            <div className="text-emerald-300/70 text-xs">
               {isSpanish ? 'Última actualización:' : 'Last update:'} {lastUpdate ? lastUpdate.toLocaleString() : 'N/A'}
             </div>
           </div>

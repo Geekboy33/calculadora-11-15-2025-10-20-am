@@ -9,7 +9,7 @@ import {
   TrendingUp, DollarSign, Database, Activity, Shield, Wallet,
   Clock, CheckCircle, Lock, ChevronLeft, ChevronRight, BarChart3,
   Globe, Building2, Coins, Bell, RefreshCw, Sparkles, Users,
-  FileText, ArrowRight, Download, Cpu, Zap
+  FileText, ArrowRight, Download, Cpu, Zap, Search, Pause
 } from 'lucide-react';
 import { ledgerPersistenceStoreV2, type LedgerBalanceV2 } from '../lib/ledger-persistence-store-v2';
 import { useLanguage } from '../lib/i18n';
@@ -133,16 +133,16 @@ export function CentralBankingDashboard1() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white p-6 overflow-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white p-6 overflow-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Cpu className="w-10 h-10 text-purple-400" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <Cpu className="w-10 h-10 text-emerald-400" />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-pink-400 bg-clip-text text-transparent">
               Central Panel 1
             </h1>
-            <span className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30">
+            <span className="text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">
               Treasury Reserve1
             </span>
             {isLiveUpdating && (
@@ -151,38 +151,38 @@ export function CentralBankingDashboard1() {
               </span>
             )}
           </div>
-          <p className="text-purple-300/70">
+          <p className="text-emerald-300/70">
             {isSpanish ? 'Sincronizado con Treasury Reserve1 en tiempo real' : 'Synced with Treasury Reserve1 in real-time'}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-purple-300 text-sm">{currentTime.toLocaleDateString()}</p>
+          <p className="text-emerald-300 text-sm">{currentTime.toLocaleDateString()}</p>
           <p className="text-2xl font-mono text-white">{currentTime.toLocaleTimeString()}</p>
         </div>
       </div>
 
       {/* Progress Bar Global */}
-      <div className={`mb-6 rounded-xl p-4 border ${isProcessing ? 'bg-amber-900/20 border-amber-500/30 animate-pulse' : 'bg-purple-900/20 border-purple-500/30'}`}>
+      <div className={`mb-6 rounded-xl p-4 border ${isProcessing ? 'bg-amber-900/20 border-amber-500/30 animate-pulse' : 'bg-emerald-900/20 border-emerald-500/30'}`}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div className={`w-3 h-3 rounded-full ${isProcessing ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'}`} />
-            <span className={`font-semibold ${isProcessing ? 'text-amber-300' : 'text-purple-300'}`}>
+            <span className={`font-semibold flex items-center gap-1 ${isProcessing ? 'text-amber-300' : 'text-emerald-300'}`}>
               {isProcessing 
-                ? (isSpanish ? '🔍 ESCANEANDO EN TIEMPO REAL' : '🔍 SCANNING IN REAL-TIME')
+                ? (isSpanish ? <><Search className="w-4 h-4 animate-pulse" /> ESCANEANDO EN TIEMPO REAL</> : <><Search className="w-4 h-4 animate-pulse" /> SCANNING IN REAL-TIME</>)
                 : progress >= 100 
-                  ? '✅ COMPLETADO' 
+                  ? <><CheckCircle className="w-4 h-4" /> COMPLETADO</> 
                   : progress > 0 
-                    ? '⏸️ PAUSADO' 
-                    : '⏳ ESPERANDO'}
+                    ? <><Pause className="w-4 h-4" /> PAUSADO</> 
+                    : <><Clock className="w-4 h-4" /> ESPERANDO</>}
             </span>
           </div>
-          <span className={`font-bold text-lg ${isProcessing ? 'text-amber-400' : 'text-purple-400'}`}>
+          <span className={`font-bold text-lg ${isProcessing ? 'text-amber-400' : 'text-emerald-400'}`}>
             {progress.toFixed(1)}%
           </span>
         </div>
         <div className="w-full bg-black/30 rounded-full h-3 overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-300 ${isProcessing ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-purple-500 to-pink-500'}`}
+            className={`h-full rounded-full transition-all duration-300 ${isProcessing ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-emerald-500 to-pink-500'}`}
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -191,14 +191,14 @@ export function CentralBankingDashboard1() {
       {/* Main Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Total Quadrillion */}
-        <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-6 border border-purple-500/30">
+        <div className="bg-gradient-to-br from-emerald-900/40 to-pink-900/40 rounded-2xl p-6 border border-emerald-500/30">
           <div className="flex items-center justify-between mb-4">
-            <Database className="w-8 h-8 text-purple-400" />
+            <Database className="w-8 h-8 text-emerald-400" />
             <span className={`px-2 py-1 rounded-full text-xs ${getHealthColor(metrics?.systemHealth || 'warning')}`}>
               {metrics?.systemHealth?.toUpperCase()}
             </span>
           </div>
-          <p className="text-purple-300/70 text-sm mb-1">{isSpanish ? 'Balance Total' : 'Total Balance'}</p>
+          <p className="text-emerald-300/70 text-sm mb-1">{isSpanish ? 'Balance Total' : 'Total Balance'}</p>
           <p className={`text-3xl font-black ${isProcessing ? 'text-amber-400 animate-pulse' : 'text-white'}`}>
             {formatQuadrillion(currentQuadrillion)}
           </p>
@@ -238,7 +238,7 @@ export function CentralBankingDashboard1() {
 
       {/* Currency Grid */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-purple-300 mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-bold text-emerald-300 mb-4 flex items-center gap-2">
           <Globe className="w-6 h-6" />
           {isSpanish ? 'Balances por Divisa' : 'Balances by Currency'}
         </h2>
@@ -251,13 +251,13 @@ export function CentralBankingDashboard1() {
                 onClick={() => setSelectedCurrency(balance.currency)}
                 className={`p-4 rounded-xl cursor-pointer transition-all border ${
                   selectedCurrency === balance.currency
-                    ? 'bg-purple-500/30 border-purple-400 scale-105'
+                    ? 'bg-emerald-500/30 border-emerald-400 scale-105'
                     : 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50'
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-lg font-bold">{balance.currency}</span>
-                  <span className="text-purple-400">{getCurrencySymbol(balance.currency)}</span>
+                  <span className="text-emerald-400">{getCurrencySymbol(balance.currency)}</span>
                 </div>
                 <p className={`text-sm font-mono break-all ${isProcessing ? 'text-amber-300' : 'text-white'}`}>
                   {getCurrencySymbol(balance.currency)}{BigInt(Math.floor(balance.balance)).toLocaleString()}.00
@@ -270,7 +270,7 @@ export function CentralBankingDashboard1() {
           </div>
         ) : (
           <div className="bg-slate-800/30 rounded-xl p-12 text-center border border-slate-700/50">
-            <Cpu className="w-16 h-16 text-purple-400 mx-auto mb-4 opacity-50" />
+            <Cpu className="w-16 h-16 text-emerald-400 mx-auto mb-4 opacity-50" />
             <p className="text-slate-400">
               {isSpanish 
                 ? 'Carga un archivo en Treasury Reserve1 para ver los datos aquí'
@@ -282,15 +282,15 @@ export function CentralBankingDashboard1() {
 
       {/* Selected Currency Detail */}
       {selectedBalance && (
-        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-6 border border-purple-500/20">
+        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-6 border border-emerald-500/20">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                <DollarSign className="w-7 h-7 text-purple-400" />
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                <DollarSign className="w-7 h-7 text-emerald-400" />
               </div>
               <div>
                 <h3 className="text-xl font-bold">{selectedBalance.currency}</h3>
-                <p className="text-purple-300/50 text-sm">{selectedBalance.account}</p>
+                <p className="text-emerald-300/50 text-sm">{selectedBalance.account}</p>
               </div>
             </div>
             <CheckCircle className="w-8 h-8 text-emerald-400" />
@@ -298,19 +298,19 @@ export function CentralBankingDashboard1() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-black/20 rounded-xl p-4">
-              <p className="text-purple-300/70 text-sm mb-1">{isSpanish ? 'Balance Total' : 'Total Balance'}</p>
+              <p className="text-emerald-300/70 text-sm mb-1">{isSpanish ? 'Balance Total' : 'Total Balance'}</p>
               <p className="text-2xl font-black text-white break-all">
                 {getCurrencySymbol(selectedBalance.currency)}{BigInt(Math.floor(selectedBalance.balance)).toLocaleString()}.00
               </p>
             </div>
             <div className="bg-black/20 rounded-xl p-4">
-              <p className="text-purple-300/70 text-sm mb-1">{isSpanish ? 'Transacciones' : 'Transactions'}</p>
+              <p className="text-emerald-300/70 text-sm mb-1">{isSpanish ? 'Transacciones' : 'Transactions'}</p>
               <p className="text-2xl font-black text-white">
                 {selectedBalance.transactionCount.toLocaleString()}
               </p>
             </div>
             <div className="bg-black/20 rounded-xl p-4">
-              <p className="text-purple-300/70 text-sm mb-1">{isSpanish ? 'Última Actualización' : 'Last Update'}</p>
+              <p className="text-emerald-300/70 text-sm mb-1">{isSpanish ? 'Última Actualización' : 'Last Update'}</p>
               <p className="text-lg font-bold text-white">
                 {new Date(selectedBalance.lastUpdate).toLocaleTimeString()}
               </p>
@@ -320,7 +320,7 @@ export function CentralBankingDashboard1() {
       )}
 
       {/* Footer */}
-      <div className="mt-8 text-center text-purple-300/50 text-sm">
+      <div className="mt-8 text-center text-emerald-300/50 text-sm">
         <p>Central Panel 1 - {isSpanish ? 'Sincronizado con' : 'Synced with'} Treasury Reserve1</p>
         <p className="text-xs mt-1">Digital Commercial Bank Ltd © 2025</p>
       </div>
