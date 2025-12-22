@@ -66,6 +66,215 @@ const BLOCKCHAINS = [
   { name: 'Stellar', symbol: 'XLM', color: 'text-indigo-400' },
 ];
 
+// TOP 100 BANKS WORLDWIDE - Ranking by Assets
+const TOP_100_BANKS = [
+  { name: 'Industrial and Commercial Bank of China (ICBC)', swift: 'ICBKCNBJ', country: 'CN' },
+  { name: 'China Construction Bank', swift: 'PCBCCNBJ', country: 'CN' },
+  { name: 'Agricultural Bank of China', swift: 'ABOCCNBJ', country: 'CN' },
+  { name: 'Bank of China', swift: 'BKCHCNBJ', country: 'CN' },
+  { name: 'JPMorgan Chase', swift: 'CHASUS33', country: 'US' },
+  { name: 'Bank of America', swift: 'BOFAUS3N', country: 'US' },
+  { name: 'HSBC Holdings', swift: 'HSBCHKHH', country: 'GB' },
+  { name: 'BNP Paribas', swift: 'BNPAFRPP', country: 'FR' },
+  { name: 'Mitsubishi UFJ Financial', swift: 'BOABORPX', country: 'JP' },
+  { name: 'Crédit Agricole', swift: 'AGRIFRPP', country: 'FR' },
+  { name: 'Sumitomo Mitsui Financial', swift: 'SMBCJPJT', country: 'JP' },
+  { name: 'Barclays', swift: 'BABORJPJ', country: 'GB' },
+  { name: 'Mizuho Financial', swift: 'MHCBJPJT', country: 'JP' },
+  { name: 'Société Générale', swift: 'SOGEFRPP', country: 'FR' },
+  { name: 'Deutsche Bank', swift: 'DEUTDEFF', country: 'DE' },
+  { name: 'Citigroup', swift: 'CITIUS33', country: 'US' },
+  { name: 'Wells Fargo', swift: 'WFBIUS6S', country: 'US' },
+  { name: 'Postal Savings Bank of China', swift: 'PSBCCNBJ', country: 'CN' },
+  { name: 'Bank of Communications', swift: 'COMMCNSH', country: 'CN' },
+  { name: 'Royal Bank of Canada', swift: 'ROYCCAT2', country: 'CA' },
+  { name: 'UBS Group', swift: 'UBSWCHZH', country: 'CH' },
+  { name: 'Toronto-Dominion Bank', swift: 'TDOMCATTTOR', country: 'CA' },
+  { name: 'Goldman Sachs', swift: 'GLODARSP', country: 'US' },
+  { name: 'Santander', swift: 'BSCHESMM', country: 'ES' },
+  { name: 'Morgan Stanley', swift: 'MSTCUS33', country: 'US' },
+  { name: 'China Merchants Bank', swift: 'CMBCCNBS', country: 'CN' },
+  { name: 'ING Group', swift: 'INGBNL2A', country: 'NL' },
+  { name: 'Intesa Sanpaolo', swift: 'BCITITMM', country: 'IT' },
+  { name: 'China CITIC Bank', swift: 'CIKIENBX', country: 'CN' },
+  { name: 'Credit Suisse', swift: 'CRESCHZZ', country: 'CH' },
+  { name: 'Standard Chartered', swift: 'SCBLHKHH', country: 'GB' },
+  { name: 'Commonwealth Bank', swift: 'CTBAAU2S', country: 'AU' },
+  { name: 'Shanghai Pudong Development Bank', swift: 'SPDBCNSH', country: 'CN' },
+  { name: 'Lloyds Banking Group', swift: 'LOYDGB2L', country: 'GB' },
+  { name: 'NatWest Group', swift: 'NWBKGB2L', country: 'GB' },
+  { name: 'Industrial Bank', swift: 'FJIBCNBA', country: 'CN' },
+  { name: 'Westpac', swift: 'WPACAU2S', country: 'AU' },
+  { name: 'ANZ Banking Group', swift: 'ANZBAU3M', country: 'AU' },
+  { name: 'National Australia Bank', swift: 'NATAAU33', country: 'AU' },
+  { name: 'Nordea', swift: 'NDEASESS', country: 'SE' },
+  { name: 'UniCredit', swift: 'UNCRITMM', country: 'IT' },
+  { name: 'Scotiabank', swift: 'NOSCCATT', country: 'CA' },
+  { name: 'KB Financial Group', swift: 'CZNBKRSE', country: 'KR' },
+  { name: 'DBS Group', swift: 'DBSSSGSG', country: 'SG' },
+  { name: 'Banco Bradesco', swift: 'BBDEBRSP', country: 'BR' },
+  { name: 'Itaú Unibanco', swift: 'ITAUBRSP', country: 'BR' },
+  { name: 'Banco do Brasil', swift: 'BRASBRRJ', country: 'BR' },
+  { name: 'BBVA', swift: 'BBVAESMM', country: 'ES' },
+  { name: 'China Minsheng Banking', swift: 'MSBCCNBJ', country: 'CN' },
+  { name: 'China Everbright Bank', swift: 'EVERCNBJ', country: 'CN' },
+  { name: 'Commerzbank', swift: 'COBADEFF', country: 'DE' },
+  { name: 'Ping An Bank', swift: 'SZDBCNBS', country: 'CN' },
+  { name: 'State Bank of India', swift: 'SBININBB', country: 'IN' },
+  { name: 'Rabobank', swift: 'RABONL2U', country: 'NL' },
+  { name: 'Danske Bank', swift: 'DABADKKK', country: 'DK' },
+  { name: 'KBC Group', swift: 'KREDBEBB', country: 'BE' },
+  { name: 'Shinhan Financial Group', swift: 'SHBKKRSE', country: 'KR' },
+  { name: 'Standard Bank', swift: 'SBZAZAJJ', country: 'ZA' },
+  { name: 'Hana Financial Group', swift: 'HNBNKRSE', country: 'KR' },
+  { name: 'OCBC Bank', swift: 'OCBCSGSG', country: 'SG' },
+  { name: 'UOB', swift: 'UOVBSGSG', country: 'SG' },
+  { name: 'First Abu Dhabi Bank', swift: 'NBABOREA', country: 'AE' },
+  { name: 'CaixaBank', swift: 'CAIXESBB', country: 'ES' },
+  { name: 'Resona Holdings', swift: 'DABORSJP', country: 'JP' },
+  { name: 'Bank Central Asia', swift: 'CENAIDJA', country: 'ID' },
+  { name: 'Sberbank', swift: 'SABRRUMM', country: 'RU' },
+  { name: 'Woori Financial', swift: 'HVBKKRSE', country: 'KR' },
+  { name: 'Bank of Montreal', swift: 'BOFMCAM2', country: 'CA' },
+  { name: 'Handelsbanken', swift: 'HANDSESS', country: 'SE' },
+  { name: 'Swedbank', swift: 'SWEDSESS', country: 'SE' },
+  { name: 'SEB', swift: 'ESSESESS', country: 'SE' },
+  { name: 'DNB', swift: 'DNBANOKK', country: 'NO' },
+  { name: 'Bank Mandiri', swift: 'BMRIIDJA', country: 'ID' },
+  { name: 'Bank Rakyat Indonesia', swift: 'BRINIDJA', country: 'ID' },
+  { name: 'Bank Negara Indonesia', swift: 'BABORIDJ', country: 'ID' },
+  { name: 'National Bank of Canada', swift: 'BNDCCAMM', country: 'CA' },
+  { name: 'Macquarie Group', swift: 'MACQAU2S', country: 'AU' },
+  { name: 'Qatar National Bank', swift: 'QNBAQAQA', country: 'QA' },
+  { name: 'Emirates NBD', swift: 'EABORAEA', country: 'AE' },
+  { name: 'Erste Group', swift: 'GIBAATWW', country: 'AT' },
+  { name: 'Raiffeisen Bank', swift: 'RABORWWR', country: 'AT' },
+  { name: 'Bank of New York Mellon', swift: 'IRVTUS3N', country: 'US' },
+  { name: 'State Street', swift: 'SBOSUS33', country: 'US' },
+  { name: 'CIBC', swift: 'CIBCCATT', country: 'CA' },
+  { name: 'Maybank', swift: 'MABORMY2', country: 'MY' },
+  { name: 'CIMB Group', swift: 'CIBBMYKL', country: 'MY' },
+  { name: 'Public Bank Berhad', swift: 'PBBEMYKL', country: 'MY' },
+  { name: 'Banco Santander Brasil', swift: 'BABORBRB', country: 'BR' },
+  { name: 'HDFC Bank', swift: 'HDFCINBB', country: 'IN' },
+  { name: 'ICICI Bank', swift: 'ABORINBA', country: 'IN' },
+  { name: 'Axis Bank', swift: 'AXISINBB', country: 'IN' },
+  { name: 'Kotak Mahindra Bank', swift: 'ABORINSB', country: 'IN' },
+  { name: 'Hang Seng Bank', swift: 'HABORHKH', country: 'HK' },
+  { name: 'Bank of East Asia', swift: 'BABORHKH', country: 'HK' },
+  { name: 'Cathay Financial', swift: 'BOTKTWTX', country: 'TW' },
+  { name: 'Mega Financial', swift: 'ICBKTWTP', country: 'TW' },
+  { name: 'VTB Bank', swift: 'VTBRRUMM', country: 'RU' },
+  { name: 'Alfa-Bank', swift: 'ALFARUMM', country: 'RU' },
+  { name: 'Gazprombank', swift: 'GABORUMM', country: 'RU' },
+];
+
+// Función para generar cuentas bancarias aleatorias por banco
+const generateBankAccounts = (bankName: string, swift: string, count: number = 2): string[] => {
+  const accounts: string[] = [];
+  const baseNum = swift.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+  for (let i = 0; i < count; i++) {
+    const accountNum = `${swift.substring(0, 4)}${String(baseNum + i * 1000).padStart(8, '0')}${String(Math.floor(Math.random() * 9999)).padStart(4, '0')}`;
+    accounts.push(accountNum);
+  }
+  return accounts;
+};
+
+// Librería de 200 cuentas bancarias pre-generadas
+const BANK_ACCOUNTS_LIBRARY: { bank: string; swift: string; accounts: string[] }[] = TOP_100_BANKS.map(bank => ({
+  bank: bank.name,
+  swift: bank.swift,
+  accounts: generateBankAccounts(bank.name, bank.swift, 2),
+}));
+
+// Conceptos de depósito predefinidos
+const DEPOSIT_CONCEPTS = {
+  es: [
+    'Depósito en efectivo',
+    'Transferencia bancaria',
+    'Pago de servicios',
+    'Nómina / Salario',
+    'Devolución de impuestos',
+    'Dividendos',
+    'Intereses ganados',
+    'Reembolso',
+    'Venta de activos',
+    'Liquidación de inversiones',
+    'Préstamo recibido',
+    'Capital social',
+    'Aportación de socio',
+    'Ingreso por ventas',
+    'Comisiones recibidas',
+    'Regalías',
+    'Honorarios profesionales',
+    'Pago de cliente',
+    'Cobro de facturas',
+    'Transferencia internacional',
+    'Remesa familiar',
+    'Subsidio gubernamental',
+    'Pensión',
+    'Seguro - Indemnización',
+    'Premio / Bonificación',
+    'Herencia',
+    'Donación recibida',
+    'Venta de inmueble',
+    'Venta de vehículo',
+    'Venta de equipos',
+    'Liquidación de contrato',
+    'Ajuste contable',
+    'Corrección de saldo',
+    'Compensación',
+    'Transferencia entre cuentas propias',
+    'Depósito inicial',
+    'Recarga de fondos',
+    'Capitalización',
+    'Fondeo de cuenta custodio',
+    'Treasury transfer',
+  ],
+  en: [
+    'Cash deposit',
+    'Bank transfer',
+    'Service payment',
+    'Payroll / Salary',
+    'Tax refund',
+    'Dividends',
+    'Interest earned',
+    'Refund',
+    'Asset sale',
+    'Investment liquidation',
+    'Loan received',
+    'Share capital',
+    'Partner contribution',
+    'Sales income',
+    'Commissions received',
+    'Royalties',
+    'Professional fees',
+    'Client payment',
+    'Invoice collection',
+    'International transfer',
+    'Family remittance',
+    'Government subsidy',
+    'Pension',
+    'Insurance - Indemnity',
+    'Bonus / Award',
+    'Inheritance',
+    'Donation received',
+    'Real estate sale',
+    'Vehicle sale',
+    'Equipment sale',
+    'Contract settlement',
+    'Accounting adjustment',
+    'Balance correction',
+    'Compensation',
+    'Transfer between own accounts',
+    'Initial deposit',
+    'Fund reload',
+    'Capitalization',
+    'Custody account funding',
+    'Treasury transfer',
+  ],
+};
+
 export function CustodyAccountsModule() {
   const { t, language } = useLanguage();
   const isSpanish = language === 'es';
@@ -146,6 +355,16 @@ export function CustodyAccountsModule() {
     valueDate: new Date().toISOString().split('T')[0],
     notes: '',
   });
+  
+  // Estados para selectores de banco y cuenta
+  const [selectedBankIndex, setSelectedBankIndex] = useState<number>(-1);
+  const [selectedAccountIndex, setSelectedAccountIndex] = useState<number>(-1);
+  const [useManualBank, setUseManualBank] = useState(true);
+  const [useManualAccount, setUseManualAccount] = useState(true);
+  const [useManualDescription, setUseManualDescription] = useState(true);
+  
+  // Opción para enmascarar cuentas en PDF
+  const [maskAccountsInPDF, setMaskAccountsInPDF] = useState(false);
 
   // Modal para historial de transacciones
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
@@ -3027,6 +3246,28 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               )}
 
+              {/* Opción para enmascarar cuentas en PDF */}
+              <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 mb-4">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={maskAccountsInPDF}
+                    onChange={e => setMaskAccountsInPDF(e.target.checked)}
+                    className="w-5 h-5 accent-amber-500 rounded"
+                  />
+                  <div>
+                    <div className="text-sm font-semibold text-amber-400">
+                      {language === 'es' ? 'Enmascarar números de cuenta en PDF' : 'Mask account numbers in PDF'}
+                    </div>
+                    <div className="text-xs text-amber-300/70">
+                      {language === 'es' 
+                        ? 'Los últimos 4 dígitos de las cuentas se mostrarán como ****' 
+                        : 'Last 4 digits of accounts will be shown as ****'}
+                    </div>
+                  </div>
+                </label>
+              </div>
+
               {/* Botones de Acción */}
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[#ffffff]/30">
                 <button
@@ -3159,24 +3400,23 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
 
-              {/* Cuenta origen y banco */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-[#ffffff] mb-2 block">
-                    {isSpanish ? 'Cuenta Origen' : 'Source Account'}
-                  </label>
-                  <input
-                    type="text"
-                    value={addFundsData.sourceAccount}
-                    onChange={e => setAddFundsData({...addFundsData, sourceAccount: e.target.value})}
-                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
-                    placeholder={isSpanish ? 'Número de cuenta' : 'Account number'}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-[#ffffff] mb-2 block">
+              {/* Banco origen */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-[#ffffff]">
                     {isSpanish ? 'Banco Origen' : 'Source Bank'}
                   </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setUseManualBank(!useManualBank)}
+                      className={`text-xs px-2 py-1 rounded ${useManualBank ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'}`}
+                    >
+                      {useManualBank ? (isSpanish ? 'Manual' : 'Manual') : (isSpanish ? 'Seleccionar' : 'Select')}
+                    </button>
+                  </div>
+                </div>
+                {useManualBank ? (
                   <input
                     type="text"
                     value={addFundsData.sourceBank}
@@ -3184,21 +3424,122 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
                     placeholder={isSpanish ? 'Nombre del banco' : 'Bank name'}
                   />
-                </div>
+                ) : (
+                  <select
+                    value={selectedBankIndex}
+                    onChange={e => {
+                      const idx = parseInt(e.target.value);
+                      setSelectedBankIndex(idx);
+                      if (idx >= 0) {
+                        const bank = TOP_100_BANKS[idx];
+                        setAddFundsData({...addFundsData, sourceBank: `${bank.name} (${bank.swift})`});
+                        setSelectedAccountIndex(-1);
+                      }
+                    }}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500 max-h-60"
+                  >
+                    <option value={-1}>{isSpanish ? '-- Seleccionar banco --' : '-- Select bank --'}</option>
+                    {TOP_100_BANKS.map((bank, idx) => (
+                      <option key={idx} value={idx}>
+                        {bank.name} ({bank.swift}) - {bank.country}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
-              {/* Descripción */}
+              {/* Cuenta origen */}
               <div>
-                <label className="text-sm text-[#ffffff] mb-2 block">
-                  {isSpanish ? 'Descripción' : 'Description'}
-                </label>
-                <input
-                  type="text"
-                  value={addFundsData.description}
-                  onChange={e => setAddFundsData({...addFundsData, description: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
-                  placeholder={isSpanish ? 'Concepto del depósito' : 'Deposit concept'}
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-[#ffffff]">
+                    {isSpanish ? 'Cuenta Origen' : 'Source Account'}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setUseManualAccount(!useManualAccount)}
+                      className={`text-xs px-2 py-1 rounded ${useManualAccount ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'}`}
+                    >
+                      {useManualAccount ? (isSpanish ? 'Manual' : 'Manual') : (isSpanish ? 'Librería' : 'Library')}
+                    </button>
+                  </div>
+                </div>
+                {useManualAccount ? (
+                  <input
+                    type="text"
+                    value={addFundsData.sourceAccount}
+                    onChange={e => setAddFundsData({...addFundsData, sourceAccount: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                    placeholder={isSpanish ? 'Número de cuenta' : 'Account number'}
+                  />
+                ) : (
+                  <select
+                    value={selectedAccountIndex}
+                    onChange={e => {
+                      const idx = parseInt(e.target.value);
+                      setSelectedAccountIndex(idx);
+                      if (idx >= 0 && selectedBankIndex >= 0) {
+                        const bankLib = BANK_ACCOUNTS_LIBRARY[selectedBankIndex];
+                        if (bankLib && bankLib.accounts[idx]) {
+                          setAddFundsData({...addFundsData, sourceAccount: bankLib.accounts[idx]});
+                        }
+                      }
+                    }}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                    disabled={selectedBankIndex < 0 && !useManualBank}
+                  >
+                    <option value={-1}>
+                      {selectedBankIndex < 0 && !useManualBank 
+                        ? (isSpanish ? '-- Seleccione un banco primero --' : '-- Select a bank first --')
+                        : (isSpanish ? '-- Seleccionar cuenta --' : '-- Select account --')}
+                    </option>
+                    {selectedBankIndex >= 0 && BANK_ACCOUNTS_LIBRARY[selectedBankIndex]?.accounts.map((acc, idx) => (
+                      <option key={idx} value={idx}>
+                        {acc}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Descripción / Concepto */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-[#ffffff]">
+                    {isSpanish ? 'Descripción / Concepto' : 'Description / Concept'}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setUseManualDescription(!useManualDescription)}
+                      className={`text-xs px-2 py-1 rounded ${useManualDescription ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}
+                    >
+                      {useManualDescription ? (isSpanish ? 'Manual' : 'Manual') : (isSpanish ? 'Predefinido' : 'Predefined')}
+                    </button>
+                  </div>
+                </div>
+                {useManualDescription ? (
+                  <input
+                    type="text"
+                    value={addFundsData.description}
+                    onChange={e => setAddFundsData({...addFundsData, description: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                    placeholder={isSpanish ? 'Concepto del depósito' : 'Deposit concept'}
+                  />
+                ) : (
+                  <select
+                    value={addFundsData.description}
+                    onChange={e => setAddFundsData({...addFundsData, description: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="">{isSpanish ? '-- Seleccionar concepto --' : '-- Select concept --'}</option>
+                    {(isSpanish ? DEPOSIT_CONCEPTS.es : DEPOSIT_CONCEPTS.en).map((concept, idx) => (
+                      <option key={idx} value={concept}>
+                        {concept}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {/* Notas */}
@@ -3768,6 +4109,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
         <CustodyBlackScreen
           account={selectedAccount}
           onClose={() => setShowBlackScreen(false)}
+          maskAccounts={maskAccountsInPDF}
         />
       )}
 

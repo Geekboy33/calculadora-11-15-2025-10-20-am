@@ -14,9 +14,17 @@ import { downloadPDF } from '../lib/download-helper';
 interface CustodyBlackScreenProps {
   account: any;
   onClose: () => void;
+  maskAccounts?: boolean;
 }
 
-export function CustodyBlackScreen({ account, onClose }: CustodyBlackScreenProps) {
+// Función para enmascarar números de cuenta
+const maskAccountNumber = (accountNumber: string, mask: boolean): string => {
+  if (!mask || !accountNumber) return accountNumber;
+  if (accountNumber.length <= 4) return '****';
+  return accountNumber.slice(0, -4) + '****';
+};
+
+export function CustodyBlackScreen({ account, onClose, maskAccounts = false }: CustodyBlackScreenProps) {
   const { language } = useLanguage();
   const blackScreenRef = useRef<HTMLDivElement>(null);
 
@@ -1360,7 +1368,8 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
         drawSection(isSpanish ? 'DETALLE DE ORIGEN/DESTINO' : 'SOURCE/DESTINATION DETAILS', 9);
         
         const detailRows = account.transactions.slice(-12).reverse().map((tx: any) => {
-          const sourceInfo = tx.sourceAccount || tx.destinationAccount || '-';
+          const rawSourceInfo = tx.sourceAccount || tx.destinationAccount || '-';
+          const sourceInfo = maskAccounts ? maskAccountNumber(rawSourceInfo, true) : rawSourceInfo;
           const bankInfo = tx.sourceBank || tx.destinationBank || '-';
           const direction = tx.type === 'transfer_in' || tx.type === 'deposit' || tx.type === 'initial' 
             ? (isSpanish ? 'ENTRADA' : 'IN') 
