@@ -256,7 +256,9 @@ class CustodyStore {
     contractAddress?: string,
     fundDenomination: 'M1' | 'M2' = 'M1',
     accountCategory: AccountCategory = 'custody',
-    customAccountNumber?: string // Número de cuenta manual opcional
+    customAccountNumber?: string, // Número de cuenta manual opcional
+    customCreationDate?: string, // Fecha de creación manual (YYYY-MM-DD)
+    customCreationTime?: string // Hora de creación manual (HH:mm)
   ): CustodyAccount {
     // 🔢 GENERAR NÚMERO DE CUENTA SECUENCIAL ISO BANCARIO
     const generatedAccountNumber = this.getNextAccountNumber(accountType, currency);
@@ -285,8 +287,15 @@ class CustodyStore {
     // Usar número de cuenta personalizado o generado
     const finalAccountNumber = customAccountNumber || generatedAccountNumber;
     
-    // Crear transacción inicial
+    // Usar fecha/hora personalizada o actual
     const now = new Date();
+    const creationDate = customCreationDate || now.toISOString().split('T')[0];
+    const creationTime = customCreationTime ? `${customCreationTime}:00` : now.toTimeString().split(' ')[0];
+    const creationTimestamp = customCreationDate 
+      ? new Date(`${customCreationDate}T${customCreationTime || '00:00'}:00`).toISOString()
+      : now.toISOString();
+    
+    // Crear transacción inicial con fecha personalizada
     const initialTransaction: CustodyTransaction = {
       id: `TXN-INIT-${Date.now()}`,
       type: 'initial',
@@ -295,12 +304,12 @@ class CustodyStore {
       balanceAfter: balance,
       description: 'Initial deposit - Account opening',
       reference: this.generateTransactionReference(),
-      transactionDate: now.toISOString().split('T')[0],
-      transactionTime: now.toTimeString().split(' ')[0],
-      createdAt: now.toISOString(),
+      transactionDate: creationDate,
+      transactionTime: creationTime,
+      createdAt: creationTimestamp,
       createdBy: 'SYSTEM',
       status: 'completed',
-      valueDate: now.toISOString().split('T')[0],
+      valueDate: creationDate,
       notes: `Account created with initial balance of ${currency} ${balance.toLocaleString()}`
     };
     
@@ -332,10 +341,10 @@ class CustodyStore {
       kycVerified: true,
       amlScore,
       riskLevel: amlScore >= 90 ? 'low' : amlScore >= 75 ? 'medium' : 'high',
-      // Timestamps
-      createdAt: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
-      lastAudit: new Date().toISOString(),
+      // Timestamps - Usar fecha de creación personalizada
+      createdAt: creationTimestamp,
+      lastUpdated: creationTimestamp,
+      lastAudit: creationTimestamp,
       reservations: [],
     };
 

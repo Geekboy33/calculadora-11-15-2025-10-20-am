@@ -1140,6 +1140,20 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
       // 1. INFORMACIÓN DE LA CUENTA
       drawSection(isSpanish ? 'INFORMACIÓN DE LA CUENTA CUSTODIO' : 'CUSTODY ACCOUNT INFORMATION', 1);
       const currInfo = currencyData[account.currency] || { num: account.currency, name: account.currency };
+      
+      // Formatear fecha de apertura de cuenta desde createdAt
+      const accountCreationDate = new Date(account.createdAt || Date.now());
+      const formattedCreationDate = accountCreationDate.toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      const formattedCreationTime = accountCreationDate.toLocaleTimeString(isSpanish ? 'es-ES' : 'en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      });
+      
       drawTable(
         [isSpanish ? 'Campo' : 'Field', isSpanish ? 'Valor' : 'Value'],
         [
@@ -1148,6 +1162,8 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
           [isSpanish ? 'Tipo de Cuenta' : 'Account Type', isBanking ? 'Custody Banking Account' : 'Custody Blockchain Account'],
           [isSpanish ? 'Divisa' : 'Currency', `${account.currency} - ${currInfo.name}`],
           ['ISO 4217', currInfo.num],
+          [isSpanish ? 'Fecha de Apertura' : 'Opening Date', formattedCreationDate],
+          [isSpanish ? 'Hora de Apertura' : 'Opening Time', formattedCreationTime],
           [isSpanish ? 'Clasificación de Fondos' : 'Fund Classification', account.fundDenomination || 'M1'],
           [isSpanish ? 'Estado de la Cuenta' : 'Account Status', '✓ ACTIVE'],
           [isSpanish ? 'Banco Custodio' : 'Custodian Bank', 'Digital Commercial Bank Ltd']
@@ -1301,7 +1317,8 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
         
         drawSection(isSpanish ? 'HISTORIAL DE MOVIMIENTOS' : 'TRANSACTION HISTORY', 8);
         
-        const transactionRows = account.transactions.slice(-15).reverse().map((tx: any) => {
+        // Primera tabla: Datos principales
+        const transactionRows = account.transactions.slice(-12).reverse().map((tx: any) => {
           const typeLabels: Record<string, string> = {
             initial: isSpanish ? 'Apertura' : 'Opening',
             deposit: isSpanish ? 'Depósito' : 'Deposit',
@@ -1318,7 +1335,6 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
             tx.transactionDate,
             tx.transactionTime?.substring(0, 5) || '-',
             typeLabel,
-            (tx.description || '-').substring(0, 25),
             amount,
             `${account.currency} ${tx.balanceAfter.toLocaleString()}`
           ];
@@ -1330,12 +1346,46 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
               isSpanish ? 'Fecha' : 'Date',
               isSpanish ? 'Hora' : 'Time',
               isSpanish ? 'Tipo' : 'Type',
-              isSpanish ? 'Descripción' : 'Description',
               isSpanish ? 'Monto' : 'Amount',
               isSpanish ? 'Balance' : 'Balance'
             ],
             transactionRows,
-            [25, 16, 22, 45, 35, 37]
+            [28, 18, 28, 48, 58]
+          );
+        }
+        
+        y += 5;
+        
+        // Segunda tabla: Detalle de cuentas y bancos
+        drawSection(isSpanish ? 'DETALLE DE ORIGEN/DESTINO' : 'SOURCE/DESTINATION DETAILS', 9);
+        
+        const detailRows = account.transactions.slice(-12).reverse().map((tx: any) => {
+          const sourceInfo = tx.sourceAccount || tx.destinationAccount || '-';
+          const bankInfo = tx.sourceBank || tx.destinationBank || '-';
+          const direction = tx.type === 'transfer_in' || tx.type === 'deposit' || tx.type === 'initial' 
+            ? (isSpanish ? 'ENTRADA' : 'IN') 
+            : (isSpanish ? 'SALIDA' : 'OUT');
+          
+          return [
+            tx.transactionDate,
+            direction,
+            (sourceInfo || '-').substring(0, 25),
+            (bankInfo || '-').substring(0, 30),
+            tx.reference?.substring(0, 20) || '-'
+          ];
+        });
+        
+        if (detailRows.length > 0) {
+          drawTable(
+            [
+              isSpanish ? 'Fecha' : 'Date',
+              isSpanish ? 'Dir.' : 'Dir.',
+              isSpanish ? 'Cuenta Origen/Destino' : 'Source/Dest. Account',
+              isSpanish ? 'Banco' : 'Bank',
+              isSpanish ? 'Referencia' : 'Reference'
+            ],
+            detailRows,
+            [25, 18, 50, 55, 32]
           );
         }
         
@@ -1347,8 +1397,8 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
         pdf.setFontSize(6);
         pdf.setFont('helvetica', 'normal');
         pdf.text(isSpanish 
-          ? `Total transacciones: ${account.transactions.length} | Mostrando últimas 15 transacciones | Período: ${account.transactions[0]?.transactionDate || '-'} - ${account.transactions[account.transactions.length - 1]?.transactionDate || '-'}`
-          : `Total transactions: ${account.transactions.length} | Showing last 15 transactions | Period: ${account.transactions[0]?.transactionDate || '-'} - ${account.transactions[account.transactions.length - 1]?.transactionDate || '-'}`,
+          ? `Total transacciones: ${account.transactions.length} | Mostrando últimas 12 transacciones | Período: ${account.transactions[0]?.transactionDate || '-'} - ${account.transactions[account.transactions.length - 1]?.transactionDate || '-'}`
+          : `Total transactions: ${account.transactions.length} | Showing last 12 transactions | Period: ${account.transactions[0]?.transactionDate || '-'} - ${account.transactions[account.transactions.length - 1]?.transactionDate || '-'}`,
           margin + 4, y + 7);
         y += 18;
       }
@@ -1359,8 +1409,8 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
         y = margin + 10;
       }
 
-      // 9. DECLARACIÓN OFICIAL
-      drawSection(isSpanish ? 'DECLARACIÓN OFICIAL DEL BANCO' : 'OFFICIAL BANK DECLARATION', account.transactions && account.transactions.length > 0 ? 9 : 8);
+      // 10. DECLARACIÓN OFICIAL
+      drawSection(isSpanish ? 'DECLARACIÓN OFICIAL DEL BANCO' : 'OFFICIAL BANK DECLARATION', account.transactions && account.transactions.length > 0 ? 10 : 8);
       
       y += 2;
       pdf.setFillColor(250, 251, 252);

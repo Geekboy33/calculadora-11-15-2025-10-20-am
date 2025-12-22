@@ -113,6 +113,8 @@ export function CustodyAccountsModule() {
     bankName: 'DIGITAL COMMERCIAL BANK LTD.',
     fundDenomination: 'M1' as 'M1' | 'M2',
     customAccountNumber: '', // Número de cuenta manual opcional
+    creationDate: new Date().toISOString().split('T')[0], // Fecha de creación manual
+    creationTime: new Date().toTimeString().split(' ')[0].substring(0, 5), // Hora de creación manual
   });
 
   // Modal para agregar fondos
@@ -549,7 +551,9 @@ export function CustodyAccountsModule() {
       formData.contractAddress || undefined,
       formData.fundDenomination,
       formData.accountCategory as AccountCategory,
-      finalAccountNumber
+      finalAccountNumber,
+      formData.creationDate, // Fecha de creación personalizada
+      formData.creationTime  // Hora de creación personalizada
     );
 
     setShowCreateModal(false);
@@ -565,6 +569,8 @@ export function CustodyAccountsModule() {
       bankName: 'DIGITAL COMMERCIAL BANK LTD.',
       fundDenomination: 'M1',
       customAccountNumber: '',
+      creationDate: new Date().toISOString().split('T')[0],
+      creationTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
     });
     
     // Mostrar mensaje de confirmación
@@ -1962,6 +1968,43 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   💡 {language === 'es' 
                     ? 'Use los botones para generar o ingrese su propio número de cuenta.' 
                     : 'Use buttons to generate or enter your own account number.'}
+                </div>
+              </div>
+
+              {/* Fecha y Hora de Creación Manual */}
+              <div className="bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border border-cyan-500/30 rounded-lg p-4">
+                <label className="text-sm text-cyan-400 mb-3 block flex items-center gap-2 font-semibold">
+                  <Calendar className="w-4 h-4" />
+                  {language === 'es' ? 'Fecha y Hora de Creación (Modificable)' : 'Creation Date & Time (Editable)'}
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-[#999] mb-1 block">
+                      {language === 'es' ? 'Fecha de Apertura' : 'Opening Date'}
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.creationDate}
+                      onChange={e => setFormData({...formData, creationDate: e.target.value})}
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/30 rounded-lg text-[#ffffff] focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-[#999] mb-1 block">
+                      {language === 'es' ? 'Hora de Apertura' : 'Opening Time'}
+                    </label>
+                    <input
+                      type="time"
+                      value={formData.creationTime}
+                      onChange={e => setFormData({...formData, creationTime: e.target.value})}
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-cyan-500/30 rounded-lg text-[#ffffff] focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+                <div className="text-xs text-cyan-300 mt-2">
+                  📅 {language === 'es' 
+                    ? 'Puede seleccionar fechas pasadas para registrar cuentas existentes.' 
+                    : 'You can select past dates to register existing accounts.'}
                 </div>
               </div>
 
