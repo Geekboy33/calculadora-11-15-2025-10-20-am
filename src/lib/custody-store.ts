@@ -234,10 +234,13 @@ class CustodyStore {
 
   /**
    * Generar número de referencia único para transacciones
+   * @param transactionDate - Fecha de la transacción en formato YYYY-MM-DD (opcional, usa fecha actual si no se proporciona)
    */
-  generateTransactionReference(): string {
-    const date = new Date();
-    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+  generateTransactionReference(transactionDate?: string): string {
+    // Usar la fecha de transacción proporcionada o la fecha actual
+    const dateStr = transactionDate 
+      ? transactionDate.replace(/-/g, '') 
+      : new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const random = Math.random().toString(36).substring(2, 10).toUpperCase();
     return `TXN-${dateStr}-${random}`;
   }
@@ -303,7 +306,7 @@ class CustodyStore {
       currency,
       balanceAfter: balance,
       description: 'Initial deposit - Account opening',
-      reference: this.generateTransactionReference(),
+      reference: this.generateTransactionReference(creationDate),
       transactionDate: creationDate,
       transactionTime: creationTime,
       createdAt: creationTimestamp,
@@ -1099,7 +1102,7 @@ class CustodyStore {
       currency: account.currency,
       balanceAfter: newBalance,
       description: transactionData.description,
-      reference: this.generateTransactionReference(),
+      reference: this.generateTransactionReference(transactionData.transactionDate),
       sourceAccount: transactionData.sourceAccount,
       sourceBank: transactionData.sourceBank,
       transactionDate: transactionData.transactionDate,
@@ -1199,7 +1202,7 @@ class CustodyStore {
       currency: account.currency,
       balanceAfter: newBalance,
       description: transactionData.description,
-      reference: this.generateTransactionReference(),
+      reference: this.generateTransactionReference(transactionData.transactionDate),
       destinationAccount: transactionData.destinationAccount,
       destinationBank: transactionData.destinationBank,
       transactionDate: transactionData.transactionDate,
