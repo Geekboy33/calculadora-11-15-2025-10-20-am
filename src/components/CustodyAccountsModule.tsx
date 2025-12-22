@@ -441,7 +441,7 @@ export function CustodyAccountsModule() {
   // Generar IBAN con formato internacional ISO 13616
   const generateInternationalIBAN = (currency: string, accountNumber?: string): string => {
     const country = IBAN_COUNTRIES[currency] || { code: 'KM', length: 27, name: 'Union of Comoros' };
-    const bankCode = 'DCBK'; // Digital Commercial Bank - Comoros
+    const bankCode = 'DCB'; // Digital Commercial Bank
     const branchCode = '001';
     
     // Generar número de cuenta si no se proporciona
@@ -460,7 +460,7 @@ export function CustodyAccountsModule() {
     return iban.toUpperCase();
   };
 
-  // Generar número de cuenta en formato internacional - Union of Comoros
+  // Generar número de cuenta en formato internacional - DCB Union of Comoros
   const generateInternationalAccountNumber = (currency: string, category: string): string => {
     const country = IBAN_COUNTRIES[currency] || { code: 'KM', length: 27, name: 'Union of Comoros' };
     const categoryCode: Record<string, string> = {
@@ -475,10 +475,10 @@ export function CustodyAccountsModule() {
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const sequence = Math.floor(Math.random() * 9999999).toString().padStart(7, '0');
+    const sequence = Math.floor(Math.random() * 999999).toString().padStart(6, '0');
     
-    // Formato: PAÍS-BANCO-TIPO-AÑO-MES-SECUENCIA
-    return `${country.code}${currency}${typeCode}${year}${month}${sequence}`;
+    // Formato: PAÍS-DCB-DIVISA-TIPO-AÑO-MES-SECUENCIA
+    return `${country.code}DCB${currency}${typeCode}${year}${month}${sequence}`;
   };
 
   // Obtener balances disponibles según la fuente seleccionada
@@ -1941,7 +1941,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   value={formData.customAccountNumber}
                   onChange={e => setFormData({...formData, customAccountNumber: e.target.value.toUpperCase()})}
                   className="w-full px-4 py-3 bg-[#0a0a0a] border border-yellow-500/30 rounded-lg text-[#ffffff] font-mono focus:outline-none focus:border-yellow-500 text-lg tracking-wider"
-                  placeholder={language === 'es' ? 'Ej: DE89DAES0011234567890' : 'Ex: DE89DAES0011234567890'}
+                  placeholder={language === 'es' ? 'Ej: KM89DCB0011234567890123' : 'Ex: KM89DCB0011234567890123'}
                 />
                 
                 {/* Info del formato */}
