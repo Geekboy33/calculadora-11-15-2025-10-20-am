@@ -3027,10 +3027,16 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </label>
                 <input
                   type="number"
-                  value={addFundsData.amount || ''}
-                  onChange={e => setAddFundsData({...addFundsData, amount: parseFloat(e.target.value) || 0})}
+                  min="0"
+                  step="0.01"
+                  value={addFundsData.amount === 0 ? '' : addFundsData.amount}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setAddFundsData({...addFundsData, amount: val === '' ? 0 : parseFloat(val)});
+                  }}
                   className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono text-xl focus:outline-none focus:border-emerald-500"
                   placeholder="0.00"
+                  autoComplete="off"
                 />
               </div>
 
@@ -3187,11 +3193,17 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </label>
                 <input
                   type="number"
-                  value={withdrawData.amount || ''}
-                  onChange={e => setWithdrawData({...withdrawData, amount: parseFloat(e.target.value) || 0})}
+                  min="0"
+                  step="0.01"
+                  value={withdrawData.amount === 0 ? '' : withdrawData.amount}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setWithdrawData({...withdrawData, amount: val === '' ? 0 : parseFloat(val)});
+                  }}
                   max={selectedAccount.availableBalance}
                   className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono text-xl focus:outline-none focus:border-orange-500"
                   placeholder="0.00"
+                  autoComplete="off"
                 />
                 {/* Botones de porcentaje */}
                 <div className="flex gap-2 mt-2">
@@ -3411,10 +3423,16 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </label>
                 <input
                   type="number"
-                  value={transferData.amount || ''}
-                  onChange={e => setTransferData({...transferData, amount: parseFloat(e.target.value) || 0})}
+                  min="0"
+                  step="0.01"
+                  value={transferData.amount === 0 ? '' : transferData.amount}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setTransferData({...transferData, amount: val === '' ? 0 : parseFloat(val)});
+                  }}
                   className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono text-xl focus:outline-none focus:border-purple-500"
                   placeholder="0.00"
+                  autoComplete="off"
                 />
               </div>
 
