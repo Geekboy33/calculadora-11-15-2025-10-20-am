@@ -196,6 +196,12 @@ export function CustodyAccountsModule() {
 
   // Cargar datos al montar
   useEffect(() => {
+    // 🔄 Regenerar referencias de transacciones para que coincidan con las fechas
+    const updatedRefs = custodyStore.regenerateTransactionReferences();
+    if (updatedRefs > 0) {
+      console.log(`[CustodyModule] 🔄 ${updatedRefs} referencias de transacciones corregidas automáticamente`);
+    }
+    
     const accounts = custodyStore.getAccounts();
     setCustodyAccounts(accounts);
 
@@ -1710,7 +1716,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
         </div>
 
         {/* Acciones Rápidas */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Botón para Transferencia entre Cuentas */}
           <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-2 border-purple-500/30 rounded-xl p-6 text-center">
             <div className="mb-4">
@@ -1736,6 +1742,34 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 {language === 'es' ? '⚠️ Necesitas al menos 2 cuentas' : '⚠️ You need at least 2 accounts'}
               </p>
             )}
+          </div>
+
+          {/* Botón para Regenerar Referencias TXN */}
+          <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-2 border-amber-500/30 rounded-xl p-6 text-center">
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-amber-400 mb-2">
+                {language === 'es' ? '🔧 Corregir Referencias TXN' : '🔧 Fix TXN References'}
+              </h3>
+              <p className="text-sm text-[#999]">
+                {language === 'es' 
+                  ? 'Regenera las referencias para que coincidan con las fechas'
+                  : 'Regenerate references to match transaction dates'}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                const count = custodyStore.forceRegenerateAllReferences();
+                setCustodyAccounts(custodyStore.getAccounts());
+                alert(language === 'es' 
+                  ? `✅ ${count} referencias regeneradas correctamente` 
+                  : `✅ ${count} references regenerated successfully`);
+              }}
+              disabled={custodyAccounts.length === 0}
+              className="px-8 py-4 bg-gradient-to-br from-amber-600 to-orange-600 text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] transition-all text-lg flex items-center gap-3 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <History className="w-6 h-6" />
+              {language === 'es' ? 'Regenerar TXN' : 'Regenerate TXN'}
+            </button>
           </div>
 
           {/* Botón para Crear Más Cuentas */}

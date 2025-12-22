@@ -1304,6 +1304,73 @@ class CustodyStore {
   }
 
   /**
+   * Regenerar referencias de transacciones para que coincidan con las fechas de transacción
+   * Esto corrige las referencias que fueron creadas con la fecha actual en lugar de la fecha de transacción
+   */
+  regenerateTransactionReferences(): number {
+    const accounts = this.getAccounts();
+    let updatedCount = 0;
+
+    accounts.forEach(account => {
+      if (account.transactions && account.transactions.length > 0) {
+        account.transactions.forEach(tx => {
+          // Verificar si la referencia no coincide con la fecha de transacción
+          if (tx.reference && tx.transactionDate) {
+            const txDateStr = tx.transactionDate.replace(/-/g, '');
+            const refDateMatch = tx.reference.match(/TXN-(\d{8})-/);
+            
+            if (refDateMatch && refDateMatch[1] !== txDateStr) {
+              // La fecha en la referencia no coincide con la fecha de transacción
+              const random = tx.reference.split('-')[2] || Math.random().toString(36).substring(2, 10).toUpperCase();
+              tx.reference = `TXN-${txDateStr}-${random}`;
+              updatedCount++;
+              console.log(`[CustodyStore] ✅ Referencia actualizada: ${tx.reference} (fecha: ${tx.transactionDate})`);
+            }
+          }
+        });
+      }
+    });
+
+    if (updatedCount > 0) {
+      this.saveAccounts(accounts);
+      console.log(`[CustodyStore] 🔄 ${updatedCount} referencias de transacciones actualizadas`);
+    }
+
+    return updatedCount;
+  }
+
+  /**
+   * Forzar regeneración de TODAS las referencias de transacciones
+   * Útil cuando se necesita actualizar todas las referencias sin importar si coinciden o no
+   */
+  forceRegenerateAllReferences(): number {
+    const accounts = this.getAccounts();
+    let updatedCount = 0;
+
+    accounts.forEach(account => {
+      if (account.transactions && account.transactions.length > 0) {
+        account.transactions.forEach(tx => {
+          if (tx.transactionDate) {
+            const txDateStr = tx.transactionDate.replace(/-/g, '');
+            const random = Math.random().toString(36).substring(2, 10).toUpperCase();
+            const oldRef = tx.reference;
+            tx.reference = `TXN-${txDateStr}-${random}`;
+            updatedCount++;
+            console.log(`[CustodyStore] 🔄 Referencia regenerada: ${oldRef} → ${tx.reference}`);
+          }
+        });
+      }
+    });
+
+    if (updatedCount > 0) {
+      this.saveAccounts(accounts);
+      console.log(`[CustodyStore] ✅ ${updatedCount} referencias regeneradas forzosamente`);
+    }
+
+    return updatedCount;
+  }
+
+  /**
    * Obtener cuenta por ID
    */
   getAccountById(id: string): CustodyAccount | null {
