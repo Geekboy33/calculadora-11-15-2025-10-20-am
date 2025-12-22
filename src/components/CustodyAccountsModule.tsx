@@ -21,11 +21,19 @@ import {
   TrendingUp,
   Database,
   DollarSign,
-  Building2
+  Building2,
+  PlusCircle,
+  History,
+  Calendar,
+  Clock,
+  FileText,
+  Banknote,
+  ArrowDownCircle,
+  ArrowUpCircle
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
-import { custodyStore, type CustodyAccount } from '../lib/custody-store';
+import { custodyStore, type CustodyAccount, type CustodyTransaction, type AccountCategory } from '../lib/custody-store';
 import { CustodyBlackScreen } from './CustodyBlackScreen';
 import { apiVUSD1Store } from '../lib/api-vusd1-store';
 import { transactionEventStore } from '../lib/transaction-event-store';
@@ -58,9 +66,19 @@ export function CustodyAccountsModule() {
   const containerRef = useRef<HTMLDivElement>(null);
   const accountsListRef = useRef<HTMLDivElement>(null);
 
+  // Tipos de cuenta disponibles
+  const ACCOUNT_CATEGORIES = [
+    { id: 'custody', nameEs: 'Cuenta Custodio', nameEn: 'Custody Account' },
+    { id: 'savings', nameEs: 'Cuenta de Ahorros', nameEn: 'Savings Account' },
+    { id: 'checking', nameEs: 'Cuenta Corriente', nameEn: 'Checking Account' },
+    { id: 'nostro', nameEs: 'Cuenta Nostro', nameEn: 'Nostro Account' },
+    { id: 'margin', nameEs: 'Cuenta de Margen', nameEn: 'Margin Account' },
+  ];
+
   // Formulario de creación
   const [formData, setFormData] = useState({
     accountType: 'blockchain' as 'blockchain' | 'banking',
+    accountCategory: 'custody' as 'custody' | 'savings' | 'checking' | 'nostro' | 'margin',
     accountName: '',
     currency: 'USD',
     amount: 0,
@@ -68,8 +86,26 @@ export function CustodyAccountsModule() {
     tokenSymbol: '',
     contractAddress: '',
     bankName: 'DAES - Data and Exchange Settlement',
-    fundDenomination: 'M1' as 'M1' | 'M2', // Denominación de fondos
+    fundDenomination: 'M1' as 'M1' | 'M2',
+    customAccountNumber: '', // Número de cuenta manual opcional
   });
+
+  // Modal para agregar fondos
+  const [showAddFundsModal, setShowAddFundsModal] = useState(false);
+  const [addFundsData, setAddFundsData] = useState({
+    amount: 0,
+    type: 'deposit' as 'deposit' | 'transfer_in' | 'adjustment',
+    description: '',
+    sourceAccount: '',
+    sourceBank: '',
+    transactionDate: new Date().toISOString().split('T')[0],
+    transactionTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
+    valueDate: new Date().toISOString().split('T')[0],
+    notes: '',
+  });
+
+  // Modal para historial de transacciones
+  const [showTransactionHistory, setShowTransactionHistory] = useState(false);
 
 
   // Formulario de reserva
@@ -156,16 +192,64 @@ export function CustodyAccountsModule() {
   };
 
   // Crear cuenta custodio
+  // Función para agregar fondos a cuenta existente
+  const handleAddFunds = () => {
+    if (!selectedAccount || addFundsData.amount <= 0) {
+      alert(isSpanish ? 'Ingrese un monto válido' : 'Enter a valid amount');
+      return;
+    }
+
+    const transaction = custodyStore.addFundsWithTransaction(selectedAccount.id, {
+      amount: addFundsData.amount,
+      type: addFundsData.type,
+      description: addFundsData.description || (isSpanish ? 'Ingreso de fondos' : 'Funds deposit'),
+      sourceAccount: addFundsData.sourceAccount,
+      sourceBank: addFundsData.sourceBank,
+      transactionDate: addFundsData.transactionDate,
+      transactionTime: addFundsData.transactionTime + ':00',
+      valueDate: addFundsData.valueDate,
+      notes: addFundsData.notes,
+      createdBy: 'OPERATOR'
+    });
+
+    if (transaction) {
+      alert(isSpanish 
+        ? `✅ Fondos agregados exitosamente\nReferencia: ${transaction.reference}` 
+        : `✅ Funds added successfully\nReference: ${transaction.reference}`
+      );
+      setShowAddFundsModal(false);
+      setAddFundsData({
+        amount: 0,
+        type: 'deposit',
+        description: '',
+        sourceAccount: '',
+        sourceBank: '',
+        transactionDate: new Date().toISOString().split('T')[0],
+        transactionTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
+        valueDate: new Date().toISOString().split('T')[0],
+        notes: '',
+      });
+    } else {
+      alert(isSpanish ? '❌ Error al agregar fondos' : '❌ Error adding funds');
+    }
+  };
+
+  // Obtener nombre de categoría de cuenta
+  const getAccountCategoryName = (category: string) => {
+    const cat = ACCOUNT_CATEGORIES.find(c => c.id === category);
+    return cat ? (isSpanish ? cat.nameEs : cat.nameEn) : category;
+  };
+
   const handleCreateAccount = () => {
     if (!formData.accountName || formData.amount <= 0) {
-      alert('Completa todos los campos');
+      alert(isSpanish ? 'Completa todos los campos' : 'Complete all fields');
       return;
     }
 
     // Verificar que hay fondos disponibles
     const balance = systemBalances.find(b => b.currency === formData.currency);
     if (!balance || balance.totalAmount < formData.amount) {
-      alert('Fondos insuficientes en el sistema DAES');
+      alert(isSpanish ? 'Fondos insuficientes en el sistema DAES' : 'Insufficient funds in DAES system');
       return;
     }
 
@@ -176,7 +260,7 @@ export function CustodyAccountsModule() {
     console.log(`  Balance DAES ANTES: ${formData.currency} ${balanceBefore.toLocaleString()}`);
     console.log(`  Monto a transferir: ${formData.currency} ${formData.amount.toLocaleString()}`);
     console.log(`  Balance DAES DESPUÉS: ${formData.currency} ${(balanceBefore - formData.amount).toLocaleString()}`);
-    console.log(`  Destino: Cuenta Custodio (${formData.accountType})`);
+    console.log(`  Destino: Cuenta Custodio (${formData.accountType}) - ${formData.accountCategory}`);
     
     custodyStore.createAccount(
       formData.accountType,
@@ -187,12 +271,15 @@ export function CustodyAccountsModule() {
       tokenSymbol,
       formData.bankName,
       formData.contractAddress || undefined,
-      formData.fundDenomination
+      formData.fundDenomination,
+      formData.accountCategory as AccountCategory,
+      formData.customAccountNumber || undefined
     );
 
     setShowCreateModal(false);
     setFormData({ 
       accountType: 'blockchain', 
+      accountCategory: 'custody',
       accountName: '', 
       currency: 'USD', 
       amount: 0, 
@@ -201,6 +288,7 @@ export function CustodyAccountsModule() {
       contractAddress: '',
       bankName: 'DAES - Data and Exchange Settlement',
       fundDenomination: 'M1',
+      customAccountNumber: '',
     });
     
     // Mostrar mensaje de confirmación
@@ -773,6 +861,11 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     }`}>
                       {(account.accountType || 'blockchain') === 'blockchain' ? 'BLOCKCHAIN CUSTODY' : 'BANKING ACCOUNT'}
                     </span>
+                    {account.accountCategory && (
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 border border-purple-500/40 text-purple-400">
+                        {getAccountCategoryName(account.accountCategory)}
+                      </span>
+                    )}
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                       account.apiStatus === 'active' ? 'bg-white/20/20 text-black' :
                       account.apiStatus === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
@@ -801,6 +894,28 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   >
                     <Shield className="w-4 h-4 inline mr-1" />
                     {language === 'es' ? 'Ver Verificación' : 'View Verification'}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedAccount(account);
+                      setShowAddFundsModal(true);
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:shadow-[0_0_15px_rgba(16,185,129,0.6)] transition-all text-sm font-bold"
+                  >
+                    <PlusCircle className="w-4 h-4 inline mr-1" />
+                    {language === 'es' ? '+ Fondos' : '+ Funds'}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedAccount(account);
+                      setShowTransactionHistory(true);
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-[0_0_15px_rgba(59,130,246,0.6)] transition-all text-sm font-bold"
+                  >
+                    <History className="w-4 h-4 inline mr-1" />
+                    {language === 'es' ? 'Historial' : 'History'}
                   </button>
                   <button
                     onClick={(e) => {
@@ -1382,6 +1497,52 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono focus:outline-none focus:border-[#ffffff]/50"
                     placeholder="0.00"
                   />
+                </div>
+              </div>
+
+              {/* Selector de Categoría de Cuenta */}
+              <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg p-4">
+                <label className="text-sm text-purple-400 mb-3 block font-semibold flex items-center gap-2">
+                  <Banknote className="w-4 h-4" />
+                  {language === 'es' ? 'Categoría de Cuenta' : 'Account Category'}
+                </label>
+                <div className="grid grid-cols-5 gap-2">
+                  {ACCOUNT_CATEGORIES.map(cat => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setFormData({...formData, accountCategory: cat.id as AccountCategory})}
+                      className={`p-3 rounded-lg border-2 transition-all text-center ${
+                        formData.accountCategory === cat.id
+                          ? 'border-purple-500 bg-purple-500/20'
+                          : 'border-[#1a1a1a] bg-[#0a0a0a] hover:border-purple-500/30'
+                      }`}
+                    >
+                      <div className={`text-xs font-bold ${formData.accountCategory === cat.id ? 'text-purple-300' : 'text-[#999]'}`}>
+                        {isSpanish ? cat.nameEs : cat.nameEn}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Número de Cuenta Manual (Opcional) */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-yellow-400" />
+                  {language === 'es' ? 'Número de Cuenta (Opcional)' : 'Account Number (Optional)'}
+                </label>
+                <input
+                  type="text"
+                  value={formData.customAccountNumber}
+                  onChange={e => setFormData({...formData, customAccountNumber: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono focus:outline-none focus:border-yellow-500/50"
+                  placeholder={language === 'es' ? 'Dejar vacío para generar automáticamente' : 'Leave empty to auto-generate'}
+                />
+                <div className="text-xs text-[#666] mt-1">
+                  {language === 'es' 
+                    ? '💡 Si desea un número específico, ingréselo aquí. De lo contrario se generará automáticamente.' 
+                    : '💡 If you want a specific number, enter it here. Otherwise it will be auto-generated.'}
                 </div>
               </div>
 
@@ -2349,6 +2510,254 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   {language === 'es' ? 'Cerrar' : 'Close'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Agregar Fondos */}
+      {showAddFundsModal && selectedAccount && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-emerald-500/50 rounded-2xl p-6 max-w-lg w-full shadow-[0_0_50px_rgba(16,185,129,0.3)]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                <PlusCircle className="w-6 h-6" />
+                {isSpanish ? 'Agregar Fondos' : 'Add Funds'}
+              </h3>
+              <button
+                onClick={() => setShowAddFundsModal(false)}
+                className="text-[#ffffff] hover:text-red-400 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="bg-[#0d0d0d] border border-emerald-500/30 rounded-lg p-4 mb-4">
+              <div className="text-sm text-[#999] mb-1">{isSpanish ? 'Cuenta destino:' : 'Destination account:'}</div>
+              <div className="text-lg font-bold text-[#ffffff]">{selectedAccount.accountName}</div>
+              <div className="text-sm text-emerald-400 font-mono">{selectedAccount.accountNumber || selectedAccount.id}</div>
+              <div className="text-sm text-[#666] mt-2">
+                {isSpanish ? 'Balance actual:' : 'Current balance:'} {selectedAccount.currency} {selectedAccount.totalBalance.toLocaleString()}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Tipo de transacción */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Tipo de Transacción' : 'Transaction Type'}
+                </label>
+                <select
+                  value={addFundsData.type}
+                  onChange={e => setAddFundsData({...addFundsData, type: e.target.value as 'deposit' | 'transfer_in' | 'adjustment'})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="deposit">{isSpanish ? 'Depósito' : 'Deposit'}</option>
+                  <option value="transfer_in">{isSpanish ? 'Transferencia Entrante' : 'Incoming Transfer'}</option>
+                  <option value="adjustment">{isSpanish ? 'Ajuste Contable' : 'Accounting Adjustment'}</option>
+                </select>
+              </div>
+
+              {/* Monto */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Monto' : 'Amount'} ({selectedAccount.currency})
+                </label>
+                <input
+                  type="number"
+                  value={addFundsData.amount || ''}
+                  onChange={e => setAddFundsData({...addFundsData, amount: parseFloat(e.target.value) || 0})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono text-xl focus:outline-none focus:border-emerald-500"
+                  placeholder="0.00"
+                />
+              </div>
+
+              {/* Fecha y Hora */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block flex items-center gap-1">
+                    <Calendar className="w-4 h-4 text-emerald-400" />
+                    {isSpanish ? 'Fecha' : 'Date'}
+                  </label>
+                  <input
+                    type="date"
+                    value={addFundsData.transactionDate}
+                    onChange={e => setAddFundsData({...addFundsData, transactionDate: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block flex items-center gap-1">
+                    <Clock className="w-4 h-4 text-emerald-400" />
+                    {isSpanish ? 'Hora' : 'Time'}
+                  </label>
+                  <input
+                    type="time"
+                    value={addFundsData.transactionTime}
+                    onChange={e => setAddFundsData({...addFundsData, transactionTime: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              {/* Cuenta origen y banco */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block">
+                    {isSpanish ? 'Cuenta Origen' : 'Source Account'}
+                  </label>
+                  <input
+                    type="text"
+                    value={addFundsData.sourceAccount}
+                    onChange={e => setAddFundsData({...addFundsData, sourceAccount: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                    placeholder={isSpanish ? 'Número de cuenta' : 'Account number'}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block">
+                    {isSpanish ? 'Banco Origen' : 'Source Bank'}
+                  </label>
+                  <input
+                    type="text"
+                    value={addFundsData.sourceBank}
+                    onChange={e => setAddFundsData({...addFundsData, sourceBank: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                    placeholder={isSpanish ? 'Nombre del banco' : 'Bank name'}
+                  />
+                </div>
+              </div>
+
+              {/* Descripción */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Descripción' : 'Description'}
+                </label>
+                <input
+                  type="text"
+                  value={addFundsData.description}
+                  onChange={e => setAddFundsData({...addFundsData, description: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                  placeholder={isSpanish ? 'Concepto del depósito' : 'Deposit concept'}
+                />
+              </div>
+
+              {/* Notas */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Notas adicionales' : 'Additional notes'}
+                </label>
+                <textarea
+                  value={addFundsData.notes}
+                  onChange={e => setAddFundsData({...addFundsData, notes: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500 h-20 resize-none"
+                  placeholder={isSpanish ? 'Información adicional...' : 'Additional information...'}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAddFundsModal(false)}
+                className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#333] text-[#ffffff] rounded-lg hover:bg-[#222] transition-colors"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleAddFunds}
+                disabled={addFundsData.amount <= 0}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-500 hover:to-green-500 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <ArrowDownCircle className="w-5 h-5" />
+                {isSpanish ? 'Agregar Fondos' : 'Add Funds'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Historial de Transacciones */}
+      {showTransactionHistory && selectedAccount && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-blue-500/50 rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-[0_0_50px_rgba(59,130,246,0.3)]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-blue-400 flex items-center gap-2">
+                <History className="w-6 h-6" />
+                {isSpanish ? 'Historial de Transacciones' : 'Transaction History'}
+              </h3>
+              <button
+                onClick={() => setShowTransactionHistory(false)}
+                className="text-[#ffffff] hover:text-red-400 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="bg-[#0d0d0d] border border-blue-500/30 rounded-lg p-4 mb-4">
+              <div className="text-lg font-bold text-[#ffffff]">{selectedAccount.accountName}</div>
+              <div className="text-sm text-blue-400 font-mono">{selectedAccount.accountNumber || selectedAccount.id}</div>
+              <div className="text-sm text-[#666] mt-1">
+                {isSpanish ? 'Balance actual:' : 'Current balance:'} {selectedAccount.currency} {selectedAccount.totalBalance.toLocaleString()}
+              </div>
+            </div>
+
+            <div className="overflow-y-auto max-h-[50vh]">
+              {selectedAccount.transactions && selectedAccount.transactions.length > 0 ? (
+                <table className="w-full text-sm">
+                  <thead className="bg-blue-900/30 text-blue-300 sticky top-0">
+                    <tr>
+                      <th className="px-3 py-2 text-left">{isSpanish ? 'Fecha' : 'Date'}</th>
+                      <th className="px-3 py-2 text-left">{isSpanish ? 'Hora' : 'Time'}</th>
+                      <th className="px-3 py-2 text-left">{isSpanish ? 'Tipo' : 'Type'}</th>
+                      <th className="px-3 py-2 text-left">{isSpanish ? 'Descripción' : 'Description'}</th>
+                      <th className="px-3 py-2 text-right">{isSpanish ? 'Monto' : 'Amount'}</th>
+                      <th className="px-3 py-2 text-right">{isSpanish ? 'Balance' : 'Balance'}</th>
+                      <th className="px-3 py-2 text-left">{isSpanish ? 'Referencia' : 'Reference'}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...selectedAccount.transactions].reverse().map((tx, idx) => (
+                      <tr key={tx.id} className={`border-b border-[#1a1a1a] ${idx % 2 === 0 ? 'bg-[#0a0a0a]' : 'bg-[#0d0d0d]'}`}>
+                        <td className="px-3 py-3 text-[#ffffff]">{tx.transactionDate}</td>
+                        <td className="px-3 py-3 text-[#999]">{tx.transactionTime}</td>
+                        <td className="px-3 py-3">
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${
+                            tx.type === 'deposit' || tx.type === 'transfer_in' || tx.type === 'initial' 
+                              ? 'bg-emerald-500/20 text-emerald-400'
+                              : tx.type === 'withdrawal' || tx.type === 'transfer_out'
+                              ? 'bg-red-500/20 text-red-400'
+                              : 'bg-blue-500/20 text-blue-400'
+                          }`}>
+                            {tx.type.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-[#999] max-w-[200px] truncate">{tx.description}</td>
+                        <td className={`px-3 py-3 text-right font-mono font-bold ${tx.amount >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {tx.amount >= 0 ? '+' : ''}{selectedAccount.currency} {Math.abs(tx.amount).toLocaleString()}
+                        </td>
+                        <td className="px-3 py-3 text-right font-mono text-[#ffffff]">
+                          {selectedAccount.currency} {tx.balanceAfter.toLocaleString()}
+                        </td>
+                        <td className="px-3 py-3 text-[#666] font-mono text-xs">{tx.reference}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="text-center py-12 text-[#666]">
+                  <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>{isSpanish ? 'No hay transacciones registradas' : 'No transactions recorded'}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowTransactionHistory(false)}
+                className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#333] text-[#ffffff] rounded-lg hover:bg-[#222] transition-colors"
+              >
+                {isSpanish ? 'Cerrar' : 'Close'}
+              </button>
             </div>
           </div>
         </div>

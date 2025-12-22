@@ -9,14 +9,42 @@ import { vusdCapStore } from './vusd-cap-store';
 import { daesPledgeStore } from './daes-pledge-store';
 import { transactionEventStore } from './transaction-event-store';
 
+// Tipo de transacción para historial de movimientos
+export interface CustodyTransaction {
+  id: string;
+  type: 'deposit' | 'withdrawal' | 'transfer_in' | 'transfer_out' | 'initial' | 'adjustment';
+  amount: number;
+  currency: string;
+  balanceAfter: number;
+  description: string;
+  reference: string;
+  sourceAccount?: string; // Cuenta origen (para ingresos)
+  sourceBank?: string; // Banco origen
+  destinationAccount?: string; // Cuenta destino (para egresos)
+  destinationBank?: string; // Banco destino
+  transactionDate: string; // Fecha de la transacción (puede ser manual)
+  transactionTime: string; // Hora de la transacción (puede ser manual)
+  createdAt: string; // Fecha real de registro en el sistema
+  createdBy: string; // Usuario que registró
+  status: 'pending' | 'completed' | 'cancelled' | 'reversed';
+  valueDate: string; // Fecha valor
+  notes?: string;
+}
+
+// Categoría de cuenta bancaria
+export type AccountCategory = 'custody' | 'savings' | 'checking' | 'nostro' | 'margin';
+
 export interface CustodyAccount {
   id: string;
   accountType: 'blockchain' | 'banking'; // NUEVO: Tipo de cuenta
+  accountCategory: AccountCategory; // Categoría: Custodio, Ahorros, Corriente, Nostro, Margen
   accountName: string;
   currency: string;
   reservedBalance: number;
   availableBalance: number;
   totalBalance: number;
+  // Historial de transacciones
+  transactions: CustodyTransaction[];
   // Fund Denomination (M1/M2)
   fundDenomination: 'M1' | 'M2'; // M1 = Liquid Cash, M2 = Near Money
   // Blockchain fields (si accountType = 'blockchain')
@@ -205,6 +233,16 @@ class CustodyStore {
   }
 
   /**
+   * Generar número de referencia único para transacciones
+   */
+  generateTransactionReference(): string {
+    const date = new Date();
+    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+    const random = Math.random().toString(36).substring(2, 10).toUpperCase();
+    return `TXN-${dateStr}-${random}`;
+  }
+
+  /**
    * Crear nueva cuenta custodio (BLOCKCHAIN o BANKING)
    */
   createAccount(
@@ -216,7 +254,9 @@ class CustodyStore {
     tokenSymbol?: string,
     bankName?: string,
     contractAddress?: string,
-    fundDenomination: 'M1' | 'M2' = 'M1'
+    fundDenomination: 'M1' | 'M2' = 'M1',
+    accountCategory: AccountCategory = 'custody',
+    customAccountNumber?: string // Número de cuenta manual opcional
   ): CustodyAccount {
     // 🔢 GENERAR NÚMERO DE CUENTA SECUENCIAL ISO BANCARIO
     const generatedAccountNumber = this.getNextAccountNumber(accountType, currency);
@@ -242,14 +282,38 @@ class CustodyStore {
     // Determinar nombre del tipo para display
     const accountTypeDisplay = accountType === 'blockchain' ? 'BLOCKCHAIN CUSTODY' : 'BANKING ACCOUNT';
     
+    // Usar número de cuenta personalizado o generado
+    const finalAccountNumber = customAccountNumber || generatedAccountNumber;
+    
+    // Crear transacción inicial
+    const now = new Date();
+    const initialTransaction: CustodyTransaction = {
+      id: `TXN-INIT-${Date.now()}`,
+      type: 'initial',
+      amount: balance,
+      currency,
+      balanceAfter: balance,
+      description: 'Initial deposit - Account opening',
+      reference: this.generateTransactionReference(),
+      transactionDate: now.toISOString().split('T')[0],
+      transactionTime: now.toTimeString().split(' ')[0],
+      createdAt: now.toISOString(),
+      createdBy: 'SYSTEM',
+      status: 'completed',
+      valueDate: now.toISOString().split('T')[0],
+      notes: `Account created with initial balance of ${currency} ${balance.toLocaleString()}`
+    };
+    
     const account: CustodyAccount = {
       id,
       accountType,
+      accountCategory, // Custodio, Ahorros, Corriente, Nostro, Margen
       accountName,
       currency,
       reservedBalance: 0,
       availableBalance: balance, // Incluye todo el balance (reservado + libre)
       totalBalance: balance,
+      transactions: [initialTransaction], // Historial de transacciones
       fundDenomination, // M1 = Liquid Cash, M2 = Near Money
       encryptedData,
       verificationHash,
@@ -281,7 +345,7 @@ class CustodyStore {
       // Usar contractAddress proporcionado o dejar vacío para ingreso manual
       account.contractAddress = contractAddress || '';
       account.tokenSymbol = tokenSymbol || `${currency}T`;
-      account.accountNumber = generatedAccountNumber; // Número secuencial
+      account.accountNumber = finalAccountNumber; // Número secuencial o personalizado
     } else {
       account.bankName = bankName || 'DAES - Data and Exchange Settlement';
       account.iban = this.generateIBAN(currency);
@@ -944,6 +1008,223 @@ class CustodyStore {
     });
     
     return true;
+  }
+
+  /**
+   * Agregar fondos con transacción completa (fecha/hora manual, cuenta origen, etc.)
+   * @param accountId - ID de la cuenta destino
+   * @param transactionData - Datos completos de la transacción
+   * @returns La transacción creada o null si hubo error
+   */
+  addFundsWithTransaction(
+    accountId: string,
+    transactionData: {
+      amount: number;
+      type: 'deposit' | 'transfer_in' | 'adjustment';
+      description: string;
+      sourceAccount?: string;
+      sourceBank?: string;
+      transactionDate: string; // YYYY-MM-DD
+      transactionTime: string; // HH:mm:ss
+      valueDate?: string;
+      notes?: string;
+      createdBy?: string;
+    }
+  ): CustodyTransaction | null {
+    const accounts = this.getAccounts();
+    const account = accounts.find(a => a.id === accountId);
+    
+    if (!account) {
+      console.error('[CustodyStore] ❌ Cuenta no encontrada:', accountId);
+      return null;
+    }
+    
+    if (transactionData.amount <= 0) {
+      console.error('[CustodyStore] ❌ El monto debe ser positivo');
+      return null;
+    }
+    
+    const oldBalance = account.totalBalance;
+    const newBalance = oldBalance + transactionData.amount;
+    
+    // Crear la transacción
+    const transaction: CustodyTransaction = {
+      id: `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      type: transactionData.type,
+      amount: transactionData.amount,
+      currency: account.currency,
+      balanceAfter: newBalance,
+      description: transactionData.description,
+      reference: this.generateTransactionReference(),
+      sourceAccount: transactionData.sourceAccount,
+      sourceBank: transactionData.sourceBank,
+      transactionDate: transactionData.transactionDate,
+      transactionTime: transactionData.transactionTime,
+      createdAt: new Date().toISOString(),
+      createdBy: transactionData.createdBy || 'OPERATOR',
+      status: 'completed',
+      valueDate: transactionData.valueDate || transactionData.transactionDate,
+      notes: transactionData.notes
+    };
+    
+    // Actualizar balances de la cuenta
+    account.availableBalance = account.availableBalance + transactionData.amount;
+    account.totalBalance = newBalance;
+    account.lastUpdated = new Date().toISOString();
+    
+    // Agregar transacción al historial
+    if (!account.transactions) {
+      account.transactions = [];
+    }
+    account.transactions.push(transaction);
+    
+    // Guardar cambios
+    this.saveAccounts(accounts);
+    
+    // Registrar evento
+    transactionEventStore.recordBalanceIncrease(
+      accountId,
+      account.accountName,
+      transactionData.amount,
+      account.currency,
+      oldBalance,
+      newBalance
+    );
+    
+    console.log('[CustodyStore] ✅ Fondos agregados con transacción:', {
+      account: account.accountName,
+      amount: transactionData.amount,
+      currency: account.currency,
+      oldBalance,
+      newBalance,
+      transactionId: transaction.id,
+      date: transactionData.transactionDate,
+      time: transactionData.transactionTime
+    });
+    
+    return transaction;
+  }
+
+  /**
+   * Retirar fondos con transacción completa
+   * @param accountId - ID de la cuenta origen
+   * @param transactionData - Datos completos de la transacción
+   * @returns La transacción creada o null si hubo error
+   */
+  withdrawFundsWithTransaction(
+    accountId: string,
+    transactionData: {
+      amount: number;
+      type: 'withdrawal' | 'transfer_out';
+      description: string;
+      destinationAccount?: string;
+      destinationBank?: string;
+      transactionDate: string;
+      transactionTime: string;
+      valueDate?: string;
+      notes?: string;
+      createdBy?: string;
+    }
+  ): CustodyTransaction | null {
+    const accounts = this.getAccounts();
+    const account = accounts.find(a => a.id === accountId);
+    
+    if (!account) {
+      console.error('[CustodyStore] ❌ Cuenta no encontrada:', accountId);
+      return null;
+    }
+    
+    if (transactionData.amount <= 0) {
+      console.error('[CustodyStore] ❌ El monto debe ser positivo');
+      return null;
+    }
+    
+    if (transactionData.amount > account.availableBalance) {
+      console.error('[CustodyStore] ❌ Fondos insuficientes. Disponible:', account.availableBalance);
+      return null;
+    }
+    
+    const oldBalance = account.totalBalance;
+    const newBalance = oldBalance - transactionData.amount;
+    
+    // Crear la transacción
+    const transaction: CustodyTransaction = {
+      id: `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      type: transactionData.type,
+      amount: -transactionData.amount, // Negativo para retiros
+      currency: account.currency,
+      balanceAfter: newBalance,
+      description: transactionData.description,
+      reference: this.generateTransactionReference(),
+      destinationAccount: transactionData.destinationAccount,
+      destinationBank: transactionData.destinationBank,
+      transactionDate: transactionData.transactionDate,
+      transactionTime: transactionData.transactionTime,
+      createdAt: new Date().toISOString(),
+      createdBy: transactionData.createdBy || 'OPERATOR',
+      status: 'completed',
+      valueDate: transactionData.valueDate || transactionData.transactionDate,
+      notes: transactionData.notes
+    };
+    
+    // Actualizar balances de la cuenta
+    account.availableBalance = account.availableBalance - transactionData.amount;
+    account.totalBalance = newBalance;
+    account.lastUpdated = new Date().toISOString();
+    
+    // Agregar transacción al historial
+    if (!account.transactions) {
+      account.transactions = [];
+    }
+    account.transactions.push(transaction);
+    
+    // Guardar cambios
+    this.saveAccounts(accounts);
+    
+    // Registrar evento
+    transactionEventStore.recordBalanceDecrease(
+      accountId,
+      account.accountName,
+      transactionData.amount,
+      account.currency,
+      oldBalance,
+      newBalance
+    );
+    
+    console.log('[CustodyStore] ✅ Fondos retirados con transacción:', {
+      account: account.accountName,
+      amount: transactionData.amount,
+      currency: account.currency,
+      oldBalance,
+      newBalance,
+      transactionId: transaction.id
+    });
+    
+    return transaction;
+  }
+
+  /**
+   * Obtener historial de transacciones de una cuenta
+   */
+  getTransactionHistory(accountId: string): CustodyTransaction[] {
+    const account = this.getAccountById(accountId);
+    if (!account) return [];
+    return account.transactions || [];
+  }
+
+  /**
+   * Obtener transacciones por rango de fechas
+   */
+  getTransactionsByDateRange(
+    accountId: string,
+    startDate: string,
+    endDate: string
+  ): CustodyTransaction[] {
+    const transactions = this.getTransactionHistory(accountId);
+    return transactions.filter(t => {
+      const txDate = t.transactionDate;
+      return txDate >= startDate && txDate <= endDate;
+    });
   }
 
   /**

@@ -1293,8 +1293,74 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
       
       y += 58;
 
-      // 8. DECLARACIÓN OFICIAL
-      drawSection(isSpanish ? 'DECLARACIÓN OFICIAL DEL BANCO' : 'OFFICIAL BANK DECLARATION', 8);
+      // 8. HISTORIAL DE TRANSACCIONES
+      if (account.transactions && account.transactions.length > 0) {
+        // Nueva página para transacciones
+        pdf.addPage();
+        y = margin + 10;
+        
+        drawSection(isSpanish ? 'HISTORIAL DE MOVIMIENTOS' : 'TRANSACTION HISTORY', 8);
+        
+        const transactionRows = account.transactions.slice(-15).reverse().map((tx: any) => {
+          const typeLabels: Record<string, string> = {
+            initial: isSpanish ? 'Apertura' : 'Opening',
+            deposit: isSpanish ? 'Depósito' : 'Deposit',
+            withdrawal: isSpanish ? 'Retiro' : 'Withdrawal',
+            transfer_in: isSpanish ? 'Trans. Ent.' : 'Transfer In',
+            transfer_out: isSpanish ? 'Trans. Sal.' : 'Transfer Out',
+            adjustment: isSpanish ? 'Ajuste' : 'Adjustment'
+          };
+          
+          const typeLabel = typeLabels[tx.type] || tx.type;
+          const amount = tx.amount >= 0 ? `+${account.currency} ${Math.abs(tx.amount).toLocaleString()}` : `-${account.currency} ${Math.abs(tx.amount).toLocaleString()}`;
+          
+          return [
+            tx.transactionDate,
+            tx.transactionTime?.substring(0, 5) || '-',
+            typeLabel,
+            (tx.description || '-').substring(0, 25),
+            amount,
+            `${account.currency} ${tx.balanceAfter.toLocaleString()}`
+          ];
+        });
+        
+        if (transactionRows.length > 0) {
+          drawTable(
+            [
+              isSpanish ? 'Fecha' : 'Date',
+              isSpanish ? 'Hora' : 'Time',
+              isSpanish ? 'Tipo' : 'Type',
+              isSpanish ? 'Descripción' : 'Description',
+              isSpanish ? 'Monto' : 'Amount',
+              isSpanish ? 'Balance' : 'Balance'
+            ],
+            transactionRows,
+            [25, 16, 22, 45, 35, 37]
+          );
+        }
+        
+        // Info de transacciones
+        y += 3;
+        pdf.setFillColor(248, 250, 252);
+        pdf.roundedRect(margin, y, pageWidth - (margin * 2), 12, 1, 1, 'F');
+        pdf.setTextColor(...colors.gray);
+        pdf.setFontSize(6);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(isSpanish 
+          ? `Total transacciones: ${account.transactions.length} | Mostrando últimas 15 transacciones | Período: ${account.transactions[0]?.transactionDate || '-'} - ${account.transactions[account.transactions.length - 1]?.transactionDate || '-'}`
+          : `Total transactions: ${account.transactions.length} | Showing last 15 transactions | Period: ${account.transactions[0]?.transactionDate || '-'} - ${account.transactions[account.transactions.length - 1]?.transactionDate || '-'}`,
+          margin + 4, y + 7);
+        y += 18;
+      }
+
+      // Nueva página para declaración
+      if (y > pageHeight - 80) {
+        pdf.addPage();
+        y = margin + 10;
+      }
+
+      // 9. DECLARACIÓN OFICIAL
+      drawSection(isSpanish ? 'DECLARACIÓN OFICIAL DEL BANCO' : 'OFFICIAL BANK DECLARATION', account.transactions && account.transactions.length > 0 ? 9 : 8);
       
       y += 2;
       pdf.setFillColor(250, 251, 252);
