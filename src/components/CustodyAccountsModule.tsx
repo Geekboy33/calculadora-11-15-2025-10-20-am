@@ -29,7 +29,8 @@ import {
   FileText,
   Banknote,
   ArrowDownCircle,
-  ArrowUpCircle
+  ArrowUpCircle,
+  Edit
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
@@ -150,6 +151,13 @@ export function CustodyAccountsModule() {
 
   // Modal para transferencia entre cuentas custodio
   const [showTransferModal, setShowTransferModal] = useState(false);
+  
+  // Modal para editar nombre de cuenta
+  const [showEditNameModal, setShowEditNameModal] = useState(false);
+  const [editNameData, setEditNameData] = useState({
+    newName: '',
+  });
+  
   const [transferData, setTransferData] = useState({
     sourceAccountId: '',
     destinationAccountId: '',
@@ -295,6 +303,28 @@ export function CustodyAccountsModule() {
       });
     } else {
       alert(isSpanish ? '❌ Error al agregar fondos' : '❌ Error adding funds');
+    }
+  };
+
+  // Función para editar nombre de cuenta
+  const handleEditName = () => {
+    if (!selectedAccount || !editNameData.newName.trim()) {
+      alert(isSpanish ? 'Ingrese un nombre válido' : 'Enter a valid name');
+      return;
+    }
+
+    const success = custodyStore.updateAccountName(selectedAccount.id, editNameData.newName.trim());
+    
+    if (success) {
+      alert(isSpanish 
+        ? `✅ Nombre actualizado exitosamente\n\nNuevo nombre: ${editNameData.newName.trim()}` 
+        : `✅ Name updated successfully\n\nNew name: ${editNameData.newName.trim()}`
+      );
+      setShowEditNameModal(false);
+      setEditNameData({ newName: '' });
+      setSelectedAccount(null);
+    } else {
+      alert(isSpanish ? '❌ Error al actualizar el nombre' : '❌ Error updating name');
     }
   };
 
@@ -1212,6 +1242,18 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   >
                     <Shield className="w-4 h-4 inline mr-1" />
                     {language === 'es' ? 'Ver Verificación' : 'View Verification'}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedAccount(account);
+                      setEditNameData({ newName: account.accountName });
+                      setShowEditNameModal(true);
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:shadow-[0_0_15px_rgba(59,130,246,0.6)] transition-all text-sm font-bold"
+                  >
+                    <Edit className="w-4 h-4 inline mr-1" />
+                    {language === 'es' ? 'Editar' : 'Edit'}
                   </button>
                   <button
                     onClick={(e) => {
@@ -3492,6 +3534,93 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               >
                 <Banknote className="w-5 h-5" />
                 {isSpanish ? 'Transferir' : 'Transfer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Editar Nombre de Cuenta */}
+      {showEditNameModal && selectedAccount && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-blue-500/50 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(59,130,246,0.3)]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-blue-400 flex items-center gap-2">
+                <Edit className="w-6 h-6" />
+                {isSpanish ? 'Editar Nombre de Cuenta' : 'Edit Account Name'}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowEditNameModal(false);
+                  setEditNameData({ newName: '' });
+                }}
+                className="text-[#ffffff] hover:text-red-400 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Info de cuenta actual */}
+            <div className="bg-[#0d0d0d] border border-blue-500/30 rounded-lg p-4 mb-6">
+              <div className="text-sm text-[#999] mb-1">{isSpanish ? 'Cuenta seleccionada:' : 'Selected account:'}</div>
+              <div className="text-sm text-blue-400 font-mono">{selectedAccount.accountNumber || selectedAccount.id}</div>
+              <div className="text-xs text-[#666] mt-2">
+                {selectedAccount.currency} - {selectedAccount.accountCategory?.toUpperCase() || 'CUSTODY'}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Nombre actual */}
+              <div>
+                <label className="text-sm text-[#999] mb-2 block">
+                  {isSpanish ? 'Nombre Actual' : 'Current Name'}
+                </label>
+                <div className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#333] rounded-lg text-[#666] font-mono">
+                  {selectedAccount.accountName}
+                </div>
+              </div>
+
+              {/* Nuevo nombre */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Nuevo Nombre' : 'New Name'} *
+                </label>
+                <input
+                  type="text"
+                  value={editNameData.newName}
+                  onChange={e => setEditNameData({ newName: e.target.value })}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-blue-500/30 rounded-lg text-[#ffffff] focus:outline-none focus:border-blue-500"
+                  placeholder={isSpanish ? 'Ingrese el nuevo nombre' : 'Enter new name'}
+                  autoFocus
+                />
+              </div>
+
+              {/* Mensaje de ayuda */}
+              <div className="text-xs text-[#666] bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                💡 {isSpanish 
+                  ? 'El cambio de nombre se aplicará inmediatamente y se reflejará en todos los documentos y reportes.' 
+                  : 'The name change will be applied immediately and reflected in all documents and reports.'}
+              </div>
+            </div>
+
+            {/* Botones */}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowEditNameModal(false);
+                  setEditNameData({ newName: '' });
+                }}
+                className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#333] text-[#ffffff] rounded-lg hover:bg-[#2a2a2a] transition-all"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleEditName}
+                disabled={!editNameData.newName.trim() || editNameData.newName.trim() === selectedAccount.accountName}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-500 hover:to-cyan-500 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Check className="w-5 h-5" />
+                {isSpanish ? 'Guardar Cambios' : 'Save Changes'}
               </button>
             </div>
           </div>

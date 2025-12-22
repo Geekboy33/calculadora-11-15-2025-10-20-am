@@ -950,6 +950,41 @@ class CustodyStore {
   }
 
   /**
+   * Actualizar nombre de una cuenta
+   * @param accountId - ID de la cuenta
+   * @param newName - Nuevo nombre de la cuenta
+   * @returns true si fue exitoso, false si hubo error
+   */
+  updateAccountName(accountId: string, newName: string): boolean {
+    if (!newName || newName.trim().length === 0) {
+      console.error('[CustodyStore] ❌ El nombre no puede estar vacío');
+      return false;
+    }
+
+    const accounts = this.getAccounts();
+    const account = accounts.find(a => a.id === accountId);
+    
+    if (!account) {
+      console.error('[CustodyStore] Cuenta no encontrada:', accountId);
+      return false;
+    }
+    
+    const oldName = account.accountName;
+    account.accountName = newName.trim();
+    account.lastUpdated = new Date().toISOString();
+    
+    this.saveAccounts(accounts);
+    
+    console.log('[CustodyStore] ✅ Nombre de cuenta actualizado:', {
+      accountId,
+      oldName,
+      newName: account.accountName
+    });
+    
+    return true;
+  }
+
+  /**
    * Actualizar balance de forma relativa (sumar o restar)
    * @param accountId - ID de la cuenta
    * @param amount - Monto a agregar (positivo) o restar (negativo)
