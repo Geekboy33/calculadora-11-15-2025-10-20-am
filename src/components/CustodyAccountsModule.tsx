@@ -130,6 +130,32 @@ export function CustodyAccountsModule() {
   // Modal para historial de transacciones
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
 
+  // Modal para retiro de fondos
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawData, setWithdrawData] = useState({
+    amount: 0,
+    type: 'withdrawal' as 'withdrawal' | 'transfer_out',
+    description: '',
+    destinationAccount: '',
+    destinationBank: '',
+    transactionDate: new Date().toISOString().split('T')[0],
+    transactionTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
+    valueDate: new Date().toISOString().split('T')[0],
+    notes: '',
+  });
+
+  // Modal para transferencia entre cuentas custodio
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [transferData, setTransferData] = useState({
+    sourceAccountId: '',
+    destinationAccountId: '',
+    amount: 0,
+    description: '',
+    transactionDate: new Date().toISOString().split('T')[0],
+    transactionTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
+    notes: '',
+  });
+
 
   // Formulario de reserva
   const [reserveData, setReserveData] = useState({
@@ -265,6 +291,142 @@ export function CustodyAccountsModule() {
       });
     } else {
       alert(isSpanish ? '❌ Error al agregar fondos' : '❌ Error adding funds');
+    }
+  };
+
+  // Función para retirar fondos de cuenta existente
+  const handleWithdraw = () => {
+    if (!selectedAccount || withdrawData.amount <= 0) {
+      alert(isSpanish ? 'Ingrese un monto válido' : 'Enter a valid amount');
+      return;
+    }
+
+    if (withdrawData.amount > selectedAccount.availableBalance) {
+      alert(isSpanish 
+        ? `Fondos insuficientes. Disponible: ${selectedAccount.currency} ${selectedAccount.availableBalance.toLocaleString()}` 
+        : `Insufficient funds. Available: ${selectedAccount.currency} ${selectedAccount.availableBalance.toLocaleString()}`
+      );
+      return;
+    }
+
+    const transaction = custodyStore.withdrawFundsWithTransaction(selectedAccount.id, {
+      amount: withdrawData.amount,
+      type: withdrawData.type,
+      description: withdrawData.description || (isSpanish ? 'Retiro de fondos' : 'Funds withdrawal'),
+      destinationAccount: withdrawData.destinationAccount,
+      destinationBank: withdrawData.destinationBank,
+      transactionDate: withdrawData.transactionDate,
+      transactionTime: withdrawData.transactionTime + ':00',
+      valueDate: withdrawData.valueDate,
+      notes: withdrawData.notes,
+      createdBy: 'OPERATOR'
+    });
+
+    if (transaction) {
+      alert(isSpanish 
+        ? `✅ Retiro procesado exitosamente\nReferencia: ${transaction.reference}\nMonto: ${selectedAccount.currency} ${withdrawData.amount.toLocaleString()}` 
+        : `✅ Withdrawal processed successfully\nReference: ${transaction.reference}\nAmount: ${selectedAccount.currency} ${withdrawData.amount.toLocaleString()}`
+      );
+      setShowWithdrawModal(false);
+      setWithdrawData({
+        amount: 0,
+        type: 'withdrawal',
+        description: '',
+        destinationAccount: '',
+        destinationBank: '',
+        transactionDate: new Date().toISOString().split('T')[0],
+        transactionTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
+        valueDate: new Date().toISOString().split('T')[0],
+        notes: '',
+      });
+    } else {
+      alert(isSpanish ? '❌ Error al procesar retiro' : '❌ Error processing withdrawal');
+    }
+  };
+
+  // Función para transferir entre cuentas custodio
+  const handleTransferBetweenAccounts = () => {
+    if (!transferData.sourceAccountId || !transferData.destinationAccountId) {
+      alert(isSpanish ? 'Seleccione cuenta origen y destino' : 'Select source and destination accounts');
+      return;
+    }
+
+    if (transferData.sourceAccountId === transferData.destinationAccountId) {
+      alert(isSpanish ? 'Las cuentas origen y destino deben ser diferentes' : 'Source and destination accounts must be different');
+      return;
+    }
+
+    if (transferData.amount <= 0) {
+      alert(isSpanish ? 'Ingrese un monto válido' : 'Enter a valid amount');
+      return;
+    }
+
+    const sourceAccount = custodyAccounts.find(a => a.id === transferData.sourceAccountId);
+    const destAccount = custodyAccounts.find(a => a.id === transferData.destinationAccountId);
+
+    if (!sourceAccount || !destAccount) {
+      alert(isSpanish ? 'Cuenta no encontrada' : 'Account not found');
+      return;
+    }
+
+    if (transferData.amount > sourceAccount.availableBalance) {
+      alert(isSpanish 
+        ? `Fondos insuficientes en cuenta origen. Disponible: ${sourceAccount.currency} ${sourceAccount.availableBalance.toLocaleString()}` 
+        : `Insufficient funds in source account. Available: ${sourceAccount.currency} ${sourceAccount.availableBalance.toLocaleString()}`
+      );
+      return;
+    }
+
+    // Retirar de cuenta origen
+    const withdrawTx = custodyStore.withdrawFundsWithTransaction(sourceAccount.id, {
+      amount: transferData.amount,
+      type: 'transfer_out',
+      description: `${isSpanish ? 'Transferencia a' : 'Transfer to'}: ${destAccount.accountName}`,
+      destinationAccount: destAccount.accountNumber || destAccount.id,
+      destinationBank: 'DAES Internal',
+      transactionDate: transferData.transactionDate,
+      transactionTime: transferData.transactionTime + ':00',
+      valueDate: transferData.transactionDate,
+      notes: transferData.notes,
+      createdBy: 'OPERATOR'
+    });
+
+    if (!withdrawTx) {
+      alert(isSpanish ? '❌ Error al debitar cuenta origen' : '❌ Error debiting source account');
+      return;
+    }
+
+    // Depositar en cuenta destino
+    const depositTx = custodyStore.addFundsWithTransaction(destAccount.id, {
+      amount: transferData.amount,
+      type: 'transfer_in',
+      description: `${isSpanish ? 'Transferencia desde' : 'Transfer from'}: ${sourceAccount.accountName}`,
+      sourceAccount: sourceAccount.accountNumber || sourceAccount.id,
+      sourceBank: 'DAES Internal',
+      transactionDate: transferData.transactionDate,
+      transactionTime: transferData.transactionTime + ':00',
+      valueDate: transferData.transactionDate,
+      notes: transferData.notes,
+      createdBy: 'OPERATOR'
+    });
+
+    if (depositTx) {
+      alert(isSpanish 
+        ? `✅ Transferencia completada\n\nOrigen: ${sourceAccount.accountName}\nDestino: ${destAccount.accountName}\nMonto: ${sourceAccount.currency} ${transferData.amount.toLocaleString()}\n\nRef. Débito: ${withdrawTx.reference}\nRef. Crédito: ${depositTx.reference}` 
+        : `✅ Transfer completed\n\nFrom: ${sourceAccount.accountName}\nTo: ${destAccount.accountName}\nAmount: ${sourceAccount.currency} ${transferData.amount.toLocaleString()}\n\nDebit Ref: ${withdrawTx.reference}\nCredit Ref: ${depositTx.reference}`
+      );
+      setShowTransferModal(false);
+      setTransferData({
+        sourceAccountId: '',
+        destinationAccountId: '',
+        amount: 0,
+        description: '',
+        transactionDate: new Date().toISOString().split('T')[0],
+        transactionTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
+        notes: '',
+      });
+    } else {
+      alert(isSpanish ? '❌ Error al acreditar cuenta destino' : '❌ Error crediting destination account');
     }
   };
 
@@ -1051,8 +1213,19 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     }}
                     className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:shadow-[0_0_15px_rgba(16,185,129,0.6)] transition-all text-sm font-bold"
                   >
-                    <PlusCircle className="w-4 h-4 inline mr-1" />
+                    <ArrowDownCircle className="w-4 h-4 inline mr-1" />
                     {language === 'es' ? '+ Fondos' : '+ Funds'}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedAccount(account);
+                      setShowWithdrawModal(true);
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:shadow-[0_0_15px_rgba(249,115,22,0.6)] transition-all text-sm font-bold"
+                  >
+                    <ArrowUpCircle className="w-4 h-4 inline mr-1" />
+                    {language === 'es' ? '- Retiro' : '- Withdraw'}
                   </button>
                   <button
                     onClick={(e) => {
@@ -1486,29 +1659,59 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
           ))}
         </div>
 
-        {/* Botón para Crear Más Cuentas */}
-        <div className="mt-6 bg-gradient-to-r from-[#0d0d0d] to-black border-2 border-[#ffffff]/30 rounded-xl p-6 text-center">
-          <div className="mb-4">
-            <h3 className="text-lg font-bold text-[#ffffff] mb-2">
-              {language === 'es' ? '✨ Crear Nueva Cuenta Custodio' : '✨ Create New Custody Account'}
-            </h3>
-            <p className="text-sm text-[#ffffff]">
-              {language === 'es' 
-                ? 'Agrega más cuentas blockchain o bancarias para gestionar fondos adicionales'
-                : 'Add more blockchain or banking accounts to manage additional funds'}
-            </p>
+        {/* Acciones Rápidas */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Botón para Transferencia entre Cuentas */}
+          <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-2 border-purple-500/30 rounded-xl p-6 text-center">
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-purple-400 mb-2">
+                {language === 'es' ? '🔄 Transferir entre Cuentas' : '🔄 Transfer Between Accounts'}
+              </h3>
+              <p className="text-sm text-[#999]">
+                {language === 'es' 
+                  ? 'Mueve fondos entre tus cuentas custodio creadas'
+                  : 'Move funds between your custody accounts'}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowTransferModal(true)}
+              disabled={custodyAccounts.length < 2}
+              className="px-8 py-4 bg-gradient-to-br from-purple-600 to-pink-600 text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] transition-all text-lg flex items-center gap-3 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Banknote className="w-6 h-6" />
+              {language === 'es' ? 'Transferir Fondos' : 'Transfer Funds'}
+            </button>
+            {custodyAccounts.length < 2 && (
+              <p className="text-xs text-yellow-500 mt-2">
+                {language === 'es' ? '⚠️ Necesitas al menos 2 cuentas' : '⚠️ You need at least 2 accounts'}
+              </p>
+            )}
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-8 py-4 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(255, 255, 255,0.8)] transition-all text-lg flex items-center gap-3 mx-auto"
-          >
-            <Plus className="w-6 h-6" />
-            {language === 'es' ? 'Crear Otra Cuenta Custodio' : 'Create Another Custody Account'}
-          </button>
-          <div className="mt-3 text-xs text-[#ffffff]">
-            {language === 'es' 
-              ? `Total de cuentas activas: ${custodyAccounts.length}` 
-              : `Total active accounts: ${custodyAccounts.length}`}
+
+          {/* Botón para Crear Más Cuentas */}
+          <div className="bg-gradient-to-r from-[#0d0d0d] to-black border-2 border-[#ffffff]/30 rounded-xl p-6 text-center">
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-[#ffffff] mb-2">
+                {language === 'es' ? '✨ Crear Nueva Cuenta Custodio' : '✨ Create New Custody Account'}
+              </h3>
+              <p className="text-sm text-[#999]">
+                {language === 'es' 
+                  ? 'Agrega más cuentas blockchain o bancarias'
+                  : 'Add more blockchain or banking accounts'}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-8 py-4 bg-gradient-to-br from-[#ffffff] to-[#e0e0e0] text-black font-bold rounded-lg hover:shadow-[0_0_30px_rgba(255, 255, 255,0.8)] transition-all text-lg flex items-center gap-3 mx-auto"
+            >
+              <Plus className="w-6 h-6" />
+              {language === 'es' ? 'Crear Otra Cuenta Custodio' : 'Create Another Custody Account'}
+            </button>
+            <div className="mt-3 text-xs text-[#999]">
+              {language === 'es' 
+                ? `Total de cuentas activas: ${custodyAccounts.length}` 
+                : `Total active accounts: ${custodyAccounts.length}`}
+            </div>
           </div>
         </div>
         </>
@@ -2884,6 +3087,348 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               >
                 <ArrowDownCircle className="w-5 h-5" />
                 {isSpanish ? 'Agregar Fondos' : 'Add Funds'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Retiro de Fondos */}
+      {showWithdrawModal && selectedAccount && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-orange-500/50 rounded-2xl p-6 max-w-lg w-full shadow-[0_0_50px_rgba(249,115,22,0.3)]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-orange-400 flex items-center gap-2">
+                <ArrowUpCircle className="w-6 h-6" />
+                {isSpanish ? 'Retirar Fondos' : 'Withdraw Funds'}
+              </h3>
+              <button
+                onClick={() => setShowWithdrawModal(false)}
+                className="text-[#ffffff] hover:text-red-400 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="bg-[#0d0d0d] border border-orange-500/30 rounded-lg p-4 mb-4">
+              <div className="text-sm text-[#999] mb-1">{isSpanish ? 'Cuenta origen:' : 'Source account:'}</div>
+              <div className="text-lg font-bold text-[#ffffff]">{selectedAccount.accountName}</div>
+              <div className="text-sm text-orange-400 font-mono">{selectedAccount.accountNumber || selectedAccount.id}</div>
+              <div className="text-sm text-emerald-400 mt-2 font-bold">
+                {isSpanish ? 'Disponible:' : 'Available:'} {selectedAccount.currency} {selectedAccount.availableBalance.toLocaleString()}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Tipo de retiro */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Tipo de Retiro' : 'Withdrawal Type'}
+                </label>
+                <select
+                  value={withdrawData.type}
+                  onChange={e => setWithdrawData({...withdrawData, type: e.target.value as 'withdrawal' | 'transfer_out'})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                >
+                  <option value="withdrawal">{isSpanish ? 'Retiro' : 'Withdrawal'}</option>
+                  <option value="transfer_out">{isSpanish ? 'Transferencia Saliente' : 'Outgoing Transfer'}</option>
+                </select>
+              </div>
+
+              {/* Monto */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Monto a Retirar' : 'Amount to Withdraw'} ({selectedAccount.currency})
+                </label>
+                <input
+                  type="number"
+                  value={withdrawData.amount || ''}
+                  onChange={e => setWithdrawData({...withdrawData, amount: parseFloat(e.target.value) || 0})}
+                  max={selectedAccount.availableBalance}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono text-xl focus:outline-none focus:border-orange-500"
+                  placeholder="0.00"
+                />
+                {/* Botones de porcentaje */}
+                <div className="flex gap-2 mt-2">
+                  {[25, 50, 75, 100].map(pct => (
+                    <button
+                      key={pct}
+                      type="button"
+                      onClick={() => setWithdrawData({...withdrawData, amount: (selectedAccount.availableBalance * pct) / 100})}
+                      className="flex-1 px-2 py-1 bg-orange-600/20 border border-orange-500/30 rounded text-orange-400 text-xs font-bold hover:bg-orange-500/30 transition-all"
+                    >
+                      {pct}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Fecha y Hora */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block flex items-center gap-1">
+                    <Calendar className="w-4 h-4 text-orange-400" />
+                    {isSpanish ? 'Fecha' : 'Date'}
+                  </label>
+                  <input
+                    type="date"
+                    value={withdrawData.transactionDate}
+                    onChange={e => setWithdrawData({...withdrawData, transactionDate: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block flex items-center gap-1">
+                    <Clock className="w-4 h-4 text-orange-400" />
+                    {isSpanish ? 'Hora' : 'Time'}
+                  </label>
+                  <input
+                    type="time"
+                    value={withdrawData.transactionTime}
+                    onChange={e => setWithdrawData({...withdrawData, transactionTime: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+              </div>
+
+              {/* Cuenta destino y banco */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block">
+                    {isSpanish ? 'Cuenta Destino' : 'Destination Account'}
+                  </label>
+                  <input
+                    type="text"
+                    value={withdrawData.destinationAccount}
+                    onChange={e => setWithdrawData({...withdrawData, destinationAccount: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                    placeholder={isSpanish ? 'Número de cuenta' : 'Account number'}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block">
+                    {isSpanish ? 'Banco Destino' : 'Destination Bank'}
+                  </label>
+                  <input
+                    type="text"
+                    value={withdrawData.destinationBank}
+                    onChange={e => setWithdrawData({...withdrawData, destinationBank: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                    placeholder={isSpanish ? 'Nombre del banco' : 'Bank name'}
+                  />
+                </div>
+              </div>
+
+              {/* Descripción */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Descripción' : 'Description'}
+                </label>
+                <input
+                  type="text"
+                  value={withdrawData.description}
+                  onChange={e => setWithdrawData({...withdrawData, description: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                  placeholder={isSpanish ? 'Concepto del retiro' : 'Withdrawal concept'}
+                />
+              </div>
+
+              {/* Notas */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Notas adicionales' : 'Additional notes'}
+                </label>
+                <textarea
+                  value={withdrawData.notes}
+                  onChange={e => setWithdrawData({...withdrawData, notes: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500 h-16 resize-none"
+                  placeholder={isSpanish ? 'Información adicional...' : 'Additional information...'}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowWithdrawModal(false)}
+                className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#333] text-[#ffffff] rounded-lg hover:bg-[#222] transition-colors"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleWithdraw}
+                disabled={withdrawData.amount <= 0 || withdrawData.amount > selectedAccount.availableBalance}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:from-orange-500 hover:to-red-500 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <ArrowUpCircle className="w-5 h-5" />
+                {isSpanish ? 'Retirar Fondos' : 'Withdraw Funds'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Transferencia entre Cuentas */}
+      {showTransferModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-purple-500/50 rounded-2xl p-6 max-w-lg w-full shadow-[0_0_50px_rgba(168,85,247,0.3)]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-purple-400 flex items-center gap-2">
+                <Banknote className="w-6 h-6" />
+                {isSpanish ? 'Transferencia entre Cuentas' : 'Transfer Between Accounts'}
+              </h3>
+              <button
+                onClick={() => setShowTransferModal(false)}
+                className="text-[#ffffff] hover:text-red-400 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Cuenta Origen */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block flex items-center gap-2">
+                  <ArrowUpCircle className="w-4 h-4 text-orange-400" />
+                  {isSpanish ? 'Cuenta Origen' : 'Source Account'}
+                </label>
+                <select
+                  value={transferData.sourceAccountId}
+                  onChange={e => setTransferData({...transferData, sourceAccountId: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-orange-500/30 rounded-lg text-[#ffffff] focus:outline-none focus:border-orange-500"
+                >
+                  <option value="">{isSpanish ? '-- Seleccionar cuenta origen --' : '-- Select source account --'}</option>
+                  {custodyAccounts.map(acc => (
+                    <option key={acc.id} value={acc.id}>
+                      {acc.accountName} ({acc.currency}) - {isSpanish ? 'Disponible' : 'Available'}: {acc.availableBalance.toLocaleString()}
+                    </option>
+                  ))}
+                </select>
+                {transferData.sourceAccountId && (
+                  <div className="mt-2 p-2 bg-orange-500/10 border border-orange-500/30 rounded text-xs">
+                    <span className="text-orange-400 font-bold">
+                      {custodyAccounts.find(a => a.id === transferData.sourceAccountId)?.accountNumber || 'N/A'}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Cuenta Destino */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block flex items-center gap-2">
+                  <ArrowDownCircle className="w-4 h-4 text-emerald-400" />
+                  {isSpanish ? 'Cuenta Destino' : 'Destination Account'}
+                </label>
+                <select
+                  value={transferData.destinationAccountId}
+                  onChange={e => setTransferData({...transferData, destinationAccountId: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-emerald-500/30 rounded-lg text-[#ffffff] focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="">{isSpanish ? '-- Seleccionar cuenta destino --' : '-- Select destination account --'}</option>
+                  {custodyAccounts
+                    .filter(acc => acc.id !== transferData.sourceAccountId)
+                    .map(acc => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.accountName} ({acc.currency}) - {isSpanish ? 'Balance' : 'Balance'}: {acc.totalBalance.toLocaleString()}
+                      </option>
+                    ))}
+                </select>
+                {transferData.destinationAccountId && (
+                  <div className="mt-2 p-2 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs">
+                    <span className="text-emerald-400 font-bold">
+                      {custodyAccounts.find(a => a.id === transferData.destinationAccountId)?.accountNumber || 'N/A'}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Verificación de divisas */}
+              {transferData.sourceAccountId && transferData.destinationAccountId && (
+                (() => {
+                  const source = custodyAccounts.find(a => a.id === transferData.sourceAccountId);
+                  const dest = custodyAccounts.find(a => a.id === transferData.destinationAccountId);
+                  if (source && dest && source.currency !== dest.currency) {
+                    return (
+                      <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-yellow-400 text-sm">
+                        ⚠️ {isSpanish 
+                          ? `Las cuentas tienen diferentes divisas (${source.currency} → ${dest.currency}). Se transferirá el monto nominal.`
+                          : `Accounts have different currencies (${source.currency} → ${dest.currency}). Nominal amount will be transferred.`}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()
+              )}
+
+              {/* Monto */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Monto a Transferir' : 'Amount to Transfer'}
+                </label>
+                <input
+                  type="number"
+                  value={transferData.amount || ''}
+                  onChange={e => setTransferData({...transferData, amount: parseFloat(e.target.value) || 0})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono text-xl focus:outline-none focus:border-purple-500"
+                  placeholder="0.00"
+                />
+              </div>
+
+              {/* Fecha y Hora */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block flex items-center gap-1">
+                    <Calendar className="w-4 h-4 text-purple-400" />
+                    {isSpanish ? 'Fecha' : 'Date'}
+                  </label>
+                  <input
+                    type="date"
+                    value={transferData.transactionDate}
+                    onChange={e => setTransferData({...transferData, transactionDate: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block flex items-center gap-1">
+                    <Clock className="w-4 h-4 text-purple-400" />
+                    {isSpanish ? 'Hora' : 'Time'}
+                  </label>
+                  <input
+                    type="time"
+                    value={transferData.transactionTime}
+                    onChange={e => setTransferData({...transferData, transactionTime: e.target.value})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+              </div>
+
+              {/* Notas */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block">
+                  {isSpanish ? 'Notas' : 'Notes'}
+                </label>
+                <textarea
+                  value={transferData.notes}
+                  onChange={e => setTransferData({...transferData, notes: e.target.value})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500 h-16 resize-none"
+                  placeholder={isSpanish ? 'Notas de la transferencia...' : 'Transfer notes...'}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowTransferModal(false)}
+                className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#333] text-[#ffffff] rounded-lg hover:bg-[#222] transition-colors"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleTransferBetweenAccounts}
+                disabled={!transferData.sourceAccountId || !transferData.destinationAccountId || transferData.amount <= 0}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Banknote className="w-5 h-5" />
+                {isSpanish ? 'Transferir' : 'Transfer'}
               </button>
             </div>
           </div>
