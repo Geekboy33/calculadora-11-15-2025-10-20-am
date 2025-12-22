@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
+import { ledgerPersistenceStoreV2, type LedgerBalanceV2 } from '../lib/ledger-persistence-store-v2';
 import { custodyStore, type CustodyAccount, type CustodyTransaction, type AccountCategory } from '../lib/custody-store';
 import { CustodyBlackScreen } from './CustodyBlackScreen';
 import { apiVUSD1Store } from '../lib/api-vusd1-store';
@@ -54,6 +55,28 @@ export function CustodyAccountsModule() {
   const isSpanish = language === 'es';
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
   const [systemBalances, setSystemBalances] = useState<CurrencyBalance[]>([]);
+  const [ledger1Balances, setLedger1Balances] = useState<LedgerBalanceV2[]>([]);
+  const [fundSource, setFundSource] = useState<'ledger' | 'ledger1'>('ledger');
+  
+  // IBAN Country Codes para formato internacional
+  const IBAN_COUNTRIES: Record<string, { code: string; length: number; name: string }> = {
+    'USD': { code: 'US', length: 17, name: 'United States' },
+    'EUR': { code: 'DE', length: 22, name: 'Germany (SEPA)' },
+    'GBP': { code: 'GB', length: 22, name: 'United Kingdom' },
+    'CHF': { code: 'CH', length: 21, name: 'Switzerland' },
+    'CAD': { code: 'CA', length: 24, name: 'Canada' },
+    'AUD': { code: 'AU', length: 24, name: 'Australia' },
+    'JPY': { code: 'JP', length: 24, name: 'Japan' },
+    'CNY': { code: 'CN', length: 22, name: 'China' },
+    'INR': { code: 'IN', length: 22, name: 'India' },
+    'MXN': { code: 'MX', length: 18, name: 'Mexico' },
+    'BRL': { code: 'BR', length: 29, name: 'Brazil' },
+    'RUB': { code: 'RU', length: 33, name: 'Russia' },
+    'KRW': { code: 'KR', length: 24, name: 'South Korea' },
+    'SGD': { code: 'SG', length: 24, name: 'Singapore' },
+    'HKD': { code: 'HK', length: 22, name: 'Hong Kong' },
+    'AED': { code: 'AE', length: 23, name: 'UAE' },
+  };
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showReserveModal, setShowReserveModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -138,8 +161,13 @@ export function CustodyAccountsModule() {
     const accounts = custodyStore.getAccounts();
     setCustodyAccounts(accounts);
 
+    // Cargar balances de Account Ledger
     const balances = balanceStore.getBalances();
     setSystemBalances(balances);
+    
+    // Cargar balances de Account Ledger1 (Treasury Reserve1)
+    const ledger1State = ledgerPersistenceStoreV2.getState();
+    setLedger1Balances(ledger1State.balances);
 
     // 🔥 SUSCRIBIRSE A CAMBIOS EN TIEMPO REAL 🔥
     const unsubscribeCustody = custodyStore.subscribe((newAccounts) => {
@@ -148,13 +176,19 @@ export function CustodyAccountsModule() {
     });
     
     const unsubscribeBalance = balanceStore.subscribe((newBalances) => {
-      console.log('[CustodyModule] 🔄 Actualización de balances del sistema:', newBalances.length, 'divisas');
+      console.log('[CustodyModule] 🔄 Actualización de balances Account Ledger:', newBalances.length, 'divisas');
       setSystemBalances(newBalances);
+    });
+    
+    const unsubscribeLedger1 = ledgerPersistenceStoreV2.subscribe((newState) => {
+      console.log('[CustodyModule] 🔄 Actualización de balances Account Ledger1:', newState.balances.length, 'divisas');
+      setLedger1Balances(newState.balances);
     });
 
     return () => {
       unsubscribeCustody();
       unsubscribeBalance();
+      unsubscribeLedger1();
     };
   }, []);
 
@@ -240,27 +274,105 @@ export function CustodyAccountsModule() {
     return cat ? (isSpanish ? cat.nameEs : cat.nameEn) : category;
   };
 
+  // Generar IBAN con formato internacional ISO 13616
+  const generateInternationalIBAN = (currency: string, accountNumber?: string): string => {
+    const country = IBAN_COUNTRIES[currency] || { code: 'XX', length: 22, name: 'International' };
+    const bankCode = 'DAES'; // Digital Asset & Exchange Settlement
+    const branchCode = '001';
+    
+    // Generar número de cuenta si no se proporciona
+    let baseNumber = accountNumber;
+    if (!baseNumber) {
+      const randomDigits = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+      baseNumber = randomDigits;
+    }
+    
+    // Calcular dígitos de control IBAN (simplificado)
+    const checkDigits = ((98 - (parseInt(baseNumber.slice(-2)) % 97)) % 97).toString().padStart(2, '0');
+    
+    // Formato: PAÍS + CHECK + BANCO + BRANCH + CUENTA
+    const iban = `${country.code}${checkDigits}${bankCode}${branchCode}${baseNumber.padStart(12, '0')}`;
+    
+    return iban.toUpperCase();
+  };
+
+  // Generar número de cuenta en formato internacional
+  const generateInternationalAccountNumber = (currency: string, category: string): string => {
+    const country = IBAN_COUNTRIES[currency] || { code: 'XX', length: 22, name: 'International' };
+    const categoryCode: Record<string, string> = {
+      'custody': 'CUS',
+      'savings': 'SAV',
+      'checking': 'CHK',
+      'nostro': 'NOS',
+      'margin': 'MRG'
+    };
+    
+    const typeCode = categoryCode[category] || 'GEN';
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const sequence = Math.floor(Math.random() * 9999999).toString().padStart(7, '0');
+    
+    // Formato: PAÍS-BANCO-TIPO-AÑO-MES-SECUENCIA
+    return `${country.code}${currency}${typeCode}${year}${month}${sequence}`;
+  };
+
+  // Obtener balances disponibles según la fuente seleccionada
+  const getAvailableBalances = () => {
+    if (fundSource === 'ledger1') {
+      return ledger1Balances.map(b => ({
+        currency: b.currency,
+        totalAmount: b.balance,
+        accountName: b.account || `${b.currency} Account`,
+        transactionCount: b.transactionCount,
+        largestTransaction: b.largestTransaction,
+        smallestTransaction: b.smallestTransaction,
+        averageTransaction: b.averageTransaction,
+        lastUpdated: b.lastUpdate,
+        amounts: []
+      }));
+    }
+    return systemBalances;
+  };
+
   const handleCreateAccount = () => {
     if (!formData.accountName || formData.amount <= 0) {
       alert(isSpanish ? 'Completa todos los campos' : 'Complete all fields');
       return;
     }
 
-    // Verificar que hay fondos disponibles
-    const balance = systemBalances.find(b => b.currency === formData.currency);
+    // Obtener balances según la fuente seleccionada
+    const availableBalances = getAvailableBalances();
+    const balance = availableBalances.find(b => b.currency === formData.currency);
+    
     if (!balance || balance.totalAmount < formData.amount) {
-      alert(isSpanish ? 'Fondos insuficientes en el sistema DAES' : 'Insufficient funds in DAES system');
+      const sourceName = fundSource === 'ledger1' ? 'Account Ledger1 (Treasury Reserve1)' : 'Account Ledger';
+      alert(isSpanish 
+        ? `Fondos insuficientes en ${sourceName}` 
+        : `Insufficient funds in ${sourceName}`);
       return;
     }
 
     const balanceBefore = balance.totalAmount;
     const tokenSymbol = formData.tokenSymbol || `${formData.currency}T`;
     
+    // Generar número de cuenta internacional si no se proporciona
+    let finalAccountNumber = formData.customAccountNumber;
+    if (!finalAccountNumber) {
+      finalAccountNumber = generateInternationalAccountNumber(
+        formData.currency, 
+        formData.accountCategory
+      );
+    }
+    
+    const sourceName = fundSource === 'ledger1' ? 'Account Ledger1' : 'Account Ledger';
     console.log('[CustodyModule] 💸 TRANSFERENCIA DE FONDOS:');
-    console.log(`  Balance DAES ANTES: ${formData.currency} ${balanceBefore.toLocaleString()}`);
+    console.log(`  Fuente: ${sourceName}`);
+    console.log(`  Balance ANTES: ${formData.currency} ${balanceBefore.toLocaleString()}`);
     console.log(`  Monto a transferir: ${formData.currency} ${formData.amount.toLocaleString()}`);
-    console.log(`  Balance DAES DESPUÉS: ${formData.currency} ${(balanceBefore - formData.amount).toLocaleString()}`);
-    console.log(`  Destino: Cuenta Custodio (${formData.accountType}) - ${formData.accountCategory}`);
+    console.log(`  Balance DESPUÉS: ${formData.currency} ${(balanceBefore - formData.amount).toLocaleString()}`);
+    console.log(`  Destino: Cuenta ${formData.accountCategory} (${formData.accountType})`);
+    console.log(`  Número de cuenta: ${finalAccountNumber}`);
     
     custodyStore.createAccount(
       formData.accountType,
@@ -273,7 +385,7 @@ export function CustodyAccountsModule() {
       formData.contractAddress || undefined,
       formData.fundDenomination,
       formData.accountCategory as AccountCategory,
-      formData.customAccountNumber || undefined
+      finalAccountNumber
     );
 
     setShowCreateModal(false);
@@ -812,24 +924,60 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
         </div>
       </div>
 
-      {/* Balances del Sistema Disponibles */}
-      {systemBalances.length > 0 && (
-        <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-[#ffffff] mb-4">
-            {language === 'es' ? 'Fondos Disponibles del Sistema Digital Commercial Bank Ltd' : 'Digital Commercial Bank Ltd System Available Funds'}
-          </h2>
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-            {systemBalances.map(bal => (
-              <div key={bal.currency} className="bg-[#0a0a0a] border border-[#ffffff]/20 rounded-lg p-3 text-center">
-                <div className="text-sm text-[#ffffff]">{bal.currency}</div>
-                <div className="text-lg font-bold text-[#ffffff] font-mono">
-                  {bal.totalAmount.toLocaleString()}
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Selector de Fuente de Fondos */}
+      <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-xl p-6">
+        <h2 className="text-xl font-semibold text-blue-400 mb-4 flex items-center gap-2">
+          <Database className="w-5 h-5" />
+          {language === 'es' ? 'Fuente de Fondos' : 'Fund Source'}
+        </h2>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <button
+            onClick={() => setFundSource('ledger')}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              fundSource === 'ledger'
+                ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#999] hover:border-emerald-500/30'
+            }`}
+          >
+            <div className="text-lg font-bold">📊 Account Ledger</div>
+            <div className="text-xs mt-1">{language === 'es' ? 'Treasury Reserve Original' : 'Original Treasury Reserve'}</div>
+            <div className="text-sm mt-2 font-mono">{systemBalances.length} {language === 'es' ? 'divisas' : 'currencies'}</div>
+          </button>
+          <button
+            onClick={() => setFundSource('ledger1')}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              fundSource === 'ledger1'
+                ? 'border-purple-500 bg-purple-500/20 text-purple-400'
+                : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#999] hover:border-purple-500/30'
+            }`}
+          >
+            <div className="text-lg font-bold">📈 Account Ledger1</div>
+            <div className="text-xs mt-1">{language === 'es' ? 'Treasury Reserve1 (V2)' : 'Treasury Reserve1 (V2)'}</div>
+            <div className="text-sm mt-2 font-mono">{ledger1Balances.length} {language === 'es' ? 'divisas' : 'currencies'}</div>
+          </button>
         </div>
-      )}
+        
+        {/* Balances de la fuente seleccionada */}
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+          {getAvailableBalances().map(bal => (
+            <div key={bal.currency} className={`bg-[#0a0a0a] border rounded-lg p-3 text-center ${
+              fundSource === 'ledger1' ? 'border-purple-500/30' : 'border-emerald-500/30'
+            }`}>
+              <div className="text-sm text-[#ffffff]">{bal.currency}</div>
+              <div className={`text-lg font-bold font-mono ${
+                fundSource === 'ledger1' ? 'text-purple-400' : 'text-emerald-400'
+              }`}>
+                {bal.totalAmount.toLocaleString()}
+              </div>
+              {IBAN_COUNTRIES[bal.currency] && (
+                <div className="text-xs text-[#666] mt-1">
+                  {IBAN_COUNTRIES[bal.currency].code} - ISO
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Cuentas Custodio */}
       {custodyAccounts.length > 0 ? (
@@ -1467,6 +1615,25 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 />
               </div>
 
+              {/* Indicador de fuente de fondos seleccionada */}
+              <div className={`p-3 rounded-lg border ${
+                fundSource === 'ledger1' 
+                  ? 'bg-purple-500/10 border-purple-500/30' 
+                  : 'bg-emerald-500/10 border-emerald-500/30'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <Database className={`w-4 h-4 ${fundSource === 'ledger1' ? 'text-purple-400' : 'text-emerald-400'}`} />
+                  <span className={`text-sm font-bold ${fundSource === 'ledger1' ? 'text-purple-400' : 'text-emerald-400'}`}>
+                    {fundSource === 'ledger1' ? 'Account Ledger1' : 'Account Ledger'}
+                  </span>
+                </div>
+                <div className="text-xs text-[#999] mt-1">
+                  {language === 'es' 
+                    ? `Fondos de ${fundSource === 'ledger1' ? 'Treasury Reserve1' : 'Treasury Reserve'}`
+                    : `Funds from ${fundSource === 'ledger1' ? 'Treasury Reserve1' : 'Treasury Reserve'}`}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm text-[#ffffff] mb-2 block">
@@ -1478,9 +1645,9 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-[#ffffff]/50"
                     aria-label="Seleccionar moneda"
                   >
-                    {systemBalances.map(bal => (
+                    {getAvailableBalances().map(bal => (
                       <option key={bal.currency} value={bal.currency}>
-                        {bal.currency} - {language === 'es' ? 'Disponible' : 'Available'}: {bal.totalAmount.toLocaleString()}
+                        {bal.currency} ({IBAN_COUNTRIES[bal.currency]?.code || 'XX'}) - {language === 'es' ? 'Disponible' : 'Available'}: {bal.totalAmount.toLocaleString()}
                       </option>
                     ))}
                   </select>
@@ -1526,23 +1693,70 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
 
-              {/* Número de Cuenta Manual (Opcional) */}
-              <div>
-                <label className="text-sm text-[#ffffff] mb-2 block flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-yellow-400" />
-                  {language === 'es' ? 'Número de Cuenta (Opcional)' : 'Account Number (Optional)'}
+              {/* Número de Cuenta con Formato Internacional */}
+              <div className="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-500/30 rounded-lg p-4">
+                <label className="text-sm text-yellow-400 mb-2 block flex items-center gap-2 font-semibold">
+                  <FileText className="w-4 h-4" />
+                  {language === 'es' ? 'Número de Cuenta Internacional' : 'International Account Number'}
                 </label>
+                
+                {/* Botones para generar formatos */}
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const iban = generateInternationalIBAN(formData.currency);
+                      setFormData({...formData, customAccountNumber: iban});
+                    }}
+                    className="px-3 py-2 bg-blue-600/30 border border-blue-500/50 rounded-lg text-blue-400 text-xs font-bold hover:bg-blue-500/40 transition-all"
+                  >
+                    🏦 {language === 'es' ? 'Generar IBAN' : 'Generate IBAN'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const intl = generateInternationalAccountNumber(formData.currency, formData.accountCategory);
+                      setFormData({...formData, customAccountNumber: intl});
+                    }}
+                    className="px-3 py-2 bg-emerald-600/30 border border-emerald-500/50 rounded-lg text-emerald-400 text-xs font-bold hover:bg-emerald-500/40 transition-all"
+                  >
+                    🌐 {language === 'es' ? 'ISO Estándar' : 'ISO Standard'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({...formData, customAccountNumber: ''})}
+                    className="px-3 py-2 bg-gray-600/30 border border-gray-500/50 rounded-lg text-gray-400 text-xs font-bold hover:bg-gray-500/40 transition-all"
+                  >
+                    🔄 {language === 'es' ? 'Auto' : 'Auto'}
+                  </button>
+                </div>
+                
                 <input
                   type="text"
                   value={formData.customAccountNumber}
-                  onChange={e => setFormData({...formData, customAccountNumber: e.target.value})}
-                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono focus:outline-none focus:border-yellow-500/50"
-                  placeholder={language === 'es' ? 'Dejar vacío para generar automáticamente' : 'Leave empty to auto-generate'}
+                  onChange={e => setFormData({...formData, customAccountNumber: e.target.value.toUpperCase()})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-yellow-500/30 rounded-lg text-[#ffffff] font-mono focus:outline-none focus:border-yellow-500 text-lg tracking-wider"
+                  placeholder={language === 'es' ? 'Ej: DE89DAES0011234567890' : 'Ex: DE89DAES0011234567890'}
                 />
-                <div className="text-xs text-[#666] mt-1">
-                  {language === 'es' 
-                    ? '💡 Si desea un número específico, ingréselo aquí. De lo contrario se generará automáticamente.' 
-                    : '💡 If you want a specific number, enter it here. Otherwise it will be auto-generated.'}
+                
+                {/* Info del formato */}
+                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                  <div className="bg-[#0a0a0a] p-2 rounded border border-[#1a1a1a]">
+                    <span className="text-[#666]">{language === 'es' ? 'País:' : 'Country:'}</span>
+                    <span className="text-yellow-400 ml-1 font-bold">
+                      {IBAN_COUNTRIES[formData.currency]?.code || 'XX'} - {IBAN_COUNTRIES[formData.currency]?.name || 'International'}
+                    </span>
+                  </div>
+                  <div className="bg-[#0a0a0a] p-2 rounded border border-[#1a1a1a]">
+                    <span className="text-[#666]">{language === 'es' ? 'Formato:' : 'Format:'}</span>
+                    <span className="text-yellow-400 ml-1 font-bold">ISO 13616 IBAN</span>
+                  </div>
+                </div>
+                
+                <div className="text-xs text-[#666] mt-2">
+                  💡 {language === 'es' 
+                    ? 'Use los botones para generar o ingrese su propio número de cuenta.' 
+                    : 'Use buttons to generate or enter your own account number.'}
                 </div>
               </div>
 
