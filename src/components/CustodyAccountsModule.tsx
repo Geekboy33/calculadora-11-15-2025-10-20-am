@@ -58,24 +58,26 @@ export function CustodyAccountsModule() {
   const [ledger1Balances, setLedger1Balances] = useState<LedgerBalanceV2[]>([]);
   const [fundSource, setFundSource] = useState<'ledger' | 'ledger1'>('ledger');
   
-  // IBAN Country Codes para formato internacional
+  // IBAN Country Codes - Union of Comoros (Banco Digital Commercial Bank Ltd)
+  // Código ISO 3166-1: KM (Comoros)
   const IBAN_COUNTRIES: Record<string, { code: string; length: number; name: string }> = {
-    'USD': { code: 'US', length: 17, name: 'United States' },
-    'EUR': { code: 'DE', length: 22, name: 'Germany (SEPA)' },
-    'GBP': { code: 'GB', length: 22, name: 'United Kingdom' },
-    'CHF': { code: 'CH', length: 21, name: 'Switzerland' },
-    'CAD': { code: 'CA', length: 24, name: 'Canada' },
-    'AUD': { code: 'AU', length: 24, name: 'Australia' },
-    'JPY': { code: 'JP', length: 24, name: 'Japan' },
-    'CNY': { code: 'CN', length: 22, name: 'China' },
-    'INR': { code: 'IN', length: 22, name: 'India' },
-    'MXN': { code: 'MX', length: 18, name: 'Mexico' },
-    'BRL': { code: 'BR', length: 29, name: 'Brazil' },
-    'RUB': { code: 'RU', length: 33, name: 'Russia' },
-    'KRW': { code: 'KR', length: 24, name: 'South Korea' },
-    'SGD': { code: 'SG', length: 24, name: 'Singapore' },
-    'HKD': { code: 'HK', length: 22, name: 'Hong Kong' },
-    'AED': { code: 'AE', length: 23, name: 'UAE' },
+    'USD': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'EUR': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'GBP': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'CHF': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'CAD': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'AUD': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'JPY': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'CNY': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'INR': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'MXN': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'BRL': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'RUB': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'KRW': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'SGD': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'HKD': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'AED': { code: 'KM', length: 27, name: 'Union of Comoros' },
+    'KMF': { code: 'KM', length: 27, name: 'Union of Comoros' }, // Franco Comorense
   };
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showReserveModal, setShowReserveModal] = useState(false);
@@ -438,8 +440,8 @@ export function CustodyAccountsModule() {
 
   // Generar IBAN con formato internacional ISO 13616
   const generateInternationalIBAN = (currency: string, accountNumber?: string): string => {
-    const country = IBAN_COUNTRIES[currency] || { code: 'XX', length: 22, name: 'International' };
-    const bankCode = 'DAES'; // Digital Asset & Exchange Settlement
+    const country = IBAN_COUNTRIES[currency] || { code: 'KM', length: 27, name: 'Union of Comoros' };
+    const bankCode = 'DCBK'; // Digital Commercial Bank - Comoros
     const branchCode = '001';
     
     // Generar número de cuenta si no se proporciona
@@ -458,9 +460,9 @@ export function CustodyAccountsModule() {
     return iban.toUpperCase();
   };
 
-  // Generar número de cuenta en formato internacional
+  // Generar número de cuenta en formato internacional - Union of Comoros
   const generateInternationalAccountNumber = (currency: string, category: string): string => {
-    const country = IBAN_COUNTRIES[currency] || { code: 'XX', length: 22, name: 'International' };
+    const country = IBAN_COUNTRIES[currency] || { code: 'KM', length: 27, name: 'Union of Comoros' };
     const categoryCode: Record<string, string> = {
       'custody': 'CUS',
       'savings': 'SAV',
