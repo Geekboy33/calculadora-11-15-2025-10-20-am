@@ -725,15 +725,18 @@ export function CustodyAccountsModule() {
       if (tx.type === 'deposit') {
         const result = custodyStore.addFundsWithTransaction(
           selectedAccount.id,
-          tx.amount,
-          'deposit',
-          tx.description,
-          tx.account,
-          tx.bank,
-          dateStr,
-          timeStr,
-          dateStr,
-          `Auto-generated deposit`
+          {
+            amount: tx.amount,
+            type: 'deposit',
+            description: tx.description,
+            sourceAccount: tx.account,
+            sourceBank: tx.bank,
+            transactionDate: dateStr,
+            transactionTime: timeStr,
+            valueDate: dateStr,
+            notes: 'Auto-generated deposit',
+            createdBy: 'SYSTEM'
+          }
         );
         if (result) {
           currentBalance += tx.amount;
@@ -744,15 +747,18 @@ export function CustodyAccountsModule() {
         if (currentBalance >= tx.amount) {
           const result = custodyStore.withdrawFundsWithTransaction(
             selectedAccount.id,
-            tx.amount,
-            'withdrawal',
-            tx.description,
-            tx.account,
-            tx.bank,
-            dateStr,
-            timeStr,
-            dateStr,
-            `Auto-generated withdrawal`
+            {
+              amount: tx.amount,
+              type: 'withdrawal',
+              description: tx.description,
+              destinationAccount: tx.account,
+              destinationBank: tx.bank,
+              transactionDate: dateStr,
+              transactionTime: timeStr,
+              valueDate: dateStr,
+              notes: 'Auto-generated withdrawal',
+              createdBy: 'SYSTEM'
+            }
           );
           if (result) {
             currentBalance -= tx.amount;
