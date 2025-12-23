@@ -113,14 +113,19 @@ export interface TZDigitalConfig {
   lastUpdated: string;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// BEARER TOKEN CONFIGURADO
+// ═══════════════════════════════════════════════════════════════════════════
+const CONFIGURED_BEARER_TOKEN = '4e2e1b2f-03f3-4c5b-b54e-23d9145c1fde';
+
 const DEFAULT_CONFIG: TZDigitalConfig = {
-  bearerToken: '',
+  bearerToken: CONFIGURED_BEARER_TOKEN,
   baseUrl: API_URL,
   defaultCurrency: 'USD',
   defaultSenderName: 'Digital Commercial Bank Ltd',
-  defaultSenderAccount: '',
+  defaultSenderAccount: 'DAES-BK-USD-001',
   defaultSenderBank: 'Digital Commercial Bank Ltd',
-  isConfigured: false,
+  isConfigured: true,
   lastUpdated: new Date().toISOString(),
 };
 

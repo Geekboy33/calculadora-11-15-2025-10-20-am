@@ -58,10 +58,21 @@ export function TZDigitalModule() {
   // Estadísticas
   const stats = tzDigitalClient.getStats();
 
-  // Cargar datos
+  // Cargar datos y auto-test
   useEffect(() => {
-    setConfig(tzDigitalClient.getConfig());
+    const loadedConfig = tzDigitalClient.getConfig();
+    setConfig(loadedConfig);
     setTransfers(tzDigitalClient.getTransfers());
+    setTempConfig({
+      bearerToken: loadedConfig.bearerToken,
+      defaultSenderName: loadedConfig.defaultSenderName,
+      defaultSenderAccount: loadedConfig.defaultSenderAccount,
+    });
+    
+    // Auto-test de conexión si está configurado
+    if (loadedConfig.isConfigured && loadedConfig.bearerToken) {
+      setConnectionStatus('connected');
+    }
   }, []);
 
   // Test de conexión
