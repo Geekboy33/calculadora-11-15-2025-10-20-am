@@ -29,6 +29,47 @@ app.use((err, req, res, next) => {
 
 ensureDataFiles();
 
+// ============================================================================
+// PÁGINA DE INICIO - STATUS DEL SERVIDOR
+// ============================================================================
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    server: 'LedgerDAES Terminal Backend',
+    version: '1.1.0',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      'TZ Digital / CIS S2S': {
+        test: 'GET /api/tz-digital/test',
+        transactions: 'POST /api/tz-digital/transactions',
+        fundsProcessing: 'POST /api/tz-digital/funds-processing'
+      },
+      'MG Webhook': {
+        transfer: 'POST /api/mg-webhook/transfer'
+      },
+      'YooMoney OAuth': {
+        token: 'POST /api/yoomoney/oauth/token'
+      },
+      'Admin': {
+        apiKeys: 'POST /admin/api-keys',
+        porReports: 'POST /admin/import-por'
+      }
+    },
+    cis_s2s: {
+      server: 'DEV-CORE-PAY-GW-01',
+      location: 'London, UK',
+      globalIP: '172.67.157.88',
+      port: 8443,
+      protocols: ['SWIFT.Net', 'SWIFT.Com', 'SWIFT MT103', 'VISA NET', 'S2S']
+    }
+  });
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', uptime: process.uptime() });
+});
+
 function findKeyByApiKey(apiKey) {
   const keys = getApiKeys();
   return keys.find(k => k.apiKey === apiKey && k.status !== 'revoked');
