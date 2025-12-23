@@ -465,8 +465,9 @@ export function CustodyAccountsModule() {
   const [showHistoryGenerator, setShowHistoryGenerator] = useState(false);
   const [historyConfig, setHistoryConfig] = useState({
     totalAmount: 0,
-    periodType: 'months' as 'months' | 'years',
-    periodValue: 6,
+    // Rango de fechas personalizado
+    startDate: new Date(new Date().getFullYear() - 1, 0, 1).toISOString().split('T')[0], // 1 enero del año pasado
+    endDate: new Date().toISOString().split('T')[0], // Hoy
     transactionCount: { min: 10, max: 30 },
     depositPercentage: 60, // 60% deposits, 40% withdrawals
     selectedBanks: [] as number[], // índices de bancos seleccionados
@@ -636,13 +637,15 @@ export function CustodyAccountsModule() {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
-      // Calcular fechas de inicio y fin
-      const endDate = new Date();
-      const startDate = new Date();
-      if (historyConfig.periodType === 'months') {
-        startDate.setMonth(startDate.getMonth() - historyConfig.periodValue);
-      } else {
-        startDate.setFullYear(startDate.getFullYear() - historyConfig.periodValue);
+      // Usar fechas del rango seleccionado
+      const startDate = new Date(historyConfig.startDate);
+      const endDate = new Date(historyConfig.endDate);
+      
+      // Validar que la fecha de inicio sea anterior a la de fin
+      if (startDate >= endDate) {
+        alert(isSpanish ? '❌ La fecha de inicio debe ser anterior a la fecha de fin' : '❌ Start date must be before end date');
+        setIsGeneratingHistory(false);
+        return;
       }
 
       // Calcular número de transacciones
@@ -817,8 +820,8 @@ export function CustodyAccountsModule() {
       setIsGeneratingHistory(false);
 
       alert(isSpanish 
-        ? `✅ Historial generado exitosamente\n\n${successCount} transacciones creadas\n${numDeposits} depósitos\n${numWithdrawals} retiros\n\nPeríodo: ${historyConfig.periodValue} ${historyConfig.periodType === 'months' ? 'meses' : 'años'}`
-        : `✅ History generated successfully\n\n${successCount} transactions created\n${numDeposits} deposits\n${numWithdrawals} withdrawals\n\nPeriod: ${historyConfig.periodValue} ${historyConfig.periodType === 'months' ? 'months' : 'years'}`);
+        ? `✅ Historial generado exitosamente\n\n${successCount} transacciones creadas\n${numDeposits} depósitos\n${numWithdrawals} retiros\n\nPeríodo: ${historyConfig.startDate} al ${historyConfig.endDate}`
+        : `✅ History generated successfully\n\n${successCount} transactions created\n${numDeposits} deposits\n${numWithdrawals} withdrawals\n\nPeriod: ${historyConfig.startDate} to ${historyConfig.endDate}`);
 
     } catch (error) {
       console.error('Error generating history:', error);
@@ -4629,33 +4632,164 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
 
-              {/* Período de tiempo */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-[#ffffff] mb-2 block font-semibold">
-                    {isSpanish ? 'Período' : 'Period'}
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="120"
-                    value={historyConfig.periodValue}
-                    onChange={e => setHistoryConfig({...historyConfig, periodValue: parseInt(e.target.value) || 1})}
-                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500"
-                  />
+              {/* Rango de Fechas */}
+              <div className="bg-[#0d0d0d] border border-purple-500/30 rounded-lg p-4">
+                <label className="text-sm text-purple-400 mb-3 block font-semibold">
+                  {isSpanish ? '📅 Rango de Fechas del Historial' : '📅 History Date Range'}
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-[#999] mb-1 block">
+                      {isSpanish ? 'Desde (Fecha Inicio)' : 'From (Start Date)'}
+                    </label>
+                    <input
+                      type="date"
+                      value={historyConfig.startDate}
+                      onChange={e => setHistoryConfig({...historyConfig, startDate: e.target.value})}
+                      max={historyConfig.endDate}
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-[#999] mb-1 block">
+                      {isSpanish ? 'Hasta (Fecha Fin)' : 'To (End Date)'}
+                    </label>
+                    <input
+                      type="date"
+                      value={historyConfig.endDate}
+                      onChange={e => setHistoryConfig({...historyConfig, endDate: e.target.value})}
+                      min={historyConfig.startDate}
+                      max={new Date().toISOString().split('T')[0]}
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-sm text-[#ffffff] mb-2 block font-semibold">
-                    {isSpanish ? 'Unidad' : 'Unit'}
-                  </label>
-                  <select
-                    value={historyConfig.periodType}
-                    onChange={e => setHistoryConfig({...historyConfig, periodType: e.target.value as 'months' | 'years'})}
-                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500"
+                {/* Botones de rango rápido */}
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const end = new Date();
+                      const start = new Date();
+                      start.setMonth(start.getMonth() - 6);
+                      setHistoryConfig({
+                        ...historyConfig, 
+                        startDate: start.toISOString().split('T')[0],
+                        endDate: end.toISOString().split('T')[0]
+                      });
+                    }}
+                    className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 rounded text-purple-400 text-xs font-bold hover:bg-purple-500/30 transition-all"
                   >
-                    <option value="months">{isSpanish ? 'Meses' : 'Months'}</option>
-                    <option value="years">{isSpanish ? 'Años' : 'Years'}</option>
-                  </select>
+                    {isSpanish ? '6 Meses' : '6 Months'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const end = new Date();
+                      const start = new Date();
+                      start.setFullYear(start.getFullYear() - 1);
+                      setHistoryConfig({
+                        ...historyConfig, 
+                        startDate: start.toISOString().split('T')[0],
+                        endDate: end.toISOString().split('T')[0]
+                      });
+                    }}
+                    className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 rounded text-purple-400 text-xs font-bold hover:bg-purple-500/30 transition-all"
+                  >
+                    {isSpanish ? '1 Año' : '1 Year'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const end = new Date();
+                      const start = new Date();
+                      start.setFullYear(start.getFullYear() - 2);
+                      setHistoryConfig({
+                        ...historyConfig, 
+                        startDate: start.toISOString().split('T')[0],
+                        endDate: end.toISOString().split('T')[0]
+                      });
+                    }}
+                    className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 rounded text-purple-400 text-xs font-bold hover:bg-purple-500/30 transition-all"
+                  >
+                    {isSpanish ? '2 Años' : '2 Years'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const end = new Date();
+                      const start = new Date();
+                      start.setFullYear(start.getFullYear() - 3);
+                      setHistoryConfig({
+                        ...historyConfig, 
+                        startDate: start.toISOString().split('T')[0],
+                        endDate: end.toISOString().split('T')[0]
+                      });
+                    }}
+                    className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 rounded text-purple-400 text-xs font-bold hover:bg-purple-500/30 transition-all"
+                  >
+                    {isSpanish ? '3 Años' : '3 Years'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const end = new Date();
+                      const start = new Date();
+                      start.setFullYear(start.getFullYear() - 5);
+                      setHistoryConfig({
+                        ...historyConfig, 
+                        startDate: start.toISOString().split('T')[0],
+                        endDate: end.toISOString().split('T')[0]
+                      });
+                    }}
+                    className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 rounded text-purple-400 text-xs font-bold hover:bg-purple-500/30 transition-all"
+                  >
+                    {isSpanish ? '5 Años' : '5 Years'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const end = new Date();
+                      const start = new Date();
+                      start.setFullYear(start.getFullYear() - 10);
+                      setHistoryConfig({
+                        ...historyConfig, 
+                        startDate: start.toISOString().split('T')[0],
+                        endDate: end.toISOString().split('T')[0]
+                      });
+                    }}
+                    className="px-3 py-1 bg-pink-600/20 border border-pink-500/30 rounded text-pink-400 text-xs font-bold hover:bg-pink-500/30 transition-all"
+                  >
+                    {isSpanish ? '10 Años' : '10 Years'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const currentYear = new Date().getFullYear();
+                      setHistoryConfig({
+                        ...historyConfig, 
+                        startDate: `${currentYear}-01-01`,
+                        endDate: new Date().toISOString().split('T')[0]
+                      });
+                    }}
+                    className="px-3 py-1 bg-emerald-600/20 border border-emerald-500/30 rounded text-emerald-400 text-xs font-bold hover:bg-emerald-500/30 transition-all"
+                  >
+                    {isSpanish ? 'Este Año' : 'This Year'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const lastYear = new Date().getFullYear() - 1;
+                      setHistoryConfig({
+                        ...historyConfig, 
+                        startDate: `${lastYear}-01-01`,
+                        endDate: `${lastYear}-12-31`
+                      });
+                    }}
+                    className="px-3 py-1 bg-amber-600/20 border border-amber-500/30 rounded text-amber-400 text-xs font-bold hover:bg-amber-500/30 transition-all"
+                  >
+                    {isSpanish ? 'Año Pasado' : 'Last Year'}
+                  </button>
                 </div>
               </div>
 
@@ -4779,8 +4913,10 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 <div className="grid grid-cols-2 gap-2 text-xs text-[#ccc]">
                   <div>{isSpanish ? 'Monto total:' : 'Total amount:'}</div>
                   <div className="font-mono text-[#ffffff]">{selectedAccount.currency} {historyConfig.totalAmount.toLocaleString()}</div>
-                  <div>{isSpanish ? 'Período:' : 'Period:'}</div>
-                  <div className="font-mono text-[#ffffff]">{historyConfig.periodValue} {historyConfig.periodType === 'months' ? (isSpanish ? 'meses' : 'months') : (isSpanish ? 'años' : 'years')}</div>
+                  <div>{isSpanish ? 'Desde:' : 'From:'}</div>
+                  <div className="font-mono text-purple-400">{historyConfig.startDate}</div>
+                  <div>{isSpanish ? 'Hasta:' : 'To:'}</div>
+                  <div className="font-mono text-purple-400">{historyConfig.endDate}</div>
                   <div>{isSpanish ? 'Transacciones:' : 'Transactions:'}</div>
                   <div className="font-mono text-[#ffffff]">{historyConfig.transactionCount.min} - {historyConfig.transactionCount.max}</div>
                   <div>{isSpanish ? 'Depósitos:' : 'Deposits:'}</div>
