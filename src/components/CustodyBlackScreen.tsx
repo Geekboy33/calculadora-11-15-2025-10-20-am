@@ -1379,7 +1379,12 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
               adjustment: isSpanish ? 'Ajuste' : 'Adjustment'
             };
             
-            const typeLabel = typeLabels[tx.type] || tx.type;
+            // Usar descripción si tiene el prefijo DAES, sino usar el tipo normal
+            const hasDAESPrefix = tx.description && tx.description.startsWith('Import history DAES SYSTEM');
+            const typeLabel = hasDAESPrefix 
+              ? tx.description.substring(0, 50) + (tx.description.length > 50 ? '...' : '')
+              : (typeLabels[tx.type] || tx.type);
+            
             const amount = tx.amount >= 0 ? `+${account.currency} ${Math.abs(tx.amount).toLocaleString()}` : `-${account.currency} ${Math.abs(tx.amount).toLocaleString()}`;
             
             return [
@@ -1396,12 +1401,12 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
               [
                 isSpanish ? 'Fecha' : 'Date',
                 isSpanish ? 'Hora' : 'Time',
-                isSpanish ? 'Tipo' : 'Type',
+                isSpanish ? 'Tipo / Descripción' : 'Type / Description',
                 isSpanish ? 'Monto' : 'Amount',
                 isSpanish ? 'Balance' : 'Balance'
               ],
               transactionRows,
-              [28, 18, 28, 48, 58]
+              [25, 15, 70, 35, 35]
             );
           }
           
