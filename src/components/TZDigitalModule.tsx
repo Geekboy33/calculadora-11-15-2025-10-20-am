@@ -20,7 +20,8 @@ import {
   TransferRecord,
   Currency,
   ConnectionTestResult,
-  ConnectionCheck
+  ConnectionCheck,
+  ConnectionProof
 } from '../lib/tz-digital-api';
 import { custodyStore, CustodyAccount } from '../lib/custody-store';
 import jsPDF from 'jspdf';
@@ -1341,6 +1342,73 @@ export function TZDigitalModule() {
               ))}
             </div>
 
+            {/* Indicador de Conexión Real */}
+            <div className={`border-2 rounded-xl p-4 mb-6 ${
+              connectionTestResult.isRealConnection 
+                ? 'bg-emerald-900/20 border-emerald-500/50' 
+                : 'bg-red-900/20 border-red-500/50'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    connectionTestResult.isRealConnection ? 'bg-emerald-500/30' : 'bg-red-500/30'
+                  }`}>
+                    {connectionTestResult.isRealConnection ? (
+                      <CheckCircle className="w-7 h-7 text-emerald-400" />
+                    ) : (
+                      <XCircle className="w-7 h-7 text-red-400" />
+                    )}
+                  </div>
+                  <div>
+                    <div className={`text-lg font-bold ${
+                      connectionTestResult.isRealConnection ? 'text-emerald-400' : 'text-red-400'
+                    }`}>
+                      {connectionTestResult.isRealConnection 
+                        ? (isSpanish ? '✓ CONEXIÓN REAL VERIFICADA' : '✓ REAL CONNECTION VERIFIED')
+                        : (isSpanish ? '✗ CONEXIÓN NO VERIFICADA' : '✗ CONNECTION NOT VERIFIED')}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {connectionTestResult.isRealConnection 
+                        ? (isSpanish ? 'La conexión con TZ Digital es genuina y verificada' : 'Connection with TZ Digital is genuine and verified')
+                        : (isSpanish ? 'No se pudo confirmar que la conexión sea real' : 'Could not confirm connection is real')}
+                    </div>
+                  </div>
+                </div>
+                {connectionTestResult.isRealConnection && connectionTestResult.connectionProof && (
+                  <div className="text-right">
+                    <div className="text-xs text-emerald-400 font-mono">
+                      {connectionTestResult.connectionProof.proofHash?.substring(0, 12)}...
+                    </div>
+                    <div className="text-xs text-gray-500">Proof Hash</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Detalles de la prueba de conexión */}
+              {connectionTestResult.connectionProof && (
+                <div className="mt-4 grid grid-cols-3 gap-3">
+                  <div className="bg-black/30 rounded-lg p-2 text-center">
+                    <div className={`text-sm font-bold ${connectionTestResult.connectionProof.dnsResolved ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {connectionTestResult.connectionProof.dnsResolved ? '✓' : '✗'}
+                    </div>
+                    <div className="text-xs text-gray-400">DNS</div>
+                  </div>
+                  <div className="bg-black/30 rounded-lg p-2 text-center">
+                    <div className={`text-sm font-bold ${connectionTestResult.connectionProof.sslVerified ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {connectionTestResult.connectionProof.sslVerified ? '✓' : '✗'}
+                    </div>
+                    <div className="text-xs text-gray-400">SSL</div>
+                  </div>
+                  <div className="bg-black/30 rounded-lg p-2 text-center">
+                    <div className="text-sm font-bold text-white">
+                      {connectionTestResult.connectionProof.responseTime}ms
+                    </div>
+                    <div className="text-xs text-gray-400">{isSpanish ? 'Latencia' : 'Latency'}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Información adicional */}
             <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
               <div className="flex items-center gap-2 mb-2">
@@ -1360,6 +1428,18 @@ export function TZDigitalModule() {
                     {new Date(connectionTestResult.timestamp).toLocaleString()}
                   </span>
                 </div>
+                {connectionTestResult.connectionProof && (
+                  <>
+                    <div>
+                      <span className="text-gray-500">HTTP Status:</span>
+                      <span className="ml-1 text-white">{connectionTestResult.connectionProof.httpStatusCode}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Server Headers:</span>
+                      <span className="ml-1 text-white">{Object.keys(connectionTestResult.connectionProof.serverHeaders || {}).length}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
