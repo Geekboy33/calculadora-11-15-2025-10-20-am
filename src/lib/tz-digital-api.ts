@@ -14,14 +14,41 @@
 // URL directa de TZ Digital
 const TZ_DIRECT_URL = "https://banktransfer.tzdigitalpvtlimited.com/api/transactions";
 
+// Servidor local Express (para Electron y producción)
+const LOCAL_SERVER_URL = "http://localhost:3000";
+
 // Proxy local para evitar CORS en browser
 const TZ_PROXY_URL = "/api/tz-digital/transactions";
 const TZ_PROXY_TEST_URL = "/api/tz-digital/test";
 
-// Detectar si estamos en browser y usar proxy
+// Detectar entorno
 const IS_BROWSER = typeof window !== 'undefined';
-const API_URL = IS_BROWSER ? TZ_PROXY_URL : TZ_DIRECT_URL;
-const TEST_URL = IS_BROWSER ? TZ_PROXY_TEST_URL : TZ_DIRECT_URL;
+const IS_ELECTRON = IS_BROWSER && ((window as any).electron !== undefined || navigator.userAgent.includes('Electron'));
+const IS_FILE_PROTOCOL = IS_BROWSER && window.location.protocol === 'file:';
+const IS_PRODUCTION = IS_BROWSER && !window.location.hostname.includes('localhost') && window.location.protocol !== 'file:';
+
+// Determinar URLs según entorno
+// En Electron o file:// usamos el servidor local directamente
+// En desarrollo web usamos el proxy de Vite
+const getApiUrl = () => {
+  if (IS_ELECTRON || IS_FILE_PROTOCOL) {
+    return `${LOCAL_SERVER_URL}/api/tz-digital/transactions`;
+  }
+  return TZ_PROXY_URL;
+};
+
+const getTestUrl = () => {
+  if (IS_ELECTRON || IS_FILE_PROTOCOL) {
+    return `${LOCAL_SERVER_URL}/api/tz-digital/test`;
+  }
+  return TZ_PROXY_TEST_URL;
+};
+
+const API_URL = getApiUrl();
+const TEST_URL = getTestUrl();
+
+// Estado del servidor local
+let localServerAvailable: boolean | null = null;
 
 const DEFAULT_TIMEOUT = 25000; // 25 segundos
 
@@ -946,22 +973,35 @@ class TZDigitalTransferClient {
 
     if (!IS_BROWSER) return errors;
 
+    // Determinar la URL de test según el entorno
+    const testUrl = (IS_ELECTRON || IS_FILE_PROTOCOL) 
+      ? `${LOCAL_SERVER_URL}/api/tz-digital/test`
+      : '/api/tz-digital/test';
+
+    console.log(`[TZDigital] 🔍 Probando proxy en: ${testUrl} (Electron: ${IS_ELECTRON}, File: ${IS_FILE_PROTOCOL})`);
+
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-      const response = await fetch('/api/tz-digital/test', {
+      const response = await fetch(testUrl, {
         method: 'GET',
-        signal: controller.signal
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+        }
       });
 
       clearTimeout(timeoutId);
+      localServerAvailable = response.ok;
 
       if (response.status === 404) {
         errors.push({
           code: 'PROXY_NOT_FOUND',
           message: 'Proxy local no encontrado',
-          details: 'El servidor backend no está corriendo o el endpoint no existe',
+          details: IS_ELECTRON || IS_FILE_PROTOCOL
+            ? `Servidor local no responde en ${LOCAL_SERVER_URL}. Abre una terminal y ejecuta: cd server && node index.js`
+            : 'El servidor backend no está corriendo o el endpoint no existe. Ejecuta: cd server && node index.js',
           timestamp: new Date().toISOString()
         });
       } else if (!response.ok && response.status !== 500) {
@@ -970,17 +1010,58 @@ class TZDigitalTransferClient {
           message: `Proxy responde con error HTTP ${response.status}`,
           timestamp: new Date().toISOString()
         });
+      } else {
+        console.log('[TZDigital] ✅ Proxy local disponible');
       }
     } catch (err: any) {
+      localServerAvailable = false;
+      
+      const isNetworkError = err?.name === 'TypeError' || err?.message?.includes('fetch');
+      const isAbortError = err?.name === 'AbortError';
+      
       errors.push({
         code: 'PROXY_UNREACHABLE',
-        message: 'No se puede conectar al proxy local',
-        details: 'Verifica que el servidor backend esté corriendo: cd server && node index.js',
+        message: 'No se puede conectar al servidor local',
+        details: IS_ELECTRON || IS_FILE_PROTOCOL
+          ? `⚠️ IMPORTANTE: Debes iniciar el servidor manualmente.\n\n1. Abre PowerShell o Terminal\n2. Navega a: ${window.location.href.includes('file:') ? 'tu directorio del proyecto' : ''}\n3. Ejecuta: cd server && node index.js\n4. Espera ver: "Server listening on port 3000"\n5. Vuelve a probar la conexión`
+          : isAbortError 
+            ? 'Timeout: El servidor tardó demasiado en responder'
+            : isNetworkError
+              ? 'Error de red: Verifica que el servidor esté corriendo en puerto 3000'
+              : `Error: ${err?.message || 'Error desconocido'}`,
         timestamp: new Date().toISOString()
       });
     }
 
     return errors;
+  }
+
+  // Verificar si el servidor local está disponible
+  async checkLocalServerAvailable(): Promise<boolean> {
+    if (localServerAvailable !== null) {
+      return localServerAvailable;
+    }
+
+    try {
+      const testUrl = (IS_ELECTRON || IS_FILE_PROTOCOL) 
+        ? `${LOCAL_SERVER_URL}/api/tz-digital/test`
+        : '/api/tz-digital/test';
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(testUrl, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      localServerAvailable = response.ok || response.status < 500;
+      return localServerAvailable;
+    } catch {
+      localServerAvailable = false;
+      return false;
+    }
   }
 
   private async diagnoseAuthentication(): Promise<ConnectionError[]> {
@@ -1116,7 +1197,15 @@ class TZDigitalTransferClient {
       'PROXY_NOT_FOUND': {
         errorCode: 'PROXY_NOT_FOUND',
         description: 'Iniciar servidor backend',
-        steps: [
+        steps: IS_ELECTRON || IS_FILE_PROTOCOL ? [
+          '⚠️ ESTÁS USANDO EL INSTALADOR DE ESCRITORIO',
+          '1. Abre PowerShell o CMD como administrador',
+          '2. Navega al directorio donde instalaste la app',
+          '3. Entra a la carpeta "server": cd server',
+          '4. Ejecuta: node index.js',
+          '5. Deja la ventana abierta',
+          '6. Vuelve a la app y prueba la conexión'
+        ] : [
           '1. Abre una terminal',
           '2. Navega al directorio del proyecto',
           '3. Ejecuta: cd server && node index.js',
@@ -1127,8 +1216,19 @@ class TZDigitalTransferClient {
       },
       'PROXY_UNREACHABLE': {
         errorCode: 'PROXY_UNREACHABLE',
-        description: 'Reiniciar servidor proxy',
-        steps: [
+        description: 'Servidor local no disponible',
+        steps: IS_ELECTRON || IS_FILE_PROTOCOL ? [
+          '⚠️ EL SERVIDOR LOCAL DEBE EJECUTARSE MANUALMENTE',
+          '',
+          '📋 PASOS PARA WINDOWS:',
+          '1. Presiona Win + X y selecciona "Terminal"',
+          `2. Escribe: cd "${process.env.PORTABLE_EXECUTABLE_DIR || 'C:\\ruta\\a\\tu\\proyecto'}"`,
+          '3. Luego: cd server',
+          '4. Finalmente: node index.js',
+          '',
+          '✅ Debes ver: "Server listening on port 3000"',
+          '⚠️ NO cierres la terminal mientras uses la app'
+        ] : [
           '1. Detén el servidor actual (Ctrl+C)',
           '2. Ejecuta: cd server && node index.js',
           '3. Verifica que no haya errores en la consola'
