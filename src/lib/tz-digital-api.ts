@@ -98,6 +98,32 @@ export interface ApiResult<T = any> {
   timestamp: string;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// TIPOS PARA TEST DE CONEXIÓN ROBUSTO
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface ConnectionCheck {
+  name: string;
+  status: 'pending' | 'passed' | 'failed' | 'warning';
+  message: string;
+  duration: number;
+  details?: any;
+}
+
+export interface ConnectionTestResult {
+  success: boolean;
+  message: string;
+  checks: ConnectionCheck[];
+  summary: {
+    total: number;
+    passed: number;
+    failed: number;
+    warnings: number;
+    duration: number;
+  };
+  timestamp: string;
+}
+
 export interface TransferRecord {
   id: string;
   payload: MoneyTransferPayload;
@@ -430,23 +456,134 @@ class TZDigitalTransferClient {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Test de conexión
+  // Test de conexión ROBUSTO
   // ─────────────────────────────────────────────────────────────────────────
 
-  async testConnection(): Promise<{ success: boolean; message: string; details?: any }> {
+  async testConnection(): Promise<ConnectionTestResult> {
+    const startTime = Date.now();
+    const checks: ConnectionCheck[] = [];
+
+    console.log('[TZDigital] 🔍 Iniciando verificación robusta de conexión...');
+
+    // CHECK 1: Verificar configuración
+    const configCheck: ConnectionCheck = {
+      name: 'Configuración',
+      status: 'pending',
+      message: '',
+      duration: 0
+    };
+    
     if (!this.config.bearerToken) {
-      return { success: false, message: 'Bearer Token no configurado' };
+      configCheck.status = 'failed';
+      configCheck.message = 'Bearer Token no configurado';
+      checks.push(configCheck);
+      return this.buildTestResult(false, checks, startTime);
     }
+    
+    if (this.config.bearerToken.length < 10) {
+      configCheck.status = 'warning';
+      configCheck.message = 'Bearer Token parece demasiado corto';
+    } else {
+      configCheck.status = 'passed';
+      configCheck.message = `Token configurado (${this.config.bearerToken.substring(0, 8)}...)`;
+    }
+    checks.push(configCheck);
+
+    // CHECK 2: Verificar proxy local (solo en browser)
+    if (IS_BROWSER) {
+      const proxyCheck = await this.checkLocalProxy();
+      checks.push(proxyCheck);
+      
+      if (proxyCheck.status === 'failed') {
+        return this.buildTestResult(false, checks, startTime);
+      }
+    }
+
+    // CHECK 3: Verificar endpoint de test
+    const endpointCheck = await this.checkEndpoint();
+    checks.push(endpointCheck);
+
+    // CHECK 4: Verificar autenticación
+    const authCheck = await this.checkAuthentication();
+    checks.push(authCheck);
+
+    // CHECK 5: Verificar latencia
+    const latencyCheck = await this.checkLatency();
+    checks.push(latencyCheck);
+
+    // Determinar resultado final
+    const hasFailures = checks.some(c => c.status === 'failed');
+    const hasWarnings = checks.some(c => c.status === 'warning');
+    
+    return this.buildTestResult(!hasFailures, checks, startTime, hasWarnings);
+  }
+
+  private async checkLocalProxy(): Promise<ConnectionCheck> {
+    const check: ConnectionCheck = {
+      name: 'Proxy Local',
+      status: 'pending',
+      message: '',
+      duration: 0
+    };
+    const start = Date.now();
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch('/api/tz-digital/test', {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+          'X-TZ-Token': this.config.bearerToken,
+        },
+      });
+
+      clearTimeout(timeoutId);
+      check.duration = Date.now() - start;
+
+      if (response.ok) {
+        const data = await response.json().catch(() => ({}));
+        check.status = 'passed';
+        check.message = `Proxy activo (${check.duration}ms)`;
+        check.details = data;
+      } else if (response.status === 404) {
+        check.status = 'failed';
+        check.message = 'Proxy no encontrado - Verifica que el servidor backend esté corriendo';
+      } else {
+        check.status = 'warning';
+        check.message = `Proxy responde con HTTP ${response.status}`;
+      }
+    } catch (err: any) {
+      check.duration = Date.now() - start;
+      if (err?.name === 'AbortError') {
+        check.status = 'failed';
+        check.message = 'Timeout conectando al proxy local';
+      } else {
+        check.status = 'failed';
+        check.message = `Error de proxy: ${err?.message || 'Conexión rechazada'}`;
+        check.details = { error: err?.message, hint: 'Ejecuta: cd server && node index.js' };
+      }
+    }
+
+    return check;
+  }
+
+  private async checkEndpoint(): Promise<ConnectionCheck> {
+    const check: ConnectionCheck = {
+      name: 'Endpoint TZ Digital',
+      status: 'pending',
+      message: '',
+      duration: 0
+    };
+    const start = Date.now();
 
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      // Usar endpoint de test del proxy en browser
-      const testUrl = IS_BROWSER ? TEST_URL : this.config.baseUrl;
+      const testUrl = IS_BROWSER ? '/api/tz-digital/test' : TZ_DIRECT_URL;
       
-      console.log(`[TZDigital] 🔍 Test de conexión a: ${testUrl}`);
-
       const response = await fetch(testUrl, {
         method: IS_BROWSER ? 'GET' : 'OPTIONS',
         signal: controller.signal,
@@ -457,35 +594,218 @@ class TZDigitalTransferClient {
       });
 
       clearTimeout(timeoutId);
+      check.duration = Date.now() - start;
 
-      // En browser, el proxy devuelve JSON
-      let result = { success: false, message: '' };
-      if (IS_BROWSER) {
-        try {
-          result = await response.json();
-        } catch {
-          result = { success: response.ok, message: `HTTP ${response.status}` };
-        }
+      // Cualquier respuesta del servidor indica que está accesible
+      if (response.ok || response.status === 405 || response.status === 401 || response.status === 403) {
+        check.status = 'passed';
+        check.message = `Servidor accesible (HTTP ${response.status}, ${check.duration}ms)`;
+      } else if (response.status === 404) {
+        check.status = 'warning';
+        check.message = 'Endpoint responde pero ruta no encontrada';
+      } else {
+        check.status = 'warning';
+        check.message = `Servidor responde HTTP ${response.status}`;
       }
 
-      return {
-        success: IS_BROWSER ? result.success : (response.ok || response.status === 405 || response.status === 404),
-        message: IS_BROWSER ? result.message : (response.ok 
-          ? 'Conexión exitosa'
-          : `Servidor responde (HTTP ${response.status})`),
-        details: {
-          status: response.status,
-          statusText: response.statusText,
-        },
+      check.details = {
+        status: response.status,
+        statusText: response.statusText,
+        url: testUrl
       };
 
     } catch (err: any) {
-      return {
-        success: false,
-        message: err?.name === 'AbortError' ? 'Timeout de conexión' : 'Error de conexión',
-        details: String(err?.message || err),
-      };
+      check.duration = Date.now() - start;
+      
+      if (err?.name === 'AbortError') {
+        check.status = 'failed';
+        check.message = 'Timeout - El servidor no responde en 10s';
+      } else if (err?.message?.includes('ENOTFOUND') || err?.message?.includes('DNS')) {
+        check.status = 'failed';
+        check.message = 'Error DNS - No se puede resolver el dominio';
+      } else if (err?.message?.includes('ECONNREFUSED')) {
+        check.status = 'failed';
+        check.message = 'Conexión rechazada por el servidor';
+      } else if (err?.message?.includes('SSL') || err?.message?.includes('certificate')) {
+        check.status = 'failed';
+        check.message = 'Error de certificado SSL';
+      } else {
+        check.status = 'failed';
+        check.message = `Error de red: ${err?.message || 'Desconocido'}`;
+      }
+      
+      check.details = { error: err?.message };
     }
+
+    return check;
+  }
+
+  private async checkAuthentication(): Promise<ConnectionCheck> {
+    const check: ConnectionCheck = {
+      name: 'Autenticación',
+      status: 'pending',
+      message: '',
+      duration: 0
+    };
+    const start = Date.now();
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      // Enviar una petición mínima para verificar el token
+      const testUrl = IS_BROWSER ? '/api/tz-digital/transactions' : TZ_DIRECT_URL;
+      
+      const response = await fetch(testUrl, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.config.bearerToken}`,
+          'X-TZ-Token': this.config.bearerToken,
+        },
+        body: JSON.stringify({
+          amount: 0.01,
+          currency: 'USD',
+          reference: `TEST-${Date.now()}`,
+          _test: true
+        }),
+      });
+
+      clearTimeout(timeoutId);
+      check.duration = Date.now() - start;
+
+      let responseData: any = {};
+      try {
+        responseData = await response.json();
+      } catch {
+        // Ignorar error de parsing
+      }
+
+      if (response.status === 401) {
+        check.status = 'failed';
+        check.message = 'Token inválido o expirado';
+        check.details = responseData;
+      } else if (response.status === 403) {
+        check.status = 'failed';
+        check.message = 'Token sin permisos suficientes';
+        check.details = responseData;
+      } else if (response.ok) {
+        check.status = 'passed';
+        check.message = 'Token válido y autorizado';
+      } else if (response.status === 400 || response.status === 422) {
+        // Error de validación significa que el token es válido pero el payload no
+        check.status = 'passed';
+        check.message = 'Token aceptado (validación de payload fallida - esperado)';
+      } else {
+        check.status = 'warning';
+        check.message = `Respuesta HTTP ${response.status} - Verificar manualmente`;
+        check.details = responseData;
+      }
+
+    } catch (err: any) {
+      check.duration = Date.now() - start;
+      check.status = 'warning';
+      check.message = 'No se pudo verificar autenticación';
+      check.details = { error: err?.message };
+    }
+
+    return check;
+  }
+
+  private async checkLatency(): Promise<ConnectionCheck> {
+    const check: ConnectionCheck = {
+      name: 'Latencia',
+      status: 'pending',
+      message: '',
+      duration: 0
+    };
+
+    const latencies: number[] = [];
+    const testUrl = IS_BROWSER ? '/api/tz-digital/test' : TZ_DIRECT_URL;
+
+    // Hacer 3 pings para medir latencia promedio
+    for (let i = 0; i < 3; i++) {
+      const start = Date.now();
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        await fetch(testUrl, {
+          method: IS_BROWSER ? 'GET' : 'HEAD',
+          signal: controller.signal,
+          headers: {
+            'X-TZ-Token': this.config.bearerToken,
+          },
+        });
+        
+        clearTimeout(timeoutId);
+        latencies.push(Date.now() - start);
+      } catch {
+        latencies.push(5000); // Timeout value
+      }
+    }
+
+    const avgLatency = Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length);
+    check.duration = avgLatency;
+
+    if (avgLatency < 500) {
+      check.status = 'passed';
+      check.message = `Excelente (${avgLatency}ms promedio)`;
+    } else if (avgLatency < 1500) {
+      check.status = 'passed';
+      check.message = `Buena (${avgLatency}ms promedio)`;
+    } else if (avgLatency < 3000) {
+      check.status = 'warning';
+      check.message = `Alta latencia (${avgLatency}ms promedio)`;
+    } else {
+      check.status = 'warning';
+      check.message = `Muy alta latencia (${avgLatency}ms promedio)`;
+    }
+
+    check.details = { latencies, average: avgLatency };
+    return check;
+  }
+
+  private buildTestResult(
+    success: boolean, 
+    checks: ConnectionCheck[], 
+    startTime: number,
+    hasWarnings: boolean = false
+  ): ConnectionTestResult {
+    const totalDuration = Date.now() - startTime;
+    const passed = checks.filter(c => c.status === 'passed').length;
+    const failed = checks.filter(c => c.status === 'failed').length;
+    const warnings = checks.filter(c => c.status === 'warning').length;
+
+    let message: string;
+    if (success && !hasWarnings) {
+      message = `✅ Conexión verificada (${passed}/${checks.length} checks OK)`;
+    } else if (success && hasWarnings) {
+      message = `⚠️ Conexión disponible con advertencias (${warnings} warnings)`;
+    } else {
+      message = `❌ Conexión fallida (${failed} errores)`;
+    }
+
+    console.log(`[TZDigital] ${message} - ${totalDuration}ms total`);
+    checks.forEach(c => {
+      const icon = c.status === 'passed' ? '✅' : c.status === 'warning' ? '⚠️' : '❌';
+      console.log(`[TZDigital]   ${icon} ${c.name}: ${c.message}`);
+    });
+
+    return {
+      success,
+      message,
+      checks,
+      summary: {
+        total: checks.length,
+        passed,
+        failed,
+        warnings,
+        duration: totalDuration
+      },
+      timestamp: new Date().toISOString()
+    };
   }
 
   // ─────────────────────────────────────────────────────────────────────────

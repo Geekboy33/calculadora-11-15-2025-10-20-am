@@ -18,7 +18,9 @@ import {
   MoneyTransferPayload, 
   TZDigitalConfig, 
   TransferRecord,
-  Currency 
+  Currency,
+  ConnectionTestResult,
+  ConnectionCheck
 } from '../lib/tz-digital-api';
 import { custodyStore, CustodyAccount } from '../lib/custody-store';
 import jsPDF from 'jspdf';
@@ -43,6 +45,10 @@ export function TZDigitalModule() {
   // Recibo generado
   const [lastTransferForReceipt, setLastTransferForReceipt] = useState<TransferRecord | null>(null);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
+
+  // Test de conexión
+  const [connectionTestResult, setConnectionTestResult] = useState<ConnectionTestResult | null>(null);
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
 
   // Formulario de transferencia
   const [transferForm, setTransferForm] = useState<MoneyTransferPayload>({
@@ -106,13 +112,34 @@ export function TZDigitalModule() {
   // Test de conexión
   const handleTestConnection = async () => {
     setIsLoading(true);
-    const result = await tzDigitalClient.testConnection();
-    setConnectionStatus(result.success ? 'connected' : 'error');
-    setIsLoading(false);
+    setConnectionTestResult(null);
     
-    alert(isSpanish 
-      ? `${result.success ? '✅' : '❌'} ${result.message}`
-      : `${result.success ? '✅' : '❌'} ${result.message}`);
+    const result = await tzDigitalClient.testConnection();
+    
+    setConnectionStatus(result.success ? 'connected' : 'error');
+    setConnectionTestResult(result);
+    setShowConnectionModal(true);
+    setIsLoading(false);
+  };
+
+  // Obtener icono para check
+  const getCheckIcon = (status: ConnectionCheck['status']) => {
+    switch (status) {
+      case 'passed': return <CheckCircle className="w-5 h-5 text-emerald-400" />;
+      case 'failed': return <XCircle className="w-5 h-5 text-red-400" />;
+      case 'warning': return <AlertTriangle className="w-5 h-5 text-yellow-400" />;
+      default: return <Clock className="w-5 h-5 text-gray-400" />;
+    }
+  };
+
+  // Color de fondo para check
+  const getCheckBgColor = (status: ConnectionCheck['status']) => {
+    switch (status) {
+      case 'passed': return 'bg-emerald-500/10 border-emerald-500/30';
+      case 'failed': return 'bg-red-500/10 border-red-500/30';
+      case 'warning': return 'bg-yellow-500/10 border-yellow-500/30';
+      default: return 'bg-gray-500/10 border-gray-500/30';
+    }
   };
 
   // Guardar configuración
@@ -1143,6 +1170,133 @@ export function TZDigitalModule() {
                   {isSpanish ? 'Descargar Recibo' : 'Download Receipt'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Test de Conexión Robusto */}
+      {showConnectionModal && connectionTestResult && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-blue-500/50 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                  connectionTestResult.success ? 'bg-emerald-500/20' : 'bg-red-500/20'
+                }`}>
+                  {connectionTestResult.success ? (
+                    <Wifi className="w-6 h-6 text-emerald-400" />
+                  ) : (
+                    <WifiOff className="w-6 h-6 text-red-400" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">
+                    {isSpanish ? 'Diagnóstico de Conexión' : 'Connection Diagnostics'}
+                  </h3>
+                  <p className={`text-sm ${connectionTestResult.success ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {connectionTestResult.message}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowConnectionModal(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Resumen */}
+            <div className="grid grid-cols-4 gap-3 mb-6">
+              <div className="bg-black/30 rounded-lg p-3 text-center">
+                <div className="text-xl font-bold text-white">{connectionTestResult.summary.total}</div>
+                <div className="text-xs text-gray-400">Total</div>
+              </div>
+              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 text-center">
+                <div className="text-xl font-bold text-emerald-400">{connectionTestResult.summary.passed}</div>
+                <div className="text-xs text-gray-400">{isSpanish ? 'Pasados' : 'Passed'}</div>
+              </div>
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
+                <div className="text-xl font-bold text-yellow-400">{connectionTestResult.summary.warnings}</div>
+                <div className="text-xs text-gray-400">{isSpanish ? 'Advertencias' : 'Warnings'}</div>
+              </div>
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-center">
+                <div className="text-xl font-bold text-red-400">{connectionTestResult.summary.failed}</div>
+                <div className="text-xs text-gray-400">{isSpanish ? 'Fallidos' : 'Failed'}</div>
+              </div>
+            </div>
+
+            {/* Checks detallados */}
+            <div className="space-y-3 mb-6">
+              <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                {isSpanish ? 'Verificaciones Realizadas' : 'Checks Performed'}
+              </h4>
+              {connectionTestResult.checks.map((check, idx) => (
+                <div 
+                  key={idx}
+                  className={`border rounded-lg p-4 ${getCheckBgColor(check.status)}`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      {getCheckIcon(check.status)}
+                      <span className="font-semibold text-white">{check.name}</span>
+                    </div>
+                    <span className="text-xs text-gray-400">{check.duration}ms</span>
+                  </div>
+                  <p className="text-sm text-gray-300">{check.message}</p>
+                  {check.details && check.status !== 'passed' && (
+                    <div className="mt-2 text-xs text-gray-500 bg-black/30 rounded p-2 font-mono">
+                      {typeof check.details === 'string' 
+                        ? check.details 
+                        : JSON.stringify(check.details, null, 2)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Información adicional */}
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-semibold text-blue-400">
+                  {isSpanish ? 'Información del Test' : 'Test Information'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                <div>
+                  <span className="text-gray-500">{isSpanish ? 'Duración Total:' : 'Total Duration:'}</span>
+                  <span className="ml-1 text-white">{connectionTestResult.summary.duration}ms</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">{isSpanish ? 'Fecha:' : 'Date:'}</span>
+                  <span className="ml-1 text-white">
+                    {new Date(connectionTestResult.timestamp).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConnectionModal(false)}
+                className="flex-1 px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+              >
+                {isSpanish ? 'Cerrar' : 'Close'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowConnectionModal(false);
+                  handleTestConnection();
+                }}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-500 hover:to-cyan-500 font-bold flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="w-5 h-5" />
+                {isSpanish ? 'Repetir Test' : 'Retest'}
+              </button>
             </div>
           </div>
         </div>
