@@ -23,7 +23,10 @@ import {
   ConnectionTestResult,
   ConnectionCheck,
   ConnectionProof,
-  TroubleshootResult
+  TroubleshootResult,
+  FundsTxPayload,
+  FundsProcessingConfig,
+  FundsProcessingResult
 } from '../lib/tz-digital-api';
 import { custodyStore, CustodyAccount } from '../lib/custody-store';
 import jsPDF from 'jspdf';
@@ -38,7 +41,7 @@ export function TZDigitalModule() {
   const [showToken, setShowToken] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'error'>('unknown');
-  const [activeTab, setActiveTab] = useState<'transfer' | 'history' | 'config'>('transfer');
+  const [activeTab, setActiveTab] = useState<'transfer' | 'funds' | 'history' | 'config'>('transfer');
 
   // Cuentas Custodio
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
@@ -76,6 +79,31 @@ export function TZDigitalModule() {
     purpose: 'Treasury Transfer',
     channel: 'API2API',
   });
+
+  // Funds Processing Form
+  const [fundsForm, setFundsForm] = useState<FundsTxPayload>({
+    transaction_id: '',
+    amount: 0,
+    currency: 'EUR',
+    from_bank: 'Digital Commercial Bank Ltd',
+    to_bank: '',
+    status: 'pending',
+    reference: '',
+    description: ''
+  });
+
+  // Funds Processing Config
+  const [fundsConfig, setFundsConfig] = useState<Partial<FundsProcessingConfig>>({
+    handshake: {
+      enabled: true,
+      mode: 'sha256',
+      headerName: 'X-Handshake-Hash'
+    }
+  });
+
+  // Funds Processing Result
+  const [fundsResult, setFundsResult] = useState<FundsProcessingResult | null>(null);
+  const [showFundsResult, setShowFundsResult] = useState(false);
 
   // Configuración temporal
   const [tempConfig, setTempConfig] = useState({
@@ -563,6 +591,62 @@ export function TZDigitalModule() {
     return filename;
   };
 
+  // Enviar Funds Processing Transaction con SHA256 Handshake
+  const handleSendFundsProcessing = async () => {
+    if (!tzDigitalClient.isConfigured()) {
+      alert(isSpanish 
+        ? '❌ Configura el Bearer Token primero' 
+        : '❌ Configure Bearer Token first');
+      setActiveTab('config');
+      return;
+    }
+
+    if (fundsForm.amount <= 0) {
+      alert(isSpanish ? '❌ Ingresa un monto válido' : '❌ Enter a valid amount');
+      return;
+    }
+
+    if (!fundsForm.to_bank) {
+      alert(isSpanish ? '❌ Ingresa el banco destino' : '❌ Enter destination bank');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Generar transaction_id si no existe
+      const payload: FundsTxPayload = {
+        ...fundsForm,
+        transaction_id: fundsForm.transaction_id || `CR${Date.now()}${Math.floor(Math.random() * 10000)}`,
+      };
+
+      const result = await tzDigitalClient.sendFundsProcessingTransaction(payload, fundsConfig);
+
+      setFundsResult(result);
+      setShowFundsResult(true);
+      loadTransfers();
+
+      if (result.ok) {
+        // Limpiar formulario
+        setFundsForm({
+          transaction_id: '',
+          amount: 0,
+          currency: 'EUR',
+          from_bank: 'Digital Commercial Bank Ltd',
+          to_bank: '',
+          status: 'pending',
+          reference: '',
+          description: ''
+        });
+      }
+
+    } catch (error: any) {
+      alert(`❌ Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Enviar transferencia
   const handleSendTransfer = async () => {
     if (!tzDigitalClient.isConfigured()) {
@@ -758,7 +842,18 @@ export function TZDigitalModule() {
             }`}
           >
             <Send className="w-5 h-5" />
-            {isSpanish ? 'Nueva Transferencia' : 'New Transfer'}
+            {isSpanish ? 'Transferencia' : 'Transfer'}
+          </button>
+          <button
+            onClick={() => setActiveTab('funds')}
+            className={`px-6 py-3 rounded-lg font-bold flex items-center gap-2 transition-all ${
+              activeTab === 'funds' 
+                ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white' 
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            }`}
+          >
+            <Shield className="w-5 h-5" />
+            {isSpanish ? 'Funds Processing' : 'Funds Processing'}
           </button>
           <button
             onClick={() => setActiveTab('history')}
@@ -1088,6 +1183,246 @@ export function TZDigitalModule() {
                   <>
                     <Send className="w-6 h-6" />
                     {isSpanish ? 'Enviar Transferencia' : 'Send Transfer'} {transferForm.currency} {transferForm.amount.toLocaleString()}
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Funds Processing - SHA256 Handshake */}
+          {activeTab === 'funds' && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <Shield className="w-6 h-6 text-amber-400" />
+                <div>
+                  <h3 className="text-xl font-bold text-white">
+                    {isSpanish ? 'Funds Processing Transaction' : 'Funds Processing Transaction'}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {isSpanish ? 'Transacción con SHA256 Handshake Hash' : 'Transaction with SHA256 Handshake Hash'}
+                  </p>
+                </div>
+              </div>
+
+              {/* SHA256 Handshake Info */}
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <Shield className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-amber-300">
+                      {isSpanish ? 'SHA256 Handshake Verificación' : 'SHA256 Handshake Verification'}
+                    </h4>
+                    <p className="text-sm text-gray-300 mt-1">
+                      {isSpanish 
+                        ? 'Cada transacción incluye un hash SHA256 del payload para verificación de integridad.'
+                        : 'Each transaction includes a SHA256 hash of the payload for integrity verification.'}
+                    </p>
+                    <div className="flex items-center gap-4 mt-2 text-xs">
+                      <span className="text-emerald-400">✓ SHA-256</span>
+                      <span className="text-emerald-400">✓ Canonical JSON</span>
+                      <span className={fundsConfig.handshake?.mode === 'hmac-sha256' ? 'text-emerald-400' : 'text-gray-500'}>
+                        {fundsConfig.handshake?.mode === 'hmac-sha256' ? '✓' : '○'} HMAC-SHA256
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Formulario */}
+              <div className="grid grid-cols-2 gap-6">
+                {/* Transaction ID */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Transaction ID
+                  </label>
+                  <input
+                    type="text"
+                    value={fundsForm.transaction_id}
+                    onChange={(e) => setFundsForm({...fundsForm, transaction_id: e.target.value})}
+                    placeholder="CR38828530 (auto-generado si vacío)"
+                    className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+
+                {/* Monto */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {isSpanish ? 'Monto' : 'Amount'}
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={fundsForm.amount || ''}
+                      onChange={(e) => setFundsForm({...fundsForm, amount: parseFloat(e.target.value) || 0})}
+                      placeholder="500165420800.00"
+                      className="flex-1 px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                    />
+                    <select
+                      value={fundsForm.currency}
+                      onChange={(e) => setFundsForm({...fundsForm, currency: e.target.value})}
+                      className="px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                    >
+                      <option value="EUR">EUR</option>
+                      <option value="USD">USD</option>
+                      <option value="GBP">GBP</option>
+                      <option value="CHF">CHF</option>
+                      <option value="JPY">JPY</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* From Bank */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {isSpanish ? 'Banco Origen' : 'From Bank'}
+                  </label>
+                  <input
+                    type="text"
+                    value={fundsForm.from_bank}
+                    onChange={(e) => setFundsForm({...fundsForm, from_bank: e.target.value})}
+                    placeholder="Deutsche Bank AG"
+                    className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+
+                {/* To Bank */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {isSpanish ? 'Banco Destino' : 'To Bank'}
+                  </label>
+                  <input
+                    type="text"
+                    value={fundsForm.to_bank}
+                    onChange={(e) => setFundsForm({...fundsForm, to_bank: e.target.value})}
+                    placeholder="HSBC UK Bank plc"
+                    className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={fundsForm.status}
+                    onChange={(e) => setFundsForm({...fundsForm, status: e.target.value})}
+                    className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+
+                {/* Reference */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {isSpanish ? 'Referencia' : 'Reference'}
+                  </label>
+                  <input
+                    type="text"
+                    value={fundsForm.reference || ''}
+                    onChange={(e) => setFundsForm({...fundsForm, reference: e.target.value})}
+                    placeholder="TREASURY-2025-001"
+                    className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {isSpanish ? 'Descripción' : 'Description'}
+                  </label>
+                  <input
+                    type="text"
+                    value={fundsForm.description || ''}
+                    onChange={(e) => setFundsForm({...fundsForm, description: e.target.value})}
+                    placeholder={isSpanish ? 'Transferencia de tesorería API2API' : 'Treasury transfer API2API'}
+                    className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Handshake Config */}
+              <div className="bg-black/40 rounded-xl p-4">
+                <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-amber-400" />
+                  {isSpanish ? 'Configuración Handshake' : 'Handshake Configuration'}
+                </h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="handshakeEnabled"
+                      checked={fundsConfig.handshake?.enabled !== false}
+                      onChange={(e) => setFundsConfig({
+                        ...fundsConfig,
+                        handshake: { ...fundsConfig.handshake, enabled: e.target.checked }
+                      })}
+                      className="w-4 h-4 accent-amber-500"
+                    />
+                    <label htmlFor="handshakeEnabled" className="text-sm text-gray-300">
+                      {isSpanish ? 'Habilitar' : 'Enable'}
+                    </label>
+                  </div>
+                  <div>
+                    <select
+                      value={fundsConfig.handshake?.mode || 'sha256'}
+                      onChange={(e) => setFundsConfig({
+                        ...fundsConfig,
+                        handshake: { ...fundsConfig.handshake, mode: e.target.value as 'sha256' | 'hmac-sha256' }
+                      })}
+                      className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded-lg text-white text-sm focus:border-amber-500 focus:outline-none"
+                    >
+                      <option value="sha256">SHA-256</option>
+                      <option value="hmac-sha256">HMAC-SHA256</option>
+                    </select>
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      value={fundsConfig.handshake?.headerName || 'X-Handshake-Hash'}
+                      onChange={(e) => setFundsConfig({
+                        ...fundsConfig,
+                        handshake: { ...fundsConfig.handshake, headerName: e.target.value }
+                      })}
+                      placeholder="Header Name"
+                      className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded-lg text-white text-sm focus:border-amber-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+                {fundsConfig.handshake?.mode === 'hmac-sha256' && (
+                  <div className="mt-3">
+                    <input
+                      type="password"
+                      value={fundsConfig.handshake?.secret || ''}
+                      onChange={(e) => setFundsConfig({
+                        ...fundsConfig,
+                        handshake: { ...fundsConfig.handshake, secret: e.target.value }
+                      })}
+                      placeholder={isSpanish ? 'Secret para HMAC-SHA256' : 'HMAC-SHA256 Secret'}
+                      className="w-full px-3 py-2 bg-black/50 border border-gray-600 rounded-lg text-white text-sm focus:border-amber-500 focus:outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Botón Enviar */}
+              <button
+                onClick={handleSendFundsProcessing}
+                disabled={isLoading || !fundsForm.amount || !fundsForm.to_bank}
+                className="w-full py-4 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl font-bold text-lg hover:from-amber-500 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              >
+                {isLoading ? (
+                  <>
+                    <RefreshCw className="w-6 h-6 animate-spin" />
+                    {isSpanish ? 'Procesando...' : 'Processing...'}
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-6 h-6" />
+                    {isSpanish ? 'Enviar con SHA256 Handshake' : 'Send with SHA256 Handshake'}
                   </>
                 )}
               </button>
@@ -1502,6 +1837,89 @@ export function TZDigitalModule() {
                 {isSpanish ? 'Repetir Test' : 'Retest'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Funds Processing Result */}
+      {showFundsResult && fundsResult && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-amber-500/50 rounded-2xl p-6 max-w-lg w-full">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className={`p-3 rounded-xl ${fundsResult.ok ? 'bg-emerald-600' : 'bg-red-600'}`}>
+                  {fundsResult.ok ? (
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  ) : (
+                    <XCircle className="w-6 h-6 text-white" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">
+                    {fundsResult.ok 
+                      ? (isSpanish ? 'Transacción Exitosa' : 'Transaction Successful')
+                      : (isSpanish ? 'Error en Transacción' : 'Transaction Failed')}
+                  </h3>
+                  <p className="text-sm text-gray-400">Funds Processing Transaction</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowFundsResult(false)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <XCircle className="w-6 h-6 text-gray-400" />
+              </button>
+            </div>
+
+            {/* Details */}
+            <div className="space-y-4">
+              {/* Status */}
+              <div className={`p-4 rounded-xl ${fundsResult.ok ? 'bg-emerald-500/20 border border-emerald-500/50' : 'bg-red-500/20 border border-red-500/50'}`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-300">{isSpanish ? 'Estado HTTP' : 'HTTP Status'}</span>
+                  <span className={`font-bold ${fundsResult.ok ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {fundsResult.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Handshake Hash */}
+              {fundsResult.handshakeHash && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield className="w-4 h-4 text-amber-400" />
+                    <span className="text-sm font-semibold text-amber-300">SHA256 Handshake Hash</span>
+                  </div>
+                  <code className="text-xs text-gray-300 break-all font-mono">
+                    {fundsResult.handshakeHash}
+                  </code>
+                </div>
+              )}
+
+              {/* Response Data */}
+              <div className="bg-black/40 rounded-xl p-4">
+                <h4 className="text-sm font-semibold text-gray-400 mb-2">
+                  {isSpanish ? 'Respuesta del Servidor' : 'Server Response'}
+                </h4>
+                <pre className="text-xs text-gray-300 overflow-auto max-h-40 font-mono">
+                  {JSON.stringify(fundsResult.data, null, 2)}
+                </pre>
+              </div>
+
+              {/* Timestamp */}
+              <div className="text-xs text-gray-500 text-center">
+                {fundsResult.timestamp}
+              </div>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowFundsResult(false)}
+              className="w-full mt-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg font-bold hover:from-amber-500 hover:to-orange-500 transition-all"
+            >
+              {isSpanish ? 'Cerrar' : 'Close'}
+            </button>
           </div>
         </div>
       )}

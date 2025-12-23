@@ -55,7 +55,151 @@ const DEFAULT_TIMEOUT = 25000; // 25 segundos
 export type Currency = "USD" | "EUR";
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TIPOS DE PAYLOAD
+// FUNDS PROCESSING - SHA256 HANDSHAKE TYPES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Funds Processing Transaction Payload
+ * Used for bank-to-bank transfers with SHA256 handshake verification
+ */
+export interface FundsTxPayload {
+  transaction_id: string;
+  amount: number;
+  currency: string;      // e.g. "EUR", "USD"
+  from_bank: string;     // e.g. "Deutsche Bank AG"
+  to_bank: string;       // e.g. "HSBC UK Bank plc"
+  status: "pending" | "approved" | "rejected" | string;
+  // Optional additional fields
+  reference?: string;
+  description?: string;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Handshake configuration for SHA256/HMAC-SHA256 verification
+ */
+export interface HandshakeConfig {
+  enabled?: boolean;
+  mode?: "sha256" | "hmac-sha256";
+  secret?: string; // only for hmac-sha256
+  headerName?: string; // default "X-Handshake-Hash"
+}
+
+/**
+ * Funds Processing Configuration
+ */
+export interface FundsProcessingConfig {
+  baseUrl: string;        // e.g. "https://banktransfer.tzdigitalpvtlimited.com"
+  endpointPath?: string;  // default "/api/transactions"
+  bearerToken: string;    // API Authentication Key
+  timeoutMs?: number;
+  handshake?: HandshakeConfig;
+}
+
+/**
+ * Result from Funds Processing API call
+ */
+export interface FundsProcessingResult {
+  ok: boolean;
+  status: number;
+  data: any;
+  rawText?: string;
+  handshakeHash?: string;
+  timestamp: string;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SHA256 HANDSHAKE UTILITIES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Canonicalize JSON to get stable hashing:
+ * - Sorts object keys recursively
+ * - Ensures the same payload always produces the same hash
+ */
+function canonicalize(value: any): any {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === "object") {
+    const out: Record<string, any> = {};
+    for (const k of Object.keys(value).sort()) out[k] = canonicalize(value[k]);
+    return out;
+  }
+  return value;
+}
+
+/**
+ * Generate SHA256 hash (browser compatible)
+ */
+async function sha256Hex(data: string): Promise<string> {
+  try {
+    const encoder = new TextEncoder();
+    const dataBuffer = encoder.encode(data);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch {
+    // Fallback for environments without crypto.subtle
+    let hash = 0;
+    for (let i = 0; i < data.length; i++) {
+      const char = data.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16).padStart(64, '0');
+  }
+}
+
+/**
+ * Generate HMAC-SHA256 hash (browser compatible)
+ */
+async function hmacSha256Hex(data: string, secret: string): Promise<string> {
+  try {
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const key = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const dataBuffer = encoder.encode(data);
+    const signature = await crypto.subtle.sign('HMAC', key, dataBuffer);
+    const hashArray = Array.from(new Uint8Array(signature));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (err) {
+    console.error('[TZDigital] HMAC-SHA256 error:', err);
+    throw new Error('HMAC-SHA256 not available in this environment');
+  }
+}
+
+/**
+ * Build handshake hash from payload
+ */
+async function buildHandshakeHash(
+  payload: FundsTxPayload, 
+  handshake?: HandshakeConfig
+): Promise<string | null> {
+  if (!handshake || handshake.enabled === false) return null;
+
+  const canonicalPayload = canonicalize(payload);
+  const bodyStr = JSON.stringify(canonicalPayload);
+
+  const mode = handshake.mode ?? "sha256";
+
+  if (mode === "sha256") {
+    return await sha256Hex(bodyStr);
+  }
+
+  // hmac-sha256
+  if (!handshake.secret) {
+    throw new Error("handshake.secret is required when handshake.mode is 'hmac-sha256'");
+  }
+  return await hmacSha256Hex(bodyStr, handshake.secret);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TIPOS DE PAYLOAD - STANDARD TRANSFER
 // ═══════════════════════════════════════════════════════════════════════════
 
 export interface MoneyTransferPayload {
@@ -337,6 +481,174 @@ class TZDigitalTransferClient {
 
   // ─────────────────────────────────────────────────────────────────────────
   // Envío de transferencias
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Envía una transacción de Funds Processing con SHA256 Handshake Hash
+   * 
+   * @param payload - FundsTxPayload con datos de la transacción
+   * @param config - Configuración opcional (usa la config del cliente por defecto)
+   * @returns FundsProcessingResult con el resultado de la operación
+   */
+  async sendFundsProcessingTransaction(
+    payload: FundsTxPayload,
+    config?: Partial<FundsProcessingConfig>
+  ): Promise<FundsProcessingResult> {
+    const cfg: FundsProcessingConfig = {
+      baseUrl: config?.baseUrl || TZ_DIRECT_URL.replace('/api/transactions', ''),
+      endpointPath: config?.endpointPath || '/api/transactions',
+      bearerToken: config?.bearerToken || this.config.bearerToken,
+      timeoutMs: config?.timeoutMs || DEFAULT_TIMEOUT,
+      handshake: config?.handshake ?? {
+        enabled: true,
+        mode: 'sha256',
+        headerName: 'X-Handshake-Hash'
+      }
+    };
+
+    if (!cfg.bearerToken) {
+      return {
+        ok: false,
+        status: 0,
+        data: { error: 'Bearer Token no configurado' },
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    // Validar payload
+    if (!payload.transaction_id) {
+      payload.transaction_id = `CR${Date.now()}${Math.floor(Math.random() * 10000)}`;
+    }
+    if (!payload.amount || payload.amount <= 0) {
+      return {
+        ok: false,
+        status: 0,
+        data: { error: 'Monto inválido' },
+        timestamp: new Date().toISOString()
+      };
+    }
+    if (!payload.currency) {
+      return {
+        ok: false,
+        status: 0,
+        data: { error: 'Moneda requerida' },
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    // Construir URL
+    const url = (IS_ELECTRON || IS_FILE_PROTOCOL)
+      ? `${LOCAL_SERVER_URL}/api/tz-digital/funds-processing`
+      : '/api/tz-digital/funds-processing';
+
+    // Generar handshake hash
+    let handshakeHash: string | null = null;
+    try {
+      handshakeHash = await buildHandshakeHash(payload, cfg.handshake);
+    } catch (err: any) {
+      console.error('[TZDigital] Error generando handshake hash:', err);
+    }
+
+    const headerName = cfg.handshake?.headerName ?? 'X-Handshake-Hash';
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${cfg.bearerToken}`,
+      'X-TZ-Token': cfg.bearerToken,
+    };
+
+    if (handshakeHash) {
+      headers[headerName] = handshakeHash;
+    }
+
+    console.log(`[TZDigital] 📤 Funds Processing Transaction:`);
+    console.log(`  - ID: ${payload.transaction_id}`);
+    console.log(`  - Amount: ${payload.currency} ${payload.amount.toLocaleString()}`);
+    console.log(`  - From: ${payload.from_bank}`);
+    console.log(`  - To: ${payload.to_bank}`);
+    console.log(`  - Handshake Hash: ${handshakeHash ? handshakeHash.substring(0, 16) + '...' : 'disabled'}`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), cfg.timeoutMs || DEFAULT_TIMEOUT);
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        signal: controller.signal,
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      clearTimeout(timeoutId);
+
+      const text = await response.text();
+      let data: any = null;
+
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
+
+      const result: FundsProcessingResult = {
+        ok: response.ok,
+        status: response.status,
+        data: data ?? { message: 'Non-JSON response', body: text },
+        rawText: data ? undefined : text,
+        handshakeHash: handshakeHash || undefined,
+        timestamp: new Date().toISOString()
+      };
+
+      // Guardar en historial
+      const record: TransferRecord = {
+        id: `FP-${payload.transaction_id}`,
+        payload: payload as any,
+        result: result as any,
+        timestamp: new Date().toISOString(),
+        status: response.ok ? 'success' : 'failed',
+      };
+      this.transfers.unshift(record);
+      if (this.transfers.length > 100) {
+        this.transfers = this.transfers.slice(0, 100);
+      }
+      this.saveTransfers();
+
+      console.log(`[TZDigital] ${response.ok ? '✅' : '❌'} Funds Processing Result:`, result);
+
+      return result;
+
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      
+      const isAbort = err?.name === 'AbortError';
+      return {
+        ok: false,
+        status: 0,
+        data: {
+          error: isAbort ? `Timeout (${cfg.timeoutMs}ms)` : 'Error de red/conexión',
+          details: String(err?.message || err)
+        },
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Genera un hash SHA256 para verificar integridad de datos
+   */
+  async generateSHA256Hash(data: string | object): Promise<string> {
+    const str = typeof data === 'string' ? data : JSON.stringify(canonicalize(data));
+    return await sha256Hex(str);
+  }
+
+  /**
+   * Genera un hash HMAC-SHA256 para autenticación
+   */
+  async generateHMACSHA256Hash(data: string | object, secret: string): Promise<string> {
+    const str = typeof data === 'string' ? data : JSON.stringify(canonicalize(data));
+    return await hmacSha256Hex(str, secret);
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
 
   /**

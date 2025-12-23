@@ -416,6 +416,76 @@ app.options('/api/tz-digital/transactions', async (req, res) => {
   res.status(200).json({ success: true, message: 'TZ Digital Proxy available' });
 });
 
+// ============================================================================
+// TZ DIGITAL - FUNDS PROCESSING WITH SHA256 HANDSHAKE
+// ============================================================================
+app.post('/api/tz-digital/funds-processing', async (req, res) => {
+  const TZ_API_URL = 'https://banktransfer.tzdigitalpvtlimited.com/api/transactions';
+  const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '');
+  const handshakeHash = req.headers['x-handshake-hash'];
+
+  try {
+    console.log('[TZ Digital Funds Processing] 📤 Enviando transacción:', {
+      transaction_id: req.body?.transaction_id,
+      amount: req.body?.amount,
+      currency: req.body?.currency,
+      from_bank: req.body?.from_bank,
+      to_bank: req.body?.to_bank,
+      handshakeHash: handshakeHash ? handshakeHash.substring(0, 16) + '...' : 'none'
+    });
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${bearerToken}`,
+    };
+
+    // Incluir handshake hash si está presente
+    if (handshakeHash) {
+      headers['X-Handshake-Hash'] = handshakeHash;
+    }
+
+    const response = await fetch(TZ_API_URL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(req.body),
+      signal: AbortSignal.timeout(30000)
+    });
+
+    const responseText = await response.text();
+    let responseData;
+    
+    try {
+      responseData = responseText ? JSON.parse(responseText) : null;
+    } catch {
+      responseData = { raw: responseText };
+    }
+
+    console.log('[TZ Digital Funds Processing] 📥 Respuesta:', {
+      status: response.status,
+      ok: response.ok,
+      data: responseData
+    });
+
+    res.status(response.status).json({
+      success: response.ok,
+      status: response.status,
+      data: responseData,
+      timestamp: new Date().toISOString(),
+      handshakeVerified: !!handshakeHash
+    });
+
+  } catch (error) {
+    console.error('[TZ Digital Funds Processing] ❌ Error:', error.message);
+    
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      code: error.code || 'NETWORK_ERROR',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 app.get('/api/tz-digital/test', async (req, res) => {
   const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '');
   
