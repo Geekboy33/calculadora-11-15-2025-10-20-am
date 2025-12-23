@@ -3,9 +3,9 @@
  * Genera Black Screen para cuentas custodio individuales
  */
 
-import { X, Download, Printer, Image as ImageIcon, FileText } from 'lucide-react';
+import { X, Download, Printer, Image as ImageIcon, FileText, Settings, Calendar, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { BankIcon, BlockchainIcon, SecurityIcon, ComplianceIcon, AwardIcon, CheckIcon, IconText } from './CustomIcons';
@@ -27,6 +27,16 @@ const maskAccountNumber = (accountNumber: string, mask: boolean): string => {
 export function CustodyBlackScreen({ account, onClose, maskAccounts = false }: CustodyBlackScreenProps) {
   const { language } = useLanguage();
   const blackScreenRef = useRef<HTMLDivElement>(null);
+  const isSpanish = language === 'es';
+
+  // Estado para modal de configuración PDF5
+  const [showPDF5Config, setShowPDF5Config] = useState(false);
+  const [pdf5Config, setPdf5Config] = useState({
+    maskAccountNumbers: maskAccounts,
+    dateRangeType: 'all' as 'all' | 'custom',
+    startDate: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0], // 1 enero
+    endDate: new Date().toISOString().split('T')[0], // Hoy
+  });
 
   const isBanking = (account.accountType || 'blockchain') === 'banking';
 
@@ -1319,61 +1329,94 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
 
       // 8. HISTORIAL DE TRANSACCIONES
       if (account.transactions && account.transactions.length > 0) {
+        // Filtrar transacciones según configuración
+        let filteredTransactions = [...account.transactions];
+        
+        if (pdf5Config.dateRangeType === 'custom') {
+          const startDate = new Date(pdf5Config.startDate);
+          const endDate = new Date(pdf5Config.endDate);
+          endDate.setHours(23, 59, 59, 999); // Incluir todo el día final
+          
+          filteredTransactions = account.transactions.filter((tx: any) => {
+            const txDate = new Date(tx.transactionDate);
+            return txDate >= startDate && txDate <= endDate;
+          });
+        }
+
         // Nueva página para transacciones
         pdf.addPage();
         y = margin + 10;
         
-        drawSection(isSpanish ? 'HISTORIAL DE MOVIMIENTOS' : 'TRANSACTION HISTORY', 8);
+        // Mostrar rango de fechas en el título
+        const dateRangeText = pdf5Config.dateRangeType === 'custom' 
+          ? ` (${pdf5Config.startDate} - ${pdf5Config.endDate})`
+          : ` (${isSpanish ? 'COMPLETO' : 'FULL'})`;
         
-        // Primera tabla: Datos principales
-        const transactionRows = account.transactions.slice(-12).reverse().map((tx: any) => {
-          const typeLabels: Record<string, string> = {
-            initial: isSpanish ? 'Apertura' : 'Opening',
-            deposit: isSpanish ? 'Depósito' : 'Deposit',
-            withdrawal: isSpanish ? 'Retiro' : 'Withdrawal',
-            transfer_in: isSpanish ? 'Trans. Ent.' : 'Transfer In',
-            transfer_out: isSpanish ? 'Trans. Sal.' : 'Transfer Out',
-            adjustment: isSpanish ? 'Ajuste' : 'Adjustment'
-          };
+        drawSection((isSpanish ? 'HISTORIAL DE MOVIMIENTOS' : 'TRANSACTION HISTORY') + dateRangeText, 8);
+        
+        // Mostrar todas las transacciones filtradas (en múltiples páginas si es necesario)
+        const transactionsToShow = filteredTransactions.reverse();
+        const itemsPerPage = 15;
+        let currentPage = 0;
+        
+        for (let i = 0; i < transactionsToShow.length; i += itemsPerPage) {
+          if (i > 0) {
+            pdf.addPage();
+            y = margin + 10;
+            drawSection((isSpanish ? 'HISTORIAL DE MOVIMIENTOS' : 'TRANSACTION HISTORY') + ` (${isSpanish ? 'Cont.' : 'Cont.'} ${currentPage + 1})`, 8);
+          }
           
-          const typeLabel = typeLabels[tx.type] || tx.type;
-          const amount = tx.amount >= 0 ? `+${account.currency} ${Math.abs(tx.amount).toLocaleString()}` : `-${account.currency} ${Math.abs(tx.amount).toLocaleString()}`;
+          const pageTransactions = transactionsToShow.slice(i, i + itemsPerPage);
           
-          return [
-            tx.transactionDate,
-            tx.transactionTime?.substring(0, 5) || '-',
-            typeLabel,
-            amount,
-            `${account.currency} ${tx.balanceAfter.toLocaleString()}`
-          ];
-        });
-        
-        if (transactionRows.length > 0) {
-          drawTable(
-            [
-              isSpanish ? 'Fecha' : 'Date',
-              isSpanish ? 'Hora' : 'Time',
-              isSpanish ? 'Tipo' : 'Type',
-              isSpanish ? 'Monto' : 'Amount',
-              isSpanish ? 'Balance' : 'Balance'
-            ],
-            transactionRows,
-            [28, 18, 28, 48, 58]
-          );
-        }
-        
-        y += 5;
-        
-        // Segunda tabla: Detalle de cuentas y bancos
-        drawSection(isSpanish ? 'DETALLE DE ORIGEN/DESTINO' : 'SOURCE/DESTINATION DETAILS', 9);
-        
-        const detailRows = account.transactions.slice(-12).reverse().map((tx: any) => {
-          const rawSourceInfo = tx.sourceAccount || tx.destinationAccount || '-';
-          const sourceInfo = maskAccounts ? maskAccountNumber(rawSourceInfo, true) : rawSourceInfo;
-          const bankInfo = tx.sourceBank || tx.destinationBank || '-';
-          const direction = tx.type === 'transfer_in' || tx.type === 'deposit' || tx.type === 'initial' 
-            ? (isSpanish ? 'ENTRADA' : 'IN') 
-            : (isSpanish ? 'SALIDA' : 'OUT');
+          // Primera tabla: Datos principales
+          const transactionRows = pageTransactions.map((tx: any) => {
+            const typeLabels: Record<string, string> = {
+              initial: isSpanish ? 'Apertura' : 'Opening',
+              deposit: isSpanish ? 'Depósito' : 'Deposit',
+              withdrawal: isSpanish ? 'Retiro' : 'Withdrawal',
+              transfer_in: isSpanish ? 'Trans. Ent.' : 'Transfer In',
+              transfer_out: isSpanish ? 'Trans. Sal.' : 'Transfer Out',
+              adjustment: isSpanish ? 'Ajuste' : 'Adjustment'
+            };
+            
+            const typeLabel = typeLabels[tx.type] || tx.type;
+            const amount = tx.amount >= 0 ? `+${account.currency} ${Math.abs(tx.amount).toLocaleString()}` : `-${account.currency} ${Math.abs(tx.amount).toLocaleString()}`;
+            
+            return [
+              tx.transactionDate,
+              tx.transactionTime?.substring(0, 5) || '-',
+              typeLabel,
+              amount,
+              `${account.currency} ${tx.balanceAfter.toLocaleString()}`
+            ];
+          });
+          
+          if (transactionRows.length > 0) {
+            drawTable(
+              [
+                isSpanish ? 'Fecha' : 'Date',
+                isSpanish ? 'Hora' : 'Time',
+                isSpanish ? 'Tipo' : 'Type',
+                isSpanish ? 'Monto' : 'Amount',
+                isSpanish ? 'Balance' : 'Balance'
+              ],
+              transactionRows,
+              [28, 18, 28, 48, 58]
+            );
+          }
+          
+          y += 5;
+          
+          // Segunda tabla: Detalle de cuentas y bancos
+          drawSection((isSpanish ? 'DETALLE DE ORIGEN/DESTINO' : 'SOURCE/DESTINATION DETAILS') + (i > 0 ? ` (${isSpanish ? 'Cont.' : 'Cont.'})` : ''), 9);
+          
+          const detailRows = pageTransactions.map((tx: any) => {
+            const rawSourceInfo = tx.sourceAccount || tx.destinationAccount || '-';
+            const sourceInfo = pdf5Config.maskAccountNumbers ? maskAccountNumber(rawSourceInfo, true) : rawSourceInfo;
+            const bankInfo = tx.sourceBank || tx.destinationBank || '-';
+            const direction = tx.type === 'transfer_in' || tx.type === 'deposit' || tx.type === 'initial' 
+              ? (isSpanish ? 'ENTRADA' : 'IN') 
+              : (isSpanish ? 'SALIDA' : 'OUT');
           
           return [
             tx.transactionDate,
@@ -1397,17 +1440,28 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
             [25, 18, 50, 55, 32]
           );
         }
+          
+          currentPage++;
+        }
         
-        // Info de transacciones
+        // Info de transacciones - mostrar totales y rango correcto
         y += 3;
         pdf.setFillColor(248, 250, 252);
         pdf.roundedRect(margin, y, pageWidth - (margin * 2), 12, 1, 1, 'F');
         pdf.setTextColor(...colors.gray);
         pdf.setFontSize(6);
         pdf.setFont('helvetica', 'normal');
+        
+        const totalFiltered = filteredTransactions.length;
+        const totalAll = account.transactions.length;
+        const periodText = pdf5Config.dateRangeType === 'custom' 
+          ? `${pdf5Config.startDate} - ${pdf5Config.endDate}`
+          : (isSpanish ? 'Historial Completo' : 'Full History');
+        const maskedText = pdf5Config.maskAccountNumbers ? (isSpanish ? ' | Cuentas enmascaradas' : ' | Accounts masked') : '';
+        
         pdf.text(isSpanish 
-          ? `Total transacciones: ${account.transactions.length} | Mostrando últimas 12 transacciones | Período: ${account.transactions[0]?.transactionDate || '-'} - ${account.transactions[account.transactions.length - 1]?.transactionDate || '-'}`
-          : `Total transactions: ${account.transactions.length} | Showing last 12 transactions | Period: ${account.transactions[0]?.transactionDate || '-'} - ${account.transactions[account.transactions.length - 1]?.transactionDate || '-'}`,
+          ? `Total transacciones mostradas: ${totalFiltered} de ${totalAll} | Período: ${periodText}${maskedText}`
+          : `Total transactions shown: ${totalFiltered} of ${totalAll} | Period: ${periodText}${maskedText}`,
           margin + 4, y + 7);
         y += 18;
       }
@@ -1656,7 +1710,7 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
               PDF4 Statement
             </button>
             <button
-              onClick={handleDownloadPDF5Institutional}
+              onClick={() => setShowPDF5Config(true)}
               className="px-3 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 border border-amber-400/50 text-black rounded hover:from-amber-400 hover:to-yellow-400 text-sm flex items-center gap-1 font-bold shadow-lg shadow-amber-500/30"
             >
               <FileText className="w-4 h-4" />
@@ -1918,6 +1972,226 @@ Certificate Authority:   DAES 256 DATA AND EXCHANGE SETTLEMENT
           </div>
         </div>
       </div>
+
+      {/* Modal de Configuración PDF5 Institucional */}
+      {showPDF5Config && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[200] p-4">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-amber-500/50 rounded-2xl p-6 max-w-lg w-full shadow-[0_0_50px_rgba(245,158,11,0.3)]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-amber-400 flex items-center gap-2">
+                <Settings className="w-6 h-6" />
+                {isSpanish ? 'Configurar PDF5 Institucional' : 'Configure Institutional PDF5'}
+              </h3>
+              <button
+                onClick={() => setShowPDF5Config(false)}
+                className="text-[#ffffff] hover:text-red-400 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              {/* Opción de enmascarar cuentas */}
+              <div className="bg-[#0d0d0d] border border-amber-500/30 rounded-lg p-4">
+                <label className="flex items-center justify-between cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    {pdf5Config.maskAccountNumbers ? (
+                      <EyeOff className="w-5 h-5 text-amber-400" />
+                    ) : (
+                      <Eye className="w-5 h-5 text-emerald-400" />
+                    )}
+                    <div>
+                      <div className="text-[#ffffff] font-semibold">
+                        {isSpanish ? 'Ocultar Números de Cuenta' : 'Mask Account Numbers'}
+                      </div>
+                      <div className="text-xs text-[#999]">
+                        {isSpanish 
+                          ? 'Reemplaza los últimos 4 dígitos con ****' 
+                          : 'Replace last 4 digits with ****'}
+                      </div>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={pdf5Config.maskAccountNumbers}
+                    onChange={e => setPdf5Config({...pdf5Config, maskAccountNumbers: e.target.checked})}
+                    className="w-5 h-5 accent-amber-500 rounded"
+                  />
+                </label>
+              </div>
+
+              {/* Rango de fechas del historial */}
+              <div className="bg-[#0d0d0d] border border-amber-500/30 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Calendar className="w-5 h-5 text-amber-400" />
+                  <span className="text-[#ffffff] font-semibold">
+                    {isSpanish ? 'Rango del Historial' : 'History Range'}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 p-2 rounded hover:bg-amber-500/10 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="dateRange"
+                      checked={pdf5Config.dateRangeType === 'all'}
+                      onChange={() => setPdf5Config({...pdf5Config, dateRangeType: 'all'})}
+                      className="w-4 h-4 accent-amber-500"
+                    />
+                    <span className="text-[#ffffff]">
+                      {isSpanish ? 'Historial Completo (Todas las transacciones)' : 'Full History (All transactions)'}
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-2 rounded hover:bg-amber-500/10 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="dateRange"
+                      checked={pdf5Config.dateRangeType === 'custom'}
+                      onChange={() => setPdf5Config({...pdf5Config, dateRangeType: 'custom'})}
+                      className="w-4 h-4 accent-amber-500"
+                    />
+                    <span className="text-[#ffffff]">
+                      {isSpanish ? 'Rango Personalizado' : 'Custom Range'}
+                    </span>
+                  </label>
+
+                  {pdf5Config.dateRangeType === 'custom' && (
+                    <div className="grid grid-cols-2 gap-3 mt-3 pl-7">
+                      <div>
+                        <label className="text-xs text-[#999] mb-1 block">
+                          {isSpanish ? 'Desde' : 'From'}
+                        </label>
+                        <input
+                          type="date"
+                          value={pdf5Config.startDate}
+                          onChange={e => setPdf5Config({...pdf5Config, startDate: e.target.value})}
+                          max={pdf5Config.endDate}
+                          className="w-full px-3 py-2 bg-[#0a0a0a] border border-[#333] rounded-lg text-[#ffffff] focus:outline-none focus:border-amber-500 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-[#999] mb-1 block">
+                          {isSpanish ? 'Hasta' : 'To'}
+                        </label>
+                        <input
+                          type="date"
+                          value={pdf5Config.endDate}
+                          onChange={e => setPdf5Config({...pdf5Config, endDate: e.target.value})}
+                          min={pdf5Config.startDate}
+                          max={new Date().toISOString().split('T')[0]}
+                          className="w-full px-3 py-2 bg-[#0a0a0a] border border-[#333] rounded-lg text-[#ffffff] focus:outline-none focus:border-amber-500 text-sm"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Botones rápidos de período */}
+                  <div className="flex gap-2 flex-wrap mt-2 pl-7">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setFullYear(start.getFullYear() - 1);
+                        setPdf5Config({
+                          ...pdf5Config,
+                          dateRangeType: 'custom',
+                          startDate: start.toISOString().split('T')[0],
+                          endDate: end.toISOString().split('T')[0]
+                        });
+                      }}
+                      className="px-2 py-1 bg-amber-600/20 border border-amber-500/30 rounded text-amber-400 text-xs hover:bg-amber-500/30"
+                    >
+                      {isSpanish ? '1 Año' : '1 Year'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setFullYear(start.getFullYear() - 2);
+                        setPdf5Config({
+                          ...pdf5Config,
+                          dateRangeType: 'custom',
+                          startDate: start.toISOString().split('T')[0],
+                          endDate: end.toISOString().split('T')[0]
+                        });
+                      }}
+                      className="px-2 py-1 bg-amber-600/20 border border-amber-500/30 rounded text-amber-400 text-xs hover:bg-amber-500/30"
+                    >
+                      {isSpanish ? '2 Años' : '2 Years'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setFullYear(start.getFullYear() - 5);
+                        setPdf5Config({
+                          ...pdf5Config,
+                          dateRangeType: 'custom',
+                          startDate: start.toISOString().split('T')[0],
+                          endDate: end.toISOString().split('T')[0]
+                        });
+                      }}
+                      className="px-2 py-1 bg-amber-600/20 border border-amber-500/30 rounded text-amber-400 text-xs hover:bg-amber-500/30"
+                    >
+                      {isSpanish ? '5 Años' : '5 Years'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currentYear = new Date().getFullYear();
+                        setPdf5Config({
+                          ...pdf5Config,
+                          dateRangeType: 'custom',
+                          startDate: `${currentYear}-01-01`,
+                          endDate: new Date().toISOString().split('T')[0]
+                        });
+                      }}
+                      className="px-2 py-1 bg-emerald-600/20 border border-emerald-500/30 rounded text-emerald-400 text-xs hover:bg-emerald-500/30"
+                    >
+                      {isSpanish ? 'Este Año' : 'This Year'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Resumen de configuración */}
+              <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3">
+                <div className="text-xs text-amber-300">
+                  <strong>{isSpanish ? 'Resumen:' : 'Summary:'}</strong>
+                  <ul className="mt-1 space-y-1 text-[#ccc]">
+                    <li>• {isSpanish ? 'Cuentas:' : 'Accounts:'} {pdf5Config.maskAccountNumbers ? (isSpanish ? 'Ocultas (****)' : 'Masked (****)') : (isSpanish ? 'Visibles' : 'Visible')}</li>
+                    <li>• {isSpanish ? 'Historial:' : 'History:'} {pdf5Config.dateRangeType === 'all' ? (isSpanish ? 'Completo' : 'Full') : `${pdf5Config.startDate} → ${pdf5Config.endDate}`}</li>
+                    <li>• {isSpanish ? 'Transacciones:' : 'Transactions:'} {account.transactions?.length || 0} {isSpanish ? 'totales' : 'total'}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowPDF5Config(false)}
+                className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#333] text-[#ffffff] rounded-lg hover:bg-[#222] transition-colors"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowPDF5Config(false);
+                  handleDownloadPDF5Institutional();
+                }}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-lg hover:from-amber-400 hover:to-yellow-400 transition-all font-bold flex items-center justify-center gap-2"
+              >
+                <FileText className="w-5 h-5" />
+                {isSpanish ? 'Generar PDF5' : 'Generate PDF5'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
