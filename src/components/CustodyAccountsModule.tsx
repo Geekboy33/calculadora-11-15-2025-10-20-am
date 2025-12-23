@@ -471,6 +471,7 @@ export function CustodyAccountsModule() {
     transactionCount: { min: 10, max: 30 },
     depositPercentage: 60, // 60% deposits, 40% withdrawals
     selectedBanks: [] as number[], // índices de bancos seleccionados
+    addImportPrefix: true, // Agregar prefijo "Import history DAES SYSTEM" al tipo
   });
   const [isGeneratingHistory, setIsGeneratingHistory] = useState(false);
   const [generationProgress, setGenerationProgress] = useState({ current: 0, total: 0, status: '' });
@@ -704,17 +705,21 @@ export function CustodyAccountsModule() {
       const avgDepositAmount = historyConfig.totalAmount / numDeposits;
       const avgWithdrawAmount = numWithdrawals > 0 ? (historyConfig.totalAmount * 0.7) / numWithdrawals : 0;
 
+      // Prefijo para el tipo de transacción
+      const importPrefix = historyConfig.addImportPrefix ? 'Import history DAES SYSTEM ' : '';
+
       // Generar depósitos
       for (let i = 0; i < numDeposits; i++) {
         const bankInfo = getRandomBank();
         const concepts = isSpanish ? DEPOSIT_CONCEPTS.es : DEPOSIT_CONCEPTS.en;
+        const baseDescription = concepts[Math.floor(Math.random() * concepts.length)];
         transactions.push({
           type: 'deposit',
           amount: generateRandomAmount(avgDepositAmount),
           date: generateRandomDate(),
           bank: bankInfo.name,
           account: bankInfo.account,
-          description: concepts[Math.floor(Math.random() * concepts.length)],
+          description: `${importPrefix}${baseDescription}`,
         });
       }
 
@@ -722,13 +727,14 @@ export function CustodyAccountsModule() {
       for (let i = 0; i < numWithdrawals; i++) {
         const bankInfo = getRandomBank();
         const concepts = isSpanish ? WITHDRAWAL_CONCEPTS.es : WITHDRAWAL_CONCEPTS.en;
+        const baseDescription = concepts[Math.floor(Math.random() * concepts.length)];
         transactions.push({
           type: 'withdrawal',
           amount: generateRandomAmount(avgWithdrawAmount),
           date: generateRandomDate(),
           bank: bankInfo.name,
           account: bankInfo.account,
-          description: concepts[Math.floor(Math.random() * concepts.length)],
+          description: `${importPrefix}${baseDescription}`,
         });
       }
 
@@ -2360,6 +2366,34 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               >
                 <Sparkles className="w-5 h-5" />
                 {language === 'es' ? 'Generar Historial Auto' : 'Generate Auto History'}
+              </button>
+              <button
+                onClick={() => {
+                  const count = custodyStore.addImportPrefixToTransactions();
+                  setCustodyAccounts(custodyStore.getAccounts());
+                  alert(language === 'es' 
+                    ? `✅ ${count} transacciones actualizadas con prefijo "Import history DAES SYSTEM"` 
+                    : `✅ ${count} transactions updated with "Import history DAES SYSTEM" prefix`);
+                }}
+                disabled={custodyAccounts.length === 0}
+                className="px-6 py-3 bg-gradient-to-br from-emerald-600 to-green-600 text-white font-bold rounded-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <FileText className="w-5 h-5" />
+                {language === 'es' ? 'Agregar Prefijo DAES' : 'Add DAES Prefix'}
+              </button>
+              <button
+                onClick={() => {
+                  const count = custodyStore.removeImportPrefixFromTransactions();
+                  setCustodyAccounts(custodyStore.getAccounts());
+                  alert(language === 'es' 
+                    ? `✅ ${count} transacciones: prefijo "Import history DAES SYSTEM" removido` 
+                    : `✅ ${count} transactions: "Import history DAES SYSTEM" prefix removed`);
+                }}
+                disabled={custodyAccounts.length === 0}
+                className="px-6 py-3 bg-gradient-to-br from-red-600 to-orange-600 text-white font-bold rounded-lg hover:shadow-[0_0_20px_rgba(239,68,68,0.6)] transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <X className="w-5 h-5" />
+                {language === 'es' ? 'Quitar Prefijo DAES' : 'Remove DAES Prefix'}
               </button>
             </div>
           </div>
@@ -4847,6 +4881,31 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                   <span>20% {isSpanish ? 'Depósitos' : 'Deposits'}</span>
                   <span>90% {isSpanish ? 'Depósitos' : 'Deposits'}</span>
                 </div>
+              </div>
+
+              {/* Prefijo Import history DAES SYSTEM */}
+              <div className="bg-[#0d0d0d] border border-purple-500/30 rounded-lg p-4">
+                <label className="flex items-center justify-between cursor-pointer">
+                  <div>
+                    <div className="text-[#ffffff] font-semibold text-sm">
+                      {isSpanish ? 'Agregar Prefijo DAES SYSTEM' : 'Add DAES SYSTEM Prefix'}
+                    </div>
+                    <div className="text-xs text-[#999] mt-1">
+                      {isSpanish 
+                        ? 'Agrega "Import history DAES SYSTEM" antes del tipo' 
+                        : 'Adds "Import history DAES SYSTEM" before type'}
+                    </div>
+                    <div className="text-xs text-purple-400 mt-1 font-mono">
+                      {isSpanish ? 'Ejemplo: ' : 'Example: '}"Import history DAES SYSTEM {isSpanish ? 'Depósito' : 'Deposit'}"
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={historyConfig.addImportPrefix}
+                    onChange={e => setHistoryConfig({...historyConfig, addImportPrefix: e.target.checked})}
+                    className="w-5 h-5 accent-purple-500 rounded"
+                  />
+                </label>
               </div>
 
               {/* Selección de bancos */}
