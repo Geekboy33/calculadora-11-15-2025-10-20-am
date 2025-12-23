@@ -2,13 +2,15 @@
  * TZ Digital Bank Transfer Module
  * API: https://banktransfer.tzdigitalpvtlimited.com
  * Transferencias USD y EUR vía REST API + Bearer Token
+ * Integrado con Custody Accounts y generación de recibos institucionales
  */
 
 import { useState, useEffect } from 'react';
 import { 
   Send, Settings, History, DollarSign, Euro, CheckCircle, XCircle, 
-  Clock, RefreshCw, Trash2, Copy, Eye, EyeOff, Wifi, WifiOff,
-  ArrowRightLeft, FileText, Shield, Globe, AlertTriangle
+  Clock, RefreshCw, Trash2, Eye, EyeOff, Wifi, WifiOff,
+  ArrowRightLeft, FileText, Shield, Globe, AlertTriangle, Wallet,
+  Download, Building2, CreditCard, Receipt, Landmark
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { 
@@ -18,6 +20,8 @@ import {
   TransferRecord,
   Currency 
 } from '../lib/tz-digital-api';
+import { custodyStore, CustodyAccount } from '../lib/custody-store';
+import jsPDF from 'jspdf';
 
 export function TZDigitalModule() {
   const { language } = useLanguage();
@@ -26,11 +30,19 @@ export function TZDigitalModule() {
   // Estados
   const [config, setConfig] = useState<TZDigitalConfig>(tzDigitalClient.getConfig());
   const [transfers, setTransfers] = useState<TransferRecord[]>(tzDigitalClient.getTransfers());
-  const [showConfig, setShowConfig] = useState(false);
   const [showToken, setShowToken] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'error'>('unknown');
   const [activeTab, setActiveTab] = useState<'transfer' | 'history' | 'config'>('transfer');
+
+  // Cuentas Custodio
+  const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
+  const [selectedAccountId, setSelectedAccountId] = useState<string>('');
+  const selectedAccount = custodyAccounts.find(a => a.id === selectedAccountId);
+
+  // Recibo generado
+  const [lastTransferForReceipt, setLastTransferForReceipt] = useState<TransferRecord | null>(null);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
 
   // Formulario de transferencia
   const [transferForm, setTransferForm] = useState<MoneyTransferPayload>({
@@ -69,11 +81,27 @@ export function TZDigitalModule() {
       defaultSenderAccount: loadedConfig.defaultSenderAccount,
     });
     
+    // Cargar cuentas custodio
+    const accounts = custodyStore.getAccounts();
+    setCustodyAccounts(accounts);
+    
     // Auto-test de conexión si está configurado
     if (loadedConfig.isConfigured && loadedConfig.bearerToken) {
       setConnectionStatus('connected');
     }
   }, []);
+
+  // Actualizar cuentas cuando cambie el currency
+  useEffect(() => {
+    const accounts = custodyStore.getAccounts();
+    const filteredAccounts = accounts.filter(a => a.currency === transferForm.currency);
+    setCustodyAccounts(filteredAccounts);
+    
+    // Si la cuenta seleccionada no es del currency actual, deseleccionar
+    if (selectedAccount && selectedAccount.currency !== transferForm.currency) {
+      setSelectedAccountId('');
+    }
+  }, [transferForm.currency]);
 
   // Test de conexión
   const handleTestConnection = async () => {
@@ -95,7 +123,6 @@ export function TZDigitalModule() {
       defaultSenderAccount: tempConfig.defaultSenderAccount,
     });
     setConfig(tzDigitalClient.getConfig());
-    setShowConfig(false);
     alert(isSpanish ? '✅ Configuración guardada' : '✅ Configuration saved');
   };
 
@@ -103,6 +130,374 @@ export function TZDigitalModule() {
   const handleGenerateReference = () => {
     const ref = tzDigitalClient.generateReference(transferForm.currency);
     setTransferForm({ ...transferForm, reference: ref });
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // GENERADOR DE RECIBO PDF INSTITUCIONAL
+  // ═══════════════════════════════════════════════════════════════════════════
+  const generateTransferReceiptPDF = async (transfer: TransferRecord, senderAccount?: CustodyAccount) => {
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    let y = margin;
+    const date = new Date(transfer.timestamp);
+
+    // Colores corporativos institucionales
+    const colors = {
+      darkBlue: [8, 20, 40] as [number, number, number],
+      navy: [12, 30, 55] as [number, number, number],
+      gold: [197, 165, 55] as [number, number, number],
+      lightGold: [218, 190, 100] as [number, number, number],
+      green: [22, 163, 74] as [number, number, number],
+      emerald: [16, 185, 129] as [number, number, number],
+      gray: [75, 85, 99] as [number, number, number],
+      lightGray: [248, 250, 252] as [number, number, number],
+      black: [0, 0, 0] as [number, number, number],
+      white: [255, 255, 255] as [number, number, number],
+      red: [220, 38, 38] as [number, number, number]
+    };
+
+    // ISO 4217 Currency Codes
+    const currencyData: Record<string, { num: string; name: string }> = {
+      'USD': { num: '840', name: 'United States Dollar' },
+      'EUR': { num: '978', name: 'Euro' },
+    };
+
+    // Identificadores únicos
+    const receiptNumber = `TZ-${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}-${Math.floor(Math.random() * 999999).toString().padStart(6, '0')}`;
+    const verificationCode = Array.from({length: 32}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
+    const securityHash = Array.from({length: 64}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // HEADER INSTITUCIONAL PREMIUM
+    // ═══════════════════════════════════════════════════════════════════════════
+    const drawInstitutionalHeader = () => {
+      // Fondo principal del header
+      pdf.setFillColor(...colors.darkBlue);
+      pdf.rect(0, 0, pageWidth, 58, 'F');
+      
+      // Líneas doradas decorativas superiores
+      pdf.setFillColor(...colors.gold);
+      pdf.rect(0, 0, pageWidth, 2, 'F');
+      pdf.setFillColor(...colors.lightGold);
+      pdf.rect(0, 2, pageWidth, 0.5, 'F');
+      
+      // Marco dorado interior
+      pdf.setDrawColor(...colors.gold);
+      pdf.setLineWidth(0.8);
+      pdf.rect(8, 8, pageWidth - 16, 42, 'S');
+      
+      // Patrón de líneas decorativo inferior
+      pdf.setDrawColor(...colors.gold);
+      pdf.setLineWidth(0.2);
+      for (let i = 0; i < pageWidth; i += 6) {
+        pdf.line(i, 56, i + 3, 56);
+      }
+      
+      // Línea dorada inferior del header
+      pdf.setFillColor(...colors.gold);
+      pdf.rect(0, 58, pageWidth, 2.5, 'F');
+      
+      // Nombre del banco - institucional
+      pdf.setTextColor(...colors.white);
+      pdf.setFontSize(26);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('DIGITAL COMMERCIAL BANK LTD', pageWidth / 2, 22, { align: 'center' });
+      
+      // Sistema DAES
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(...colors.gold);
+      pdf.text('DAES - Digital Asset & Electronic Services Platform', pageWidth / 2, 30, { align: 'center' });
+      
+      // URLs oficiales
+      pdf.setFontSize(7);
+      pdf.setTextColor(160, 170, 180);
+      pdf.text('www.digcommbank.com    |    www.luxliqdaes.cloud', pageWidth / 2, 38, { align: 'center' });
+      
+      // Título del documento
+      pdf.setFontSize(13);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(...colors.white);
+      const title = isSpanish ? 'COMPROBANTE DE TRANSFERENCIA INTERNACIONAL' : 'INTERNATIONAL TRANSFER RECEIPT';
+      pdf.text(title, pageWidth / 2, 48, { align: 'center' });
+      
+      // Subtítulo
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(...colors.lightGold);
+      const subtitle = 'TZ Digital Bank Transfer Protocol';
+      pdf.text(subtitle, pageWidth / 2, 54, { align: 'center' });
+      
+      y = 68;
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // FOOTER INSTITUCIONAL
+    // ═══════════════════════════════════════════════════════════════════════════
+    const drawInstitutionalFooter = () => {
+      const footerY = pageHeight - 20;
+      
+      // Fondo del footer
+      pdf.setFillColor(248, 250, 252);
+      pdf.rect(0, footerY - 8, pageWidth, 28, 'F');
+      
+      // Línea dorada superior
+      pdf.setFillColor(...colors.gold);
+      pdf.rect(0, footerY - 8, pageWidth, 1.5, 'F');
+      
+      // Información del banco
+      pdf.setTextColor(...colors.gray);
+      pdf.setFontSize(6.5);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Digital Commercial Bank Ltd | ISO 27001:2022 Certified | ISO 20022 Native | PCI-DSS Level 1 | FATF AML/CFT Compliant', pageWidth / 2, footerY - 2, { align: 'center' });
+      
+      // URLs
+      pdf.setTextColor(...colors.darkBlue);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7);
+      pdf.text('https://digcommbank.com', margin, footerY + 4);
+      pdf.text('https://luxliqdaes.cloud', margin + 48, footerY + 4);
+      
+      // Fecha de generación
+      const dateText = date.toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { 
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+      pdf.setTextColor(...colors.gray);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(dateText, pageWidth / 2, footerY + 4, { align: 'center' });
+      
+      // Confidencial
+      pdf.setTextColor(...colors.red);
+      pdf.setFontSize(5.5);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(isSpanish ? 'DOCUMENTO CONFIDENCIAL' : 'CONFIDENTIAL DOCUMENT', pageWidth - margin, footerY - 2, { align: 'right' });
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // FUNCIÓN PARA DIBUJAR SECCIÓN
+    // ═══════════════════════════════════════════════════════════════════════════
+    const drawSection = (title: string, sectionNum: number) => {
+      // Fondo de sección institucional
+      pdf.setFillColor(...colors.darkBlue);
+      pdf.rect(margin, y, pageWidth - (margin * 2), 8, 'F');
+      
+      // Borde dorado izquierdo
+      pdf.setFillColor(...colors.gold);
+      pdf.rect(margin, y, 2.5, 8, 'F');
+      
+      // Número de sección
+      pdf.setFillColor(...colors.gold);
+      pdf.rect(margin + 4, y + 1, 12, 6, 'F');
+      pdf.setTextColor(...colors.darkBlue);
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(String(sectionNum).padStart(2, '0'), margin + 10, y + 5.2, { align: 'center' });
+      
+      pdf.setTextColor(...colors.white);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(title, margin + 20, y + 5.5);
+      
+      y += 11;
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // FUNCIÓN PARA DIBUJAR TABLA
+    // ═══════════════════════════════════════════════════════════════════════════
+    const drawTable = (data: [string, string][], startY: number): number => {
+      const colWidth1 = 55;
+      const colWidth2 = pageWidth - (margin * 2) - colWidth1;
+      const rowHeight = 7;
+      let currentY = startY;
+      
+      data.forEach((row, index) => {
+        const bgColor = index % 2 === 0 ? colors.lightGray : colors.white;
+        pdf.setFillColor(...bgColor);
+        pdf.rect(margin, currentY, pageWidth - (margin * 2), rowHeight, 'F');
+        
+        // Borde
+        pdf.setDrawColor(200, 200, 200);
+        pdf.setLineWidth(0.1);
+        pdf.rect(margin, currentY, colWidth1, rowHeight, 'S');
+        pdf.rect(margin + colWidth1, currentY, colWidth2, rowHeight, 'S');
+        
+        // Label
+        pdf.setTextColor(...colors.gray);
+        pdf.setFontSize(7);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(row[0], margin + 2, currentY + 4.5);
+        
+        // Value
+        pdf.setTextColor(...colors.black);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(row[1], margin + colWidth1 + 2, currentY + 4.5);
+        
+        currentY += rowHeight;
+      });
+      
+      return currentY;
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GENERAR CONTENIDO
+    // ═══════════════════════════════════════════════════════════════════════════
+    drawInstitutionalHeader();
+
+    // SECCIÓN 01: INFORMACIÓN DEL RECIBO
+    drawSection(isSpanish ? 'INFORMACIÓN DEL COMPROBANTE' : 'RECEIPT INFORMATION', 1);
+    y = drawTable([
+      [isSpanish ? 'Número de Recibo' : 'Receipt Number', receiptNumber],
+      [isSpanish ? 'Referencia' : 'Reference', transfer.payload.reference],
+      [isSpanish ? 'Fecha de Transacción' : 'Transaction Date', date.toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')],
+      [isSpanish ? 'Hora de Transacción' : 'Transaction Time', date.toLocaleTimeString(isSpanish ? 'es-ES' : 'en-US')],
+      [isSpanish ? 'Estado' : 'Status', transfer.status === 'success' ? (isSpanish ? '✓ COMPLETADA' : '✓ COMPLETED') : (isSpanish ? '✗ FALLIDA' : '✗ FAILED')],
+      [isSpanish ? 'Canal' : 'Channel', 'TZ Digital Bank Transfer API'],
+    ], y);
+    y += 5;
+
+    // SECCIÓN 02: CUENTA ORDENANTE
+    drawSection(isSpanish ? 'CUENTA ORDENANTE / ORIGINATOR' : 'ORIGINATOR ACCOUNT', 2);
+    const senderData: [string, string][] = [
+      [isSpanish ? 'Banco Ordenante' : 'Ordering Bank', 'DIGITAL COMMERCIAL BANK LTD'],
+      [isSpanish ? 'Nombre Ordenante' : 'Originator Name', config.defaultSenderName || 'Digital Commercial Bank Ltd'],
+    ];
+    
+    if (senderAccount) {
+      senderData.push(
+        [isSpanish ? 'Cuenta Ordenante' : 'Originator Account', senderAccount.accountNumber || senderAccount.id],
+        [isSpanish ? 'Tipo de Cuenta' : 'Account Type', senderAccount.accountCategory?.toUpperCase() || 'CUSTODY'],
+        [isSpanish ? 'Balance Anterior' : 'Balance Before', `${senderAccount.currency} ${(senderAccount.availableBalance + transfer.payload.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`],
+        [isSpanish ? 'Balance Actual' : 'Current Balance', `${senderAccount.currency} ${senderAccount.availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`],
+      );
+    } else {
+      senderData.push(
+        [isSpanish ? 'Cuenta Ordenante' : 'Originator Account', config.defaultSenderAccount || 'DAES-BK-001'],
+      );
+    }
+    y = drawTable(senderData, y);
+    y += 5;
+
+    // SECCIÓN 03: BENEFICIARIO
+    drawSection(isSpanish ? 'DATOS DEL BENEFICIARIO' : 'BENEFICIARY DETAILS', 3);
+    const beneficiaryData: [string, string][] = [
+      [isSpanish ? 'Nombre Beneficiario' : 'Beneficiary Name', transfer.payload.beneficiary_name || '-'],
+      [isSpanish ? 'Cuenta Beneficiario' : 'Beneficiary Account', transfer.payload.beneficiary_account || transfer.payload.beneficiary_iban || '-'],
+      [isSpanish ? 'Banco Beneficiario' : 'Beneficiary Bank', transfer.payload.beneficiary_bank || '-'],
+    ];
+    if (transfer.payload.beneficiary_swift) {
+      beneficiaryData.push([isSpanish ? 'Código SWIFT/BIC' : 'SWIFT/BIC Code', transfer.payload.beneficiary_swift]);
+    }
+    if (transfer.payload.beneficiary_country) {
+      beneficiaryData.push([isSpanish ? 'País' : 'Country', transfer.payload.beneficiary_country]);
+    }
+    y = drawTable(beneficiaryData, y);
+    y += 5;
+
+    // SECCIÓN 04: MONTO TRANSFERIDO
+    drawSection(isSpanish ? 'MONTO DE LA TRANSFERENCIA' : 'TRANSFER AMOUNT', 4);
+    
+    // Cuadro destacado para el monto
+    pdf.setFillColor(...colors.darkBlue);
+    pdf.rect(margin, y, pageWidth - (margin * 2), 20, 'F');
+    pdf.setFillColor(...colors.gold);
+    pdf.rect(margin, y, 3, 20, 'F');
+    
+    const currencyInfo = currencyData[transfer.payload.currency] || { num: '000', name: transfer.payload.currency };
+    
+    pdf.setTextColor(...colors.white);
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(isSpanish ? 'MONTO TOTAL TRANSFERIDO' : 'TOTAL AMOUNT TRANSFERRED', margin + 8, y + 5);
+    
+    pdf.setFontSize(22);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(...colors.gold);
+    pdf.text(`${transfer.payload.currency} ${transfer.payload.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, margin + 8, y + 14);
+    
+    pdf.setFontSize(7);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(180, 180, 180);
+    pdf.text(`ISO 4217: ${currencyInfo.num} - ${currencyInfo.name}`, pageWidth - margin - 5, y + 14, { align: 'right' });
+    
+    y += 25;
+
+    // SECCIÓN 05: CONCEPTO
+    if (transfer.payload.note || transfer.payload.purpose) {
+      drawSection(isSpanish ? 'CONCEPTO / DETALLE' : 'PURPOSE / DETAIL', 5);
+      y = drawTable([
+        [isSpanish ? 'Propósito' : 'Purpose', transfer.payload.purpose || 'Treasury Transfer'],
+        [isSpanish ? 'Nota/Concepto' : 'Note/Concept', transfer.payload.note || '-'],
+      ], y);
+      y += 5;
+    }
+
+    // SECCIÓN 06: VERIFICACIÓN DIGITAL
+    drawSection(isSpanish ? 'VERIFICACIÓN Y SEGURIDAD' : 'VERIFICATION & SECURITY', 6);
+    
+    // Box de verificación
+    pdf.setFillColor(250, 252, 255);
+    pdf.setDrawColor(...colors.gold);
+    pdf.setLineWidth(0.5);
+    pdf.rect(margin, y, pageWidth - (margin * 2), 25, 'FD');
+    
+    pdf.setTextColor(...colors.gray);
+    pdf.setFontSize(6);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(isSpanish ? 'CÓDIGO DE VERIFICACIÓN' : 'VERIFICATION CODE', margin + 3, y + 5);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(5.5);
+    pdf.setTextColor(...colors.darkBlue);
+    pdf.text(verificationCode, margin + 3, y + 9);
+    
+    pdf.setTextColor(...colors.gray);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(6);
+    pdf.text('SHA-256 SECURITY HASH', margin + 3, y + 15);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(4.5);
+    pdf.setTextColor(...colors.darkBlue);
+    pdf.text(securityHash, margin + 3, y + 19);
+    
+    // Sello de verificado
+    if (transfer.status === 'success') {
+      pdf.setFillColor(...colors.green);
+      pdf.setTextColor(...colors.white);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'bold');
+      const stampX = pageWidth - margin - 35;
+      const stampY = y + 5;
+      pdf.rect(stampX, stampY, 30, 15, 'F');
+      pdf.text(isSpanish ? '✓ VERIFICADO' : '✓ VERIFIED', stampX + 15, stampY + 10, { align: 'center' });
+    }
+
+    y += 30;
+
+    // Declaración final
+    pdf.setTextColor(...colors.gray);
+    pdf.setFontSize(7);
+    pdf.setFont('helvetica', 'italic');
+    const declaration = isSpanish 
+      ? 'Este documento certifica la ejecución de la transferencia internacional a través del protocolo TZ Digital Bank Transfer. La operación ha sido procesada de conformidad con los estándares ISO 20022 y las regulaciones FATF aplicables.'
+      : 'This document certifies the execution of the international transfer through the TZ Digital Bank Transfer protocol. The operation has been processed in accordance with ISO 20022 standards and applicable FATF regulations.';
+    
+    const lines = pdf.splitTextToSize(declaration, pageWidth - (margin * 2));
+    pdf.text(lines, margin, y);
+
+    // Footer
+    drawInstitutionalFooter();
+
+    // Guardar
+    const filename = `TZ_Transfer_Receipt_${receiptNumber}`;
+    pdf.save(`${filename}.pdf`);
+    
+    return filename;
   };
 
   // Enviar transferencia
@@ -125,13 +520,23 @@ export function TZDigitalModule() {
       return;
     }
 
+    // Validar cuenta custodio si está seleccionada
+    if (selectedAccount) {
+      if (selectedAccount.availableBalance < transferForm.amount) {
+        alert(isSpanish 
+          ? `❌ Fondos insuficientes. Balance disponible: ${selectedAccount.currency} ${selectedAccount.availableBalance.toLocaleString()}`
+          : `❌ Insufficient funds. Available balance: ${selectedAccount.currency} ${selectedAccount.availableBalance.toLocaleString()}`);
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     const payload: MoneyTransferPayload = {
       ...transferForm,
       reference: transferForm.reference || tzDigitalClient.generateReference(transferForm.currency),
-      sender_name: config.defaultSenderName,
-      sender_account: config.defaultSenderAccount,
+      sender_name: selectedAccount?.accountName || config.defaultSenderName,
+      sender_account: selectedAccount?.accountNumber || config.defaultSenderAccount,
       sender_bank: 'Digital Commercial Bank Ltd',
     };
 
@@ -139,13 +544,33 @@ export function TZDigitalModule() {
       idempotencyKey: payload.reference,
     });
 
+    // Deducir del balance de la cuenta custodio si la transferencia fue exitosa
+    if (result.ok && selectedAccount) {
+      custodyStore.withdrawFundsWithTransaction({
+        accountId: selectedAccount.id,
+        amount: transferForm.amount,
+        type: 'transfer_out',
+        description: `TZ Digital Transfer - ${transferForm.beneficiary_name}`,
+        destinationAccount: transferForm.beneficiary_account || transferForm.beneficiary_iban || '',
+        destinationBank: transferForm.beneficiary_bank || '',
+        transactionDate: new Date().toISOString().split('T')[0],
+        transactionTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
+        valueDate: new Date().toISOString().split('T')[0],
+        notes: `Ref: ${payload.reference}`,
+      });
+      
+      // Actualizar cuentas
+      const accounts = custodyStore.getAccounts().filter(a => a.currency === transferForm.currency);
+      setCustodyAccounts(accounts);
+    }
+
+    const transferRecord = tzDigitalClient.getTransfers()[0];
     setTransfers(tzDigitalClient.getTransfers());
     setIsLoading(false);
 
     if (result.ok) {
-      alert(isSpanish 
-        ? `✅ Transferencia enviada exitosamente\n\nReferencia: ${payload.reference}\nMonto: ${payload.currency} ${payload.amount.toLocaleString()}`
-        : `✅ Transfer sent successfully\n\nReference: ${payload.reference}\nAmount: ${payload.currency} ${payload.amount.toLocaleString()}`);
+      setLastTransferForReceipt(transferRecord);
+      setShowReceiptModal(true);
       
       // Limpiar formulario
       setTransferForm({
@@ -166,9 +591,10 @@ export function TZDigitalModule() {
     }
   };
 
-  // Copiar al portapapeles
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  // Descargar recibo
+  const handleDownloadReceipt = async (transfer: TransferRecord) => {
+    const account = custodyAccounts.find(a => a.id === selectedAccountId);
+    await generateTransferReceiptPDF(transfer, account);
   };
 
   return (
@@ -304,6 +730,56 @@ export function TZDigitalModule() {
                 </div>
               )}
 
+              {/* Selector de Cuenta Custodio */}
+              <div className="bg-gradient-to-r from-emerald-900/30 to-teal-900/30 border border-emerald-500/30 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Wallet className="w-5 h-5 text-emerald-400" />
+                  <label className="text-emerald-400 font-semibold">
+                    {isSpanish ? 'Cuenta Custodio Origen' : 'Source Custody Account'}
+                  </label>
+                </div>
+                
+                {custodyAccounts.length === 0 ? (
+                  <div className="text-gray-400 text-sm py-2">
+                    {isSpanish 
+                      ? `No hay cuentas custodio en ${transferForm.currency}. Crea una en el módulo Custody Accounts.`
+                      : `No custody accounts in ${transferForm.currency}. Create one in Custody Accounts module.`}
+                  </div>
+                ) : (
+                  <select
+                    value={selectedAccountId}
+                    onChange={e => setSelectedAccountId(e.target.value)}
+                    className="w-full px-4 py-3 bg-black/50 border border-emerald-500/30 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="">{isSpanish ? '-- Seleccionar Cuenta --' : '-- Select Account --'}</option>
+                    {custodyAccounts.map(account => (
+                      <option key={account.id} value={account.id}>
+                        {account.accountName} - {account.currency} {account.availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })} ({account.accountNumber || account.id})
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {selectedAccount && (
+                  <div className="mt-3 grid grid-cols-3 gap-3">
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <div className="text-xs text-gray-400">{isSpanish ? 'Balance Disponible' : 'Available Balance'}</div>
+                      <div className="text-lg font-bold text-emerald-400">
+                        {selectedAccount.currency} {selectedAccount.availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <div className="text-xs text-gray-400">{isSpanish ? 'Tipo de Cuenta' : 'Account Type'}</div>
+                      <div className="text-lg font-bold text-white">{selectedAccount.accountCategory?.toUpperCase() || 'CUSTODY'}</div>
+                    </div>
+                    <div className="bg-black/30 rounded-lg p-3">
+                      <div className="text-xs text-gray-400">{isSpanish ? 'Número de Cuenta' : 'Account Number'}</div>
+                      <div className="text-sm font-mono text-white">{selectedAccount.accountNumber || selectedAccount.id}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-6">
                 {/* Columna izquierda - Monto y Moneda */}
                 <div className="space-y-4">
@@ -357,6 +833,12 @@ export function TZDigitalModule() {
                         </button>
                       ))}
                     </div>
+                    {selectedAccount && transferForm.amount > selectedAccount.availableBalance && (
+                      <div className="mt-2 text-red-400 text-sm flex items-center gap-1">
+                        <AlertTriangle className="w-4 h-4" />
+                        {isSpanish ? 'Fondos insuficientes' : 'Insufficient funds'}
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-black/30 rounded-xl p-4">
@@ -442,7 +924,7 @@ export function TZDigitalModule() {
               {/* Botón de envío */}
               <button
                 onClick={handleSendTransfer}
-                disabled={isLoading || !config.isConfigured || transferForm.amount <= 0}
+                disabled={isLoading || !config.isConfigured || transferForm.amount <= 0 || (selectedAccount && transferForm.amount > selectedAccount.availableBalance)}
                 className="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-bold text-lg hover:from-blue-500 hover:to-cyan-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
               >
                 {isLoading ? (
@@ -516,11 +998,23 @@ export function TZDigitalModule() {
                             <div className="text-sm text-gray-400">{t.payload.beneficiary_name}</div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="font-mono text-xs text-gray-400">{t.payload.reference}</div>
-                          <div className="text-xs text-gray-500">
-                            {new Date(t.timestamp).toLocaleString()}
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <div className="font-mono text-xs text-gray-400">{t.payload.reference}</div>
+                            <div className="text-xs text-gray-500">
+                              {new Date(t.timestamp).toLocaleString()}
+                            </div>
                           </div>
+                          {t.status === 'success' && (
+                            <button
+                              onClick={() => handleDownloadReceipt(t)}
+                              className="px-3 py-2 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500/30 flex items-center gap-1"
+                              title={isSpanish ? 'Descargar Recibo' : 'Download Receipt'}
+                            >
+                              <Receipt className="w-4 h-4" />
+                              <Download className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </div>
                       {t.result.error && (
@@ -612,9 +1106,49 @@ export function TZDigitalModule() {
           <p className="mt-1">Digital Commercial Bank Ltd • DAES Platform</p>
         </div>
       </div>
+
+      {/* Modal de Recibo Generado */}
+      {showReceiptModal && lastTransferForReceipt && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-emerald-500/50 rounded-2xl p-6 max-w-md w-full">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-12 h-12 text-emerald-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {isSpanish ? '¡Transferencia Exitosa!' : 'Transfer Successful!'}
+              </h3>
+              <p className="text-gray-400 mb-4">
+                {lastTransferForReceipt.payload.currency} {lastTransferForReceipt.payload.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-sm text-gray-500 mb-6">
+                {isSpanish ? 'Referencia:' : 'Reference:'} {lastTransferForReceipt.payload.reference}
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowReceiptModal(false)}
+                  className="flex-1 px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+                >
+                  {isSpanish ? 'Cerrar' : 'Close'}
+                </button>
+                <button
+                  onClick={() => {
+                    handleDownloadReceipt(lastTransferForReceipt);
+                    setShowReceiptModal(false);
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-lg hover:from-amber-400 hover:to-yellow-400 font-bold flex items-center justify-center gap-2"
+                >
+                  <Receipt className="w-5 h-5" />
+                  {isSpanish ? 'Descargar Recibo' : 'Download Receipt'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default TZDigitalModule;
-
