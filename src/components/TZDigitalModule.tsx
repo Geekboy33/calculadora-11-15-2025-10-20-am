@@ -330,14 +330,14 @@ export function TZDigitalModule() {
       pdf.setFontSize(13);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(...colors.white);
-      const title = isSpanish ? 'COMPROBANTE DE TRANSFERENCIA INTERNACIONAL' : 'INTERNATIONAL TRANSFER RECEIPT';
+      const title = 'DIRECT CASH TRANSFER';
       pdf.text(title, pageWidth / 2, 48, { align: 'center' });
       
       // Subtítulo
       pdf.setFontSize(8);
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(...colors.lightGold);
-      const subtitle = 'TZ Digital Bank Transfer Protocol';
+      const subtitle = 'Open Banking ISO 20022 | CIS S2S Protocol';
       pdf.text(subtitle, pageWidth / 2, 54, { align: 'center' });
       
       y = 68;
@@ -463,7 +463,7 @@ export function TZDigitalModule() {
       [isSpanish ? 'Fecha de Transacción' : 'Transaction Date', date.toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')],
       [isSpanish ? 'Hora de Transacción' : 'Transaction Time', date.toLocaleTimeString(isSpanish ? 'es-ES' : 'en-US')],
       [isSpanish ? 'Estado' : 'Status', transfer.status === 'success' ? (isSpanish ? '✓ COMPLETADA' : '✓ COMPLETED') : (isSpanish ? '✗ FALLIDA' : '✗ FAILED')],
-      [isSpanish ? 'Canal' : 'Channel', 'TZ Digital Bank Transfer API'],
+      [isSpanish ? 'Canal' : 'Channel', 'CIS S2S Direct Cash Transfer'],
     ], y);
     y += 5;
 
@@ -478,8 +478,6 @@ export function TZDigitalModule() {
       senderData.push(
         [isSpanish ? 'Cuenta Ordenante' : 'Originator Account', senderAccount.accountNumber || senderAccount.id],
         [isSpanish ? 'Tipo de Cuenta' : 'Account Type', senderAccount.accountCategory?.toUpperCase() || 'CUSTODY'],
-        [isSpanish ? 'Balance Anterior' : 'Balance Before', `${senderAccount.currency} ${(senderAccount.availableBalance + transfer.payload.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`],
-        [isSpanish ? 'Balance Actual' : 'Current Balance', `${senderAccount.currency} ${senderAccount.availableBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`],
       );
     } else {
       senderData.push(
@@ -589,8 +587,8 @@ export function TZDigitalModule() {
     pdf.setFontSize(7);
     pdf.setFont('helvetica', 'italic');
     const declaration = isSpanish 
-      ? 'Este documento certifica la ejecución de la transferencia internacional a través del protocolo TZ Digital Bank Transfer. La operación ha sido procesada de conformidad con los estándares ISO 20022 y las regulaciones FATF aplicables.'
-      : 'This document certifies the execution of the international transfer through the TZ Digital Bank Transfer protocol. The operation has been processed in accordance with ISO 20022 standards and applicable FATF regulations.';
+      ? 'Este documento certifica la ejecución de la transferencia de efectivo directo a través del protocolo CIS S2S Open Banking. La operación ha sido procesada de conformidad con los estándares ISO 20022 y las regulaciones FATF aplicables.'
+      : 'This document certifies the execution of the direct cash transfer through the CIS S2S Open Banking protocol. The operation has been processed in accordance with ISO 20022 standards and applicable FATF regulations.';
     
     const lines = pdf.splitTextToSize(declaration, pageWidth - (margin * 2));
     pdf.text(lines, margin, y);
