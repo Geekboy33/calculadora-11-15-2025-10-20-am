@@ -463,7 +463,7 @@ export function TZDigitalModule() {
       [isSpanish ? 'Fecha de Transacción' : 'Transaction Date', date.toLocaleDateString(isSpanish ? 'es-ES' : 'en-US')],
       [isSpanish ? 'Hora de Transacción' : 'Transaction Time', date.toLocaleTimeString(isSpanish ? 'es-ES' : 'en-US')],
       [isSpanish ? 'Estado' : 'Status', transfer.status === 'success' ? (isSpanish ? '✓ COMPLETADA' : '✓ COMPLETED') : (isSpanish ? '✗ FALLIDA' : '✗ FAILED')],
-      [isSpanish ? 'Canal' : 'Channel', 'CIS S2S Direct Cash Transfer'],
+      [isSpanish ? 'Canal' : 'Channel', 'Direct Cash Transfer'],
     ], y);
     y += 5;
 
