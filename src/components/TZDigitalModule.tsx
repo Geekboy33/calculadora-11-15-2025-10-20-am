@@ -80,7 +80,7 @@ export function TZDigitalModule() {
     channel: 'API2API',
   });
 
-  // Funds Processing Form
+  // Funds Processing Form (CIS S2S API 2025)
   const [fundsForm, setFundsForm] = useState<FundsTxPayload>({
     transaction_id: '',
     amount: 0,
@@ -88,9 +88,23 @@ export function TZDigitalModule() {
     from_bank: 'Digital Commercial Bank Ltd',
     to_bank: '',
     status: 'pending',
+    protocol: 'SWIFT_MT103_GPI',
+    channel: 'INSTANT_SERVER_SETTLEMENT',
     reference: '',
     description: ''
   });
+
+  // CIS S2S Transfer Protocols (Sin Blockchain)
+  const TRANSFER_PROTOCOLS = [
+    { value: 'SWIFT_NET', label: 'SWIFT.Net' },
+    { value: 'SWIFT_COM', label: 'SWIFT.Com' },
+    { value: 'SWIFT_MT103_DIRECT', label: 'SWIFT MT103 Direct Cash Transfer' },
+    { value: 'SWIFT_MT103_GPI', label: 'SWIFT MT103 GPI' },
+    { value: 'SWIFT_MT103_GPI_SEMI', label: 'SWIFT MT103 GPI Semi Automatic' },
+    { value: 'VISA_NET', label: 'VISA NET' },
+    { value: 'SERVER_TO_SERVER', label: 'Server to Server (IP/IP)' },
+    { value: 'GLOBAL_SERVER_POOL', label: 'Global Server Pool' },
+  ];
 
   // Funds Processing Config
   const [fundsConfig, setFundsConfig] = useState<Partial<FundsProcessingConfig>>({
@@ -1189,18 +1203,40 @@ export function TZDigitalModule() {
             </div>
           )}
 
-          {/* Funds Processing - SHA256 Handshake */}
+          {/* Funds Processing - CIS S2S API 2025 */}
           {activeTab === 'funds' && (
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
                 <Shield className="w-6 h-6 text-amber-400" />
                 <div>
                   <h3 className="text-xl font-bold text-white">
-                    {isSpanish ? 'Funds Processing Transaction' : 'Funds Processing Transaction'}
+                    CIS S2S Funds Processing
                   </h3>
                   <p className="text-sm text-gray-400">
-                    {isSpanish ? 'Transacción con SHA256 Handshake Hash' : 'Transaction with SHA256 Handshake Hash'}
+                    DevMind Group - Instant Server Settlement
                   </p>
+                </div>
+              </div>
+
+              {/* Server Info Banner */}
+              <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/30 rounded-xl p-4 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div>
+                    <p className="text-xs text-gray-400">{isSpanish ? 'Servidor' : 'Server'}</p>
+                    <p className="text-sm font-bold text-white">DEV-CORE-PAY-GW-01</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Global IP</p>
+                    <p className="text-sm font-mono text-cyan-400">172.67.157.88</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">{isSpanish ? 'Puerto' : 'Port'}</p>
+                    <p className="text-sm font-mono text-emerald-400">8443 (TLS/SSL)</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">{isSpanish ? 'Ubicación' : 'Location'}</p>
+                    <p className="text-sm text-white">London, UK</p>
+                  </div>
                 </div>
               </div>
 
@@ -1208,21 +1244,19 @@ export function TZDigitalModule() {
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
                 <div className="flex items-start gap-3">
                   <Shield className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-semibold text-amber-300">
-                      {isSpanish ? 'SHA256 Handshake Verificación' : 'SHA256 Handshake Verification'}
+                      SHA256 Handshake Verification
                     </h4>
-                    <p className="text-sm text-gray-300 mt-1">
-                      {isSpanish 
-                        ? 'Cada transacción incluye un hash SHA256 del payload para verificación de integridad.'
-                        : 'Each transaction includes a SHA256 hash of the payload for integrity verification.'}
+                    <p className="text-xs text-gray-400 mt-1 font-mono break-all">
+                      b19f2a94eab4cd3b92f1e3e0dce9d541c8b7aa3fdbe6e2f4ac3c91a5fbb2f44
                     </p>
-                    <div className="flex items-center gap-4 mt-2 text-xs">
-                      <span className="text-emerald-400">✓ SHA-256</span>
-                      <span className="text-emerald-400">✓ Canonical JSON</span>
-                      <span className={fundsConfig.handshake?.mode === 'hmac-sha256' ? 'text-emerald-400' : 'text-gray-500'}>
-                        {fundsConfig.handshake?.mode === 'hmac-sha256' ? '✓' : '○'} HMAC-SHA256
-                      </span>
+                    <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+                      <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">✓ SHA-256</span>
+                      <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">✓ TLS/SSL</span>
+                      <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded">✓ SWIFT</span>
+                      <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded">✓ VISA NET</span>
+                      <span className="px-2 py-0.5 bg-gray-500/20 text-gray-400 rounded">○ No Blockchain</span>
                     </div>
                   </div>
                 </div>
@@ -1297,6 +1331,22 @@ export function TZDigitalModule() {
                     placeholder="HSBC UK Bank plc"
                     className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
                   />
+                </div>
+
+                {/* Transfer Protocol */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {isSpanish ? 'Protocolo de Transferencia' : 'Transfer Protocol'}
+                  </label>
+                  <select
+                    value={fundsForm.protocol || 'SWIFT_MT103_GPI'}
+                    onChange={(e) => setFundsForm({...fundsForm, protocol: e.target.value as any})}
+                    className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:border-amber-500 focus:outline-none"
+                  >
+                    {TRANSFER_PROTOCOLS.map(p => (
+                      <option key={p.value} value={p.value}>{p.label}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Status */}

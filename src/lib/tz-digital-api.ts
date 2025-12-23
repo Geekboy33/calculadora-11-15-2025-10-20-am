@@ -11,8 +11,34 @@
 // CONFIGURACIÓN
 // ═══════════════════════════════════════════════════════════════════════════
 
-// URL directa de TZ Digital
-const TZ_DIRECT_URL = "https://banktransfer.tzdigitalpvtlimited.com/api/transactions";
+// ═══════════════════════════════════════════════════════════════════════════
+// CIS S2S API 2025 - DEVMIND GROUP CONFIGURATION
+// ═══════════════════════════════════════════════════════════════════════════
+// Receiving Server Name: DEV-CORE-PAY-GW-01
+// Server Location: London, United Kingdom
+// Protocol: HTTPS REST API — JSON Payload
+// ═══════════════════════════════════════════════════════════════════════════
+
+// URL directa de DevMind Group API (CIS S2S)
+const TZ_DIRECT_URL = "https://banktransfer.devmindgroup.com/api/transactions";
+
+// API alternativa de recepción
+const DEVMIND_RECEIVE_URL = "https://secure.devmindpay.com/api/v1/transaction/receive";
+
+// Global Server IP
+const GLOBAL_SERVER_IP = "172.67.157.88";
+const RECEIVING_PORT = 8443; // TLS/SSL Enabled
+
+// API Keys del documento CIS S2S
+const CIS_API_KEY = "47061d41-7994-4fad-99a7-54879acd9a83";
+const CIS_AUTH_KEY = "DMP-SECURE-KEY-7X93-FF28-ZQ19";
+
+// SHA256 Handshake Hash (del documento)
+const CIS_SHA256_HANDSHAKE = "b19f2a94eab4cd3b92f1e3e0dce9d541c8b7aa3fdbe6e2f4ac3c91a5fbb2f44";
+
+// Internal IP Ranges
+const INTERNAL_IP_RANGES = ["172.16.0.0/24", "10.26.0.0/16"];
+const DNS_RANGE = "192.168.1.100/24";
 
 // Servidor local Express (para Electron y producción)
 const LOCAL_SERVER_URL = "http://localhost:3000";
@@ -59,8 +85,71 @@ export type Currency = "USD" | "EUR";
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * CIS S2S Supported Transfer Protocols (Sin Blockchain)
+ */
+export type TransferProtocol = 
+  | 'SWIFT_NET'
+  | 'SWIFT_COM'
+  | 'SWIFT_MT103_DIRECT'
+  | 'SWIFT_MT103_GPI'
+  | 'SWIFT_MT103_GPI_SEMI'
+  | 'VISA_NET'
+  | 'SERVER_TO_SERVER'
+  | 'GLOBAL_SERVER_POOL';
+
+/**
+ * CIS S2S Client Information (Black Screen Display)
+ */
+export interface CISClientInfo {
+  signatory_name: string;
+  nationality: string;
+  passport_number: string;
+  date_of_issue: string;
+  expiration_date: string;
+  issued_by: string;
+  date_of_birth: string;
+  place_of_birth: string;
+}
+
+/**
+ * CIS S2S Server Details (Black Screen Display)
+ */
+export interface CISServerDetails {
+  global_server_ip: string;
+  global_id?: string;
+  receiving_server_name: string;
+  receiving_port: number;
+  api_endpoint: string;
+  api_key: string;
+  auth_key: string;
+  internal_ip_ranges: string[];
+  dns_range: string;
+}
+
+/**
+ * CIS S2S Transmission Codes
+ */
+export interface TransmissionCodes {
+  reference_number?: string;
+  transaction_code?: string;
+  access_code?: string;
+  release_code?: string;
+  withdrawal_code?: string;
+  download_code?: string;
+  final_code?: string;
+  final_blocking_code?: string;
+  interbank_blocking_code?: string;
+  permit_arrival_money_number?: string;
+  clearing_house_number?: string;
+  transaction_id?: string;
+  unique_transaction_number?: string;
+  hash_code?: string;
+  approval_code?: string;
+}
+
+/**
  * Funds Processing Transaction Payload
- * Used for bank-to-bank transfers with SHA256 handshake verification
+ * Based on CIS S2S API 2025 - Expected Payload Structure
  */
 export interface FundsTxPayload {
   transaction_id: string;
@@ -69,6 +158,11 @@ export interface FundsTxPayload {
   from_bank: string;     // e.g. "Deutsche Bank AG"
   to_bank: string;       // e.g. "HSBC UK Bank plc"
   status: "pending" | "approved" | "rejected" | string;
+  // CIS S2S Optional fields
+  protocol?: TransferProtocol;
+  channel?: 'INSTANT_SERVER_SETTLEMENT' | string;
+  transmission_codes?: TransmissionCodes;
+  client_info?: CISClientInfo;
   // Optional additional fields
   reference?: string;
   description?: string;

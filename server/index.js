@@ -322,9 +322,30 @@ app.post('/api/yoomoney/oauth/token', async (req, res) => {
 // ============================================================================
 // TZ DIGITAL BANK TRANSFER PROXY - Transferencias USD/EUR
 // ============================================================================
+// ============================================================================
+// CIS S2S API 2025 - DEVMIND GROUP CONFIGURATION
+// ============================================================================
+// Receiving Server Name: DEV-CORE-PAY-GW-01
+// Server Location: London, United Kingdom
+// Global Server IP: 172.67.157.88
+// Port: 8443 (TLS/SSL Enabled)
+// ============================================================================
+const CIS_S2S_CONFIG = {
+  API_URL: 'https://banktransfer.devmindgroup.com/api/transactions',
+  RECEIVE_URL: 'https://secure.devmindpay.com/api/v1/transaction/receive',
+  GLOBAL_IP: '172.67.157.88',
+  PORT: 8443,
+  API_KEY: '47061d41-7994-4fad-99a7-54879acd9a83',
+  AUTH_KEY: 'DMP-SECURE-KEY-7X93-FF28-ZQ19',
+  SHA256_HANDSHAKE: 'b19f2a94eab4cd3b92f1e3e0dce9d541c8b7aa3fdbe6e2f4ac3c91a5fbb2f44',
+  INTERNAL_IP_RANGES: ['172.16.0.0/24', '10.26.0.0/16'],
+  DNS_RANGE: '192.168.1.100/24'
+};
+
 app.post('/api/tz-digital/transactions', async (req, res) => {
-  const TZ_API_URL = 'https://banktransfer.tzdigitalpvtlimited.com/api/transactions';
-  const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '');
+  // Usar CIS S2S API URL (DevMind Group)
+  const TZ_API_URL = CIS_S2S_CONFIG.API_URL;
+  const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '') || CIS_S2S_CONFIG.API_KEY;
 
   try {
     console.log('[TZ Digital Proxy] 📤 Enviando transferencia:', {
@@ -417,34 +438,51 @@ app.options('/api/tz-digital/transactions', async (req, res) => {
 });
 
 // ============================================================================
-// TZ DIGITAL - FUNDS PROCESSING WITH SHA256 HANDSHAKE
+// CIS S2S - FUNDS PROCESSING WITH SHA256 HANDSHAKE (DEVMIND GROUP)
+// Channel: Instant Server Settlement
+// Protocols: SWIFT, VISA NET, Server to Server (NO Blockchain)
 // ============================================================================
 app.post('/api/tz-digital/funds-processing', async (req, res) => {
-  const TZ_API_URL = 'https://banktransfer.tzdigitalpvtlimited.com/api/transactions';
-  const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '');
-  const handshakeHash = req.headers['x-handshake-hash'];
+  // Usar CIS S2S API URL (DevMind Group)
+  const API_URL = CIS_S2S_CONFIG.API_URL;
+  const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '') || CIS_S2S_CONFIG.API_KEY;
+  const handshakeHash = req.headers['x-handshake-hash'] || CIS_S2S_CONFIG.SHA256_HANDSHAKE;
 
   try {
-    console.log('[TZ Digital Funds Processing] 📤 Enviando transacción:', {
+    console.log('[CIS S2S Funds Processing] 📤 Enviando transacción a DevMind Group:', {
+      endpoint: API_URL,
       transaction_id: req.body?.transaction_id,
       amount: req.body?.amount,
       currency: req.body?.currency,
       from_bank: req.body?.from_bank,
       to_bank: req.body?.to_bank,
+      protocol: req.body?.protocol || 'SWIFT_MT103_GPI',
+      channel: 'INSTANT_SERVER_SETTLEMENT',
       handshakeHash: handshakeHash ? handshakeHash.substring(0, 16) + '...' : 'none'
     });
 
+    // CIS S2S Headers completos
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${bearerToken}`,
+      'X-API-Key': CIS_S2S_CONFIG.API_KEY,
+      'X-Auth-Key': CIS_S2S_CONFIG.AUTH_KEY,
+      'X-Global-Server-IP': CIS_S2S_CONFIG.GLOBAL_IP,
+      'X-Channel': 'INSTANT_SERVER_SETTLEMENT',
+      'Accept': 'application/json',
     };
 
-    // Incluir handshake hash si está presente
+    // Incluir handshake hash
     if (handshakeHash) {
       headers['X-Handshake-Hash'] = handshakeHash;
     }
 
-    const response = await fetch(TZ_API_URL, {
+    // Incluir protocolo si está especificado
+    if (req.body?.protocol) {
+      headers['X-Transfer-Protocol'] = req.body.protocol;
+    }
+
+    const response = await fetch(API_URL, {
       method: 'POST',
       headers,
       body: JSON.stringify(req.body),
@@ -460,7 +498,7 @@ app.post('/api/tz-digital/funds-processing', async (req, res) => {
       responseData = { raw: responseText };
     }
 
-    console.log('[TZ Digital Funds Processing] 📥 Respuesta:', {
+    console.log('[CIS S2S Funds Processing] 📥 Respuesta:', {
       status: response.status,
       ok: response.ok,
       data: responseData
@@ -471,11 +509,17 @@ app.post('/api/tz-digital/funds-processing', async (req, res) => {
       status: response.status,
       data: responseData,
       timestamp: new Date().toISOString(),
-      handshakeVerified: !!handshakeHash
+      handshakeVerified: !!handshakeHash,
+      server: {
+        name: 'DEV-CORE-PAY-GW-01',
+        location: 'London, United Kingdom',
+        globalIP: CIS_S2S_CONFIG.GLOBAL_IP,
+        port: CIS_S2S_CONFIG.PORT
+      }
     });
 
   } catch (error) {
-    console.error('[TZ Digital Funds Processing] ❌ Error:', error.message);
+    console.error('[CIS S2S Funds Processing] ❌ Error:', error.message);
     
     res.status(500).json({
       success: false,
@@ -487,30 +531,48 @@ app.post('/api/tz-digital/funds-processing', async (req, res) => {
 });
 
 app.get('/api/tz-digital/test', async (req, res) => {
-  const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '');
+  const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '') || CIS_S2S_CONFIG.API_KEY;
   
   try {
-    console.log('[TZ Digital Proxy] 🔍 Test de conexión...');
+    console.log('[CIS S2S] 🔍 Test de conexión a DevMind Group...');
     
-    const response = await fetch('https://banktransfer.tzdigitalpvtlimited.com/api/transactions', {
+    const response = await fetch(CIS_S2S_CONFIG.API_URL, {
       method: 'OPTIONS',
       headers: {
-        'Authorization': bearerToken ? `Bearer ${bearerToken}` : '',
+        'Authorization': `Bearer ${bearerToken}`,
+        'X-API-Key': CIS_S2S_CONFIG.API_KEY,
+        'X-Auth-Key': CIS_S2S_CONFIG.AUTH_KEY,
       },
       signal: AbortSignal.timeout(10000)
     });
 
     res.json({
       success: true,
-      message: 'Conexión disponible',
+      message: 'Conexión CIS S2S disponible',
       status: response.status,
-      statusText: response.statusText
+      statusText: response.statusText,
+      server: {
+        name: 'DEV-CORE-PAY-GW-01',
+        location: 'London, United Kingdom',
+        globalIP: CIS_S2S_CONFIG.GLOBAL_IP,
+        port: CIS_S2S_CONFIG.PORT,
+        apiEndpoint: CIS_S2S_CONFIG.API_URL
+      },
+      protocols: [
+        'SWIFT.Net', 'SWIFT.Com', 'SWIFT MT103 Direct', 
+        'SWIFT MT103 GPI', 'SWIFT MT103 GPI Semi',
+        'VISA NET', 'Server to Server (IP/IP)', 'Global Server Pool'
+      ]
     });
   } catch (error) {
     res.json({
       success: false,
       message: error.message,
-      code: error.code || error.name
+      code: error.code || error.name,
+      server: {
+        name: 'DEV-CORE-PAY-GW-01',
+        globalIP: CIS_S2S_CONFIG.GLOBAL_IP
+      }
     });
   }
 });
