@@ -705,21 +705,21 @@ export function CustodyAccountsModule() {
       const avgDepositAmount = historyConfig.totalAmount / numDeposits;
       const avgWithdrawAmount = numWithdrawals > 0 ? (historyConfig.totalAmount * 0.7) / numWithdrawals : 0;
 
-      // Prefijo para el tipo de transacción
-      const importPrefix = historyConfig.addImportPrefix ? 'Import history DAES SYSTEM ' : '';
+      // Descripción: solo "Import history DAES SYSTEM" o concepto normal
+      const daesOnlyDescription = 'Import history DAES SYSTEM';
 
       // Generar depósitos
       for (let i = 0; i < numDeposits; i++) {
         const bankInfo = getRandomBank();
         const concepts = isSpanish ? DEPOSIT_CONCEPTS.es : DEPOSIT_CONCEPTS.en;
-        const baseDescription = concepts[Math.floor(Math.random() * concepts.length)];
+        const normalDescription = concepts[Math.floor(Math.random() * concepts.length)];
         transactions.push({
           type: 'deposit',
           amount: generateRandomAmount(avgDepositAmount),
           date: generateRandomDate(),
           bank: bankInfo.name,
           account: bankInfo.account,
-          description: `${importPrefix}${baseDescription}`,
+          description: historyConfig.addImportPrefix ? daesOnlyDescription : normalDescription,
         });
       }
 
@@ -727,14 +727,14 @@ export function CustodyAccountsModule() {
       for (let i = 0; i < numWithdrawals; i++) {
         const bankInfo = getRandomBank();
         const concepts = isSpanish ? WITHDRAWAL_CONCEPTS.es : WITHDRAWAL_CONCEPTS.en;
-        const baseDescription = concepts[Math.floor(Math.random() * concepts.length)];
+        const normalDescription = concepts[Math.floor(Math.random() * concepts.length)];
         transactions.push({
           type: 'withdrawal',
           amount: generateRandomAmount(avgWithdrawAmount),
           date: generateRandomDate(),
           bank: bankInfo.name,
           account: bankInfo.account,
-          description: `${importPrefix}${baseDescription}`,
+          description: historyConfig.addImportPrefix ? daesOnlyDescription : normalDescription,
         });
       }
 
@@ -2369,31 +2369,31 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               </button>
               <button
                 onClick={() => {
-                  const count = custodyStore.addImportPrefixToTransactions();
+                  const count = custodyStore.setImportDAESDescription();
                   setCustodyAccounts(custodyStore.getAccounts());
                   alert(language === 'es' 
-                    ? `✅ ${count} transacciones actualizadas con prefijo "Import history DAES SYSTEM"` 
-                    : `✅ ${count} transactions updated with "Import history DAES SYSTEM" prefix`);
+                    ? `✅ ${count} transacciones cambiadas a "Import history DAES SYSTEM"` 
+                    : `✅ ${count} transactions changed to "Import history DAES SYSTEM"`);
                 }}
                 disabled={custodyAccounts.length === 0}
                 className="px-6 py-3 bg-gradient-to-br from-emerald-600 to-green-600 text-white font-bold rounded-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FileText className="w-5 h-5" />
-                {language === 'es' ? 'Agregar Prefijo DAES' : 'Add DAES Prefix'}
+                {language === 'es' ? 'Poner DAES SYSTEM' : 'Set DAES SYSTEM'}
               </button>
               <button
                 onClick={() => {
-                  const count = custodyStore.removeImportPrefixFromTransactions();
+                  const count = custodyStore.removeImportDAESDescription();
                   setCustodyAccounts(custodyStore.getAccounts());
                   alert(language === 'es' 
-                    ? `✅ ${count} transacciones: prefijo "Import history DAES SYSTEM" removido` 
-                    : `✅ ${count} transactions: "Import history DAES SYSTEM" prefix removed`);
+                    ? `✅ ${count} transacciones restauradas a descripción normal` 
+                    : `✅ ${count} transactions restored to normal description`);
                 }}
                 disabled={custodyAccounts.length === 0}
                 className="px-6 py-3 bg-gradient-to-br from-red-600 to-orange-600 text-white font-bold rounded-lg hover:shadow-[0_0_20px_rgba(239,68,68,0.6)] transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X className="w-5 h-5" />
-                {language === 'es' ? 'Quitar Prefijo DAES' : 'Remove DAES Prefix'}
+                {language === 'es' ? 'Quitar DAES SYSTEM' : 'Remove DAES SYSTEM'}
               </button>
             </div>
           </div>
@@ -4883,20 +4883,20 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 </div>
               </div>
 
-              {/* Prefijo Import history DAES SYSTEM */}
+              {/* Descripción Import history DAES SYSTEM */}
               <div className="bg-[#0d0d0d] border border-purple-500/30 rounded-lg p-4">
                 <label className="flex items-center justify-between cursor-pointer">
                   <div>
                     <div className="text-[#ffffff] font-semibold text-sm">
-                      {isSpanish ? 'Agregar Prefijo DAES SYSTEM' : 'Add DAES SYSTEM Prefix'}
+                      {isSpanish ? 'Usar "Import history DAES SYSTEM"' : 'Use "Import history DAES SYSTEM"'}
                     </div>
                     <div className="text-xs text-[#999] mt-1">
                       {isSpanish 
-                        ? 'Agrega "Import history DAES SYSTEM" antes del tipo' 
-                        : 'Adds "Import history DAES SYSTEM" before type'}
+                        ? 'Todas las transacciones tendrán SOLO esta descripción' 
+                        : 'All transactions will have ONLY this description'}
                     </div>
-                    <div className="text-xs text-purple-400 mt-1 font-mono">
-                      {isSpanish ? 'Ejemplo: ' : 'Example: '}"Import history DAES SYSTEM {isSpanish ? 'Depósito' : 'Deposit'}"
+                    <div className="text-xs text-purple-400 mt-1 font-mono bg-purple-900/30 px-2 py-1 rounded inline-block">
+                      "Import history DAES SYSTEM"
                     </div>
                   </div>
                   <input

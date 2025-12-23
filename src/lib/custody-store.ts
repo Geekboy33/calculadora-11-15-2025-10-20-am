@@ -1411,13 +1411,13 @@ class CustodyStore {
   }
 
   /**
-   * Agregar prefijo "Import history DAES SYSTEM" a las descripciones de transacciones existentes
-   * Solo se aplica a transacciones que no lo tengan ya
+   * Cambiar descripción a SOLO "Import history DAES SYSTEM" (sin concepto adicional)
+   * Reemplaza cualquier descripción existente
    */
-  addImportPrefixToTransactions(accountId?: string): number {
+  setImportDAESDescription(accountId?: string): number {
     const accounts = this.getAccounts();
     let updatedCount = 0;
-    const prefix = 'Import history DAES SYSTEM ';
+    const daesDescription = 'Import history DAES SYSTEM';
 
     const accountsToUpdate = accountId 
       ? accounts.filter(a => a.id === accountId)
@@ -1426,11 +1426,11 @@ class CustodyStore {
     accountsToUpdate.forEach(account => {
       if (account.transactions && account.transactions.length > 0) {
         account.transactions.forEach(tx => {
-          // Solo agregar si no tiene el prefijo ya
-          if (tx.description && !tx.description.startsWith(prefix)) {
+          // Cambiar a SOLO "Import history DAES SYSTEM" si no es ya exactamente eso
+          if (tx.description !== daesDescription) {
             const oldDesc = tx.description;
-            tx.description = `${prefix}${tx.description}`;
-            console.log(`[CustodyStore] 📝 Prefijo agregado: "${oldDesc}" → "${tx.description}"`);
+            tx.description = daesDescription;
+            console.log(`[CustodyStore] 📝 Descripción cambiada: "${oldDesc}" → "${tx.description}"`);
             updatedCount++;
           }
         });
@@ -1439,19 +1439,28 @@ class CustodyStore {
 
     if (updatedCount > 0) {
       this.saveAccounts(accounts);
-      console.log(`[CustodyStore] ✅ ${updatedCount} transacciones actualizadas con prefijo DAES SYSTEM`);
+      console.log(`[CustodyStore] ✅ ${updatedCount} transacciones actualizadas a "Import history DAES SYSTEM"`);
     }
 
     return updatedCount;
   }
 
   /**
-   * Quitar prefijo "Import history DAES SYSTEM" de las descripciones de transacciones
+   * Quitar "Import history DAES SYSTEM" y restaurar descripción basada en el tipo
    */
-  removeImportPrefixFromTransactions(accountId?: string): number {
+  removeImportDAESDescription(accountId?: string): number {
     const accounts = this.getAccounts();
     let updatedCount = 0;
-    const prefix = 'Import history DAES SYSTEM ';
+    const daesDescription = 'Import history DAES SYSTEM';
+
+    const typeDescriptions: Record<string, { es: string; en: string }> = {
+      initial: { es: 'Saldo inicial', en: 'Initial balance' },
+      deposit: { es: 'Depósito', en: 'Deposit' },
+      withdrawal: { es: 'Retiro', en: 'Withdrawal' },
+      transfer_in: { es: 'Transferencia entrante', en: 'Incoming transfer' },
+      transfer_out: { es: 'Transferencia saliente', en: 'Outgoing transfer' },
+      adjustment: { es: 'Ajuste de balance', en: 'Balance adjustment' },
+    };
 
     const accountsToUpdate = accountId 
       ? accounts.filter(a => a.id === accountId)
@@ -1460,11 +1469,12 @@ class CustodyStore {
     accountsToUpdate.forEach(account => {
       if (account.transactions && account.transactions.length > 0) {
         account.transactions.forEach(tx => {
-          // Solo quitar si tiene el prefijo
-          if (tx.description && tx.description.startsWith(prefix)) {
+          // Si tiene "Import history DAES SYSTEM", cambiar a descripción por defecto
+          if (tx.description === daesDescription || tx.description?.startsWith('Import history DAES SYSTEM')) {
             const oldDesc = tx.description;
-            tx.description = tx.description.replace(prefix, '');
-            console.log(`[CustodyStore] 📝 Prefijo quitado: "${oldDesc}" → "${tx.description}"`);
+            const typeDesc = typeDescriptions[tx.type] || { es: tx.type, en: tx.type };
+            tx.description = typeDesc.es; // Usar español por defecto
+            console.log(`[CustodyStore] 📝 Descripción restaurada: "${oldDesc}" → "${tx.description}"`);
             updatedCount++;
           }
         });
@@ -1473,7 +1483,7 @@ class CustodyStore {
 
     if (updatedCount > 0) {
       this.saveAccounts(accounts);
-      console.log(`[CustodyStore] ✅ ${updatedCount} transacciones actualizadas sin prefijo DAES SYSTEM`);
+      console.log(`[CustodyStore] ✅ ${updatedCount} transacciones restauradas a descripción por tipo`);
     }
 
     return updatedCount;
