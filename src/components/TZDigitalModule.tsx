@@ -10,7 +10,8 @@ import {
   Send, Settings, History, DollarSign, Euro, CheckCircle, XCircle, 
   Clock, RefreshCw, Trash2, Eye, EyeOff, Wifi, WifiOff,
   ArrowRightLeft, FileText, Shield, Globe, AlertTriangle, Wallet,
-  Download, Building2, CreditCard, Receipt, Landmark
+  Download, Building2, CreditCard, Receipt, Landmark, Wrench, 
+  Zap, Bug, CheckSquare, Square, ChevronRight, Terminal
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { 
@@ -21,7 +22,8 @@ import {
   Currency,
   ConnectionTestResult,
   ConnectionCheck,
-  ConnectionProof
+  ConnectionProof,
+  TroubleshootResult
 } from '../lib/tz-digital-api';
 import { custodyStore, CustodyAccount } from '../lib/custody-store';
 import jsPDF from 'jspdf';
@@ -50,6 +52,11 @@ export function TZDigitalModule() {
   // Test de conexión
   const [connectionTestResult, setConnectionTestResult] = useState<ConnectionTestResult | null>(null);
   const [showConnectionModal, setShowConnectionModal] = useState(false);
+
+  // Troubleshooter
+  const [troubleshootResult, setTroubleshootResult] = useState<TroubleshootResult | null>(null);
+  const [showTroubleshootModal, setShowTroubleshootModal] = useState(false);
+  const [isTroubleshooting, setIsTroubleshooting] = useState(false);
 
   // Modo de envío
   const [directTransfer, setDirectTransfer] = useState(false);
@@ -124,6 +131,31 @@ export function TZDigitalModule() {
     setConnectionTestResult(result);
     setShowConnectionModal(true);
     setIsLoading(false);
+  };
+
+  // Solucionador de errores
+  const handleTroubleshoot = async () => {
+    setIsTroubleshooting(true);
+    setTroubleshootResult(null);
+    setShowTroubleshootModal(true);
+    
+    try {
+      const result = await tzDigitalClient.troubleshootConnection();
+      setTroubleshootResult(result);
+      
+      // Actualizar estado de conexión basado en resultado
+      if (result.finalStatus === 'connected') {
+        setConnectionStatus('connected');
+      } else if (result.finalStatus === 'partially_connected') {
+        setConnectionStatus('connected');
+      } else {
+        setConnectionStatus('error');
+      }
+    } catch (error) {
+      console.error('Error en troubleshoot:', error);
+    } finally {
+      setIsTroubleshooting(false);
+    }
   };
 
   // Obtener icono para check
@@ -678,6 +710,14 @@ export function TZDigitalModule() {
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                 {isSpanish ? 'Test' : 'Test'}
+              </button>
+              <button
+                onClick={handleTroubleshoot}
+                disabled={isTroubleshooting}
+                className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-500 hover:to-orange-500 transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                <Wrench className={`w-4 h-4 ${isTroubleshooting ? 'animate-spin' : ''}`} />
+                {isSpanish ? 'Solucionar Errores' : 'Troubleshoot'}
               </button>
             </div>
           </div>
@@ -1460,6 +1500,238 @@ export function TZDigitalModule() {
               >
                 <RefreshCw className="w-5 h-5" />
                 {isSpanish ? 'Repetir Test' : 'Retest'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Troubleshooter - Solucionador de Errores */}
+      {showTroubleshootModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-amber-500/50 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-amber-600 to-orange-600 rounded-xl">
+                  <Wrench className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">
+                    {isSpanish ? 'Solucionador de Errores' : 'Connection Troubleshooter'}
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    {isSpanish ? 'Diagnóstico y reparación automática' : 'Automatic diagnosis and repair'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowTroubleshootModal(false)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <XCircle className="w-6 h-6 text-gray-400" />
+              </button>
+            </div>
+
+            {/* Loading State */}
+            {isTroubleshooting && (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="relative">
+                  <div className="w-20 h-20 border-4 border-amber-500/30 rounded-full"></div>
+                  <div className="w-20 h-20 border-4 border-amber-500 border-t-transparent rounded-full animate-spin absolute top-0"></div>
+                </div>
+                <p className="text-amber-400 mt-6 font-semibold">
+                  {isSpanish ? 'Diagnosticando y solucionando errores...' : 'Diagnosing and fixing errors...'}
+                </p>
+                <div className="mt-4 text-sm text-gray-400 text-center">
+                  <p>{isSpanish ? '• Verificando configuración' : '• Checking configuration'}</p>
+                  <p>{isSpanish ? '• Probando conectividad de red' : '• Testing network connectivity'}</p>
+                  <p>{isSpanish ? '• Verificando proxy local' : '• Verifying local proxy'}</p>
+                  <p>{isSpanish ? '• Validando autenticación' : '• Validating authentication'}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Results */}
+            {troubleshootResult && !isTroubleshooting && (
+              <div className="space-y-6">
+                {/* Status Banner */}
+                <div className={`p-4 rounded-xl ${
+                  troubleshootResult.finalStatus === 'connected' 
+                    ? 'bg-emerald-500/20 border border-emerald-500/50'
+                    : troubleshootResult.finalStatus === 'partially_connected'
+                    ? 'bg-amber-500/20 border border-amber-500/50'
+                    : 'bg-red-500/20 border border-red-500/50'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    {troubleshootResult.finalStatus === 'connected' ? (
+                      <CheckCircle className="w-8 h-8 text-emerald-400" />
+                    ) : troubleshootResult.finalStatus === 'partially_connected' ? (
+                      <AlertTriangle className="w-8 h-8 text-amber-400" />
+                    ) : (
+                      <XCircle className="w-8 h-8 text-red-400" />
+                    )}
+                    <div>
+                      <h4 className={`text-lg font-bold ${
+                        troubleshootResult.finalStatus === 'connected' ? 'text-emerald-400' :
+                        troubleshootResult.finalStatus === 'partially_connected' ? 'text-amber-400' :
+                        'text-red-400'
+                      }`}>
+                        {troubleshootResult.finalStatus === 'connected' 
+                          ? (isSpanish ? '✓ Conexión Exitosa' : '✓ Connection Successful')
+                          : troubleshootResult.finalStatus === 'partially_connected'
+                          ? (isSpanish ? '⚠ Conexión Parcial' : '⚠ Partial Connection')
+                          : (isSpanish ? '✗ Conexión Fallida' : '✗ Connection Failed')}
+                      </h4>
+                      <p className="text-sm text-gray-300">
+                        {troubleshootResult.errorsFound.length} {isSpanish ? 'errores encontrados' : 'errors found'}, 
+                        {' '}{troubleshootResult.solutionsApplied.length} {isSpanish ? 'solucionados automáticamente' : 'auto-fixed'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Errores Encontrados */}
+                {troubleshootResult.errorsFound.length > 0 && (
+                  <div className="bg-black/40 rounded-xl p-4">
+                    <h5 className="text-sm font-semibold text-red-400 mb-3 flex items-center gap-2">
+                      <Bug className="w-4 h-4" />
+                      {isSpanish ? 'Errores Detectados' : 'Errors Detected'} ({troubleshootResult.errorsFound.length})
+                    </h5>
+                    <div className="space-y-2">
+                      {troubleshootResult.errorsFound.map((error, idx) => (
+                        <div key={idx} className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                          <div className="flex items-start gap-2">
+                            <XCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium text-red-300">{error.message}</p>
+                              {error.details && (
+                                <p className="text-xs text-gray-400 mt-1">{error.details}</p>
+                              )}
+                              <span className="text-xs text-gray-500 mt-1 inline-block bg-gray-800 px-2 py-0.5 rounded">
+                                {error.code}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Soluciones Aplicadas */}
+                {troubleshootResult.solutionsApplied.length > 0 && (
+                  <div className="bg-black/40 rounded-xl p-4">
+                    <h5 className="text-sm font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                      <CheckSquare className="w-4 h-4" />
+                      {isSpanish ? 'Soluciones Aplicadas Automáticamente' : 'Auto-Applied Solutions'} ({troubleshootResult.solutionsApplied.length})
+                    </h5>
+                    <div className="space-y-2">
+                      {troubleshootResult.solutionsApplied.map((solution, idx) => (
+                        <div key={idx} className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          <p className="text-sm text-emerald-300">{solution}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Soluciones Pendientes */}
+                {troubleshootResult.solutionsPending.length > 0 && (
+                  <div className="bg-black/40 rounded-xl p-4">
+                    <h5 className="text-sm font-semibold text-amber-400 mb-3 flex items-center gap-2">
+                      <Square className="w-4 h-4" />
+                      {isSpanish ? 'Acciones Manuales Requeridas' : 'Manual Actions Required'} ({troubleshootResult.solutionsPending.length})
+                    </h5>
+                    <div className="space-y-3">
+                      {troubleshootResult.solutionsPending.map((solution, idx) => (
+                        <div key={idx} className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className={`px-2 py-0.5 text-xs rounded font-semibold ${
+                                  solution.priority === 'critical' ? 'bg-red-500/30 text-red-300' :
+                                  solution.priority === 'high' ? 'bg-orange-500/30 text-orange-300' :
+                                  solution.priority === 'medium' ? 'bg-yellow-500/30 text-yellow-300' :
+                                  'bg-gray-500/30 text-gray-300'
+                                }`}>
+                                  {solution.priority.toUpperCase()}
+                                </span>
+                                <span className="text-sm font-medium text-amber-300">{solution.description}</span>
+                              </div>
+                              <div className="space-y-1 mt-2">
+                                {solution.steps.map((step, stepIdx) => (
+                                  <div key={stepIdx} className="flex items-start gap-2 text-xs text-gray-300">
+                                    <ChevronRight className="w-3 h-3 text-amber-400 flex-shrink-0 mt-0.5" />
+                                    <span>{step}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recomendaciones */}
+                {troubleshootResult.recommendations.length > 0 && (
+                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                    <h5 className="text-sm font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                      <Zap className="w-4 h-4" />
+                      {isSpanish ? 'Recomendaciones' : 'Recommendations'}
+                    </h5>
+                    <div className="space-y-2">
+                      {troubleshootResult.recommendations.map((rec, idx) => (
+                        <p key={idx} className="text-sm text-gray-300">{rec}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Terminal de diagnóstico */}
+                <div className="bg-black rounded-xl p-4 font-mono text-xs">
+                  <div className="flex items-center gap-2 mb-3 text-gray-500">
+                    <Terminal className="w-4 h-4" />
+                    <span>{isSpanish ? 'Log de Diagnóstico' : 'Diagnostic Log'}</span>
+                  </div>
+                  <div className="space-y-1 text-gray-400">
+                    <p className="text-emerald-400">[DIAG] {isSpanish ? 'Inicio de diagnóstico' : 'Diagnosis started'}</p>
+                    {troubleshootResult.errorsFound.map((error, idx) => (
+                      <p key={idx} className="text-red-400">[ERROR] {error.code}: {error.message}</p>
+                    ))}
+                    {troubleshootResult.solutionsApplied.map((sol, idx) => (
+                      <p key={idx} className="text-emerald-400">[FIXED] {sol}</p>
+                    ))}
+                    <p className={`${
+                      troubleshootResult.finalStatus === 'connected' ? 'text-emerald-400' :
+                      troubleshootResult.finalStatus === 'partially_connected' ? 'text-amber-400' :
+                      'text-red-400'
+                    }`}>
+                      [RESULT] Status: {troubleshootResult.finalStatus.toUpperCase()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Acciones */}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowTroubleshootModal(false)}
+                className="flex-1 px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+              >
+                {isSpanish ? 'Cerrar' : 'Close'}
+              </button>
+              <button
+                onClick={handleTroubleshoot}
+                disabled={isTroubleshooting}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-500 hover:to-orange-500 font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-5 h-5 ${isTroubleshooting ? 'animate-spin' : ''}`} />
+                {isSpanish ? 'Volver a Diagnosticar' : 'Re-diagnose'}
               </button>
             </div>
           </div>

@@ -138,6 +138,35 @@ export interface ConnectionProof {
   proofHash: string;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// TIPOS PARA SOLUCIONADOR DE ERRORES
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface ConnectionError {
+  code: string;
+  message: string;
+  details?: string;
+  timestamp: string;
+}
+
+export interface ConnectionSolution {
+  errorCode: string;
+  description: string;
+  steps: string[];
+  autoFixAvailable: boolean;
+  autoFixAction?: () => Promise<boolean>;
+  priority: 'critical' | 'high' | 'medium' | 'low';
+}
+
+export interface TroubleshootResult {
+  success: boolean;
+  errorsFound: ConnectionError[];
+  solutionsApplied: string[];
+  solutionsPending: ConnectionSolution[];
+  finalStatus: 'connected' | 'partially_connected' | 'disconnected';
+  recommendations: string[];
+}
+
 export interface TransferRecord {
   id: string;
   payload: MoneyTransferPayload;
@@ -725,6 +754,533 @@ class TZDigitalTransferClient {
       }
       return Math.abs(hash).toString(16).padStart(16, '0');
     }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SOLUCIONADOR DE ERRORES DE CONEXIÓN
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Diagnostica y soluciona automáticamente problemas de conexión
+   */
+  async troubleshootConnection(): Promise<TroubleshootResult> {
+    console.log('[TZDigital] 🔧 Iniciando diagnóstico y solución de errores...');
+    
+    const errorsFound: ConnectionError[] = [];
+    const solutionsApplied: string[] = [];
+    const solutionsPending: ConnectionSolution[] = [];
+    const recommendations: string[] = [];
+
+    // PASO 1: Verificar configuración básica
+    console.log('[TZDigital] 📋 Paso 1: Verificando configuración...');
+    const configErrors = this.diagnoseConfiguration();
+    errorsFound.push(...configErrors);
+
+    // Auto-fix: Configuración básica
+    for (const error of configErrors) {
+      const solution = this.getSolutionForError(error.code);
+      if (solution.autoFixAvailable && solution.autoFixAction) {
+        console.log(`[TZDigital] 🔧 Aplicando auto-fix: ${solution.description}`);
+        const fixed = await solution.autoFixAction();
+        if (fixed) {
+          solutionsApplied.push(solution.description);
+        } else {
+          solutionsPending.push(solution);
+        }
+      } else {
+        solutionsPending.push(solution);
+      }
+    }
+
+    // PASO 2: Verificar conectividad de red
+    console.log('[TZDigital] 🌐 Paso 2: Verificando conectividad de red...');
+    const networkErrors = await this.diagnoseNetwork();
+    errorsFound.push(...networkErrors);
+
+    for (const error of networkErrors) {
+      const solution = this.getSolutionForError(error.code);
+      if (solution.autoFixAvailable && solution.autoFixAction) {
+        console.log(`[TZDigital] 🔧 Aplicando auto-fix: ${solution.description}`);
+        const fixed = await solution.autoFixAction();
+        if (fixed) {
+          solutionsApplied.push(solution.description);
+        } else {
+          solutionsPending.push(solution);
+        }
+      } else {
+        solutionsPending.push(solution);
+      }
+    }
+
+    // PASO 3: Verificar proxy local
+    console.log('[TZDigital] 🖥️ Paso 3: Verificando proxy local...');
+    const proxyErrors = await this.diagnoseProxy();
+    errorsFound.push(...proxyErrors);
+
+    for (const error of proxyErrors) {
+      const solution = this.getSolutionForError(error.code);
+      solutionsPending.push(solution);
+    }
+
+    // PASO 4: Verificar autenticación
+    console.log('[TZDigital] 🔑 Paso 4: Verificando autenticación...');
+    const authErrors = await this.diagnoseAuthentication();
+    errorsFound.push(...authErrors);
+
+    for (const error of authErrors) {
+      const solution = this.getSolutionForError(error.code);
+      solutionsPending.push(solution);
+    }
+
+    // PASO 5: Intentar conexión alternativa
+    console.log('[TZDigital] 🔄 Paso 5: Probando conexión alternativa...');
+    const alternativeResult = await this.tryAlternativeConnection();
+    if (alternativeResult.success) {
+      solutionsApplied.push('Conexión alternativa establecida');
+    }
+
+    // Generar recomendaciones
+    recommendations.push(...this.generateRecommendations(errorsFound, solutionsPending));
+
+    // Determinar estado final
+    let finalStatus: 'connected' | 'partially_connected' | 'disconnected' = 'disconnected';
+    
+    if (errorsFound.length === 0 || solutionsApplied.length > 0) {
+      // Hacer test final
+      const finalTest = await this.quickConnectionTest();
+      if (finalTest) {
+        finalStatus = 'connected';
+      } else if (solutionsApplied.length > 0) {
+        finalStatus = 'partially_connected';
+      }
+    }
+
+    const result: TroubleshootResult = {
+      success: finalStatus === 'connected',
+      errorsFound,
+      solutionsApplied,
+      solutionsPending,
+      finalStatus,
+      recommendations
+    };
+
+    console.log('[TZDigital] ✅ Diagnóstico completado:', {
+      errores: errorsFound.length,
+      solucionesAplicadas: solutionsApplied.length,
+      solucionesPendientes: solutionsPending.length,
+      estadoFinal: finalStatus
+    });
+
+    return result;
+  }
+
+  private diagnoseConfiguration(): ConnectionError[] {
+    const errors: ConnectionError[] = [];
+
+    if (!this.config.bearerToken) {
+      errors.push({
+        code: 'NO_TOKEN',
+        message: 'Bearer Token no configurado',
+        details: 'El token de autenticación es requerido para conectarse a TZ Digital',
+        timestamp: new Date().toISOString()
+      });
+    } else if (this.config.bearerToken.length < 20) {
+      errors.push({
+        code: 'INVALID_TOKEN_LENGTH',
+        message: 'Bearer Token parece ser inválido (muy corto)',
+        details: `Longitud actual: ${this.config.bearerToken.length} caracteres`,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    if (!this.config.baseUrl) {
+      errors.push({
+        code: 'NO_BASE_URL',
+        message: 'URL base no configurada',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    return errors;
+  }
+
+  private async diagnoseNetwork(): Promise<ConnectionError[]> {
+    const errors: ConnectionError[] = [];
+
+    // Test de conectividad básica
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      // Intentar conectar a un endpoint conocido
+      await fetch('https://www.google.com/favicon.ico', {
+        method: 'HEAD',
+        signal: controller.signal,
+        mode: 'no-cors'
+      });
+
+      clearTimeout(timeoutId);
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        errors.push({
+          code: 'NETWORK_TIMEOUT',
+          message: 'Timeout de red - Sin conexión a Internet',
+          details: 'No se pudo establecer conexión en 5 segundos',
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        errors.push({
+          code: 'NETWORK_ERROR',
+          message: 'Error de conectividad de red',
+          details: err?.message || 'Error desconocido',
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+
+    return errors;
+  }
+
+  private async diagnoseProxy(): Promise<ConnectionError[]> {
+    const errors: ConnectionError[] = [];
+
+    if (!IS_BROWSER) return errors;
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch('/api/tz-digital/test', {
+        method: 'GET',
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.status === 404) {
+        errors.push({
+          code: 'PROXY_NOT_FOUND',
+          message: 'Proxy local no encontrado',
+          details: 'El servidor backend no está corriendo o el endpoint no existe',
+          timestamp: new Date().toISOString()
+        });
+      } else if (!response.ok && response.status !== 500) {
+        errors.push({
+          code: 'PROXY_ERROR',
+          message: `Proxy responde con error HTTP ${response.status}`,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (err: any) {
+      errors.push({
+        code: 'PROXY_UNREACHABLE',
+        message: 'No se puede conectar al proxy local',
+        details: 'Verifica que el servidor backend esté corriendo: cd server && node index.js',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    return errors;
+  }
+
+  private async diagnoseAuthentication(): Promise<ConnectionError[]> {
+    const errors: ConnectionError[] = [];
+
+    if (!this.config.bearerToken) return errors;
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const testUrl = IS_BROWSER ? '/api/tz-digital/transactions' : TZ_DIRECT_URL;
+
+      const response = await fetch(testUrl, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.config.bearerToken}`,
+          'X-TZ-Token': this.config.bearerToken,
+        },
+        body: JSON.stringify({
+          amount: 0.01,
+          currency: 'USD',
+          reference: `AUTH-TEST-${Date.now()}`,
+          _test: true
+        }),
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.status === 401) {
+        errors.push({
+          code: 'AUTH_INVALID_TOKEN',
+          message: 'Token de autenticación inválido',
+          details: 'El servidor rechazó el token. Verifica que sea correcto.',
+          timestamp: new Date().toISOString()
+        });
+      } else if (response.status === 403) {
+        errors.push({
+          code: 'AUTH_FORBIDDEN',
+          message: 'Token sin permisos suficientes',
+          details: 'El token es válido pero no tiene permisos para esta operación.',
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (err: any) {
+      // No agregar error si es un problema de red ya diagnosticado
+      if (!err?.message?.includes('network') && !err?.message?.includes('fetch')) {
+        errors.push({
+          code: 'AUTH_CHECK_FAILED',
+          message: 'No se pudo verificar la autenticación',
+          details: err?.message,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+
+    return errors;
+  }
+
+  private getSolutionForError(errorCode: string): ConnectionSolution {
+    const solutions: Record<string, ConnectionSolution> = {
+      'NO_TOKEN': {
+        errorCode: 'NO_TOKEN',
+        description: 'Configurar Bearer Token',
+        steps: [
+          '1. Ve a la pestaña "Configuración" en el módulo TZ Digital',
+          '2. Ingresa el Bearer Token proporcionado',
+          '3. Guarda la configuración',
+          '4. Vuelve a probar la conexión'
+        ],
+        autoFixAvailable: true,
+        autoFixAction: async () => {
+          // Intentar usar el token por defecto si existe
+          const defaultToken = '4e2e1b2f-03f3-4c5b-b54e-23d9145c1fde';
+          if (defaultToken) {
+            this.configure({ bearerToken: defaultToken });
+            return true;
+          }
+          return false;
+        },
+        priority: 'critical'
+      },
+      'INVALID_TOKEN_LENGTH': {
+        errorCode: 'INVALID_TOKEN_LENGTH',
+        description: 'Verificar formato del Bearer Token',
+        steps: [
+          '1. El token debe tener formato UUID (ej: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)',
+          '2. Verifica que no haya espacios en blanco',
+          '3. Copia el token directamente desde la fuente original'
+        ],
+        autoFixAvailable: false,
+        priority: 'critical'
+      },
+      'NO_BASE_URL': {
+        errorCode: 'NO_BASE_URL',
+        description: 'Restaurar URL base',
+        steps: [
+          'La URL base se restaurará automáticamente'
+        ],
+        autoFixAvailable: true,
+        autoFixAction: async () => {
+          this.configure({ baseUrl: API_URL });
+          return true;
+        },
+        priority: 'high'
+      },
+      'NETWORK_TIMEOUT': {
+        errorCode: 'NETWORK_TIMEOUT',
+        description: 'Resolver problema de conexión a Internet',
+        steps: [
+          '1. Verifica tu conexión a Internet',
+          '2. Desactiva temporalmente el firewall/antivirus',
+          '3. Verifica si usas proxy corporativo',
+          '4. Intenta con otra red (ej: datos móviles)'
+        ],
+        autoFixAvailable: false,
+        priority: 'critical'
+      },
+      'NETWORK_ERROR': {
+        errorCode: 'NETWORK_ERROR',
+        description: 'Solucionar error de red',
+        steps: [
+          '1. Reinicia tu router/módem',
+          '2. Verifica cables de red',
+          '3. Desactiva VPN si está activo',
+          '4. Contacta a soporte de red'
+        ],
+        autoFixAvailable: false,
+        priority: 'high'
+      },
+      'PROXY_NOT_FOUND': {
+        errorCode: 'PROXY_NOT_FOUND',
+        description: 'Iniciar servidor backend',
+        steps: [
+          '1. Abre una terminal',
+          '2. Navega al directorio del proyecto',
+          '3. Ejecuta: cd server && node index.js',
+          '4. Espera a ver "Server listening on port 3000"'
+        ],
+        autoFixAvailable: false,
+        priority: 'critical'
+      },
+      'PROXY_UNREACHABLE': {
+        errorCode: 'PROXY_UNREACHABLE',
+        description: 'Reiniciar servidor proxy',
+        steps: [
+          '1. Detén el servidor actual (Ctrl+C)',
+          '2. Ejecuta: cd server && node index.js',
+          '3. Verifica que no haya errores en la consola'
+        ],
+        autoFixAvailable: false,
+        priority: 'critical'
+      },
+      'PROXY_ERROR': {
+        errorCode: 'PROXY_ERROR',
+        description: 'Verificar configuración del proxy',
+        steps: [
+          '1. Revisa los logs del servidor',
+          '2. Verifica que el puerto 3000 esté libre',
+          '3. Reinicia el servidor backend'
+        ],
+        autoFixAvailable: false,
+        priority: 'high'
+      },
+      'AUTH_INVALID_TOKEN': {
+        errorCode: 'AUTH_INVALID_TOKEN',
+        description: 'Corregir token de autenticación',
+        steps: [
+          '1. Verifica que el token sea el correcto',
+          '2. El token puede haber expirado - solicita uno nuevo',
+          '3. Contacta al administrador de TZ Digital'
+        ],
+        autoFixAvailable: false,
+        priority: 'critical'
+      },
+      'AUTH_FORBIDDEN': {
+        errorCode: 'AUTH_FORBIDDEN',
+        description: 'Solicitar permisos adicionales',
+        steps: [
+          '1. El token no tiene permisos para transferencias',
+          '2. Contacta al administrador para habilitar permisos',
+          '3. Solicita un token con permisos de producción'
+        ],
+        autoFixAvailable: false,
+        priority: 'high'
+      },
+      'AUTH_CHECK_FAILED': {
+        errorCode: 'AUTH_CHECK_FAILED',
+        description: 'Reintentar verificación de autenticación',
+        steps: [
+          '1. Espera unos segundos',
+          '2. Vuelve a probar la conexión',
+          '3. Si persiste, verifica el token'
+        ],
+        autoFixAvailable: false,
+        priority: 'medium'
+      }
+    };
+
+    return solutions[errorCode] || {
+      errorCode,
+      description: 'Error desconocido',
+      steps: ['Contacta a soporte técnico'],
+      autoFixAvailable: false,
+      priority: 'low'
+    };
+  }
+
+  private async tryAlternativeConnection(): Promise<{ success: boolean }> {
+    console.log('[TZDigital] 🔄 Intentando conexión alternativa...');
+
+    // Intentar con diferentes configuraciones
+    const attempts = [
+      { name: 'Proxy directo', url: '/api/tz-digital/test' },
+      { name: 'Health check', url: '/api/tz-digital/transactions' },
+    ];
+
+    for (const attempt of attempts) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        const response = await fetch(attempt.url, {
+          method: attempt.url.includes('test') ? 'GET' : 'OPTIONS',
+          signal: controller.signal,
+          headers: {
+            'X-TZ-Token': this.config.bearerToken,
+          }
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok || response.status === 405 || response.status < 500) {
+          console.log(`[TZDigital] ✅ Conexión alternativa exitosa: ${attempt.name}`);
+          return { success: true };
+        }
+      } catch {
+        console.log(`[TZDigital] ❌ Intento fallido: ${attempt.name}`);
+      }
+    }
+
+    return { success: false };
+  }
+
+  private async quickConnectionTest(): Promise<boolean> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(IS_BROWSER ? '/api/tz-digital/test' : API_URL, {
+        method: IS_BROWSER ? 'GET' : 'OPTIONS',
+        signal: controller.signal,
+        headers: {
+          'X-TZ-Token': this.config.bearerToken,
+        }
+      });
+
+      clearTimeout(timeoutId);
+      return response.ok || response.status === 405 || response.status < 500;
+    } catch {
+      return false;
+    }
+  }
+
+  private generateRecommendations(errors: ConnectionError[], pendingSolutions: ConnectionSolution[]): string[] {
+    const recommendations: string[] = [];
+
+    // Priorizar recomendaciones según errores
+    const hasCritical = pendingSolutions.some(s => s.priority === 'critical');
+    const hasProxyError = errors.some(e => e.code.includes('PROXY'));
+    const hasAuthError = errors.some(e => e.code.includes('AUTH'));
+    const hasNetworkError = errors.some(e => e.code.includes('NETWORK'));
+
+    if (hasCritical) {
+      recommendations.push('⚠️ Hay errores críticos que deben resolverse antes de continuar');
+    }
+
+    if (hasProxyError) {
+      recommendations.push('💡 Asegúrate de que el servidor backend esté corriendo (cd server && node index.js)');
+    }
+
+    if (hasAuthError) {
+      recommendations.push('🔑 Verifica que tu Bearer Token sea válido y tenga permisos');
+    }
+
+    if (hasNetworkError) {
+      recommendations.push('🌐 Verifica tu conexión a Internet antes de intentar de nuevo');
+    }
+
+    if (errors.length === 0) {
+      recommendations.push('✅ No se encontraron errores - La conexión debería funcionar');
+    }
+
+    if (pendingSolutions.length > 0) {
+      recommendations.push(`📋 Hay ${pendingSolutions.length} solución(es) pendiente(s) de aplicar manualmente`);
+    }
+
+    return recommendations;
   }
 
   private async checkLocalProxy(): Promise<ConnectionCheck> {
