@@ -461,6 +461,17 @@ export function CustodyAccountsModule() {
   // Opción para enmascarar cuentas en PDF
   const [maskAccountsInPDF, setMaskAccountsInPDF] = useState(false);
 
+  // Modal para generador automático de historial
+  const [showHistoryGenerator, setShowHistoryGenerator] = useState(false);
+  const [historyConfig, setHistoryConfig] = useState({
+    totalAmount: 0,
+    periodType: 'months' as 'months' | 'years',
+    periodValue: 6,
+    transactionCount: { min: 10, max: 30 },
+    depositPercentage: 60, // 60% deposits, 40% withdrawals
+    selectedBanks: [] as number[], // índices de bancos seleccionados
+  });
+
   // Modal para historial de transacciones
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
 
@@ -596,6 +607,168 @@ export function CustodyAccountsModule() {
     if (containerRef.current) {
       containerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  // Función para generar historial automático de transacciones
+  const handleGenerateAutoHistory = () => {
+    if (!selectedAccount) {
+      alert(isSpanish ? 'Seleccione una cuenta' : 'Select an account');
+      return;
+    }
+
+    if (historyConfig.selectedBanks.length === 0) {
+      alert(isSpanish ? 'Seleccione al menos un banco' : 'Select at least one bank');
+      return;
+    }
+
+    if (historyConfig.totalAmount <= 0) {
+      alert(isSpanish ? 'Ingrese un monto total válido' : 'Enter a valid total amount');
+      return;
+    }
+
+    // Calcular fechas de inicio y fin
+    const endDate = new Date();
+    const startDate = new Date();
+    if (historyConfig.periodType === 'months') {
+      startDate.setMonth(startDate.getMonth() - historyConfig.periodValue);
+    } else {
+      startDate.setFullYear(startDate.getFullYear() - historyConfig.periodValue);
+    }
+
+    // Calcular número de transacciones
+    const numTransactions = Math.floor(
+      Math.random() * (historyConfig.transactionCount.max - historyConfig.transactionCount.min + 1) 
+      + historyConfig.transactionCount.min
+    );
+
+    // Calcular número de depósitos y retiros
+    const numDeposits = Math.round(numTransactions * (historyConfig.depositPercentage / 100));
+    const numWithdrawals = numTransactions - numDeposits;
+
+    // Generar fechas aleatorias distribuidas en el período
+    const generateRandomDate = (): Date => {
+      const timeDiff = endDate.getTime() - startDate.getTime();
+      const randomTime = Math.random() * timeDiff;
+      return new Date(startDate.getTime() + randomTime);
+    };
+
+    // Generar monto aleatorio dentro de un rango
+    const generateRandomAmount = (average: number): number => {
+      const variation = 0.5; // 50% de variación
+      const min = average * (1 - variation);
+      const max = average * (1 + variation);
+      return Math.round((Math.random() * (max - min) + min) * 100) / 100;
+    };
+
+    // Seleccionar banco aleatorio de los seleccionados
+    const getRandomBank = (): { name: string; account: string } => {
+      const bankIdx = historyConfig.selectedBanks[Math.floor(Math.random() * historyConfig.selectedBanks.length)];
+      const bank = TOP_100_BANKS[bankIdx];
+      const bankLib = BANK_ACCOUNTS_LIBRARY[bankIdx];
+      const account = bankLib.accounts[Math.floor(Math.random() * bankLib.accounts.length)];
+      return { name: bank.name, account };
+    };
+
+    // Generar todas las transacciones
+    const transactions: Array<{
+      type: 'deposit' | 'withdrawal';
+      amount: number;
+      date: Date;
+      bank: string;
+      account: string;
+      description: string;
+    }> = [];
+
+    // Calcular monto promedio por depósito para que los depósitos sumen el total
+    const avgDepositAmount = historyConfig.totalAmount / numDeposits;
+    const avgWithdrawAmount = (historyConfig.totalAmount * 0.7) / numWithdrawals; // Los retiros son ~70% del total depositado
+
+    // Generar depósitos
+    for (let i = 0; i < numDeposits; i++) {
+      const bankInfo = getRandomBank();
+      const concepts = isSpanish ? DEPOSIT_CONCEPTS.es : DEPOSIT_CONCEPTS.en;
+      transactions.push({
+        type: 'deposit',
+        amount: generateRandomAmount(avgDepositAmount),
+        date: generateRandomDate(),
+        bank: bankInfo.name,
+        account: bankInfo.account,
+        description: concepts[Math.floor(Math.random() * concepts.length)],
+      });
+    }
+
+    // Generar retiros
+    for (let i = 0; i < numWithdrawals; i++) {
+      const bankInfo = getRandomBank();
+      const concepts = isSpanish ? WITHDRAWAL_CONCEPTS.es : WITHDRAWAL_CONCEPTS.en;
+      transactions.push({
+        type: 'withdrawal',
+        amount: generateRandomAmount(avgWithdrawAmount),
+        date: generateRandomDate(),
+        bank: bankInfo.name,
+        account: bankInfo.account,
+        description: concepts[Math.floor(Math.random() * concepts.length)],
+      });
+    }
+
+    // Ordenar por fecha (más antigua primero)
+    transactions.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    // Aplicar transacciones a la cuenta
+    let successCount = 0;
+    let currentBalance = selectedAccount.totalBalance;
+
+    transactions.forEach(tx => {
+      const dateStr = tx.date.toISOString().split('T')[0];
+      const timeStr = tx.date.toTimeString().split(' ')[0].substring(0, 5);
+
+      if (tx.type === 'deposit') {
+        const result = custodyStore.addFundsWithTransaction(
+          selectedAccount.id,
+          tx.amount,
+          'deposit',
+          tx.description,
+          tx.account,
+          tx.bank,
+          dateStr,
+          timeStr,
+          dateStr,
+          `Auto-generated deposit`
+        );
+        if (result) {
+          currentBalance += tx.amount;
+          successCount++;
+        }
+      } else {
+        // Solo hacer retiro si hay fondos suficientes
+        if (currentBalance >= tx.amount) {
+          const result = custodyStore.withdrawFundsWithTransaction(
+            selectedAccount.id,
+            tx.amount,
+            'withdrawal',
+            tx.description,
+            tx.account,
+            tx.bank,
+            dateStr,
+            timeStr,
+            dateStr,
+            `Auto-generated withdrawal`
+          );
+          if (result) {
+            currentBalance -= tx.amount;
+            successCount++;
+          }
+        }
+      }
+    });
+
+    // Actualizar estado
+    setCustodyAccounts(custodyStore.getAccounts());
+    setShowHistoryGenerator(false);
+
+    alert(isSpanish 
+      ? `✅ Historial generado exitosamente\n\n${successCount} transacciones creadas\n${numDeposits} depósitos\n${numWithdrawals} retiros\n\nPeríodo: ${historyConfig.periodValue} ${historyConfig.periodType === 'months' ? 'meses' : 'años'}`
+      : `✅ History generated successfully\n\n${successCount} transactions created\n${numDeposits} deposits\n${numWithdrawals} withdrawals\n\nPeriod: ${historyConfig.periodValue} ${historyConfig.periodType === 'months' ? 'months' : 'years'}`);
   };
 
   // Crear cuenta custodio
@@ -2113,6 +2286,21 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               >
                 <Landmark className="w-5 h-5" />
                 {language === 'es' ? 'Limpiar SWIFT de Bancos' : 'Clean SWIFT from Banks'}
+              </button>
+              <button
+                onClick={() => {
+                  if (custodyAccounts.length > 0) {
+                    setSelectedAccount(custodyAccounts[0]);
+                    setShowHistoryGenerator(true);
+                  } else {
+                    alert(language === 'es' ? 'Cree una cuenta primero' : 'Create an account first');
+                  }
+                }}
+                disabled={custodyAccounts.length === 0}
+                className="px-6 py-3 bg-gradient-to-br from-purple-600 to-pink-600 text-white font-bold rounded-lg hover:shadow-[0_0_20px_rgba(168,85,247,0.6)] transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Sparkles className="w-5 h-5" />
+                {language === 'es' ? 'Generar Historial Auto' : 'Generate Auto History'}
               </button>
             </div>
           </div>
@@ -4309,6 +4497,260 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#333] text-[#ffffff] rounded-lg hover:bg-[#222] transition-colors"
               >
                 {isSpanish ? 'Cerrar' : 'Close'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Generador de Historial Automático */}
+      {showHistoryGenerator && selectedAccount && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 overflow-auto">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-purple-500/50 rounded-2xl p-6 max-w-2xl w-full shadow-[0_0_50px_rgba(168,85,247,0.3)] max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-purple-400 flex items-center gap-2">
+                <Sparkles className="w-6 h-6" />
+                {isSpanish ? 'Generador de Historial Automático' : 'Automatic History Generator'}
+              </h3>
+              <button
+                onClick={() => setShowHistoryGenerator(false)}
+                className="text-[#ffffff] hover:text-red-400 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Cuenta seleccionada */}
+            <div className="bg-[#0d0d0d] border border-purple-500/30 rounded-lg p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-[#999] mb-1">{isSpanish ? 'Cuenta seleccionada:' : 'Selected account:'}</div>
+                  <div className="text-lg font-bold text-[#ffffff]">{selectedAccount.accountName}</div>
+                  <div className="text-sm text-purple-400 font-mono">{selectedAccount.currency}</div>
+                </div>
+                <select
+                  value={selectedAccount.id}
+                  onChange={e => {
+                    const acc = custodyAccounts.find(a => a.id === e.target.value);
+                    if (acc) setSelectedAccount(acc);
+                  }}
+                  className="px-3 py-2 bg-[#1a1a1a] border border-purple-500/30 rounded-lg text-[#ffffff] text-sm"
+                >
+                  {custodyAccounts.map(acc => (
+                    <option key={acc.id} value={acc.id}>{acc.accountName} ({acc.currency})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Monto Total */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block font-semibold">
+                  {isSpanish ? 'Monto Total a Distribuir' : 'Total Amount to Distribute'} ({selectedAccount.currency})
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  value={historyConfig.totalAmount === 0 ? '' : historyConfig.totalAmount}
+                  onChange={e => setHistoryConfig({...historyConfig, totalAmount: parseFloat(e.target.value) || 0})}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] font-mono text-xl focus:outline-none focus:border-purple-500"
+                  placeholder="1,000,000"
+                />
+                {/* Botones de cantidad rápida */}
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {[100000, 500000, 1000000, 5000000, 10000000, 50000000].map(amt => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setHistoryConfig({...historyConfig, totalAmount: amt})}
+                      className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 rounded text-purple-400 text-xs font-bold hover:bg-purple-500/30 transition-all"
+                    >
+                      {(amt / 1000000).toFixed(amt >= 1000000 ? 0 : 1)}M
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Período de tiempo */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block font-semibold">
+                    {isSpanish ? 'Período' : 'Period'}
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="120"
+                    value={historyConfig.periodValue}
+                    onChange={e => setHistoryConfig({...historyConfig, periodValue: parseInt(e.target.value) || 1})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block font-semibold">
+                    {isSpanish ? 'Unidad' : 'Unit'}
+                  </label>
+                  <select
+                    value={historyConfig.periodType}
+                    onChange={e => setHistoryConfig({...historyConfig, periodType: e.target.value as 'months' | 'years'})}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500"
+                  >
+                    <option value="months">{isSpanish ? 'Meses' : 'Months'}</option>
+                    <option value="years">{isSpanish ? 'Años' : 'Years'}</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Rango de transacciones */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block font-semibold">
+                    {isSpanish ? 'Mínimo de Transacciones' : 'Min Transactions'}
+                  </label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="500"
+                    value={historyConfig.transactionCount.min}
+                    onChange={e => setHistoryConfig({
+                      ...historyConfig, 
+                      transactionCount: {...historyConfig.transactionCount, min: parseInt(e.target.value) || 5}
+                    })}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-[#ffffff] mb-2 block font-semibold">
+                    {isSpanish ? 'Máximo de Transacciones' : 'Max Transactions'}
+                  </label>
+                  <input
+                    type="number"
+                    min="5"
+                    max="500"
+                    value={historyConfig.transactionCount.max}
+                    onChange={e => setHistoryConfig({
+                      ...historyConfig, 
+                      transactionCount: {...historyConfig.transactionCount, max: parseInt(e.target.value) || 30}
+                    })}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg text-[#ffffff] focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+              </div>
+
+              {/* Porcentaje de depósitos vs retiros */}
+              <div>
+                <label className="text-sm text-[#ffffff] mb-2 block font-semibold">
+                  {isSpanish ? `Proporción: ${historyConfig.depositPercentage}% Depósitos / ${100 - historyConfig.depositPercentage}% Retiros` 
+                    : `Ratio: ${historyConfig.depositPercentage}% Deposits / ${100 - historyConfig.depositPercentage}% Withdrawals`}
+                </label>
+                <input
+                  type="range"
+                  min="20"
+                  max="90"
+                  value={historyConfig.depositPercentage}
+                  onChange={e => setHistoryConfig({...historyConfig, depositPercentage: parseInt(e.target.value)})}
+                  className="w-full h-3 bg-[#1a1a1a] rounded-lg appearance-none cursor-pointer accent-purple-500"
+                />
+                <div className="flex justify-between text-xs text-[#666] mt-1">
+                  <span>20% {isSpanish ? 'Depósitos' : 'Deposits'}</span>
+                  <span>90% {isSpanish ? 'Depósitos' : 'Deposits'}</span>
+                </div>
+              </div>
+
+              {/* Selección de bancos */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-[#ffffff] font-semibold">
+                    {isSpanish ? 'Bancos a Utilizar' : 'Banks to Use'} ({historyConfig.selectedBanks.length} {isSpanish ? 'seleccionados' : 'selected'})
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setHistoryConfig({...historyConfig, selectedBanks: TOP_100_BANKS.map((_, idx) => idx)})}
+                      className="text-xs px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded hover:bg-emerald-500/30"
+                    >
+                      {isSpanish ? 'Todos' : 'All'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHistoryConfig({...historyConfig, selectedBanks: []})}
+                      className="text-xs px-2 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30"
+                    >
+                      {isSpanish ? 'Ninguno' : 'None'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const randomBanks = Array.from({length: 10}, () => Math.floor(Math.random() * TOP_100_BANKS.length));
+                        setHistoryConfig({...historyConfig, selectedBanks: [...new Set(randomBanks)]});
+                      }}
+                      className="text-xs px-2 py-1 bg-purple-500/20 text-purple-400 rounded hover:bg-purple-500/30"
+                    >
+                      {isSpanish ? '10 Aleatorios' : '10 Random'}
+                    </button>
+                  </div>
+                </div>
+                <div className="max-h-40 overflow-y-auto bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg p-2">
+                  <div className="grid grid-cols-2 gap-1">
+                    {TOP_100_BANKS.slice(0, 50).map((bank, idx) => (
+                      <label key={idx} className="flex items-center gap-2 p-1 hover:bg-purple-500/10 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={historyConfig.selectedBanks.includes(idx)}
+                          onChange={e => {
+                            if (e.target.checked) {
+                              setHistoryConfig({...historyConfig, selectedBanks: [...historyConfig.selectedBanks, idx]});
+                            } else {
+                              setHistoryConfig({...historyConfig, selectedBanks: historyConfig.selectedBanks.filter(i => i !== idx)});
+                            }
+                          }}
+                          className="w-4 h-4 accent-purple-500 rounded"
+                        />
+                        <span className="text-xs text-[#ccc] truncate">{bank.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Resumen de configuración */}
+              <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
+                <h4 className="text-sm font-bold text-purple-400 mb-2">
+                  {isSpanish ? 'Resumen de Configuración' : 'Configuration Summary'}
+                </h4>
+                <div className="grid grid-cols-2 gap-2 text-xs text-[#ccc]">
+                  <div>{isSpanish ? 'Monto total:' : 'Total amount:'}</div>
+                  <div className="font-mono text-[#ffffff]">{selectedAccount.currency} {historyConfig.totalAmount.toLocaleString()}</div>
+                  <div>{isSpanish ? 'Período:' : 'Period:'}</div>
+                  <div className="font-mono text-[#ffffff]">{historyConfig.periodValue} {historyConfig.periodType === 'months' ? (isSpanish ? 'meses' : 'months') : (isSpanish ? 'años' : 'years')}</div>
+                  <div>{isSpanish ? 'Transacciones:' : 'Transactions:'}</div>
+                  <div className="font-mono text-[#ffffff]">{historyConfig.transactionCount.min} - {historyConfig.transactionCount.max}</div>
+                  <div>{isSpanish ? 'Depósitos:' : 'Deposits:'}</div>
+                  <div className="font-mono text-emerald-400">~{Math.round(((historyConfig.transactionCount.min + historyConfig.transactionCount.max) / 2) * (historyConfig.depositPercentage / 100))}</div>
+                  <div>{isSpanish ? 'Retiros:' : 'Withdrawals:'}</div>
+                  <div className="font-mono text-orange-400">~{Math.round(((historyConfig.transactionCount.min + historyConfig.transactionCount.max) / 2) * ((100 - historyConfig.depositPercentage) / 100))}</div>
+                  <div>{isSpanish ? 'Bancos:' : 'Banks:'}</div>
+                  <div className="font-mono text-[#ffffff]">{historyConfig.selectedBanks.length}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowHistoryGenerator(false)}
+                className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#333] text-[#ffffff] rounded-lg hover:bg-[#222] transition-colors"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleGenerateAutoHistory}
+                disabled={historyConfig.selectedBanks.length === 0 || historyConfig.totalAmount <= 0}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-5 h-5" />
+                {isSpanish ? 'Generar Historial' : 'Generate History'}
               </button>
             </div>
           </div>
