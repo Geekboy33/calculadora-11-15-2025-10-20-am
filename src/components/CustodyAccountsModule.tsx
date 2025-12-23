@@ -471,6 +471,8 @@ export function CustodyAccountsModule() {
     depositPercentage: 60, // 60% deposits, 40% withdrawals
     selectedBanks: [] as number[], // índices de bancos seleccionados
   });
+  const [isGeneratingHistory, setIsGeneratingHistory] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState({ current: 0, total: 0, status: '' });
 
   // Modal para historial de transacciones
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
@@ -609,8 +611,8 @@ export function CustodyAccountsModule() {
     }
   };
 
-  // Función para generar historial automático de transacciones
-  const handleGenerateAutoHistory = () => {
+  // Función para generar historial automático de transacciones (ASÍNCRONA)
+  const handleGenerateAutoHistory = async () => {
     if (!selectedAccount) {
       alert(isSpanish ? 'Seleccione una cuenta' : 'Select an account');
       return;
@@ -626,155 +628,203 @@ export function CustodyAccountsModule() {
       return;
     }
 
-    // Calcular fechas de inicio y fin
-    const endDate = new Date();
-    const startDate = new Date();
-    if (historyConfig.periodType === 'months') {
-      startDate.setMonth(startDate.getMonth() - historyConfig.periodValue);
-    } else {
-      startDate.setFullYear(startDate.getFullYear() - historyConfig.periodValue);
-    }
+    // Iniciar proceso
+    setIsGeneratingHistory(true);
+    setGenerationProgress({ current: 0, total: 0, status: isSpanish ? 'Preparando...' : 'Preparing...' });
 
-    // Calcular número de transacciones
-    const numTransactions = Math.floor(
-      Math.random() * (historyConfig.transactionCount.max - historyConfig.transactionCount.min + 1) 
-      + historyConfig.transactionCount.min
-    );
+    // Pequeña pausa para que la UI se actualice
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-    // Calcular número de depósitos y retiros
-    const numDeposits = Math.round(numTransactions * (historyConfig.depositPercentage / 100));
-    const numWithdrawals = numTransactions - numDeposits;
-
-    // Generar fechas aleatorias distribuidas en el período
-    const generateRandomDate = (): Date => {
-      const timeDiff = endDate.getTime() - startDate.getTime();
-      const randomTime = Math.random() * timeDiff;
-      return new Date(startDate.getTime() + randomTime);
-    };
-
-    // Generar monto aleatorio dentro de un rango
-    const generateRandomAmount = (average: number): number => {
-      const variation = 0.5; // 50% de variación
-      const min = average * (1 - variation);
-      const max = average * (1 + variation);
-      return Math.round((Math.random() * (max - min) + min) * 100) / 100;
-    };
-
-    // Seleccionar banco aleatorio de los seleccionados
-    const getRandomBank = (): { name: string; account: string } => {
-      const bankIdx = historyConfig.selectedBanks[Math.floor(Math.random() * historyConfig.selectedBanks.length)];
-      const bank = TOP_100_BANKS[bankIdx];
-      const bankLib = BANK_ACCOUNTS_LIBRARY[bankIdx];
-      const account = bankLib.accounts[Math.floor(Math.random() * bankLib.accounts.length)];
-      return { name: bank.name, account };
-    };
-
-    // Generar todas las transacciones
-    const transactions: Array<{
-      type: 'deposit' | 'withdrawal';
-      amount: number;
-      date: Date;
-      bank: string;
-      account: string;
-      description: string;
-    }> = [];
-
-    // Calcular monto promedio por depósito para que los depósitos sumen el total
-    const avgDepositAmount = historyConfig.totalAmount / numDeposits;
-    const avgWithdrawAmount = (historyConfig.totalAmount * 0.7) / numWithdrawals; // Los retiros son ~70% del total depositado
-
-    // Generar depósitos
-    for (let i = 0; i < numDeposits; i++) {
-      const bankInfo = getRandomBank();
-      const concepts = isSpanish ? DEPOSIT_CONCEPTS.es : DEPOSIT_CONCEPTS.en;
-      transactions.push({
-        type: 'deposit',
-        amount: generateRandomAmount(avgDepositAmount),
-        date: generateRandomDate(),
-        bank: bankInfo.name,
-        account: bankInfo.account,
-        description: concepts[Math.floor(Math.random() * concepts.length)],
-      });
-    }
-
-    // Generar retiros
-    for (let i = 0; i < numWithdrawals; i++) {
-      const bankInfo = getRandomBank();
-      const concepts = isSpanish ? WITHDRAWAL_CONCEPTS.es : WITHDRAWAL_CONCEPTS.en;
-      transactions.push({
-        type: 'withdrawal',
-        amount: generateRandomAmount(avgWithdrawAmount),
-        date: generateRandomDate(),
-        bank: bankInfo.name,
-        account: bankInfo.account,
-        description: concepts[Math.floor(Math.random() * concepts.length)],
-      });
-    }
-
-    // Ordenar por fecha (más antigua primero)
-    transactions.sort((a, b) => a.date.getTime() - b.date.getTime());
-
-    // Aplicar transacciones a la cuenta
-    let successCount = 0;
-    let currentBalance = selectedAccount.totalBalance;
-
-    transactions.forEach(tx => {
-      const dateStr = tx.date.toISOString().split('T')[0];
-      const timeStr = tx.date.toTimeString().split(' ')[0].substring(0, 5);
-
-      if (tx.type === 'deposit') {
-        const result = custodyStore.addFundsWithTransaction(
-          selectedAccount.id,
-          {
-            amount: tx.amount,
-            type: 'deposit',
-            description: tx.description,
-            sourceAccount: tx.account,
-            sourceBank: tx.bank,
-            transactionDate: dateStr,
-            transactionTime: timeStr,
-            valueDate: dateStr,
-            notes: 'Auto-generated deposit',
-            createdBy: 'SYSTEM'
-          }
-        );
-        if (result) {
-          currentBalance += tx.amount;
-          successCount++;
-        }
+    try {
+      // Calcular fechas de inicio y fin
+      const endDate = new Date();
+      const startDate = new Date();
+      if (historyConfig.periodType === 'months') {
+        startDate.setMonth(startDate.getMonth() - historyConfig.periodValue);
       } else {
-        // Solo hacer retiro si hay fondos suficientes
-        if (currentBalance >= tx.amount) {
-          const result = custodyStore.withdrawFundsWithTransaction(
-            selectedAccount.id,
-            {
-              amount: tx.amount,
-              type: 'withdrawal',
-              description: tx.description,
-              destinationAccount: tx.account,
-              destinationBank: tx.bank,
-              transactionDate: dateStr,
-              transactionTime: timeStr,
-              valueDate: dateStr,
-              notes: 'Auto-generated withdrawal',
-              createdBy: 'SYSTEM'
+        startDate.setFullYear(startDate.getFullYear() - historyConfig.periodValue);
+      }
+
+      // Calcular número de transacciones
+      const numTransactions = Math.floor(
+        Math.random() * (historyConfig.transactionCount.max - historyConfig.transactionCount.min + 1) 
+        + historyConfig.transactionCount.min
+      );
+
+      // Calcular número de depósitos y retiros
+      const numDeposits = Math.round(numTransactions * (historyConfig.depositPercentage / 100));
+      const numWithdrawals = numTransactions - numDeposits;
+
+      setGenerationProgress({ 
+        current: 0, 
+        total: numTransactions, 
+        status: isSpanish ? `Generando ${numTransactions} transacciones...` : `Generating ${numTransactions} transactions...` 
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // Generar fechas aleatorias distribuidas en el período
+      const generateRandomDate = (): Date => {
+        const timeDiff = endDate.getTime() - startDate.getTime();
+        const randomTime = Math.random() * timeDiff;
+        return new Date(startDate.getTime() + randomTime);
+      };
+
+      // Generar monto aleatorio dentro de un rango
+      const generateRandomAmount = (average: number): number => {
+        const variation = 0.5;
+        const min = average * (1 - variation);
+        const max = average * (1 + variation);
+        return Math.round((Math.random() * (max - min) + min) * 100) / 100;
+      };
+
+      // Seleccionar banco aleatorio de los seleccionados
+      const getRandomBank = (): { name: string; account: string } => {
+        const bankIdx = historyConfig.selectedBanks[Math.floor(Math.random() * historyConfig.selectedBanks.length)];
+        const bank = TOP_100_BANKS[bankIdx];
+        const bankLib = BANK_ACCOUNTS_LIBRARY[bankIdx];
+        const account = bankLib.accounts[Math.floor(Math.random() * bankLib.accounts.length)];
+        return { name: bank.name, account };
+      };
+
+      // Generar todas las transacciones
+      const transactions: Array<{
+        type: 'deposit' | 'withdrawal';
+        amount: number;
+        date: Date;
+        bank: string;
+        account: string;
+        description: string;
+      }> = [];
+
+      // Calcular monto promedio
+      const avgDepositAmount = historyConfig.totalAmount / numDeposits;
+      const avgWithdrawAmount = numWithdrawals > 0 ? (historyConfig.totalAmount * 0.7) / numWithdrawals : 0;
+
+      // Generar depósitos
+      for (let i = 0; i < numDeposits; i++) {
+        const bankInfo = getRandomBank();
+        const concepts = isSpanish ? DEPOSIT_CONCEPTS.es : DEPOSIT_CONCEPTS.en;
+        transactions.push({
+          type: 'deposit',
+          amount: generateRandomAmount(avgDepositAmount),
+          date: generateRandomDate(),
+          bank: bankInfo.name,
+          account: bankInfo.account,
+          description: concepts[Math.floor(Math.random() * concepts.length)],
+        });
+      }
+
+      // Generar retiros
+      for (let i = 0; i < numWithdrawals; i++) {
+        const bankInfo = getRandomBank();
+        const concepts = isSpanish ? WITHDRAWAL_CONCEPTS.es : WITHDRAWAL_CONCEPTS.en;
+        transactions.push({
+          type: 'withdrawal',
+          amount: generateRandomAmount(avgWithdrawAmount),
+          date: generateRandomDate(),
+          bank: bankInfo.name,
+          account: bankInfo.account,
+          description: concepts[Math.floor(Math.random() * concepts.length)],
+        });
+      }
+
+      // Ordenar por fecha (más antigua primero)
+      transactions.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+      // Aplicar transacciones en lotes para no bloquear UI
+      let successCount = 0;
+      let currentBalance = selectedAccount.totalBalance;
+      const batchSize = 5; // Procesar 5 transacciones a la vez
+
+      for (let i = 0; i < transactions.length; i += batchSize) {
+        const batch = transactions.slice(i, i + batchSize);
+        
+        for (const tx of batch) {
+          const dateStr = tx.date.toISOString().split('T')[0];
+          const timeStr = tx.date.toTimeString().split(' ')[0].substring(0, 5);
+
+          if (tx.type === 'deposit') {
+            const result = custodyStore.addFundsWithTransaction(
+              selectedAccount.id,
+              {
+                amount: tx.amount,
+                type: 'deposit',
+                description: tx.description,
+                sourceAccount: tx.account,
+                sourceBank: tx.bank,
+                transactionDate: dateStr,
+                transactionTime: timeStr,
+                valueDate: dateStr,
+                notes: 'Auto-generated deposit',
+                createdBy: 'SYSTEM'
+              }
+            );
+            if (result) {
+              currentBalance += tx.amount;
+              successCount++;
             }
-          );
-          if (result) {
-            currentBalance -= tx.amount;
-            successCount++;
+          } else {
+            if (currentBalance >= tx.amount) {
+              const result = custodyStore.withdrawFundsWithTransaction(
+                selectedAccount.id,
+                {
+                  amount: tx.amount,
+                  type: 'withdrawal',
+                  description: tx.description,
+                  destinationAccount: tx.account,
+                  destinationBank: tx.bank,
+                  transactionDate: dateStr,
+                  transactionTime: timeStr,
+                  valueDate: dateStr,
+                  notes: 'Auto-generated withdrawal',
+                  createdBy: 'SYSTEM'
+                }
+              );
+              if (result) {
+                currentBalance -= tx.amount;
+                successCount++;
+              }
+            }
           }
         }
+
+        // Actualizar progreso y dar tiempo a la UI
+        setGenerationProgress({ 
+          current: Math.min(i + batchSize, transactions.length), 
+          total: transactions.length, 
+          status: isSpanish 
+            ? `Procesando ${Math.min(i + batchSize, transactions.length)}/${transactions.length}...` 
+            : `Processing ${Math.min(i + batchSize, transactions.length)}/${transactions.length}...`
+        });
+        
+        // Pausa corta para que la UI se actualice
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
-    });
 
-    // Actualizar estado
-    setCustodyAccounts(custodyStore.getAccounts());
-    setShowHistoryGenerator(false);
+      // Finalizar
+      setGenerationProgress({ 
+        current: transactions.length, 
+        total: transactions.length, 
+        status: isSpanish ? '✅ Completado!' : '✅ Completed!' 
+      });
 
-    alert(isSpanish 
-      ? `✅ Historial generado exitosamente\n\n${successCount} transacciones creadas\n${numDeposits} depósitos\n${numWithdrawals} retiros\n\nPeríodo: ${historyConfig.periodValue} ${historyConfig.periodType === 'months' ? 'meses' : 'años'}`
-      : `✅ History generated successfully\n\n${successCount} transactions created\n${numDeposits} deposits\n${numWithdrawals} withdrawals\n\nPeriod: ${historyConfig.periodValue} ${historyConfig.periodType === 'months' ? 'months' : 'years'}`);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Actualizar estado
+      setCustodyAccounts(custodyStore.getAccounts());
+      setShowHistoryGenerator(false);
+      setIsGeneratingHistory(false);
+
+      alert(isSpanish 
+        ? `✅ Historial generado exitosamente\n\n${successCount} transacciones creadas\n${numDeposits} depósitos\n${numWithdrawals} retiros\n\nPeríodo: ${historyConfig.periodValue} ${historyConfig.periodType === 'months' ? 'meses' : 'años'}`
+        : `✅ History generated successfully\n\n${successCount} transactions created\n${numDeposits} deposits\n${numWithdrawals} withdrawals\n\nPeriod: ${historyConfig.periodValue} ${historyConfig.periodType === 'months' ? 'months' : 'years'}`);
+
+    } catch (error) {
+      console.error('Error generating history:', error);
+      setIsGeneratingHistory(false);
+      alert(isSpanish ? '❌ Error al generar historial' : '❌ Error generating history');
+    }
   };
 
   // Crear cuenta custodio
@@ -4743,20 +4793,55 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
               </div>
             </div>
 
+            {/* Barra de progreso */}
+            {isGeneratingHistory && (
+              <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-4 mt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-purple-300 font-semibold">{generationProgress.status}</span>
+                  <span className="text-sm text-purple-400 font-mono">
+                    {generationProgress.current}/{generationProgress.total}
+                  </span>
+                </div>
+                <div className="w-full h-3 bg-[#1a1a1a] rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-200 ease-out"
+                    style={{ 
+                      width: generationProgress.total > 0 
+                        ? `${(generationProgress.current / generationProgress.total) * 100}%` 
+                        : '0%' 
+                    }}
+                  />
+                </div>
+                <div className="text-xs text-[#666] mt-2 text-center">
+                  {isSpanish ? 'Por favor espere, no cierre esta ventana...' : 'Please wait, do not close this window...'}
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShowHistoryGenerator(false)}
-                className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#333] text-[#ffffff] rounded-lg hover:bg-[#222] transition-colors"
+                disabled={isGeneratingHistory}
+                className="flex-1 px-4 py-3 bg-[#1a1a1a] border border-[#333] text-[#ffffff] rounded-lg hover:bg-[#222] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSpanish ? 'Cancelar' : 'Cancel'}
               </button>
               <button
                 onClick={handleGenerateAutoHistory}
-                disabled={historyConfig.selectedBanks.length === 0 || historyConfig.totalAmount <= 0}
+                disabled={historyConfig.selectedBanks.length === 0 || historyConfig.totalAmount <= 0 || isGeneratingHistory}
                 className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                <Sparkles className="w-5 h-5" />
-                {isSpanish ? 'Generar Historial' : 'Generate History'}
+                {isGeneratingHistory ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    {isSpanish ? 'Generando...' : 'Generating...'}
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    {isSpanish ? 'Generar Historial' : 'Generate History'}
+                  </>
+                )}
               </button>
             </div>
           </div>
