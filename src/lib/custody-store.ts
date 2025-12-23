@@ -1371,6 +1371,46 @@ class CustodyStore {
   }
 
   /**
+   * Limpiar códigos SWIFT de los nombres de bancos en todas las transacciones
+   * Convierte "Bank Name (SWIFTCODE)" a "Bank Name"
+   */
+  cleanSwiftCodesFromBanks(): number {
+    const accounts = this.getAccounts();
+    let cleanedCount = 0;
+
+    // Regex para detectar y eliminar códigos SWIFT: (XXXXXXXX) o (XXXXXXXXXXX)
+    const swiftRegex = /\s*\([A-Z0-9]{6,11}\)\s*$/;
+
+    accounts.forEach(account => {
+      if (account.transactions && account.transactions.length > 0) {
+        account.transactions.forEach(tx => {
+          // Limpiar sourceBank
+          if (tx.sourceBank && swiftRegex.test(tx.sourceBank)) {
+            const cleanedBank = tx.sourceBank.replace(swiftRegex, '').trim();
+            console.log(`[CustodyStore] 🧹 Limpiando SWIFT de sourceBank: "${tx.sourceBank}" → "${cleanedBank}"`);
+            tx.sourceBank = cleanedBank;
+            cleanedCount++;
+          }
+          // Limpiar destinationBank
+          if (tx.destinationBank && swiftRegex.test(tx.destinationBank)) {
+            const cleanedBank = tx.destinationBank.replace(swiftRegex, '').trim();
+            console.log(`[CustodyStore] 🧹 Limpiando SWIFT de destinationBank: "${tx.destinationBank}" → "${cleanedBank}"`);
+            tx.destinationBank = cleanedBank;
+            cleanedCount++;
+          }
+        });
+      }
+    });
+
+    if (cleanedCount > 0) {
+      this.saveAccounts(accounts);
+      console.log(`[CustodyStore] ✅ ${cleanedCount} códigos SWIFT eliminados de nombres de bancos`);
+    }
+
+    return cleanedCount;
+  }
+
+  /**
    * Obtener cuenta por ID
    */
   getAccountById(id: string): CustodyAccount | null {

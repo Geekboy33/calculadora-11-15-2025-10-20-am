@@ -2077,28 +2077,44 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
           <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border-2 border-amber-500/30 rounded-xl p-6 text-center">
             <div className="mb-4">
               <h3 className="text-lg font-bold text-amber-400 mb-2">
-                <Wrench className="w-5 h-5 inline mr-1" /> {language === 'es' ? 'Corregir Referencias TXN' : 'Fix TXN References'}
+                <Wrench className="w-5 h-5 inline mr-1" /> {language === 'es' ? 'Herramientas de Mantenimiento' : 'Maintenance Tools'}
               </h3>
               <p className="text-sm text-[#999]">
                 {language === 'es' 
-                  ? 'Regenera las referencias para que coincidan con las fechas'
-                  : 'Regenerate references to match transaction dates'}
+                  ? 'Corregir datos de transacciones existentes'
+                  : 'Fix existing transaction data'}
               </p>
             </div>
-            <button
-              onClick={() => {
-                const count = custodyStore.forceRegenerateAllReferences();
-                setCustodyAccounts(custodyStore.getAccounts());
-                alert(language === 'es' 
-                  ? `✅ ${count} referencias regeneradas correctamente` 
-                  : `✅ ${count} references regenerated successfully`);
-              }}
-              disabled={custodyAccounts.length === 0}
-              className="px-8 py-4 bg-gradient-to-br from-amber-600 to-orange-600 text-white font-bold rounded-lg hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] transition-all text-lg flex items-center gap-3 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <History className="w-6 h-6" />
-              {language === 'es' ? 'Regenerar TXN' : 'Regenerate TXN'}
-            </button>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  const count = custodyStore.forceRegenerateAllReferences();
+                  setCustodyAccounts(custodyStore.getAccounts());
+                  alert(language === 'es' 
+                    ? `✅ ${count} referencias regeneradas correctamente` 
+                    : `✅ ${count} references regenerated successfully`);
+                }}
+                disabled={custodyAccounts.length === 0}
+                className="px-6 py-3 bg-gradient-to-br from-amber-600 to-orange-600 text-white font-bold rounded-lg hover:shadow-[0_0_20px_rgba(245,158,11,0.6)] transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <History className="w-5 h-5" />
+                {language === 'es' ? 'Regenerar Referencias TXN' : 'Regenerate TXN References'}
+              </button>
+              <button
+                onClick={() => {
+                  const count = custodyStore.cleanSwiftCodesFromBanks();
+                  setCustodyAccounts(custodyStore.getAccounts());
+                  alert(language === 'es' 
+                    ? `✅ ${count} códigos SWIFT eliminados de nombres de bancos` 
+                    : `✅ ${count} SWIFT codes removed from bank names`);
+                }}
+                disabled={custodyAccounts.length === 0}
+                className="px-6 py-3 bg-gradient-to-br from-cyan-600 to-blue-600 text-white font-bold rounded-lg hover:shadow-[0_0_20px_rgba(34,211,238,0.6)] transition-all flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Landmark className="w-5 h-5" />
+                {language === 'es' ? 'Limpiar SWIFT de Bancos' : 'Clean SWIFT from Banks'}
+              </button>
+            </div>
           </div>
 
           {/* Botón para Crear Más Cuentas */}
@@ -3527,7 +3543,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                       setSelectedBankIndex(idx);
                       if (idx >= 0) {
                         const bank = TOP_100_BANKS[idx];
-                        setAddFundsData({...addFundsData, sourceBank: `${bank.name} (${bank.swift})`});
+                        setAddFundsData({...addFundsData, sourceBank: bank.name});
                         setSelectedAccountIndex(-1);
                       }
                     }}
@@ -3807,7 +3823,7 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                       setSelectedWithdrawBankIndex(idx);
                       if (idx >= 0) {
                         const bank = TOP_100_BANKS[idx];
-                        setWithdrawData({...withdrawData, destinationBank: `${bank.name} (${bank.swift})`});
+                        setWithdrawData({...withdrawData, destinationBank: bank.name});
                         setSelectedWithdrawAccountIndex(-1);
                       }
                     }}
