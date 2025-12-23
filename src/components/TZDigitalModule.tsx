@@ -26,7 +26,8 @@ import {
   TroubleshootResult,
   FundsTxPayload,
   FundsProcessingConfig,
-  FundsProcessingResult
+  FundsProcessingResult,
+  TransferVerificationResult
 } from '../lib/tz-digital-api';
 import { custodyStore, CustodyAccount } from '../lib/custody-store';
 import jsPDF from 'jspdf';
@@ -118,6 +119,13 @@ export function TZDigitalModule() {
   // Funds Processing Result
   const [fundsResult, setFundsResult] = useState<FundsProcessingResult | null>(null);
   const [showFundsResult, setShowFundsResult] = useState(false);
+
+  // Verificador de recepción
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [verifyTransactionId, setVerifyTransactionId] = useState('');
+  const [verifyReference, setVerifyReference] = useState('');
+  const [verificationResult, setVerificationResult] = useState<TransferVerificationResult | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Configuración temporal
   const [tempConfig, setTempConfig] = useState({
@@ -476,8 +484,10 @@ export function TZDigitalModule() {
     
     if (senderAccount) {
       senderData.push(
-        [isSpanish ? 'Cuenta Ordenante' : 'Originator Account', senderAccount.accountNumber || senderAccount.id],
+        [isSpanish ? 'Cuenta Custodio Origen' : 'Source Custody Account', senderAccount.accountName || 'N/A'],
+        [isSpanish ? 'Número de Cuenta' : 'Account Number', senderAccount.accountNumber || senderAccount.id],
         [isSpanish ? 'Tipo de Cuenta' : 'Account Type', senderAccount.accountCategory?.toUpperCase() || 'CUSTODY'],
+        [isSpanish ? 'Divisa' : 'Currency', senderAccount.currency || transfer.payload.currency],
       );
     } else {
       senderData.push(

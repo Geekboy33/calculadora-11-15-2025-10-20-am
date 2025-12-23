@@ -636,6 +636,109 @@ app.post('/api/tz-digital/funds-processing', async (req, res) => {
   }
 });
 
+// ============================================================================
+// VERIFICADOR DE RECEPCIÓN DE TRANSFERENCIAS
+// ============================================================================
+app.post('/api/tz-digital/verify-receipt', async (req, res) => {
+  const { transaction_id, reference } = req.body;
+  
+  console.log('[CIS S2S] 🔍 Verificando recepción de transferencia:', {
+    transaction_id,
+    reference
+  });
+
+  if (!transaction_id) {
+    return res.status(400).json({
+      verified: false,
+      status: 'error',
+      message: 'Se requiere transaction_id'
+    });
+  }
+
+  // En modo local, simular verificación exitosa
+  if (CIS_S2S_CONFIG.LOCAL_MODE) {
+    const now = new Date();
+    const sentTime = new Date(now.getTime() - 30000); // 30 segundos antes
+    const receivedTime = new Date(now.getTime() - 15000); // 15 segundos antes
+    const confirmedTime = new Date(now.getTime() - 5000); // 5 segundos antes
+
+    const verificationResult = {
+      verified: true,
+      status: 'received',
+      transaction_id: transaction_id,
+      reference: reference || `REF-${transaction_id}`,
+      receiver_confirmation: {
+        confirmed: true,
+        confirmation_time: confirmedTime.toISOString(),
+        confirmation_code: `CONF-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        receiver_reference: `RCV-${Math.random().toString(36).substring(2, 10).toUpperCase()}`
+      },
+      transmission_codes: {
+        trn: `TRN${Date.now()}`,
+        release_code: `RC${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+        download_code: `DL${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        approval_code: `APR${Math.floor(Math.random() * 1000000)}`,
+        hash_code: CIS_S2S_CONFIG.SHA256_HANDSHAKE
+      },
+      timestamps: {
+        sent_at: sentTime.toISOString(),
+        received_at: receivedTime.toISOString(),
+        confirmed_at: confirmedTime.toISOString()
+      },
+      server_info: {
+        name: 'DEV-CORE-PAY-GW-01',
+        location: 'London, United Kingdom',
+        globalIP: CIS_S2S_CONFIG.GLOBAL_IP
+      },
+      message: '✓ Transferencia recibida y confirmada por el receptor',
+      timestamp: now.toISOString()
+    };
+
+    console.log('[CIS S2S] ✅ Verificación completada (LOCAL):', {
+      transaction_id,
+      status: 'received',
+      confirmed: true
+    });
+
+    return res.json(verificationResult);
+  }
+
+  // En modo externo, consultar API real
+  try {
+    const response = await fetch(`${CIS_S2S_CONFIG.API_URL}/${transaction_id}/status`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${CIS_S2S_CONFIG.API_KEY}`,
+        'X-API-Key': CIS_S2S_CONFIG.API_KEY,
+        'X-Auth-Key': CIS_S2S_CONFIG.AUTH_KEY,
+      },
+      signal: AbortSignal.timeout(15000)
+    });
+
+    const data = await response.json();
+
+    res.json({
+      verified: data.status === 'received' || data.status === 'completed',
+      status: data.status || 'unknown',
+      transaction_id,
+      reference,
+      ...data,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('[CIS S2S] ❌ Error verificando:', error.message);
+    
+    res.status(500).json({
+      verified: false,
+      status: 'error',
+      transaction_id,
+      message: `Error de verificación: ${error.message}`,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 app.get('/api/tz-digital/test', async (req, res) => {
   const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '') || CIS_S2S_CONFIG.API_KEY;
   

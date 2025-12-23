@@ -202,6 +202,45 @@ export interface FundsProcessingResult {
   timestamp: string;
 }
 
+/**
+ * Transfer Verification Result
+ */
+export interface TransferVerificationResult {
+  verified: boolean;
+  status: 'received' | 'pending' | 'processing' | 'failed' | 'not_found' | 'unknown';
+  transaction_id: string;
+  reference?: string;
+  amount?: number;
+  currency?: string;
+  from_bank?: string;
+  to_bank?: string;
+  receiver_confirmation?: {
+    confirmed: boolean;
+    confirmation_time?: string;
+    confirmation_code?: string;
+    receiver_reference?: string;
+  };
+  transmission_codes?: {
+    trn?: string;
+    release_code?: string;
+    download_code?: string;
+    approval_code?: string;
+    hash_code?: string;
+  };
+  timestamps?: {
+    sent_at?: string;
+    received_at?: string;
+    confirmed_at?: string;
+  };
+  server_info?: {
+    name: string;
+    location: string;
+    globalIP: string;
+  };
+  message: string;
+  timestamp: string;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // SHA256 HANDSHAKE UTILITIES
 // ═══════════════════════════════════════════════════════════════════════════
@@ -742,6 +781,92 @@ class TZDigitalTransferClient {
   async generateHMACSHA256Hash(data: string | object, secret: string): Promise<string> {
     const str = typeof data === 'string' ? data : JSON.stringify(canonicalize(data));
     return await hmacSha256Hex(str, secret);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Verifica si una transferencia fue recibida por el receptor
+   * @param transactionId - ID de la transacción a verificar
+   * @param reference - Referencia opcional de la transferencia
+   * @returns TransferVerificationResult con el estado de la verificación
+   */
+  async verifyTransferReceipt(
+    transactionId: string,
+    reference?: string
+  ): Promise<TransferVerificationResult> {
+    console.log(`[TZDigital] 🔍 Verificando recepción de transferencia: ${transactionId}`);
+
+    const url = (IS_ELECTRON || IS_FILE_PROTOCOL)
+      ? `${LOCAL_SERVER_URL}/api/tz-digital/verify-receipt`
+      : '/api/tz-digital/verify-receipt';
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.config.bearerToken}`,
+          'X-TZ-Token': this.config.bearerToken,
+        },
+        body: JSON.stringify({
+          transaction_id: transactionId,
+          reference: reference,
+        }),
+      });
+
+      clearTimeout(timeoutId);
+
+      const data = await response.json();
+
+      const result: TransferVerificationResult = {
+        verified: data.verified || data.status === 'received',
+        status: data.status || 'unknown',
+        transaction_id: transactionId,
+        reference: reference || data.reference,
+        amount: data.amount,
+        currency: data.currency,
+        from_bank: data.from_bank,
+        to_bank: data.to_bank,
+        receiver_confirmation: data.receiver_confirmation,
+        transmission_codes: data.transmission_codes,
+        timestamps: data.timestamps,
+        server_info: data.server_info,
+        message: data.message || (data.verified ? 'Transferencia verificada exitosamente' : 'Verificación pendiente'),
+        timestamp: new Date().toISOString(),
+      };
+
+      console.log(`[TZDigital] ${result.verified ? '✅' : '⏳'} Verificación:`, result);
+
+      return result;
+
+    } catch (err: any) {
+      console.error('[TZDigital] ❌ Error verificando transferencia:', err);
+      
+      return {
+        verified: false,
+        status: 'unknown',
+        transaction_id: transactionId,
+        reference,
+        message: `Error de verificación: ${err?.message || 'Error desconocido'}`,
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  /**
+   * Busca una transferencia en el historial local
+   */
+  findTransferById(transactionId: string): TransferRecord | undefined {
+    return this.transfers.find(t => 
+      t.id === transactionId || 
+      t.payload.reference === transactionId ||
+      t.payload.transaction_id === transactionId
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────
