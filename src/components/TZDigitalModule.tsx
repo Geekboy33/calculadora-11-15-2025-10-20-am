@@ -337,7 +337,7 @@ export function TZDigitalModule() {
       pdf.setFontSize(8);
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(...colors.lightGold);
-      const subtitle = 'Open Banking ISO 20022 | CIS S2S Protocol';
+      const subtitle = 'Open Banking ISO 20022 | Server to Server Protocol';
       pdf.text(subtitle, pageWidth / 2, 54, { align: 'center' });
       
       y = 68;
@@ -587,8 +587,8 @@ export function TZDigitalModule() {
     pdf.setFontSize(7);
     pdf.setFont('helvetica', 'italic');
     const declaration = isSpanish 
-      ? 'Este documento certifica la ejecución de la transferencia de efectivo directo a través del protocolo CIS S2S Open Banking. La operación ha sido procesada de conformidad con los estándares ISO 20022 y las regulaciones FATF aplicables.'
-      : 'This document certifies the execution of the direct cash transfer through the CIS S2S Open Banking protocol. The operation has been processed in accordance with ISO 20022 standards and applicable FATF regulations.';
+      ? 'Este documento certifica la ejecución de la transferencia de efectivo directo a través del protocolo Open Banking Server to Server. La operación ha sido procesada de conformidad con los estándares ISO 20022 y las regulaciones FATF aplicables.'
+      : 'This document certifies the execution of the direct cash transfer through the Open Banking Server to Server protocol. The operation has been processed in accordance with ISO 20022 standards and applicable FATF regulations.';
     
     const lines = pdf.splitTextToSize(declaration, pageWidth - (margin * 2));
     pdf.text(lines, margin, y);
