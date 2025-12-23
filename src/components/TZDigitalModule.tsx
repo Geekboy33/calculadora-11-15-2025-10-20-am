@@ -50,6 +50,9 @@ export function TZDigitalModule() {
   const [connectionTestResult, setConnectionTestResult] = useState<ConnectionTestResult | null>(null);
   const [showConnectionModal, setShowConnectionModal] = useState(false);
 
+  // Modo de envío
+  const [directTransfer, setDirectTransfer] = useState(false);
+
   // Formulario de transferencia
   const [transferForm, setTransferForm] = useState<MoneyTransferPayload>({
     amount: 0,
@@ -542,7 +545,7 @@ export function TZDigitalModule() {
       return;
     }
 
-    if (!transferForm.beneficiary_name) {
+    if (!directTransfer && !transferForm.beneficiary_name) {
       alert(isSpanish ? '❌ Ingresa el nombre del beneficiario' : '❌ Enter beneficiary name');
       return;
     }
@@ -565,6 +568,13 @@ export function TZDigitalModule() {
       sender_name: selectedAccount?.accountName || config.defaultSenderName,
       sender_account: selectedAccount?.accountNumber || config.defaultSenderAccount,
       sender_bank: 'Digital Commercial Bank Ltd',
+      // Si es envío directo, usar valores por defecto
+      ...(directTransfer && {
+        beneficiary_name: 'Direct Transfer',
+        beneficiary_account: 'DIRECT',
+        beneficiary_bank: 'TZ Digital Bank',
+        transfer_type: 'direct',
+      }),
     };
 
     const result = await tzDigitalClient.sendMoney(payload, {
@@ -577,9 +587,11 @@ export function TZDigitalModule() {
         accountId: selectedAccount.id,
         amount: transferForm.amount,
         type: 'transfer_out',
-        description: `TZ Digital Transfer - ${transferForm.beneficiary_name}`,
-        destinationAccount: transferForm.beneficiary_account || transferForm.beneficiary_iban || '',
-        destinationBank: transferForm.beneficiary_bank || '',
+        description: directTransfer 
+          ? `TZ Digital Direct Transfer - ${transferForm.reference}`
+          : `TZ Digital Transfer - ${transferForm.beneficiary_name}`,
+        destinationAccount: directTransfer ? 'DIRECT' : (transferForm.beneficiary_account || transferForm.beneficiary_iban || ''),
+        destinationBank: directTransfer ? 'TZ Digital Bank' : (transferForm.beneficiary_bank || ''),
         transactionDate: new Date().toISOString().split('T')[0],
         transactionTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
         valueDate: new Date().toISOString().split('T')[0],
@@ -890,32 +902,104 @@ export function TZDigitalModule() {
 
                 {/* Columna derecha - Beneficiario */}
                 <div className="space-y-4">
-                  <div className="bg-black/30 rounded-xl p-4">
-                    <label className="text-sm text-gray-400 mb-2 block">{isSpanish ? 'Beneficiario' : 'Beneficiary'}</label>
-                    <input
-                      type="text"
-                      value={transferForm.beneficiary_name}
-                      onChange={e => setTransferForm({ ...transferForm, beneficiary_name: e.target.value })}
-                      className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 mb-3"
-                      placeholder={isSpanish ? 'Nombre del beneficiario' : 'Beneficiary name'}
-                    />
-                    <input
-                      type="text"
-                      value={transferForm.beneficiary_account}
-                      onChange={e => setTransferForm({ ...transferForm, beneficiary_account: e.target.value })}
-                      className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white font-mono focus:outline-none focus:border-blue-500 mb-3"
-                      placeholder={isSpanish ? 'Número de cuenta' : 'Account number'}
-                    />
-                    <input
-                      type="text"
-                      value={transferForm.beneficiary_bank}
-                      onChange={e => setTransferForm({ ...transferForm, beneficiary_bank: e.target.value })}
-                      className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                      placeholder={isSpanish ? 'Banco del beneficiario' : 'Beneficiary bank'}
-                    />
+                  {/* Selector de Tipo de Envío */}
+                  <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Send className="w-5 h-5 text-purple-400" />
+                        <label className="text-purple-400 font-semibold">
+                          {isSpanish ? 'Tipo de Envío' : 'Transfer Type'}
+                        </label>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setDirectTransfer(false)}
+                        className={`flex-1 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all ${
+                          !directTransfer 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                        }`}
+                      >
+                        <Building2 className="w-4 h-4" />
+                        {isSpanish ? 'Con Beneficiario' : 'With Beneficiary'}
+                      </button>
+                      <button
+                        onClick={() => setDirectTransfer(true)}
+                        className={`flex-1 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all ${
+                          directTransfer 
+                            ? 'bg-purple-600 text-white' 
+                            : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                        }`}
+                      >
+                        <ArrowRightLeft className="w-4 h-4" />
+                        {isSpanish ? 'Envío Directo' : 'Direct Transfer'}
+                      </button>
+                    </div>
+                    {directTransfer && (
+                      <div className="mt-3 text-xs text-purple-300 bg-purple-500/10 p-2 rounded">
+                        {isSpanish 
+                          ? '💡 Envío directo sin especificar beneficiario. Los fondos se enviarán directamente a través de TZ Digital.'
+                          : '💡 Direct transfer without specifying beneficiary. Funds will be sent directly through TZ Digital.'}
+                      </div>
+                    )}
                   </div>
 
-                  {transferForm.currency === 'EUR' && (
+                  {/* Campos de Beneficiario (solo si no es envío directo) */}
+                  {!directTransfer && (
+                    <div className="bg-black/30 rounded-xl p-4">
+                      <label className="text-sm text-gray-400 mb-2 block">{isSpanish ? 'Beneficiario' : 'Beneficiary'}</label>
+                      <input
+                        type="text"
+                        value={transferForm.beneficiary_name}
+                        onChange={e => setTransferForm({ ...transferForm, beneficiary_name: e.target.value })}
+                        className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 mb-3"
+                        placeholder={isSpanish ? 'Nombre del beneficiario' : 'Beneficiary name'}
+                      />
+                      <input
+                        type="text"
+                        value={transferForm.beneficiary_account}
+                        onChange={e => setTransferForm({ ...transferForm, beneficiary_account: e.target.value })}
+                        className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white font-mono focus:outline-none focus:border-blue-500 mb-3"
+                        placeholder={isSpanish ? 'Número de cuenta' : 'Account number'}
+                      />
+                      <input
+                        type="text"
+                        value={transferForm.beneficiary_bank}
+                        onChange={e => setTransferForm({ ...transferForm, beneficiary_bank: e.target.value })}
+                        className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                        placeholder={isSpanish ? 'Banco del beneficiario' : 'Beneficiary bank'}
+                      />
+                    </div>
+                  )}
+
+                  {/* Info de Envío Directo */}
+                  {directTransfer && (
+                    <div className="bg-purple-900/20 border border-purple-500/30 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Landmark className="w-5 h-5 text-purple-400" />
+                        <span className="text-purple-400 font-semibold">
+                          {isSpanish ? 'Información de Envío Directo' : 'Direct Transfer Info'}
+                        </span>
+                      </div>
+                      <div className="space-y-2 text-sm text-gray-300">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">{isSpanish ? 'Destino:' : 'Destination:'}</span>
+                          <span>TZ Digital Bank</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">{isSpanish ? 'Tipo:' : 'Type:'}</span>
+                          <span>Direct Transfer</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">{isSpanish ? 'Procesamiento:' : 'Processing:'}</span>
+                          <span className="text-emerald-400">{isSpanish ? 'Inmediato' : 'Immediate'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {transferForm.currency === 'EUR' && !directTransfer && (
                     <div className="bg-black/30 rounded-xl p-4">
                       <label className="text-sm text-gray-400 mb-2 block">IBAN / SWIFT</label>
                       <input
