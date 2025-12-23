@@ -461,7 +461,8 @@ export interface TZDigitalConfig {
 // ═══════════════════════════════════════════════════════════════════════════
 // BEARER TOKEN CONFIGURADO
 // ═══════════════════════════════════════════════════════════════════════════
-const CONFIGURED_BEARER_TOKEN = '4e2e1b2f-03f3-4c5b-b54e-23d9145c1fde';
+// Token CIS S2S API 2025 - DevMind Group
+const CONFIGURED_BEARER_TOKEN = '47061d41-7994-4fad-99a7-54879acd9a83';
 
 const DEFAULT_CONFIG: TZDigitalConfig = {
   bearerToken: CONFIGURED_BEARER_TOKEN,
