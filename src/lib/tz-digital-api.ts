@@ -11,7 +11,18 @@
 // CONFIGURACIÓN
 // ═══════════════════════════════════════════════════════════════════════════
 
-const API_URL = "https://banktransfer.tzdigitalpvtlimited.com/api/transactions";
+// URL directa de TZ Digital
+const TZ_DIRECT_URL = "https://banktransfer.tzdigitalpvtlimited.com/api/transactions";
+
+// Proxy local para evitar CORS en browser
+const TZ_PROXY_URL = "/api/tz-digital/transactions";
+const TZ_PROXY_TEST_URL = "/api/tz-digital/test";
+
+// Detectar si estamos en browser y usar proxy
+const IS_BROWSER = typeof window !== 'undefined';
+const API_URL = IS_BROWSER ? TZ_PROXY_URL : TZ_DIRECT_URL;
+const TEST_URL = IS_BROWSER ? TZ_PROXY_TEST_URL : TZ_DIRECT_URL;
+
 const DEFAULT_TIMEOUT = 25000; // 25 segundos
 
 export type Currency = "USD" | "EUR";
@@ -282,6 +293,7 @@ class TZDigitalTransferClient {
     
     console.log(`[TZDigital] 📤 Enviando transferencia ${payload.currency} ${payload.amount}...`);
     console.log(`[TZDigital] Reference: ${payload.reference}`);
+    console.log(`[TZDigital] URL: ${this.config.baseUrl} (Browser: ${IS_BROWSER})`);
 
     try {
       const response = await fetch(this.config.baseUrl, {
@@ -290,6 +302,7 @@ class TZDigitalTransferClient {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.config.bearerToken}`,
+          'X-TZ-Token': this.config.bearerToken, // Header para el proxy
           ...(opts?.idempotencyKey ? { 'Idempotency-Key': opts.idempotencyKey } : {}),
         },
         body: JSON.stringify(payload),
@@ -429,21 +442,37 @@ class TZDigitalTransferClient {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch(this.config.baseUrl, {
-        method: 'OPTIONS',
+      // Usar endpoint de test del proxy en browser
+      const testUrl = IS_BROWSER ? TEST_URL : this.config.baseUrl;
+      
+      console.log(`[TZDigital] 🔍 Test de conexión a: ${testUrl}`);
+
+      const response = await fetch(testUrl, {
+        method: IS_BROWSER ? 'GET' : 'OPTIONS',
         signal: controller.signal,
         headers: {
           'Authorization': `Bearer ${this.config.bearerToken}`,
+          'X-TZ-Token': this.config.bearerToken,
         },
       });
 
       clearTimeout(timeoutId);
 
+      // En browser, el proxy devuelve JSON
+      let result = { success: false, message: '' };
+      if (IS_BROWSER) {
+        try {
+          result = await response.json();
+        } catch {
+          result = { success: response.ok, message: `HTTP ${response.status}` };
+        }
+      }
+
       return {
-        success: response.ok || response.status === 405 || response.status === 404,
-        message: response.ok 
+        success: IS_BROWSER ? result.success : (response.ok || response.status === 405 || response.status === 404),
+        message: IS_BROWSER ? result.message : (response.ok 
           ? 'Conexión exitosa'
-          : `Servidor responde (HTTP ${response.status})`,
+          : `Servidor responde (HTTP ${response.status})`),
         details: {
           status: response.status,
           statusText: response.statusText,

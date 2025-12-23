@@ -320,6 +320,132 @@ app.post('/api/yoomoney/oauth/token', async (req, res) => {
 });
 
 // ============================================================================
+// TZ DIGITAL BANK TRANSFER PROXY - Transferencias USD/EUR
+// ============================================================================
+app.post('/api/tz-digital/transactions', async (req, res) => {
+  const TZ_API_URL = 'https://banktransfer.tzdigitalpvtlimited.com/api/transactions';
+  const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '');
+
+  try {
+    console.log('[TZ Digital Proxy] 📤 Enviando transferencia:', {
+      url: TZ_API_URL,
+      currency: req.body?.currency,
+      amount: req.body?.amount,
+      reference: req.body?.reference,
+      hasToken: !!bearerToken
+    });
+
+    if (!bearerToken) {
+      return res.status(401).json({
+        success: false,
+        error: 'Missing Bearer Token',
+        message: 'Se requiere el token de autorización'
+      });
+    }
+
+    const response = await fetch(TZ_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${bearerToken}`,
+        'Accept': 'application/json',
+        ...(req.headers['idempotency-key'] && { 'Idempotency-Key': req.headers['idempotency-key'] }),
+      },
+      body: JSON.stringify(req.body),
+      signal: AbortSignal.timeout(30000)
+    });
+
+    const text = await response.text();
+    let data;
+    
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = { raw: text };
+    }
+
+    console.log('[TZ Digital Proxy] ✅ Respuesta:', {
+      status: response.status,
+      statusText: response.statusText,
+      hasData: !!data
+    });
+
+    // Agregar headers de respuesta útiles
+    const requestId = response.headers.get('x-request-id') || 
+                      response.headers.get('x-correlation-id') ||
+                      `TZ-${Date.now()}`;
+    
+    res.setHeader('x-request-id', requestId);
+    res.status(response.status).json(data);
+
+  } catch (error) {
+    console.error('[TZ Digital Proxy] ❌ Error:', {
+      message: error.message,
+      code: error.code,
+      name: error.name
+    });
+
+    let errorMessage = error.message;
+    let errorCode = 'UNKNOWN_ERROR';
+
+    if (error.code === 'ENOTFOUND') {
+      errorMessage = 'No se puede resolver el dominio del servidor TZ Digital';
+      errorCode = 'DNS_ERROR';
+    } else if (error.code === 'ECONNREFUSED') {
+      errorMessage = 'El servidor TZ Digital rechazó la conexión';
+      errorCode = 'CONNECTION_REFUSED';
+    } else if (error.name === 'AbortError') {
+      errorMessage = 'Timeout: El servidor TZ Digital no respondió en 30 segundos';
+      errorCode = 'TIMEOUT';
+    } else if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' || error.code === 'CERT_HAS_EXPIRED') {
+      errorMessage = 'Error de certificado SSL del servidor TZ Digital';
+      errorCode = 'SSL_ERROR';
+    }
+
+    res.status(500).json({
+      success: false,
+      error: errorCode,
+      message: errorMessage,
+      details: error.message
+    });
+  }
+});
+
+// Test de conexión TZ Digital
+app.options('/api/tz-digital/transactions', async (req, res) => {
+  res.status(200).json({ success: true, message: 'TZ Digital Proxy available' });
+});
+
+app.get('/api/tz-digital/test', async (req, res) => {
+  const bearerToken = req.headers['x-tz-token'] || req.headers['authorization']?.replace('Bearer ', '');
+  
+  try {
+    console.log('[TZ Digital Proxy] 🔍 Test de conexión...');
+    
+    const response = await fetch('https://banktransfer.tzdigitalpvtlimited.com/api/transactions', {
+      method: 'OPTIONS',
+      headers: {
+        'Authorization': bearerToken ? `Bearer ${bearerToken}` : '',
+      },
+      signal: AbortSignal.timeout(10000)
+    });
+
+    res.json({
+      success: true,
+      message: 'Conexión disponible',
+      status: response.status,
+      statusText: response.statusText
+    });
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message,
+      code: error.code || error.name
+    });
+  }
+});
+
+// ============================================================================
 // MG WEBHOOK PROXY - Reenvía peticiones a MG Productive Investments
 // ============================================================================
 app.post('/api/mg-webhook/transfer', async (req, res) => {
