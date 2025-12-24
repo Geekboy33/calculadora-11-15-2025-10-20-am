@@ -864,9 +864,60 @@ app.post('/api/mg-webhook/transfer', async (req, res) => {
   }
 });
 
+// ============================================================================
+// KUCOIN API PROXY
+// ============================================================================
+
+const KUCOIN_API_BASE = 'https://api.kucoin.com';
+
+// Proxy genérico para KuCoin - usar middleware
+app.use('/api/kucoin', async (req, res) => {
+  const endpoint = req.originalUrl.replace('/api/kucoin', '');
+  const url = `${KUCOIN_API_BASE}${endpoint}`;
+  
+  console.log(`[KuCoin Proxy] ${req.method} ${endpoint}`);
+  
+  try {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Pasar headers de autenticación de KuCoin
+    if (req.headers['kc-api-key']) headers['KC-API-KEY'] = req.headers['kc-api-key'];
+    if (req.headers['kc-api-sign']) headers['KC-API-SIGN'] = req.headers['kc-api-sign'];
+    if (req.headers['kc-api-timestamp']) headers['KC-API-TIMESTAMP'] = req.headers['kc-api-timestamp'];
+    if (req.headers['kc-api-passphrase']) headers['KC-API-PASSPHRASE'] = req.headers['kc-api-passphrase'];
+    if (req.headers['kc-api-key-version']) headers['KC-API-KEY-VERSION'] = req.headers['kc-api-key-version'];
+    
+    const fetchOptions = {
+      method: req.method,
+      headers,
+    };
+    
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      fetchOptions.body = JSON.stringify(req.body);
+    }
+    
+    const response = await fetch(url, fetchOptions);
+    const data = await response.json();
+    
+    console.log(`[KuCoin Proxy] Response: ${response.status}`);
+    
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error(`[KuCoin Proxy] Error:`, error.message);
+    res.status(500).json({
+      success: false,
+      error: 'KuCoin Proxy Error',
+      message: error.message
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`[PoR API] Server listening on http://localhost:${PORT}`);
   console.log(`[MG Webhook Proxy] Proxy endpoint available at http://localhost:${PORT}/api/mg-webhook/transfer`);
+  console.log(`[KuCoin Proxy] Proxy endpoint available at http://localhost:${PORT}/api/kucoin/*`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
     console.error(`❌ Error: El puerto ${PORT} ya está en uso`);
