@@ -137,6 +137,92 @@ export function TZDigitalModule() {
   // Estadísticas
   const stats = tzDigitalClient.getStats();
 
+  // Función para cargar transferencias
+  const loadTransfers = () => {
+    setTransfers(tzDigitalClient.getTransfers());
+  };
+
+  // Función para recuperar historial desde localStorage
+  const recoverTransferHistory = () => {
+    try {
+      const stored = localStorage.getItem('tz_digital_transfers');
+      if (stored) {
+        const parsedTransfers = JSON.parse(stored);
+        if (Array.isArray(parsedTransfers) && parsedTransfers.length > 0) {
+          setTransfers(parsedTransfers);
+          alert(isSpanish 
+            ? `✓ Se recuperaron ${parsedTransfers.length} transferencias del historial` 
+            : `✓ Recovered ${parsedTransfers.length} transfers from history`);
+        } else {
+          alert(isSpanish 
+            ? '⚠️ No hay transferencias almacenadas en el historial' 
+            : '⚠️ No transfers stored in history');
+        }
+      } else {
+        alert(isSpanish 
+          ? '⚠️ No se encontró historial de transferencias' 
+          : '⚠️ No transfer history found');
+      }
+    } catch (error) {
+      console.error('Error recovering history:', error);
+      alert(isSpanish 
+        ? '❌ Error al recuperar el historial' 
+        : '❌ Error recovering history');
+    }
+  };
+
+  // Función para exportar historial a JSON
+  const exportTransferHistory = () => {
+    const data = tzDigitalClient.getTransfers();
+    if (data.length === 0) {
+      alert(isSpanish 
+        ? '⚠️ No hay transferencias para exportar' 
+        : '⚠️ No transfers to export');
+      return;
+    }
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `TZ_Transfer_History_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Función para importar historial desde JSON
+  const importTransferHistory = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target?.result as string);
+        if (Array.isArray(imported)) {
+          // Guardar en localStorage
+          localStorage.setItem('tz_digital_transfers', JSON.stringify(imported));
+          setTransfers(imported);
+          alert(isSpanish 
+            ? `✓ Se importaron ${imported.length} transferencias` 
+            : `✓ Imported ${imported.length} transfers`);
+        } else {
+          alert(isSpanish 
+            ? '❌ Formato de archivo inválido' 
+            : '❌ Invalid file format');
+        }
+      } catch (error) {
+        alert(isSpanish 
+          ? '❌ Error al leer el archivo' 
+          : '❌ Error reading file');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  };
+
   // Cargar datos y auto-test
   useEffect(() => {
     const loadedConfig = tzDigitalClient.getConfig();
@@ -1789,20 +1875,54 @@ export function TZDigitalModule() {
                   <History className="w-6 h-6 text-blue-400" />
                   {isSpanish ? 'Historial de Transferencias' : 'Transfer History'}
                 </h2>
-                {transfers.length > 0 && (
+                <div className="flex items-center gap-2">
+                  {/* Botón Recuperar Historial */}
                   <button
-                    onClick={() => {
-                      if (confirm(isSpanish ? '¿Limpiar historial?' : 'Clear history?')) {
-                        tzDigitalClient.clearTransfers();
-                        setTransfers([]);
-                      }
-                    }}
-                    className="px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 flex items-center gap-2"
+                    onClick={recoverTransferHistory}
+                    className="px-4 py-2 bg-emerald-600/20 text-emerald-400 rounded-lg hover:bg-emerald-600/30 flex items-center gap-2"
+                    title={isSpanish ? 'Recuperar historial desde almacenamiento local' : 'Recover history from local storage'}
                   >
-                    <Trash2 className="w-4 h-4" />
-                    {isSpanish ? 'Limpiar' : 'Clear'}
+                    <RefreshCw className="w-4 h-4" />
+                    {isSpanish ? 'Recuperar' : 'Recover'}
                   </button>
-                )}
+                  
+                  {/* Botón Exportar */}
+                  <button
+                    onClick={exportTransferHistory}
+                    className="px-4 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 flex items-center gap-2"
+                    title={isSpanish ? 'Exportar historial a JSON' : 'Export history to JSON'}
+                  >
+                    <Download className="w-4 h-4" />
+                    {isSpanish ? 'Exportar' : 'Export'}
+                  </button>
+                  
+                  {/* Botón Importar */}
+                  <label className="px-4 py-2 bg-cyan-600/20 text-cyan-400 rounded-lg hover:bg-cyan-600/30 flex items-center gap-2 cursor-pointer">
+                    <FileText className="w-4 h-4" />
+                    {isSpanish ? 'Importar' : 'Import'}
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={importTransferHistory}
+                      className="hidden"
+                    />
+                  </label>
+                  
+                  {transfers.length > 0 && (
+                    <button
+                      onClick={() => {
+                        if (confirm(isSpanish ? '¿Limpiar historial?' : 'Clear history?')) {
+                          tzDigitalClient.clearTransfers();
+                          setTransfers([]);
+                        }
+                      }}
+                      className="px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 flex items-center gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {isSpanish ? 'Limpiar' : 'Clear'}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {transfers.length === 0 ? (
