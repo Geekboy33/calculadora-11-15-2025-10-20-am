@@ -3236,29 +3236,58 @@ export function TZDigitalModule() {
               </div>
             </div>
 
-            {/* Botón para cargar datos de ejemplo del PDF */}
-            <button
-              onClick={() => {
-                setRestoreData({
-                  receiptNumber: 'TZ-20251223-872344',
-                  reference: 'DAES-USD-1766508373325-R21PLK',
-                  date: '12/23/2025',
-                  time: '8:46:13 PM',
-                  amount: 10000,
-                  currency: 'USD',
-                  beneficiaryName: 'Direct Transfer',
-                  beneficiaryAccount: 'DIRECT',
-                  beneficiaryBank: 'TZ Digital Bank',
-                  originatorAccount: 'DAES-BK-USD-1000002',
-                  purpose: 'Treasury Transfer',
-                  note: ''
-                });
-              }}
-              className="w-full mb-4 px-4 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 flex items-center justify-center gap-2"
-            >
-              <FileText className="w-4 h-4" />
-              {isSpanish ? 'Cargar datos del PDF TZ-20251223-872344' : 'Load data from PDF TZ-20251223-872344'}
-            </button>
+            {/* Botones para cargar datos de PDFs guardados */}
+            <div className="space-y-2 mb-4">
+              <p className="text-xs text-gray-500 mb-2">{isSpanish ? 'Cargar datos de PDF guardado:' : 'Load saved PDF data:'}</p>
+              
+              {/* PDF 1: TZ-20251223-872344 - USD 10,000 */}
+              <button
+                onClick={() => {
+                  setRestoreData({
+                    receiptNumber: 'TZ-20251223-872344',
+                    reference: 'DAES-USD-1766508373325-R21PLK',
+                    date: '12/23/2025',
+                    time: '8:46:13 PM',
+                    amount: 10000,
+                    currency: 'USD',
+                    beneficiaryName: 'Direct Transfer',
+                    beneficiaryAccount: 'DIRECT',
+                    beneficiaryBank: 'TZ Digital Bank',
+                    originatorAccount: 'Trademore Value Capital FZE - ledger 1009',
+                    purpose: 'Treasury Transfer',
+                    note: ''
+                  });
+                }}
+                className="w-full px-4 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 flex items-center justify-center gap-2 text-sm"
+              >
+                <FileText className="w-4 h-4" />
+                TZ-20251223-872344 | USD 10,000.00
+              </button>
+
+              {/* PDF 2: TZ-20251223-576575 - USD 100 */}
+              <button
+                onClick={() => {
+                  setRestoreData({
+                    receiptNumber: 'TZ-20251223-576575',
+                    reference: 'DAES-USD-1766507636090-YXZQRV',
+                    date: '12/23/2025',
+                    time: '8:33:56 PM',
+                    amount: 100,
+                    currency: 'USD',
+                    beneficiaryName: 'Direct Transfer',
+                    beneficiaryAccount: 'DIRECT',
+                    beneficiaryBank: 'TZ Digital Bank',
+                    originatorAccount: 'Trademore Value Capital FZE - ledger 1009',
+                    purpose: 'Treasury Transfer',
+                    note: ''
+                  });
+                }}
+                className="w-full px-4 py-2 bg-emerald-600/20 text-emerald-400 rounded-lg hover:bg-emerald-600/30 flex items-center justify-center gap-2 text-sm"
+              >
+                <FileText className="w-4 h-4" />
+                TZ-20251223-576575 | USD 100.00
+              </button>
+            </div>
 
             <div className="flex gap-3">
               <button
