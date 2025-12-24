@@ -223,6 +223,105 @@ export function TZDigitalModule() {
     event.target.value = '';
   };
 
+  // Función para restaurar transferencia manualmente desde datos del PDF
+  const restoreTransferFromPDF = (pdfData: {
+    receiptNumber: string;
+    reference: string;
+    date: string;
+    time: string;
+    amount: number;
+    currency: string;
+    beneficiaryName: string;
+    beneficiaryAccount: string;
+    beneficiaryBank: string;
+    originatorAccount: string;
+    purpose?: string;
+    note?: string;
+  }) => {
+    // Parsear fecha y hora del PDF
+    const [month, day, year] = pdfData.date.split('/');
+    const [timePart, ampm] = pdfData.time.split(' ');
+    const [hours, minutes, seconds] = timePart.split(':');
+    let hour24 = parseInt(hours);
+    if (ampm?.toUpperCase() === 'PM' && hour24 !== 12) hour24 += 12;
+    if (ampm?.toUpperCase() === 'AM' && hour24 === 12) hour24 = 0;
+    
+    const timestamp = new Date(
+      parseInt(year), 
+      parseInt(month) - 1, 
+      parseInt(day),
+      hour24,
+      parseInt(minutes),
+      parseInt(seconds)
+    ).toISOString();
+
+    const restoredTransfer: TransferRecord = {
+      id: pdfData.receiptNumber,
+      timestamp,
+      status: 'success',
+      payload: {
+        amount: pdfData.amount,
+        currency: pdfData.currency as Currency,
+        reference: pdfData.reference,
+        beneficiary_name: pdfData.beneficiaryName,
+        beneficiary_account: pdfData.beneficiaryAccount,
+        beneficiary_bank: pdfData.beneficiaryBank,
+        purpose: pdfData.purpose || 'Treasury Transfer',
+        note: pdfData.note || '',
+      },
+      result: {
+        ok: true,
+        success: true,
+        status: 200,
+        data: {
+          transaction_id: pdfData.receiptNumber,
+          reference: pdfData.reference,
+          status: 'completed',
+          message: 'Transfer restored from PDF receipt'
+        },
+        timestamp
+      }
+    };
+
+    // Obtener transferencias actuales
+    const currentTransfers = tzDigitalClient.getTransfers();
+    
+    // Verificar si ya existe
+    const exists = currentTransfers.some(t => t.id === restoredTransfer.id || t.payload.reference === restoredTransfer.payload.reference);
+    if (exists) {
+      alert(isSpanish 
+        ? '⚠️ Esta transferencia ya existe en el historial' 
+        : '⚠️ This transfer already exists in history');
+      return;
+    }
+
+    // Agregar al principio del array
+    const updatedTransfers = [restoredTransfer, ...currentTransfers];
+    localStorage.setItem('tz_digital_transfers', JSON.stringify(updatedTransfers));
+    setTransfers(updatedTransfers);
+    
+    alert(isSpanish 
+      ? `✓ Transferencia restaurada exitosamente\nRecibo: ${pdfData.receiptNumber}\nMonto: ${pdfData.currency} ${pdfData.amount.toLocaleString()}` 
+      : `✓ Transfer restored successfully\nReceipt: ${pdfData.receiptNumber}\nAmount: ${pdfData.currency} ${pdfData.amount.toLocaleString()}`);
+  };
+
+  // Estado para modal de restauración manual
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [restoreData, setRestoreData] = useState({
+    receiptNumber: '',
+    reference: '',
+    date: '',
+    time: '',
+    amount: 0,
+    currency: 'USD' as Currency,
+    beneficiaryName: '',
+    beneficiaryAccount: '',
+    beneficiaryBank: '',
+    originatorAccount: '',
+    purpose: 'Treasury Transfer',
+    note: ''
+  });
+
   // Cargar datos y auto-test
   useEffect(() => {
     const loadedConfig = tzDigitalClient.getConfig();
@@ -1875,7 +1974,17 @@ export function TZDigitalModule() {
                   <History className="w-6 h-6 text-blue-400" />
                   {isSpanish ? 'Historial de Transferencias' : 'Transfer History'}
                 </h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Botón Restaurar desde PDF */}
+                  <button
+                    onClick={() => setShowRestoreModal(true)}
+                    className="px-4 py-2 bg-amber-600/20 text-amber-400 rounded-lg hover:bg-amber-600/30 flex items-center gap-2"
+                    title={isSpanish ? 'Restaurar transferencia desde datos del PDF' : 'Restore transfer from PDF data'}
+                  >
+                    <Receipt className="w-4 h-4" />
+                    {isSpanish ? 'Restaurar PDF' : 'Restore PDF'}
+                  </button>
+                  
                   {/* Botón Recuperar Historial */}
                   <button
                     onClick={recoverTransferHistory}
@@ -2646,6 +2755,210 @@ export function TZDigitalModule() {
               >
                 <RefreshCw className={`w-5 h-5 ${isTroubleshooting ? 'animate-spin' : ''}`} />
                 {isSpanish ? 'Volver a Diagnosticar' : 'Re-diagnose'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Restaurar Transferencia desde PDF */}
+      {showRestoreModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] border-2 border-amber-500/50 rounded-2xl p-6 max-w-2xl w-full my-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                <Receipt className="w-6 h-6 text-amber-400" />
+                {isSpanish ? 'Restaurar Transferencia desde PDF' : 'Restore Transfer from PDF'}
+              </h3>
+              <button
+                onClick={() => setShowRestoreModal(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-400 mb-6">
+              {isSpanish 
+                ? 'Ingresa los datos del recibo PDF para restaurar la transferencia al historial.' 
+                : 'Enter the PDF receipt data to restore the transfer to history.'}
+            </p>
+
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Número de Recibo' : 'Receipt Number'}</label>
+                <input
+                  type="text"
+                  value={restoreData.receiptNumber}
+                  onChange={(e) => setRestoreData({...restoreData, receiptNumber: e.target.value})}
+                  placeholder="TZ-20251223-872344"
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Referencia' : 'Reference'}</label>
+                <input
+                  type="text"
+                  value={restoreData.reference}
+                  onChange={(e) => setRestoreData({...restoreData, reference: e.target.value})}
+                  placeholder="DAES-USD-1766508373325-R21PLK"
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Fecha (MM/DD/YYYY)' : 'Date (MM/DD/YYYY)'}</label>
+                <input
+                  type="text"
+                  value={restoreData.date}
+                  onChange={(e) => setRestoreData({...restoreData, date: e.target.value})}
+                  placeholder="12/23/2025"
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Hora' : 'Time'}</label>
+                <input
+                  type="text"
+                  value={restoreData.time}
+                  onChange={(e) => setRestoreData({...restoreData, time: e.target.value})}
+                  placeholder="8:46:13 PM"
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Monto' : 'Amount'}</label>
+                <input
+                  type="number"
+                  value={restoreData.amount || ''}
+                  onChange={(e) => setRestoreData({...restoreData, amount: parseFloat(e.target.value) || 0})}
+                  placeholder="10000"
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Moneda' : 'Currency'}</label>
+                <select
+                  value={restoreData.currency}
+                  onChange={(e) => setRestoreData({...restoreData, currency: e.target.value as Currency})}
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                >
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Nombre Beneficiario' : 'Beneficiary Name'}</label>
+                <input
+                  type="text"
+                  value={restoreData.beneficiaryName}
+                  onChange={(e) => setRestoreData({...restoreData, beneficiaryName: e.target.value})}
+                  placeholder="Direct Transfer"
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Cuenta Beneficiario' : 'Beneficiary Account'}</label>
+                <input
+                  type="text"
+                  value={restoreData.beneficiaryAccount}
+                  onChange={(e) => setRestoreData({...restoreData, beneficiaryAccount: e.target.value})}
+                  placeholder="DIRECT"
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Banco Beneficiario' : 'Beneficiary Bank'}</label>
+                <input
+                  type="text"
+                  value={restoreData.beneficiaryBank}
+                  onChange={(e) => setRestoreData({...restoreData, beneficiaryBank: e.target.value})}
+                  placeholder="TZ Digital Bank"
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Cuenta Ordenante' : 'Originator Account'}</label>
+                <input
+                  type="text"
+                  value={restoreData.originatorAccount}
+                  onChange={(e) => setRestoreData({...restoreData, originatorAccount: e.target.value})}
+                  placeholder="DAES-BK-USD-1000002"
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="text-sm text-gray-400 mb-1 block">{isSpanish ? 'Propósito' : 'Purpose'}</label>
+                <input
+                  type="text"
+                  value={restoreData.purpose}
+                  onChange={(e) => setRestoreData({...restoreData, purpose: e.target.value})}
+                  placeholder="Treasury Transfer"
+                  className="w-full px-3 py-2 bg-black/50 border border-gray-700 rounded-lg text-white"
+                />
+              </div>
+            </div>
+
+            {/* Botón para cargar datos de ejemplo del PDF */}
+            <button
+              onClick={() => {
+                setRestoreData({
+                  receiptNumber: 'TZ-20251223-872344',
+                  reference: 'DAES-USD-1766508373325-R21PLK',
+                  date: '12/23/2025',
+                  time: '8:46:13 PM',
+                  amount: 10000,
+                  currency: 'USD',
+                  beneficiaryName: 'Direct Transfer',
+                  beneficiaryAccount: 'DIRECT',
+                  beneficiaryBank: 'TZ Digital Bank',
+                  originatorAccount: 'DAES-BK-USD-1000002',
+                  purpose: 'Treasury Transfer',
+                  note: ''
+                });
+              }}
+              className="w-full mb-4 px-4 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 flex items-center justify-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              {isSpanish ? 'Cargar datos del PDF TZ-20251223-872344' : 'Load data from PDF TZ-20251223-872344'}
+            </button>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowRestoreModal(false)}
+                className="flex-1 px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={() => {
+                  if (!restoreData.receiptNumber || !restoreData.reference || !restoreData.amount) {
+                    alert(isSpanish 
+                      ? '❌ Completa los campos requeridos (Recibo, Referencia, Monto)' 
+                      : '❌ Fill required fields (Receipt, Reference, Amount)');
+                    return;
+                  }
+                  restoreTransferFromPDF(restoreData);
+                  setShowRestoreModal(false);
+                  // Limpiar formulario
+                  setRestoreData({
+                    receiptNumber: '',
+                    reference: '',
+                    date: '',
+                    time: '',
+                    amount: 0,
+                    currency: 'USD',
+                    beneficiaryName: '',
+                    beneficiaryAccount: '',
+                    beneficiaryBank: '',
+                    originatorAccount: '',
+                    purpose: 'Treasury Transfer',
+                    note: ''
+                  });
+                }}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-lg hover:from-amber-400 hover:to-yellow-400 font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle className="w-5 h-5" />
+                {isSpanish ? 'Restaurar Transferencia' : 'Restore Transfer'}
               </button>
             </div>
           </div>
