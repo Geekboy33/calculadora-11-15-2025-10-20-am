@@ -52,7 +52,113 @@ export default function KuCoinModule() {
   const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
   const [selectedCustodyAccount, setSelectedCustodyAccount] = useState<string>('');
   const [useCustodyFunds, setUseCustodyFunds] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [depositFromAccount, setDepositFromAccount] = useState('');
   const eventsContainerRef = useRef<HTMLDivElement>(null);
+
+  // Función para depositar USD desde Custody a KuCoin
+  const handleDepositToKuCoin = () => {
+    if (!depositFromAccount || !depositAmount) {
+      alert(isSpanish ? '❌ Selecciona cuenta y monto' : '❌ Select account and amount');
+      return;
+    }
+
+    const amount = parseFloat(depositAmount);
+    if (isNaN(amount) || amount <= 0) {
+      alert(isSpanish ? '❌ Monto inválido' : '❌ Invalid amount');
+      return;
+    }
+
+    const custodyAccount = custodyAccounts.find(a => a.id === depositFromAccount);
+    if (!custodyAccount) {
+      alert(isSpanish ? '❌ Cuenta no encontrada' : '❌ Account not found');
+      return;
+    }
+
+    if (custodyAccount.availableBalance < amount) {
+      alert(isSpanish 
+        ? `❌ Fondos insuficientes. Disponible: $${custodyAccount.availableBalance.toLocaleString()}` 
+        : `❌ Insufficient funds. Available: $${custodyAccount.availableBalance.toLocaleString()}`);
+      return;
+    }
+
+    // Confirmar
+    const confirmed = confirm(isSpanish
+      ? `¿Depositar $${amount.toLocaleString()} USD desde "${custodyAccount.accountName}" a KuCoin?`
+      : `Deposit $${amount.toLocaleString()} USD from "${custodyAccount.accountName}" to KuCoin?`
+    );
+
+    if (!confirmed) return;
+
+    // 1. Descontar de Custody Account
+    custodyStore.withdrawFundsWithTransaction(custodyAccount.id, {
+      amount: amount,
+      description: `KuCoin Deposit | Transfer to KuCoin Main Account`,
+      destinationAccount: 'KuCoin Main Account',
+      destinationBank: 'KuCoin Exchange',
+      transactionDate: new Date().toISOString().split('T')[0],
+      transactionTime: new Date().toTimeString().split(' ')[0]
+    });
+
+    // 2. Actualizar balance de KuCoin (agregar a USD Main)
+    setAccounts(prevAccounts => {
+      const newAccounts = [...prevAccounts];
+      const usdMainIndex = newAccounts.findIndex(a => a.currency === 'USD' && a.type === 'main');
+      
+      if (usdMainIndex >= 0) {
+        // Actualizar existente
+        const currentBalance = parseFloat(newAccounts[usdMainIndex].available) || 0;
+        const currentTotal = parseFloat(newAccounts[usdMainIndex].balance) || 0;
+        newAccounts[usdMainIndex] = {
+          ...newAccounts[usdMainIndex],
+          available: (currentBalance + amount).toFixed(2),
+          balance: (currentTotal + amount).toFixed(2)
+        };
+      } else {
+        // Crear nueva cuenta USD Main
+        newAccounts.push({
+          id: `main-usd-${Date.now()}`,
+          currency: 'USD',
+          type: 'main',
+          balance: amount.toFixed(2),
+          available: amount.toFixed(2),
+          holds: '0'
+        });
+      }
+      
+      return newAccounts;
+    });
+
+    // 3. Agregar evento al log
+    kucoinClient.addEvent({
+      type: 'balance',
+      status: 'success',
+      data: { 
+        currency: 'USD', 
+        available: amount.toFixed(2),
+        availableChange: `+${amount.toFixed(2)}`,
+        source: custodyAccount.accountName
+      },
+      message: `💰 Depósito USD: +$${amount.toLocaleString()} desde ${custodyAccount.accountName}`,
+    });
+
+    // 4. Actualizar lista de custody accounts
+    setCustodyAccounts(custodyStore.getAccounts());
+
+    // 5. Cerrar modal y limpiar
+    setShowDepositModal(false);
+    setDepositAmount('');
+    setDepositFromAccount('');
+
+    // 6. Actualizar eventos
+    setEvents(kucoinClient.getEvents());
+
+    alert(isSpanish
+      ? `✓ Depósito exitoso!\n$${amount.toLocaleString()} USD enviado a KuCoin Main Account`
+      : `✓ Deposit successful!\n$${amount.toLocaleString()} USD sent to KuCoin Main Account`
+    );
+  };
 
   // Formulario de configuración
   const [tempConfig, setTempConfig] = useState({
@@ -1561,22 +1667,19 @@ export default function KuCoinModule() {
                 </div>
               </div>
 
-              {/* Botón para cargar USD desde Custody */}
+              {/* Botón para depositar USD desde Custody a KuCoin */}
               {custodyAccounts.filter(a => a.currency === 'USD' && a.availableBalance > 0).length > 0 && (
                 <button
-                  onClick={() => {
-                    setUseCustodyFunds(true);
-                    setActiveTab('convert');
-                  }}
-                  className="w-full py-2 bg-gradient-to-r from-purple-600/50 to-indigo-600/50 border border-purple-500/30 text-white rounded-lg text-xs font-semibold hover:from-purple-600 hover:to-indigo-600 transition-all flex items-center justify-center gap-2"
+                  onClick={() => setShowDepositModal(true)}
+                  className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 border border-green-500/50 text-white rounded-lg text-sm font-bold hover:from-green-500 hover:to-emerald-500 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
                 >
-                  <Database className="w-4 h-4" />
-                  {isSpanish ? 'Cargar USD desde Custody' : 'Load USD from Custody'}
-                  <span className="text-purple-300">
-                    (${custodyAccounts
+                  <Send className="w-5 h-5" />
+                  {isSpanish ? '💵 Depositar USD a KuCoin' : '💵 Deposit USD to KuCoin'}
+                  <span className="bg-black/30 px-2 py-0.5 rounded-full text-xs">
+                    ${custodyAccounts
                       .filter(a => a.currency === 'USD')
                       .reduce((sum, a) => sum + a.availableBalance, 0)
-                      .toLocaleString()})
+                      .toLocaleString()} {isSpanish ? 'disponible' : 'available'}
                   </span>
                 </button>
               )}
@@ -1636,6 +1739,164 @@ export default function KuCoinModule() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Depósito USD a KuCoin */}
+      {showDepositModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d] border border-green-500/30 rounded-2xl p-6 max-w-md w-full">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                  <Send className="w-5 h-5 text-white" />
+                </div>
+                {isSpanish ? 'Depositar USD a KuCoin' : 'Deposit USD to KuCoin'}
+              </h3>
+              <button
+                onClick={() => setShowDepositModal(false)}
+                className="text-gray-500 hover:text-white text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Flujo visual */}
+            <div className="bg-black/30 rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex flex-col items-center">
+                  <Database className="w-8 h-8 text-purple-400 mb-1" />
+                  <span className="text-gray-400">Custody</span>
+                </div>
+                <div className="flex-1 mx-3 border-t-2 border-dashed border-green-500/50 relative">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    USD
+                  </span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <Coins className="w-8 h-8 text-green-400 mb-1" />
+                  <span className="text-gray-400">KuCoin</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Seleccionar cuenta origen */}
+            <div className="mb-4">
+              <label className="text-sm text-gray-400 mb-2 block">
+                {isSpanish ? 'Cuenta Origen (Custody USD)' : 'Source Account (Custody USD)'}
+              </label>
+              <select
+                value={depositFromAccount}
+                onChange={(e) => {
+                  setDepositFromAccount(e.target.value);
+                  // Auto-fill amount
+                  if (e.target.value) {
+                    const account = custodyAccounts.find(a => a.id === e.target.value);
+                    if (account) {
+                      setDepositAmount(account.availableBalance.toString());
+                    }
+                  }
+                }}
+                className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white focus:border-green-500 outline-none"
+              >
+                <option value="">{isSpanish ? '-- Seleccionar Cuenta --' : '-- Select Account --'}</option>
+                {custodyAccounts
+                  .filter(a => a.currency === 'USD' && a.availableBalance > 0)
+                  .map(account => (
+                    <option key={account.id} value={account.id}>
+                      {account.accountName} | ${account.availableBalance.toLocaleString()}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {/* Cuenta seleccionada info */}
+            {depositFromAccount && (() => {
+              const account = custodyAccounts.find(a => a.id === depositFromAccount);
+              if (!account) return null;
+              return (
+                <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 mb-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">{isSpanish ? 'Disponible' : 'Available'}</span>
+                    <span className="text-lg font-bold text-purple-400">${account.availableBalance.toLocaleString()}</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">{account.accountNumber}</div>
+                </div>
+              );
+            })()}
+
+            {/* Monto a depositar */}
+            <div className="mb-4">
+              <label className="text-sm text-gray-400 mb-2 block">
+                {isSpanish ? 'Monto USD a Depositar' : 'USD Amount to Deposit'}
+              </label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="number"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  className="w-full pl-10 pr-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white text-xl font-bold focus:border-green-500 outline-none"
+                />
+              </div>
+              
+              {/* Botones de cantidad rápida */}
+              {depositFromAccount && (
+                <div className="flex gap-2 mt-2">
+                  {[25, 50, 75, 100].map(pct => {
+                    const account = custodyAccounts.find(a => a.id === depositFromAccount);
+                    if (!account) return null;
+                    const amount = (account.availableBalance * pct / 100).toFixed(2);
+                    return (
+                      <button
+                        key={pct}
+                        onClick={() => setDepositAmount(amount)}
+                        className="flex-1 py-1 bg-gray-700 text-gray-300 text-xs rounded hover:bg-gray-600"
+                      >
+                        {pct}%
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Destino */}
+            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Coins className="w-5 h-5 text-green-400" />
+                <span className="text-sm font-semibold text-green-400">
+                  {isSpanish ? 'Destino: KuCoin Main Account (USD)' : 'Destination: KuCoin Main Account (USD)'}
+                </span>
+              </div>
+              <div className="text-xs text-gray-400">
+                {isSpanish 
+                  ? 'Los fondos estarán disponibles para conversión USD → USDT' 
+                  : 'Funds will be available for USD → USDT conversion'}
+              </div>
+            </div>
+
+            {/* Botones */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDepositModal(false)}
+                className="flex-1 py-3 bg-gray-700 text-white rounded-xl font-bold hover:bg-gray-600"
+              >
+                {isSpanish ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleDepositToKuCoin}
+                disabled={!depositFromAccount || !depositAmount || parseFloat(depositAmount) <= 0}
+                className="flex-1 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold hover:from-green-500 hover:to-emerald-500 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <Send className="w-5 h-5" />
+                {isSpanish ? 'Depositar' : 'Deposit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
