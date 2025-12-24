@@ -30,6 +30,7 @@ import {
   REST_ENDPOINTS,
   EnvironmentType
 } from '../lib/kucoin-api';
+import { custodyStore, CustodyAccount } from '../lib/custody-store';
 import jsPDF from 'jspdf';
 
 export default function KuCoinModule() {
@@ -37,7 +38,7 @@ export default function KuCoinModule() {
   const isSpanish = language === 'es';
 
   // Estados
-  const [activeTab, setActiveTab] = useState<'convert' | 'websocket' | 'history' | 'config' | 'docs'>('convert');
+  const [activeTab, setActiveTab] = useState<'convert' | 'custody' | 'websocket' | 'history' | 'config' | 'docs'>('convert');
   const [config, setConfig] = useState<KuCoinConfig>(kucoinClient.getConfig());
   const [flows, setFlows] = useState<FiatToUSDTFlow[]>(kucoinClient.getFlows());
   const [events, setEvents] = useState<FlowOperation[]>(kucoinClient.getEvents());
@@ -48,6 +49,9 @@ export default function KuCoinModule() {
   const [accounts, setAccounts] = useState<KuCoinAccount[]>([]);
   const [currentOperations, setCurrentOperations] = useState<FlowOperation[]>([]);
   const [autoConversionEnabled, setAutoConversionEnabled] = useState(false);
+  const [custodyAccounts, setCustodyAccounts] = useState<CustodyAccount[]>([]);
+  const [selectedCustodyAccount, setSelectedCustodyAccount] = useState<string>('');
+  const [useCustodyFunds, setUseCustodyFunds] = useState(false);
   const eventsContainerRef = useRef<HTMLDivElement>(null);
 
   // Formulario de configuración
@@ -84,6 +88,18 @@ export default function KuCoinModule() {
       environment: loadedConfig.environment || 'production',
     });
 
+    // Cargar cuentas custodio
+    const loadCustodyAccounts = () => {
+      const accounts = custodyStore.getAccounts();
+      setCustodyAccounts(accounts);
+    };
+    loadCustodyAccounts();
+
+    // Suscribirse a cambios en custody accounts
+    const unsubscribeCustody = custodyStore.subscribe((accounts) => {
+      setCustodyAccounts(accounts);
+    });
+
     // Event listeners
     const handleEvent = (event: FlowOperation) => {
       setEvents(kucoinClient.getEvents());
@@ -112,6 +128,7 @@ export default function KuCoinModule() {
     }
 
     return () => {
+      unsubscribeCustody();
       kucoinClient.off('event', handleEvent);
       kucoinClient.off('ws:connected', handleWsConnected);
       kucoinClient.off('ws:disconnected', handleWsDisconnected);
@@ -259,9 +276,30 @@ export default function KuCoinModule() {
       return;
     }
 
+    // Validar cuenta custodio si está seleccionada
+    let custodyAccount: CustodyAccount | null = null;
+    if (useCustodyFunds && selectedCustodyAccount) {
+      custodyAccount = custodyAccounts.find(a => a.id === selectedCustodyAccount) || null;
+      if (!custodyAccount) {
+        alert(isSpanish ? '❌ Cuenta custodio no encontrada' : '❌ Custody account not found');
+        return;
+      }
+      const amount = parseFloat(convertForm.usdAmount);
+      if (custodyAccount.availableBalance < amount) {
+        alert(isSpanish 
+          ? `❌ Fondos insuficientes en cuenta custodio. Disponible: ${custodyAccount.currency} ${custodyAccount.availableBalance.toLocaleString()}` 
+          : `❌ Insufficient funds in custody account. Available: ${custodyAccount.currency} ${custodyAccount.availableBalance.toLocaleString()}`);
+        return;
+      }
+    }
+
+    const sourceInfo = useCustodyFunds && custodyAccount 
+      ? `\n${isSpanish ? 'Cuenta Origen' : 'Source Account'}: ${custodyAccount.accountName}`
+      : '';
+
     const confirmed = confirm(isSpanish
-      ? `¿Confirmar conversión de ${convertForm.usdAmount} USD a USDT y envío a ${convertForm.destAddress.slice(0, 15)}...?`
-      : `Confirm conversion of ${convertForm.usdAmount} USD to USDT and send to ${convertForm.destAddress.slice(0, 15)}...?`
+      ? `¿Confirmar conversión de ${convertForm.usdAmount} USD a USDT y envío a ${convertForm.destAddress.slice(0, 15)}...?${sourceInfo}`
+      : `Confirm conversion of ${convertForm.usdAmount} USD to USDT and send to ${convertForm.destAddress.slice(0, 15)}...?${sourceInfo}`
     );
 
     if (!confirmed) return;
@@ -270,6 +308,24 @@ export default function KuCoinModule() {
     setCurrentOperations([]);
 
     try {
+      // Si usamos fondos de cuenta custodio, registrar el retiro
+      if (useCustodyFunds && custodyAccount) {
+        const amount = parseFloat(convertForm.usdAmount);
+        
+        // Registrar retiro en la cuenta custodio
+        custodyStore.withdrawFundsWithTransaction(custodyAccount.id, {
+          amount: amount,
+          description: `KuCoin USD→USDT Conversion | Dest: ${convertForm.destAddress.slice(0, 20)}... | Network: ${convertForm.network}`,
+          destinationAccount: convertForm.destAddress,
+          destinationBank: 'KuCoin Exchange',
+          transactionDate: new Date().toISOString().split('T')[0],
+          transactionTime: new Date().toTimeString().split(' ')[0]
+        });
+
+        // Actualizar lista de cuentas
+        setCustodyAccounts(custodyStore.getAccounts());
+      }
+
       const flow = await kucoinClient.executeFiatToUSDTFlow(
         convertForm.usdAmount,
         convertForm.destAddress,
@@ -282,9 +338,13 @@ export default function KuCoinModule() {
       setFlows(kucoinClient.getFlows());
 
       if (flow.status === 'completed') {
+        const custodyInfo = useCustodyFunds && custodyAccount 
+          ? `\n${isSpanish ? 'Descontado de' : 'Deducted from'}: ${custodyAccount.accountName}`
+          : '';
+        
         alert(isSpanish
-          ? `✓ ¡Conversión completada!\nUSDT enviado: ${flow.usdtReceived}\nID de retiro: ${flow.withdrawalId}`
-          : `✓ Conversion completed!\nUSDT sent: ${flow.usdtReceived}\nWithdrawal ID: ${flow.withdrawalId}`
+          ? `✓ ¡Conversión completada!\nUSDT enviado: ${flow.usdtReceived}\nID de retiro: ${flow.withdrawalId}${custodyInfo}`
+          : `✓ Conversion completed!\nUSDT sent: ${flow.usdtReceived}\nWithdrawal ID: ${flow.withdrawalId}${custodyInfo}`
         );
         setConvertForm({
           usdAmount: '',
@@ -491,6 +551,7 @@ export default function KuCoinModule() {
         <div className="flex gap-2 mb-6 flex-wrap">
           {[
             { id: 'convert', icon: ArrowRightLeft, label: isSpanish ? 'Convertir' : 'Convert' },
+            { id: 'custody', icon: Database, label: isSpanish ? 'Cuentas Custodio' : 'Custody Accounts', count: custodyAccounts.length },
             { id: 'websocket', icon: Radio, label: 'WebSocket' },
             { id: 'history', icon: History, label: isSpanish ? 'Historial' : 'History', count: flows.length },
             { id: 'config', icon: Settings, label: isSpanish ? 'Config' : 'Settings', alert: !config.isConfigured },
@@ -541,6 +602,141 @@ export default function KuCoinModule() {
                   </div>
                 )}
 
+                {/* Fuente de Fondos - Custody Accounts */}
+                <div className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 border border-purple-500/30 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold text-purple-400 flex items-center gap-2">
+                      <Database className="w-4 h-4" />
+                      {isSpanish ? 'Fuente de Fondos' : 'Funds Source'}
+                    </h3>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={useCustodyFunds}
+                        onChange={(e) => {
+                          setUseCustodyFunds(e.target.checked);
+                          if (!e.target.checked) {
+                            setSelectedCustodyAccount('');
+                          }
+                        }}
+                        className="w-4 h-4 accent-purple-500"
+                      />
+                      <span className="text-sm text-gray-300">
+                        {isSpanish ? 'Usar Cuenta Custodio' : 'Use Custody Account'}
+                      </span>
+                    </label>
+                  </div>
+
+                  {useCustodyFunds && (
+                    <div className="space-y-3">
+                      {custodyAccounts.length === 0 ? (
+                        <div className="text-center py-4 text-gray-500">
+                          <Database className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                          <p className="text-sm">{isSpanish ? 'No hay cuentas custodio creadas' : 'No custody accounts created'}</p>
+                          <p className="text-xs text-gray-600">{isSpanish ? 'Crea una cuenta en el módulo Custody Accounts' : 'Create an account in Custody Accounts module'}</p>
+                        </div>
+                      ) : (
+                        <>
+                          <select
+                            value={selectedCustodyAccount}
+                            onChange={(e) => {
+                              setSelectedCustodyAccount(e.target.value);
+                              // Auto-fill amount from selected account
+                              if (e.target.value) {
+                                const account = custodyAccounts.find(a => a.id === e.target.value);
+                                if (account) {
+                                  setConvertForm({
+                                    ...convertForm,
+                                    usdAmount: account.availableBalance.toString()
+                                  });
+                                }
+                              }
+                            }}
+                            className="w-full px-4 py-3 bg-black/50 border border-purple-500/30 rounded-lg text-white focus:border-purple-500 outline-none"
+                          >
+                            <option value="">{isSpanish ? '-- Seleccionar Cuenta Custodio --' : '-- Select Custody Account --'}</option>
+                            {custodyAccounts.filter(a => a.availableBalance > 0).map(account => (
+                              <option key={account.id} value={account.id}>
+                                {account.accountName} | {account.currency} {account.availableBalance.toLocaleString()} | {account.accountCategory}
+                              </option>
+                            ))}
+                          </select>
+
+                          {/* Cuenta Seleccionada - Detalles */}
+                          {selectedCustodyAccount && (
+                            <div className="bg-black/30 rounded-lg p-3 space-y-2">
+                              {(() => {
+                                const account = custodyAccounts.find(a => a.id === selectedCustodyAccount);
+                                if (!account) return null;
+                                return (
+                                  <>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-xs text-gray-400">{isSpanish ? 'Nombre' : 'Name'}</span>
+                                      <span className="text-sm font-semibold text-white">{account.accountName}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-xs text-gray-400">{isSpanish ? 'Número' : 'Number'}</span>
+                                      <span className="text-xs font-mono text-gray-300">{account.accountNumber}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-xs text-gray-400">{isSpanish ? 'Tipo' : 'Type'}</span>
+                                      <span className="text-xs text-purple-400 uppercase">{account.accountCategory}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-xs text-gray-400">{isSpanish ? 'Divisa' : 'Currency'}</span>
+                                      <span className="text-sm font-semibold text-blue-400">{account.currency}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center border-t border-gray-700 pt-2 mt-2">
+                                      <span className="text-xs text-gray-400">{isSpanish ? 'Balance Disponible' : 'Available Balance'}</span>
+                                      <span className="text-lg font-bold text-green-400">
+                                        {account.currency === 'USD' ? '$' : ''}{account.availableBalance.toLocaleString()}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-xs text-gray-400">{isSpanish ? 'Balance Reservado' : 'Reserved Balance'}</span>
+                                      <span className="text-sm text-yellow-400">{account.reservedBalance.toLocaleString()}</span>
+                                    </div>
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          )}
+
+                          {/* Lista de cuentas USD disponibles */}
+                          <div className="mt-3">
+                            <p className="text-xs text-gray-500 mb-2">{isSpanish ? 'Cuentas USD disponibles:' : 'Available USD accounts:'}</p>
+                            <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                              {custodyAccounts
+                                .filter(a => a.currency === 'USD' && a.availableBalance > 0)
+                                .slice(0, 6)
+                                .map(account => (
+                                  <button
+                                    key={account.id}
+                                    onClick={() => {
+                                      setSelectedCustodyAccount(account.id);
+                                      setConvertForm({
+                                        ...convertForm,
+                                        usdAmount: account.availableBalance.toString()
+                                      });
+                                    }}
+                                    className={`p-2 rounded-lg text-left text-xs transition-all ${
+                                      selectedCustodyAccount === account.id
+                                        ? 'bg-purple-500/30 border border-purple-500'
+                                        : 'bg-black/30 border border-gray-700 hover:border-purple-500/50'
+                                    }`}
+                                  >
+                                    <div className="font-semibold text-white truncate">{account.accountName}</div>
+                                    <div className="text-green-400">${account.availableBalance.toLocaleString()}</div>
+                                  </button>
+                                ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 {/* Flujo Visual */}
                 <div className="bg-black/30 rounded-xl p-6">
                   <h3 className="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">
@@ -548,7 +744,7 @@ export default function KuCoinModule() {
                   </h3>
                   <div className="flex items-center justify-between">
                     {[
-                      { icon: DollarSign, label: 'USD (Main)', color: 'green' },
+                      { icon: useCustodyFunds ? Database : DollarSign, label: useCustodyFunds ? 'Custody' : 'USD (Main)', color: useCustodyFunds ? 'purple' : 'green' },
                       { icon: ArrowRightLeft, label: 'Trade', color: 'blue' },
                       { icon: Coins, label: 'Buy USDT', color: 'yellow' },
                       { icon: Wallet, label: 'Main', color: 'purple' },
@@ -656,6 +852,161 @@ export default function KuCoinModule() {
                     </>
                   )}
                 </button>
+              </div>
+            )}
+
+            {/* Custody Accounts Tab */}
+            {activeTab === 'custody' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <Database className="w-6 h-6 text-purple-400" />
+                    <h2 className="text-xl font-bold">{isSpanish ? 'Cuentas Custodio Disponibles' : 'Available Custody Accounts'}</h2>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                    <span>{custodyAccounts.length} {isSpanish ? 'cuentas' : 'accounts'}</span>
+                    <button
+                      onClick={() => setCustodyAccounts(custodyStore.getAccounts())}
+                      className="p-2 hover:bg-gray-700 rounded-lg"
+                      title={isSpanish ? 'Actualizar' : 'Refresh'}
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Resumen de fondos */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 text-center">
+                    <div className="text-2xl font-bold text-green-400">
+                      ${custodyAccounts
+                        .filter(a => a.currency === 'USD')
+                        .reduce((sum, a) => sum + a.availableBalance, 0)
+                        .toLocaleString()}
+                    </div>
+                    <div className="text-xs text-gray-400">USD {isSpanish ? 'Disponible' : 'Available'}</div>
+                  </div>
+                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-center">
+                    <div className="text-2xl font-bold text-blue-400">
+                      €{custodyAccounts
+                        .filter(a => a.currency === 'EUR')
+                        .reduce((sum, a) => sum + a.availableBalance, 0)
+                        .toLocaleString()}
+                    </div>
+                    <div className="text-xs text-gray-400">EUR {isSpanish ? 'Disponible' : 'Available'}</div>
+                  </div>
+                  <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 text-center">
+                    <div className="text-2xl font-bold text-purple-400">
+                      {custodyAccounts.filter(a => a.availableBalance > 0).length}
+                    </div>
+                    <div className="text-xs text-gray-400">{isSpanish ? 'Cuentas con Fondos' : 'Funded Accounts'}</div>
+                  </div>
+                </div>
+
+                {/* Lista de cuentas */}
+                {custodyAccounts.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <Database className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                    <p className="text-lg">{isSpanish ? 'No hay cuentas custodio' : 'No custody accounts'}</p>
+                    <p className="text-sm mt-2">{isSpanish ? 'Crea cuentas en el módulo Custody Accounts' : 'Create accounts in Custody Accounts module'}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                    {custodyAccounts.map(account => (
+                      <div
+                        key={account.id}
+                        className={`border rounded-xl p-4 transition-all cursor-pointer hover:border-purple-500/50 ${
+                          selectedCustodyAccount === account.id 
+                            ? 'border-purple-500 bg-purple-500/10' 
+                            : 'border-gray-700 bg-black/20'
+                        }`}
+                        onClick={() => {
+                          setSelectedCustodyAccount(account.id);
+                          setUseCustodyFunds(true);
+                          setConvertForm({
+                            ...convertForm,
+                            usdAmount: account.availableBalance.toString()
+                          });
+                          setActiveTab('convert');
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              account.currency === 'USD' ? 'bg-green-500/20' :
+                              account.currency === 'EUR' ? 'bg-blue-500/20' :
+                              'bg-gray-500/20'
+                            }`}>
+                              <DollarSign className={`w-5 h-5 ${
+                                account.currency === 'USD' ? 'text-green-400' :
+                                account.currency === 'EUR' ? 'text-blue-400' :
+                                'text-gray-400'
+                              }`} />
+                            </div>
+                            <div>
+                              <div className="font-semibold text-white">{account.accountName}</div>
+                              <div className="text-xs text-gray-500 font-mono">{account.accountNumber}</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className={`text-lg font-bold ${
+                              account.availableBalance > 0 ? 'text-green-400' : 'text-gray-500'
+                            }`}>
+                              {account.currency} {account.availableBalance.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-gray-500 uppercase">{account.accountCategory}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Detalles adicionales */}
+                        <div className="mt-3 pt-3 border-t border-gray-700/50 grid grid-cols-4 gap-2 text-xs">
+                          <div>
+                            <span className="text-gray-500">{isSpanish ? 'Reservado' : 'Reserved'}</span>
+                            <div className="text-yellow-400">{account.reservedBalance.toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">{isSpanish ? 'Tipo' : 'Type'}</span>
+                            <div className="text-purple-400 uppercase">{account.accountType}</div>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Bank</span>
+                            <div className="text-gray-300 truncate">{account.bankName || 'DCB'}</div>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">{isSpanish ? 'Transacciones' : 'Transactions'}</span>
+                            <div className="text-gray-300">{account.transactions?.length || 0}</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Acciones rápidas */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      // Seleccionar la cuenta USD con mayor balance
+                      const usdAccounts = custodyAccounts.filter(a => a.currency === 'USD' && a.availableBalance > 0);
+                      if (usdAccounts.length > 0) {
+                        const maxAccount = usdAccounts.reduce((max, a) => a.availableBalance > max.availableBalance ? a : max);
+                        setSelectedCustodyAccount(maxAccount.id);
+                        setUseCustodyFunds(true);
+                        setConvertForm({
+                          ...convertForm,
+                          usdAmount: maxAccount.availableBalance.toString()
+                        });
+                        setActiveTab('convert');
+                      } else {
+                        alert(isSpanish ? '❌ No hay cuentas USD con fondos' : '❌ No USD accounts with funds');
+                      }
+                    }}
+                    className="flex-1 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold flex items-center justify-center gap-2"
+                  >
+                    <Zap className="w-5 h-5" />
+                    {isSpanish ? 'Convertir Mayor Balance USD' : 'Convert Highest USD Balance'}
+                  </button>
+                </div>
               </div>
             )}
 
