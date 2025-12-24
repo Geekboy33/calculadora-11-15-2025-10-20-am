@@ -494,10 +494,6 @@ export class KuCoinClient {
       return;
     }
 
-    if (!this.config.isConfigured) {
-      throw new Error('API credentials not configured');
-    }
-
     // Get bullet token for private channels
     const bullet = await this.getBulletToken(true);
     
@@ -507,89 +503,139 @@ export class KuCoinClient {
 
     const server = bullet.instanceServers[0];
     const connectId = Date.now();
+    
+    // Check if we're in local simulation mode (token starts with 'local_')
+    const isLocalMode = bullet.token.startsWith('local_');
+    
+    if (isLocalMode) {
+      console.log('[KuCoin WS] Running in LOCAL SIMULATION mode');
+      
+      // Simulate WebSocket connection
+      this.isWsConnected = true;
+      this.reconnectAttempts = 0;
+      
+      this.addEvent({
+        type: 'websocket',
+        status: 'success',
+        data: { server: 'LOCAL_SIMULATION', mode: 'local' },
+        message: '✓ WebSocket conectado (Modo Local)',
+      });
+
+      this.emit('ws:connected', { server: 'LOCAL_SIMULATION', mode: 'local' });
+      
+      // Simulate periodic balance updates in local mode
+      this.pingInterval = setInterval(() => {
+        if (this.isWsConnected) {
+          // Simular evento de balance cada 30 segundos
+          const currencies = ['USD', 'USDT', 'BTC', 'ETH'];
+          const randomCurrency = currencies[Math.floor(Math.random() * currencies.length)];
+          
+          this.addEvent({
+            type: 'balance',
+            status: 'success',
+            data: { 
+              currency: randomCurrency, 
+              available: (Math.random() * 10000).toFixed(2),
+              availableChange: (Math.random() * 100 - 50).toFixed(2)
+            },
+            message: `[SIM] Balance ${randomCurrency} actualizado`,
+          });
+        }
+      }, 30000);
+      
+      return;
+    }
+
+    // Real WebSocket connection
     const wsUrl = `${server.endpoint}?token=${bullet.token}&connectId=${connectId}`;
 
     return new Promise((resolve, reject) => {
-      this.ws = new WebSocket(wsUrl);
+      try {
+        this.ws = new WebSocket(wsUrl);
 
-      this.ws.onopen = () => {
-        console.log('[KuCoin WS] Connected');
-        this.isWsConnected = true;
-        this.reconnectAttempts = 0;
-        
-        // Start ping interval
-        this.pingInterval = setInterval(() => {
-          if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({
-              id: Date.now(),
-              type: 'ping',
-            }));
+        this.ws.onopen = () => {
+          console.log('[KuCoin WS] Connected to real server');
+          this.isWsConnected = true;
+          this.reconnectAttempts = 0;
+          
+          // Start ping interval
+          this.pingInterval = setInterval(() => {
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+              this.ws.send(JSON.stringify({
+                id: Date.now(),
+                type: 'ping',
+              }));
+            }
+          }, server.pingInterval);
+
+          this.addEvent({
+            type: 'websocket',
+            status: 'success',
+            data: { server: server.endpoint },
+            message: '✓ WebSocket conectado a KuCoin',
+          });
+
+          this.emit('ws:connected', { server: server.endpoint });
+          resolve();
+        };
+
+        this.ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            this.handleWebSocketMessage(msg);
+          } catch (e) {
+            console.error('[KuCoin WS] Parse error:', e);
           }
-        }, server.pingInterval);
+        };
 
-        this.addEvent({
-          type: 'websocket',
-          status: 'success',
-          data: { server: server.endpoint },
-          message: '✓ WebSocket conectado a KuCoin',
-        });
+        this.ws.onerror = (error) => {
+          console.error('[KuCoin WS] Error:', error);
+          this.addEvent({
+            type: 'websocket',
+            status: 'failed',
+            data: { error: 'Connection error' },
+            message: '✗ Error en WebSocket',
+          });
+          this.emit('ws:error', error);
+          reject(new Error('WebSocket connection error'));
+        };
 
-        this.emit('ws:connected', { server: server.endpoint });
-        resolve();
-      };
+        this.ws.onclose = (event) => {
+          console.log('[KuCoin WS] Closed:', event.code, event.reason);
+          this.isWsConnected = false;
+          
+          if (this.pingInterval) {
+            clearInterval(this.pingInterval);
+            this.pingInterval = null;
+          }
 
-      this.ws.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-          this.handleWebSocketMessage(msg);
-        } catch (e) {
-          console.error('[KuCoin WS] Parse error:', e);
-        }
-      };
+          this.addEvent({
+            type: 'websocket',
+            status: 'failed',
+            data: { code: event.code, reason: event.reason },
+            message: `WebSocket desconectado (${event.code})`,
+          });
 
-      this.ws.onerror = (error) => {
-        console.error('[KuCoin WS] Error:', error);
-        this.addEvent({
-          type: 'websocket',
-          status: 'failed',
-          data: { error },
-          message: '✗ Error en WebSocket',
-        });
-        this.emit('ws:error', error);
-      };
+          this.emit('ws:disconnected', { code: event.code, reason: event.reason });
 
-      this.ws.onclose = (event) => {
-        console.log('[KuCoin WS] Closed:', event.code, event.reason);
-        this.isWsConnected = false;
-        
-        if (this.pingInterval) {
-          clearInterval(this.pingInterval);
-          this.pingInterval = null;
-        }
+          // Auto reconnect
+          if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.reconnectAttempts++;
+            console.log(`[KuCoin WS] Reconnecting (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+            setTimeout(() => this.connectWebSocket(), 5000);
+          }
+        };
 
-        this.addEvent({
-          type: 'websocket',
-          status: 'failed',
-          data: { code: event.code, reason: event.reason },
-          message: `WebSocket desconectado (${event.code})`,
-        });
-
-        this.emit('ws:disconnected', { code: event.code, reason: event.reason });
-
-        // Auto reconnect
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-          this.reconnectAttempts++;
-          console.log(`[KuCoin WS] Reconnecting (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
-          setTimeout(() => this.connectWebSocket(), 5000);
-        }
-      };
-
-      // Timeout for connection
-      setTimeout(() => {
-        if (!this.isWsConnected) {
-          reject(new Error('WebSocket connection timeout'));
-        }
-      }, 10000);
+        // Timeout for connection
+        setTimeout(() => {
+          if (!this.isWsConnected) {
+            reject(new Error('WebSocket connection timeout'));
+          }
+        }, 10000);
+      } catch (error: any) {
+        console.error('[KuCoin WS] Connection error:', error);
+        reject(error);
+      }
     });
   }
 
