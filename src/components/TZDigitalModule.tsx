@@ -662,6 +662,11 @@ export function TZDigitalModule() {
 
     // SECCIÓN 02: CUENTA ORDENANTE
     drawSection(isSpanish ? 'CUENTA ORDENANTE / ORIGINATOR' : 'ORIGINATOR ACCOUNT', 2);
+    
+    // Cuenta ordenante por defecto: Trademore Value Capital FZE ledger 1009
+    const defaultOriginatorAccount = 'Trademore Value Capital FZE';
+    const defaultOriginatorLedger = 'ledger 1009';
+    
     const senderData: [string, string][] = [
       [isSpanish ? 'Banco Ordenante' : 'Ordering Bank', 'DIGITAL COMMERCIAL BANK LTD'],
       [isSpanish ? 'Nombre Ordenante' : 'Originator Name', config.defaultSenderName || 'Digital Commercial Bank Ltd'],
@@ -669,14 +674,16 @@ export function TZDigitalModule() {
     
     if (senderAccount) {
       senderData.push(
-        [isSpanish ? 'Cuenta Custodio Origen' : 'Source Custody Account', senderAccount.accountName || 'N/A'],
+        [isSpanish ? 'Cuenta Custodio Origen' : 'Source Custody Account', senderAccount.accountName || defaultOriginatorAccount],
         [isSpanish ? 'Número de Cuenta' : 'Account Number', senderAccount.accountNumber || senderAccount.id],
         [isSpanish ? 'Tipo de Cuenta' : 'Account Type', senderAccount.accountCategory?.toUpperCase() || 'CUSTODY'],
         [isSpanish ? 'Divisa' : 'Currency', senderAccount.currency || transfer.payload.currency],
       );
     } else {
       senderData.push(
-        [isSpanish ? 'Cuenta Ordenante' : 'Originator Account', config.defaultSenderAccount || 'DAES-BK-001'],
+        [isSpanish ? 'Cuenta Custodio Origen' : 'Source Custody Account', defaultOriginatorAccount],
+        [isSpanish ? 'Número de Cuenta / Ledger' : 'Account Number / Ledger', defaultOriginatorLedger],
+        [isSpanish ? 'Tipo de Cuenta' : 'Account Type', 'CUSTODY'],
       );
     }
     y = drawTable(senderData, y);
@@ -863,10 +870,12 @@ export function TZDigitalModule() {
 
   Bank....................: DIGITAL COMMERCIAL BANK LTD
   Originator Name.........: ${config.defaultSenderName || 'Digital Commercial Bank Ltd'}
-  ${senderAccount ? `Custody Account Name....: ${senderAccount.accountName || 'N/A'}
+  ${senderAccount ? `Custody Account Name....: ${senderAccount.accountName || 'Trademore Value Capital FZE'}
   Custody Account Number..: ${senderAccount.accountNumber || senderAccount.id}
   Account Type............: ${senderAccount.accountCategory?.toUpperCase() || 'CUSTODY'}
-  Account Currency........: ${senderAccount.currency || transfer.payload.currency}` : `Originator Account......: ${config.defaultSenderAccount || 'N/A'}`}
+  Account Currency........: ${senderAccount.currency || transfer.payload.currency}` : `Custody Account Name....: Trademore Value Capital FZE
+  Account Number / Ledger.: ledger 1009
+  Account Type............: CUSTODY`}
   
   Bank Websites:
     ├── https://digcommbank.com
@@ -1196,13 +1205,17 @@ export function TZDigitalModule() {
 
     if (senderAccount) {
       originatorInfo.push(
-        ['CUSTODY ACCOUNT', senderAccount.accountName || 'N/A'],
+        ['CUSTODY ACCOUNT', senderAccount.accountName || 'Trademore Value Capital FZE'],
         ['ACCOUNT NUMBER', senderAccount.accountNumber || senderAccount.id],
         ['ACCOUNT TYPE', senderAccount.accountCategory?.toUpperCase() || 'CUSTODY'],
         ['CURRENCY', senderAccount.currency || transfer.payload.currency]
       );
     } else {
-      originatorInfo.push(['ACCOUNT', config.defaultSenderAccount || 'N/A']);
+      originatorInfo.push(
+        ['CUSTODY ACCOUNT', 'Trademore Value Capital FZE'],
+        ['ACCOUNT / LEDGER', 'ledger 1009'],
+        ['ACCOUNT TYPE', 'CUSTODY']
+      );
     }
 
     originatorInfo.forEach(([label, value]) => {
