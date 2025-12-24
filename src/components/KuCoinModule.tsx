@@ -620,12 +620,43 @@ export default function KuCoinModule() {
                   </div>
                 )}
 
-                {/* Fuente de Fondos - Custody Accounts */}
+                {/* Info: Cómo depositar USD en KuCoin */}
+                <div className="bg-gradient-to-r from-amber-900/20 to-orange-900/20 border border-amber-500/30 rounded-xl p-4 mb-4">
+                  <h3 className="text-sm font-semibold text-amber-400 flex items-center gap-2 mb-3">
+                    <AlertTriangle className="w-4 h-4" />
+                    {isSpanish ? '¿Cómo cargar USD en KuCoin?' : 'How to load USD in KuCoin?'}
+                  </h3>
+                  <div className="text-xs text-gray-300 space-y-2">
+                    <p>
+                      {isSpanish 
+                        ? 'Para convertir USD a USDT necesitas tener USD en tu cuenta KuCoin Main:' 
+                        : 'To convert USD to USDT you need USD in your KuCoin Main account:'}
+                    </p>
+                    <ol className="list-decimal list-inside space-y-1 text-gray-400">
+                      <li>{isSpanish ? 'Deposita USD Fiat en KuCoin (banco/tarjeta)' : 'Deposit USD Fiat to KuCoin (bank/card)'}</li>
+                      <li>{isSpanish ? 'O transfiere desde otra cuenta/exchange' : 'Or transfer from another account/exchange'}</li>
+                      <li>{isSpanish ? 'Los fondos aparecerán en tu Main Account' : 'Funds will appear in your Main Account'}</li>
+                    </ol>
+                  </div>
+                  
+                  {/* Balance actual de KuCoin USD */}
+                  <div className="mt-3 p-2 bg-black/30 rounded-lg flex justify-between items-center">
+                    <span className="text-xs text-gray-400">{isSpanish ? 'Tu USD en KuCoin Main:' : 'Your USD in KuCoin Main:'}</span>
+                    <span className="text-lg font-bold text-green-400">
+                      ${(() => {
+                        const usdMain = accounts.find(a => a.currency === 'USD' && a.type === 'main');
+                        return usdMain ? parseFloat(usdMain.available).toLocaleString() : '0.00';
+                      })()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Fuente de Fondos - Custody Accounts (para registro interno) */}
                 <div className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 border border-purple-500/30 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-semibold text-purple-400 flex items-center gap-2">
                       <Database className="w-4 h-4" />
-                      {isSpanish ? 'Fuente de Fondos' : 'Funds Source'}
+                      {isSpanish ? 'Registro de Origen (Custody Account)' : 'Source Record (Custody Account)'}
                     </h3>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -1491,19 +1522,114 @@ export default function KuCoinModule() {
               )}
             </div>
 
-            {/* Accounts found */}
-            {accounts.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-gray-700">
-                <h4 className="text-xs font-semibold text-gray-400 mb-2">
-                  {isSpanish ? 'Cuentas' : 'Accounts'}
-                </h4>
-                <div className="space-y-2">
-                  {accounts.slice(0, 5).map((acc, idx) => (
-                    <div key={idx} className="flex justify-between text-xs bg-black/30 p-2 rounded">
-                      <span className="font-semibold">{acc.currency}</span>
-                      <span className="text-green-400">{parseFloat(acc.available).toFixed(2)}</span>
+            {/* USD Balance - Prominente */}
+            <div className="mt-4 pt-4 border-t border-gray-700">
+              <h4 className="text-xs font-semibold text-gray-400 mb-2 flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-green-400" />
+                {isSpanish ? 'Balance USD (KuCoin)' : 'USD Balance (KuCoin)'}
+              </h4>
+              
+              {/* USD Main Account */}
+              <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 border border-green-500/30 rounded-lg p-3 mb-2">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-xs text-gray-400">Main Account</span>
+                    <div className="text-xl font-bold text-green-400">
+                      ${(() => {
+                        const usdMain = accounts.find(a => a.currency === 'USD' && a.type === 'main');
+                        return usdMain ? parseFloat(usdMain.available).toLocaleString() : '0.00';
+                      })()}
                     </div>
-                  ))}
+                  </div>
+                  <DollarSign className="w-8 h-8 text-green-500/30" />
+                </div>
+              </div>
+              
+              {/* USD Trade Account */}
+              <div className="bg-black/30 border border-gray-700 rounded-lg p-3 mb-3">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-xs text-gray-400">Trade Account</span>
+                    <div className="text-lg font-bold text-blue-400">
+                      ${(() => {
+                        const usdTrade = accounts.find(a => a.currency === 'USD' && a.type === 'trade');
+                        return usdTrade ? parseFloat(usdTrade.available).toLocaleString() : '0.00';
+                      })()}
+                    </div>
+                  </div>
+                  <ArrowRightLeft className="w-6 h-6 text-blue-500/30" />
+                </div>
+              </div>
+
+              {/* Botón para cargar USD desde Custody */}
+              {custodyAccounts.filter(a => a.currency === 'USD' && a.availableBalance > 0).length > 0 && (
+                <button
+                  onClick={() => {
+                    setUseCustodyFunds(true);
+                    setActiveTab('convert');
+                  }}
+                  className="w-full py-2 bg-gradient-to-r from-purple-600/50 to-indigo-600/50 border border-purple-500/30 text-white rounded-lg text-xs font-semibold hover:from-purple-600 hover:to-indigo-600 transition-all flex items-center justify-center gap-2"
+                >
+                  <Database className="w-4 h-4" />
+                  {isSpanish ? 'Cargar USD desde Custody' : 'Load USD from Custody'}
+                  <span className="text-purple-300">
+                    (${custodyAccounts
+                      .filter(a => a.currency === 'USD')
+                      .reduce((sum, a) => sum + a.availableBalance, 0)
+                      .toLocaleString()})
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {/* USDT Balance */}
+            <div className="mt-3">
+              <h4 className="text-xs font-semibold text-gray-400 mb-2 flex items-center gap-2">
+                <Coins className="w-4 h-4 text-emerald-400" />
+                USDT
+              </h4>
+              <div className="bg-black/30 border border-gray-700 rounded-lg p-3">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-xs text-gray-400">Main</span>
+                    <div className="text-lg font-bold text-emerald-400">
+                      {(() => {
+                        const usdtMain = accounts.find(a => a.currency === 'USDT' && a.type === 'main');
+                        return usdtMain ? parseFloat(usdtMain.available).toLocaleString() : '0.00';
+                      })()} USDT
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-gray-400">Trade</span>
+                    <div className="text-sm text-gray-300">
+                      {(() => {
+                        const usdtTrade = accounts.find(a => a.currency === 'USDT' && a.type === 'trade');
+                        return usdtTrade ? parseFloat(usdtTrade.available).toLocaleString() : '0.00';
+                      })()} USDT
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Otras cuentas */}
+            {accounts.length > 0 && (
+              <div className="mt-3">
+                <h4 className="text-xs font-semibold text-gray-400 mb-2">
+                  {isSpanish ? 'Otras Monedas' : 'Other Currencies'}
+                </h4>
+                <div className="space-y-1 max-h-24 overflow-y-auto">
+                  {accounts
+                    .filter(a => !['USD', 'USDT'].includes(a.currency))
+                    .slice(0, 6)
+                    .map((acc, idx) => (
+                      <div key={idx} className="flex justify-between text-xs bg-black/20 p-2 rounded">
+                        <span className="font-semibold text-gray-300">{acc.currency}</span>
+                        <span className={parseFloat(acc.available) > 0 ? 'text-green-400' : 'text-gray-500'}>
+                          {parseFloat(acc.available).toFixed(4)}
+                        </span>
+                      </div>
+                    ))}
                 </div>
               </div>
             )}
