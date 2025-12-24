@@ -1005,6 +1005,405 @@ export function TZDigitalModule() {
     return result.trim() || 'Zero';
   };
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // GENERAR PDF4 BLACKSCREEN - TRANSFER TECHNICAL STATEMENT
+  // ═══════════════════════════════════════════════════════════════════════════
+  const generatePDF4BlackScreen = async (transfer: TransferRecord, senderAccount?: CustodyAccount) => {
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 12;
+    let yPos = margin;
+    const lineHeight = 4.5;
+    const date = new Date(transfer.timestamp);
+    const now = new Date();
+
+    // Datos reales del servidor de salida
+    const SERVER_CONFIG = {
+      API_URL: 'https://banktransfer.devmindgroup.com/api/transactions',
+      RECEIVE_URL: 'https://secure.devmindpay.com/api/v1/transaction/receive',
+      GLOBAL_IP: '172.67.157.88',
+      PORT: 8443,
+      API_KEY: '47061d41-7994-4fad-99a7-54879acd9a83',
+      AUTH_KEY: 'DMP-SECURE-KEY-7X93-FF28-ZQ19',
+      SHA256_HANDSHAKE: 'b19f2a94eab4cd3b92f1e3e0dce9d541c8b7aa3fdbe6e2f4ac3c91a5fbb2f44'
+    };
+
+    // ISO 4217 Currency Codes
+    const currencyISO: Record<string, string> = {
+      'USD': '840', 'EUR': '978', 'GBP': '826', 'CHF': '756'
+    };
+
+    // Identificadores
+    const documentRef = `TZ/${date.getFullYear()}/${Math.floor(Math.random() * 9999999).toString().padStart(7, '0')}`;
+
+    // Función helper para fondo negro
+    const addBlackPage = () => {
+      pdf.setFillColor(0, 0, 0);
+      pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+    };
+
+    // Funciones helper para texto
+    const setTerminalGreen = (size: number = 8) => {
+      pdf.setTextColor(0, 255, 65);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'normal');
+    };
+
+    const setWhiteText = (size: number = 8) => {
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'normal');
+    };
+
+    const setGrayText = (size: number = 7) => {
+      pdf.setTextColor(180, 180, 180);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'normal');
+    };
+
+    const drawLine = (y: number, width: number = 0.2) => {
+      pdf.setDrawColor(100, 100, 100);
+      pdf.setLineWidth(width);
+      pdf.line(margin, y, pageWidth - margin, y);
+    };
+
+    const drawDottedLine = (y: number) => {
+      pdf.setDrawColor(60, 60, 60);
+      pdf.setLineWidth(0.1);
+      for (let x = margin; x < pageWidth - margin; x += 2) {
+        pdf.line(x, y, x + 1, y);
+      }
+    };
+
+    const checkNewPage = (requiredSpace: number = 25) => {
+      if (yPos + requiredSpace > pageHeight - margin) {
+        pdf.addPage();
+        addBlackPage();
+        yPos = margin;
+        setGrayText(6);
+        pdf.text(`Transfer ID: ${transfer.id} | Page ${pdf.getNumberOfPages()}`, pageWidth - margin, yPos, { align: 'right' });
+        yPos += 8;
+        return true;
+      }
+      return false;
+    };
+
+    // ==================== PÁGINA 1 ====================
+    addBlackPage();
+
+    // ===== HEADER INSTITUCIONAL =====
+    setGrayText(6);
+    pdf.text('ISO 27001:2022 | ISO 20022 | OPEN BANKING', margin, yPos);
+    pdf.text(`REF: ${documentRef}`, pageWidth - margin, yPos, { align: 'right' });
+    yPos += 6;
+
+    drawLine(yPos, 0.5);
+    yPos += 6;
+
+    setTerminalGreen(10);
+    pdf.text('DIGITAL COMMERCIAL BANK LTD', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 5;
+
+    setWhiteText(8);
+    pdf.text('TRANSFER TECHNICAL STATEMENT', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 4;
+
+    setGrayText(7);
+    pdf.text('DAES - DIGITAL ASSET & ELECTRONIC SERVICES', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 6;
+
+    drawLine(yPos, 0.5);
+    yPos += 8;
+
+    // ===== SECTION 01: TRANSACTION IDENTIFICATION =====
+    setGrayText(6);
+    pdf.text('01. TRANSACTION IDENTIFICATION', margin, yPos);
+    yPos += 5;
+
+    const txInfo = [
+      ['TRANSACTION ID', transfer.id],
+      ['REFERENCE', transfer.payload.reference],
+      ['DATE', date.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })],
+      ['TIME', date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) + ' UTC'],
+      ['STATUS', transfer.status === 'success' ? 'COMPLETED' : 'FAILED'],
+    ];
+
+    txInfo.forEach(([label, value]) => {
+      setTerminalGreen(7);
+      pdf.text(`${label}:`, margin, yPos);
+      setWhiteText(7);
+      pdf.text(String(value), margin + 50, yPos);
+      yPos += lineHeight;
+    });
+
+    yPos += 4;
+    drawDottedLine(yPos);
+    yPos += 8;
+
+    // ===== SECTION 02: SERVER IDENTIFICATION =====
+    checkNewPage(60);
+    setGrayText(6);
+    pdf.text('02. OUTGOING SERVER IDENTIFICATION', margin, yPos);
+    yPos += 5;
+
+    const serverInfo = [
+      ['PROVIDER', 'DevMind Group - Payment Gateway'],
+      ['API KEY (TOKEN)', SERVER_CONFIG.API_KEY],
+      ['AUTH KEY', SERVER_CONFIG.AUTH_KEY],
+      ['SERVER IP', SERVER_CONFIG.GLOBAL_IP],
+      ['PORT', String(SERVER_CONFIG.PORT)],
+      ['PRIMARY ENDPOINT', SERVER_CONFIG.API_URL],
+      ['RECEIVE ENDPOINT', SERVER_CONFIG.RECEIVE_URL],
+    ];
+
+    serverInfo.forEach(([label, value]) => {
+      setTerminalGreen(6);
+      pdf.text(`${label}:`, margin, yPos);
+      setWhiteText(6);
+      const maxWidth = pageWidth - margin - 50;
+      const lines = pdf.splitTextToSize(String(value), maxWidth);
+      pdf.text(lines[0], margin + 45, yPos);
+      yPos += lineHeight;
+    });
+
+    yPos += 2;
+    setTerminalGreen(5);
+    pdf.text('SHA256 HANDSHAKE:', margin, yPos);
+    setWhiteText(5);
+    pdf.text(SERVER_CONFIG.SHA256_HANDSHAKE, margin + 35, yPos);
+    yPos += lineHeight;
+
+    yPos += 4;
+    drawDottedLine(yPos);
+    yPos += 8;
+
+    // ===== SECTION 03: ORIGINATOR (SOURCE) =====
+    checkNewPage(45);
+    setGrayText(6);
+    pdf.text('03. ORIGINATOR (SOURCE OF FUNDS)', margin, yPos);
+    yPos += 5;
+
+    const originatorInfo = [
+      ['BANK', 'DIGITAL COMMERCIAL BANK LTD'],
+      ['ORIGINATOR NAME', config.defaultSenderName || 'Digital Commercial Bank Ltd'],
+    ];
+
+    if (senderAccount) {
+      originatorInfo.push(
+        ['CUSTODY ACCOUNT', senderAccount.accountName || 'N/A'],
+        ['ACCOUNT NUMBER', senderAccount.accountNumber || senderAccount.id],
+        ['ACCOUNT TYPE', senderAccount.accountCategory?.toUpperCase() || 'CUSTODY'],
+        ['CURRENCY', senderAccount.currency || transfer.payload.currency]
+      );
+    } else {
+      originatorInfo.push(['ACCOUNT', config.defaultSenderAccount || 'N/A']);
+    }
+
+    originatorInfo.forEach(([label, value]) => {
+      setTerminalGreen(7);
+      pdf.text(`${label}:`, margin, yPos);
+      setWhiteText(7);
+      pdf.text(String(value), margin + 45, yPos);
+      yPos += lineHeight;
+    });
+
+    yPos += 4;
+    drawDottedLine(yPos);
+    yPos += 8;
+
+    // ===== SECTION 04: BENEFICIARY =====
+    checkNewPage(40);
+    setGrayText(6);
+    pdf.text('04. BENEFICIARY', margin, yPos);
+    yPos += 5;
+
+    const beneficiaryInfo = [
+      ['NAME', transfer.payload.beneficiary_name || 'Direct Transfer'],
+      ['ACCOUNT', transfer.payload.beneficiary_account || transfer.payload.beneficiary_iban || 'N/A'],
+      ['BANK', transfer.payload.beneficiary_bank || 'N/A'],
+    ];
+
+    if (transfer.payload.beneficiary_swift) {
+      beneficiaryInfo.push(['SWIFT/BIC', transfer.payload.beneficiary_swift]);
+    }
+    if (transfer.payload.beneficiary_country) {
+      beneficiaryInfo.push(['COUNTRY', transfer.payload.beneficiary_country]);
+    }
+
+    beneficiaryInfo.forEach(([label, value]) => {
+      setTerminalGreen(7);
+      pdf.text(`${label}:`, margin, yPos);
+      setWhiteText(7);
+      pdf.text(String(value), margin + 45, yPos);
+      yPos += lineHeight;
+    });
+
+    yPos += 4;
+    drawDottedLine(yPos);
+    yPos += 8;
+
+    // ===== SECTION 05: TRANSFER AMOUNT =====
+    checkNewPage(40);
+    setGrayText(6);
+    pdf.text('05. TRANSFER AMOUNT', margin, yPos);
+    yPos += 6;
+
+    // Cuadro destacado para el monto
+    pdf.setFillColor(0, 40, 0);
+    pdf.rect(margin, yPos, pageWidth - (margin * 2), 18, 'F');
+    pdf.setDrawColor(0, 255, 65);
+    pdf.setLineWidth(0.5);
+    pdf.rect(margin, yPos, pageWidth - (margin * 2), 18, 'S');
+
+    setTerminalGreen(8);
+    pdf.text('AMOUNT TRANSFERRED', margin + 5, yPos + 6);
+    
+    pdf.setFontSize(14);
+    pdf.setFont('Courier', 'bold');
+    pdf.text(`${transfer.payload.currency} ${transfer.payload.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, margin + 5, yPos + 13);
+
+    setGrayText(6);
+    const isoCode = currencyISO[transfer.payload.currency] || '000';
+    pdf.text(`ISO 4217: ${isoCode}`, pageWidth - margin - 5, yPos + 13, { align: 'right' });
+
+    yPos += 24;
+
+    setTerminalGreen(6);
+    pdf.text('AMOUNT IN WORDS:', margin, yPos);
+    setWhiteText(6);
+    pdf.text(numberToWords(transfer.payload.amount) + ' ' + transfer.payload.currency, margin + 35, yPos);
+    yPos += lineHeight + 4;
+
+    drawDottedLine(yPos);
+    yPos += 8;
+
+    // ===== SECTION 06: API REQUEST DETAILS =====
+    checkNewPage(45);
+    setGrayText(6);
+    pdf.text('06. API REQUEST DETAILS', margin, yPos);
+    yPos += 5;
+
+    const apiDetails = [
+      ['METHOD', 'POST'],
+      ['ENDPOINT', SERVER_CONFIG.API_URL],
+      ['CONTENT-TYPE', 'application/json'],
+      ['AUTHORIZATION', `Bearer ${SERVER_CONFIG.API_KEY}`],
+      ['X-API-KEY', SERVER_CONFIG.API_KEY],
+      ['X-AUTH-KEY', SERVER_CONFIG.AUTH_KEY],
+      ['X-GLOBAL-SERVER-IP', SERVER_CONFIG.GLOBAL_IP],
+    ];
+
+    apiDetails.forEach(([label, value]) => {
+      setTerminalGreen(6);
+      pdf.text(`${label}:`, margin, yPos);
+      setWhiteText(5);
+      const maxWidth = pageWidth - margin - 45;
+      const lines = pdf.splitTextToSize(String(value), maxWidth);
+      pdf.text(lines[0], margin + 40, yPos);
+      yPos += lineHeight;
+    });
+
+    yPos += 4;
+    drawDottedLine(yPos);
+    yPos += 8;
+
+    // ===== SECTION 07: API RESPONSE =====
+    checkNewPage(35);
+    setGrayText(6);
+    pdf.text('07. API RESPONSE', margin, yPos);
+    yPos += 5;
+
+    const responseInfo = [
+      ['HTTP STATUS', transfer.status === 'success' ? '200 OK' : String(transfer.result?.status || 'Error')],
+      ['RESULT', transfer.status === 'success' ? 'SUCCESS' : 'FAILED'],
+    ];
+
+    if (transfer.result?.data?.transaction_id) {
+      responseInfo.push(['SERVER TX ID', transfer.result.data.transaction_id]);
+    }
+    if (transfer.result?.data?.request_id) {
+      responseInfo.push(['REQUEST ID', transfer.result.data.request_id]);
+    }
+    if (transfer.result?.data?.channel) {
+      responseInfo.push(['CHANNEL', transfer.result.data.channel]);
+    }
+
+    responseInfo.forEach(([label, value]) => {
+      setTerminalGreen(7);
+      pdf.text(`${label}:`, margin, yPos);
+      setWhiteText(7);
+      pdf.text(String(value), margin + 45, yPos);
+      yPos += lineHeight;
+    });
+
+    yPos += 4;
+    drawDottedLine(yPos);
+    yPos += 8;
+
+    // ===== SECTION 08: PURPOSE =====
+    checkNewPage(25);
+    setGrayText(6);
+    pdf.text('08. PURPOSE & NOTES', margin, yPos);
+    yPos += 5;
+
+    const purposeInfo = [
+      ['PURPOSE', transfer.payload.purpose || 'Treasury Transfer'],
+      ['DESCRIPTION', transfer.payload.note || 'Direct Cash Transfer'],
+      ['PAYMENT TYPE', 'CREDIT TRANSFER'],
+      ['CHANNEL', 'INSTANT_SERVER_SETTLEMENT'],
+    ];
+
+    purposeInfo.forEach(([label, value]) => {
+      setTerminalGreen(7);
+      pdf.text(`${label}:`, margin, yPos);
+      setWhiteText(7);
+      pdf.text(String(value), margin + 45, yPos);
+      yPos += lineHeight;
+    });
+
+    yPos += 6;
+    drawLine(yPos);
+    yPos += 8;
+
+    // ===== FOOTER =====
+    checkNewPage(35);
+
+    setGrayText(6);
+    pdf.text('CONTACT INFORMATION', margin, yPos);
+    yPos += 5;
+
+    setTerminalGreen(6);
+    pdf.text('Digital Commercial Bank Ltd - Operations Department', margin, yPos);
+    yPos += lineHeight;
+    setWhiteText(6);
+    pdf.text('Email: operations@digcommbank.com', margin, yPos);
+    yPos += lineHeight;
+    pdf.text('Web: https://digcommbank.com | https://luxliqdaes.cloud', margin, yPos);
+    yPos += lineHeight + 4;
+
+    drawLine(yPos, 0.5);
+    yPos += 6;
+
+    setGrayText(5);
+    pdf.text('This document certifies the execution of the transfer through the Open Banking API to API protocol.', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 4;
+    pdf.text('The operation has been processed in accordance with ISO 20022 standards.', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 6;
+
+    setTerminalGreen(6);
+    pdf.text(`© ${now.getFullYear()} Digital Commercial Bank Ltd - All Rights Reserved`, pageWidth / 2, yPos, { align: 'center' });
+
+    // Guardar PDF
+    const filename = `TZ_Transfer_Statement_${transfer.id}`;
+    pdf.save(`${filename}.pdf`);
+  };
+
   // Enviar Funds Processing Transaction con SHA256 Handshake
   const handleSendFundsProcessing = async () => {
     if (!tzDigitalClient.isConfigured()) {
@@ -2007,6 +2406,17 @@ export function TZDigitalModule() {
                                 <FileText className="w-4 h-4" />
                                 <span className="text-xs">TXT</span>
                               </button>
+                              <button
+                                onClick={() => {
+                                  const account = custodyAccounts.find(a => a.id === selectedAccountId);
+                                  generatePDF4BlackScreen(t, account);
+                                }}
+                                className="px-3 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 flex items-center gap-1"
+                                title={isSpanish ? 'Descargar PDF4 BlackScreen' : 'Download PDF4 BlackScreen'}
+                              >
+                                <Terminal className="w-4 h-4" />
+                                <span className="text-xs">PDF4</span>
+                              </button>
                             </div>
                           )}
                         </div>
@@ -2138,9 +2548,19 @@ export function TZDigitalModule() {
                     className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-400 hover:to-blue-400 font-bold flex items-center justify-center gap-2"
                   >
                     <FileText className="w-5 h-5" />
-                    {isSpanish ? 'Descargar Prueba Técnica TXT' : 'Download Technical Proof TXT'}
+                    {isSpanish ? 'TXT Técnico' : 'Technical TXT'}
                   </button>
                 </div>
+                <button
+                  onClick={() => {
+                    const account = custodyAccounts.find(a => a.id === selectedAccountId);
+                    generatePDF4BlackScreen(lastTransferForReceipt, account);
+                  }}
+                  className="w-full px-4 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-500 hover:to-green-500 font-bold flex items-center justify-center gap-2"
+                >
+                  <Terminal className="w-5 h-5" />
+                  {isSpanish ? 'Descargar PDF4 BlackScreen' : 'Download PDF4 BlackScreen'}
+                </button>
                 <button
                   onClick={() => setShowReceiptModal(false)}
                   className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
