@@ -869,7 +869,7 @@ app.post('/api/mg-webhook/transfer', async (req, res) => {
 // ============================================================================
 
 const KUCOIN_API_BASE = 'https://api.kucoin.com';
-const KUCOIN_LOCAL_MODE = process.env.KUCOIN_LOCAL_MODE === 'true' || true; // Modo local por defecto
+const KUCOIN_LOCAL_MODE = process.env.KUCOIN_LOCAL_MODE === 'true' || false; // Modo LIVE por defecto
 
 // Test endpoint para verificar conectividad
 app.get('/api/kucoin/test', (req, res) => {
