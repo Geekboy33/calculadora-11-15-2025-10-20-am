@@ -804,223 +804,89 @@ export function TZDigitalModule() {
   const generateTechnicalTXT = (transfer: TransferRecord, senderAccount?: CustodyAccount) => {
     const date = new Date(transfer.timestamp);
     const now = new Date();
-    
-    // Generar identificadores únicos
-    const transactionHash = Array.from({length: 64}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
-    const serverSignature = Array.from({length: 128}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
-    const messageAuthCode = Array.from({length: 32}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
-    const releaseCode = `RC${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    const downloadCode = `DL${Math.random().toString(36).substring(2, 12).toUpperCase()}`;
-    const approvalCode = `APR${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`;
 
     const txt = `
 ╔══════════════════════════════════════════════════════════════════════════════════════════════╗
-║                    DIGITAL COMMERCIAL BANK LTD - TECHNICAL TRANSFER PROOF                    ║
+║                    DIGITAL COMMERCIAL BANK LTD - TRANSFER CONFIRMATION                       ║
 ║                         DAES - Digital Asset & Electronic Services                           ║
 ╠══════════════════════════════════════════════════════════════════════════════════════════════╣
-║  Document Type: FUNDS OUTGOING TECHNICAL CERTIFICATE                                         ║
+║  Document Type: FUNDS TRANSFER CONFIRMATION                                                  ║
 ║  Protocol: Open Banking ISO 20022 | API to API                                               ║
 ║  Generated: ${now.toISOString().padEnd(68)}║
 ╚══════════════════════════════════════════════════════════════════════════════════════════════╝
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 01: API SERVER CONFIGURATION
+  SECTION 01: API ENDPOINT
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
-  Server Name.............: DEV-CORE-PAY-GW-01
-  Global IP...............: 135.181.98.214
-  Port....................: 443 (HTTPS/TLS 1.3)
-  Location................: London, United Kingdom
-  Datacenter..............: Tier IV Certified
-  
   API Endpoint............: https://banktransfer.tzdigitalpvtlimited.com/api/transactions
-  API Version.............: v2.1.0
   Protocol................: REST/JSON over HTTPS
-  Authentication..........: Bearer Token (OAuth 2.0)
-  
-  Supported Protocols:
-    ├── ISO 20022 PAIN.001/PAIN.002
-    ├── SWIFT MT103/MT202COV
-    ├── SEPA Credit Transfer
-    ├── RTGS (Real-Time Gross Settlement)
-    ├── TARGET2 (Trans-European Automated Real-time Gross Settlement)
-    └── FedWire (Federal Reserve Wire Network)
+  Authentication..........: Bearer Token
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 02: TRANSACTION IDENTIFICATION
+  SECTION 02: TRANSACTION DATA
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
   Transaction ID..........: ${transfer.id}
   Reference...............: ${transfer.payload.reference}
-  Internal Ref............: TZ-${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}-${Math.floor(Math.random() * 999999).toString().padStart(6, '0')}
-  End-to-End ID...........: E2E${Date.now()}${Math.random().toString(36).substring(2, 8).toUpperCase()}
-  Instruction ID..........: INST${Date.now()}
-  UETR....................: ${crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).substring(2)}`}
+  Transaction Date........: ${date.toISOString().split('T')[0]}
+  Transaction Time........: ${date.toTimeString().split(' ')[0]}
+  Status..................: ${transfer.status === 'success' ? 'COMPLETED' : 'FAILED'}
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 03: ORIGINATOR DETAILS (SOURCE OF FUNDS)
+  SECTION 03: ORIGINATOR (SOURCE OF FUNDS)
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
-  Ordering Bank...........: DIGITAL COMMERCIAL BANK LTD
-  Ordering Bank BIC.......: DCBKKMMO
-  Ordering Bank Address...: Union of Comoros, Digital Banking District
-  
+  Bank....................: DIGITAL COMMERCIAL BANK LTD
   Originator Name.........: ${config.defaultSenderName || 'Digital Commercial Bank Ltd'}
   ${senderAccount ? `Custody Account Name....: ${senderAccount.accountName || 'N/A'}
   Custody Account Number..: ${senderAccount.accountNumber || senderAccount.id}
   Account Type............: ${senderAccount.accountCategory?.toUpperCase() || 'CUSTODY'}
-  Account Currency........: ${senderAccount.currency || transfer.payload.currency}
-  Account Status..........: ACTIVE` : `Originator Account......: ${config.defaultSenderAccount || 'DAES-BK-001'}`}
-  
-  Bank Websites:
-    ├── https://digcommbank.com
-    └── https://luxliqdaes.cloud
+  Account Currency........: ${senderAccount.currency || transfer.payload.currency}` : `Originator Account......: ${config.defaultSenderAccount || 'N/A'}`}
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 04: BENEFICIARY DETAILS
+  SECTION 04: BENEFICIARY
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
   Beneficiary Name........: ${transfer.payload.beneficiary_name || 'Direct Transfer'}
   Beneficiary Account.....: ${transfer.payload.beneficiary_account || transfer.payload.beneficiary_iban || 'N/A'}
   Beneficiary Bank........: ${transfer.payload.beneficiary_bank || 'N/A'}
-  Beneficiary BIC/SWIFT...: ${transfer.payload.beneficiary_swift || 'N/A'}
-  Beneficiary Country.....: ${transfer.payload.beneficiary_country || 'N/A'}
-  Beneficiary Address.....: ${transfer.payload.beneficiary_address || 'N/A'}
+  ${transfer.payload.beneficiary_swift ? `SWIFT/BIC Code..........: ${transfer.payload.beneficiary_swift}` : ''}
+  ${transfer.payload.beneficiary_country ? `Country.................: ${transfer.payload.beneficiary_country}` : ''}
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 05: TRANSFER AMOUNT & CURRENCY
+  SECTION 05: TRANSFER AMOUNT
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
-  Currency Code...........: ${transfer.payload.currency}
-  ISO 4217 Numeric........: ${transfer.payload.currency === 'USD' ? '840' : transfer.payload.currency === 'EUR' ? '978' : '000'}
-  Currency Name...........: ${transfer.payload.currency === 'USD' ? 'United States Dollar' : transfer.payload.currency === 'EUR' ? 'Euro' : transfer.payload.currency}
-  
-  Amount (Numeric)........: ${transfer.payload.amount.toFixed(2)}
+  Currency................: ${transfer.payload.currency}
+  ISO 4217 Code...........: ${transfer.payload.currency === 'USD' ? '840' : transfer.payload.currency === 'EUR' ? '978' : '000'}
+  Amount..................: ${transfer.payload.amount.toFixed(2)}
   Amount (Formatted)......: ${transfer.payload.currency} ${transfer.payload.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
   Amount (Words)..........: ${numberToWords(transfer.payload.amount)} ${transfer.payload.currency}
-  
-  Exchange Rate...........: 1.000000 (Same Currency)
-  Value Date..............: ${date.toISOString().split('T')[0]}
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 06: TIMESTAMPS & PROCESSING
+  SECTION 06: TIMESTAMPS
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
-  Transaction Initiated...: ${date.toISOString()}
-  Transaction Processed...: ${new Date(date.getTime() + 1500).toISOString()}
-  Transaction Completed...: ${new Date(date.getTime() + 3000).toISOString()}
-  Settlement Date.........: ${date.toISOString().split('T')[0]}
-  
-  Processing Time.........: ${Math.floor(Math.random() * 2000 + 1000)}ms
-  Network Latency.........: ${Math.floor(Math.random() * 100 + 20)}ms
-  
-  Timezone................: UTC+0 (Coordinated Universal Time)
-  Business Day............: ${date.toLocaleDateString('en-US', { weekday: 'long' })}
+  Created At..............: ${date.toISOString()}
+  Document Generated......: ${now.toISOString()}
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 07: SECURITY & CRYPTOGRAPHIC VERIFICATION
+  SECTION 07: API RESPONSE
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
-  Transaction Hash (SHA-256):
-    ${transactionHash}
-  
-  Server Digital Signature (RSA-4096):
-    ${serverSignature.substring(0, 64)}
-    ${serverSignature.substring(64)}
-  
-  Message Authentication Code (HMAC-SHA256):
-    ${messageAuthCode}
-  
-  TLS Session ID..........: ${Array.from({length: 32}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase()}
-  Certificate Thumbprint..: ${Array.from({length: 40}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase()}
+  HTTP Status.............: ${transfer.status === 'success' ? '200 OK' : transfer.result?.status || 'Error'}
+  Response Status.........: ${transfer.status === 'success' ? 'SUCCESS' : 'FAILED'}
+  ${transfer.result?.data?.transaction_id ? `Server Transaction ID...: ${transfer.result.data.transaction_id}` : ''}
+  ${transfer.result?.data?.message ? `Server Message..........: ${transfer.result.data.message}` : ''}
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 08: TRANSMISSION CODES
-════════════════════════════════════════════════════════════════════════════════════════════════
-
-  TRN (Transaction Reference Number).....: TRN${Date.now()}
-  Release Code...........................: ${releaseCode}
-  Download Code..........................: ${downloadCode}
-  Approval Code..........................: ${approvalCode}
-  Authorization Code.....................: AUTH${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}
-  Confirmation Number....................: CONF${Date.now()}${Math.random().toString(36).substring(2, 6).toUpperCase()}
-
-════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 09: API REQUEST/RESPONSE DETAILS
-════════════════════════════════════════════════════════════════════════════════════════════════
-
-  HTTP Method.............: POST
-  HTTP Status Code........: ${transfer.status === 'success' ? '200 OK' : '4XX Error'}
-  Content-Type............: application/json; charset=utf-8
-  
-  Request Headers:
-    Authorization: Bearer ****${config.bearerToken?.slice(-8) || '********'}
-    Content-Type: application/json
-    X-Request-ID: ${transfer.id}
-    X-Correlation-ID: ${crypto.randomUUID?.() || Date.now().toString()}
-    X-Timestamp: ${date.toISOString()}
-  
-  Response Headers:
-    X-Transaction-ID: ${transfer.id}
-    X-Processing-Time: ${Math.floor(Math.random() * 2000 + 500)}ms
-    X-Server-Name: DEV-CORE-PAY-GW-01
-
-════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 10: COMPLIANCE & REGULATORY
-════════════════════════════════════════════════════════════════════════════════════════════════
-
-  AML Check Status........: ✓ PASSED
-  Sanctions Screening.....: ✓ CLEARED
-  KYC Verification........: ✓ VERIFIED
-  PEP Check...............: ✓ NO MATCH
-  
-  Regulatory Framework:
-    ├── FATF AML/CFT Guidelines
-    ├── EU PSD2 / Open Banking
-    ├── ISO 27001:2022 Information Security
-    ├── ISO 20022 Financial Messaging
-    └── PCI-DSS Level 1
-
-════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 11: TRANSACTION STATUS
-════════════════════════════════════════════════════════════════════════════════════════════════
-
-  Current Status..........: ${transfer.status === 'success' ? '✓ COMPLETED / SETTLED' : '✗ FAILED'}
-  Settlement Status.......: ${transfer.status === 'success' ? 'SETTLED' : 'PENDING'}
-  Funds Released..........: ${transfer.status === 'success' ? 'YES' : 'NO'}
-  
-  Status History:
-    [${date.toISOString()}] INITIATED - Transaction created
-    [${new Date(date.getTime() + 500).toISOString()}] VALIDATED - Payload validated
-    [${new Date(date.getTime() + 1000).toISOString()}] AUTHORIZED - Security checks passed
-    [${new Date(date.getTime() + 1500).toISOString()}] PROCESSED - Sent to network
-    [${new Date(date.getTime() + 2500).toISOString()}] ${transfer.status === 'success' ? 'COMPLETED - Funds transferred' : 'FAILED - Error occurred'}
-
-════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 12: PURPOSE & NOTES
+  SECTION 08: PURPOSE & NOTES
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
   Purpose.................: ${transfer.payload.purpose || 'Treasury Transfer'}
-  Description.............: ${transfer.payload.note || 'API to API Direct Cash Transfer'}
+  Description.............: ${transfer.payload.note || 'Direct Cash Transfer'}
   Payment Type............: CREDIT TRANSFER
-  Priority................: ${transfer.payload.priority || 'NORM'}
-  Charge Bearer...........: ${transfer.payload.charge_bearer || 'SHA'}
-
-════════════════════════════════════════════════════════════════════════════════════════════════
-  VERIFICATION STATEMENT
-════════════════════════════════════════════════════════════════════════════════════════════════
-
-  This technical document certifies that the above-referenced transaction has been:
-  
-    ✓ Initiated by the ordering party through secure API channels
-    ✓ Validated against ISO 20022 message standards
-    ✓ Processed through encrypted TLS 1.3 connections
-    ✓ Authenticated using OAuth 2.0 Bearer Token
-    ✓ Verified for AML/CFT compliance
-    ✓ Transmitted to the beneficiary's financial institution
-  
-  The transaction details contained herein are accurate as of the generation timestamp
-  and can be used as proof of funds transfer initiation and completion.
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
   CONTACT INFORMATION
@@ -1033,13 +899,13 @@ export function TZDigitalModule() {
   Web:   https://digcommbank.com
   API:   https://luxliqdaes.cloud
   
-  For transaction verification, please reference:
+  For verification, reference:
     Transaction ID: ${transfer.id}
     Reference: ${transfer.payload.reference}
 
 ╔══════════════════════════════════════════════════════════════════════════════════════════════╗
-║                              END OF TECHNICAL TRANSFER PROOF                                 ║
-║                   Document generated automatically by DAES Banking Platform                  ║
+║                              END OF TRANSFER CONFIRMATION                                    ║
+║                   Document generated by DAES Banking Platform                                ║
 ║                              © ${now.getFullYear()} Digital Commercial Bank Ltd                              ║
 ╚══════════════════════════════════════════════════════════════════════════════════════════════╝
 `;
@@ -1049,7 +915,7 @@ export function TZDigitalModule() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `TZ_Technical_Proof_${transfer.id}.txt`;
+    a.download = `TZ_Transfer_Confirmation_${transfer.id}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
