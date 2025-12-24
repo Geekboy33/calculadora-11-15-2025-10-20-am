@@ -805,23 +805,47 @@ export function TZDigitalModule() {
     const date = new Date(transfer.timestamp);
     const now = new Date();
 
+    // Datos reales del servidor de salida (CIS S2S / DevMind Group)
+    const SERVER_CONFIG = {
+      API_URL: 'https://banktransfer.devmindgroup.com/api/transactions',
+      RECEIVE_URL: 'https://secure.devmindpay.com/api/v1/transaction/receive',
+      GLOBAL_IP: '172.67.157.88',
+      PORT: 8443,
+      API_KEY: '47061d41-7994-4fad-99a7-54879acd9a83',
+      AUTH_KEY: 'DMP-SECURE-KEY-7X93-FF28-ZQ19',
+      SHA256_HANDSHAKE: 'b19f2a94eab4cd3b92f1e3e0dce9d541c8b7aa3fdbe6e2f4ac3c91a5fbb2f44',
+      INTERNAL_IP_RANGES: ['172.16.0.0/24', '10.26.0.0/16'],
+      DNS_RANGE: '192.168.1.100/24'
+    };
+
     const txt = `
 ╔══════════════════════════════════════════════════════════════════════════════════════════════╗
 ║                    DIGITAL COMMERCIAL BANK LTD - TRANSFER CONFIRMATION                       ║
 ║                         DAES - Digital Asset & Electronic Services                           ║
 ╠══════════════════════════════════════════════════════════════════════════════════════════════╣
-║  Document Type: FUNDS TRANSFER CONFIRMATION                                                  ║
+║  Document Type: FUNDS TRANSFER TECHNICAL CERTIFICATE                                         ║
 ║  Protocol: Open Banking ISO 20022 | API to API                                               ║
 ║  Generated: ${now.toISOString().padEnd(68)}║
 ╚══════════════════════════════════════════════════════════════════════════════════════════════╝
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 01: API ENDPOINT
+  SECTION 01: OUTGOING SERVER IDENTIFICATION
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
-  API Endpoint............: https://banktransfer.tzdigitalpvtlimited.com/api/transactions
-  Protocol................: REST/JSON over HTTPS
-  Authentication..........: Bearer Token
+  Server Provider.........: DevMind Group - Payment Gateway
+  API Key (Token).........: ${SERVER_CONFIG.API_KEY}
+  Auth Key................: ${SERVER_CONFIG.AUTH_KEY}
+  SHA256 Handshake........: ${SERVER_CONFIG.SHA256_HANDSHAKE}
+
+  Server Global IP........: ${SERVER_CONFIG.GLOBAL_IP}
+  Server Port.............: ${SERVER_CONFIG.PORT}
+  Protocol................: HTTPS / TLS 1.3
+  
+  Primary API Endpoint....: ${SERVER_CONFIG.API_URL}
+  Receive Endpoint........: ${SERVER_CONFIG.RECEIVE_URL}
+  
+  Internal IP Ranges......: ${SERVER_CONFIG.INTERNAL_IP_RANGES.join(', ')}
+  DNS Range...............: ${SERVER_CONFIG.DNS_RANGE}
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
   SECTION 02: TRANSACTION DATA
@@ -843,6 +867,10 @@ export function TZDigitalModule() {
   Custody Account Number..: ${senderAccount.accountNumber || senderAccount.id}
   Account Type............: ${senderAccount.accountCategory?.toUpperCase() || 'CUSTODY'}
   Account Currency........: ${senderAccount.currency || transfer.payload.currency}` : `Originator Account......: ${config.defaultSenderAccount || 'N/A'}`}
+  
+  Bank Websites:
+    ├── https://digcommbank.com
+    └── https://luxliqdaes.cloud
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
   SECTION 04: BENEFICIARY
@@ -868,25 +896,43 @@ export function TZDigitalModule() {
   SECTION 06: TIMESTAMPS
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
-  Created At..............: ${date.toISOString()}
+  Transaction Created.....: ${date.toISOString()}
   Document Generated......: ${now.toISOString()}
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 07: API RESPONSE
+  SECTION 07: API REQUEST DETAILS
+════════════════════════════════════════════════════════════════════════════════════════════════
+
+  Method..................: POST
+  Endpoint................: ${SERVER_CONFIG.API_URL}
+  Content-Type............: application/json
+  
+  Headers Sent:
+    Authorization: Bearer ${SERVER_CONFIG.API_KEY}
+    X-API-Key: ${SERVER_CONFIG.API_KEY}
+    X-Auth-Key: ${SERVER_CONFIG.AUTH_KEY}
+    X-Global-Server-IP: ${SERVER_CONFIG.GLOBAL_IP}
+    X-Handshake-Hash: ${SERVER_CONFIG.SHA256_HANDSHAKE}
+
+════════════════════════════════════════════════════════════════════════════════════════════════
+  SECTION 08: API RESPONSE
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
   HTTP Status.............: ${transfer.status === 'success' ? '200 OK' : transfer.result?.status || 'Error'}
   Response Status.........: ${transfer.status === 'success' ? 'SUCCESS' : 'FAILED'}
   ${transfer.result?.data?.transaction_id ? `Server Transaction ID...: ${transfer.result.data.transaction_id}` : ''}
+  ${transfer.result?.data?.request_id ? `Server Request ID.......: ${transfer.result.data.request_id}` : ''}
   ${transfer.result?.data?.message ? `Server Message..........: ${transfer.result.data.message}` : ''}
+  ${transfer.result?.data?.channel ? `Channel.................: ${transfer.result.data.channel}` : ''}
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
-  SECTION 08: PURPOSE & NOTES
+  SECTION 09: PURPOSE & NOTES
 ════════════════════════════════════════════════════════════════════════════════════════════════
 
   Purpose.................: ${transfer.payload.purpose || 'Treasury Transfer'}
   Description.............: ${transfer.payload.note || 'Direct Cash Transfer'}
   Payment Type............: CREDIT TRANSFER
+  Channel.................: INSTANT_SERVER_SETTLEMENT
 
 ════════════════════════════════════════════════════════════════════════════════════════════════
   CONTACT INFORMATION
@@ -902,6 +948,7 @@ export function TZDigitalModule() {
   For verification, reference:
     Transaction ID: ${transfer.id}
     Reference: ${transfer.payload.reference}
+    API Key: ${SERVER_CONFIG.API_KEY}
 
 ╔══════════════════════════════════════════════════════════════════════════════════════════════╗
 ║                              END OF TRANSFER CONFIRMATION                                    ║
