@@ -157,28 +157,39 @@ export default function KuCoinModule() {
 
   // Test de conexión REST
   const handleTestConnection = async () => {
-    if (!config.isConfigured) {
-      alert(isSpanish 
-        ? '❌ Configura las credenciales primero' 
-        : '❌ Configure credentials first');
-      return;
-    }
-
     setIsLoading(true);
     try {
+      // Primero probar el proxy
+      const proxyTest = await kucoinClient.testProxy();
+      console.log('[KuCoin UI] Proxy test:', proxyTest);
+      
+      if (!proxyTest.success) {
+        setConnectionStatus('error');
+        alert(isSpanish 
+          ? `❌ Error de proxy: ${proxyTest.message}\n\nAsegúrate de que el servidor esté corriendo:\ncd server && node index.js` 
+          : `❌ Proxy error: ${proxyTest.message}\n\nMake sure the server is running:\ncd server && node index.js`);
+        setIsLoading(false);
+        return;
+      }
+
+      // Luego probar la conexión completa
       const result = await kucoinClient.testConnection();
       if (result.success) {
         setConnectionStatus('connected');
         setAccounts(result.accounts || []);
+        const modeInfo = result.mode === 'LOCAL_SIMULATION' 
+          ? (isSpanish ? ' (Modo Local)' : ' (Local Mode)')
+          : '';
         alert(isSpanish 
-          ? `✓ ${result.message}` 
-          : `✓ ${result.message}`);
+          ? `✓ ${result.message}${modeInfo}` 
+          : `✓ ${result.message}${modeInfo}`);
       } else {
         setConnectionStatus('error');
         alert(`❌ ${result.message}`);
       }
     } catch (error: any) {
       setConnectionStatus('error');
+      console.error('[KuCoin UI] Test error:', error);
       alert(`❌ Error: ${error.message}`);
     } finally {
       setIsLoading(false);
@@ -187,24 +198,31 @@ export default function KuCoinModule() {
 
   // Test WebSocket
   const handleTestWebSocket = async () => {
-    if (!config.isConfigured) {
-      alert(isSpanish 
-        ? '❌ Configura las credenciales primero' 
-        : '❌ Configure credentials first');
-      return;
-    }
-
     setWsStatus('connecting');
     try {
+      // Primero verificar que el proxy esté online
+      const proxyTest = await kucoinClient.testProxy();
+      if (!proxyTest.success) {
+        setWsStatus('disconnected');
+        alert(isSpanish 
+          ? `❌ Error de proxy: ${proxyTest.message}` 
+          : `❌ Proxy error: ${proxyTest.message}`);
+        return;
+      }
+
       const result = await kucoinClient.testWebSocket();
       if (result.success) {
         setWsStatus('connected');
+        alert(isSpanish 
+          ? `✓ ${result.message}` 
+          : `✓ ${result.message}`);
       } else {
         setWsStatus('disconnected');
         alert(`❌ ${result.message}`);
       }
     } catch (error: any) {
       setWsStatus('disconnected');
+      console.error('[KuCoin UI] WS Test error:', error);
       alert(`❌ Error: ${error.message}`);
     }
   };

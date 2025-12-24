@@ -1062,15 +1062,31 @@ export class KuCoinClient {
   // Test Connection
   // ─────────────────────────────────────────────────────────────────────────
 
-  async testConnection(): Promise<{ success: boolean; message: string; accounts?: KuCoinAccount[] }> {
+  async testConnection(): Promise<{ success: boolean; message: string; accounts?: KuCoinAccount[]; mode?: string }> {
     try {
+      // Primero probar el proxy
+      const proxyTest = await fetch('/api/kucoin/test');
+      const proxyData = await proxyTest.json();
+      
+      console.log('[KuCoin] Proxy test:', proxyData);
+      
+      if (!proxyTest.ok) {
+        return {
+          success: false,
+          message: 'Error conectando al proxy local',
+        };
+      }
+
+      // Luego probar las cuentas
       const accounts = await this.getAccounts();
       return {
         success: true,
         message: `Conexión exitosa. ${accounts.length} cuentas encontradas.`,
         accounts,
+        mode: proxyData.mode || 'UNKNOWN',
       };
     } catch (error: any) {
+      console.error('[KuCoin] Test connection error:', error);
       return {
         success: false,
         message: `Error de conexión: ${error.message}`,
@@ -1080,16 +1096,48 @@ export class KuCoinClient {
 
   async testWebSocket(): Promise<{ success: boolean; message: string }> {
     try {
+      // Verificar que tenemos credenciales (o modo local)
+      console.log('[KuCoin WS] Testing WebSocket connection...');
+      
       await this.connectWebSocket();
       await this.subscribe(WS_CHANNELS.balance, true);
+      
       return {
         success: true,
         message: 'WebSocket conectado y suscrito a balance',
       };
     } catch (error: any) {
+      console.error('[KuCoin WS] Test error:', error);
       return {
         success: false,
         message: `Error WebSocket: ${error.message}`,
+      };
+    }
+  }
+
+  // Test rápido del proxy
+  async testProxy(): Promise<{ success: boolean; message: string; data?: any }> {
+    try {
+      const response = await fetch('/api/kucoin/test');
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        return {
+          success: true,
+          message: `Proxy online - Mode: ${data.mode}`,
+          data,
+        };
+      }
+      
+      return {
+        success: false,
+        message: 'Proxy no disponible',
+        data,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: `Error de proxy: ${error.message}`,
       };
     }
   }
