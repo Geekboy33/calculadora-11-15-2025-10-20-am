@@ -1252,34 +1252,26 @@ export function TZDigitalModule() {
     checkNewPage(40);
     setGrayText(6);
     pdf.text('05. TRANSFER AMOUNT', margin, yPos);
-    yPos += 6;
+    yPos += 5;
 
-    // Cuadro destacado para el monto
-    pdf.setFillColor(0, 40, 0);
-    pdf.rect(margin, yPos, pageWidth - (margin * 2), 18, 'F');
-    pdf.setDrawColor(0, 255, 65);
-    pdf.setLineWidth(0.5);
-    pdf.rect(margin, yPos, pageWidth - (margin * 2), 18, 'S');
-
-    setTerminalGreen(8);
-    pdf.text('AMOUNT TRANSFERRED', margin + 5, yPos + 6);
-    
-    pdf.setFontSize(14);
-    pdf.setFont('Courier', 'bold');
-    pdf.text(`${transfer.payload.currency} ${transfer.payload.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`, margin + 5, yPos + 13);
-
-    setGrayText(6);
     const isoCode = currencyISO[transfer.payload.currency] || '000';
-    pdf.text(`ISO 4217: ${isoCode}`, pageWidth - margin - 5, yPos + 13, { align: 'right' });
 
-    yPos += 24;
+    const amountInfo = [
+      ['CURRENCY', transfer.payload.currency],
+      ['ISO 4217 CODE', isoCode],
+      ['AMOUNT TRANSFERRED', `${transfer.payload.currency} ${transfer.payload.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+      ['AMOUNT IN WORDS', numberToWords(transfer.payload.amount) + ' ' + transfer.payload.currency],
+    ];
 
-    setTerminalGreen(6);
-    pdf.text('AMOUNT IN WORDS:', margin, yPos);
-    setWhiteText(6);
-    pdf.text(numberToWords(transfer.payload.amount) + ' ' + transfer.payload.currency, margin + 35, yPos);
-    yPos += lineHeight + 4;
+    amountInfo.forEach(([label, value]) => {
+      setTerminalGreen(7);
+      pdf.text(`${label}:`, margin, yPos);
+      setWhiteText(7);
+      pdf.text(String(value), margin + 45, yPos);
+      yPos += lineHeight;
+    });
 
+    yPos += 4;
     drawDottedLine(yPos);
     yPos += 8;
 
