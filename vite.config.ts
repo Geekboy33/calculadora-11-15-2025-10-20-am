@@ -11,6 +11,12 @@ export default defineConfig({
     strictPort: false,
     open: true,
     proxy: {
+      // Proxy para DeFi Arbitrage Bot API (puerto 3101)
+      '/api/defi/multichain-arb': {
+        target: 'http://localhost:3101',
+        changeOrigin: true,
+        secure: false,
+      },
       // Proxy todas las llamadas /api al backend Express en puerto 3000
       '/api': {
         target: 'http://localhost:3000',

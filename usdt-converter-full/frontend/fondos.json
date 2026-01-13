@@ -1,0 +1,16 @@
+{
+    "cuentas_bancarias": [
+        {
+            "id": 1,
+            "nombre": "Cuenta 1",
+            "monto_usd": 1000.00,
+            "direccion_usdt": "0x1234567890123456789012345678901234567890"
+        },
+        {
+            "id": 2,
+            "nombre": "Cuenta 2",
+            "monto_usd": 1500.00,
+            "direccion_usdt": "0x0987654321098765432109876543210987654321"
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-01-05T16:03:04.876Z",
+  "botAddress": "0x7025BfcCEC45613C371B24a7F8B53f1ccc458D3F",
+  "transactions": [
+    {
+      "id": 1,
+      "type": "Curve vs Uniswap",
+      "hash": "0x3d5725ebdd23e9e47e21fe3890b691842f10c0fd2c26d3018e9a0eba269abbd6",
+      "block": 24169527,
+      "gain": 3,
+      "status": "SUCCESS"
+    },
+    {
+      "id": 4,
+      "type": "Curve vs Uniswap (50)",
+      "hash": "0x0ca079fce2039edea689e9b11318ba4bd55063ae68f2565d437c67c375e60e0f",
+      "block": 24169531,
+      "gain": 1.5,
+      "status": "SUCCESS"
+    }
+  ],
+  "totalGains": 4.5,
+  "roi": "1.29%"
+}

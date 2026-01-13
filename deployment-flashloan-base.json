@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-01-06T14:34:23.644Z",
+  "network": "base",
+  "chainId": 8453,
+  "deployer": "0x05316B102FE62574b9cBd45709f8F1B6C00beC8a",
+  "contracts": {
+    "FlashLoanArbitrage": "0x029e1b46b97E41cC6c454313f42C6D5b744839d1"
+  },
+  "config": {
+    "aavePoolAddressesProvider": "0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D",
+    "uniswapV3Router": "0x2626664c2603336E57B271c5C0b26F421741e481",
+    "sushiRouter": "0x0000000000000000000000000000000000000000",
+    "WETH": "0x4200000000000000000000000000000000000006",
+    "USDC": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "USDT": "0x0000000000000000000000000000000000000000",
+    "DAI": "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"
+  },
+  "features": [
+    "Flash Loans $1k-$10k sin colateral",
+    "Intra-DEX Arbitrage (fee tiers)",
+    "Cross-DEX Arbitrage (Uniswap ↔ Velodrome/Sushi)",
+    "Triangular Arbitrage (WETH-USDC-DAI)",
+    "MEV Protection (deadline, slippage)",
+    "Profit validation antes de ejecutar"
+  ]
+}

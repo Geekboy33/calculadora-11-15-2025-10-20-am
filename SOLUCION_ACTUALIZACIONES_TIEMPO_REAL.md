@@ -231,3 +231,21 @@ window.debugOrigenFondos = true;
 - React DevTools para verificar actualizaciones de estado
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

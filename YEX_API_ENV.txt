@@ -1,0 +1,89 @@
+# ====================================================================
+# CONFIGURACIÓN FRONTEND - SISTEMA COREBANKING DAES
+# ====================================================================
+
+# Supabase Configuration (si usas Supabase)
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.tu-key-completa-aqui
+
+# ====================================================================
+# DAES USD ALCHEMY - Backend API (ETH Mainnet)
+# ====================================================================
+VITE_ETH_USD_API_BASE=http://localhost:3000
+
+# ====================================================================
+# App Configuration
+# ====================================================================
+VITE_APP_TITLE=CoreBanking System DAES
+VITE_APP_VERSION=3.1.0
+
+# CEX.io Prime Configuration
+CEXIO_LOCAL_MODE=false
+CEXIO_API_KEY=19b1ccfa8767067077769da1901ccb84718dd824cec907504d67e126b74bccff
+CEXIO_API_SECRET=1cd0cc6c8800fddb69e1405a771de4f18d01325108720c3aa79a424ef71a9647
+
+# CEX.io Prime Frontend Variables
+VITE_CEX_PRIME_API_KEY=19b1ccfa8767067077769da1901ccb84718dd824cec907504d67e126b74bccff
+VITE_CEX_PRIME_API_SECRET=1cd0cc6c8800fddb69e1405a771de4f18d01325108720c3aa79a424ef71a9647
+CEXIO_USER_ID=up212631737
+
+# =============================================================================
+# FRONTEND - Variables de Entorno Locales
+# =============================================================================
+
+# USDT CONVERTER MODULE
+VITE_INFURA_PROJECT_ID=6b7bd498942d42edab758545c7d30403
+
+# Clave Privada de Ethereum (REEMPLAZAR CON TU CLAVE)
+VITE_ETH_PRIVATE_KEY=d1bf385c43fb999290e3e0365f8cc45bfa97b780a97c6eb4bd790ec3fa09a036
+
+# Direccion de Wallet
+VITE_ETH_WALLET_ADDRESS=0x05316B102FE62574b9cBd45709f8F1B6C00beC8a
+
+# DAES USD ALCHEMY MODULE
+VITE_ETH_USD_API_BASE=http://localhost:3000
+
+
+# =============================================================================
+# USDT CONTRACT (ERC-20 on Ethereum Mainnet)
+# =============================================================================
+VITE_USDT_CONTRACT_ADDRESS=0xdAC17F958D2ee523a2206206994597C13D831ec7
+
+
+ETH_RPC_URL=https://eth-mainnet.g.alchemy.com/v2/mm-9UjI5oG51l94mRH3fh
+
+VITE_ETH_RPC_URL=https://eth-mainnet.g.alchemy.com/v2/mm-9UjI5oG51l94mRH3fh
+
+
+
+
+# YEX API Configuration
+VITE_YEX_API_KEY=59d87db1d7c008d136c74b1a7f5312a0
+VITE_YEX_SECRET_KEY=13061f61e585b097a2ee393c203d000a
+VITE_YEX_API_BASE=https://openapi.yex.io
+
+# ============================================================================
+# YEX API MODULE - CONFIGURACIÓN ADICIONAL
+# ============================================================================
+
+# Futures API
+VITE_YEX_FUTURES_BASE=https://futuresopenapi.yex.io
+
+# WebSocket URLs
+VITE_YEX_WS_URL=wss://ws.yex.io/kline-api/ws
+VITE_YEX_WS_FUTURES_URL=wss://futuresws.yex.io/kline-api/ws
+
+# Configuración de conexión
+YEX_TIMEOUT_MS=30000
+YEX_RECV_WINDOW_MS=5000
+YEX_MAX_RETRIES=3
+
+# Rate Limits
+YEX_RATE_LIMIT_IP=12000
+YEX_RATE_LIMIT_UID=60000
+
+# Logging
+YEX_LOG_LEVEL=info
+
+# Trading Defaults
+YEX_DEFAULT_SYMBOL=BTCUSDT

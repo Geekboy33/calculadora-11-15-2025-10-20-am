@@ -1,0 +1,715 @@
+{
+  "name": "multichain-microarb",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
+
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-Chain Micro Arbitrage Bot with AI Rotation (Thompson Sampling)",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "tsx src/test.ts",
+    "verify": "tsx scripts/verify-rpcs.ts",
+    "deploy": "tsx scripts/deploy-all.ts",
+    "compile": "npx hardhat compile"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^22.0.0",
+    "hardhat": "^2.22.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}

@@ -293,7 +293,7 @@ box-shadow:
 
 **Login válido:**
 - Username: `operator`
-- Password: `operator123`
+- Password: `Eldiosdelacero34@`
 
 **Nota:** El sistema de seguridad usa hash SHA-256
 

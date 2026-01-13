@@ -1,0 +1,42 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "description": "Fondos para conversión USD → USDT",
+    "created": "2025-01-02T00:00:00Z",
+    "total_usd": 150.00
+  },
+  "configuracion": {
+    "tasa_minima": 0.98,
+    "tasa_maxima": 1.02,
+    "gas_limite": 200000,
+    "reintentos_maximos": 3,
+    "oracle": "CoinGecko"
+  },
+  "cuentas_bancarias": [
+    {
+      "id": 1,
+      "nombre": "Cuenta Principal",
+      "monto_usd": 100.00,
+      "direccion_usdt": "0xac56805515af1552d8ae9ac190050a8e549dd2fb",
+      "estado": "pendiente",
+      "prioridad": "alta"
+    },
+    {
+      "id": 2,
+      "nombre": "Cuenta Secundaria",
+      "monto_usd": 50.00,
+      "direccion_usdt": "0xac56805515af1552d8ae9ac190050a8e549dd2fb",
+      "estado": "pendiente",
+      "prioridad": "media"
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+

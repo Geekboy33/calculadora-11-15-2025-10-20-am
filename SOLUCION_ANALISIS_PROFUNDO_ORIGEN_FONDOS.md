@@ -221,3 +221,21 @@ El sistema incluye logging completo para debugging:
 **El módulo "Origen de Fondos" ahora tiene capacidades de análisis profundo similares a Treasury Reserve 1, optimizadas para detección de cuentas bancarias.** 🚀
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

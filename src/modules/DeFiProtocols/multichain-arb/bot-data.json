@@ -1,0 +1,470 @@
+{
+  "metrics": [
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15372,
+      "ts": 1767692531265
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15501,
+      "ts": 1767692547473
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 26032,
+      "ts": 1767692574211
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25526,
+      "ts": 1767692600440
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5004,
+      "ts": 1767692606147
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15541,
+      "ts": 1767692622394
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5004,
+      "ts": 1767692628102
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15180,
+      "ts": 1767692643997
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25692,
+      "ts": 1767692670395
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25154,
+      "ts": 1767692696257
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5004,
+      "ts": 1767692701977
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5004,
+      "ts": 1767692707689
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5009,
+      "ts": 1767692713397
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5000,
+      "ts": 1767692719098
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15256,
+      "ts": 1767692735063
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5007,
+      "ts": 1767692740782
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15238,
+      "ts": 1767692756728
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25481,
+      "ts": 1767692782915
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5001,
+      "ts": 1767692788633
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15277,
+      "ts": 1767692804618
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 14943,
+      "ts": 1767692820268
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5005,
+      "ts": 1767692825980
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15395,
+      "ts": 1767692842080
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5009,
+      "ts": 1767692847791
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25875,
+      "ts": 1767692874374
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5009,
+      "ts": 1767692880086
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5007,
+      "ts": 1767692885803
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15370,
+      "ts": 1767692901879
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25801,
+      "ts": 1767692928383
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25071,
+      "ts": 1767692954156
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15092,
+      "ts": 1767692969953
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 14459,
+      "ts": 1767692985114
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 14720,
+      "ts": 1767693000536
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5013,
+      "ts": 1767693006249
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15782,
+      "ts": 1767693022739
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 14915,
+      "ts": 1767693038359
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 14666,
+      "ts": 1767693053748
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 14714,
+      "ts": 1767693069166
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5002,
+      "ts": 1767693074873
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25581,
+      "ts": 1767693101162
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15192,
+      "ts": 1767693117054
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5009,
+      "ts": 1767693122766
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25918,
+      "ts": 1767693149392
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15823,
+      "ts": 1767693165922
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 14748,
+      "ts": 1767693181372
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25938,
+      "ts": 1767693208019
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5012,
+      "ts": 1767693213734
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5012,
+      "ts": 1767693219446
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5006,
+      "ts": 1767693225156
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15335,
+      "ts": 1767693241198
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25997,
+      "ts": 1767693267905
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25235,
+      "ts": 1767693293851
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5014,
+      "ts": 1767693299565
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25727,
+      "ts": 1767693325995
+    },
+    {
+      "chain": "base",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 15167,
+      "ts": 1767693341869
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5000,
+      "ts": 1767693347576
+    },
+    {
+      "chain": "arbitrum",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": true,
+      "latencyMs": 25483,
+      "ts": 1767693373774
+    },
+    {
+      "chain": "optimism",
+      "profitUsd": 0,
+      "gasUsd": 0,
+      "success": false,
+      "latencyMs": 5004,
+      "ts": 1767693379483
+    }
+  ],
+  "banditStates": [],
+  "trades": []
+}

@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-01-05T16:17:04.060Z",
+  "strategies": [
+    {
+      "strategy": "Curve vs Uniswap",
+      "operations": 5,
+      "totalGains": 15,
+      "avgTimeMs": 12589.4,
+      "roi": 3,
+      "efficiency": 0.23829570908859835
+    },
+    {
+      "strategy": "Multi-Hop",
+      "operations": 0,
+      "totalGains": 0,
+      "avgTimeMs": null,
+      "roi": 1,
+      "efficiency": null
+    },
+    {
+      "strategy": "Triángulo Stablecoins",
+      "operations": 0,
+      "totalGains": 0,
+      "avgTimeMs": null,
+      "roi": 1,
+      "efficiency": null
+    }
+  ],
+  "bestStrategy": "Curve vs Uniswap",
+  "recommendations": {
+    "frequency": "Cada 1-2 minutos",
+    "amount": "100-200 USDC",
+    "gasMultiplier": "5x",
+    "maxSlippage": "1.5%"
+  },
+  "projections": {
+    "dailyOperations": 20,
+    "dailyGain": 60,
+    "monthlyGain": 1800,
+    "yearlyGain": 21900,
+    "annualROI": "2190.0%"
+  }
+}

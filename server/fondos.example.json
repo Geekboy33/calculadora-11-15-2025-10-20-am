@@ -1,0 +1,12 @@
+{
+  "request_id": "test-conversion-2025-01-01",
+  "timestamp": "2025-01-01T10:00:00Z",
+  "cuentas_bancarias": [
+    {
+      "id": 1,
+      "nombre": "Cuenta Principal de Prueba",
+      "monto_usd": 1.00,
+      "direccion_usdt": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+    }
+  ]
+}

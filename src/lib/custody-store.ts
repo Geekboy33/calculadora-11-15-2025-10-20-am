@@ -817,6 +817,83 @@ class CustodyStore {
   }
 
   /**
+   * Deducir fondos directamente después de una conversión exitosa
+   * No usa el sistema de reservas - deduce directamente del balance
+   */
+  deductFundsAfterConversion(
+    accountId: string,
+    amount: number,
+    blockchain: string,
+    destinationAddress: string,
+    txHash: string
+  ): boolean {
+    const accounts = this.getAccounts();
+    const account = accounts.find(a => a.id === accountId);
+
+    if (!account) {
+      console.error('[CustodyStore] Cuenta no encontrada:', accountId);
+      return false;
+    }
+
+    if (account.availableBalance < amount) {
+      console.error('[CustodyStore] Balance insuficiente para deducción');
+      return false;
+    }
+
+    // Crear transacción de egreso
+    const transaction: CustodyTransaction = {
+      id: `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
+      type: 'withdrawal',
+      amount: amount,
+      currency: account.currency,
+      balanceAfter: account.availableBalance - amount,
+      description: `Conversión USD→USDT via ${blockchain}`,
+      reference: txHash,
+      destinationAccount: destinationAddress,
+      destinationBank: blockchain,
+      transactionDate: new Date().toISOString().split('T')[0],
+      transactionTime: new Date().toTimeString().split(' ')[0],
+      createdAt: new Date().toISOString(),
+      createdBy: 'USDT_CONVERTER',
+      status: 'completed',
+      valueDate: new Date().toISOString().split('T')[0],
+      notes: `Conversión automática USD→USDT. TX: ${txHash}`
+    };
+
+    // Deducir del balance
+    account.availableBalance -= amount;
+    account.totalBalance -= amount;
+    account.transactions.push(transaction);
+    account.lastUpdated = new Date().toISOString();
+
+    this.saveAccounts(accounts);
+    this.notifyListeners(accounts);
+
+    // Sincronizar con otros módulos
+    this.syncBalancesWithModules(account);
+
+    console.log('[CustodyStore] ✅ Fondos deducidos después de conversión:', {
+      account: account.accountName,
+      amount,
+      blockchain,
+      txHash,
+      newBalance: account.availableBalance
+    });
+
+    // Registrar en historial
+    custodyHistory.addTransactionLog(
+      accountId,
+      account.accountName,
+      'WITHDRAW',
+      `Conversión USD→USDT: ${account.currency} ${amount.toLocaleString()} enviado a ${destinationAddress.slice(0, 10)}...`,
+      amount,
+      account.currency
+    );
+
+    return true;
+  }
+
+  /**
    * Confirmar reserva (actualizar a confirmed)
    */
   confirmReservation(accountId: string, reservationId: string): boolean {
@@ -1533,10 +1610,11 @@ class CustodyStore {
   /**
    * Notificar cambios
    */
-  private notifyListeners(accounts: CustodyAccount[]): void {
+  private notifyListeners(accounts?: CustodyAccount[]): void {
+    const accountsToNotify = accounts || this.getAccounts();
     this.listeners.forEach(listener => {
       try {
-        listener(accounts);
+        listener(accountsToNotify);
       } catch (error) {
         console.error('[CustodyStore] Error in listener:', error);
       }
@@ -1794,4 +1872,3 @@ class CustodyStore {
 }
 
 export const custodyStore = new CustodyStore();
-

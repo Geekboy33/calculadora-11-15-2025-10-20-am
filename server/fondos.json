@@ -1,0 +1,31 @@
+{
+  "cuentas_bancarias": [
+    {
+      "id": 1,
+      "nombre": "Cuenta Principal USD",
+      "monto_usd": 10000,
+      "direccion_usdt": "0x742d35Cc6634C0532925a3b844Bc93e57C58b49a",
+      "tipo": "corriente",
+      "banco": "Banco Digital",
+      "moneda": "USD"
+    },
+    {
+      "id": 2,
+      "nombre": "Cuenta Secundaria USD",
+      "monto_usd": 5000,
+      "direccion_usdt": "0x742d35Cc6634C0532925a3b844Bc93e57C58b49a",
+      "tipo": "ahorro",
+      "banco": "Banco Digital",
+      "moneda": "USD"
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+

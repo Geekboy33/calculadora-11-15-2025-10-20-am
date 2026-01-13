@@ -1087,6 +1087,31 @@ app.use('/api/kucoin', async (req, res) => {
   }
 });
 
+// ============================================================================
+// DCB INTEGRATION - Módulo de Integración con DCB Platform
+// ============================================================================
+try {
+  const dcbIntegrationRoutes = await import('./routes/dcb-integration-routes.js');
+  app.use('/api/dcb', dcbIntegrationRoutes.default);
+  console.log('✅ [DCB Integration] Rutas configuradas en /api/dcb');
+  console.log('   → Endpoints disponibles:');
+  console.log('      GET    /api/dcb/accounts/user/:userId');
+  console.log('      GET    /api/dcb/accounts/:accountId');
+  console.log('      GET    /api/dcb/accounts/:accountId/balance');
+  console.log('      GET    /api/dcb/accounts/:accountId/movements');
+  console.log('      POST   /api/dcb/accounts');
+  console.log('      POST   /api/dcb/transfers');
+  console.log('      GET    /api/dcb/payments/user/:userId');
+  console.log('      GET    /api/dcb/payments/:transactionId');
+  console.log('      GET    /api/dcb/fx/rates');
+  console.log('      GET    /api/dcb/fx/rate');
+  console.log('      POST   /api/dcb/fx/quote');
+  console.log('      POST   /api/dcb/fx/exchange');
+  console.log('      GET    /api/dcb/health');
+} catch (error) {
+  console.warn('⚠️  [DCB Integration] No se pudieron cargar las rutas:', error.message);
+}
+
 app.listen(PORT, () => {
   console.log(`[PoR API] Server listening on http://localhost:${PORT}`);
   console.log(`[MG Webhook Proxy] Proxy endpoint available at http://localhost:${PORT}/api/mg-webhook/transfer`);

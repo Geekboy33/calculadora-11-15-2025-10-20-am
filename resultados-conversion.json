@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-01-02T12:21:01.770Z",
+  "rate": 0.999005,
+  "totalUSD": 1000,
+  "totalUSDT": "1000.995991",
+  "wallet": "0x05316B102FE62574b9cBd45709f8F1B6C00beC8a",
+  "transacciones": [
+    {
+      "id": 1,
+      "nombre": "Cuenta Principal - Cliente A",
+      "usd": 100,
+      "usdt": "100.099599",
+      "wallet": "0xac56805515af1552d8ae9ac190050a8e549dd2fb",
+      "txHash": null,
+      "status": "⚠️  SIN FONDOS"
+    },
+    {
+      "id": 2,
+      "nombre": "Cuenta Secundaria - Cliente B",
+      "usd": 250,
+      "usdt": "250.248998",
+      "wallet": "0x1234567890123456789012345678901234567890",
+      "txHash": null,
+      "status": "⚠️  SIN FONDOS"
+    },
+    {
+      "id": 3,
+      "nombre": "Cuenta Especial - Cliente C",
+      "usd": 500,
+      "usdt": "500.497996",
+      "wallet": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+      "txHash": null,
+      "status": "⚠️  SIN FONDOS"
+    },
+    {
+      "id": 4,
+      "nombre": "Cuenta Reserva - Cliente D",
+      "usd": 150,
+      "usdt": "150.149399",
+      "wallet": "0x9999999999999999999999999999999999999999",
+      "txHash": null,
+      "status": "⚠️  SIN FONDOS"
+    }
+  ]
+}

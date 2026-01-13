@@ -190,3 +190,21 @@ Cada algoritmo registra su progreso en la consola:
 **El módulo "Origen de Fondos" ahora tiene capacidades de desciframiento ultra avanzadas de última generación, con actualizaciones en tiempo real que muestran el progreso detallado de cada algoritmo mientras procesa.** 🚀
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

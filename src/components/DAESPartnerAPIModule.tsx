@@ -1489,7 +1489,7 @@ export function DAESPartnerAPIModule() {
     };
 
     setClients([...clients, client]);
-    generateClientCredentialsTXT(client, partner);
+    generateClientCredentialsPDF(client, partner);
     setNewClient({
       partnerIdForClient: '',
       externalClientId: '',
@@ -1500,7 +1500,890 @@ export function DAESPartnerAPIModule() {
       webhookUrl: ''
     });
 
-    alert(`✅ ${isSpanish ? 'CLIENTE CREADO' : 'CLIENT CREATED'}\n\n${client.legalName}\n\n📄 ${isSpanish ? 'TXT con credenciales descargado' : 'Credentials TXT downloaded'}`);
+    alert(`✅ ${isSpanish ? 'CLIENTE CREADO' : 'CLIENT CREATED'}\n\n${client.legalName}\n\n📄 ${isSpanish ? 'PDF con credenciales descargado' : 'Credentials PDF downloaded'}`);
+  };
+
+  // Generar PDF con documentación técnica completa para DAES Partner API
+  const generateClientCredentialsPDF = async (client: any, partner: Partner) => {
+    const baseUrl = 'https://luxliqdaes.cloud/partner-api/v1';
+    
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    let yPos = margin;
+    const lineHeight = 4;
+    const codeLineHeight = 3;
+    const date = new Date();
+    const formattedDate = date.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
+    const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+    // Identificadores únicos
+    const documentRef = `DAES-API/${date.getFullYear()}/${Math.floor(Math.random() * 9999999).toString().padStart(7, '0')}`;
+    const verificationCode = Array.from({length: 32}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
+    const securityHash = Array.from({length: 64}, () => Math.random().toString(16).charAt(2)).join('').toUpperCase();
+
+    // Lista completa de divisas soportadas
+    const supportedCurrencies = [
+      { code: 'USD', name: isSpanish ? 'Dólar Estadounidense' : 'US Dollar', symbol: '$' },
+      { code: 'EUR', name: 'Euro', symbol: '€' },
+      { code: 'GBP', name: isSpanish ? 'Libra Esterlina' : 'British Pound', symbol: '£' },
+      { code: 'CHF', name: isSpanish ? 'Franco Suizo' : 'Swiss Franc', symbol: 'CHF' },
+      { code: 'JPY', name: isSpanish ? 'Yen Japonés' : 'Japanese Yen', symbol: '¥' },
+      { code: 'CNY', name: isSpanish ? 'Yuan Chino' : 'Chinese Yuan', symbol: '¥' },
+      { code: 'CAD', name: isSpanish ? 'Dólar Canadiense' : 'Canadian Dollar', symbol: 'C$' },
+      { code: 'AUD', name: isSpanish ? 'Dólar Australiano' : 'Australian Dollar', symbol: 'A$' },
+      { code: 'NZD', name: isSpanish ? 'Dólar Neozelandés' : 'New Zealand Dollar', symbol: 'NZ$' },
+      { code: 'SGD', name: isSpanish ? 'Dólar de Singapur' : 'Singapore Dollar', symbol: 'S$' },
+      { code: 'HKD', name: isSpanish ? 'Dólar de Hong Kong' : 'Hong Kong Dollar', symbol: 'HK$' },
+      { code: 'SEK', name: isSpanish ? 'Corona Sueca' : 'Swedish Krona', symbol: 'kr' },
+      { code: 'NOK', name: isSpanish ? 'Corona Noruega' : 'Norwegian Krone', symbol: 'kr' },
+      { code: 'DKK', name: isSpanish ? 'Corona Danesa' : 'Danish Krone', symbol: 'kr' },
+      { code: 'MXN', name: isSpanish ? 'Peso Mexicano' : 'Mexican Peso', symbol: 'MX$' },
+      { code: 'BRL', name: isSpanish ? 'Real Brasileño' : 'Brazilian Real', symbol: 'R$' },
+      { code: 'ARS', name: isSpanish ? 'Peso Argentino' : 'Argentine Peso', symbol: 'AR$' },
+      { code: 'CLP', name: isSpanish ? 'Peso Chileno' : 'Chilean Peso', symbol: 'CL$' },
+      { code: 'COP', name: isSpanish ? 'Peso Colombiano' : 'Colombian Peso', symbol: 'CO$' },
+      { code: 'PEN', name: isSpanish ? 'Sol Peruano' : 'Peruvian Sol', symbol: 'S/' },
+      { code: 'INR', name: isSpanish ? 'Rupia India' : 'Indian Rupee', symbol: '₹' },
+      { code: 'KRW', name: isSpanish ? 'Won Surcoreano' : 'South Korean Won', symbol: '₩' },
+      { code: 'THB', name: isSpanish ? 'Baht Tailandés' : 'Thai Baht', symbol: '฿' },
+      { code: 'IDR', name: isSpanish ? 'Rupia Indonesia' : 'Indonesian Rupiah', symbol: 'Rp' },
+      { code: 'MYR', name: isSpanish ? 'Ringgit Malayo' : 'Malaysian Ringgit', symbol: 'RM' },
+      { code: 'PHP', name: isSpanish ? 'Peso Filipino' : 'Philippine Peso', symbol: '₱' },
+      { code: 'VND', name: isSpanish ? 'Dong Vietnamita' : 'Vietnamese Dong', symbol: '₫' },
+      { code: 'AED', name: isSpanish ? 'Dirham de EAU' : 'UAE Dirham', symbol: 'د.إ' },
+      { code: 'SAR', name: isSpanish ? 'Riyal Saudí' : 'Saudi Riyal', symbol: '﷼' },
+      { code: 'QAR', name: isSpanish ? 'Riyal Catarí' : 'Qatari Riyal', symbol: 'ر.ق' },
+      { code: 'KWD', name: isSpanish ? 'Dinar Kuwaití' : 'Kuwaiti Dinar', symbol: 'د.ك' },
+      { code: 'BHD', name: isSpanish ? 'Dinar Bareiní' : 'Bahraini Dinar', symbol: 'ب.د' },
+      { code: 'OMR', name: isSpanish ? 'Rial Omaní' : 'Omani Rial', symbol: 'ر.ع.' },
+      { code: 'ZAR', name: isSpanish ? 'Rand Sudafricano' : 'South African Rand', symbol: 'R' },
+      { code: 'EGP', name: isSpanish ? 'Libra Egipcia' : 'Egyptian Pound', symbol: 'E£' },
+      { code: 'NGN', name: isSpanish ? 'Naira Nigeriano' : 'Nigerian Naira', symbol: '₦' },
+      { code: 'KES', name: isSpanish ? 'Chelín Keniano' : 'Kenyan Shilling', symbol: 'KSh' },
+      { code: 'TRY', name: isSpanish ? 'Lira Turca' : 'Turkish Lira', symbol: '₺' },
+      { code: 'ILS', name: isSpanish ? 'Shekel Israelí' : 'Israeli Shekel', symbol: '₪' },
+      { code: 'PLN', name: isSpanish ? 'Zloty Polaco' : 'Polish Zloty', symbol: 'zł' },
+      { code: 'CZK', name: isSpanish ? 'Corona Checa' : 'Czech Koruna', symbol: 'Kč' },
+      { code: 'HUF', name: isSpanish ? 'Forinto Húngaro' : 'Hungarian Forint', symbol: 'Ft' },
+      { code: 'RON', name: isSpanish ? 'Leu Rumano' : 'Romanian Leu', symbol: 'lei' },
+      { code: 'RUB', name: isSpanish ? 'Rublo Ruso' : 'Russian Ruble', symbol: '₽' },
+      { code: 'UAH', name: isSpanish ? 'Grivna Ucraniana' : 'Ukrainian Hryvnia', symbol: '₴' },
+      { code: 'KMF', name: isSpanish ? 'Franco Comorense' : 'Comorian Franc', symbol: 'CF' },
+      { code: 'XAF', name: isSpanish ? 'Franco CFA Central' : 'Central African CFA', symbol: 'FCFA' },
+      { code: 'XOF', name: isSpanish ? 'Franco CFA Occidental' : 'West African CFA', symbol: 'CFA' },
+      { code: 'USDT', name: 'Tether USD', symbol: '₮' },
+      { code: 'USDC', name: 'USD Coin', symbol: 'USDC' },
+      { code: 'VUSD', name: 'DAES Virtual USD', symbol: 'V$' },
+      { code: 'DUSD', name: 'DAES USD', symbol: 'D$' }
+    ];
+
+    // Funciones helper para estilo bancario premium
+    const addBlackPage = () => {
+      pdf.setFillColor(8, 12, 20);
+      pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+    };
+
+    const setTerminalGreen = (size: number = 8) => {
+      pdf.setTextColor(0, 255, 100);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'normal');
+    };
+
+    const setCyanText = (size: number = 8) => {
+      pdf.setTextColor(0, 200, 255);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'normal');
+    };
+
+    const setYellowText = (size: number = 8) => {
+      pdf.setTextColor(255, 200, 0);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'normal');
+    };
+
+    const setWhiteText = (size: number = 8) => {
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'normal');
+    };
+
+    const setGrayText = (size: number = 7) => {
+      pdf.setTextColor(140, 150, 170);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'normal');
+    };
+
+    const setBrightGreen = (size: number = 8) => {
+      pdf.setTextColor(57, 255, 20);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'bold');
+    };
+
+    const setOrangeText = (size: number = 8) => {
+      pdf.setTextColor(255, 140, 0);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'normal');
+    };
+
+    const setPurpleText = (size: number = 8) => {
+      pdf.setTextColor(180, 100, 255);
+      pdf.setFontSize(size);
+      pdf.setFont('Courier', 'normal');
+    };
+
+    const drawLine = (y: number, width: number = 0.2) => {
+      pdf.setDrawColor(60, 70, 90);
+      pdf.setLineWidth(width);
+      pdf.line(margin, y, pageWidth - margin, y);
+    };
+
+    const drawGreenLine = (y: number) => {
+      pdf.setDrawColor(0, 180, 100);
+      pdf.setLineWidth(0.3);
+      pdf.line(margin, y, pageWidth - margin, y);
+    };
+
+    const drawDottedLine = (y: number) => {
+      pdf.setDrawColor(40, 50, 70);
+      pdf.setLineWidth(0.1);
+      for (let x = margin; x < pageWidth - margin; x += 2) {
+        pdf.line(x, y, x + 1, y);
+      }
+    };
+
+    const addSectionHeader = (title: string, icon: string = '▸') => {
+      checkNewPage(15);
+      yPos += 3;
+      drawGreenLine(yPos);
+      yPos += 5;
+      setTerminalGreen(9);
+      pdf.text(`${icon} ${title}`, margin, yPos);
+      yPos += 6;
+    };
+
+    const addSubSection = (title: string) => {
+      checkNewPage(10);
+      yPos += 2;
+      setCyanText(7);
+      pdf.text(`► ${title}`, margin, yPos);
+      yPos += 5;
+    };
+
+    const addParagraph = (text: string) => {
+      const lines = pdf.splitTextToSize(text, pageWidth - 2 * margin);
+      lines.forEach((line: string) => {
+        checkNewPage(5);
+        setWhiteText(6);
+        pdf.text(line, margin, yPos);
+        yPos += lineHeight;
+      });
+      yPos += 2;
+    };
+
+    const addCodeBlock = (code: string, language: string = 'json') => {
+      const codeLines = code.split('\n');
+      const blockHeight = codeLines.length * codeLineHeight + 6;
+      checkNewPage(blockHeight + 5);
+      
+      pdf.setFillColor(15, 20, 30);
+      pdf.roundedRect(margin, yPos - 2, pageWidth - 2 * margin, blockHeight, 2, 2, 'F');
+      
+      setGrayText(5);
+      pdf.text(language.toUpperCase(), pageWidth - margin - 2, yPos + 1, { align: 'right' });
+      yPos += 3;
+      
+      codeLines.forEach((line: string) => {
+        if (line.includes('//') || line.includes('#')) {
+          setGrayText(5.5);
+        } else if (line.includes('const ') || line.includes('let ') || line.includes('function ') || line.includes('async ')) {
+          setPurpleText(5.5);
+        } else if (line.includes('"') || line.includes("'")) {
+          setOrangeText(5.5);
+        } else if (line.includes('return ') || line.includes('await ') || line.includes('if ') || line.includes('else ')) {
+          setCyanText(5.5);
+        } else {
+          setWhiteText(5.5);
+        }
+        pdf.text(line, margin + 3, yPos);
+        yPos += codeLineHeight;
+      });
+      yPos += 3;
+    };
+
+    let pageNumber = 1;
+    const checkNewPage = (requiredSpace: number = 25) => {
+      if (yPos + requiredSpace > pageHeight - 15) {
+        setGrayText(5);
+        pdf.text(`${documentRef} | ${isSpanish ? 'Pág' : 'Page'} ${pageNumber}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
+        
+        pdf.addPage();
+        pageNumber++;
+        addBlackPage();
+        yPos = margin;
+        
+        setGrayText(5);
+        pdf.text(`DAES Partner API - ${client.legalName}`, margin, yPos);
+        pdf.text(`${isSpanish ? 'Pág' : 'Page'} ${pageNumber}`, pageWidth - margin, yPos, { align: 'right' });
+        yPos += 6;
+        drawLine(yPos, 0.3);
+        yPos += 6;
+        return true;
+      }
+      return false;
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PÁGINA 1: PORTADA
+    // ═══════════════════════════════════════════════════════════════════════════
+    addBlackPage();
+
+    setGrayText(5);
+    pdf.text('ISO 27001:2022 | SOC 2 Type II | PCI-DSS', margin, yPos);
+    pdf.text(`REF: ${documentRef}`, pageWidth - margin, yPos, { align: 'right' });
+    yPos += 4;
+
+    drawGreenLine(yPos);
+    yPos += 10;
+
+    setTerminalGreen(16);
+    pdf.text('DAES PARTNER API', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 8;
+
+    setCyanText(10);
+    pdf.text(isSpanish ? 'MANUAL DE INTEGRACIÓN TÉCNICA' : 'TECHNICAL INTEGRATION MANUAL', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 6;
+
+    setWhiteText(8);
+    pdf.text(isSpanish ? 'Guía Completa para Recepción de Transferencias' : 'Complete Guide for Receiving Transfers', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 4;
+
+    setGrayText(6);
+    pdf.text('CashTransfer.v1 Protocol | REST API | JSON | Webhook', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 8;
+
+    drawGreenLine(yPos);
+    yPos += 10;
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 1: INFORMACIÓN DEL CLIENTE
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '1. INFORMACIÓN DEL CLIENTE REGISTRADO' : '1. REGISTERED CLIENT INFORMATION', '◆');
+
+    addParagraph(isSpanish 
+      ? 'Los siguientes datos identifican su cuenta como Partner registrado en el sistema DAES. Estos datos son únicos e intransferibles.'
+      : 'The following data identifies your account as a registered Partner in the DAES system. This data is unique and non-transferable.');
+
+    const clientInfo = [
+      [isSpanish ? 'Cliente ID' : 'Client ID', client.clientId, isSpanish ? 'Identificador único en DAES' : 'Unique identifier in DAES'],
+      [isSpanish ? 'ID Externo' : 'External ID', client.externalClientId, isSpanish ? 'Su referencia interna' : 'Your internal reference'],
+      [isSpanish ? 'Nombre Legal' : 'Legal Name', client.legalName, isSpanish ? 'Nombre registrado oficialmente' : 'Officially registered name'],
+      [isSpanish ? 'Tipo' : 'Type', client.type, isSpanish ? 'Categoría de cliente' : 'Client category'],
+      [isSpanish ? 'País' : 'Country', client.country, isSpanish ? 'Jurisdicción de registro' : 'Registration jurisdiction'],
+      [isSpanish ? 'Estado' : 'Status', client.status, isSpanish ? 'Estado actual de la cuenta' : 'Current account status'],
+      ['Partner', partner.name, isSpanish ? 'Partner asociado' : 'Associated partner'],
+      ['Partner ID', partner.partnerId, isSpanish ? 'ID del partner' : 'Partner ID'],
+      [isSpanish ? 'Fecha de Registro' : 'Registration Date', fmt.dateTime(client.createdAt), isSpanish ? 'Fecha de creación' : 'Creation date']
+    ];
+
+    clientInfo.forEach(([label, value, desc]) => {
+      setCyanText(6);
+      pdf.text(`${label}:`, margin, yPos);
+      setWhiteText(6);
+      pdf.text(String(value), margin + 45, yPos);
+      setGrayText(5);
+      pdf.text(`(${desc})`, margin + 110, yPos);
+      yPos += lineHeight + 1;
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 2: CREDENCIALES
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '2. CREDENCIALES DE AUTENTICACIÓN' : '2. AUTHENTICATION CREDENTIALS', '🔐');
+
+    setYellowText(7);
+    pdf.text(isSpanish ? '⚠️ CONFIDENCIAL - Guardar de forma segura. No compartir.' : '⚠️ CONFIDENTIAL - Store securely. Do not share.', margin, yPos);
+    yPos += lineHeight + 3;
+
+    addParagraph(isSpanish 
+      ? 'Estas credenciales son necesarias para autenticar todas las comunicaciones con la API de DAES. El Webhook Secret se utiliza para verificar que las notificaciones provienen realmente de DAES.'
+      : 'These credentials are required to authenticate all communications with the DAES API. The Webhook Secret is used to verify that notifications actually come from DAES.');
+
+    const credentials = [
+      ['Partner Client ID', partner.clientId],
+      ['Client API Key', client.apiKey],
+      ['Webhook Secret', client.webhookSecret || (isSpanish ? '[Se genera al configurar webhook]' : '[Generated when configuring webhook]')]
+    ];
+
+    credentials.forEach(([label, value]) => {
+      setCyanText(6);
+      pdf.text(`${label}:`, margin, yPos);
+      setTerminalGreen(5);
+      pdf.text(String(value), margin + 45, yPos);
+      yPos += lineHeight + 1;
+    });
+
+    if (client.webhookUrl) {
+      yPos += 3;
+      setCyanText(6);
+      pdf.text('Webhook URL:', margin, yPos);
+      setWhiteText(5);
+      pdf.text(client.webhookUrl, margin + 30, yPos);
+      yPos += lineHeight;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 3: ¿QUÉ ES DAES PARTNER API?
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '3. ¿QUÉ ES DAES PARTNER API?' : '3. WHAT IS DAES PARTNER API?', '📖');
+
+    addParagraph(isSpanish 
+      ? 'DAES Partner API es un sistema de transferencias de fondos que permite a instituciones financieras y empresas registradas recibir pagos de forma automatizada. Cuando Digital Commercial Bank Ltd (DAES) realiza una transferencia a su favor, el sistema envía automáticamente una notificación a su servidor (webhook) con todos los detalles de la transacción.'
+      : 'DAES Partner API is a funds transfer system that allows registered financial institutions and companies to receive payments automatically. When Digital Commercial Bank Ltd (DAES) makes a transfer to you, the system automatically sends a notification to your server (webhook) with all transaction details.');
+
+    addParagraph(isSpanish 
+      ? 'El protocolo utilizado es CashTransfer.v1, un formato JSON estandarizado que contiene toda la información necesaria para procesar y registrar la transferencia en su sistema.'
+      : 'The protocol used is CashTransfer.v1, a standardized JSON format that contains all the information needed to process and record the transfer in your system.');
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 4: CONFIGURACIÓN DE LA API
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '4. CONFIGURACIÓN TÉCNICA DE LA API' : '4. API TECHNICAL CONFIGURATION', '🌐');
+
+    addParagraph(isSpanish 
+      ? 'Para recibir transferencias, debe configurar un servidor web (webhook) que escuche las notificaciones de DAES. A continuación se detallan los parámetros técnicos:'
+      : 'To receive transfers, you must configure a web server (webhook) that listens for DAES notifications. Below are the technical parameters:');
+
+    const serverConfig = [
+      ['Base URL', baseUrl, isSpanish ? 'URL base de la API DAES' : 'DAES API base URL'],
+      [isSpanish ? 'Protocolo' : 'Protocol', 'HTTPS REST API', isSpanish ? 'Solo conexiones seguras' : 'Secure connections only'],
+      [isSpanish ? 'Formato de Datos' : 'Data Format', 'JSON (CashTransfer.v1)', isSpanish ? 'Estructura estandarizada' : 'Standardized structure'],
+      [isSpanish ? 'Autenticación' : 'Authentication', 'HMAC-SHA256', isSpanish ? 'Firma criptográfica' : 'Cryptographic signature'],
+      [isSpanish ? 'Método HTTP' : 'HTTP Method', 'POST', isSpanish ? 'Para recibir datos' : 'To receive data'],
+      [isSpanish ? 'Versión API' : 'API Version', 'v1.0', isSpanish ? 'Versión actual' : 'Current version'],
+      ['Content-Type', 'application/json', isSpanish ? 'Tipo de contenido' : 'Content type'],
+      [isSpanish ? 'Encoding' : 'Encoding', 'UTF-8', isSpanish ? 'Codificación de caracteres' : 'Character encoding']
+    ];
+
+    serverConfig.forEach(([label, value, desc]) => {
+      setCyanText(6);
+      pdf.text(`${label}:`, margin, yPos);
+      setTerminalGreen(6);
+      pdf.text(String(value), margin + 45, yPos);
+      setGrayText(5);
+      pdf.text(`- ${desc}`, margin + 110, yPos);
+      yPos += lineHeight + 1;
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 5: DIVISAS SOPORTADAS
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '5. DIVISAS SOPORTADAS' : '5. SUPPORTED CURRENCIES', '💱');
+
+    addParagraph(isSpanish 
+      ? 'DAES Partner API soporta las siguientes divisas para envío y recepción de fondos. Los códigos siguen el estándar ISO 4217. Puede recibir transferencias en cualquiera de estas divisas:'
+      : 'DAES Partner API supports the following currencies for sending and receiving funds. The codes follow the ISO 4217 standard. You can receive transfers in any of these currencies:');
+
+    addSubSection(isSpanish ? 'Divisas Principales (Major Currencies)' : 'Major Currencies');
+    
+    const majorCurrencies = supportedCurrencies.slice(0, 12);
+    let currencyLine = '';
+    majorCurrencies.forEach((curr, idx) => {
+      currencyLine += `${curr.code} `;
+      if ((idx + 1) % 6 === 0 || idx === majorCurrencies.length - 1) {
+        setTerminalGreen(6);
+        pdf.text(currencyLine.trim(), margin, yPos);
+        yPos += lineHeight;
+        currencyLine = '';
+      }
+    });
+
+    addSubSection(isSpanish ? 'Divisas de América Latina' : 'Latin American Currencies');
+    const latamCurrencies = supportedCurrencies.filter(c => ['MXN', 'BRL', 'ARS', 'CLP', 'COP', 'PEN'].includes(c.code));
+    latamCurrencies.forEach(curr => {
+      setTerminalGreen(5);
+      pdf.text(`${curr.code}`, margin, yPos);
+      setWhiteText(5);
+      pdf.text(`- ${curr.name}`, margin + 15, yPos);
+      yPos += codeLineHeight + 0.5;
+    });
+
+    addSubSection(isSpanish ? 'Divisas de Asia y Pacífico' : 'Asia Pacific Currencies');
+    const asiaCurrencies = supportedCurrencies.filter(c => ['JPY', 'CNY', 'INR', 'KRW', 'THB', 'IDR', 'MYR', 'PHP', 'VND', 'SGD', 'HKD', 'AUD', 'NZD'].includes(c.code));
+    asiaCurrencies.forEach(curr => {
+      setTerminalGreen(5);
+      pdf.text(`${curr.code}`, margin, yPos);
+      setWhiteText(5);
+      pdf.text(`- ${curr.name}`, margin + 15, yPos);
+      yPos += codeLineHeight + 0.5;
+    });
+
+    addSubSection(isSpanish ? 'Divisas de Medio Oriente y África' : 'Middle East & Africa Currencies');
+    const meaCurrencies = supportedCurrencies.filter(c => ['AED', 'SAR', 'QAR', 'KWD', 'BHD', 'OMR', 'ZAR', 'EGP', 'NGN', 'KES', 'ILS', 'TRY', 'KMF'].includes(c.code));
+    meaCurrencies.forEach(curr => {
+      setTerminalGreen(5);
+      pdf.text(`${curr.code}`, margin, yPos);
+      setWhiteText(5);
+      pdf.text(`- ${curr.name}`, margin + 15, yPos);
+      yPos += codeLineHeight + 0.5;
+    });
+
+    addSubSection(isSpanish ? 'Divisas de Europa' : 'European Currencies');
+    const euroCurrencies = supportedCurrencies.filter(c => ['EUR', 'GBP', 'CHF', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'RUB', 'UAH'].includes(c.code));
+    euroCurrencies.forEach(curr => {
+      setTerminalGreen(5);
+      pdf.text(`${curr.code}`, margin, yPos);
+      setWhiteText(5);
+      pdf.text(`- ${curr.name}`, margin + 15, yPos);
+      yPos += codeLineHeight + 0.5;
+    });
+
+    addSubSection(isSpanish ? 'Divisas Digitales / Stablecoins' : 'Digital Currencies / Stablecoins');
+    const digitalCurrencies = supportedCurrencies.filter(c => ['USDT', 'USDC', 'VUSD', 'DUSD'].includes(c.code));
+    digitalCurrencies.forEach(curr => {
+      setTerminalGreen(5);
+      pdf.text(`${curr.code}`, margin, yPos);
+      setWhiteText(5);
+      pdf.text(`- ${curr.name}`, margin + 15, yPos);
+      yPos += codeLineHeight + 0.5;
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 6: PAYLOAD CashTransfer.v1
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '6. ESTRUCTURA DEL PAYLOAD - CashTransfer.v1' : '6. PAYLOAD STRUCTURE - CashTransfer.v1', '📥');
+
+    addParagraph(isSpanish 
+      ? 'Cuando DAES envía una transferencia, su servidor recibirá un POST HTTP con el siguiente payload JSON. Este es el formato exacto que debe procesar:'
+      : 'When DAES sends a transfer, your server will receive an HTTP POST with the following JSON payload. This is the exact format you must process:');
+
+    const payloadExample = `{
+  "CashTransfer.v1": {
+    "SendingName": "Digital Commercial Bank Ltd",
+    "SendingAccount": "ACC-DCB-001",
+    "ReceivingName": "${client.legalName}",
+    "ReceivingAccount": "[YOUR_ACCOUNT_NUMBER]",
+    "Datetime": "${new Date().toISOString()}",
+    "Amount": "10000.00",
+    "SendingCurrency": "USD",
+    "ReceivingCurrency": "USD",
+    "Description": "Payment transfer",
+    "TransferRequestID": "TXN-${Date.now()}",
+    "ReceivingInstitution": "${client.legalName}",
+    "SendingInstitution": "Digital Commercial Bank Ltd",
+    "method": "API",
+    "purpose": "PAYMENT",
+    "source": "DAES_PARTNER_API"
+  }
+}`;
+
+    addCodeBlock(payloadExample, 'json');
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 7: DESCRIPCIÓN DETALLADA DE CAMPOS
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '7. DESCRIPCIÓN DETALLADA DE CADA CAMPO' : '7. DETAILED FIELD DESCRIPTIONS', '📋');
+
+    addParagraph(isSpanish 
+      ? 'A continuación se explica cada campo del payload CashTransfer.v1 y cómo debe interpretarlo en su sistema:'
+      : 'Below is an explanation of each field in the CashTransfer.v1 payload and how you should interpret it in your system:');
+
+    const fieldDescriptions = isSpanish ? [
+      ['SendingName', 'Nombre completo del remitente. Siempre será "Digital Commercial Bank Ltd" para transferencias desde DAES.'],
+      ['SendingAccount', 'Número de cuenta de origen en DAES. Use este campo para referencia interna.'],
+      ['ReceivingName', 'Su nombre legal tal como está registrado en DAES. Verifique que coincida con sus registros.'],
+      ['ReceivingAccount', 'El número de cuenta destino donde se acreditarán los fondos. Debe coincidir con una cuenta válida en su sistema.'],
+      ['Datetime', 'Fecha y hora de la transferencia en formato ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ). Use UTC para consistencia.'],
+      ['Amount', 'Monto de la transferencia como string con 2 decimales. Ej: "10000.00". Convierta a número para cálculos.'],
+      ['SendingCurrency', 'Código ISO 4217 de la divisa de origen. Ej: USD, EUR, GBP. Ver lista de divisas soportadas.'],
+      ['ReceivingCurrency', 'Código ISO 4217 de la divisa de destino. Puede ser diferente a SendingCurrency si hay conversión.'],
+      ['Description', 'Descripción o concepto del pago. Use para mostrar al usuario final y para auditoría.'],
+      ['TransferRequestID', 'ID único de la transacción. IMPORTANTE: Use este ID para evitar duplicados (idempotencia).'],
+      ['ReceivingInstitution', 'Nombre de su institución receptora. Debe coincidir con su registro en DAES.'],
+      ['SendingInstitution', 'Institución que envía los fondos. Siempre "Digital Commercial Bank Ltd".'],
+      ['method', 'Método de transferencia. Siempre será "API" para transferencias programáticas.'],
+      ['purpose', 'Propósito del pago. Valores: PAYMENT, TRANSFER, SALARY, INVOICE, REFUND, OTHER.'],
+      ['source', 'Sistema de origen. Siempre "DAES_PARTNER_API" para este módulo.']
+    ] : [
+      ['SendingName', 'Full name of the sender. Always "Digital Commercial Bank Ltd" for DAES transfers.'],
+      ['SendingAccount', 'Source account number in DAES. Use this field for internal reference.'],
+      ['ReceivingName', 'Your legal name as registered in DAES. Verify it matches your records.'],
+      ['ReceivingAccount', 'Destination account number where funds will be credited. Must match a valid account in your system.'],
+      ['Datetime', 'Transfer date and time in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ). Use UTC for consistency.'],
+      ['Amount', 'Transfer amount as string with 2 decimals. E.g.: "10000.00". Convert to number for calculations.'],
+      ['SendingCurrency', 'ISO 4217 code of source currency. E.g.: USD, EUR, GBP. See supported currencies list.'],
+      ['ReceivingCurrency', 'ISO 4217 code of destination currency. May differ from SendingCurrency if conversion applies.'],
+      ['Description', 'Payment description or concept. Use to display to end user and for auditing.'],
+      ['TransferRequestID', 'Unique transaction ID. IMPORTANT: Use this ID to prevent duplicates (idempotency).'],
+      ['ReceivingInstitution', 'Name of your receiving institution. Must match your DAES registration.'],
+      ['SendingInstitution', 'Institution sending the funds. Always "Digital Commercial Bank Ltd".'],
+      ['method', 'Transfer method. Always "API" for programmatic transfers.'],
+      ['purpose', 'Payment purpose. Values: PAYMENT, TRANSFER, SALARY, INVOICE, REFUND, OTHER.'],
+      ['source', 'Source system. Always "DAES_PARTNER_API" for this module.']
+    ];
+
+    fieldDescriptions.forEach(([field, desc]) => {
+      checkNewPage(12);
+      setTerminalGreen(6);
+      pdf.text(String(field), margin, yPos);
+      yPos += lineHeight;
+      setGrayText(5);
+      const descLines = pdf.splitTextToSize(String(desc), pageWidth - 2 * margin - 5);
+      descLines.forEach((line: string) => {
+        pdf.text(`  ${line}`, margin, yPos);
+        yPos += codeLineHeight;
+      });
+      yPos += 2;
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 8: CÓDIGO DE IMPLEMENTACIÓN - NODE.JS
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '8. IMPLEMENTACIÓN EN NODE.JS (EXPRESS)' : '8. NODE.JS IMPLEMENTATION (EXPRESS)', '💻');
+
+    addParagraph(isSpanish 
+      ? 'El siguiente código es un ejemplo completo de cómo implementar un servidor webhook para recibir transferencias de DAES. Puede copiar y adaptar este código a su infraestructura:'
+      : 'The following code is a complete example of how to implement a webhook server to receive DAES transfers. You can copy and adapt this code to your infrastructure:');
+
+    addSubSection(isSpanish ? 'Paso 1: Configuración Inicial' : 'Step 1: Initial Setup');
+
+    const nodeServerCode = `// daes-receiver.js
+// ${isSpanish ? 'Servidor de recepción DAES Partner API' : 'DAES Partner API Receiver Server'}
+// ${isSpanish ? 'Cliente' : 'Client'}: ${client.legalName}
+// ${isSpanish ? 'Generado' : 'Generated'}: ${formattedDate}
+
+const express = require('express');
+const crypto = require('crypto');
+const app = express();
+app.use(express.json());
+
+// ${isSpanish ? 'CREDENCIALES - Reemplace con sus valores reales' : 'CREDENTIALS - Replace with your actual values'}
+const CONFIG = {
+  CLIENT_ID: '${client.clientId}',
+  API_KEY: '${client.apiKey}',
+  WEBHOOK_SECRET: '${client.webhookSecret || 'YOUR_WEBHOOK_SECRET'}',
+  PORT: 3000  // ${isSpanish ? 'Puerto donde escuchará su servidor' : 'Port where your server will listen'}
+};`;
+
+    addCodeBlock(nodeServerCode, 'javascript');
+
+    addSubSection(isSpanish ? 'Paso 2: Función de Verificación de Firma' : 'Step 2: Signature Verification Function');
+
+    addParagraph(isSpanish 
+      ? 'Esta función es CRÍTICA para la seguridad. Verifica que el payload realmente proviene de DAES usando HMAC-SHA256:'
+      : 'This function is CRITICAL for security. It verifies that the payload actually comes from DAES using HMAC-SHA256:');
+
+    const verifySignatureCode = `// ${isSpanish ? 'IMPORTANTE: Verificar firma HMAC-SHA256' : 'IMPORTANT: Verify HMAC-SHA256 signature'}
+function verifySignature(payload, signature) {
+  // ${isSpanish ? 'Crear HMAC usando el webhook secret' : 'Create HMAC using the webhook secret'}
+  const hmac = crypto.createHmac('sha256', CONFIG.WEBHOOK_SECRET);
+  
+  // ${isSpanish ? 'Calcular la firma esperada' : 'Calculate expected signature'}
+  const expected = hmac.update(JSON.stringify(payload)).digest('hex');
+  
+  // ${isSpanish ? 'Comparación segura contra timing attacks' : 'Secure comparison against timing attacks'}
+  return crypto.timingSafeEqual(
+    Buffer.from(signature || ''),
+    Buffer.from(expected)
+  );
+}`;
+
+    addCodeBlock(verifySignatureCode, 'javascript');
+
+    const webhookEndpointCode = `// ${isSpanish ? 'ENDPOINT PRINCIPAL - Recibir transferencias' : 'MAIN ENDPOINT - Receive transfers'}
+app.post('/webhook/daes/receive', async (req, res) => {
+  try {
+    // 1. ${isSpanish ? 'Verificar firma' : 'Verify signature'}
+    const signature = req.headers['x-daes-signature'];
+    if (!verifySignature(req.body, signature)) {
+      return res.status(401).json({ error: 'INVALID_SIGNATURE' });
+    }
+
+    // 2. ${isSpanish ? 'Extraer datos de CashTransfer.v1' : 'Extract CashTransfer.v1 data'}
+    const transfer = req.body['CashTransfer.v1'];
+    
+    console.log('${isSpanish ? 'Transferencia recibida' : 'Transfer received'}:');
+    console.log('  TransferRequestID:', transfer.TransferRequestID);
+    console.log('  Amount:', transfer.Amount, transfer.ReceivingCurrency);
+    console.log('  From:', transfer.SendingName);
+
+    // 3. ${isSpanish ? 'IMPLEMENTAR: Su lógica de negocio' : 'IMPLEMENT: Your business logic'}
+    // await saveToDatabase(transfer);
+    // await updateAccountBalance(transfer.ReceivingAccount, transfer.Amount);
+    // await sendNotification(transfer);
+
+    // 4. ${isSpanish ? 'Responder con confirmación' : 'Respond with confirmation'}
+    res.status(200).json({
+      status: 'ACCEPTED',
+      transactionId: transfer.TransferRequestID,
+      receivedAt: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(CONFIG.PORT, () => {
+  console.log('DAES Receiver running on port', CONFIG.PORT);
+});`;
+
+    addCodeBlock(webhookEndpointCode, 'javascript');
+
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 9: IMPLEMENTACIÓN PYTHON
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '9. IMPLEMENTACIÓN ALTERNATIVA EN PYTHON (FLASK)' : '9. ALTERNATIVE PYTHON IMPLEMENTATION (FLASK)', '🐍');
+
+    addParagraph(isSpanish 
+      ? 'Si su infraestructura utiliza Python, aquí tiene un ejemplo equivalente usando Flask:'
+      : 'If your infrastructure uses Python, here is an equivalent example using Flask:');
+
+    const pythonCode = `# daes_receiver.py
+# ${isSpanish ? 'Servidor de recepción DAES Partner API' : 'DAES Partner API Receiver Server'}
+# ${isSpanish ? 'Cliente' : 'Client'}: ${client.legalName}
+
+from flask import Flask, request, jsonify
+import hmac, hashlib, json
+
+app = Flask(__name__)
+
+CONFIG = {
+    'CLIENT_ID': '${client.clientId}',
+    'WEBHOOK_SECRET': '${client.webhookSecret || 'YOUR_WEBHOOK_SECRET'}'
+}
+
+def verify_signature(payload, signature):
+    """${isSpanish ? 'Verificar firma HMAC-SHA256' : 'Verify HMAC-SHA256 signature'}"""
+    expected = hmac.new(
+        CONFIG['WEBHOOK_SECRET'].encode(),
+        json.dumps(payload).encode(),
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(signature or '', expected)
+
+@app.route('/webhook/daes/receive', methods=['POST'])
+def receive_transfer():
+    """${isSpanish ? 'Endpoint para recibir transferencias' : 'Endpoint to receive transfers'}"""
+    signature = request.headers.get('X-DAES-Signature')
+    if not verify_signature(request.json, signature):
+        return jsonify({'error': 'INVALID_SIGNATURE'}), 401
+    
+    transfer = request.json.get('CashTransfer.v1', {})
+    
+    # ${isSpanish ? 'Registrar la transferencia' : 'Log the transfer'}
+    print(f"TransferRequestID: {transfer['TransferRequestID']}")
+    print(f"Amount: {transfer['Amount']} {transfer['ReceivingCurrency']}")
+    print(f"From: {transfer['SendingName']}")
+    
+    # ${isSpanish ? 'IMPLEMENTAR: Su lógica de negocio aquí' : 'IMPLEMENT: Your business logic here'}
+    # save_to_database(transfer)
+    # update_account_balance(transfer)
+    # send_notification(transfer)
+    
+    return jsonify({
+        'status': 'ACCEPTED',
+        'transactionId': transfer['TransferRequestID']
+    })
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=3000)`;
+
+    addCodeBlock(pythonCode, 'python');
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 10: RESPUESTAS ESPERADAS
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '10. RESPUESTAS QUE SU SERVIDOR DEBE ENVIAR' : '10. RESPONSES YOUR SERVER MUST SEND', '📤');
+
+    addParagraph(isSpanish 
+      ? 'Su servidor DEBE responder con un código HTTP 200 y un JSON de confirmación para que DAES registre la transferencia como exitosa. Si hay errores, use los códigos HTTP apropiados:'
+      : 'Your server MUST respond with HTTP 200 and a confirmation JSON for DAES to register the transfer as successful. If there are errors, use appropriate HTTP codes:');
+
+    addSubSection(isSpanish ? 'Respuesta Exitosa (HTTP 200)' : 'Successful Response (HTTP 200)');
+
+    const successResponse = `{
+  "status": "ACCEPTED",
+  "transactionId": "TXN-1234567890",
+  "receivedAt": "${new Date().toISOString()}",
+  "message": "${isSpanish ? 'Transferencia procesada correctamente' : 'Transfer processed successfully'}"
+}`;
+
+    addCodeBlock(successResponse, 'json');
+
+    addSubSection(isSpanish ? 'Respuestas de Error' : 'Error Responses');
+
+    const errorResponses = `// HTTP 401 - ${isSpanish ? 'Firma inválida (rechazar transferencia)' : 'Invalid signature (reject transfer)'}
+{ "error": "INVALID_SIGNATURE", "message": "Signature verification failed" }
+
+// HTTP 400 - ${isSpanish ? 'Payload inválido o campos faltantes' : 'Invalid payload or missing fields'}
+{ "error": "INVALID_PAYLOAD", "message": "Missing required field: Amount" }
+
+// HTTP 404 - ${isSpanish ? 'Cuenta destino no encontrada' : 'Destination account not found'}
+{ "error": "ACCOUNT_NOT_FOUND", "message": "Account does not exist" }
+
+// HTTP 500 - ${isSpanish ? 'Error interno del servidor' : 'Internal server error'}
+{ "error": "INTERNAL_ERROR", "message": "Database connection failed" }`;
+
+    addCodeBlock(errorResponses, 'json');
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 11: HEADERS HTTP
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '11. HEADERS HTTP QUE RECIBIRÁ' : '11. HTTP HEADERS YOU WILL RECEIVE', '📋');
+
+    addParagraph(isSpanish 
+      ? 'DAES enviará los siguientes headers HTTP en cada solicitud. Use X-DAES-Signature para verificar la autenticidad:'
+      : 'DAES will send the following HTTP headers with each request. Use X-DAES-Signature to verify authenticity:');
+
+    const headersInfo = [
+      ['Content-Type', 'application/json', isSpanish ? 'Tipo de contenido siempre JSON' : 'Content type always JSON'],
+      ['X-DAES-Signature', isSpanish ? '[HMAC-SHA256]' : '[HMAC-SHA256]', isSpanish ? 'Firma para verificación - CRÍTICO' : 'Signature for verification - CRITICAL'],
+      ['X-DAES-Timestamp', isSpanish ? '[Unix ms]' : '[Unix ms]', isSpanish ? 'Timestamp de la solicitud' : 'Request timestamp'],
+      ['X-DAES-Client-ID', client.clientId, isSpanish ? 'Su ID de cliente' : 'Your client ID'],
+      ['X-DAES-Transaction-ID', isSpanish ? '[TXN-xxx]' : '[TXN-xxx]', isSpanish ? 'ID único de transacción' : 'Unique transaction ID'],
+      ['Authorization', `Bearer ${client.apiKey.slice(0, 10)}...`, isSpanish ? 'Token de autenticación' : 'Authentication token']
+    ];
+
+    headersInfo.forEach(([header, value, desc]) => {
+      setTerminalGreen(6);
+      pdf.text(String(header), margin, yPos);
+      setWhiteText(5);
+      pdf.text(String(value), margin + 50, yPos);
+      setGrayText(5);
+      pdf.text(`- ${desc}`, margin + 100, yPos);
+      yPos += lineHeight + 1;
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 12: CHECKLIST DE IMPLEMENTACIÓN
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? 'CHECKLIST DE IMPLEMENTACIÓN' : 'IMPLEMENTATION CHECKLIST', '✅');
+
+    const checklist = isSpanish ? [
+      '☐ Crear endpoint POST /webhook/daes/receive',
+      '☐ Implementar verificación de firma HMAC-SHA256',
+      '☐ Parsear el objeto CashTransfer.v1 del payload',
+      '☐ Validar campos requeridos (Amount, TransferRequestID)',
+      '☐ Guardar transacción en base de datos',
+      '☐ Actualizar balance de cuenta destino',
+      '☐ Responder con status ACCEPTED y transactionId',
+      '☐ Implementar logs para auditoría',
+      '☐ Configurar HTTPS en producción',
+      '☐ Notificar a DAES su URL de webhook'
+    ] : [
+      '☐ Create POST endpoint /webhook/daes/receive',
+      '☐ Implement HMAC-SHA256 signature verification',
+      '☐ Parse CashTransfer.v1 object from payload',
+      '☐ Validate required fields (Amount, TransferRequestID)',
+      '☐ Save transaction to database',
+      '☐ Update destination account balance',
+      '☐ Respond with ACCEPTED status and transactionId',
+      '☐ Implement audit logging',
+      '☐ Configure HTTPS for production',
+      '☐ Notify DAES of your webhook URL'
+    ];
+
+    checklist.forEach(item => {
+      setWhiteText(6);
+      pdf.text(item, margin, yPos);
+      yPos += lineHeight;
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SECCIÓN 13: SOPORTE TÉCNICO Y CONTACTO
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? '13. SOPORTE TÉCNICO Y CONTACTO' : '13. TECHNICAL SUPPORT & CONTACT', '📞');
+
+    addParagraph(isSpanish 
+      ? 'Si tiene preguntas o necesita asistencia durante la integración, puede contactar a nuestro equipo de soporte técnico:'
+      : 'If you have questions or need assistance during integration, you can contact our technical support team:');
+
+    const contactInfo = [
+      [isSpanish ? 'Portal de Partners' : 'Partner Portal', 'https://luxliqdaes.cloud/partner-portal', isSpanish ? 'Acceso a documentación y herramientas' : 'Access to documentation and tools'],
+      [isSpanish ? 'Documentación API' : 'API Documentation', 'https://luxliqdaes.cloud/docs/partner-api', isSpanish ? 'Referencia técnica completa' : 'Complete technical reference'],
+      [isSpanish ? 'Soporte Técnico' : 'Technical Support', 'support@luxliqdaes.cloud', isSpanish ? 'Respuesta en 24h hábiles' : 'Response within 24 business hours'],
+      ['Base URL', baseUrl, isSpanish ? 'Endpoint principal de la API' : 'Main API endpoint'],
+      [isSpanish ? 'Estado del Sistema' : 'System Status', 'https://status.luxliqdaes.cloud', isSpanish ? 'Monitoreo en tiempo real' : 'Real-time monitoring']
+    ];
+
+    contactInfo.forEach(([label, value, desc]) => {
+      setCyanText(6);
+      pdf.text(`${label}:`, margin, yPos);
+      setWhiteText(5);
+      pdf.text(String(value), margin + 45, yPos);
+      setGrayText(5);
+      pdf.text(`- ${desc}`, margin + 120, yPos);
+      yPos += lineHeight + 1;
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // RESUMEN DE DIVISAS (Tabla compacta)
+    // ═══════════════════════════════════════════════════════════════════════════
+    addSectionHeader(isSpanish ? 'RESUMEN: CÓDIGOS DE DIVISAS SOPORTADAS' : 'SUMMARY: SUPPORTED CURRENCY CODES', '💰');
+
+    setGrayText(5);
+    pdf.text(isSpanish ? 'Códigos ISO 4217 válidos para SendingCurrency y ReceivingCurrency:' : 'Valid ISO 4217 codes for SendingCurrency and ReceivingCurrency:', margin, yPos);
+    yPos += lineHeight;
+
+    // Mostrar todas las divisas en formato compacto
+    let currencyRow = '';
+    supportedCurrencies.forEach((curr, idx) => {
+      currencyRow += `${curr.code} `;
+      if ((idx + 1) % 12 === 0 || idx === supportedCurrencies.length - 1) {
+        setTerminalGreen(5);
+        pdf.text(currencyRow.trim(), margin, yPos);
+        yPos += codeLineHeight;
+        currencyRow = '';
+      }
+    });
+
+    yPos += 6;
+    drawGreenLine(yPos);
+    yPos += 6;
+
+    // Footer final
+    setGrayText(5);
+    pdf.text(isSpanish ? 'Documento generado:' : 'Document generated:', margin, yPos);
+    setWhiteText(5);
+    pdf.text(`${formattedDate} ${formattedTime} UTC`, margin + 40, yPos);
+    yPos += lineHeight;
+
+    setGrayText(5);
+    pdf.text('Document Hash:', margin, yPos);
+    setTerminalGreen(4);
+    pdf.text(securityHash.slice(0, 40) + '...', margin + 30, yPos);
+    yPos += lineHeight;
+
+    setGrayText(5);
+    pdf.text('Verification Code:', margin, yPos);
+    setTerminalGreen(4);
+    pdf.text(verificationCode, margin + 38, yPos);
+    yPos += lineHeight + 4;
+
+    setCyanText(6);
+    pdf.text('Digital Commercial Bank Ltd © 2025 - All Rights Reserved', pageWidth / 2, yPos, { align: 'center' });
+    yPos += lineHeight;
+    setGrayText(5);
+    pdf.text(isSpanish ? 'DOCUMENTO CONFIDENCIAL - USO EXCLUSIVO DEL CLIENTE REGISTRADO' : 'CONFIDENTIAL DOCUMENT - FOR REGISTERED CLIENT USE ONLY', pageWidth / 2, yPos, { align: 'center' });
+
+    // Footer en última página
+    setGrayText(5);
+    pdf.text(`${documentRef} | ${isSpanish ? 'Pág' : 'Page'} ${pageNumber}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
+
+    // Guardar PDF
+    const filename = `DAES_Partner_API_Integration_${client.legalName.replace(/\s+/g, '_')}_${client.clientId}.pdf`;
+    pdf.save(filename);
+    
+    console.log(`[DAES Partner API] 📄 PDF de integración completo generado para: ${client.legalName}`);
   };
 
   const generateClientCredentialsTXT = (client: any, partner: Partner) => {
@@ -4003,32 +4886,54 @@ Partner: ${partner.name}
               </div>
             </div>
 
-            {/* Ejemplo CashTransfer.v1 */}
+            {/* Ejemplo ISO 20022 pacs.008 */}
             <div>
               <h3 className="text-lg font-bold text-[var(--text-primary)] m-card">
-                {isSpanish ? "Ejemplo CashTransfer.v1" : "CashTransfer.v1 Example"}
+                {isSpanish ? "Ejemplo ISO 20022 pacs.008" : "ISO 20022 pacs.008 Example"}
               </h3>
               <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-card-sm overflow-x-auto">
                 <pre className="text-[var(--text-primary)] font-mono text-xs">
-{`{
-  "CashTransfer.v1": {
-    "SendingName": "Digital Commercial Bank Ltd",
-    "SendingAccount": "ACC-USD-001",
-    "ReceivingName": "Cliente Destino",
-    "ReceivingAccount": "ACC-USD-002",
-    "Datetime": "2025-11-26T12:00:00.000Z",
-    "Amount": "1000.00",
-    "SendingCurrency": "USD",
-    "ReceivingCurrency": "USD",
-    "Description": "Payment",
-    "TransferRequestID": "PLK-TX-001",
-    "ReceivingInstitution": "Digital Commercial Bank DAES",
-    "SendingInstitution": "Digital Commercial Bank DAES",
-    "method": "API",
-    "purpose": "PAYMENT",
-    "source": "DAES"
-  }
-}`}
+{`<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.008.001.08">
+  <FIToFICstmrCdtTrf>
+    <GrpHdr>
+      <MsgId>DAES-${Date.now()}</MsgId>
+      <CreDtTm>${new Date().toISOString()}</CreDtTm>
+      <NbOfTxs>1</NbOfTxs>
+      <SttlmInf>
+        <SttlmMtd>CLRG</SttlmMtd>
+      </SttlmInf>
+    </GrpHdr>
+    <CdtTrfTxInf>
+      <PmtId>
+        <InstrId>DAES-INSTR-001</InstrId>
+        <EndToEndId>DAES-E2E-001</EndToEndId>
+        <UETR>550e8400-e29b-41d4-a716-446655440000</UETR>
+      </PmtId>
+      <IntrBkSttlmAmt Ccy="USD">10000.00</IntrBkSttlmAmt>
+      <ChrgBr>SHAR</ChrgBr>
+      <Dbtr>
+        <Nm>Digital Commercial Bank Ltd</Nm>
+      </Dbtr>
+      <DbtrAgt>
+        <FinInstnId>
+          <BICFI>DIGCGB2L</BICFI>
+        </FinInstnId>
+      </DbtrAgt>
+      <Cdtr>
+        <Nm>Cliente Destino</Nm>
+      </Cdtr>
+      <CdtrAgt>
+        <FinInstnId>
+          <BICFI>DIGCGB2L</BICFI>
+        </FinInstnId>
+      </CdtrAgt>
+      <RmtInf>
+        <Ustrd>Payment</Ustrd>
+      </RmtInf>
+    </CdtTrfTxInf>
+  </FIToFICstmrCdtTrf>
+</Document>`}
                 </pre>
               </div>
             </div>
@@ -4220,11 +5125,11 @@ Partner: ${partner.name}
                             onClick={() => {
                               const partnerForClient = partners.find(p => p.partnerId === client.partnerId);
                               if (partnerForClient) {
-                                generateClientCredentialsTXT(client, partnerForClient);
+                                generateClientCredentialsPDF(client, partnerForClient);
                               }
                             }}
                             className="p-card-sm bg-white/5 hover:bg-white/10 border border-white/15 hover:border-white/30 text-[var(--text-primary)] rounded-lg transition-all"
-                            title={isSpanish ? "Descargar credenciales TXT" : "Download credentials TXT"}
+                            title={isSpanish ? "Descargar credenciales PDF" : "Download credentials PDF"}
                           >
                             <Download className="w-5 h-5" />
                           </button>
@@ -4766,4 +5671,3 @@ Partner: ${partner.name}
     </div>
   );
 }
-

@@ -83,6 +83,14 @@ class LedgerPersistenceStore {
       if (saved) {
         const parsed = JSON.parse(saved);
         this.state = { ...this.state, ...parsed };
+        
+        // ✅ FIX: Al recargar la página, el proceso real ya no está corriendo
+        // Resetear isProcessing para que el botón "Cargar Ledger1" funcione
+        if (this.state.isProcessing) {
+          console.log('[Ledger Store] ⚠️ Proceso anterior interrumpido, reseteando estado...');
+          this.state.isProcessing = false;
+        }
+        
         console.log('[Ledger Store] ✅ Estado cargado desde localStorage');
         console.log('[Ledger Store] 📊 Progreso:', this.state.progress.percentage.toFixed(2) + '%');
         console.log('[Ledger Store] 💰 Balances:', this.state.balances.length);
@@ -360,4 +368,3 @@ class LedgerPersistenceStore {
 // Export singleton instance
 export const ledgerPersistenceStore = LedgerPersistenceStore.getInstance();
 export type { LedgerFileState, LedgerProgress, LedgerBalance };
-

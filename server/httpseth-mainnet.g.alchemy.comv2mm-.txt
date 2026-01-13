@@ -1,0 +1,25 @@
+https://eth-mainnet.g.alchemy.com/v2/mm-9UjI5oG51l94mRH3fh
+
+apikey mm-9UjI5oG51l94mRH3fh
+
+
+
+curl https://eth-mainnet.g.alchemy.com/v2/mm-9UjI5oG51l94mRH3fh \
+     --request POST \
+     --header 'accept: application/json' \
+     --header 'content-type: application/json' \
+     --data '{"id":1,"jsonrpc":"2.0","method":"eth_blockNumber"}'
+
+
+
+https://www.alchemy.com/docs/chains/ethereum/ethereum-api-endpoints/eth-block-number
+
+
+
+PASO 2) Copiar tu Endpoint URL (el RPC)
+
+En “Endpoint URL” dale Copy.
+
+Vas a pegarlo en .env como:
+
+ETH_RPC_URL=<PEGA_AQUI_EL_ENDPOINT>

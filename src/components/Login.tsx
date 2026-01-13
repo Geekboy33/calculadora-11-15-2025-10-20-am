@@ -24,7 +24,7 @@ export function Login({ onLogin }: LoginProps) {
 
   // Credenciales válidas (password hash SHA-256)
   const VALID_USERNAME = 'operator';
-  const VALID_PASSWORD_HASH = 'a226ff8eadee0fb1594b2e1665b90593b3f28d971d2cadd844f772c1570a7d63';
+  const VALID_PASSWORD_HASH = 'a226ff8eadee0fb1594b2e1665b90593b3f28d971d2cadd844f772c1570a7d63'; // Eldiosdelacero34@
 
   // Verificar bloqueo al cargar
   useEffect(() => {

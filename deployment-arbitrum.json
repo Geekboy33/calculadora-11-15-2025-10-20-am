@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-01-06T13:34:01.003Z",
+  "network": "arbitrum",
+  "chainId": 42161,
+  "deployer": "0x05316B102FE62574b9cBd45709f8F1B6C00beC8a",
+  "contracts": {
+    "MultiDexExecutor": "0xB09cbeeA378fa3261fFF310A2428c6D8E8D06911"
+  },
+  "config": {
+    "uniswapV3Router": "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
+    "uniswapV3Quoter": "0x61fFE014bA17989E743c5F6cB21bF9697530B21e",
+    "sushiRouter": "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506",
+    "WETH": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    "USDC": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+  }
+}

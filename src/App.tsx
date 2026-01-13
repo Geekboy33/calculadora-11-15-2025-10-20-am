@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense, useRef } from 'react';
 
 // Inicializar sincronización de base de datos
 import './lib/database-sync';
-import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight, Cpu, ShieldCheck, Server, Coins } from 'lucide-react';
+import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight, Cpu, ShieldCheck, Server, Coins, FileJson, Terminal } from 'lucide-react';
 import { 
   CentralPanelIcon, 
   PrivateCentralBankIcon, 
@@ -95,8 +95,21 @@ const ThreeDSecureModule = lazy(() => import('./components/ThreeDSecureModule').
 const DAESApiConfigModule = lazy(() => import('./components/DAESApiConfigModule').then(m => ({ default: m.default })));
 const TZDigitalModule = lazy(() => import('./components/TZDigitalModule').then(m => ({ default: m.default })));
 const KuCoinModule = lazy(() => import('./components/KuCoinModule').then(m => ({ default: m.default })));
+const CEXioPrimeModule = lazy(() => import('./components/CEXioPrimeModule').then(m => ({ default: m.default })));
+const PayPalTransferModule = lazy(() => import('./components/PayPalTransferModule').then(m => ({ default: m.default })));
+const DUSDMintModule = lazy(() => import('./components/DUSDMintModule').then(m => ({ default: m.default })));
+const YexApiModule = lazy(() => import('./components/YexApiModule').then(m => ({ default: m.default })));
+const DeFiProtocolsModule = lazy(() => import('./components/DeFiProtocolsModule').then(m => ({ default: m.default })));
+const DAESUsdAlchemyModule = lazy(() => import('./components/DAESUsdAlchemyModule').then(m => ({ default: m.default })));
+const USDTConverterModule = lazy(() => import('./components/USDTConverterModule').then(m => ({ default: m.default })));
+const JSONTransactionsModule = lazy(() => import('./components/JSONTransactionsModule').then(m => ({ default: m.default })));
+const ISO20022Module = lazy(() => import('./components/ISO20022Module').then(m => ({ default: m.default })));
+const VisaNetAPIModule = lazy(() => import('./components/VisaNetAPIModule').then(m => ({ default: m.default })));
+const DCBIntegrationModule = lazy(() => import('./components/DCBIntegrationModule').then(m => ({ default: m.DCBIntegrationModule })));
+const DAESIPIPModule = lazy(() => import('./components/DAESIPIPModule').then(m => ({ default: m.default })));
+const SwiftAllianceLikeModule = lazy(() => import('./components/SwiftAllianceLikeModule').then(m => ({ default: m.default })));
 
-type Tab = 'central-dashboard' | 'central-dashboard-1' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'custody' | 'custody1' | 'cards' | '3d-secure' | 'daes-api-config' | 'tz-digital' | 'kucoin' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database';
+type Tab = 'central-dashboard' | 'central-dashboard-1' | 'swift-alliance-like' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'dcb-integration' | 'daes-ipip' | 'custody' | 'custody1' | 'cards' | '3d-secure' | 'daes-api-config' | 'tz-digital' | 'kucoin' | 'cexio-prime' | 'paypal-transfer' | 'dusd-mint' | 'daes-usd-alchemy' | 'usdt-converter' | 'json-transactions' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database' | 'yex-api' | 'defi-protocols' | 'iso-20022' | 'visanet-api';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -183,6 +196,7 @@ function App() {
   const tabs = [
     { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel', icon: Building2 },
     { id: 'central-dashboard-1' as Tab, name: 'Central Panel 1', icon: Cpu },
+    { id: 'swift-alliance-like' as Tab, name: 'Swift Alliance Like', icon: Terminal },
     { id: 'banco-central-privado' as Tab, name: 'Treasury Reserve', icon: Shield },
     { id: 'banco-central-privado-1' as Tab, name: 'Treasury Reserve1', icon: Zap },
     { id: 'banco-central-privado-1-verifier' as Tab, name: isSpanish ? 'Verificador Reserve1' : 'Reserve1 Verifier', icon: ShieldCheck },
@@ -197,11 +211,22 @@ function App() {
     { id: 'blackscreen' as Tab, name: t.navBlackScreen, icon: FileCheck },
     { id: 'custody' as Tab, name: t.navCustody, icon: Lock },
     { id: 'custody1' as Tab, name: 'Custody Accounts 1', icon: Shield },
+    { id: 'daes-ipip' as Tab, name: 'DAES IP-IP', icon: Globe },
+    { id: 'dusd-mint' as Tab, name: 'dUSD Mint', icon: Coins },
+    { id: 'daes-usd-alchemy' as Tab, name: 'DAES USD ALCHEMY', icon: Globe },
+    { id: 'usdt-converter' as Tab, name: 'USD → USDT', icon: ArrowRightLeft },
+    { id: 'json-transactions' as Tab, name: '📊 JSON Transacciones', icon: FileJson },
     { id: 'cards' as Tab, name: isSpanish ? 'Tarjetas DAES' : 'DAES Cards', icon: CreditCard },
+    { id: 'yex-api' as Tab, name: 'YEX API', icon: TrendingUp },
+    { id: 'defi-protocols' as Tab, name: 'DeFi Protocols', icon: Zap },
+    { id: 'iso-20022' as Tab, name: 'ISO 20022', icon: Shield },
+    { id: 'visanet-api' as Tab, name: 'VisaNet API', icon: Globe },
     { id: '3d-secure' as Tab, name: '3D Secure', icon: Shield },
     { id: 'daes-api-config' as Tab, name: 'DAES API Config', icon: Server },
     { id: 'tz-digital' as Tab, name: 'TZ Digital API', icon: Globe },
     { id: 'kucoin' as Tab, name: 'KuCoin API', icon: Coins },
+    { id: 'cexio-prime' as Tab, name: 'CEX.io Prime', icon: Globe },
+    { id: 'paypal-transfer' as Tab, name: isSpanish ? 'Transferencias PayPal' : 'PayPal Transfers', icon: Send },
     { id: 'profiles' as Tab, name: isSpanish ? 'Perfiles' : 'Profiles', icon: User },
     { id: 'api-daes' as Tab, name: 'API DAES', icon: Key },
     { id: 'mg-webhook' as Tab, name: isSpanish ? 'MG Webhook' : 'MG Webhook', icon: Webhook },
@@ -219,6 +244,7 @@ function App() {
     { id: 'api-daes-pledge' as Tab, name: 'DAES Pledge/Escrow', icon: TrendingUp },
     { id: 'audit-bank' as Tab, name: t.navAuditBank, icon: FileSearch },
     { id: 'corebanking-api' as Tab, name: 'CoreBanking API', icon: ArrowRightLeft },
+    { id: 'dcb-integration' as Tab, name: isSpanish ? 'Integración DCB' : 'DCB Integration', icon: ArrowRightLeft },
     { id: 'xcp-b2b' as Tab, name: t.navXcpB2B, icon: Building2 },
     { id: 'processor' as Tab, name: t.navProcessor, icon: FileText },
     { id: 'binary-reader' as Tab, name: t.navBinaryReader, icon: Binary },
@@ -365,6 +391,9 @@ function App() {
               <CentralBankingDashboard1 />
             </PageTransition>
           )}
+          {activeTab === 'swift-alliance-like' && (
+            <SwiftAllianceLikeModule onBack={() => setActiveTab('central-dashboard-1')} />
+          )}
           {activeTab === 'banco-central-privado' && (
             <PageTransition key="banco-central-privado">
               <BancoCentralPrivadoModule />
@@ -411,11 +440,22 @@ function App() {
           {activeTab === 'blackscreen' && <BankBlackScreen />}
           {activeTab === 'custody' && <CustodyAccountsModule />}
           {activeTab === 'custody1' && <CustodyAccountsModule1 />}
+          {activeTab === 'daes-ipip' && <DAESIPIPModule />}
+          {activeTab === 'dusd-mint' && <DUSDMintModule />}
+          {activeTab === 'daes-usd-alchemy' && <DAESUsdAlchemyModule />}
+          {activeTab === 'usdt-converter' && <USDTConverterModule />}
+          {activeTab === 'json-transactions' && <JSONTransactionsModule />}
           {activeTab === 'cards' && <CardsModule />}
+          {activeTab === 'yex-api' && <YexApiModule />}
+          {activeTab === 'defi-protocols' && <DeFiProtocolsModule />}
+          {activeTab === 'iso-20022' && <ISO20022Module />}
+          {activeTab === 'visanet-api' && <VisaNetAPIModule />}
           {activeTab === '3d-secure' && <ThreeDSecureModule />}
           {activeTab === 'daes-api-config' && <DAESApiConfigModule />}
           {activeTab === 'tz-digital' && <TZDigitalModule />}
           {activeTab === 'kucoin' && <KuCoinModule />}
+          {activeTab === 'cexio-prime' && <CEXioPrimeModule />}
+          {activeTab === 'paypal-transfer' && <PayPalTransferModule />}
           {activeTab === 'profiles' && <ProfilesModule />}
           {activeTab === 'api-daes' && <APIDAESModule />}
           {activeTab === 'mg-webhook' && <MGWebhookModule />}
@@ -433,6 +473,7 @@ function App() {
           {activeTab === 'api-daes-pledge' && <APIDAESPledgeModule />}
           {activeTab === 'audit-bank' && <AuditBankWindow />}
           {activeTab === 'corebanking-api' && <CoreBankingAPIModule />}
+          {activeTab === 'dcb-integration' && <DCBIntegrationModule />}
           {activeTab === 'xcp-b2b' && <XcpB2BInterface />}
           {activeTab === 'processor' && <DTC1BProcessor />}
           {activeTab === 'binary-reader' && <AdvancedBinaryReader />}

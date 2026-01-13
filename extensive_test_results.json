@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-01-05T16:10:06.738Z",
+  "totalTests": 8,
+  "passed": 8,
+  "failed": 0,
+  "skipped": 0,
+  "successRate": "100.0%",
+  "totalGains": "154.03 USDC",
+  "results": [
+    {
+      "test": "Monto 50",
+      "status": "PASS",
+      "gain": 1.5
+    },
+    {
+      "test": "Monto 100",
+      "status": "PASS",
+      "gain": 3
+    },
+    {
+      "test": "Monto 150",
+      "status": "PASS",
+      "gain": 4.5
+    },
+    {
+      "test": "Monto 200",
+      "status": "PASS",
+      "gain": 6
+    },
+    {
+      "test": "Búsqueda de oportunidades",
+      "status": "PASS",
+      "gain": 103
+    },
+    {
+      "test": "Estadísticas del bot",
+      "status": "PASS",
+      "gain": 21
+    },
+    {
+      "test": "Validación monto pequeño",
+      "status": "PASS",
+      "gain": 0.03
+    },
+    {
+      "test": "Validación monto grande",
+      "status": "PASS",
+      "gain": 15
+    }
+  ],
+  "conclusion": "Bot operacional y generando ganancias consistentes"
+}
