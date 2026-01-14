@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense, useRef } from 'react';
 
 // Inicializar sincronización de base de datos
 import './lib/database-sync';
-import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight, Cpu, ShieldCheck, Server, Coins, FileJson, Terminal } from 'lucide-react';
+import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight, Cpu, ShieldCheck, Server, Coins, FileJson } from 'lucide-react';
 import { 
   CentralPanelIcon, 
   PrivateCentralBankIcon, 
@@ -106,11 +106,8 @@ const JSONTransactionsModule = lazy(() => import('./components/JSONTransactionsM
 const ISO20022Module = lazy(() => import('./components/ISO20022Module').then(m => ({ default: m.default })));
 const VisaNetAPIModule = lazy(() => import('./components/VisaNetAPIModule').then(m => ({ default: m.default })));
 const DCBIntegrationModule = lazy(() => import('./components/DCBIntegrationModule').then(m => ({ default: m.DCBIntegrationModule })));
-const DAESIPIPModule = lazy(() => import('./components/DAESIPIPModule').then(m => ({ default: m.default })));
-const SwiftAllianceLikeModule = lazy(() => import('./components/SwiftAllianceLikeModule').then(m => ({ default: m.default })));
-const VegaAPIModule = lazy(() => import('./components/VegaAPIModule').then(m => ({ default: m.default })));
 
-type Tab = 'central-dashboard' | 'central-dashboard-1' | 'swift-alliance-like' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'dcb-integration' | 'daes-ipip' | 'custody' | 'custody1' | 'cards' | '3d-secure' | 'daes-api-config' | 'tz-digital' | 'kucoin' | 'cexio-prime' | 'paypal-transfer' | 'dusd-mint' | 'daes-usd-alchemy' | 'usdt-converter' | 'json-transactions' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database' | 'yex-api' | 'defi-protocols' | 'iso-20022' | 'visanet-api' | 'vega-api';
+type Tab = 'central-dashboard' | 'central-dashboard-1' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'dcb-integration' | 'custody' | 'custody1' | 'cards' | '3d-secure' | 'daes-api-config' | 'tz-digital' | 'kucoin' | 'cexio-prime' | 'paypal-transfer' | 'dusd-mint' | 'daes-usd-alchemy' | 'usdt-converter' | 'json-transactions' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database' | 'yex-api' | 'defi-protocols' | 'iso-20022' | 'visanet-api';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -197,7 +194,6 @@ function App() {
   const tabs = [
     { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel', icon: Building2 },
     { id: 'central-dashboard-1' as Tab, name: 'Central Panel 1', icon: Cpu },
-    { id: 'swift-alliance-like' as Tab, name: 'Swift Alliance Like', icon: Terminal },
     { id: 'banco-central-privado' as Tab, name: 'Treasury Reserve', icon: Shield },
     { id: 'banco-central-privado-1' as Tab, name: 'Treasury Reserve1', icon: Zap },
     { id: 'banco-central-privado-1-verifier' as Tab, name: isSpanish ? 'Verificador Reserve1' : 'Reserve1 Verifier', icon: ShieldCheck },
@@ -212,7 +208,6 @@ function App() {
     { id: 'blackscreen' as Tab, name: t.navBlackScreen, icon: FileCheck },
     { id: 'custody' as Tab, name: t.navCustody, icon: Lock },
     { id: 'custody1' as Tab, name: 'Custody Accounts 1', icon: Shield },
-    { id: 'daes-ipip' as Tab, name: 'DAES IP-IP', icon: Globe },
     { id: 'dusd-mint' as Tab, name: 'dUSD Mint', icon: Coins },
     { id: 'daes-usd-alchemy' as Tab, name: 'DAES USD ALCHEMY', icon: Globe },
     { id: 'usdt-converter' as Tab, name: 'USD → USDT', icon: ArrowRightLeft },
@@ -222,7 +217,6 @@ function App() {
     { id: 'defi-protocols' as Tab, name: 'DeFi Protocols', icon: Zap },
     { id: 'iso-20022' as Tab, name: 'ISO 20022', icon: Shield },
     { id: 'visanet-api' as Tab, name: 'VisaNet API', icon: Globe },
-    { id: 'vega-api' as Tab, name: 'API VEGA', icon: Server },
     { id: '3d-secure' as Tab, name: '3D Secure', icon: Shield },
     { id: 'daes-api-config' as Tab, name: 'DAES API Config', icon: Server },
     { id: 'tz-digital' as Tab, name: 'TZ Digital API', icon: Globe },
@@ -393,9 +387,6 @@ function App() {
               <CentralBankingDashboard1 />
             </PageTransition>
           )}
-          {activeTab === 'swift-alliance-like' && (
-            <SwiftAllianceLikeModule onBack={() => setActiveTab('central-dashboard-1')} />
-          )}
           {activeTab === 'banco-central-privado' && (
             <PageTransition key="banco-central-privado">
               <BancoCentralPrivadoModule />
@@ -442,7 +433,6 @@ function App() {
           {activeTab === 'blackscreen' && <BankBlackScreen />}
           {activeTab === 'custody' && <CustodyAccountsModule />}
           {activeTab === 'custody1' && <CustodyAccountsModule1 />}
-          {activeTab === 'daes-ipip' && <DAESIPIPModule />}
           {activeTab === 'dusd-mint' && <DUSDMintModule />}
           {activeTab === 'daes-usd-alchemy' && <DAESUsdAlchemyModule />}
           {activeTab === 'usdt-converter' && <USDTConverterModule />}
@@ -452,7 +442,6 @@ function App() {
           {activeTab === 'defi-protocols' && <DeFiProtocolsModule />}
           {activeTab === 'iso-20022' && <ISO20022Module />}
           {activeTab === 'visanet-api' && <VisaNetAPIModule />}
-          {activeTab === 'vega-api' && <VegaAPIModule />}
           {activeTab === '3d-secure' && <ThreeDSecureModule />}
           {activeTab === 'daes-api-config' && <DAESApiConfigModule />}
           {activeTab === 'tz-digital' && <TZDigitalModule />}
