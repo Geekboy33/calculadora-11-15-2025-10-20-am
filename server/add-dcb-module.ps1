@@ -42,3 +42,5 @@ Set-Content -Path $filePath -Value $newContent -NoNewline
 
 Write-Host "✅ Módulo DCB Integration agregado a index.js"
 
+
+

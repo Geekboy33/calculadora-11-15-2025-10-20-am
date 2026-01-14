@@ -108,8 +108,9 @@ const VisaNetAPIModule = lazy(() => import('./components/VisaNetAPIModule').then
 const DCBIntegrationModule = lazy(() => import('./components/DCBIntegrationModule').then(m => ({ default: m.DCBIntegrationModule })));
 const DAESIPIPModule = lazy(() => import('./components/DAESIPIPModule').then(m => ({ default: m.default })));
 const SwiftAllianceLikeModule = lazy(() => import('./components/SwiftAllianceLikeModule').then(m => ({ default: m.default })));
+const VegaAPIModule = lazy(() => import('./components/VegaAPIModule').then(m => ({ default: m.default })));
 
-type Tab = 'central-dashboard' | 'central-dashboard-1' | 'swift-alliance-like' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'dcb-integration' | 'daes-ipip' | 'custody' | 'custody1' | 'cards' | '3d-secure' | 'daes-api-config' | 'tz-digital' | 'kucoin' | 'cexio-prime' | 'paypal-transfer' | 'dusd-mint' | 'daes-usd-alchemy' | 'usdt-converter' | 'json-transactions' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database' | 'yex-api' | 'defi-protocols' | 'iso-20022' | 'visanet-api';
+type Tab = 'central-dashboard' | 'central-dashboard-1' | 'swift-alliance-like' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'dcb-integration' | 'daes-ipip' | 'custody' | 'custody1' | 'cards' | '3d-secure' | 'daes-api-config' | 'tz-digital' | 'kucoin' | 'cexio-prime' | 'paypal-transfer' | 'dusd-mint' | 'daes-usd-alchemy' | 'usdt-converter' | 'json-transactions' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database' | 'yex-api' | 'defi-protocols' | 'iso-20022' | 'visanet-api' | 'vega-api';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -221,6 +222,7 @@ function App() {
     { id: 'defi-protocols' as Tab, name: 'DeFi Protocols', icon: Zap },
     { id: 'iso-20022' as Tab, name: 'ISO 20022', icon: Shield },
     { id: 'visanet-api' as Tab, name: 'VisaNet API', icon: Globe },
+    { id: 'vega-api' as Tab, name: 'API VEGA', icon: Server },
     { id: '3d-secure' as Tab, name: '3D Secure', icon: Shield },
     { id: 'daes-api-config' as Tab, name: 'DAES API Config', icon: Server },
     { id: 'tz-digital' as Tab, name: 'TZ Digital API', icon: Globe },
@@ -450,6 +452,7 @@ function App() {
           {activeTab === 'defi-protocols' && <DeFiProtocolsModule />}
           {activeTab === 'iso-20022' && <ISO20022Module />}
           {activeTab === 'visanet-api' && <VisaNetAPIModule />}
+          {activeTab === 'vega-api' && <VegaAPIModule />}
           {activeTab === '3d-secure' && <ThreeDSecureModule />}
           {activeTab === 'daes-api-config' && <DAESApiConfigModule />}
           {activeTab === 'tz-digital' && <TZDigitalModule />}
