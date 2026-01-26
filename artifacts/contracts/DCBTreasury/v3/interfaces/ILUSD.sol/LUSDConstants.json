@@ -1,0 +1,79 @@
+{
+  "_format": "hh3-artifact-1",
+  "contractName": "LUSDConstants",
+  "sourceName": "contracts/DCBTreasury/v3/interfaces/ILUSD.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "CHAIN_ID",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DECIMALS",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "LUSD_ADDRESS",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "LUSD_PRICE_USD",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ONE_LUSD",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523461001a576101149081610020823930815050f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c90816327e16d9d1460c2575080632e0f26251460ac5780634a22b6ed1460945780637cf8278514606b576385e1f4d014605257600080fd5b8060031936011260685760206040516103ed8152f35b80fd5b50806003193601126068576020604051738de60f88f19dad42dde0d9ed2eeba68269722a998152f35b50806003193601126068576020604051620f42408152f35b5080600319360112606857602060405160068152f35b90508160031936011260da57806305f5e10060209252f35b5080fdfea2646970667358221220338d20e79fbaa60752190c963d4ddc47e75763aea543678b3d755de17d3636af64736f6c63430008140033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c90816327e16d9d1460c2575080632e0f26251460ac5780634a22b6ed1460945780637cf8278514606b576385e1f4d014605257600080fd5b8060031936011260685760206040516103ed8152f35b80fd5b50806003193601126068576020604051738de60f88f19dad42dde0d9ed2eeba68269722a998152f35b50806003193601126068576020604051620f42408152f35b5080600319360112606857602060405160068152f35b90508160031936011260da57806305f5e10060209252f35b5080fdfea2646970667358221220338d20e79fbaa60752190c963d4ddc47e75763aea543678b3d755de17d3636af64736f6c63430008140033",
+  "linkReferences": {},
+  "deployedLinkReferences": {},
+  "immutableReferences": {},
+  "inputSourceName": "project/contracts/DCBTreasury/v3/interfaces/ILUSD.sol",
+  "buildInfoId": "solc-0_8_20-a1c61539025f0654ad3a75bdb2b55239eb68e7f3"
+}

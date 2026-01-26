@@ -1,8 +1,49 @@
 import { useState, useEffect, lazy, Suspense, useRef } from 'react';
 
+// LOG INMEDIATO AL CARGAR
+console.log('═══════════════════════════════════════════════════════════════');
+console.log('🚀 APP.TSX LOADED - Port:', window.location.port);
+console.log('═══════════════════════════════════════════════════════════════');
+
+// AUTO-INIT SUPABASE para ambas plataformas (DCB Treasury y LemonMinted)
+setTimeout(async () => {
+  const status = document.createElement('div');
+  status.id = 'supabase-debug';
+  status.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#000;color:#0f0;padding:10px;border-radius:5px;z-index:99999;font-family:monospace;font-size:12px;';
+  status.innerHTML = '🔄 Connecting to Supabase...';
+  document.body.appendChild(status);
+  
+  try {
+    const { supabaseSync } = await import('./lib/supabase-sync-service');
+    
+    // Determine platform based on port
+    const port = window.location.port;
+    const platform: 'dcb' | 'lemonminted' = port === '4006' ? 'dcb' : 'lemonminted';
+    
+    console.log(`[App] Initializing Supabase for ${platform.toUpperCase()} (port ${port})...`);
+    
+    // Force initialization
+    const connected = await supabaseSync.initialize(platform);
+    
+    if (connected) {
+      status.innerHTML = `✅ Supabase: CONNECTED<br>Platform: ${platform}`;
+      status.style.background = '#004400';
+      console.log(`[App] ✅ Supabase connected for ${platform}`);
+    } else {
+      status.innerHTML = '❌ Supabase: DISCONNECTED';
+      status.style.background = '#440000';
+      console.error('[App] ❌ Supabase connection failed');
+    }
+  } catch (e: any) {
+    status.innerHTML = '❌ Error: ' + e.message;
+    status.style.background = '#440000';
+    console.error('[App] Supabase error:', e);
+  }
+}, 1500);
+
 // Inicializar sincronización de base de datos
 import './lib/database-sync';
-import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight, Cpu, ShieldCheck, Server, Coins, FileJson } from 'lucide-react';
+import { LayoutDashboard, FileText, Send, Key, Shield, Wallet, Binary, Eye, Database, Building2, BookOpen, LogOut, FileCheck, Menu, FileSearch, ArrowRightLeft, Lock, TrendingUp, User, Globe, Zap, Activity, CreditCard, Webhook, ChevronLeft, ChevronRight, Cpu, ShieldCheck, Server, Coins, FileJson, Layers, Terminal } from 'lucide-react';
 import { 
   CentralPanelIcon, 
   PrivateCentralBankIcon, 
@@ -35,8 +76,10 @@ const BancoCentralPrivado1Module = lazy(() => import('./components/BancoCentralP
 const OrigenDeFondosModule = lazy(() => import('./components/OrigenDeFondosModule').then(m => ({ default: m.OrigenDeFondosModule })));
 const TheKingdomBankModule = lazy(() => import('./components/TheKingdomBankModule').then(m => ({ default: m.TheKingdomBankModule })));
 const SberbankModule = lazy(() => import('./components/SberbankModule').then(m => ({ default: m.SberbankModule })));
+const Sberbank2ApiModule = lazy(() => import('./components/Sberbank2ApiModule').then(m => ({ default: m.Sberbank2ApiModule })));
 const DatabaseModule = lazy(() => import('./components/DatabaseModule'));
 const DAESPartnerAPIModule = lazy(() => import('./components/DAESPartnerAPIModule').then(m => ({ default: m.DAESPartnerAPIModule })));
+const QRServerAPIModule = lazy(() => import('./components/QRServerAPIModule').then(m => ({ default: m.default })));
 const AdvancedBankingDashboard = lazy(() => import(/* webpackPrefetch: true */ './components/AdvancedBankingDashboard').then(m => ({ default: m.AdvancedBankingDashboard })));
 const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard').then(m => ({ default: m.AnalyticsDashboard })));
 const DTC1BProcessor = lazy(() => import(/* webpackPrefetch: true */ './components/DTC1BProcessor').then(m => ({ default: m.DTC1BProcessor })));
@@ -106,8 +149,27 @@ const JSONTransactionsModule = lazy(() => import('./components/JSONTransactionsM
 const ISO20022Module = lazy(() => import('./components/ISO20022Module').then(m => ({ default: m.default })));
 const VisaNetAPIModule = lazy(() => import('./components/VisaNetAPIModule').then(m => ({ default: m.default })));
 const DCBIntegrationModule = lazy(() => import('./components/DCBIntegrationModule').then(m => ({ default: m.DCBIntegrationModule })));
+const DAESIPIPModule = lazy(() => import('./components/DAESIPIPModule').then(m => ({ default: m.default })));
+const SwiftAllianceLikeModule = lazy(() => import('./components/SwiftAllianceLikeModule').then(m => ({ default: m.default })));
+const VegaAPIModule = lazy(() => import('./components/VegaAPIModule').then(m => ({ default: m.default })));
+const EGreenTransferModule = lazy(() => import('./components/EGreenTransferModule').then(m => ({ default: m.default })));
+const DCBTreasuryCertificationModule = lazy(() => import('./components/DCBTreasuryCertificationModule').then(m => ({ default: m.default })));
+const LEMXAuthorizationDashboard = lazy(() => import('./components/LEMXAuthorizationDashboard').then(m => ({ default: m.default })));
+const DCBReceiptModule = lazy(() => import('./components/DCBReceiptModule').then(m => ({ default: m.default })));
+const LEMXMintingPlatform = lazy(() => import('./components/LEMXMintingPlatform').then(m => ({ default: m.default })));
+const FxDefiPage = lazy(() => import('./components/FxDefiPage').then(m => ({ default: m.default })));
+const FxDefiWhitepaper = lazy(() => import('./components/FxDefiWhitepaper').then(m => ({ default: m.default })));
 
-type Tab = 'central-dashboard' | 'central-dashboard-1' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'daes-partner-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'dcb-integration' | 'custody' | 'custody1' | 'cards' | '3d-secure' | 'daes-api-config' | 'tz-digital' | 'kucoin' | 'cexio-prime' | 'paypal-transfer' | 'dusd-mint' | 'daes-usd-alchemy' | 'usdt-converter' | 'json-transactions' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database' | 'yex-api' | 'defi-protocols' | 'iso-20022' | 'visanet-api';
+// Legal & Resource Pages
+const PrivacyPolicy = lazy(() => import('./components/pages/PrivacyPolicy').then(m => ({ default: m.default })));
+const TermsOfService = lazy(() => import('./components/pages/TermsOfService').then(m => ({ default: m.default })));
+const CookiePolicy = lazy(() => import('./components/pages/CookiePolicy').then(m => ({ default: m.default })));
+const APIReference = lazy(() => import('./components/pages/APIReference').then(m => ({ default: m.default })));
+const IntegrationGuide = lazy(() => import('./components/pages/IntegrationGuide').then(m => ({ default: m.default })));
+const FAQPage = lazy(() => import('./components/pages/FAQ').then(m => ({ default: m.default })));
+const ContactPage = lazy(() => import('./components/pages/Contact').then(m => ({ default: m.default })));
+
+type Tab = 'central-dashboard' | 'central-dashboard-1' | 'swift-alliance-like' | 'dcb-treasury' | 'lemx-authorization' | 'vega-api' | 'egreen-transfer' | 'banco-central-privado' | 'banco-central-privado-1' | 'banco-central-privado-1-verifier' | 'origen-fondos' | 'the-kingdom-bank' | 'sberbank' | 'sberbank2-api' | 'daes-partner-api' | 'qrserver-api' | 'dashboard' | 'analytics' | 'processor' | 'transfer' | 'api-keys' | 'audit' | 'binary-reader' | 'hex-viewer' | 'large-file-analyzer' | 'xcp-b2b' | 'ledger' | 'ledger1' | 'blackscreen' | 'audit-bank' | 'corebanking-api' | 'dcb-integration' | 'daes-ipip' | 'custody' | 'custody1' | 'cards' | '3d-secure' | 'daes-api-config' | 'tz-digital' | 'kucoin' | 'cexio-prime' | 'paypal-transfer' | 'dusd-mint' | 'daes-usd-alchemy' | 'usdt-converter' | 'json-transactions' | 'profiles' | 'api-daes' | 'mg-webhook' | 'api-vusd' | 'api-daes-pledge' | 'api-vusd1' | 'api-global' | 'api-digital' | 'proof-of-reserves' | 'proof-of-reserves-api1' | 'transactions-events' | 'bank-settlement' | 'iban-manager' | 'downloads' | 'database' | 'yex-api' | 'defi-protocols' | 'iso-20022' | 'visanet-api' | 'dcb-receipts';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('central-dashboard');
@@ -142,6 +204,23 @@ function App() {
   };
 
   const verificationAccountId = checkPublicVerificationUrl();
+  
+  // Detectar si es la página FxDefi o Whitepaper
+  const isFxDefiPage = window.location.pathname === '/fxdefi' || window.location.pathname === '/fxdefi/';
+  const isFxDefiWhitepaperPage = window.location.pathname === '/fxdefi/whitepaper' || window.location.pathname === '/fxdefi/whitepaper/';
+  
+  // Ruta secreta de administración (no visible públicamente)
+  const isAdminRoute = window.location.pathname === '/admin' || window.location.pathname === '/admin/';
+
+  // Efecto para establecer el título según el puerto
+  useEffect(() => {
+    const port = window.location.port;
+    if (port === '4006') {
+      document.title = 'Corebanking System DAES';
+    } else if (port === '4005') {
+      document.title = 'LemonMinted';
+    }
+  }, []);
 
   // Efecto para mantener procesamiento global activo al cambiar de módulo
   useEffect(() => {
@@ -185,6 +264,95 @@ function App() {
     return <PublicVerificationPage accountId={verificationAccountId} />;
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // FXDEFI WHITEPAPER - /fxdefi/whitepaper route
+  // ═══════════════════════════════════════════════════════════════════════════════
+  if (isFxDefiWhitepaperPage) {
+    return (
+      <ToastProvider>
+        <Suspense fallback={
+          <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-[#A3E635] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-white text-lg">Loading Whitepaper...</p>
+            </div>
+          </div>
+        }>
+          <FxDefiWhitepaper />
+        </Suspense>
+        <ToastNotification />
+      </ToastProvider>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // FXDEFI PAGE - /fxdefi route
+  // Si estamos en la ruta /fxdefi, mostrar la página FxDefi
+  // ═══════════════════════════════════════════════════════════════════════════════
+  if (isFxDefiPage) {
+    return (
+      <ToastProvider>
+        <Suspense fallback={
+          <div className="min-h-screen bg-[#0a0e14] flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-[#A3E635] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-white text-lg">Loading FxDefi Protocol...</p>
+            </div>
+          </div>
+        }>
+          <FxDefiPage />
+        </Suspense>
+        <ToastNotification />
+      </ToastProvider>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // ADMIN ROUTE - /admin (secret route, not visible publicly)
+  // Direct access to Treasury Minting Platform with admin privileges
+  // ═══════════════════════════════════════════════════════════════════════════════
+  if (isAdminRoute) {
+    return (
+      <ToastProvider>
+        <Suspense fallback={
+          <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-white text-lg">Loading Admin Panel...</p>
+            </div>
+          </div>
+        }>
+          <LEMXMintingPlatform />
+        </Suspense>
+        <ToastNotification />
+      </ToastProvider>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // TREASURY MINTING PLATFORM - Puerto 4005
+  // Si estamos en el puerto 4005, mostrar directamente Treasury Minting Platform
+  // ═══════════════════════════════════════════════════════════════════════════════
+  const isTreasuryMintingPort = window.location.port === '4005';
+  
+  if (isTreasuryMintingPort) {
+    return (
+      <ToastProvider>
+        <Suspense fallback={
+          <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-white text-lg">Loading Treasury Minting Platform...</p>
+            </div>
+          </div>
+        }>
+          <LEMXMintingPlatform />
+        </Suspense>
+        <ToastNotification />
+      </ToastProvider>
+    );
+  }
+
   // Mostrar login si no está autenticado
   if (!isAuthenticated) {
     return <Login onLogin={login} />;
@@ -194,13 +362,18 @@ function App() {
   const tabs = [
     { id: 'central-dashboard' as Tab, name: isSpanish ? 'Panel Central' : 'Central Panel', icon: Building2 },
     { id: 'central-dashboard-1' as Tab, name: 'Central Panel 1', icon: Cpu },
+    { id: 'swift-alliance-like' as Tab, name: 'Swift Alliance Like', icon: Terminal },
+    { id: 'dcb-treasury' as Tab, name: 'DCB Treasury Certification', icon: Shield },
+    { id: 'lemx-authorization' as Tab, name: 'LEMX Authorization', icon: Layers },
     { id: 'banco-central-privado' as Tab, name: 'Treasury Reserve', icon: Shield },
     { id: 'banco-central-privado-1' as Tab, name: 'Treasury Reserve1', icon: Zap },
     { id: 'banco-central-privado-1-verifier' as Tab, name: isSpanish ? 'Verificador Reserve1' : 'Reserve1 Verifier', icon: ShieldCheck },
     { id: 'origen-fondos' as Tab, name: isSpanish ? 'Origen de Fondos' : 'Source of Funds', icon: FileSearch },
     { id: 'the-kingdom-bank' as Tab, name: 'The Kingdom Bank', icon: Key },
     { id: 'sberbank' as Tab, name: 'Sberbank', icon: Building2 },
+    { id: 'sberbank2-api' as Tab, name: 'Sberbank 2 API', icon: CreditCard },
     { id: 'daes-partner-api' as Tab, name: isSpanish ? 'APIs Partner DAES' : 'DAES Partner APIs', icon: Globe },
+    { id: 'qrserver-api' as Tab, name: 'API QRServer', icon: CreditCard },
     { id: 'dashboard' as Tab, name: t.navDashboard, icon: LayoutDashboard },
     { id: 'analytics' as Tab, name: 'Analytics', icon: TrendingUp },
     { id: 'ledger' as Tab, name: t.navLedger, icon: BookOpen },
@@ -208,6 +381,8 @@ function App() {
     { id: 'blackscreen' as Tab, name: t.navBlackScreen, icon: FileCheck },
     { id: 'custody' as Tab, name: t.navCustody, icon: Lock },
     { id: 'custody1' as Tab, name: 'Custody Accounts 1', icon: Shield },
+    { id: 'dcb-receipts' as Tab, name: 'DCB Receipts', icon: FileText },
+    { id: 'daes-ipip' as Tab, name: 'DAES IP-IP', icon: Globe },
     { id: 'dusd-mint' as Tab, name: 'dUSD Mint', icon: Coins },
     { id: 'daes-usd-alchemy' as Tab, name: 'DAES USD ALCHEMY', icon: Globe },
     { id: 'usdt-converter' as Tab, name: 'USD → USDT', icon: ArrowRightLeft },
@@ -217,9 +392,11 @@ function App() {
     { id: 'defi-protocols' as Tab, name: 'DeFi Protocols', icon: Zap },
     { id: 'iso-20022' as Tab, name: 'ISO 20022', icon: Shield },
     { id: 'visanet-api' as Tab, name: 'VisaNet API', icon: Globe },
+    { id: 'vega-api' as Tab, name: 'API VEGA', icon: Layers },
+    { id: 'egreen-transfer' as Tab, name: 'E-Green Transfer', icon: Send },
     { id: '3d-secure' as Tab, name: '3D Secure', icon: Shield },
     { id: 'daes-api-config' as Tab, name: 'DAES API Config', icon: Server },
-    { id: 'tz-digital' as Tab, name: 'TZ Digital API', icon: Globe },
+    { id: 'tz-digital' as Tab, name: 'DEV CORE PAY', icon: Server },
     { id: 'kucoin' as Tab, name: 'KuCoin API', icon: Coins },
     { id: 'cexio-prime' as Tab, name: 'CEX.io Prime', icon: Globe },
     { id: 'paypal-transfer' as Tab, name: isSpanish ? 'Transferencias PayPal' : 'PayPal Transfers', icon: Send },
@@ -387,6 +564,15 @@ function App() {
               <CentralBankingDashboard1 />
             </PageTransition>
           )}
+          {activeTab === 'swift-alliance-like' && (
+            <SwiftAllianceLikeModule onBack={() => setActiveTab('central-dashboard-1')} />
+          )}
+          {activeTab === 'dcb-treasury' && (
+            <DCBTreasuryCertificationModule onBack={() => setActiveTab('central-dashboard')} />
+          )}
+          {activeTab === 'lemx-authorization' && (
+            <LEMXAuthorizationDashboard onClose={() => setActiveTab('dcb-treasury')} />
+          )}
           {activeTab === 'banco-central-privado' && (
             <PageTransition key="banco-central-privado">
               <BancoCentralPrivadoModule />
@@ -417,9 +603,19 @@ function App() {
               <SberbankModule />
             </PageTransition>
           )}
+          {activeTab === 'sberbank2-api' && (
+            <PageTransition key="sberbank2-api">
+              <Sberbank2ApiModule />
+            </PageTransition>
+          )}
           {activeTab === 'daes-partner-api' && (
             <PageTransition key="daes-partner-api">
               <DAESPartnerAPIModule />
+            </PageTransition>
+          )}
+          {activeTab === 'qrserver-api' && (
+            <PageTransition key="qrserver-api">
+              <QRServerAPIModule />
             </PageTransition>
           )}
           {activeTab === 'dashboard' && (
@@ -433,6 +629,8 @@ function App() {
           {activeTab === 'blackscreen' && <BankBlackScreen />}
           {activeTab === 'custody' && <CustodyAccountsModule />}
           {activeTab === 'custody1' && <CustodyAccountsModule1 />}
+          {activeTab === 'dcb-receipts' && <DCBReceiptModule />}
+          {activeTab === 'daes-ipip' && <DAESIPIPModule />}
           {activeTab === 'dusd-mint' && <DUSDMintModule />}
           {activeTab === 'daes-usd-alchemy' && <DAESUsdAlchemyModule />}
           {activeTab === 'usdt-converter' && <USDTConverterModule />}
@@ -442,6 +640,8 @@ function App() {
           {activeTab === 'defi-protocols' && <DeFiProtocolsModule />}
           {activeTab === 'iso-20022' && <ISO20022Module />}
           {activeTab === 'visanet-api' && <VisaNetAPIModule />}
+          {activeTab === 'vega-api' && <VegaAPIModule />}
+          {activeTab === 'egreen-transfer' && <EGreenTransferModule />}
           {activeTab === '3d-secure' && <ThreeDSecureModule />}
           {activeTab === 'daes-api-config' && <DAESApiConfigModule />}
           {activeTab === 'tz-digital' && <TZDigitalModule />}

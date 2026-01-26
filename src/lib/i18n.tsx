@@ -46,6 +46,20 @@ export function useLanguage() {
   return context;
 }
 
+/**
+ * Hook to get the translations object directly
+ * Shortcut for useLanguage().t
+ */
+export function useTranslations(): Translations {
+  const { t } = useLanguage();
+  return t;
+}
+
 // Re-export types for convenience
 export type { Language, Translations };
 
+// Supported languages constant
+export const SUPPORTED_LANGUAGES: { code: Language; name: string; flag: string }[] = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' }
+];

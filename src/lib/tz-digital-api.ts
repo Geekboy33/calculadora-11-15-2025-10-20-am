@@ -1,44 +1,63 @@
 /**
- * TZ Digital Bank Transfer API Client
- * API: https://banktransfer.tzdigitalpvtlimited.com/api/transactions
- * Protocol: HTTPS REST
- * Auth: Bearer Token
+ * DEV CORE PAY - Bank Transfer API Client
+ * ═══════════════════════════════════════════════════════════════════════════
+ * DEV CORE PAY - DEVMIND GROUP
+ * Server: DEV-CORE-PAY-GW-01
+ * Location: London, United Kingdom
+ * Protocol: HTTPS REST API — JSON Payload
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Soporta transferencias USD y EUR
+ * Supported Transfer Protocols (Banking Only - No Crypto):
+ * - SWIFT.Net
+ * - SWIFT.Com  
+ * - SWIFT MT103 Direct Cash Transfer
+ * - SWIFT MT103 GPI
+ * - SWIFT MT103 GPI Semi Automatic
+ * - VISA NET
+ * - Server to Server (IP/IP)
+ * - Global Server Pool
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CONFIGURACIÓN
+// DEV CORE PAY - SERVER CONFIGURATION
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════════════════════
-// CIS S2S API 2025 - DEVMIND GROUP CONFIGURATION
-// ═══════════════════════════════════════════════════════════════════════════
-// Receiving Server Name: DEV-CORE-PAY-GW-01
-// Server Location: London, United Kingdom
-// Protocol: HTTPS REST API — JSON Payload
-// ═══════════════════════════════════════════════════════════════════════════
+// Receiving Server Details
+const DEV_CORE_PAY_SERVER = {
+  name: "DEV-CORE-PAY-GW-01",
+  location: "London, United Kingdom",
+  protocol: "HTTPS REST API — JSON Payload"
+};
 
-// URL directa de DevMind Group API (CIS S2S)
-const TZ_DIRECT_URL = "https://banktransfer.devmindgroup.com/api/transactions";
+// API Endpoints
+const DEV_CORE_PAY_API_URL = "https://banktransfer.devmindgroup.com/api/transactions";
+const DEV_CORE_PAY_DOCS_URL = "https://banktransfer.devmindgroup.com/api/docs";
+const DEV_CORE_PAY_RECEIVE_URL = "https://secure.devmindpay.com/api/v1/transaction/receive";
 
-// API alternativa de recepción
-const DEVMIND_RECEIVE_URL = "https://secure.devmindpay.com/api/v1/transaction/receive";
-
-// Global Server IP
+// Global Server IP Configuration
 const GLOBAL_SERVER_IP = "172.67.157.88";
 const RECEIVING_PORT = 8443; // TLS/SSL Enabled
 
-// API Keys del documento CIS S2S
-const CIS_API_KEY = "47061d41-7994-4fad-99a7-54879acd9a83";
-const CIS_AUTH_KEY = "DMP-SECURE-KEY-7X93-FF28-ZQ19";
+// Tunnel IPs (All point to Global Server)
+const TUNNEL_CONFIG = {
+  SWIFT_IP: "172.67.157.88",
+  VISA_NET_IP: "172.67.157.88",
+  GLOBAL_SERVER_IP: "172.67.157.88"
+};
 
-// SHA256 Handshake Hash (del documento)
-const CIS_SHA256_HANDSHAKE = "b19f2a94eab4cd3b92f1e3e0dce9d541c8b7aa3fdbe6e2f4ac3c91a5fbb2f44";
+// API Authentication Keys
+const DEV_CORE_PAY_API_KEY = "47061d41-7994-4fad-99a7-54879acd9a83";
+const DEV_CORE_PAY_AUTH_KEY = "DMP-SECURE-KEY-7X93-FF28-ZQ19";
+
+// SHA256 Handshake Hash
+const SHA256_HANDSHAKE_HASH = "b19f2a94eab4cd3b92f1e3e0dce9d541c8b7aa3fdbe6e2f4ac3c91a5fbb2f44";
 
 // Internal IP Ranges
 const INTERNAL_IP_RANGES = ["172.16.0.0/24", "10.26.0.0/16"];
 const DNS_RANGE = "192.168.1.100/24";
+
+// Legacy alias for compatibility
+const TZ_DIRECT_URL = DEV_CORE_PAY_API_URL;
 
 // Servidor local Express (para Electron y producción)
 const LOCAL_SERVER_URL = "http://localhost:3000";
@@ -85,87 +104,222 @@ export type Currency = "USD" | "EUR";
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * CIS S2S Supported Transfer Protocols (Sin Blockchain)
+ * DEV CORE PAY - Supported Transfer Protocols (Banking Only)
+ * NO CRYPTO - Traditional Banking Protocols Only
  */
 export type TransferProtocol = 
-  | 'SWIFT_NET'
-  | 'SWIFT_COM'
-  | 'SWIFT_MT103_DIRECT'
-  | 'SWIFT_MT103_GPI'
-  | 'SWIFT_MT103_GPI_SEMI'
-  | 'VISA_NET'
-  | 'SERVER_TO_SERVER'
-  | 'GLOBAL_SERVER_POOL';
+  | 'SWIFT_NET'           // Swift.Net
+  | 'SWIFT_COM'           // Swift.Com
+  | 'SWIFT_MT103_DIRECT'  // Swift MT103 Direct Cash Transfer
+  | 'SWIFT_MT103_GPI'     // Swift MT103 GPI
+  | 'SWIFT_MT103_GPI_SEMI'// Swift MT103 GPI Semi Automatic
+  | 'VISA_NET'            // VISA NET
+  | 'SERVER_TO_SERVER'    // Server to Server (IP to IP)
+  | 'GLOBAL_SERVER_POOL'; // Global Server Pool
 
 /**
- * CIS S2S Client Information (Black Screen Display)
+ * DEV CORE PAY - Server Configuration Export
  */
-export interface CISClientInfo {
-  signatory_name: string;
-  nationality: string;
-  passport_number: string;
-  date_of_issue: string;
-  expiration_date: string;
-  issued_by: string;
-  date_of_birth: string;
-  place_of_birth: string;
+export const DevCorePayConfig = {
+  server: DEV_CORE_PAY_SERVER,
+  apiUrl: DEV_CORE_PAY_API_URL,
+  docsUrl: DEV_CORE_PAY_DOCS_URL,
+  receiveUrl: DEV_CORE_PAY_RECEIVE_URL,
+  globalServerIP: GLOBAL_SERVER_IP,
+  port: RECEIVING_PORT,
+  tunnels: TUNNEL_CONFIG,
+  apiKey: DEV_CORE_PAY_API_KEY,
+  authKey: DEV_CORE_PAY_AUTH_KEY,
+  sha256Hash: SHA256_HANDSHAKE_HASH,
+  internalIpRanges: INTERNAL_IP_RANGES,
+  dnsRange: DNS_RANGE
+};
+
+/**
+ * DEV CORE PAY - Client Information (Black Screen Display)
+ * Bank account information must be HIDDEN (replaced with "N/A")
+ */
+export interface DevCorePayClientInfo {
+  signatory_name: string;      // Client/Signatory Name
+  nationality: string;          // Nationality
+  passport_number: string;      // Passport Number
+  date_of_issue: string;        // Date of Issue
+  expiration_date: string;      // Expiration Date
+  issued_by: string;            // Issued by (e.g., "HIS MAJESTY PASSPORT OFFICE (HMPO)")
+  date_of_birth: string;        // Date of Birth
+  place_of_birth: string;       // Place of Birth
 }
 
-/**
- * CIS S2S Server Details (Black Screen Display)
- */
-export interface CISServerDetails {
-  global_server_ip: string;
-  global_id?: string;
-  receiving_server_name: string;
-  receiving_port: number;
-  api_endpoint: string;
-  api_key: string;
-  auth_key: string;
-  internal_ip_ranges: string[];
-  dns_range: string;
-}
+// Legacy alias
+export type CISClientInfo = DevCorePayClientInfo;
 
 /**
- * CIS S2S Transmission Codes
+ * DEV CORE PAY - Server Details (Black Screen Display)
+ */
+export interface DevCorePayServerDetails {
+  global_server_ip: string;           // Global Server IP: 172.67.157.88
+  global_id?: string;                 // Global ID
+  receiving_server_name: string;      // DEV-CORE-PAY-GW-01
+  receiving_port: number;             // 8443 (TLS/SSL Enabled)
+  api_endpoint: string;               // https://secure.devmindpay.com/api/v1/transaction/receive
+  api_base_url: string;               // https://banktransfer.devmindgroup.com/api/docs
+  api_transaction_endpoint: string;   // https://banktransfer.devmindgroup.com/api/transactions
+  api_key: string;                    // 47061d41-7994-4fad-99a7-54879acd9a83
+  auth_key: string;                   // DMP-SECURE-KEY-7X93-FF28-ZQ19
+  server_location: string;            // London, United Kingdom
+  receiving_protocol: string;         // HTTPS REST API — JSON Payload
+  http_request_method: string;        // POST
+  authentication_method: string;      // Bearer Token Authorization
+  tunnel_swift_ip: string;            // 172.67.157.88
+  tunnel_visa_net_ip: string;         // 172.67.157.88
+  tunnel_global_server_ip: string;    // 172.67.157.88
+  internal_ip_ranges: string[];       // ["172.16.0.0/24", "10.26.0.0/16"]
+  dns_range: string;                  // 192.168.1.100/24
+  sha256_handshake_hash: string;      // b19f2a94eab4cd3b92f1e3e0dce9d541c8b7aa3fdbe6e2f4ac3c91a5fbb2f44
+}
+
+// Legacy alias
+export type CISServerDetails = DevCorePayServerDetails;
+
+/**
+ * DEV CORE PAY - Default Server Details
+ */
+export const DEFAULT_SERVER_DETAILS: DevCorePayServerDetails = {
+  global_server_ip: "172.67.157.88",
+  receiving_server_name: "DEV-CORE-PAY-GW-01",
+  receiving_port: 8443,
+  api_endpoint: "https://secure.devmindpay.com/api/v1/transaction/receive",
+  api_base_url: "https://banktransfer.devmindgroup.com/api/docs",
+  api_transaction_endpoint: "https://banktransfer.devmindgroup.com/api/transactions",
+  api_key: "47061d41-7994-4fad-99a7-54879acd9a83",
+  auth_key: "DMP-SECURE-KEY-7X93-FF28-ZQ19",
+  server_location: "London, United Kingdom",
+  receiving_protocol: "HTTPS REST API — JSON Payload",
+  http_request_method: "POST",
+  authentication_method: "Bearer Token Authorization",
+  tunnel_swift_ip: "172.67.157.88",
+  tunnel_visa_net_ip: "172.67.157.88",
+  tunnel_global_server_ip: "172.67.157.88",
+  internal_ip_ranges: ["172.16.0.0/24", "10.26.0.0/16"],
+  dns_range: "192.168.1.100/24",
+  sha256_handshake_hash: "b19f2a94eab4cd3b92f1e3e0dce9d541c8b7aa3fdbe6e2f4ac3c91a5fbb2f44"
+};
+
+/**
+ * DEV CORE PAY - Transmission Codes (Black Screen Display)
+ * All transmission codes must be visible on black screen
+ * These codes are returned in the transmission slip (PDF format)
  */
 export interface TransmissionCodes {
-  reference_number?: string;
-  transaction_code?: string;
-  access_code?: string;
-  release_code?: string;
-  withdrawal_code?: string;
-  download_code?: string;
-  final_code?: string;
-  final_blocking_code?: string;
-  interbank_blocking_code?: string;
-  permit_arrival_money_number?: string;
-  clearing_house_number?: string;
-  transaction_id?: string;
-  unique_transaction_number?: string;
-  hash_code?: string;
-  approval_code?: string;
+  reference_number?: string;           // Reference Number
+  transaction_code?: string;           // Transaction Code
+  access_code?: string;                // Access Code
+  release_code?: string;               // Release Code
+  withdrawal_code?: string;            // Withdrawal Code
+  download_code?: string;              // Download Code
+  final_code?: string;                 // Final Code
+  final_blocking_code?: string;        // Final Blocking Code
+  interbank_blocking_code?: string;    // Interbank Blocking Code
+  permit_arrival_money_number?: string;// Permit Arrival Money Number
+  clearing_house_number?: string;      // Clearing House Number
+  transaction_id?: string;             // Transaction ID (e.g., CR38828530)
+  unique_transaction_number?: string;  // Unique Transaction Number (TRN)
+  hash_code?: string;                  // Hash Code
+  approval_code?: string;              // Approval Code
 }
 
 /**
- * Funds Processing Transaction Payload
- * Based on CIS S2S API 2025 - Expected Payload Structure
+ * DEV CORE PAY - Expected Payload Structure
+ * 
+ * Este es el formato REQUERIDO por el endpoint POST /api/transactions
+ * Todos los campos marcados como required deben estar presentes
+ */
+export interface DevCorePayExpectedPayload {
+  // ─────────────────────────────────────────────────────────────────────────
+  // CAMPOS REQUERIDOS
+  // ─────────────────────────────────────────────────────────────────────────
+  transaction_id: string;        // ID único de transacción (e.g., "CR38828530")
+  transaction_type: string;      // Tipo: "bank_transfer"
+  amount: number;                // Monto de la transacción
+  currency: string;              // Moneda ISO 4217 (e.g., "EUR", "USD")
+  source_account: number;        // ID de cuenta origen (e.g., 3)
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // INFORMACIÓN DE BANCOS
+  // ─────────────────────────────────────────────────────────────────────────
+  from_bank: string;             // Banco origen (e.g., "Digital Commercial Bank Ltd")
+  to_bank: string;               // Banco destino (e.g., "HSBC UK Bank plc")
+  target_bank_name: string;      // Nombre completo del banco destino
+  target_swift_code: string;     // Código SWIFT del banco destino (e.g., "HBUKGB4B")
+  target_country: string;        // País destino (e.g., "United Kingdom")
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // PROTOCOLO Y ESTADO
+  // ─────────────────────────────────────────────────────────────────────────
+  provider: string;              // Proveedor: "SWIFT", "VISA_NET"
+  status: "pending" | "approved" | "rejected" | "processing" | "completed";
+}
+
+/**
+ * DEV CORE PAY - Funds Processing Transaction Payload
+ * 
+ * Payload completo para transacciones de fondos
+ * Incluye campos opcionales para información adicional
  */
 export interface FundsTxPayload {
-  transaction_id: string;
-  amount: number;
-  currency: string;      // e.g. "EUR", "USD"
-  from_bank: string;     // e.g. "Deutsche Bank AG"
-  to_bank: string;       // e.g. "HSBC UK Bank plc"
-  status: "pending" | "approved" | "rejected" | string;
-  // CIS S2S Optional fields
-  protocol?: TransferProtocol;
+  // ─────────────────────────────────────────────────────────────────────────
+  // CAMPOS REQUERIDOS
+  // ─────────────────────────────────────────────────────────────────────────
+  transaction_id: string;              // ID único (e.g., "CR38828530")
+  transaction_type?: string;           // Tipo: "bank_transfer"
+  amount: number;                      // Monto de la transacción
+  currency: string;                    // Moneda ISO 4217
+  source_account?: number;             // ID cuenta origen (default: 3)
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // INFORMACIÓN DE BANCOS
+  // ─────────────────────────────────────────────────────────────────────────
+  from_bank: string;                   // Banco origen
+  to_bank: string;                     // Banco destino
+  target_bank_name?: string;           // Nombre completo banco destino
+  target_swift_code?: string;          // Código SWIFT destino
+  target_country?: string;             // País destino
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // PROTOCOLO Y PROVEEDOR
+  // ─────────────────────────────────────────────────────────────────────────
+  provider?: string;                   // "SWIFT", "VISA_NET"
+  protocol?: TransferProtocol;         // SWIFT_NET, SWIFT_MT103_GPI, etc.
   channel?: 'INSTANT_SERVER_SETTLEMENT' | string;
-  transmission_codes?: TransmissionCodes;
-  client_info?: CISClientInfo;
-  // Optional additional fields
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // ESTADO
+  // ─────────────────────────────────────────────────────────────────────────
+  status: "pending" | "approved" | "rejected" | "processing" | "completed" | string;
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // CAMPOS OPCIONALES
+  // ─────────────────────────────────────────────────────────────────────────
   reference?: string;
   description?: string;
+  beneficiary_name?: string;
+  beneficiary_account?: string;
+  beneficiary_iban?: string;
+  
+  // Transmission Codes (returned in response)
+  transmission_codes?: TransmissionCodes;
+  
+  // Client Information (for Black Screen Display)
+  client_info?: DevCorePayClientInfo;
+  
+  // Server Details
+  server_details?: Partial<DevCorePayServerDetails>;
+  
+  // Bank Account Info
+  sender_bank_account?: string;
+  receiver_bank_account?: string;
+  
+  // Metadata
   metadata?: Record<string, any>;
 }
 
@@ -301,7 +455,7 @@ async function hmacSha256Hex(data: string, secret: string): Promise<string> {
     const hashArray = Array.from(new Uint8Array(signature));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   } catch (err) {
-    console.error('[TZDigital] HMAC-SHA256 error:', err);
+    console.error('[DevCorePay] HMAC-SHA256 error:', err);
     throw new Error('HMAC-SHA256 not available in this environment');
   }
 }
@@ -483,8 +637,12 @@ export interface TransferRecord {
 // STORAGE
 // ═══════════════════════════════════════════════════════════════════════════
 
-const STORAGE_KEY = 'tz_digital_config';
-const TRANSFERS_KEY = 'tz_digital_transfers';
+const STORAGE_KEY = 'dev_core_pay_config';
+const TRANSFERS_KEY = 'dev_core_pay_transfers';
+
+// Legacy storage keys for migration
+const LEGACY_STORAGE_KEY = 'tz_digital_config';
+const LEGACY_TRANSFERS_KEY = 'tz_digital_transfers';
 
 export interface TZDigitalConfig {
   bearerToken: string;
@@ -498,13 +656,17 @@ export interface TZDigitalConfig {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// BEARER TOKEN CONFIGURADO
+// DEV CORE PAY - AUTHENTICATION CONFIGURATION
 // ═══════════════════════════════════════════════════════════════════════════
-// Token CIS S2S API 2025 - DevMind Group
-const CONFIGURED_BEARER_TOKEN = '47061d41-7994-4fad-99a7-54879acd9a83';
+// API KEY - DevMind Group
+const CONFIGURED_API_KEY = '47061d41-7994-4fad-99a7-54879acd9a83';
+const CONFIGURED_AUTH_KEY = 'DMP-SECURE-KEY-7X93-FF28-ZQ19';
+
+// Legacy alias
+const CONFIGURED_BEARER_TOKEN = CONFIGURED_API_KEY;
 
 const DEFAULT_CONFIG: TZDigitalConfig = {
-  bearerToken: CONFIGURED_BEARER_TOKEN,
+  bearerToken: CONFIGURED_API_KEY,
   baseUrl: API_URL,
   defaultCurrency: 'USD',
   defaultSenderName: 'Digital Commercial Bank Ltd',
@@ -514,11 +676,29 @@ const DEFAULT_CONFIG: TZDigitalConfig = {
   lastUpdated: new Date().toISOString(),
 };
 
+// DEV CORE PAY Extended Config
+export interface DevCorePayConfig extends TZDigitalConfig {
+  authKey: string;
+  globalServerIP: string;
+  receivingPort: number;
+  serverName: string;
+  serverLocation: string;
+}
+
+export const DEFAULT_DEV_CORE_PAY_CONFIG: DevCorePayConfig = {
+  ...DEFAULT_CONFIG,
+  authKey: CONFIGURED_AUTH_KEY,
+  globalServerIP: GLOBAL_SERVER_IP,
+  receivingPort: RECEIVING_PORT,
+  serverName: DEV_CORE_PAY_SERVER.name,
+  serverLocation: DEV_CORE_PAY_SERVER.location,
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
-// CLIENTE API
+// DEV CORE PAY - API CLIENT
 // ═══════════════════════════════════════════════════════════════════════════
 
-class TZDigitalTransferClient {
+class DevCorePayTransferClient {
   private config: TZDigitalConfig;
   private transfers: TransferRecord[] = [];
 
@@ -533,12 +713,25 @@ class TZDigitalTransferClient {
 
   private loadConfig(): TZDigitalConfig {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      // Try new storage key first
+      let stored = localStorage.getItem(STORAGE_KEY);
+      
+      // If not found, try legacy key and migrate
+      if (!stored) {
+        stored = localStorage.getItem(LEGACY_STORAGE_KEY);
+        if (stored) {
+          // Migrate to new key
+          localStorage.setItem(STORAGE_KEY, stored);
+          localStorage.removeItem(LEGACY_STORAGE_KEY);
+          console.log('[DevCorePay] ✅ Migrated config from legacy storage');
+        }
+      }
+      
       if (stored) {
         return { ...DEFAULT_CONFIG, ...JSON.parse(stored) };
       }
     } catch (e) {
-      console.error('[TZDigital] Error loading config:', e);
+      console.error('[DevCorePay] Error loading config:', e);
     }
     return DEFAULT_CONFIG;
   }
@@ -547,7 +740,7 @@ class TZDigitalTransferClient {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
     } catch (e) {
-      console.error('[TZDigital] Error saving config:', e);
+      console.error('[DevCorePay] Error saving config:', e);
     }
   }
 
@@ -563,7 +756,7 @@ class TZDigitalTransferClient {
       lastUpdated: new Date().toISOString(),
     };
     this.saveConfig();
-    console.log('[TZDigital] ✅ Configuración actualizada');
+    console.log('[DevCorePay] ✅ Configuración actualizada');
   }
 
   isConfigured(): boolean {
@@ -576,12 +769,25 @@ class TZDigitalTransferClient {
 
   private loadTransfers(): TransferRecord[] {
     try {
-      const stored = localStorage.getItem(TRANSFERS_KEY);
+      // Try new storage key first
+      let stored = localStorage.getItem(TRANSFERS_KEY);
+      
+      // If not found, try legacy key and migrate
+      if (!stored) {
+        stored = localStorage.getItem(LEGACY_TRANSFERS_KEY);
+        if (stored) {
+          // Migrate to new key
+          localStorage.setItem(TRANSFERS_KEY, stored);
+          localStorage.removeItem(LEGACY_TRANSFERS_KEY);
+          console.log('[DevCorePay] ✅ Migrated transfers from legacy storage');
+        }
+      }
+      
       if (stored) {
         return JSON.parse(stored);
       }
     } catch (e) {
-      console.error('[TZDigital] Error loading transfers:', e);
+      console.error('[DevCorePay] Error loading transfers:', e);
     }
     return [];
   }
@@ -590,7 +796,7 @@ class TZDigitalTransferClient {
     try {
       localStorage.setItem(TRANSFERS_KEY, JSON.stringify(this.transfers));
     } catch (e) {
-      console.error('[TZDigital] Error saving transfers:', e);
+      console.error('[DevCorePay] Error saving transfers:', e);
     }
   }
 
@@ -680,7 +886,7 @@ class TZDigitalTransferClient {
     try {
       handshakeHash = await buildHandshakeHash(payload, cfg.handshake);
     } catch (err: any) {
-      console.error('[TZDigital] Error generando handshake hash:', err);
+      console.error('[DevCorePay] Error generando handshake hash:', err);
     }
 
     const headerName = cfg.handshake?.headerName ?? 'X-Handshake-Hash';
@@ -695,7 +901,7 @@ class TZDigitalTransferClient {
       headers[headerName] = handshakeHash;
     }
 
-    console.log(`[TZDigital] 📤 Funds Processing Transaction:`);
+    console.log(`[DevCorePay] 📤 Funds Processing Transaction:`);
     console.log(`  - ID: ${payload.transaction_id}`);
     console.log(`  - Amount: ${payload.currency} ${payload.amount.toLocaleString()}`);
     console.log(`  - From: ${payload.from_bank}`);
@@ -747,7 +953,7 @@ class TZDigitalTransferClient {
       }
       this.saveTransfers();
 
-      console.log(`[TZDigital] ${response.ok ? '✅' : '❌'} Funds Processing Result:`, result);
+      console.log(`[DevCorePay] ${response.ok ? '✅' : '❌'} Funds Processing Result:`, result);
 
       return result;
 
@@ -795,7 +1001,7 @@ class TZDigitalTransferClient {
     transactionId: string,
     reference?: string
   ): Promise<TransferVerificationResult> {
-    console.log(`[TZDigital] 🔍 Verificando recepción de transferencia: ${transactionId}`);
+    console.log(`[DevCorePay] 🔍 Verificando recepción de transferencia: ${transactionId}`);
 
     const url = (IS_ELECTRON || IS_FILE_PROTOCOL)
       ? `${LOCAL_SERVER_URL}/api/tz-digital/verify-receipt`
@@ -840,12 +1046,12 @@ class TZDigitalTransferClient {
         timestamp: new Date().toISOString(),
       };
 
-      console.log(`[TZDigital] ${result.verified ? '✅' : '⏳'} Verificación:`, result);
+      console.log(`[DevCorePay] ${result.verified ? '✅' : '⏳'} Verificación:`, result);
 
       return result;
 
     } catch (err: any) {
-      console.error('[TZDigital] ❌ Error verificando transferencia:', err);
+      console.error('[DevCorePay] ❌ Error verificando transferencia:', err);
       
       return {
         verified: false,
@@ -919,9 +1125,9 @@ class TZDigitalTransferClient {
 
     const transferId = `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     
-    console.log(`[TZDigital] 📤 Enviando transferencia ${payload.currency} ${payload.amount}...`);
-    console.log(`[TZDigital] Reference: ${payload.reference}`);
-    console.log(`[TZDigital] URL: ${this.config.baseUrl} (Browser: ${IS_BROWSER})`);
+    console.log(`[DevCorePay] 📤 Enviando transferencia ${payload.currency} ${payload.amount}...`);
+    console.log(`[DevCorePay] Reference: ${payload.reference}`);
+    console.log(`[DevCorePay] URL: ${this.config.baseUrl} (Browser: ${IS_BROWSER})`);
 
     try {
       const response = await fetch(this.config.baseUrl, {
@@ -981,7 +1187,7 @@ class TZDigitalTransferClient {
       }
       this.saveTransfers();
 
-      console.log(`[TZDigital] ${response.ok ? '✅' : '❌'} Resultado:`, result);
+      console.log(`[DevCorePay] ${response.ok ? '✅' : '❌'} Resultado:`, result);
       
       return result;
 
@@ -1009,7 +1215,7 @@ class TZDigitalTransferClient {
       this.transfers.unshift(record);
       this.saveTransfers();
 
-      console.error('[TZDigital] ❌ Error:', result);
+      console.error('[DevCorePay] ❌ Error:', result);
       return result;
 
     } finally {
@@ -1065,7 +1271,7 @@ class TZDigitalTransferClient {
     const startTime = Date.now();
     const checks: ConnectionCheck[] = [];
 
-    console.log('[TZDigital] 🔍 Iniciando verificación robusta de conexión...');
+    console.log('[DevCorePay] 🔍 Iniciando verificación robusta de conexión...');
 
     // CHECK 1: Verificar configuración
     const configCheck: ConnectionCheck = {
@@ -1156,9 +1362,9 @@ class TZDigitalTransferClient {
       const testUrl = IS_BROWSER ? '/api/tz-digital/transactions' : TZ_DIRECT_URL;
       const uniqueRef = `CONN-TEST-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
       
-      console.log('[TZDigital] 🔬 Verificando conexión REAL...');
-      console.log(`[TZDigital] URL: ${testUrl}`);
-      console.log(`[TZDigital] Reference: ${uniqueRef}`);
+      console.log('[DevCorePay] 🔬 Verificando conexión REAL...');
+      console.log(`[DevCorePay] URL: ${testUrl}`);
+      console.log(`[DevCorePay] Reference: ${uniqueRef}`);
 
       const response = await fetch(testUrl, {
         method: 'POST',
@@ -1243,8 +1449,8 @@ class TZDigitalTransferClient {
       const passedValidations = Object.values(validationResults).filter(Boolean).length;
       const totalValidations = Object.keys(validationResults).length;
 
-      console.log('[TZDigital] Validaciones de conexión real:', validationResults);
-      console.log(`[TZDigital] Validaciones pasadas: ${passedValidations}/${totalValidations}`);
+      console.log('[DevCorePay] Validaciones de conexión real:', validationResults);
+      console.log(`[DevCorePay] Validaciones pasadas: ${passedValidations}/${totalValidations}`);
 
       if (passedValidations >= 5) {
         check.status = 'passed';
@@ -1323,7 +1529,7 @@ class TZDigitalTransferClient {
    * Diagnostica y soluciona automáticamente problemas de conexión
    */
   async troubleshootConnection(): Promise<TroubleshootResult> {
-    console.log('[TZDigital] 🔧 Iniciando diagnóstico y solución de errores...');
+    console.log('[DevCorePay] 🔧 Iniciando diagnóstico y solución de errores...');
     
     const errorsFound: ConnectionError[] = [];
     const solutionsApplied: string[] = [];
@@ -1331,7 +1537,7 @@ class TZDigitalTransferClient {
     const recommendations: string[] = [];
 
     // PASO 1: Verificar configuración básica
-    console.log('[TZDigital] 📋 Paso 1: Verificando configuración...');
+    console.log('[DevCorePay] 📋 Paso 1: Verificando configuración...');
     const configErrors = this.diagnoseConfiguration();
     errorsFound.push(...configErrors);
 
@@ -1339,7 +1545,7 @@ class TZDigitalTransferClient {
     for (const error of configErrors) {
       const solution = this.getSolutionForError(error.code);
       if (solution.autoFixAvailable && solution.autoFixAction) {
-        console.log(`[TZDigital] 🔧 Aplicando auto-fix: ${solution.description}`);
+        console.log(`[DevCorePay] 🔧 Aplicando auto-fix: ${solution.description}`);
         const fixed = await solution.autoFixAction();
         if (fixed) {
           solutionsApplied.push(solution.description);
@@ -1352,14 +1558,14 @@ class TZDigitalTransferClient {
     }
 
     // PASO 2: Verificar conectividad de red
-    console.log('[TZDigital] 🌐 Paso 2: Verificando conectividad de red...');
+    console.log('[DevCorePay] 🌐 Paso 2: Verificando conectividad de red...');
     const networkErrors = await this.diagnoseNetwork();
     errorsFound.push(...networkErrors);
 
     for (const error of networkErrors) {
       const solution = this.getSolutionForError(error.code);
       if (solution.autoFixAvailable && solution.autoFixAction) {
-        console.log(`[TZDigital] 🔧 Aplicando auto-fix: ${solution.description}`);
+        console.log(`[DevCorePay] 🔧 Aplicando auto-fix: ${solution.description}`);
         const fixed = await solution.autoFixAction();
         if (fixed) {
           solutionsApplied.push(solution.description);
@@ -1372,7 +1578,7 @@ class TZDigitalTransferClient {
     }
 
     // PASO 3: Verificar proxy local
-    console.log('[TZDigital] 🖥️ Paso 3: Verificando proxy local...');
+    console.log('[DevCorePay] 🖥️ Paso 3: Verificando proxy local...');
     const proxyErrors = await this.diagnoseProxy();
     errorsFound.push(...proxyErrors);
 
@@ -1382,7 +1588,7 @@ class TZDigitalTransferClient {
     }
 
     // PASO 4: Verificar autenticación
-    console.log('[TZDigital] 🔑 Paso 4: Verificando autenticación...');
+    console.log('[DevCorePay] 🔑 Paso 4: Verificando autenticación...');
     const authErrors = await this.diagnoseAuthentication();
     errorsFound.push(...authErrors);
 
@@ -1392,7 +1598,7 @@ class TZDigitalTransferClient {
     }
 
     // PASO 5: Intentar conexión alternativa
-    console.log('[TZDigital] 🔄 Paso 5: Probando conexión alternativa...');
+    console.log('[DevCorePay] 🔄 Paso 5: Probando conexión alternativa...');
     const alternativeResult = await this.tryAlternativeConnection();
     if (alternativeResult.success) {
       solutionsApplied.push('Conexión alternativa establecida');
@@ -1423,7 +1629,7 @@ class TZDigitalTransferClient {
       recommendations
     };
 
-    console.log('[TZDigital] ✅ Diagnóstico completado:', {
+    console.log('[DevCorePay] ✅ Diagnóstico completado:', {
       errores: errorsFound.length,
       solucionesAplicadas: solutionsApplied.length,
       solucionesPendientes: solutionsPending.length,
@@ -1510,7 +1716,7 @@ class TZDigitalTransferClient {
       ? `${LOCAL_SERVER_URL}/api/tz-digital/test`
       : '/api/tz-digital/test';
 
-    console.log(`[TZDigital] 🔍 Probando proxy en: ${testUrl} (Electron: ${IS_ELECTRON}, File: ${IS_FILE_PROTOCOL})`);
+    console.log(`[DevCorePay] 🔍 Probando proxy en: ${testUrl} (Electron: ${IS_ELECTRON}, File: ${IS_FILE_PROTOCOL})`);
 
     try {
       const controller = new AbortController();
@@ -1543,7 +1749,7 @@ class TZDigitalTransferClient {
           timestamp: new Date().toISOString()
         });
       } else {
-        console.log('[TZDigital] ✅ Proxy local disponible');
+        console.log('[DevCorePay] ✅ Proxy local disponible');
       }
     } catch (err: any) {
       localServerAvailable = false;
@@ -1824,7 +2030,7 @@ class TZDigitalTransferClient {
   }
 
   private async tryAlternativeConnection(): Promise<{ success: boolean }> {
-    console.log('[TZDigital] 🔄 Intentando conexión alternativa...');
+    console.log('[DevCorePay] 🔄 Intentando conexión alternativa...');
 
     // Intentar con diferentes configuraciones
     const attempts = [
@@ -1848,11 +2054,11 @@ class TZDigitalTransferClient {
         clearTimeout(timeoutId);
 
         if (response.ok || response.status === 405 || response.status < 500) {
-          console.log(`[TZDigital] ✅ Conexión alternativa exitosa: ${attempt.name}`);
+          console.log(`[DevCorePay] ✅ Conexión alternativa exitosa: ${attempt.name}`);
           return { success: true };
         }
       } catch {
-        console.log(`[TZDigital] ❌ Intento fallido: ${attempt.name}`);
+        console.log(`[DevCorePay] ❌ Intento fallido: ${attempt.name}`);
       }
     }
 
@@ -2190,11 +2396,11 @@ class TZDigitalTransferClient {
       message = `❌ Conexión fallida (${failed} errores)`;
     }
 
-    console.log(`[TZDigital] ${message} - ${totalDuration}ms total`);
-    console.log(`[TZDigital] Conexión Real: ${isRealConnection ? 'SÍ ✓' : 'NO ✗'}`);
+    console.log(`[DevCorePay] ${message} - ${totalDuration}ms total`);
+    console.log(`[DevCorePay] Conexión Real: ${isRealConnection ? 'SÍ ✓' : 'NO ✗'}`);
     checks.forEach(c => {
       const icon = c.status === 'passed' ? '✅' : c.status === 'warning' ? '⚠️' : '❌';
-      console.log(`[TZDigital]   ${icon} ${c.name}: ${c.message}`);
+      console.log(`[DevCorePay]   ${icon} ${c.name}: ${c.message}`);
     });
 
     return {
@@ -2234,8 +2440,8 @@ class TZDigitalTransferClient {
     const passedCriteria = Object.values(criteria).filter(Boolean).length;
     const totalCriteria = Object.keys(criteria).length;
 
-    console.log('[TZDigital] Validación de conexión real:', criteria);
-    console.log(`[TZDigital] Criterios cumplidos: ${passedCriteria}/${totalCriteria}`);
+    console.log('[DevCorePay] Validación de conexión real:', criteria);
+    console.log(`[DevCorePay] Criterios cumplidos: ${passedCriteria}/${totalCriteria}`);
 
     // Necesita al menos 4 de 5 criterios para ser considerada real
     return passedCriteria >= 4;
@@ -2279,17 +2485,20 @@ class TZDigitalTransferClient {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// INSTANCIA SINGLETON
+// DEV CORE PAY - SINGLETON INSTANCE
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const tzDigitalClient = new TZDigitalTransferClient();
+export const devCorePayClient = new DevCorePayTransferClient();
+
+// Legacy alias for backward compatibility
+export const tzDigitalClient = devCorePayClient;
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FUNCIONES DE CONVENIENCIA
+// DEV CORE PAY - CONVENIENCE FUNCTIONS
 // ═══════════════════════════════════════════════════════════════════════════
 
 export async function sendMoney(payload: MoneyTransferPayload): Promise<ApiResult> {
-  return tzDigitalClient.sendMoney(payload);
+  return devCorePayClient.sendMoney(payload);
 }
 
 export async function sendUSD(
@@ -2298,10 +2507,10 @@ export async function sendUSD(
   beneficiaryAccount: string,
   opts?: { reference?: string; note?: string }
 ): Promise<ApiResult> {
-  return tzDigitalClient.sendMoney({
+  return devCorePayClient.sendMoney({
     amount,
     currency: 'USD',
-    reference: opts?.reference || tzDigitalClient.generateReference('USD'),
+    reference: opts?.reference || devCorePayClient.generateReference('USD'),
     beneficiary_name: beneficiaryName,
     beneficiary_account: beneficiaryAccount,
     note: opts?.note,
@@ -2314,15 +2523,39 @@ export async function sendEUR(
   beneficiaryIban: string,
   opts?: { reference?: string; note?: string }
 ): Promise<ApiResult> {
-  return tzDigitalClient.sendMoney({
+  return devCorePayClient.sendMoney({
     amount,
     currency: 'EUR',
-    reference: opts?.reference || tzDigitalClient.generateReference('EUR'),
+    reference: opts?.reference || devCorePayClient.generateReference('EUR'),
     beneficiary_name: beneficiaryName,
     beneficiary_iban: beneficiaryIban,
     note: opts?.note,
   });
 }
 
-export default tzDigitalClient;
+/**
+ * Send funds via DEV CORE PAY Global Server
+ * Uses SWIFT/VISA NET protocols - NO CRYPTO
+ */
+export async function sendFundsViaGlobalServer(
+  payload: FundsTxPayload,
+  protocol: TransferProtocol = 'SWIFT_MT103_GPI'
+): Promise<FundsProcessingResult> {
+  return devCorePayClient.sendFundsProcessingTransaction({
+    ...payload,
+    protocol,
+    channel: 'INSTANT_SERVER_SETTLEMENT',
+    receiver_bank_account: 'N/A', // Per specification - not required for Global Server
+  });
+}
+
+/**
+ * Get DEV CORE PAY server configuration
+ */
+export function getServerConfig(): DevCorePayServerDetails {
+  return DEFAULT_SERVER_DETAILS;
+}
+
+// Default export
+export default devCorePayClient;
 

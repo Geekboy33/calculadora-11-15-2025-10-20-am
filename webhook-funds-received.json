@@ -1,0 +1,19 @@
+{
+  "type": "payment_intent.succeeded",
+  "data": {
+    "object": {
+      "id": "pi_RF6QDE3RZNQ4",
+      "amount": 1000,
+      "currency": "gbp",
+      "status": "succeeded",
+      "metadata": {
+        "reference": "RF6QDE3RZNQ4",
+        "sender_name": "Verdenergy Ltd",
+        "sender_email": "treasury@verdenergy.com"
+      }
+    }
+  },
+  "reference": "RF6QDE3RZNQ4",
+  "status": "funds_received",
+  "amount": 10
+}

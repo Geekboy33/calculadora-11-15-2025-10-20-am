@@ -1,0 +1,51 @@
+{
+  "name": "dcb-treasury-contracts-v4",
+  "version": "4.0.0",
+  "description": "DCB Treasury Smart Contracts - USD-Backed LUSD Minting System for LemonChain",
+  "author": "Digital Commercial Bank Ltd",
+  "license": "MIT",
+  "keywords": [
+    "blockchain",
+    "smart-contracts",
+    "solidity",
+    "lemonchain",
+    "lusd",
+    "stablecoin",
+    "defi",
+    "treasury",
+    "iso20022",
+    "swift"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dcb-treasury/contracts-v4"
+  },
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "coverage": "hardhat coverage",
+    "deploy:local": "hardhat run deploy/Deploy.js --network localhost",
+    "deploy:lemonchain": "hardhat run deploy/Deploy.js --network lemonchain",
+    "deploy:testnet": "hardhat run deploy/Deploy.js --network lemonchain_testnet",
+    "verify": "hardhat verify --network lemonchain",
+    "clean": "hardhat clean",
+    "node": "hardhat node",
+    "lint": "solhint 'contracts/**/*.sol'",
+    "format": "prettier --write '**/*.{js,json,md,sol}'"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.19.0",
+    "hardhat-gas-reporter": "^1.0.9",
+    "prettier": "^3.1.0",
+    "prettier-plugin-solidity": "^1.2.0",
+    "solhint": "^4.0.0",
+    "solidity-coverage": "^0.8.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

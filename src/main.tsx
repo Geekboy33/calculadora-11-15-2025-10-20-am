@@ -8,6 +8,12 @@ import { LanguageProvider } from './lib/i18n.tsx';
 import { AuthProvider } from './lib/auth.tsx';
 import { ToastProvider, useToast } from './components/ui/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { SecurityService } from './lib/security-service';
+
+// Initialize security service on app start
+SecurityService.initialize().catch(() => {
+  // Security initialization failed - continue but log warning
+});
 
 function AppWithToast() {
   const { addToast } = useToast();
@@ -24,14 +30,20 @@ function AppWithToast() {
   return <App />;
 }
 
-// Captura de errores global
+// Secure error handling - no sensitive data in production logs
+const isProduction = !import.meta.env.DEV;
+
 window.onerror = function(message, source, lineno, colno, error) {
-  console.error('❌ Error global capturado:', { message, source, lineno, colno, error });
+  if (!isProduction) {
+    SecurityService.log.error('Global error', { message: String(message), source, lineno, colno });
+  }
   return false;
 };
 
 window.onunhandledrejection = function(event) {
-  console.error('❌ Promise rechazada sin capturar:', event.reason);
+  if (!isProduction) {
+    SecurityService.log.error('Unhandled promise rejection', { reason: String(event.reason) });
+  }
 };
 
 createRoot(document.getElementById('root')!).render(

@@ -1,0 +1,7 @@
+{
+    "amount": 1000,
+    "email": "treasury@digitalcommercialbank.com",
+    "name": "Digital Commercial Bank Ltd",
+    "transferType": "gb_bank_transfer",
+    "currency": "gbp"
+}

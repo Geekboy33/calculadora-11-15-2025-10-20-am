@@ -324,7 +324,7 @@ const DESTINATION_SERVERS = [
   { 
     id: 'devmind-group', 
     name: 'DevMind Group', 
-    displayName: 'DevMind Group (CIS S2S)',
+    displayName: 'DevMind Group (DEV CORE PAY)',
     ip: '172.67.157.88', 
     port: 8443, 
     type: 'HTTPS',

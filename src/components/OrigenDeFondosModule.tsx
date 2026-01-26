@@ -4754,7 +4754,7 @@ ${liveLog.slice(0, 20).map(l => `[${l.ts}] ${l.level || 'info'} ${l.chunk !== un
         accountType: 'Treasury Reserve',
         currency: 'USD',
         balance: 2500000000.00,
-        swift: 'DCBKUS33',
+        swift: 'DCBKAEDXXX',
         beneficiaryName: 'DCB TREASURY OPERATIONS',
         extractedAt: new Date().toISOString(),
         confidence: 99,

@@ -886,16 +886,24 @@ Timestamp: ${AUDIT_DATA.timestamp}
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="*"
+                accept="*/*"
+                multiple={false}
                 onChange={handleAnalyzeFile}
                 aria-label={isSpanish ? "Seleccionar archivo Ledger1" : "Select Ledger1 file"}
                 title={isSpanish ? "Seleccionar archivo Ledger1 para análisis" : "Select Ledger1 file for analysis"}
-                className="hidden"
+                style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
               />
               <BankingButton
                 variant="primary"
                 icon={Upload}
-                onClick={() => fileInputRef.current?.click()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                    fileInputRef.current.click();
+                  }
+                }}
                 disabled={analyzing}
               >
                 {analyzing 

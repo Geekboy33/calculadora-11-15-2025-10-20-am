@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MINT LEMON PROTOCOL - Official Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #050505;
+      --bg-secondary: #0a0f0d;
+      --bg-card: #0d1512;
+      --bg-hover: #121a17;
+      --border-primary: #1a2420;
+      --border-lemon: #a3e63540;
+      --lemon-primary: #a3e635;
+      --lemon-secondary: #84cc16;
+      --lemon-glow: rgba(163, 230, 53, 0.3);
+      --cyan: #22d3ee;
+      --purple: #a855f7;
+      --gold: #fbbf24;
+      --red: #ef4444;
+      --text-primary: #ffffff;
+      --text-secondary: #d4d4d8;
+      --text-muted: #71717a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+    ::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--lemon-primary); }
+
+    /* Custom SVG Icons */
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+
+    .icon-lg { width: 32px; height: 32px; }
+    .icon-xl { width: 48px; height: 48px; }
+
+    /* Top Navigation */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+      border-bottom: 1px solid var(--border-lemon);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      z-index: 1000;
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(163, 230, 53, 0.1);
+      border: 1px solid rgba(163, 230, 53, 0.3);
+      border-radius: 10px;
+      color: var(--lemon-primary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .back-btn:hover {
+      background: rgba(163, 230, 53, 0.2);
+      transform: translateX(-4px);
+    }
+
+    .back-btn svg {
+      transition: transform 0.2s;
+    }
+
+    .back-btn:hover svg {
+      transform: translateX(-4px);
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--lemon-primary) 0%, var(--lemon-secondary) 100%);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px var(--lemon-glow), 0 0 60px rgba(163, 230, 53, 0.15);
+    }
+
+    .logo-text h1 {
+      font-size: 20px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--lemon-primary) 0%, var(--lemon-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text span {
+      font-size: 11px;
+      color: var(--lemon-secondary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-link {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .nav-link:hover {
+      background: rgba(163, 230, 53, 0.1);
+      border-color: rgba(163, 230, 53, 0.3);
+      color: var(--lemon-primary);
+    }
+
+    .download-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--lemon-primary) 0%, var(--lemon-secondary) 100%);
+      border: none;
+      border-radius: 12px;
+      color: var(--bg-primary);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 0 20px var(--lemon-glow);
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px var(--lemon-glow);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 70px;
+      width: 280px;
+      height: calc(100vh - 70px);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-primary);
+      overflow-y: auto;
+      padding: 24px 0;
+    }
+
+    .sidebar-section { margin-bottom: 24px; }
+
+    .sidebar-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0 24px;
+      margin-bottom: 12px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar-link:hover {
+      background: rgba(163, 230, 53, 0.05);
+      color: var(--text-primary);
+      border-left-color: rgba(163, 230, 53, 0.5);
+    }
+
+    .sidebar-link.active {
+      background: rgba(163, 230, 53, 0.1);
+      color: var(--lemon-primary);
+      border-left-color: var(--lemon-primary);
+    }
+
+    .sidebar-link .s-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      margin-top: 70px;
+      padding: 40px 60px;
+      max-width: 1200px;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+      border: 1px solid var(--border-lemon);
+      border-radius: 24px;
+      padding: 60px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--lemon-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(163, 230, 53, 0.1);
+      border: 1px solid rgba(163, 230, 53, 0.3);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--lemon-primary);
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--lemon-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin-bottom: 32px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-stat { text-align: center; }
+
+    .hero-stat .value {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--lemon-primary);
+      display: block;
+    }
+
+    .hero-stat .label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Section */
+    section {
+      margin-bottom: 60px;
+      scroll-margin-top: 90px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .section-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, rgba(163, 230, 53, 0.2) 0%, rgba(163, 230, 53, 0.05) 100%);
+      border: 1px solid rgba(163, 230, 53, 0.3);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .section-header h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .section-header h2 span { color: var(--lemon-primary); }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--border-lemon);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .card-icon.lemon { background: rgba(163, 230, 53, 0.15); }
+    .card-icon.cyan { background: rgba(34, 211, 238, 0.15); }
+    .card-icon.purple { background: rgba(168, 85, 247, 0.15); }
+    .card-icon.gold { background: rgba(251, 191, 36, 0.15); }
+
+    .card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Contract Box */
+    .contract-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .contract-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, rgba(163, 230, 53, 0.1) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border-primary);
+    }
+
+    .contract-header h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--lemon-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .contract-header .tag {
+      padding: 4px 12px;
+      background: rgba(163, 230, 53, 0.15);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--lemon-primary);
+      text-transform: uppercase;
+    }
+
+    .contract-body { padding: 20px 24px; }
+
+    .contract-address {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .contract-address code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--cyan);
+      flex: 1;
+    }
+
+    .contract-address button {
+      padding: 6px 12px;
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      border-radius: 6px;
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .contract-address button:hover {
+      background: rgba(34, 211, 238, 0.2);
+    }
+
+    .contract-features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .contract-feature {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .contract-feature .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--lemon-primary);
+      border-radius: 50%;
+    }
+
+    /* Signature Flow */
+    .signature-flow {
+      display: flex;
+      align-items: stretch;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .signature-step {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+    }
+
+    .signature-step::after {
+      content: '';
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--lemon-primary), transparent);
+    }
+
+    .signature-step:last-child::after { display: none; }
+
+    .signature-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .sig-1 { background: rgba(251, 191, 36, 0.2); color: var(--gold); border: 2px solid var(--gold); }
+    .sig-2 { background: rgba(163, 230, 53, 0.2); color: var(--lemon-primary); border: 2px solid var(--lemon-primary); }
+    .sig-3 { background: rgba(168, 85, 247, 0.2); color: var(--purple); border: 2px solid var(--purple); }
+
+    .signature-step h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .signature-step p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .signature-hash {
+      padding: 10px 14px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--cyan);
+      word-break: break-all;
+    }
+
+    /* Currency Grid */
+    .currency-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+
+    .currency-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .currency-item:hover {
+      border-color: var(--border-lemon);
+      transform: scale(1.05);
+    }
+
+    .currency-item.active {
+      border-color: var(--lemon-primary);
+      background: rgba(163, 230, 53, 0.1);
+    }
+
+    .currency-item .code {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .currency-item .symbol {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .currency-item .iso {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .currency-item.active .code { color: var(--lemon-primary); }
+
+    .currency-item.active::after {
+      content: 'ACTIVE';
+      display: block;
+      margin-top: 8px;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--lemon-primary);
+      letter-spacing: 1px;
+    }
+
+    /* ISO Section */
+    .iso-section {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .iso-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .iso-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px;
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, transparent 100%);
+      border-bottom: 1px solid var(--border-primary);
+    }
+
+    .iso-logo {
+      width: 80px;
+      height: 80px;
+      background: white;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #1e40af;
+      font-size: 14px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .iso-header h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .iso-header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .iso-body { padding: 24px; }
+
+    .iso-body ul { list-style: none; }
+
+    .iso-body li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-primary);
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .iso-body li:last-child { border-bottom: none; }
+
+    .iso-body li .check-icon {
+      color: var(--lemon-primary);
+      flex-shrink: 0;
+    }
+
+    /* ISO 20022 Badge Section */
+    .iso-badge-section {
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+      border: 1px solid var(--border-lemon);
+      border-radius: 20px;
+      padding: 40px;
+      display: flex;
+      align-items: center;
+      gap: 50px;
+      margin-bottom: 32px;
+    }
+
+    .iso-badge-image-container {
+      flex-shrink: 0;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .iso-image-wrapper {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid var(--lemon-primary);
+      box-shadow: 
+        0 0 30px rgba(163, 230, 53, 0.5),
+        0 0 60px rgba(163, 230, 53, 0.3),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+      animation: iso-float 6s ease-in-out infinite;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .iso-image-wrapper img {
+      width: 120%;
+      height: 120%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    @keyframes iso-float {
+      0%, 100% {
+        transform: translateY(0);
+        box-shadow: 
+          0 0 30px rgba(163, 230, 53, 0.5),
+          0 0 60px rgba(163, 230, 53, 0.3);
+      }
+      50% {
+        transform: translateY(-8px);
+        box-shadow: 
+          0 0 50px rgba(163, 230, 53, 0.7),
+          0 0 80px rgba(163, 230, 53, 0.4);
+      }
+    }
+
+    .iso-glow {
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(163, 230, 53, 0.25) 0%, rgba(132, 204, 22, 0.12) 40%, transparent 70%);
+      z-index: 1;
+      animation: iso-glow-pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes iso-glow-pulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .iso-badges-container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .iso-badge-image-container.iso-27001 {
+      animation-delay: 0.5s;
+    }
+
+    .iso-image-wrapper.wrapper-cyan {
+      border-color: var(--cyan);
+      box-shadow: 
+        0 0 30px rgba(34, 211, 238, 0.5),
+        0 0 60px rgba(34, 211, 238, 0.3),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+      animation: iso-float-cyan 6s ease-in-out infinite;
+      animation-delay: 0.5s;
+    }
+
+    @keyframes iso-float-cyan {
+      0%, 100% {
+        transform: translateY(0);
+        box-shadow: 
+          0 0 30px rgba(34, 211, 238, 0.5),
+          0 0 60px rgba(34, 211, 238, 0.3);
+      }
+      50% {
+        transform: translateY(-8px);
+        box-shadow: 
+          0 0 50px rgba(34, 211, 238, 0.7),
+          0 0 80px rgba(34, 211, 238, 0.4);
+      }
+    }
+
+    .iso-glow.glow-cyan {
+      background: radial-gradient(circle, rgba(34, 211, 238, 0.25) 0%, rgba(34, 211, 238, 0.12) 40%, transparent 70%);
+    }
+
+    .protocol-tag.tag-cyan {
+      background: rgba(34, 211, 238, 0.1);
+      border-color: rgba(34, 211, 238, 0.3);
+      color: var(--cyan);
+    }
+
+    .certificate-image-container {
+      width: 280px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      border: 2px solid var(--border-lemon);
+    }
+
+    .certificate-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .iso-badge-content h3 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--lemon-primary);
+      margin-bottom: 16px;
+    }
+
+    .iso-badge-content p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .iso-protocols {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .protocol-tag {
+      padding: 8px 16px;
+      background: rgba(163, 230, 53, 0.1);
+      border: 1px solid rgba(163, 230, 53, 0.3);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--lemon-primary);
+    }
+
+    /* AML Section */
+    .aml-section {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, var(--bg-card) 100%);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      border-radius: 16px;
+      padding: 32px;
+    }
+
+    .aml-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .aml-header .shield-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--gold) 0%, #f59e0b 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .aml-header h3 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .aml-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .aml-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .aml-item {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .aml-item h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .aml-item p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Certificate Section */
+    .certificate-section {
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.05) 0%, var(--bg-card) 100%);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      border-radius: 16px;
+      padding: 32px;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .certificate-visual {
+      width: 280px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .cert-logo {
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cert-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .cert-subtitle {
+      font-size: 12px;
+      color: #60a5fa;
+      font-weight: 600;
+    }
+
+    .cert-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    .cert-number {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+
+    .cert-number .label {
+      font-size: 9px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cert-number .value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .cert-badges {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .cert-badge {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 600;
+    }
+
+    .cert-badge.green { background: #22c55e; }
+    .cert-badge.blue { background: #3b82f6; }
+
+    .certificate-content h3 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--cyan);
+      margin-bottom: 16px;
+    }
+
+    .certificate-content p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .certificate-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .cert-detail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .cert-detail .label { color: var(--text-muted); }
+    .cert-detail .value { color: var(--text-primary); font-weight: 600; }
+
+    /* Network Info */
+    .network-info {
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+      border: 1px solid var(--border-lemon);
+      border-radius: 16px;
+      padding: 32px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .network-stat { text-align: center; }
+
+    .network-stat .net-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      background: rgba(163, 230, 53, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .network-stat .value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--lemon-primary);
+    }
+
+    .network-stat .label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Code Block */
+    .code-block {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-primary);
+    }
+
+    .code-header span {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .code-content {
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .code-content .keyword { color: var(--purple); }
+    .code-content .string { color: var(--lemon-primary); }
+    .code-content .function { color: var(--cyan); }
+    .code-content .number { color: var(--gold); }
+
+    /* Table */
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    .doc-table th {
+      text-align: left;
+      padding: 14px 16px;
+      background: rgba(163, 230, 53, 0.1);
+      border: 1px solid var(--border-primary);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--lemon-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .doc-table td {
+      padding: 14px 16px;
+      border: 1px solid var(--border-primary);
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .doc-table tr:hover td {
+      background: rgba(163, 230, 53, 0.03);
+    }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: 80px;
+      padding: 40px 0;
+      border-top: 1px solid var(--border-primary);
+      text-align: center;
+    }
+
+    .doc-footer p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .doc-footer .version {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(163, 230, 53, 0.1);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--lemon-primary);
+      margin-top: 16px;
+    }
+
+    /* Print Styles */
+    @media print {
+      .top-nav, .sidebar, .download-btn, .back-btn { display: none !important; }
+      .main-content { margin-left: 0; margin-top: 0; padding: 20px; max-width: 100%; }
+      body { background: white !important; color: #000000 !important; }
+      
+      /* All backgrounds */
+      .hero, .card, .contract-box, .signature-step, .iso-card, .aml-section, .certificate-section, .iso-badge-section, .network-info, .code-block, .aml-item {
+        background: #f5f5f5 !important;
+        border-color: #ccc !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      
+      /* Headers and titles - BLACK */
+      .hero h1, .section-header h2, .section-header h2 span, h3, h4, .card h3, .contract-header h4, .signature-step h4, .aml-item h4, .iso-header h3, .certificate-content h3, .iso-badge-content h3 {
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+      }
+      
+      /* Primary text - BLACK */
+      p, .hero p, .card p, .signature-step p, .aml-item p, .iso-body li, .certificate-content p, .iso-badge-content p, .contract-feature, .cert-detail {
+        color: #1a1a1a !important;
+      }
+      
+      /* Secondary/muted text - DARK GRAY (readable) */
+      .text-secondary, .text-muted, .hero-stat .label, .currency-item .symbol, .currency-item .iso, .cert-detail .label, .code-header span, .sidebar-title, .network-stat .label {
+        color: #333333 !important;
+      }
+      
+      /* Values and numbers - BLACK */
+      .hero-stat .value, .network-stat .value, .cert-detail .value, .currency-item .code {
+        color: #000000 !important;
+      }
+      
+      /* Code blocks - BLACK text */
+      .code-content, .contract-address code, .signature-hash {
+        color: #000000 !important;
+        background: #e8e8e8 !important;
+      }
+      
+      /* Table */
+      .doc-table th { background: #e0e0e0 !important; color: #000000 !important; }
+      .doc-table td { color: #1a1a1a !important; }
+      
+      /* Protocol tags */
+      .protocol-tag { color: #000000 !important; background: #e0e0e0 !important; border-color: #999 !important; }
+      
+      /* Contract features dots */
+      .contract-feature .dot { background: #333333 !important; }
+      
+      /* ISO body check icons */
+      .iso-body li .check-icon { stroke: #333333 !important; }
+      
+      /* Green accent colors - keep visible but darker */
+      .lemon-primary, .currency-item.active .code, .currency-item.active::after { color: #2d5016 !important; }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .signature-flow { flex-direction: column; }
+      .signature-step::after { display: none; }
+      .iso-section { grid-template-columns: 1fr; }
+      .currency-grid { grid-template-columns: repeat(3, 1fr); }
+      .iso-badge-section { flex-direction: column; text-align: center; }
+      .iso-badge-image-container { width: 100%; display: flex; justify-content: center; }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+      .hero { padding: 40px 24px; }
+      .hero h1 { font-size: 32px; }
+      .certificate-section { flex-direction: column; }
+      .certificate-visual { width: 100%; }
+      .network-info { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <div class="nav-left">
+      <a href="/" class="back-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back to Platform
+      </a>
+      <div class="logo-section">
+        <div class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" fill="white" fill-opacity="0.9"/>
+            <path d="M12 6C12 6 8 10 8 13C8 15.5 9.5 17 12 17C14.5 17 16 15.5 16 13C16 10 12 6 12 6Z" fill="#65a30d"/>
+            <ellipse cx="12" cy="13" rx="2" ry="2.5" fill="#a3e635"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1>MINT LEMON PROTOCOL</h1>
+          <span>Official Documentation</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="#overview" class="nav-link">Overview</a>
+      <a href="#contracts" class="nav-link">Smart Contracts</a>
+      <a href="#signatures" class="nav-link">3-Signature Flow</a>
+      <a href="#compliance" class="nav-link">Compliance</a>
+    </div>
+    <button class="download-btn" onclick="window.print()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download PDF
+    </button>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Getting Started</div>
+      <a href="#overview" class="sidebar-link active">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+        Overview
+      </a>
+      <a href="#dcb" class="sidebar-link">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg></span>
+        Digital Commercial Bank
+      </a>
+      <a href="#daes" class="sidebar-link">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+        DAES System
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Technical</div>
+      <a href="#contracts" class="sidebar-link">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M9 15l3 3 3-3"/></svg></span>
+        Smart Contracts
+      </a>
+      <a href="#signatures" class="sidebar-link">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        3-Signature Process
+      </a>
+      <a href="#network" class="sidebar-link">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+        LemonChain Network
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Standards</div>
+      <a href="#iso20022" class="sidebar-link">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+        ISO 20022
+      </a>
+      <a href="#iso27001" class="sidebar-link">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        ISO 27001
+      </a>
+      <a href="#currencies" class="sidebar-link">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+        15 Treasury Currencies
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Compliance</div>
+      <a href="#aml" class="sidebar-link">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span>
+        AML/CFT Framework
+      </a>
+      <a href="#wolfsberg" class="sidebar-link">
+        <span class="s-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+        Wolfsberg Principles
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Hero -->
+    <div class="hero" id="overview">
+      <div class="hero-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Version 5.0 - Production Ready
+      </div>
+      <h1>MINT LEMON PROTOCOL</h1>
+      <p>The world's first transparent stablecoin minting protocol with three-signature blockchain verification, ISO 20022 integration, and real-time reserve transparency. Building the future of institutional-grade digital assets on LemonChain.</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="value">1:1</span>
+          <span class="label">USD Backing</span>
+        </div>
+        <div class="hero-stat">
+          <span class="value">3</span>
+          <span class="label">Signatures Required</span>
+        </div>
+        <div class="hero-stat">
+          <span class="value">15</span>
+          <span class="label">Treasury Currencies</span>
+        </div>
+        <div class="hero-stat">
+          <span class="value">100%</span>
+          <span class="label">Transparent</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ISO 20022 Badge Section -->
+    <section id="iso-native">
+      <div class="iso-badge-section">
+        <div class="iso-badge-image-container">
+          <div class="iso-glow"></div>
+          <div class="iso-image-wrapper">
+            <img src="/images/ISO20022.jpeg" alt="ISO 20022 Native - SWIFT CBPR+ Ready" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:linear-gradient(135deg,#1e40af,#3b82f6);display:flex;align-items:center;justify-content:center;color:white;font-size:24px;font-weight:800;text-align:center;line-height:1.2;&quot;>ISO<br>20022</div>'"/>
+          </div>
+        </div>
+        <div class="iso-badge-content">
+          <h3>ISO 20022 Native Infrastructure</h3>
+          <p>Treasury Minting is built natively on ISO 20022 - the universal financial messaging standard adopted by SWIFT, central banks, and payment systems worldwide. Our VUSD stablecoin seamlessly integrates with global financial infrastructure, enabling instant cross-border settlements and full regulatory compliance.</p>
+          <div class="iso-protocols">
+            <span class="protocol-tag">pain.001</span>
+            <span class="protocol-tag">pain.002</span>
+            <span class="protocol-tag">pacs.008</span>
+            <span class="protocol-tag">pacs.009</span>
+            <span class="protocol-tag">camt.053</span>
+            <span class="protocol-tag">camt.054</span>
+            <span class="protocol-tag">head.001</span>
+            <span class="protocol-tag">admi.002</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Digital Commercial Bank -->
+    <section id="dcb">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg>
+        </div>
+        <h2><span>Digital Commercial</span> Bank Ltd</h2>
+      </div>
+      
+      <div class="certificate-section">
+        <div class="certificate-image-container">
+          <img src="/images/ISO27001.jpg" alt="ISO 27001:2022 Certificate - Digital Commercial Bank Ltd" class="certificate-img"/>
+        </div>
+        <div class="certificate-content">
+          <h3>ISO/IEC 27001:2022 Certified</h3>
+          <p><strong>Digital Commercial Bank Ltd</strong> is a fully licensed financial institution that has been certified to meet the requirements of <strong>ISO/IEC 27001:2022 Information Security Management Systems</strong>, covering all financial operations including custody, payments, and blockchain integration.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DAES System -->
+    <section id="daes">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <h2><span>DAES</span> - Data and Exchange Settlement</h2>
+      </div>
+      
+      <p style="font-size: 16px; color: var(--text-secondary); margin-bottom: 24px; max-width: 800px;">
+        DAES (Data and Exchange Settlement System) is the core infrastructure powering the Mint Lemon Protocol. It handles real-time settlement, custody management, and blockchain bridge operations with full ISO 20022 compliance.
+      </p>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon lemon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3>Settlement Engine</h3>
+          <p>Automated T+0 settlement for inter-bank and blockchain transfers with real-time confirmation and complete audit trails.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon cyan">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3>ISO 20022 Gateway</h3>
+          <p>Native support for ISO 20022 financial messaging standards including pacs.008, pacs.009 and pain.001 message types.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon purple">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3>Custody Management</h3>
+          <p>Secure management of custody accounts with multi-party authorization and hardware security module integration.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon gold">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>Blockchain Bridge</h3>
+          <p>Direct integration with LemonChain for tokenization operations, enabling seamless USD to VUSD conversion.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Smart Contracts -->
+    <section id="contracts">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M9 15l3 3 3-3"/></svg>
+        </div>
+        <h2><span>Smart</span> Contracts</h2>
+      </div>
+      
+      <p style="font-size: 16px; color: var(--text-secondary); margin-bottom: 24px;">
+        All smart contracts are deployed on <strong>LemonChain Mainnet (Chain ID: 1006)</strong> and verified on the blockchain explorer.
+      </p>
+
+      <!-- VUSD Token -->
+      <div class="contract-box">
+        <div class="contract-header">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+            VUSD Token
+          </h4>
+          <span class="tag">ERC-20</span>
+        </div>
+        <div class="contract-body">
+          <div class="contract-address">
+            <code>0x0bF07709c94D32c9F000c51D4Ee0BCFfEeb1011b</code>
+            <button onclick="navigator.clipboard.writeText('0x0bF07709c94D32c9F000c51D4Ee0BCFfEeb1011b')">Copy</button>
+          </div>
+          <div class="contract-features">
+            <div class="contract-feature"><span class="dot"></span> 1:1 USD Backed Stablecoin</div>
+            <div class="contract-feature"><span class="dot"></span> 18 Decimals Precision</div>
+            <div class="contract-feature"><span class="dot"></span> Role-Based Access Control</div>
+            <div class="contract-feature"><span class="dot"></span> Mintable by VUSDMinter Only</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USD Tokenized -->
+      <div class="contract-box">
+        <div class="contract-header">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            USD (Tokenized)
+          </h4>
+          <span class="tag">Injection</span>
+        </div>
+        <div class="contract-body">
+          <div class="contract-address">
+            <code>0x7476B58f954C19dfE677407fA3e178D8f173BcD0</code>
+            <button onclick="navigator.clipboard.writeText('0x7476B58f954C19dfE677407fA3e178D8f173BcD0')">Copy</button>
+          </div>
+          <div class="contract-features">
+            <div class="contract-feature"><span class="dot"></span> First Signature (DCB Treasury)</div>
+            <div class="contract-feature"><span class="dot"></span> DAES Transaction ID Tracking</div>
+            <div class="contract-feature"><span class="dot"></span> ISO 20022 XML Hash Storage</div>
+            <div class="contract-feature"><span class="dot"></span> Injection Statistics</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lock Reserve -->
+      <div class="contract-box">
+        <div class="contract-header">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            LockReserve
+          </h4>
+          <span class="tag">Custody</span>
+        </div>
+        <div class="contract-body">
+          <div class="contract-address">
+            <code>0x154403841e99479E9F628E9F01619A4Bcc394f8a</code>
+            <button onclick="navigator.clipboard.writeText('0x154403841e99479E9F628E9F01619A4Bcc394f8a')">Copy</button>
+          </div>
+          <div class="contract-features">
+            <div class="contract-feature"><span class="dot"></span> Second Signature (Treasury Minting)</div>
+            <div class="contract-feature"><span class="dot"></span> Authorization Code Generation</div>
+            <div class="contract-feature"><span class="dot"></span> Multi-Signature Verification</div>
+            <div class="contract-feature"><span class="dot"></span> Reserve Tracking</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VUSD Minter -->
+      <div class="contract-box">
+        <div class="contract-header">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            VUSDMinter
+          </h4>
+          <span class="tag">Minting</span>
+        </div>
+        <div class="contract-body">
+          <div class="contract-address">
+            <code>0xC59D560025cdDe01E7d813575987E1E902bE2619</code>
+            <button onclick="navigator.clipboard.writeText('0xC59D560025cdDe01E7d813575987E1E902bE2619')">Copy</button>
+          </div>
+          <div class="contract-features">
+            <div class="contract-feature"><span class="dot"></span> Third Signature (Backed Certificate)</div>
+            <div class="contract-feature"><span class="dot"></span> Publication Code Generation</div>
+            <div class="contract-feature"><span class="dot"></span> Backing Ratio Verification</div>
+            <div class="contract-feature"><span class="dot"></span> VUSD Minting Execution</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Oracle -->
+      <div class="contract-box">
+        <div class="contract-header">
+          <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            PriceOracle
+          </h4>
+          <span class="tag">Oracle</span>
+        </div>
+        <div class="contract-body">
+          <div class="contract-address">
+            <code>0x56D445518ee72D979ec3DBCbc4B20f0A71D4aC5d</code>
+            <button onclick="navigator.clipboard.writeText('0x56D445518ee72D979ec3DBCbc4B20f0A71D4aC5d')">Copy</button>
+          </div>
+          <div class="contract-features">
+            <div class="contract-feature"><span class="dot"></span> Real-Time Price Feeds</div>
+            <div class="contract-feature"><span class="dot"></span> Multi-Stablecoin Support</div>
+            <div class="contract-feature"><span class="dot"></span> 8 Decimals Precision</div>
+            <div class="contract-feature"><span class="dot"></span> Backing Ratio Calculation</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Three Signature Process -->
+    <section id="signatures">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h2><span>Three-Signature</span> Verification</h2>
+      </div>
+      
+      <p style="font-size: 16px; color: var(--text-secondary); margin-bottom: 16px;">
+        Every VUSD token minted requires three independent cryptographic signatures, ensuring maximum security and complete auditability.
+      </p>
+
+      <div class="signature-flow">
+        <div class="signature-step">
+          <div class="signature-number sig-1">1</div>
+          <h4>DCB Treasury / DAES</h4>
+          <p>USD funds are injected from DAES custody account. First blockchain signature is generated with ISO 20022 message hash.</p>
+          <div class="signature-hash">dcbSignature: keccak256(amount, beneficiary, daesTransactionId, xmlHash)</div>
+        </div>
+        <div class="signature-step">
+          <div class="signature-number sig-2">2</div>
+          <h4>Treasury Minting</h4>
+          <p>Lock is accepted and moved to reserve. Second signature is generated with authorization code for tracking.</p>
+          <div class="signature-hash">mintingSignature: keccak256(lockId, amount, firstSignature, authCode)</div>
+        </div>
+        <div class="signature-step">
+          <div class="signature-number sig-3">3</div>
+          <h4>VUSDMinter Certificate</h4>
+          <p>Backed certificate is created and VUSD is minted. Publication code is generated for public verification.</p>
+          <div class="signature-hash">backedSignature: keccak256(lockReserveId, amount, firstSig, secondSig, timestamp)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LemonChain Network -->
+    <section id="network">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h2><span>LemonChain</span> Network</h2>
+      </div>
+
+      <div class="network-info">
+        <div class="network-stat">
+          <div class="net-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="value">1006</div>
+          <div class="label">Chain ID</div>
+        </div>
+        <div class="network-stat">
+          <div class="net-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="value">3s</div>
+          <div class="label">Block Time</div>
+        </div>
+        <div class="network-stat">
+          <div class="net-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="value">PoA</div>
+          <div class="label">Consensus</div>
+        </div>
+        <div class="network-stat">
+          <div class="net-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="8" fill="#a3e635" fill-opacity="0.2"/>
+              <circle cx="12" cy="12" r="5" fill="#a3e635"/>
+            </svg>
+          </div>
+          <div class="value">LEMON</div>
+          <div class="label">Native Token</div>
+        </div>
+      </div>
+
+      <div class="code-block" style="margin-top: 24px;">
+        <div class="code-header">
+          <span>Network Configuration</span>
+        </div>
+        <div class="code-content"><span class="keyword">const</span> <span class="function">LEMONCHAIN_CONFIG</span> = {
+  <span class="string">chainId</span>: <span class="number">1006</span>,
+  <span class="string">chainIdHex</span>: <span class="string">'0x3EE'</span>,
+  <span class="string">name</span>: <span class="string">'LemonChain Mainnet'</span>,
+  <span class="string">rpcUrl</span>: <span class="string">'https://rpc.lemonchain.io'</span>,
+  <span class="string">explorerUrl</span>: <span class="string">'https://explorer.lemonchain.io'</span>,
+  <span class="string">nativeCurrency</span>: {
+    <span class="string">name</span>: <span class="string">'Lemon'</span>,
+    <span class="string">symbol</span>: <span class="string">'LEMON'</span>,
+    <span class="string">decimals</span>: <span class="number">18</span>
+  }
+};</div>
+      </div>
+    </section>
+
+    <!-- ISO 20022 & ISO 27001 -->
+    <section id="iso20022">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <h2><span>ISO Standards</span> Compliance</h2>
+      </div>
+
+      <div class="iso-section">
+        <div class="iso-card">
+          <div class="iso-header">
+            <div class="iso-logo" style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); color: white;">
+              ISO<br>20022
+            </div>
+            <div>
+              <h3>ISO 20022</h3>
+              <p>Financial Messaging Standard</p>
+            </div>
+          </div>
+          <div class="iso-body">
+            <ul>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> pacs.008 - Customer Credit Transfer</li>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> pacs.009 - Financial Institution Credit Transfer</li>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> pain.001 - Customer Credit Transfer Initiation</li>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> camt.053 - Bank to Customer Statement</li>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Full SWIFT/BIC Integration</li>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> UETR (Unique End-to-End Transaction Reference)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="iso-card" id="iso27001">
+          <div class="iso-header">
+            <div class="iso-logo" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white;">
+              ISO<br>27001
+            </div>
+            <div>
+              <h3>ISO/IEC 27001:2022</h3>
+              <p>Information Security Management</p>
+            </div>
+          </div>
+          <div class="iso-body">
+            <ul>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> AES-256-GCM Military-Grade Encryption</li>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> HMAC-SHA256 Message Authentication</li>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> TLS 1.3 Secure Transport Layer</li>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> HSM (Hardware Security Module) Integration</li>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Complete Audit Trail Logging</li>
+              <li><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Role-Based Access Control (RBAC)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Treasury Currencies -->
+    <section id="currencies">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h2><span>15 Treasury</span> Currencies (ISO 4217)</h2>
+      </div>
+
+      <p style="font-size: 16px; color: var(--text-secondary); margin-bottom: 24px;">
+        DAES Treasury supports 15 ISO 4217 compliant currencies. Currently, USD → VUSD minting is active.
+      </p>
+
+      <div class="currency-grid">
+        <div class="currency-item active"><div class="code">USD</div><div class="symbol">$</div><div class="iso">ISO 840</div></div>
+        <div class="currency-item"><div class="code">EUR</div><div class="symbol">€</div><div class="iso">ISO 978</div></div>
+        <div class="currency-item"><div class="code">GBP</div><div class="symbol">£</div><div class="iso">ISO 826</div></div>
+        <div class="currency-item"><div class="code">CHF</div><div class="symbol">Fr</div><div class="iso">ISO 756</div></div>
+        <div class="currency-item"><div class="code">JPY</div><div class="symbol">¥</div><div class="iso">ISO 392</div></div>
+        <div class="currency-item"><div class="code">AED</div><div class="symbol">د.إ</div><div class="iso">ISO 784</div></div>
+        <div class="currency-item"><div class="code">SAR</div><div class="symbol">﷼</div><div class="iso">ISO 682</div></div>
+        <div class="currency-item"><div class="code">CNY</div><div class="symbol">¥</div><div class="iso">ISO 156</div></div>
+        <div class="currency-item"><div class="code">HKD</div><div class="symbol">HK$</div><div class="iso">ISO 344</div></div>
+        <div class="currency-item"><div class="code">SGD</div><div class="symbol">S$</div><div class="iso">ISO 702</div></div>
+        <div class="currency-item"><div class="code">AUD</div><div class="symbol">A$</div><div class="iso">ISO 036</div></div>
+        <div class="currency-item"><div class="code">CAD</div><div class="symbol">C$</div><div class="iso">ISO 124</div></div>
+        <div class="currency-item"><div class="code">NZD</div><div class="symbol">NZ$</div><div class="iso">ISO 554</div></div>
+        <div class="currency-item"><div class="code">SEK</div><div class="symbol">kr</div><div class="iso">ISO 752</div></div>
+        <div class="currency-item"><div class="code">NOK</div><div class="symbol">kr</div><div class="iso">ISO 578</div></div>
+      </div>
+    </section>
+
+    <!-- AML/CFT Framework -->
+    <section id="aml">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <h2><span>AML/CFT</span> Compliance Framework</h2>
+      </div>
+
+      <div class="aml-section">
+        <div class="aml-header">
+          <div class="shield-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <h3>Anti-Money Laundering & Counter-Terrorist Financing</h3>
+            <p>Aligned with Wolfsberg Group Principles and FATF Recommendations</p>
+          </div>
+        </div>
+
+        <div class="aml-grid">
+          <div class="aml-item">
+            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/></svg> MLRO Oversight</h4>
+            <p>Money Laundering Reporting Officer with unrestricted authority to investigate, escalate, block, or report any transaction. Registered with UAE FIU on goAML platform (GMLMOEC33681057391).</p>
+          </div>
+          <div class="aml-item">
+            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Transaction Monitoring</h4>
+            <p>DiXiO Smart Messaging Platform for real-time AML screening. Pre-SWIFT release screening against sanctions lists, PEP databases, and adverse media sources.</p>
+          </div>
+          <div class="aml-item">
+            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Risk-Based Triggers</h4>
+            <p>Automatic alerts for: transactions >$100K, structuring patterns, 300%+ volume spikes, high-risk jurisdictions, dormant account reactivation, and pass-through behavior.</p>
+          </div>
+          <div class="aml-item">
+            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Customer Due Diligence</h4>
+            <p>Full KYC/CDD/EDD procedures. UBO identification for 25%+ ownership. Wolfsberg AML Questionnaire for correspondent banks. Enhanced due diligence for PEPs and complex structures.</p>
+          </div>
+          <div class="aml-item">
+            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Prohibited Jurisdictions</h4>
+            <p>Zero tolerance for North Korea, Iran, and sanctioned entities under UN, OFAC, EU, and UK regulations. Dynamic high-risk jurisdiction list updated quarterly.</p>
+          </div>
+          <div class="aml-item">
+            <h4><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Record Retention</h4>
+            <p>All KYC/CDD/EDD records retained for minimum 10 years. Complete audit traceability and documentation integrity per Wolfsberg and FATF expectations.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Wolfsberg Principles -->
+    <section id="wolfsberg">
+      <div class="section-header">
+        <div class="section-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h2><span>Wolfsberg</span> Group Alignment</h2>
+      </div>
+
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>Principle</th>
+            <th>Implementation</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Governance & Accountability</td>
+            <td>MLRO with direct Board reporting line, independent from revenue functions</td>
+            <td style="color: var(--lemon-primary);">✓ Compliant</td>
+          </tr>
+          <tr>
+            <td>Customer Due Diligence</td>
+            <td>Risk-based CDD/EDD with UBO identification and ongoing monitoring</td>
+            <td style="color: var(--lemon-primary);">✓ Compliant</td>
+          </tr>
+          <tr>
+            <td>Correspondent Banking</td>
+            <td>Wolfsberg AML Questionnaire, no Shell Bank relationships</td>
+            <td style="color: var(--lemon-primary);">✓ Compliant</td>
+          </tr>
+          <tr>
+            <td>Transaction Monitoring</td>
+            <td>Real-time screening with DiXiO SMP, risk-based alert triggers</td>
+            <td style="color: var(--lemon-primary);">✓ Compliant</td>
+          </tr>
+          <tr>
+            <td>Sanctions Compliance</td>
+            <td>Pre-release screening against UN, OFAC, EU, UK sanctions lists</td>
+            <td style="color: var(--lemon-primary);">✓ Compliant</td>
+          </tr>
+          <tr>
+            <td>Suspicious Activity Reporting</td>
+            <td>goAML integration with ≤24h reporting deadline</td>
+            <td style="color: var(--lemon-primary);">✓ Compliant</td>
+          </tr>
+          <tr>
+            <td>Tipping-Off Prevention</td>
+            <td>Access controls, audit logs, neutral templates, staff training</td>
+            <td style="color: var(--lemon-primary);">✓ Compliant</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Footer -->
+    <footer class="doc-footer">
+      <p>© 2026 Digital Commercial Bank Ltd. All rights reserved.</p>
+      <p style="margin-top: 8px;">Mint Lemon Protocol - Building Transparent Finance on LemonChain</p>
+      <div class="version">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Documentation v5.0 • January 2026
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    // Sidebar active link
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+      link.addEventListener('click', function() {
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Scroll spy
+    const sections = document.querySelectorAll('section[id]');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (scrollY >= sectionTop - 100) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

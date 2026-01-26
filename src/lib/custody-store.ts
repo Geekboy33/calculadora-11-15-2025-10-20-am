@@ -672,6 +672,7 @@ class CustodyStore {
 
   /**
    * Reservar fondos para tokenización
+   * @param bypassReservationCheck - Si es true, permite reservas adicionales aunque ya exista una
    */
   reserveFunds(
     accountId: string,
@@ -679,7 +680,8 @@ class CustodyStore {
     blockchain: string,
     contractAddress: string,
     tokenAmount: number,
-    bypassLimits: boolean = false
+    bypassLimits: boolean = false,
+    bypassReservationCheck: boolean = false
   ): boolean {
     const accounts = this.getAccounts();
     const account = accounts.find(a => a.id === accountId);
@@ -690,7 +692,8 @@ class CustodyStore {
     }
 
     // ✅ VERIFICACIÓN PRINCIPAL: SI YA HAY BALANCE RESERVADO, NO PERMITIR MÁS RESERVAS
-    if (account.reservedBalance > 0) {
+    // (A menos que se haya pasado bypassReservationCheck = true para certificaciones)
+    if (account.reservedBalance > 0 && !bypassReservationCheck) {
       console.warn('[CustodyStore] ⛔ BLOQUEADO: Ya existe balance reservado en esta cuenta:', {
         accountId,
         accountName: account.accountName,
@@ -706,11 +709,12 @@ class CustodyStore {
     }
 
     // ✅ VERIFICAR SI YA HAY RESERVAS ACTIVAS EN EL ARRAY
+    // (A menos que se haya pasado bypassReservationCheck = true para certificaciones)
     const hasAnyActiveReservation = account.reservations.some(
       r => r.status === 'reserved' || r.status === 'confirmed'
     );
 
-    if (hasAnyActiveReservation) {
+    if (hasAnyActiveReservation && !bypassReservationCheck) {
       console.warn('[CustodyStore] ⛔ BLOQUEADO: Ya existe una reserva activa en esta cuenta');
       const activeReservation = account.reservations.find(r => r.status === 'reserved' || r.status === 'confirmed');
       
@@ -913,6 +917,62 @@ class CustodyStore {
     this.notifyListeners(accounts);
 
     console.log('[CustodyStore] ✅ Reserva confirmada:', reservationId);
+    return true;
+  }
+
+  /**
+   * Reservar fondos simplificado para certificaciones DCB Treasury
+   * Esta versión NO bloquea aunque ya existan reservas previas
+   * Solo reduce el availableBalance y registra la transacción
+   */
+  reserveFundsForCertification(
+    accountId: string,
+    amount: number,
+    reason: string = 'Custody Certification'
+  ): boolean {
+    const accounts = this.getAccounts();
+    const account = accounts.find(a => a.id === accountId);
+
+    if (!account) {
+      console.error('[CustodyStore] Cuenta no encontrada:', accountId);
+      return false;
+    }
+
+    // Verificar balance disponible
+    if (account.availableBalance < amount) {
+      console.error('[CustodyStore] Balance insuficiente para certificación');
+      alert(`⛔ Balance insuficiente.\n\nDisponible: ${account.currency} ${account.availableBalance.toLocaleString()}\nRequerido: ${account.currency} ${amount.toLocaleString()}`);
+      return false;
+    }
+
+    // Reducir balance disponible (NO agregar a reservedBalance para evitar bloqueos)
+    account.availableBalance -= amount;
+    account.totalBalance = account.availableBalance + account.reservedBalance;
+    account.lastUpdated = new Date().toISOString();
+
+    // Registrar transacción
+    const transaction = {
+      id: `TX-CERT-${Date.now()}`,
+      type: 'transfer_out' as const,
+      amount: amount,
+      currency: account.currency,
+      date: new Date().toISOString(),
+      valueDate: new Date().toISOString().split('T')[0],
+      notes: reason,
+      status: 'completed' as const
+    };
+    account.transactions.push(transaction);
+
+    this.saveAccounts(accounts);
+    this.notifyListeners(accounts);
+
+    console.log('[CustodyStore] ✅ Fondos reservados para certificación:', {
+      accountId,
+      amount,
+      reason,
+      newAvailable: account.availableBalance
+    });
+
     return true;
   }
 

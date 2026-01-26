@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a"/>
+      <stop offset="50%" style="stop-color:#1a1a1a"/>
+      <stop offset="100%" style="stop-color:#0a0a0a"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ff88"/>
+      <stop offset="50%" style="stop-color:#00cc66"/>
+      <stop offset="100%" style="stop-color:#009944"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#00ff88" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="200" cy="200" r="195" fill="url(#bgGrad)" stroke="url(#greenGrad)" stroke-width="4"/>
+  
+  <!-- Inner ring -->
+  <circle cx="200" cy="200" r="170" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.3"/>
+  
+  <!-- Outer decorative ring -->
+  <circle cx="200" cy="200" r="180" fill="none" stroke="#00ff88" stroke-width="1" stroke-dasharray="10,5" opacity="0.5"/>
+  
+  <!-- USD Symbol with glow -->
+  <g filter="url(#glow)">
+    <text x="200" y="230" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="140" font-weight="900" fill="url(#greenGrad)">$</text>
+  </g>
+  
+  <!-- USD text -->
+  <text x="200" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#00ff88" letter-spacing="8">USD</text>
+  
+  <!-- Top label -->
+  <text x="200" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#00cc66" opacity="0.8">TOKENIZED</text>
+  
+  <!-- Bottom label -->
+  <text x="200" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#00cc66" opacity="0.6">DCB TREASURY</text>
+  
+  <!-- Decorative dots -->
+  <circle cx="100" cy="200" r="4" fill="#00ff88" opacity="0.6"/>
+  <circle cx="300" cy="200" r="4" fill="#00ff88" opacity="0.6"/>
+  <circle cx="200" cy="100" r="4" fill="#00ff88" opacity="0.6"/>
+  
+  <!-- Corner accents -->
+  <path d="M 50 120 L 50 80 L 90 80" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.4"/>
+  <path d="M 350 120 L 350 80 L 310 80" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.4"/>
+  <path d="M 50 280 L 50 320 L 90 320" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.4"/>
+  <path d="M 350 280 L 350 320 L 310 320" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.4"/>
+</svg>

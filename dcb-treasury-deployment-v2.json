@@ -1,0 +1,26 @@
+{
+  "network": "LemonChain",
+  "chainId": 1006,
+  "deployedAt": "2026-01-15T14:17:14.557Z",
+  "version": "2.0.0",
+  "contracts": {
+    "usd": "0xBEEf32B270F79b010ef3660503A36315fc48ab90",
+    "bankRegistry": "0x80cEa2106e64B23A15B13ae785c09d478D012879",
+    "lockBox": "0x832a9Bb3AEE299b3d08C66EB8Ed54433E7D0B947",
+    "lusd": "0x1761f7d92960267476b33F1eCe2Bf4ec6dF85742",
+    "priceOracle": "0x5395b963fd21e239D7Ea9dc932b24b2930E0c716"
+  },
+  "roles": {
+    "admin": "0x772923E3f1C22A1b5Cb11722bD7B0E77BEDE8559",
+    "daesSigner": "0xCBA590Eec4E206e61Fb47A7fd4f04af76cE4202b",
+    "bankSigner": "0xF29F21Efce48AB3bf041c47Cc1fF2eBa289Ffc37",
+    "issuerOperator": "0xC3C5F66A69d595826ec853f9E89cE1dD96D85c98",
+    "approver": "0x765C1a2BF91c4802dAE034095cA0FF157631699d"
+  },
+  "configuration": {
+    "bankRegistryRequiredApprovals": 2,
+    "lockBoxRequiredSignatures": 2,
+    "oracleInitialPrice": "1.00 USD/USDT",
+    "oracleDecimals": 8
+  }
+}

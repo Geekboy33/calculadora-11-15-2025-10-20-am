@@ -27,11 +27,49 @@ dist-ssr
 .env.local
 .env.development.local
 .env.production.local
+*.env.example
+sberbank.env*
 server/data/apiKeys.json
 server/data/porReports.json
 PoR_API_SETUP.md
+
+# Server data files
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+server/data/swift-logs/
+server/certs/
+server/cookies.txt
+server/dcb-data.json
+server/*.json
+!server/package.json
+!server/package-lock.json
+
+# Build artifacts
+artifacts/build-info/*.json
+cache/
+checkpoints/
+
+# Deployment files (contain sensitive data)
+*-deployment.json
+deployments/
+
+# Test files
+test-*.json
+test-*.cjs
+*.bak
+
+# Documentation with sensitive info
+*_PRODUCTION*.txt
+*_CONFIGURATION*.txt
+ENV_*.txt
+SECURITY_*.txt
 
 # Local Netlify folder
 .netlify
 .netlify.state.json
 release/
+
+# Temporary folders
+LEMX_MINTING_PLATFORM_CODE/
+dcb-contracts-v4/

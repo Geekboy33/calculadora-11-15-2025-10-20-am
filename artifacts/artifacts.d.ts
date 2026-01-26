@@ -7,9 +7,15 @@
 import "hardhat/types/artifacts";
 declare module "hardhat/types/artifacts" {
   interface ArtifactMap {
-    ["ICurvePool"]: never
+    ["BankRegistry"]: never
+    ["CustodyVault"]: never
+    ["ICustodyVault"]: never
+    ["ILUSD"]: never
     ["IERC20"]: never
-    ["ISushiRouter"]: never
-    ["IWETH"]: never;
+    ["LockBox"]: never
+    ["PriceOracle"]: never
+    ["AggregatorV3Interface"]: never
+    ["USD"]: never
+    ["IMultiStablecoinOracle"]: never;
   }
 }

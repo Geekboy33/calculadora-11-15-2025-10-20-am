@@ -1,0 +1,225 @@
+╔══════════════════════════════════════════════════════════════════════════════════════════╗
+║             MEJORAS DE CONEXIÓN PARA PRODUCCIÓN                                          ║
+║                   Mint Lemon Protocol                                                    ║
+╠══════════════════════════════════════════════════════════════════════════════════════════╣
+║  Fecha: Enero 2026                                                                       ║
+╚══════════════════════════════════════════════════════════════════════════════════════════╝
+
+
+================================================================================
+                    RESUMEN DE MEJORAS IMPLEMENTADAS
+================================================================================
+
+Se han implementado mejoras significativas en la lógica de conexión para 
+garantizar que ambas plataformas estén SIEMPRE conectadas en producción.
+
+
+================================================================================
+                    1. NUEVO CONNECTION MANAGER
+================================================================================
+
+Archivo: src/lib/connection-manager.ts
+
+CARACTERÍSTICAS:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ • Gestión centralizada de todas las conexiones                              │
+│ • Reconexión automática con exponential backoff                             │
+│ • Múltiples endpoints de fallback para RPC y WebSocket                      │
+│ • Health monitoring cada 15 segundos                                        │
+│ • Detección de conexión estancada (stale detection)                         │
+│ • Estado de conexión observable (subscribers)                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+ENDPOINTS DE FALLBACK:
+```typescript
+RPC_ENDPOINTS: [
+  'https://rpc.lemonchain.io',
+  'https://rpc2.lemonchain.io'
+]
+
+WSS_ENDPOINTS: [
+  'wss://ws.lemonchain.io',
+  'wss://ws2.lemonchain.io'
+]
+```
+
+CONFIGURACIÓN DE RETRY:
+```typescript
+MAX_RETRIES: 10
+INITIAL_RETRY_DELAY: 1000ms
+MAX_RETRY_DELAY: 30000ms
+RETRY_MULTIPLIER: 1.5
+HEALTH_CHECK_INTERVAL: 15000ms
+```
+
+
+================================================================================
+                    2. MEJORAS EN API-BRIDGE.TS
+================================================================================
+
+WEBSOCKET CONNECTION (Producción):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ✅ Exponential backoff con jitter para reconexiones                         │
+│ ✅ Máximo 15 intentos de reconexión                                         │
+│ ✅ Timeout de conexión de 10 segundos                                       │
+│ ✅ Prevención de intentos de conexión rápidos (throttling)                  │
+│ ✅ Solicitud automática de sincronización al conectar                       │
+│ ✅ Reset de intentos después de 5 minutos de fallo                          │
+│ ✅ Método forceReconnect() para reconexión manual                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+POLLING (Backup):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ✅ Timeout de 10 segundos para cada request                                 │
+│ ✅ Prevención de polling concurrente                                        │
+│ ✅ Contador de errores con slowdown automático                              │
+│ ✅ Intervalo dinámico (2s → hasta 30s en caso de errores)                   │
+│ ✅ Auto-recuperación después de 10 segundos                                 │
+│ ✅ Método getConnectionStatus() para diagnóstico                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NUEVO MÉTODO:
+```typescript
+getConnectionStatus(): {
+  websocket: boolean;
+  polling: boolean;
+  lastPoll: Date | null;
+  reconnectAttempts: number;
+  errorCount: number;
+}
+```
+
+
+================================================================================
+                    3. CONFIGURACIÓN DE PRODUCCIÓN
+================================================================================
+
+VITE CONFIG (LEMX_MINTING_PLATFORM_CODE/vite.config.ts):
+```typescript
+server: {
+  port: 4005,
+  host: '0.0.0.0', // Escucha en todas las interfaces
+  cors: {
+    origin: ['http://localhost:4003', 'http://localhost:4004', 'http://localhost:4005'],
+    credentials: true
+  }
+}
+```
+
+
+================================================================================
+                    4. FLUJO DE CONEXIÓN
+================================================================================
+
+INICIALIZACIÓN:
+1. ConnectionManager se auto-inicializa al importar
+2. Conecta a RPC (LemonChain) con failover
+3. Conecta WebSocket (Bridge Server)
+4. Verifica health de APIs (DCB y LEMX)
+5. Inicia monitoreo de health cada 15 segundos
+
+RECONEXIÓN AUTOMÁTICA:
+1. WebSocket desconectado → Exponential backoff (1s → 30s)
+2. RPC error (3 errores) → Cambio a siguiente endpoint
+3. Polling error (5 errores) → Slowdown automático
+4. Todo falla → Reset después de 5 minutos
+
+MONITOREO:
+1. Check RPC latencia y block number
+2. Verificar progreso de bloques (stale detection > 60s)
+3. Verificar WebSocket readyState
+4. Health check APIs DCB y LEMX
+
+
+================================================================================
+                    5. ESTADOS DE CONEXIÓN
+================================================================================
+
+ConnectionState Interface:
+```typescript
+interface ConnectionState {
+  rpc: {
+    connected: boolean;
+    endpoint: string;
+    latency: number;
+    lastCheck: Date | null;
+    errors: number;
+  };
+  websocket: {
+    connected: boolean;
+    endpoint: string;
+    lastMessage: Date | null;
+    reconnectAttempts: number;
+  };
+  api: {
+    dcb: boolean;
+    lemx: boolean;
+    lastCheck: Date | null;
+  };
+  blockchain: {
+    chainId: number;
+    blockNumber: number;
+    lastBlock: Date | null;
+  };
+}
+```
+
+
+================================================================================
+                    6. USO EN COMPONENTES
+================================================================================
+
+Suscribirse a cambios de estado:
+```typescript
+import { connectionManager, ConnectionState } from './lib/connection-manager';
+
+// En un componente React
+useEffect(() => {
+  const unsubscribe = connectionManager.subscribe((state: ConnectionState) => {
+    setIsConnected(connectionManager.isFullyConnected());
+    setBlockNumber(state.blockchain.blockNumber);
+    setRpcLatency(state.rpc.latency);
+  });
+  
+  return () => unsubscribe();
+}, []);
+```
+
+Forzar reconexión:
+```typescript
+await connectionManager.forceReconnect();
+```
+
+
+================================================================================
+                    7. SERVIDORES ACTIVOS
+================================================================================
+
+URLS DE PRODUCCIÓN:
+• LEMX Minting:  http://localhost:4005 / https://treasury.luxliqdaes.cloud
+• DCB Treasury:  http://localhost:4000 / https://dcb.luxliqdaes.cloud
+• Bridge API:    http://localhost:4010 / https://api.luxliqdaes.cloud:4010
+• LEMX API:      http://localhost:4011 / https://api.luxliqdaes.cloud:4011
+• WebSocket:     ws://localhost:4012 / wss://api.luxliqdaes.cloud:4012
+• LemonChain:    https://rpc.lemonchain.io (Chain ID: 1006)
+
+
+================================================================================
+                    CONCLUSIÓN
+================================================================================
+
+Con estas mejoras, ambas plataformas:
+
+✅ Se reconectan automáticamente en caso de desconexión
+✅ Usan múltiples endpoints de fallback
+✅ Tienen monitoreo continuo de salud
+✅ Manejan errores de forma robusta
+✅ Reducen automáticamente la carga en caso de problemas
+✅ Se recuperan automáticamente después de fallos prolongados
+
+Las plataformas están listas para producción con conexión robusta y confiable.
+
+
+================================================================================
+                    FIN DEL REPORTE
+================================================================================

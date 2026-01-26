@@ -1,0 +1,137 @@
+{
+  "_format": "hh3-artifact-1",
+  "contractName": "ILocksTreasuryLUSD",
+  "sourceName": "contracts/DCBTreasury/v3/LUSDMinting.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "lockId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "lusdTxHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "publicationCode",
+          "type": "string"
+        }
+      ],
+      "name": "consumeForMinting",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "mintingId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "thirdSignatureHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "lockId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "locks",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_lockId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "usdInjectionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "authorizationCode",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "originalAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "availableAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "consumedAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "reserveAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "beneficiary",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "dcbTreasury",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "lemxOperator",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "firstSignatureHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "secondSignatureHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "thirdSignatureHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {},
+  "immutableReferences": {},
+  "inputSourceName": "project/contracts/DCBTreasury/v3/LUSDMinting.sol",
+  "buildInfoId": "solc-0_8_20-a1c61539025f0654ad3a75bdb2b55239eb68e7f3"
+}

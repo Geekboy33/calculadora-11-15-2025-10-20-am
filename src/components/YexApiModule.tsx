@@ -929,7 +929,7 @@ const YexApiModule: React.FC = () => {
 
                     {/* Quick Symbols */}
                     <div className="flex gap-2 mt-3 flex-wrap">
-                      {['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT'].map(s => (
+                      {['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOVUSDT', 'XRPUSDT'].map(s => (
                         <button
                           key={s}
                           onClick={() => {

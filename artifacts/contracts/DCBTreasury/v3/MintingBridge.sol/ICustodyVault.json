@@ -1,0 +1,122 @@
+{
+  "_format": "hh3-artifact-1",
+  "contractName": "ICustodyVault",
+  "sourceName": "contracts/DCBTreasury/v3/MintingBridge.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "authCode",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "mintTxHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "completeMinting",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "authCode",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getMintAuthorization",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "authCode",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "lockId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "beneficiary",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "createdAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "deadline",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintTxHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "mintedBy",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "mintedAt",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct ICustodyVault.MintAuthorization",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "authCode",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isAuthorizationValid",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {},
+  "immutableReferences": {},
+  "inputSourceName": "project/contracts/DCBTreasury/v3/MintingBridge.sol",
+  "buildInfoId": "solc-0_8_20-a1c61539025f0654ad3a75bdb2b55239eb68e7f3"
+}

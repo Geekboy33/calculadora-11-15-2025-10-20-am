@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
+import jsPDF from 'jspdf';
 import {
   Shield,
   Plus,
@@ -14,6 +15,7 @@ import {
   X,
   Copy,
   Download,
+  Upload,
   AlertCircle,
   CheckCircle,
   Wallet,
@@ -45,7 +47,11 @@ import {
   Settings,
   Info,
   ArrowRightLeft,
-  FileCheck
+  FileCheck,
+  Receipt,
+  Bell,
+  Zap,
+  ChevronRight
 } from 'lucide-react';
 import { useLanguage } from '../lib/i18n';
 import { balanceStore, type CurrencyBalance } from '../lib/balances-store';
@@ -54,6 +60,9 @@ import { custodyStore, type CustodyAccount, type CustodyTransaction, type Accoun
 import { CustodyBlackScreen } from './CustodyBlackScreen';
 import { apiVUSD1Store } from '../lib/api-vusd1-store';
 import { transactionEventStore } from '../lib/transaction-event-store';
+import { generateReceiptFromCustodyTransaction } from '../lib/dcb-transfer-receipt';
+import { dcbReceiptStore } from '../lib/dcb-receipt-store';
+import { treasuryInteractionService, type USDInjection } from '../lib/treasury-interaction-service';
 
 const BLOCKCHAINS = [
   { name: 'Ethereum', symbol: 'ETH', color: 'text-blue-400' },
@@ -403,6 +412,31 @@ export function CustodyAccountsModule() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const accountsListRef = useRef<HTMLDivElement>(null);
+  
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // ISO 20022 INJECTION MODAL STATE - USD Tokenization Flow
+  // ═══════════════════════════════════════════════════════════════════════════════
+  const [showISOInjectionModal, setShowISOInjectionModal] = useState(false);
+  const [isoInjectionStep, setIsoInjectionStep] = useState<'select_account' | 'upload_file' | 'review' | 'processing' | 'complete'>('select_account');
+  const [isoInjectionData, setIsoInjectionData] = useState({
+    selectedAccountId: '',
+    amount: 0,
+    beneficiary: '',
+    messageType: 'pacs.008' as string,
+    messageId: '',
+    endToEndId: '',
+    instructionId: '',
+    senderBIC: 'DCBKKWKWXXX',
+    receiverBIC: 'DCBKKWKWXXX',
+    senderIBAN: '',
+    receiverIBAN: '',
+    remittanceInfo: '',
+    xmlContent: '',
+    jsonPayload: null as any,
+    parsedFromFile: false,
+  });
+  const [isoInjectionResult, setIsoInjectionResult] = useState<USDInjection | null>(null);
+  const [isInjecting, setIsInjecting] = useState(false);
 
   // Tipos de cuenta disponibles
   const ACCOUNT_CATEGORIES = [
@@ -858,9 +892,29 @@ export function CustodyAccountsModule() {
     });
 
     if (transaction) {
+      // Generar recibo automáticamente
+      dcbReceiptStore.createReceipt({
+        transferId: transaction.reference || transaction.id,
+        amount: transaction.amount,
+        currency: transaction.currency,
+        transferDate: transaction.transactionDate,
+        transferTime: transaction.transactionTime,
+        reference: transaction.reference,
+        concept: transaction.description,
+        custodyAccountName: selectedAccount.accountName,
+        custodyAccountNumber: selectedAccount.accountNumber || selectedAccount.id,
+        custodyBankName: selectedAccount.bankName || 'Digital Commercial Bank Ltd.',
+        payerAccountNumber: addFundsData.sourceAccount || 'N/A',
+        payerName: addFundsData.sourceBank || undefined,
+        payerBank: addFundsData.sourceBank,
+        beneficiaryName: selectedAccount.accountName,
+        beneficiaryAccountNumber: selectedAccount.accountNumber || selectedAccount.id,
+        beneficiaryBank: selectedAccount.bankName || 'Digital Commercial Bank Ltd.',
+      }, true);
+
       alert(isSpanish 
-        ? `✅ Fondos agregados exitosamente\nReferencia: ${transaction.reference}` 
-        : `✅ Funds added successfully\nReference: ${transaction.reference}`
+        ? `✅ Fondos agregados exitosamente\nReferencia: ${transaction.reference}\n📄 Recibo PDF generado` 
+        : `✅ Funds added successfully\nReference: ${transaction.reference}\n📄 PDF Receipt generated`
       );
       setShowAddFundsModal(false);
       setAddFundsData({
@@ -930,9 +984,29 @@ export function CustodyAccountsModule() {
     });
 
     if (transaction) {
+      // Generar recibo automáticamente
+      dcbReceiptStore.createReceipt({
+        transferId: transaction.reference || transaction.id,
+        amount: Math.abs(transaction.amount),
+        currency: transaction.currency,
+        transferDate: transaction.transactionDate,
+        transferTime: transaction.transactionTime,
+        reference: transaction.reference,
+        concept: transaction.description,
+        custodyAccountName: selectedAccount.accountName,
+        custodyAccountNumber: selectedAccount.accountNumber || selectedAccount.id,
+        custodyBankName: selectedAccount.bankName || 'Digital Commercial Bank Ltd.',
+        payerAccountNumber: selectedAccount.accountNumber || selectedAccount.id,
+        payerName: selectedAccount.accountName,
+        payerBank: selectedAccount.bankName || 'Digital Commercial Bank Ltd.',
+        beneficiaryName: withdrawData.destinationBank || 'Beneficiary',
+        beneficiaryAccountNumber: withdrawData.destinationAccount || 'N/A',
+        beneficiaryBank: withdrawData.destinationBank,
+      }, true);
+
       alert(isSpanish 
-        ? `✅ Retiro procesado exitosamente\nReferencia: ${transaction.reference}\nMonto: ${selectedAccount.currency} ${withdrawData.amount.toLocaleString()}` 
-        : `✅ Withdrawal processed successfully\nReference: ${transaction.reference}\nAmount: ${selectedAccount.currency} ${withdrawData.amount.toLocaleString()}`
+        ? `✅ Retiro procesado exitosamente\nReferencia: ${transaction.reference}\nMonto: ${selectedAccount.currency} ${withdrawData.amount.toLocaleString()}\n📄 Recibo PDF generado` 
+        : `✅ Withdrawal processed successfully\nReference: ${transaction.reference}\nAmount: ${selectedAccount.currency} ${withdrawData.amount.toLocaleString()}\n📄 PDF Receipt generated`
       );
       setShowWithdrawModal(false);
       setWithdrawData({
@@ -1018,9 +1092,29 @@ export function CustodyAccountsModule() {
     });
 
     if (depositTx) {
+      // Generar recibo automáticamente para la transferencia
+      dcbReceiptStore.createReceipt({
+        transferId: withdrawTx.reference || withdrawTx.id,
+        amount: transferData.amount,
+        currency: sourceAccount.currency,
+        transferDate: transferData.transactionDate,
+        transferTime: transferData.transactionTime + ':00',
+        reference: withdrawTx.reference,
+        concept: `${isSpanish ? 'Transferencia interna' : 'Internal transfer'}: ${sourceAccount.accountName} → ${destAccount.accountName}`,
+        custodyAccountName: 'DAES Internal Transfer',
+        custodyAccountNumber: 'DAES-INTERNAL',
+        custodyBankName: 'Digital Commercial Bank Ltd.',
+        payerAccountNumber: sourceAccount.accountNumber || sourceAccount.id,
+        payerName: sourceAccount.accountName,
+        payerBank: sourceAccount.bankName || 'Digital Commercial Bank Ltd.',
+        beneficiaryName: destAccount.accountName,
+        beneficiaryAccountNumber: destAccount.accountNumber || destAccount.id,
+        beneficiaryBank: destAccount.bankName || 'Digital Commercial Bank Ltd.',
+      }, true);
+
       alert(isSpanish 
-        ? `✅ Transferencia completada\n\nOrigen: ${sourceAccount.accountName}\nDestino: ${destAccount.accountName}\nMonto: ${sourceAccount.currency} ${transferData.amount.toLocaleString()}\n\nRef. Débito: ${withdrawTx.reference}\nRef. Crédito: ${depositTx.reference}` 
-        : `✅ Transfer completed\n\nFrom: ${sourceAccount.accountName}\nTo: ${destAccount.accountName}\nAmount: ${sourceAccount.currency} ${transferData.amount.toLocaleString()}\n\nDebit Ref: ${withdrawTx.reference}\nCredit Ref: ${depositTx.reference}`
+        ? `✅ Transferencia completada\n\nOrigen: ${sourceAccount.accountName}\nDestino: ${destAccount.accountName}\nMonto: ${sourceAccount.currency} ${transferData.amount.toLocaleString()}\n\nRef. Débito: ${withdrawTx.reference}\nRef. Crédito: ${depositTx.reference}\n📄 Recibo PDF generado` 
+        : `✅ Transfer completed\n\nFrom: ${sourceAccount.accountName}\nTo: ${destAccount.accountName}\nAmount: ${sourceAccount.currency} ${transferData.amount.toLocaleString()}\n\nDebit Ref: ${withdrawTx.reference}\nCredit Ref: ${depositTx.reference}\n📄 PDF Receipt generated`
       );
       setShowTransferModal(false);
       setTransferData({
@@ -1365,173 +1459,414 @@ export function CustodyAccountsModule() {
     navigator.clipboard.writeText(text);
   };
 
-  // Exportar estado de cuenta
+  // ════════════════════════════════════════════════════════════════════════════
+  // EXPORTAR ESTADO DE CUENTA - PDF PROFESIONAL FINTECH
+  // ════════════════════════════════════════════════════════════════════════════
   const exportAccountStatement = (account: CustodyAccount) => {
-    const timestamp = new Date().toLocaleString(language === 'es' ? 'es-ES' : 'en-US');
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
+    const M = 15; // Margin
+    let Y = 0;
+    
+    const isSpanish = language === 'es';
     const isBanking = (account.accountType || 'blockchain') === 'banking';
+    const timestamp = new Date().toISOString();
+    const documentId = `DCB-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     
-    const statement = `
-╔═══════════════════════════════════════════════════════════════════════╗
-║           ${language === 'es' ? 'ESTADO DE CUENTA CUSTODIO' : 'CUSTODY ACCOUNT STATEMENT'}                    ║
-║           Digital Commercial Bank Ltd                                ║
-╚═══════════════════════════════════════════════════════════════════════╝
-
-${language === 'es' ? 'DOCUMENTO CONFIDENCIAL' : 'CONFIDENTIAL DOCUMENT'}
-═══════════════════════════════════════════════════════════════════════
-
-${language === 'es' ? 'TIPO DE CUENTA' : 'ACCOUNT TYPE'}:
-${isBanking 
-  ? `🏦 CUENTA BANCARIA (BANKING ACCOUNT)
-     ${language === 'es' ? 'Configurada para transferencias API internacionales' : 'Configured for international API transfers'}
-     ${language === 'es' ? 'Compatible con sistemas ISO 20022' : 'Compatible with ISO 20022 systems'}`
-  : `🌐 CUENTA BLOCKCHAIN (BLOCKCHAIN CUSTODY)
-     ${language === 'es' ? 'Configurada para tokenización y stablecoins' : 'Configured for tokenization and stablecoins'}
-     ${language === 'es' ? 'Red' : 'Network'}: ${account.blockchainLink || 'N/A'}
-     Token: ${account.tokenSymbol || 'N/A'}`
-}
-
-═══════════════════════════════════════════════════════════════════════
-${language === 'es' ? 'IDENTIFICACIÓN' : 'IDENTIFICATION'}
-═══════════════════════════════════════════════════════════════════════
-
-${language === 'es' ? 'Nombre de la Cuenta' : 'Account Name'}:      ${account.accountName}
-${language === 'es' ? 'Número de Cuenta' : 'Account Number'}:         ${account.accountNumber || 'N/A'}
-ID Interno:                   ${account.id}
-${language === 'es' ? 'Moneda' : 'Currency'}:                         ${account.currency}
-${language === 'es' ? 'Fecha de Creación' : 'Creation Date'}:        ${new Date(account.createdAt).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}
-
-═══════════════════════════════════════════════════════════════════════
-${language === 'es' ? 'RESUMEN DE BALANCES' : 'BALANCE SUMMARY'}
-═══════════════════════════════════════════════════════════════════════
-
-${language === 'es' ? 'Balance Total' : 'Total Balance'}:             ${account.currency} ${account.totalBalance.toLocaleString()}
-${language === 'es' ? 'Fondos Reservados' : 'Reserved Funds'}:        ${account.currency} ${account.reservedBalance.toLocaleString()}
-${language === 'es' ? 'Fondos Disponibles' : 'Available Funds'}:      ${account.currency} ${account.availableBalance.toLocaleString()}
-
-${language === 'es' ? 'Porcentaje Reservado' : 'Reserved Percentage'}:  ${account.totalBalance > 0 ? ((account.reservedBalance / account.totalBalance) * 100).toFixed(2) : 0}%
-${language === 'es' ? 'Porcentaje Disponible' : 'Available Percentage'}: ${account.totalBalance > 0 ? ((account.availableBalance / account.totalBalance) * 100).toFixed(2) : 0}%
-
-${isBanking ? `
-═══════════════════════════════════════════════════════════════════════
-${language === 'es' ? 'INFORMACIÓN BANCARIA' : 'BANKING INFORMATION'}
-═══════════════════════════════════════════════════════════════════════
-
-${language === 'es' ? 'Banco' : 'Bank'}:                  ${account.bankName || 'DIGITAL COMMERCIAL BANK LTD.'}
-${language === 'es' ? 'Tipo de Cuenta' : 'Account Type'}:  BANKING ACCOUNT
-
-${language === 'es' ? 'CAPACIDADES' : 'CAPABILITIES'}:
-✓ ${language === 'es' ? 'Transferencias API internacionales' : 'International API transfers'}
-✓ ${language === 'es' ? 'Compatible con sistemas ISO 20022' : 'Compatible with ISO 20022 systems'}
-✓ ${language === 'es' ? 'Integración con bancos centrales' : 'Central bank integration'}
-✓ ${language === 'es' ? 'Soporte SWIFT network' : 'SWIFT network support'}
-` : `
-═══════════════════════════════════════════════════════════════════════
-${language === 'es' ? 'INFORMACIÓN BLOCKCHAIN' : 'BLOCKCHAIN INFORMATION'}
-═══════════════════════════════════════════════════════════════════════
-
-Blockchain Network:           ${account.blockchainLink || 'N/A'}
-Token Symbol:                 ${account.tokenSymbol || 'N/A'}
-${language === 'es' ? 'Dirección del Contrato' : 'Contract Address'}:  ${account.contractAddress || 'N/A'}
-`}
-
-═══════════════════════════════════════════════════════════════════════
-${language === 'es' ? 'API DE VERIFICACIÓN' : 'VERIFICATION API'}
-═══════════════════════════════════════════════════════════════════════
-
-Endpoint:                     ${account.apiEndpoint}
-API Key:                      ${account.apiKey || 'N/A'}
-${language === 'es' ? 'Estado API' : 'API Status'}:                   ${(account.apiStatus || 'pending').toUpperCase()}
-
-${language === 'es' ? 'USO' : 'USAGE'}:
-GET ${account.apiEndpoint}
-Authorization: Bearer ${account.apiKey || '[API_KEY]'}
-
-═══════════════════════════════════════════════════════════════════════
-${language === 'es' ? 'SEGURIDAD Y CUMPLIMIENTO' : 'SECURITY & COMPLIANCE'}
-═══════════════════════════════════════════════════════════════════════
-
-${language === 'es' ? 'Hash de Verificación' : 'Verification Hash'} (SHA-256):
-${account.verificationHash}
-
-${language === 'es' ? 'Datos Encriptados' : 'Encrypted Data'} (AES-256):
-${account.encryptedData.substring(0, 80)}...
-
-${language === 'es' ? 'CUMPLIMIENTO DE ESTÁNDARES' : 'STANDARDS COMPLIANCE'}:
-┌─────────────────────────────────────────────────────────────────┐
-│ 🥇 ISO 27001:2022 - ${language === 'es' ? 'Seguridad de la Información' : 'Information Security'}        │
-│    ${language === 'es' ? 'Estado' : 'Status'}: ${account.iso27001Compliant !== false ? '✓ COMPLIANT' : '⚡ PENDING'}                                      │
-│    ${language === 'es' ? 'Seguridad total del sistema DAES' : 'Total DAES system security'}                  │
-│                                                                 │
-│ 🥇 ISO 20022 - ${language === 'es' ? 'Interoperabilidad Financiera' : 'Financial Interoperability'}          │
-│    ${language === 'es' ? 'Estado' : 'Status'}: ${account.iso20022Compatible !== false ? '✓ COMPATIBLE' : '⚡ PENDING'}                                   │
-│    ${language === 'es' ? 'Interoperabilidad con bancos centrales' : 'Central bank interoperability'}          │
-│                                                                 │
-│ 🥇 FATF AML/CFT - ${language === 'es' ? 'Anti-Lavado de Dinero' : 'Anti-Money Laundering'}               │
-│    ${language === 'es' ? 'Estado' : 'Status'}: ${account.fatfAmlVerified !== false ? '✓ VERIFIED' : '⚡ PENDING'}                                    │
-│    ${language === 'es' ? 'Legalidad y trazabilidad global' : 'Global legality & traceability'}               │
-└─────────────────────────────────────────────────────────────────┘
-
-KYC ${language === 'es' ? 'Verificado' : 'Verified'}:               ${account.kycVerified !== false ? '✓ YES' : '✗ NO'}
-AML Score:                    ${account.amlScore || 85}/100 ${
-  (account.amlScore || 85) >= 90 ? '(LOW RISK)' : 
-  (account.amlScore || 85) >= 75 ? '(MEDIUM RISK)' : 
-  '(HIGH RISK)'}
-${language === 'es' ? 'Nivel de Riesgo' : 'Risk Level'}:              ${(account.riskLevel || 'medium').toUpperCase()}
-
-═══════════════════════════════════════════════════════════════════════
-${language === 'es' ? 'RESERVAS ACTIVAS' : 'ACTIVE RESERVATIONS'} (${account.reservations?.length || 0})
-═══════════════════════════════════════════════════════════════════════
-
-${account.reservations && account.reservations.length > 0 ? account.reservations.map((r, i) => `
-${i + 1}. ${language === 'es' ? 'Reserva' : 'Reservation'} ${r.id}
-   ${language === 'es' ? 'Monto' : 'Amount'}:                 ${account.currency} ${r.amount.toLocaleString()}
-   ${language === 'es' ? 'Estado' : 'Status'}:                ${r.status.toUpperCase()}
-   ${r.type === 'blockchain' ? `Blockchain:             ${r.blockchain || 'N/A'}
-   ${language === 'es' ? 'Contrato' : 'Contract'}:            ${r.contractAddress || 'N/A'}
-   Tokens:               ${r.tokenAmount?.toLocaleString() || 'N/A'} ${account.tokenSymbol || ''}` : `
-   ${language === 'es' ? 'Referencia' : 'Reference'}:         ${r.transferReference || 'N/A'}`}
-   Timestamp:            ${new Date(r.timestamp).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}
-`).join('\n') : (language === 'es' ? 'No hay reservas activas' : 'No active reservations')}
-
-═══════════════════════════════════════════════════════════════════════
-${language === 'es' ? 'AUDITORÍA' : 'AUDIT TRAIL'}
-═══════════════════════════════════════════════════════════════════════
-
-${language === 'es' ? 'Fecha de Creación' : 'Created'}:              ${new Date(account.createdAt).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}
-${language === 'es' ? 'Última Actualización' : 'Last Updated'}:      ${new Date(account.lastUpdated).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}
-${language === 'es' ? 'Última Auditoría' : 'Last Audit'}:            ${new Date(account.lastAudit || account.lastUpdated).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')}
-
-═══════════════════════════════════════════════════════════════════════
-${language === 'es' ? 'CERTIFICACIÓN' : 'CERTIFICATION'}
-═══════════════════════════════════════════════════════════════════════
-
-${language === 'es' 
-  ? 'Este estado de cuenta certifica que los fondos mencionados están bajo custodia de DIGITAL COMMERCIAL BANK LTD. y están disponibles según se indica.'
-  : 'This account statement certifies that the mentioned funds are under custody of DIGITAL COMMERCIAL BANK LTD. and are available as indicated.'}
-
-${language === 'es' ? 'Cumplimiento' : 'Compliance'}: ISO 27001 • ISO 20022 • FATF AML/CFT
-${language === 'es' ? 'Seguridad' : 'Security'}: SHA-256 Hash • AES-256 Encryption
-
-═══════════════════════════════════════════════════════════════════════
-
-${language === 'es' ? 'Generado' : 'Generated'}: ${timestamp}
-${language === 'es' ? 'Generado por' : 'Generated by'}: DAES CoreBanking System
-${language === 'es' ? 'Hash del Documento' : 'Document Hash'}: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
-
-© ${new Date().getFullYear()} DIGITAL COMMERCIAL BANK LTD.
-═══════════════════════════════════════════════════════════════════════
-`;
-
-    const blob = new Blob([statement], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const fileName = `Estado_Cuenta_${account.accountNumber || account.id}_${Date.now()}.txt`;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Color palette - Premium Dark Fintech Theme
+    const C = {
+      bg: { r: 10, g: 15, b: 25 },
+      bgLight: { r: 20, g: 28, b: 45 },
+      bgCard: { r: 25, g: 35, b: 55 },
+      accent: { r: 0, g: 212, b: 170 }, // Teal
+      gold: { r: 255, g: 193, b: 7 },
+      white: { r: 255, g: 255, b: 255 },
+      gray: { r: 150, g: 160, b: 180 },
+      muted: { r: 100, g: 110, b: 130 },
+      success: { r: 0, g: 200, b: 83 },
+      purple: { r: 156, g: 39, b: 176 }
+    };
     
-    console.log('[CustodyModule] 📥 Estado de cuenta descargado:', fileName);
+    const setFill = (c: {r:number,g:number,b:number}) => doc.setFillColor(c.r, c.g, c.b);
+    const setText = (c: {r:number,g:number,b:number}) => doc.setTextColor(c.r, c.g, c.b);
+    const setDraw = (c: {r:number,g:number,b:number}) => doc.setDrawColor(c.r, c.g, c.b);
+    const setFont = (size: number, style: 'normal' | 'bold' = 'normal') => {
+      doc.setFontSize(size);
+      doc.setFont('helvetica', style);
+    };
+    const fmt = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtDate = (d: string) => new Date(d).toLocaleString(isSpanish ? 'es-ES' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' });
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PAGE 1: COVER & SUMMARY
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    // Dark background
+    setFill(C.bg);
+    doc.rect(0, 0, W, H, 'F');
+    
+    // Top accent bar
+    setFill(C.accent);
+    doc.rect(0, 0, W, 4, 'F');
+    
+    // Decorative corner elements
+    setFill(C.bgLight);
+    doc.triangle(0, 0, 50, 0, 0, 50, 'F');
+    doc.triangle(W, 0, W - 50, 0, W, 50, 'F');
+    
+    // Logo area
+    Y = 30;
+    setFill(C.bgCard);
+    doc.roundedRect(W/2 - 30, Y, 60, 50, 6, 6, 'F');
+    
+    setFill(C.accent);
+    doc.roundedRect(W/2 - 26, Y + 4, 52, 42, 4, 4, 'F');
+    
+    setFill(C.bg);
+    doc.roundedRect(W/2 - 22, Y + 8, 44, 34, 3, 3, 'F');
+    
+    setFont(10, 'bold');
+    setText(C.accent);
+    doc.text('DIGITAL', W/2, Y + 22, { align: 'center' });
+    setFont(12, 'bold');
+    doc.text('COMMERCIAL', W/2, Y + 31, { align: 'center' });
+    setFont(8, 'normal');
+    setText(C.gold);
+    doc.text('BANK LTD', W/2, Y + 39, { align: 'center' });
+    
+    // Main Title
+    Y = 95;
+    setFont(24, 'bold');
+    setText(C.white);
+    doc.text(isSpanish ? 'ESTADO DE CUENTA' : 'ACCOUNT STATEMENT', W/2, Y, { align: 'center' });
+    
+    setFont(11, 'normal');
+    setText(C.accent);
+    doc.text(isSpanish ? 'CUENTA CUSTODIO CERTIFICADA' : 'CERTIFIED CUSTODY ACCOUNT', W/2, Y + 12, { align: 'center' });
+    
+    // Decorative line
+    setDraw(C.accent);
+    doc.setLineWidth(0.8);
+    doc.line(W/2 - 50, Y + 20, W/2 + 50, Y + 20);
+    
+    // Document ID badge
+    Y = 130;
+    setFill(C.gold);
+    doc.roundedRect(W/2 - 45, Y, 90, 14, 7, 7, 'F');
+    setFont(9, 'bold');
+    setText(C.bg);
+    doc.text(`DOC: ${documentId}`, W/2, Y + 9, { align: 'center' });
+    
+    // Account Summary Card
+    Y = 155;
+    setFill(C.bgCard);
+    doc.roundedRect(M, Y, W - 2*M, 65, 5, 5, 'F');
+    setDraw(C.accent);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(M, Y, W - 2*M, 65, 5, 5, 'S');
+    
+    // Account name
+    setFont(14, 'bold');
+    setText(C.white);
+    doc.text(account.accountName, M + 8, Y + 14);
+    
+    setFont(9, 'normal');
+    setText(C.muted);
+    doc.text(`${isSpanish ? 'Cuenta' : 'Account'} #: ${account.accountNumber || account.id}`, M + 8, Y + 24);
+    
+    // Balance display
+    const balanceX = W - M - 8;
+    setFont(10, 'normal');
+    setText(C.muted);
+    doc.text(isSpanish ? 'BALANCE TOTAL' : 'TOTAL BALANCE', balanceX, Y + 14, { align: 'right' });
+    
+    setFont(22, 'bold');
+    setText(C.accent);
+    doc.text(`${account.currency} ${fmt(account.totalBalance)}`, balanceX, Y + 28, { align: 'right' });
+    
+    // Balance breakdown
+    const col1 = M + 8;
+    const col2 = W/2 + 10;
+    const rowY = Y + 42;
+    
+    setFont(8, 'normal');
+    setText(C.gray);
+    doc.text(isSpanish ? 'Disponible:' : 'Available:', col1, rowY);
+    setFont(10, 'bold');
+    setText(C.success);
+    doc.text(`${account.currency} ${fmt(account.availableBalance)}`, col1 + 40, rowY);
+    
+    setText(C.gray);
+    setFont(8, 'normal');
+    doc.text(isSpanish ? 'Reservado:' : 'Reserved:', col2, rowY);
+    setFont(10, 'bold');
+    setText(C.gold);
+    doc.text(`${account.currency} ${fmt(account.reservedBalance)}`, col2 + 40, rowY);
+    
+    // Percentage bars
+    const barY = Y + 52;
+    const barW = (W - 2*M - 20) / 2;
+    
+    // Available bar
+    setFill(C.bgLight);
+    doc.roundedRect(col1, barY, barW, 6, 2, 2, 'F');
+    const availPct = account.totalBalance > 0 ? (account.availableBalance / account.totalBalance) : 1;
+    setFill(C.success);
+    doc.roundedRect(col1, barY, barW * availPct, 6, 2, 2, 'F');
+    
+    setFont(7, 'normal');
+    setText(C.white);
+    doc.text(`${(availPct * 100).toFixed(1)}%`, col1 + barW/2, barY + 5, { align: 'center' });
+    
+    // Reserved bar
+    setFill(C.bgLight);
+    doc.roundedRect(col2, barY, barW, 6, 2, 2, 'F');
+    const resPct = account.totalBalance > 0 ? (account.reservedBalance / account.totalBalance) : 0;
+    setFill(C.gold);
+    doc.roundedRect(col2, barY, barW * resPct, 6, 2, 2, 'F');
+    
+    setText(C.white);
+    doc.text(`${(resPct * 100).toFixed(1)}%`, col2 + barW/2, barY + 5, { align: 'center' });
+    
+    // Account Details Grid
+    Y = 230;
+    setFill(C.bgLight);
+    doc.roundedRect(M, Y, W - 2*M, 45, 4, 4, 'F');
+    
+    const detailCol1 = M + 8;
+    const detailCol2 = W/2;
+    
+    setFont(8, 'bold');
+    setText(C.accent);
+    doc.text(isSpanish ? 'DETALLES DE LA CUENTA' : 'ACCOUNT DETAILS', detailCol1, Y + 10);
+    
+    const details = [
+      [isSpanish ? 'Tipo' : 'Type', isBanking ? 'Banking Account' : 'Blockchain Custody'],
+      [isSpanish ? 'Moneda' : 'Currency', account.currency],
+      [isSpanish ? 'Creada' : 'Created', fmtDate(account.createdAt)],
+      [isSpanish ? 'Estado' : 'Status', (account.apiStatus || 'Active').toUpperCase()]
+    ];
+    
+    details.forEach((d, i) => {
+      const x = i < 2 ? detailCol1 : detailCol2;
+      const y = Y + 20 + (i % 2) * 12;
+      setFont(7, 'normal');
+      setText(C.muted);
+      doc.text(d[0] + ':', x, y);
+      setText(C.white);
+      doc.text(d[1], x + 30, y);
+    });
+    
+    // Footer
+    setFont(7, 'normal');
+    setText(C.muted);
+    doc.text(`${isSpanish ? 'Generado' : 'Generated'}: ${fmtDate(timestamp)}`, M, H - 15);
+    doc.text('Digital Commercial Bank Ltd.', W/2, H - 15, { align: 'center' });
+    setText(C.accent);
+    doc.text('Page 1/2', W - M, H - 15, { align: 'right' });
+    
+    // Bottom accent
+    setFill(C.accent);
+    doc.rect(0, H - 4, W, 4, 'F');
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PAGE 2: AUDIT TRAIL & COMPLIANCE
+    // ═══════════════════════════════════════════════════════════════════════════
+    doc.addPage();
+    
+    // Dark background
+    setFill(C.bg);
+    doc.rect(0, 0, W, H, 'F');
+    
+    // Top accent bar
+    setFill(C.accent);
+    doc.rect(0, 0, W, 4, 'F');
+    
+    Y = 15;
+    
+    // Section: Audit Trail & Event Timeline
+    setFill(C.gold);
+    doc.roundedRect(M, Y, W - 2*M, 12, 3, 3, 'F');
+    setFont(11, 'bold');
+    setText(C.bg);
+    doc.text('AUDIT TRAIL & EVENT TIMELINE', M + 8, Y + 8);
+    
+    Y += 18;
+    
+    // Timeline events
+    const events = [
+      { 
+        time: fmtDate(account.createdAt), 
+        event: isSpanish ? 'Cuenta Creada' : 'Account Created', 
+        detail: isSpanish ? 'Cuenta custodio inicializada en el sistema DAES' : 'Custody account initialized in DAES system',
+        color: C.accent
+      },
+      { 
+        time: fmtDate(account.lastUpdated), 
+        event: isSpanish ? 'Última Actualización' : 'Last Updated', 
+        detail: `${isSpanish ? 'Balance actualizado:' : 'Balance updated:'} ${account.currency} ${fmt(account.totalBalance)}`,
+        color: C.success
+      },
+      { 
+        time: fmtDate(account.lastAudit || account.lastUpdated), 
+        event: isSpanish ? 'Auditoría del Sistema' : 'System Audit', 
+        detail: isSpanish ? 'Verificación automática de integridad completada' : 'Automatic integrity verification completed',
+        color: C.purple
+      },
+      { 
+        time: fmtDate(timestamp), 
+        event: isSpanish ? 'Documento Generado' : 'Document Generated', 
+        detail: `ID: ${documentId}`,
+        color: C.gold
+      }
+    ];
+    
+    // Add reservation events if any
+    if (account.reservations && account.reservations.length > 0) {
+      account.reservations.slice(0, 3).forEach(r => {
+        events.splice(2, 0, {
+          time: fmtDate(r.timestamp),
+          event: isSpanish ? 'Fondos Reservados' : 'Funds Reserved',
+          detail: `${account.currency} ${fmt(r.amount)} - ${r.status.toUpperCase()}`,
+          color: C.gold
+        });
+      });
+    }
+    
+    events.slice(0, 6).forEach((e, i) => {
+      setFill(i % 2 === 0 ? C.bgCard : C.bgLight);
+      doc.roundedRect(M, Y, W - 2*M, 18, 2, 2, 'F');
+      
+      // Timeline dot
+      setFill(e.color);
+      doc.circle(M + 8, Y + 9, 3, 'F');
+      
+      // Timeline line
+      if (i < events.length - 1) {
+        setDraw(C.muted);
+        doc.setLineWidth(0.3);
+        doc.line(M + 8, Y + 12, M + 8, Y + 18);
+      }
+      
+      // Event content
+      setFont(7, 'normal');
+      setText(C.gray);
+      doc.text(e.time, M + 16, Y + 6);
+      
+      setFont(9, 'bold');
+      setText(C.white);
+      doc.text(e.event, M + 16, Y + 12);
+      
+      setFont(7, 'normal');
+      setText(C.muted);
+      doc.text(e.detail.substring(0, 70), M + 16, Y + 17);
+      
+      Y += 20;
+    });
+    
+    Y += 8;
+    
+    // Section: Compliance & Security
+    setFill(C.accent);
+    doc.roundedRect(M, Y, W - 2*M, 12, 3, 3, 'F');
+    setFont(11, 'bold');
+    setText(C.bg);
+    doc.text(isSpanish ? 'CUMPLIMIENTO Y SEGURIDAD' : 'COMPLIANCE & SECURITY', M + 8, Y + 8);
+    
+    Y += 18;
+    
+    // Compliance cards
+    const complianceItems = [
+      { title: 'ISO 27001:2022', desc: isSpanish ? 'Seguridad de la Información' : 'Information Security', status: account.iso27001Compliant !== false, color: C.accent },
+      { title: 'ISO 20022', desc: isSpanish ? 'Interoperabilidad Financiera' : 'Financial Interoperability', status: account.iso20022Compatible !== false, color: C.success },
+      { title: 'FATF AML/CFT', desc: isSpanish ? 'Anti-Lavado de Dinero' : 'Anti-Money Laundering', status: account.fatfAmlVerified !== false, color: C.gold }
+    ];
+    
+    const cardW = (W - 2*M - 10) / 3;
+    complianceItems.forEach((item, i) => {
+      const x = M + i * (cardW + 5);
+      
+      setFill(C.bgCard);
+      doc.roundedRect(x, Y, cardW, 35, 3, 3, 'F');
+      
+      setFill(item.status ? item.color : C.muted);
+      doc.roundedRect(x + 3, Y + 3, cardW - 6, 4, 1, 1, 'F');
+      
+      setFont(8, 'bold');
+      setText(C.white);
+      doc.text(item.title, x + cardW/2, Y + 15, { align: 'center' });
+      
+      setFont(6, 'normal');
+      setText(C.gray);
+      doc.text(item.desc, x + cardW/2, Y + 22, { align: 'center' });
+      
+      setFont(7, 'bold');
+      setText(item.status ? C.success : C.muted);
+      doc.text(item.status ? (isSpanish ? 'VERIFICADO' : 'VERIFIED') : 'PENDING', x + cardW/2, Y + 30, { align: 'center' });
+    });
+    
+    Y += 45;
+    
+    // Security Hashes
+    setFill(C.bgLight);
+    doc.roundedRect(M, Y, W - 2*M, 35, 3, 3, 'F');
+    
+    setFont(8, 'bold');
+    setText(C.accent);
+    doc.text(isSpanish ? 'HASHES CRIPTOGRÁFICOS' : 'CRYPTOGRAPHIC HASHES', M + 8, Y + 10);
+    
+    setFont(6, 'normal');
+    setText(C.muted);
+    doc.text('Verification Hash (SHA-256):', M + 8, Y + 18);
+    setText(C.white);
+    doc.text(account.verificationHash || 'N/A', M + 8, Y + 24);
+    
+    setText(C.muted);
+    doc.text('Document Hash:', M + 8, Y + 31);
+    setText(C.accent);
+    doc.text(documentId, M + 55, Y + 31);
+    
+    Y += 42;
+    
+    // Certification Statement
+    setFill(C.bgCard);
+    doc.roundedRect(M, Y, W - 2*M, 30, 3, 3, 'F');
+    setDraw(C.gold);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(M, Y, W - 2*M, 30, 3, 3, 'S');
+    
+    setFont(8, 'bold');
+    setText(C.gold);
+    doc.text(isSpanish ? 'CERTIFICACIÓN OFICIAL' : 'OFFICIAL CERTIFICATION', M + 8, Y + 10);
+    
+    setFont(7, 'normal');
+    setText(C.white);
+    const certText = isSpanish 
+      ? 'Este documento certifica que los fondos están bajo custodia de DIGITAL COMMERCIAL BANK LTD.'
+      : 'This document certifies that funds are under custody of DIGITAL COMMERCIAL BANK LTD.';
+    doc.text(certText, M + 8, Y + 18);
+    
+    setText(C.gray);
+    doc.text('Compliance: ISO 27001 • ISO 20022 • FATF AML/CFT | Security: SHA-256 • AES-256', M + 8, Y + 25);
+    
+    // Footer
+    setFont(7, 'normal');
+    setText(C.muted);
+    doc.text(`${isSpanish ? 'Generado' : 'Generated'}: ${fmtDate(timestamp)}`, M, H - 15);
+    doc.text(`© ${new Date().getFullYear()} Digital Commercial Bank Ltd.`, W/2, H - 15, { align: 'center' });
+    setText(C.accent);
+    doc.text('Page 2/2', W - M, H - 15, { align: 'right' });
+    
+    // Bottom accent
+    setFill(C.accent);
+    doc.rect(0, H - 4, W, 4, 'F');
+    
+    // Save PDF
+    const fileName = `DCB_Account_Statement_${account.accountNumber || account.id}_${Date.now()}.pdf`;
+    doc.save(fileName);
+    
+    console.log('[CustodyModule] 📥 PDF Estado de cuenta descargado:', fileName);
   };
 
   // Exportar informe de cuenta
@@ -1850,6 +2185,26 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                     <ArrowUpCircle className="w-4 h-4 inline mr-1" />
                     {language === 'es' ? '- Retiro' : '- Withdraw'}
                   </button>
+                  {/* ISO 20022 INJECTION BUTTON - Treasury Minting Flow */}
+                  {account.currency === 'USD' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedAccount(account);
+                        setIsoInjectionData(prev => ({
+                          ...prev,
+                          selectedAccountId: account.id,
+                          senderIBAN: account.iban || '',
+                        }));
+                        setIsoInjectionStep('upload_file');
+                        setShowISOInjectionModal(true);
+                      }}
+                      className="px-4 py-2 bg-gradient-to-r from-lime-600 to-green-600 text-white rounded-lg hover:shadow-[0_0_15px_rgba(132,204,22,0.6)] transition-all text-sm font-bold animate-pulse"
+                    >
+                      <FileCheck className="w-4 h-4 inline mr-1" />
+                      {language === 'es' ? 'Inject USD (ISO)' : 'Inject USD (ISO)'}
+                    </button>
+                  )}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -4544,8 +4899,8 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                       <th className="px-3 py-2 text-left">{isSpanish ? 'Tipo' : 'Type'}</th>
                       <th className="px-3 py-2 text-left">{isSpanish ? 'Descripción' : 'Description'}</th>
                       <th className="px-3 py-2 text-right">{isSpanish ? 'Monto' : 'Amount'}</th>
-                      <th className="px-3 py-2 text-right">{isSpanish ? 'Balance' : 'Balance'}</th>
                       <th className="px-3 py-2 text-left">{isSpanish ? 'Referencia' : 'Reference'}</th>
+                      <th className="px-3 py-2 text-center">{isSpanish ? 'Recibo' : 'Receipt'}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -4568,10 +4923,30 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                         <td className={`px-3 py-3 text-right font-mono font-bold ${tx.amount >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {tx.amount >= 0 ? '+' : ''}{selectedAccount.currency} {Math.abs(tx.amount).toLocaleString()}
                         </td>
-                        <td className="px-3 py-3 text-right font-mono text-[#ffffff]">
-                          {selectedAccount.currency} {tx.balanceAfter.toLocaleString()}
-                        </td>
                         <td className="px-3 py-3 text-[#666] font-mono text-xs">{tx.reference}</td>
+                        <td className="px-3 py-3 text-center">
+                          <button
+                            onClick={() => {
+                              generateReceiptFromCustodyTransaction(
+                                tx,
+                                {
+                                  accountName: selectedAccount.accountName,
+                                  accountNumber: selectedAccount.accountNumber,
+                                  bankName: selectedAccount.bankName || 'Digital Commercial Bank Ltd.'
+                                },
+                                {
+                                  name: tx.destinationBank || tx.sourceBank || 'N/A',
+                                  accountNumber: tx.destinationAccount || tx.sourceAccount || 'N/A',
+                                  bank: tx.destinationBank || tx.sourceBank
+                                }
+                              );
+                            }}
+                            className="p-2 bg-gradient-to-br from-amber-600 to-orange-600 text-white rounded-lg hover:shadow-[0_0_15px_rgba(251,191,36,0.5)] transition-all"
+                            title={isSpanish ? 'Descargar Recibo PDF' : 'Download PDF Receipt'}
+                          >
+                            <Receipt className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -5255,6 +5630,526 @@ Hash de Documento: ${Math.random().toString(36).substring(2, 15).toUpperCase()}
                 <CheckCircle className="w-5 h-5 inline mr-2" />
                 {isSpanish ? 'Confirmar Cambio' : 'Confirm Change'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════════════ */}
+      {/* ISO 20022 USD INJECTION MODAL - Treasury Minting Flow */}
+      {/* ═══════════════════════════════════════════════════════════════════════════════ */}
+      {showISOInjectionModal && selectedAccount && (
+        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 overflow-auto">
+          <div className="bg-gradient-to-br from-[#0a0f0d] to-[#050807] border-2 border-lime-500/50 rounded-2xl max-w-4xl w-full shadow-[0_0_60px_rgba(163,230,53,0.3)] max-h-[90vh] overflow-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-lime-900/90 to-green-900/90 backdrop-blur-sm p-4 border-b border-lime-500/30 rounded-t-2xl z-10">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold text-lime-400 flex items-center gap-3">
+                  <FileCheck className="w-6 h-6" />
+                  {isSpanish ? 'Inyección USD - ISO 20022 PACS' : 'USD Injection - ISO 20022 PACS'}
+                  <span className="text-xs bg-lime-500/20 px-2 py-1 rounded-full text-lime-300">
+                    → Treasury Minting
+                  </span>
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowISOInjectionModal(false);
+                    setIsoInjectionStep('select_account');
+                    setIsoInjectionResult(null);
+                  }}
+                  className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-white/10"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              {/* Progress Steps */}
+              <div className="flex items-center gap-2 mt-4 text-xs">
+                {['upload_file', 'review', 'processing', 'complete'].map((step, idx) => (
+                  <div key={step} className="flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                      isoInjectionStep === step ? 'bg-lime-500 text-black' :
+                      ['upload_file', 'review', 'processing', 'complete'].indexOf(isoInjectionStep) > idx ? 'bg-lime-500/50 text-lime-200' :
+                      'bg-gray-700 text-gray-400'
+                    }`}>
+                      {idx + 1}
+                    </div>
+                    <span className={isoInjectionStep === step ? 'text-lime-400' : 'text-gray-500'}>
+                      {step === 'upload_file' ? (isSpanish ? 'Cargar PACS' : 'Load PACS') :
+                       step === 'review' ? (isSpanish ? 'Revisar' : 'Review') :
+                       step === 'processing' ? (isSpanish ? 'Procesando' : 'Processing') :
+                       (isSpanish ? 'Completado' : 'Complete')}
+                    </span>
+                    {idx < 3 && <ChevronRight className="w-4 h-4 text-gray-600" />}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-6">
+              {/* Account Info Card */}
+              <div className="bg-gradient-to-r from-lime-900/20 to-green-900/20 border border-lime-500/30 rounded-lg p-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-lime-400 font-bold">{selectedAccount.accountName}</div>
+                    <div className="text-xs text-gray-400">{selectedAccount.accountNumber || selectedAccount.id}</div>
+                    <div className="text-xs text-gray-500">{selectedAccount.bankName}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-white">
+                      {selectedAccount.currency} {selectedAccount.availableBalance.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-lime-400">{isSpanish ? 'Disponible' : 'Available'}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* STEP 1: Upload PACS File */}
+              {isoInjectionStep === 'upload_file' && (
+                <div className="space-y-6">
+                  <div className="text-center p-8 border-2 border-dashed border-lime-500/30 rounded-xl bg-lime-900/10 hover:bg-lime-900/20 transition-colors">
+                    <input
+                      type="file"
+                      accept=".json,.xml,.pacs"
+                      className="hidden"
+                      id="pacs-file-input"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            const content = event.target?.result as string;
+                            try {
+                              // Try to parse as JSON first
+                              if (file.name.endsWith('.json') || content.trim().startsWith('{')) {
+                                const json = JSON.parse(content);
+                                // Extract PACS data from JSON
+                                const pacsData = json.Document?.FIToFICstmrCdtTrf || json.FIToFICstmrCdtTrf || json;
+                                const grpHdr = pacsData?.GrpHdr || {};
+                                const cdtTrfTxInf = pacsData?.CdtTrfTxInf?.[0] || pacsData?.CdtTrfTxInf || {};
+                                
+                                setIsoInjectionData(prev => ({
+                                  ...prev,
+                                  messageType: 'pacs.008',
+                                  messageId: grpHdr.MsgId || `PACS-${Date.now()}`,
+                                  endToEndId: cdtTrfTxInf.PmtId?.EndToEndId || `E2E-${Date.now()}`,
+                                  instructionId: cdtTrfTxInf.PmtId?.InstrId || `INSTR-${Date.now()}`,
+                                  amount: parseFloat(cdtTrfTxInf.IntrBkSttlmAmt?.value || cdtTrfTxInf.Amt?.InstdAmt?.value || grpHdr.TtlIntrBkSttlmAmt?.value || '0'),
+                                  senderBIC: cdtTrfTxInf.InstgAgt?.FinInstnId?.BICFI || grpHdr.InstgAgt?.FinInstnId?.BICFI || 'DCBKKWKWXXX',
+                                  receiverBIC: cdtTrfTxInf.InstdAgt?.FinInstnId?.BICFI || grpHdr.InstdAgt?.FinInstnId?.BICFI || 'DCBKKWKWXXX',
+                                  senderIBAN: cdtTrfTxInf.DbtrAcct?.Id?.IBAN || '',
+                                  receiverIBAN: cdtTrfTxInf.CdtrAcct?.Id?.IBAN || '',
+                                  beneficiary: cdtTrfTxInf.Cdtr?.Nm || 'Treasury Minting Vault',
+                                  remittanceInfo: cdtTrfTxInf.RmtInf?.Ustrd || 'USD Tokenization for VUSD Minting',
+                                  jsonPayload: json,
+                                  xmlContent: '',
+                                  parsedFromFile: true,
+                                }));
+                              } else {
+                                // Parse as XML
+                                const parser = new DOMParser();
+                                const xmlDoc = parser.parseFromString(content, 'text/xml');
+                                
+                                const getMsgId = xmlDoc.querySelector('MsgId')?.textContent || `PACS-${Date.now()}`;
+                                const getE2E = xmlDoc.querySelector('EndToEndId')?.textContent || `E2E-${Date.now()}`;
+                                const getInstr = xmlDoc.querySelector('InstrId')?.textContent || `INSTR-${Date.now()}`;
+                                const getAmt = xmlDoc.querySelector('IntrBkSttlmAmt')?.textContent || xmlDoc.querySelector('InstdAmt')?.textContent || '0';
+                                const getInstgBIC = xmlDoc.querySelector('InstgAgt BICFI')?.textContent || 'DCBKKWKWXXX';
+                                const getInstdBIC = xmlDoc.querySelector('InstdAgt BICFI')?.textContent || 'DCBKKWKWXXX';
+                                const getDbtrIBAN = xmlDoc.querySelector('DbtrAcct IBAN')?.textContent || '';
+                                const getCdtrIBAN = xmlDoc.querySelector('CdtrAcct IBAN')?.textContent || '';
+                                const getCdtrNm = xmlDoc.querySelector('Cdtr Nm')?.textContent || 'Treasury Minting Vault';
+                                const getRmtInf = xmlDoc.querySelector('RmtInf Ustrd')?.textContent || 'USD Tokenization';
+                                
+                                setIsoInjectionData(prev => ({
+                                  ...prev,
+                                  messageType: content.includes('pacs.009') ? 'pacs.009' : 'pacs.008',
+                                  messageId: getMsgId,
+                                  endToEndId: getE2E,
+                                  instructionId: getInstr,
+                                  amount: parseFloat(getAmt),
+                                  senderBIC: getInstgBIC,
+                                  receiverBIC: getInstdBIC,
+                                  senderIBAN: getDbtrIBAN,
+                                  receiverIBAN: getCdtrIBAN,
+                                  beneficiary: getCdtrNm,
+                                  remittanceInfo: getRmtInf,
+                                  xmlContent: content,
+                                  jsonPayload: null,
+                                  parsedFromFile: true,
+                                }));
+                              }
+                              
+                              setIsoInjectionStep('review');
+                            } catch (err) {
+                              alert(isSpanish ? '❌ Error al parsear el archivo PACS' : '❌ Error parsing PACS file');
+                              console.error('PACS parse error:', err);
+                            }
+                          };
+                          reader.readAsText(file);
+                        }
+                      }}
+                    />
+                    <label htmlFor="pacs-file-input" className="cursor-pointer">
+                      <Upload className="w-16 h-16 mx-auto text-lime-500 mb-4" />
+                      <div className="text-lime-400 font-bold text-lg mb-2">
+                        {isSpanish ? 'Cargar archivo PACS ISO 20022' : 'Load PACS ISO 20022 File'}
+                      </div>
+                      <div className="text-gray-400 text-sm">
+                        {isSpanish ? 'Formatos soportados: JSON, XML (.pacs, .json, .xml)' : 'Supported formats: JSON, XML (.pacs, .json, .xml)'}
+                      </div>
+                      <div className="text-lime-500/60 text-xs mt-2">
+                        pacs.008 (FI to FI Customer Credit Transfer) | pacs.009 (FI Credit Transfer)
+                      </div>
+                    </label>
+                  </div>
+                  
+                  <div className="text-center text-gray-500">— {isSpanish ? 'o ingresar manualmente' : 'or enter manually'} —</div>
+                  
+                  {/* Manual Entry Form */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-lime-400 text-sm mb-1">{isSpanish ? 'Monto USD' : 'Amount USD'} *</label>
+                      <input
+                        type="number"
+                        value={isoInjectionData.amount || ''}
+                        onChange={(e) => setIsoInjectionData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                        className="w-full bg-black/50 border border-lime-500/30 rounded-lg px-4 py-3 text-white text-lg font-mono"
+                        placeholder="100000.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-lime-400 text-sm mb-1">{isSpanish ? 'Beneficiario' : 'Beneficiary'} *</label>
+                      <input
+                        type="text"
+                        value={isoInjectionData.beneficiary}
+                        onChange={(e) => setIsoInjectionData(prev => ({ ...prev, beneficiary: e.target.value }))}
+                        className="w-full bg-black/50 border border-lime-500/30 rounded-lg px-4 py-3 text-white"
+                        placeholder="Treasury Minting Vault"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-lime-400 text-sm mb-1">Message ID</label>
+                      <input
+                        type="text"
+                        value={isoInjectionData.messageId}
+                        onChange={(e) => setIsoInjectionData(prev => ({ ...prev, messageId: e.target.value }))}
+                        className="w-full bg-black/50 border border-lime-500/30 rounded-lg px-4 py-3 text-white font-mono text-sm"
+                        placeholder={`PACS-${Date.now()}`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-lime-400 text-sm mb-1">End-to-End ID</label>
+                      <input
+                        type="text"
+                        value={isoInjectionData.endToEndId}
+                        onChange={(e) => setIsoInjectionData(prev => ({ ...prev, endToEndId: e.target.value }))}
+                        className="w-full bg-black/50 border border-lime-500/30 rounded-lg px-4 py-3 text-white font-mono text-sm"
+                        placeholder={`E2E-${Date.now()}`}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-lime-400 text-sm mb-1">{isSpanish ? 'Información de Remesa' : 'Remittance Info'}</label>
+                      <input
+                        type="text"
+                        value={isoInjectionData.remittanceInfo}
+                        onChange={(e) => setIsoInjectionData(prev => ({ ...prev, remittanceInfo: e.target.value }))}
+                        className="w-full bg-black/50 border border-lime-500/30 rounded-lg px-4 py-3 text-white"
+                        placeholder="USD Tokenization for VUSD Minting"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4 mt-6">
+                    <button
+                      onClick={() => setShowISOInjectionModal(false)}
+                      className="flex-1 px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700"
+                    >
+                      {isSpanish ? 'Cancelar' : 'Cancel'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (isoInjectionData.amount > 0 && isoInjectionData.beneficiary) {
+                          if (!isoInjectionData.messageId) {
+                            setIsoInjectionData(prev => ({ ...prev, messageId: `PACS-${Date.now()}` }));
+                          }
+                          if (!isoInjectionData.endToEndId) {
+                            setIsoInjectionData(prev => ({ ...prev, endToEndId: `E2E-${Date.now()}` }));
+                          }
+                          setIsoInjectionStep('review');
+                        } else {
+                          alert(isSpanish ? '⚠️ Ingresa monto y beneficiario' : '⚠️ Enter amount and beneficiary');
+                        }
+                      }}
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-lime-600 to-green-600 text-white rounded-lg font-bold hover:shadow-[0_0_20px_rgba(132,204,22,0.5)]"
+                    >
+                      {isSpanish ? 'Continuar →' : 'Continue →'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 2: Review */}
+              {isoInjectionStep === 'review' && (
+                <div className="space-y-6">
+                  <div className="bg-black/50 border border-lime-500/30 rounded-xl p-6">
+                    <h4 className="text-lime-400 font-bold mb-4 flex items-center gap-2">
+                      <FileText className="w-5 h-5" />
+                      {isSpanish ? 'Resumen de Inyección ISO 20022' : 'ISO 20022 Injection Summary'}
+                    </h4>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="bg-lime-900/20 rounded-lg p-3">
+                        <div className="text-gray-400">{isSpanish ? 'Tipo de Mensaje' : 'Message Type'}</div>
+                        <div className="text-lime-400 font-mono font-bold">{isoInjectionData.messageType}</div>
+                      </div>
+                      <div className="bg-lime-900/20 rounded-lg p-3">
+                        <div className="text-gray-400">Message ID</div>
+                        <div className="text-white font-mono text-xs">{isoInjectionData.messageId || `PACS-${Date.now()}`}</div>
+                      </div>
+                      <div className="bg-lime-900/20 rounded-lg p-3">
+                        <div className="text-gray-400">End-to-End ID</div>
+                        <div className="text-white font-mono text-xs">{isoInjectionData.endToEndId || `E2E-${Date.now()}`}</div>
+                      </div>
+                      <div className="bg-lime-900/20 rounded-lg p-3">
+                        <div className="text-gray-400">Instruction ID</div>
+                        <div className="text-white font-mono text-xs">{isoInjectionData.instructionId || `INSTR-${Date.now()}`}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 p-4 bg-gradient-to-r from-lime-500/20 to-green-500/20 rounded-xl border border-lime-500/40">
+                      <div className="text-center">
+                        <div className="text-gray-400 text-sm">{isSpanish ? 'Monto a Tokenizar' : 'Amount to Tokenize'}</div>
+                        <div className="text-4xl font-bold text-lime-400 my-2">
+                          USD {isoInjectionData.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-gray-400 text-sm">→ USDTokenized Contract → Pending Lock → Treasury Minting</div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+                      <div>
+                        <div className="text-gray-400">{isSpanish ? 'Cuenta Origen' : 'Source Account'}</div>
+                        <div className="text-white">{selectedAccount.accountName}</div>
+                        <div className="text-gray-500 text-xs">{selectedAccount.accountNumber}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400">{isSpanish ? 'Beneficiario' : 'Beneficiary'}</div>
+                        <div className="text-white">{isoInjectionData.beneficiary}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 p-3 bg-yellow-900/20 border border-yellow-500/30 rounded-lg text-yellow-400 text-sm">
+                      <AlertTriangle className="w-4 h-4 inline mr-2" />
+                      {isSpanish 
+                        ? 'Esta acción creará un lock en Treasury Minting Platform que deberá ser aceptado para continuar con el minting de VUSD.'
+                        : 'This action will create a lock in Treasury Minting Platform that must be accepted to continue with VUSD minting.'}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setIsoInjectionStep('upload_file')}
+                      className="flex-1 px-6 py-3 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700"
+                    >
+                      ← {isSpanish ? 'Volver' : 'Back'}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setIsoInjectionStep('processing');
+                        setIsInjecting(true);
+                        
+                        try {
+                          // Call Treasury Interaction Service
+                          const result = await treasuryInteractionService.injectUSD({
+                            sourceAccount: {
+                              id: selectedAccount.id,
+                              name: selectedAccount.accountName,
+                              type: 'custody',
+                              currency: selectedAccount.currency,
+                              balance: selectedAccount.availableBalance,
+                            },
+                            amount: isoInjectionData.amount,
+                            beneficiary: isoInjectionData.beneficiary || '0x772923E3f1C22A1b5Cb11722bD7B0E77BEDE8559',
+                            isoData: {
+                              messageType: isoInjectionData.messageType,
+                              messageId: isoInjectionData.messageId || `PACS-${Date.now()}`,
+                              endToEndId: isoInjectionData.endToEndId || `E2E-${Date.now()}`,
+                              instructionId: isoInjectionData.instructionId || `INSTR-${Date.now()}`,
+                              senderBIC: isoInjectionData.senderBIC,
+                              receiverBIC: isoInjectionData.receiverBIC,
+                              senderIBAN: isoInjectionData.senderIBAN || selectedAccount.iban || '',
+                              receiverIBAN: isoInjectionData.receiverIBAN,
+                              remittanceInfo: isoInjectionData.remittanceInfo || 'USD Tokenization for VUSD Minting',
+                              xmlContent: isoInjectionData.xmlContent,
+                              jsonPayload: isoInjectionData.jsonPayload,
+                            },
+                          });
+                          
+                          if (result.success && result.injection) {
+                            setIsoInjectionResult(result.injection);
+                            
+                            // Deduct from custody account
+                            const newBalance = selectedAccount.availableBalance - isoInjectionData.amount;
+                            custodyStore.updateAccountBalance(selectedAccount.id, selectedAccount.totalBalance - isoInjectionData.amount);
+                            
+                            // Add transaction to history
+                            custodyStore.addTransaction(selectedAccount.id, {
+                              type: 'withdrawal',
+                              amount: isoInjectionData.amount,
+                              balance: newBalance,
+                              description: `ISO 20022 USD Injection - ${result.injection.injectionId}`,
+                              reference: result.injection.injectionId,
+                              timestamp: new Date().toISOString(),
+                              status: 'completed',
+                            });
+                            
+                            setIsoInjectionStep('complete');
+                          } else {
+                            throw new Error(result.error || 'Injection failed');
+                          }
+                        } catch (error: any) {
+                          alert(`❌ Error: ${error.message}`);
+                          setIsoInjectionStep('review');
+                        } finally {
+                          setIsInjecting(false);
+                        }
+                      }}
+                      disabled={isInjecting || isoInjectionData.amount > selectedAccount.availableBalance}
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-lime-600 to-green-600 text-white rounded-lg font-bold hover:shadow-[0_0_20px_rgba(132,204,22,0.5)] disabled:opacity-50"
+                    >
+                      <Zap className="w-5 h-5 inline mr-2" />
+                      {isSpanish ? 'Ejecutar Inyección' : 'Execute Injection'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 3: Processing */}
+              {isoInjectionStep === 'processing' && (
+                <div className="text-center py-12">
+                  <div className="relative w-24 h-24 mx-auto mb-6">
+                    <div className="absolute inset-0 border-4 border-lime-500/30 rounded-full animate-ping"></div>
+                    <div className="absolute inset-2 border-4 border-t-lime-500 border-r-lime-500 border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+                    <Zap className="w-10 h-10 absolute inset-0 m-auto text-lime-500" />
+                  </div>
+                  <div className="text-lime-400 text-xl font-bold mb-2">
+                    {isSpanish ? 'Procesando Inyección...' : 'Processing Injection...'}
+                  </div>
+                  <div className="text-gray-400 text-sm space-y-1">
+                    <div>1. {isSpanish ? 'Tokenizando USD en contrato USDTokenized' : 'Tokenizing USD in USDTokenized contract'}</div>
+                    <div>2. {isSpanish ? 'Generando Primera Firma (DAES)' : 'Generating First Signature (DAES)'}</div>
+                    <div>3. {isSpanish ? 'Creando Pending Lock para Treasury Minting' : 'Creating Pending Lock for Treasury Minting'}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 4: Complete */}
+              {isoInjectionStep === 'complete' && isoInjectionResult && (
+                <div className="space-y-6">
+                  <div className="text-center py-8">
+                    <div className="w-20 h-20 mx-auto mb-4 bg-lime-500/20 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-12 h-12 text-lime-500" />
+                    </div>
+                    <div className="text-2xl font-bold text-lime-400 mb-2">
+                      {isSpanish ? '¡Inyección Completada!' : 'Injection Complete!'}
+                    </div>
+                    <div className="text-gray-400">
+                      {isSpanish ? 'El lock ha sido enviado a Treasury Minting Platform' : 'Lock has been sent to Treasury Minting Platform'}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-black/50 border border-lime-500/30 rounded-xl p-6 space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-400">Injection ID</div>
+                        <div className="text-lime-400 font-mono">{isoInjectionResult.injectionId}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400">{isSpanish ? 'Monto Tokenizado' : 'Tokenized Amount'}</div>
+                        <div className="text-white font-bold">USD {isoInjectionResult.amount.toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400">TX Hash</div>
+                        <div className="text-cyan-400 font-mono text-xs truncate">{isoInjectionResult.blockchain.txHash}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400">Block</div>
+                        <div className="text-white">#{isoInjectionResult.blockchain.blockNumber}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400">{isSpanish ? 'Primera Firma' : 'First Signature'}</div>
+                        <div className="text-purple-400 font-mono text-xs truncate">{isoInjectionResult.firstSignature?.hash}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400">Status</div>
+                        <div className="text-yellow-400 font-bold flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          {isSpanish ? 'Pendiente en Treasury Minting' : 'Pending in Treasury Minting'}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-500/30 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <Bell className="w-5 h-5 text-yellow-500 mt-0.5" />
+                        <div>
+                          <div className="text-yellow-400 font-bold text-sm">
+                            {isSpanish ? 'Siguiente Paso' : 'Next Step'}
+                          </div>
+                          <div className="text-yellow-200/80 text-sm">
+                            {isSpanish 
+                              ? 'Ir a Treasury Minting Platform → Pending Locks → Aceptar el lock para continuar con el proceso de minting.'
+                              : 'Go to Treasury Minting Platform → Pending Locks → Accept the lock to continue with the minting process.'}
+                          </div>
+                          <a 
+                            href="http://127.0.0.1:4005" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 mt-2 text-lime-400 hover:text-lime-300 text-sm"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            {isSpanish ? 'Abrir Treasury Minting' : 'Open Treasury Minting'}
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => {
+                        setShowISOInjectionModal(false);
+                        setIsoInjectionStep('select_account');
+                        setIsoInjectionResult(null);
+                        setIsoInjectionData({
+                          selectedAccountId: '',
+                          amount: 0,
+                          beneficiary: '',
+                          messageType: 'pacs.008',
+                          messageId: '',
+                          endToEndId: '',
+                          instructionId: '',
+                          senderBIC: 'DCBKKWKWXXX',
+                          receiverBIC: 'DCBKKWKWXXX',
+                          senderIBAN: '',
+                          receiverIBAN: '',
+                          remittanceInfo: '',
+                          xmlContent: '',
+                          jsonPayload: null,
+                          parsedFromFile: false,
+                        });
+                        // Reload accounts
+                        setCustodyAccounts(custodyStore.getAccounts());
+                      }}
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-lime-600 to-green-600 text-white rounded-lg font-bold hover:shadow-[0_0_20px_rgba(132,204,22,0.5)]"
+                    >
+                      <CheckCircle className="w-5 h-5 inline mr-2" />
+                      {isSpanish ? 'Cerrar' : 'Close'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

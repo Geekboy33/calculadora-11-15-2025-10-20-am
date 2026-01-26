@@ -1,3 +1,26 @@
+// Standalone sha256 function for easy import
+export async function sha256(data: string): Promise<string> {
+  const buffer = new TextEncoder().encode(data);
+  const hash = await crypto.subtle.digest('SHA-256', buffer);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+// Synchronous sha256 using simple hash for non-critical operations
+export function sha256Sync(data: string): string {
+  // Simple hash function for non-critical use (not cryptographically secure but fast)
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    const char = data.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  const timestamp = Date.now().toString(16);
+  const random = Math.random().toString(16).substring(2, 10);
+  return `${Math.abs(hash).toString(16).padStart(8, '0')}${timestamp}${random}`.padStart(64, '0').substring(0, 64);
+}
+
 export class CryptoUtils {
   static async generateKey(): Promise<CryptoKey> {
     return await crypto.subtle.generateKey(
